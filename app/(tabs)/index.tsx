@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { View } from "react-native";
-import { styles } from "../../assets/styles/landing_page";
+import { styles } from "../../assets/styles/dashboard";
 
 export default function Index() {
   return (
