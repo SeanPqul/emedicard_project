@@ -40,8 +40,9 @@ export default function SignInPage() {
 
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId })
-        router.replace('/')
-      } else {
+        router.replace('/(tabs)')
+      } 
+      else {
         console.error(JSON.stringify(signInAttempt, null, 2))
         setErrorMessage('Please complete additional verification steps.')
       }
@@ -169,7 +170,7 @@ export default function SignInPage() {
           {/* Sign Up Link */}
           <View style={styles.signUpContainer}>
             <Text style={styles.signUpText}>Dont have an account? </Text>
-            <Link href="/sign-up" style={styles.signUpLink}>
+            <Link href="/(auth)/sign-up" style={styles.signUpLink} replace>
               <Text style={styles.signUpLinkText}>Sign up</Text>
             </Link>
           </View>

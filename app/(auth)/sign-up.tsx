@@ -1,110 +1,209 @@
-import * as React from 'react'
-import { Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { useSignUp } from '@clerk/clerk-expo'
+// app/(auth)/sign-up.tsx
+import { useSignUp, useSSO } from '@clerk/clerk-expo'
 import { Link, useRouter } from 'expo-router'
+import { 
+  Text, TextInput, TouchableOpacity, View, Alert, Image
+} from 'react-native'
+import { styles } from '../../assets/styles/sign-up'
+import React from 'react'
+import { Ionicons } from '@expo/vector-icons'
+import GoogleSignInButton from '../../assets/svgs/google-ctn-logo.svg'
 
-export default function SignUpScreen() {
-  const { isLoaded, signUp, setActive } = useSignUp()
+export default function SignUpPage() {
+  const { isLoaded, signUp } = useSignUp()
+  const { startSSOFlow } = useSSO()
   const router = useRouter()
 
   const [emailAddress, setEmailAddress] = React.useState('')
   const [password, setPassword] = React.useState('')
-  const [pendingVerification, setPendingVerification] = React.useState(false)
-  const [code, setCode] = React.useState('')
+  const [showPassword, setShowPassword] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState('')
 
-  // Handle submission of sign-up form
+  // Handle the submission of the sign-up form
   const onSignUpPress = async () => {
     if (!isLoaded) return
-
-    // Start sign-up process using email and password provided
+    
+    // Clear any previous errors
+    setErrorMessage('')
+    setIsLoading(true)
+    
     try {
       await signUp.create({
         emailAddress,
         password,
       })
-
-      // Send user an email with verification code
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
-      setPendingVerification(true)
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
+      
+      router.replace('/(auth)/verification')
+    } catch (err: any) {
       console.error(JSON.stringify(err, null, 2))
-    }
-  }
-
-  // Handle submission of verification form
-  const onVerifyPress = async () => {
-    if (!isLoaded) return
-
-    try {
-      // Use the code the user provided to attempt verification
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code,
-      })
-
-      // If verification was completed, set the session to active
-      // and redirect the user
-      if (signUpAttempt.status === 'complete') {
-        await setActive({ session: signUpAttempt.createdSessionId })
-        router.replace('/')
+      
+      // Handle specific error types
+      if (err.errors && err.errors.length > 0) {
+        // Handle multiple errors - prioritize email errors first, then password
+        const emailError = err.errors.find((e: any) => e.meta?.paramName === 'email_address')
+        const passwordError = err.errors.find((e: any) => e.meta?.paramName === 'password')
+        
+        if (emailError) {
+          switch (emailError.code) {
+            case 'form_identifier_exists':
+            case 'email_address_taken':
+              setErrorMessage('This email is already registered. Please use a different email or sign in.')
+              break
+            case 'form_param_format_invalid':
+            case 'form_identifier_invalid':
+              setErrorMessage('Please enter a valid email address.')
+              break
+            default:
+              setErrorMessage(emailError.longMessage || emailError.message || 'Invalid email address.')
+          }
+        } else if (passwordError) {
+          setErrorMessage('Invalid password. Please try again.')
+        } else {
+          // Fallback for other errors
+          const error = err.errors[0]
+          setErrorMessage(error.longMessage || error.message || 'An error occurred during sign up.')
+        }
       } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
-        console.error(JSON.stringify(signUpAttempt, null, 2))
+        setErrorMessage('An unexpected error occurred. Please try again.')
       }
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  if (pendingVerification) {
-    return (
-      <>
-        <Text>Verify your email</Text>
-        <TextInput
-          value={code}
-          placeholder="Enter your verification code"
-          onChangeText={(code) => setCode(code)}
-        />
-        <TouchableOpacity onPress={onVerifyPress}>
-          <Text>Verify</Text>
-        </TouchableOpacity>
-      </>
-    )
+  const handleGoogleSignUp = async () => {
+    try {
+      const { createdSessionId, setActive } = await startSSOFlow({ 
+        strategy: "oauth_google" 
+      })
+      if (setActive && createdSessionId) {
+        setActive({ session: createdSessionId })
+        router.replace("/(tabs)")
+      }
+    } catch (error) {
+      console.error("OAuth error:", error)
+      Alert.alert('Error', 'Google sign up failed. Please try again.')
+    }
   }
 
   return (
-    <View>
-      <>
-        <Text>Sign up</Text>
-        <TextInput
-          autoCapitalize="none"
-          value={emailAddress}
-          placeholder="Enter email"
-          onChangeText={(email) => setEmailAddress(email)}
-        />
-        <TextInput
-          value={password}
-          placeholder="Enter password"
-          secureTextEntry={true}
-          onChangeText={(password) => setPassword(password)}
-        />
-        <TouchableOpacity onPress={onSignUpPress}>
-          <Text>Continue</Text>
-        </TouchableOpacity>
-        <View style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
-          <Text>Already have an account?</Text>
-          <Link href="/sign-in">
-            <Text>Sign in</Text>
-          </Link>
+    <>
+      {/* Main Content */}
+      <View style={styles.content}>
+        {/* Organization Logos */}
+        <View style={styles.orgLogosContainer}>
+          <View style={styles.orgLogo}>
+            <View style={styles.healthLogo}>
+              <Image 
+                source={require('../../assets/images/cho-logo.png')} 
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.orgText}>CITY HEALTH OFFICE</Text>
+          </View>
+          <View style={styles.orgLogo}>
+            <View style={styles.cityLogo}>
+              <Image 
+                source={require('../../assets/images/davao-city-logo.png')} 
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.orgText}>DAVAO CITY</Text>
+          </View>
         </View>
-      </>
-    </View>
-  );
+        
+        {/* Title */}
+        <Text style={styles.title}>Sign Up</Text>
+        <Text style={styles.subtitle}>Register in app to manage{'\n'}your health card applications</Text>
+
+        {/* Sign Up Form */}
+        <View style={styles.formContainer}>
+          <TextInput
+            style={styles.input}
+            autoCapitalize="none"
+            value={emailAddress}
+            placeholder="Enter email"
+            placeholderTextColor="#9CA3AF"
+            onChangeText={(email) => {
+              setEmailAddress(email)
+              // Clear error when user starts typing
+              if (errorMessage) setErrorMessage('')
+            }}
+            keyboardType="email-address"
+          />
+          
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              value={password}
+              placeholder="Enter password"
+              placeholderTextColor="#9CA3AF"
+              secureTextEntry={!showPassword}
+              onChangeText={(password) => {
+                setPassword(password)
+                // Clear error when user starts typing
+                if (errorMessage) setErrorMessage('')
+              }}
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons
+                name={showPassword ? 'eye' : 'eye-off'}
+                size={24}
+                color="#9CA3AF"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Error Message */}
+          <View style={styles.errorContainer}>
+            {errorMessage ? (
+              <Text style={styles.errorText}>{errorMessage}</Text>) : null}
+          </View>
+
+
+          {/* Password Requirements */}
+          <View style={styles.passwordRequirements}>
+            <Text style={styles.requirementsTitle}>Password must contain:</Text>
+            <Text style={styles.requirementItem}>• At least 8 characters</Text>
+            <Text style={styles.requirementItem}>• One uppercase letter (A-Z)</Text>
+            <Text style={styles.requirementItem}>• One lowercase letter (a-z)</Text>
+            <Text style={styles.requirementItem}>• One number (0-9)</Text>
+          </View>
+
+          <TouchableOpacity 
+            style={[styles.signUpButton, isLoading && styles.buttonDisabled]} 
+            onPress={onSignUpPress}
+            disabled={isLoading || !emailAddress || !password}
+          >
+            <Text style={styles.signUpButtonText}>
+              {isLoading ? 'Signing Up...' : 'Continue'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Or Sign Up With */}
+          <Text style={styles.orText}>or Sign up with</Text>
+
+          {/* Google Sign Up */}
+          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignUp}>
+            <GoogleSignInButton width={200} height={50}/>
+          </TouchableOpacity>
+
+          {/* Sign In Link */}
+          <View style={styles.signInContainer}>
+            <Text style={styles.signInText}>Already have an account? </Text>
+            <Link href="/sign-in" style={styles.signInLink} replace>
+              <Text style={styles.signInLinkText}>Sign in</Text>
+            </Link>
+          </View>
+        </View>
+      </View>
+    </>
+  )
 }
