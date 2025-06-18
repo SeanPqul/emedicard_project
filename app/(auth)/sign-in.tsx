@@ -11,6 +11,7 @@ import {
   View
 } from 'react-native'
 import { styles } from '@/assets/styles/auth-styles/sign-in'
+import { ViewStyle, TextStyle, ImageStyle } from 'react-native'
 import GoogleSignInButton from '@/assets/svgs/google-ctn-logo.svg'
 
 
@@ -74,40 +75,40 @@ export default function SignInPage() {
 
   return (
     
-    <View style={styles.container}>
+    <View style={styles.container as ViewStyle}>
       {/* Organization Logos */}
-      <View style={styles.orgLogosContainer}>
-        <View style={styles.orgLogo}>
-          <View style={styles.healthLogo}>
+      <View style={styles.orgLogosContainer as ViewStyle}>
+        <View style={styles.orgLogo as ViewStyle}>
+          <View style={styles.healthLogo as ViewStyle}>
             <Image 
               source={require('../../assets/images/cho-logo.png')} 
-              style={styles.logoImage}
+              style={styles.logoImage as ImageStyle}
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.orgText}>CITY HEALTH OFFICE</Text>
+          <Text style={styles.orgText as TextStyle}>CITY HEALTH OFFICE</Text>
         </View>
         
-        <View style={styles.orgLogo}>
-          <View style={styles.cityLogo}>
+        <View style={styles.orgLogo as ViewStyle}>
+          <View style={styles.cityLogo as ViewStyle}>
             <Image 
               source={require('../../assets/images/davao-city-logo.png')} 
-              style={styles.logoImage}
+              style={styles.logoImage as ImageStyle}
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.orgText}>DAVAO CITY</Text>
+          <Text style={styles.orgText as TextStyle}>DAVAO CITY</Text>
         </View>
       </View>
 
       {/* Title */}
-      <Text style={styles.title}>eMediCard</Text>
-      <Text style={styles.subtitle}>A Mobile-Base Health Card{'\n'}Management System</Text>
+      <Text style={styles.title as TextStyle}>eMediCard</Text>
+      <Text style={styles.subtitle as TextStyle}>A Mobile-Base Health Card{'\n'}Management System</Text>
 
       {/* Sign In Form */}
-      <View style={styles.formContainer}>
+      <View style={styles.formContainer as ViewStyle}>
         <TextInput
-          style={styles.input}
+          style={styles.input as TextStyle}
           autoCapitalize="none"
           value={emailAddress}
           placeholder="Enter email"
@@ -120,9 +121,9 @@ export default function SignInPage() {
           keyboardType="email-address"
         />
         
-        <View style={styles.passwordContainer}>
+        <View style={styles.passwordContainer as ViewStyle}>
           <TextInput
-            style={styles.passwordInput}
+            style={styles.passwordInput as TextStyle}
             value={password}
             placeholder="Enter password"
             placeholderTextColor="#9CA3AF"
@@ -134,7 +135,7 @@ export default function SignInPage() {
             }}
           />
           <TouchableOpacity
-            style={styles.eyeIcon}
+            style={styles.eyeIcon as ViewStyle}
             onPress={() => setShowPassword(!showPassword)}
           >
             <Ionicons
@@ -146,40 +147,40 @@ export default function SignInPage() {
         </View>
 
         {/* Error Message and Forgot Password Row */}
-        <View style={styles.errorForgotContainer}>
-          <View style={styles.errorContainer}>
+        <View style={styles.errorForgotContainer as ViewStyle}>
+          <View style={styles.errorContainer as ViewStyle}>
             {errorMessage ? (
-              <Text style={styles.errorText}>{errorMessage}</Text>
+              <Text style={styles.errorText as TextStyle}>{errorMessage}</Text>
             ) : null}
           </View>
-          <Link href="/" style={styles.forgotPasswordLink}>
-            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+          <Link href="/" style={styles.forgotPasswordLink as TextStyle}>
+            <Text style={styles.forgotPasswordText as TextStyle}>Forgot password?</Text>
           </Link>
         </View>
 
         <TouchableOpacity 
-          style={[styles.signInButton, isLoading && styles.buttonDisabled]} 
+          style={[styles.signInButton as ViewStyle, isLoading && styles.buttonDisabled as ViewStyle]} 
           onPress={onSignInPress}
           disabled={isLoading || !emailAddress || !password}
         >
-          <Text style={styles.signInButtonText}>
+          <Text style={styles.signInButtonText as TextStyle}>
             {isLoading ? 'Signing In...' : 'Log in'}
           </Text>
         </TouchableOpacity>
 
         {/* Or Login With */}
-        <Text style={styles.orText}>or Login with</Text>
+        <Text style={styles.orText as TextStyle}>or Login with</Text>
 
         {/* Google Sign In with Complete SVG */}
-        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn}>
+        <TouchableOpacity style={styles.googleButton as ViewStyle} onPress={handleGoogleSignIn}>
           <GoogleSignInButton width={200} height={50}/>
         </TouchableOpacity>
 
         {/* Sign Up Link */}
-        <View style={styles.signUpContainer}>
-          <Text style={styles.signUpText}>Dont have an account? </Text>
+        <View style={styles.signUpContainer as ViewStyle}>
+          <Text style={styles.signUpText as TextStyle}>Dont have an account? </Text>
           <Link href="/(auth)/sign-up" replace>
-            <Text style={styles.signUpLinkText}>Sign up</Text>
+            <Text style={styles.signUpLinkText as TextStyle}>Sign up</Text>
           </Link>
         </View>
       </View>
