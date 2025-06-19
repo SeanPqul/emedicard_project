@@ -1,19 +1,20 @@
-import { StyleSheet } from 'react-native';
 import { moderateScale, scale, verticalScale } from '@/src/utils/scaling-utils';
+import { StyleSheet } from 'react-native';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
     justifyContent: 'center',
-    paddingHorizontal: moderateScale(20),
-    paddingBottom: verticalScale(20),
+    paddingHorizontal: wp('5%'),
+    paddingBottom: hp('5%'),
   },
 
   orgLogosContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginVertical: verticalScale(20),
+    marginVertical: hp('3%'),
   },
   orgLogo: {
     alignItems: 'center',
@@ -46,7 +47,7 @@ export const styles = StyleSheet.create({
   },
 
   formContainer: {
-    width: '100%',
+    width: wp('90%'),
     alignSelf: 'center',
   },
   input: {
@@ -87,7 +88,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: verticalScale(16),
+    marginBottom: verticalScale(12),
     minHeight: verticalScale(20),
   },
   errorContainer: {
@@ -95,7 +96,7 @@ export const styles = StyleSheet.create({
   },
   errorText: {
     color: '#EF4444',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(13),
     fontWeight: '500',
   },
   forgotPasswordText: {
@@ -107,10 +108,10 @@ export const styles = StyleSheet.create({
   signInButton: {
     backgroundColor: '#10B981',
     borderRadius: moderateScale(10),
-    height: verticalScale(48),
+    height: hp('6.5%'),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: verticalScale(16),
+    marginBottom: hp('3%'),
     shadowColor: '#10B981',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -139,8 +140,8 @@ export const styles = StyleSheet.create({
   },
 
   googleIcon: {
-    width: scale(200),
-    height: verticalScale(48),
+    width: wp('50%'),
+    height: hp('6.5%'),
   },
 
   signUpContainer: {
@@ -149,7 +150,7 @@ export const styles = StyleSheet.create({
   },
   signUpText: {
     color: '#6B7280',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(13),
   },
   signUpLinkText: {
     color: '#10B981',

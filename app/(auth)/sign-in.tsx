@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { useSignIn, useSSO } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +26,10 @@ export default function SignInPage() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [showPwd, setShowPwd] = React.useState(false);
+
+  // Check if device is small - adjust threshold as needed
+  const { height: screenHeight } = Dimensions.get('window');
+  const isSmallDevice = screenHeight < 800; // Devices smaller than 700px height
 
   const onSignIn = async () => {
     if (!isLoaded) return;
@@ -60,6 +65,7 @@ export default function SignInPage() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      enabled={isSmallDevice} // Only enable keyboard avoidance on small devices
     >
       {/* Logos */}
       <View style={styles.orgLogosContainer}>

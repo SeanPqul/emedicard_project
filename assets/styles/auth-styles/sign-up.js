@@ -1,180 +1,186 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native';
+import { moderateScale, scale, verticalScale } from '@/src/utils/scaling-utils';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    paddingHorizontal: wp('5%'),
+    paddingBottom: hp('8%'),
+    paddingTop: hp('6%'),
+  },
+
   orgLogosContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 30,
-    marginTop: 40,
+    marginVertical: hp('3%'),
   },
   orgLogo: {
     alignItems: 'center',
   },
   healthLogo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: moderateScale(80),
+    height: moderateScale(80),
+    borderRadius: moderateScale(40),
     backgroundColor: '#E8F5E8',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: moderateScale(2),
     borderColor: '#10B981',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   cityLogo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: moderateScale(80),
+    height: moderateScale(80),
+    borderRadius: moderateScale(40),
     backgroundColor: '#E8F5E8',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: moderateScale(2),
     borderColor: '#F59E0B',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   logoImage: {
-    width: 100,
-    height: 100,
+    width: moderateScale(80),
+    height: moderateScale(80),
   },
   orgText: {
-    fontSize: 11,
+    fontSize: moderateScale(12),
     fontWeight: '600',
-    color: '#374151',
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 30,
-    lineHeight: 20,
   },
+
+  title: {
+    fontSize: moderateScale(24),
+    fontWeight: 'bold',
+    color: '#1F2937',
+    textAlign: 'center',
+    marginBottom: verticalScale(12),
+  },
+  subtitle: {
+    fontSize: moderateScale(14),
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: moderateScale(18),
+    marginBottom: verticalScale(20),
+  },
+
   formContainer: {
-    width: '100%',
-    maxWidth: 400,
+    width: wp('90%'),
+    alignSelf: 'center',
   },
   input: {
     backgroundColor: '#F9FAFB',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    fontSize: 16,
+    borderRadius: moderateScale(10),
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: verticalScale(12),
+    fontSize: moderateScale(16),
     color: '#1F2937',
-    marginBottom: 16,
+    marginBottom: verticalScale(12),
   },
+
   passwordContainer: {
     position: 'relative',
-    marginBottom: 8,
+    marginBottom: verticalScale(4),
   },
   passwordInput: {
     backgroundColor: '#F9FAFB',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    paddingRight: 50,
-    fontSize: 16,
+    borderRadius: moderateScale(10),
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: verticalScale(12),
+    paddingRight: moderateScale(40),
+    fontSize: moderateScale(16),
     color: '#1F2937',
   },
   eyeIcon: {
     position: 'absolute',
-    right: 16,
-    top: 16,
-    padding: 4,
+    right: moderateScale(12),
+    top: verticalScale(12),
+    size: moderateScale(20),
+    padding: moderateScale(4),
   },
+
+  errorContainer: {
+    minHeight: verticalScale(16),
+    marginBottom: verticalScale(-2),
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: moderateScale(13),
+    fontWeight: '500',
+  },
+
+  passwordRequirements: {
+    marginBottom: verticalScale(16),
+  },
+  requirementsTitle: {
+    fontSize: moderateScale(12),
+    color: '#6B7280',
+    fontWeight: '500',
+    marginBottom: verticalScale(4),
+  },
+  requirementItem: {
+    fontSize: moderateScale(11),
+    color: '#9CA3AF',
+    lineHeight: moderateScale(16),
+  },
+
   signUpButton: {
     backgroundColor: '#10B981',
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: moderateScale(10),
+    height: hp('6.5%'), // Match sign in button height
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: hp('3%'),
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: moderateScale(8),
+    elevation: 8,
   },
   signUpButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: 'white',
+    fontSize: moderateScale(16),
+    fontWeight: 'bold',
   },
+
   orText: {
     textAlign: 'center',
     color: '#9CA3AF',
-    fontSize: 14,
-    marginBottom: 16,
+    fontSize: moderateScale(12),
+    marginBottom: verticalScale(16),
   },
   googleButton: {
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: verticalScale(12),
   },
+  googleIcon: {
+    width: wp('50%'),
+    height: hp('6.5%'),
+  },
+
   signInContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8, 
-    marginBottom: 0,
   },
   signInText: {
     color: '#6B7280',
-    fontSize: 14,
-  },
-  signInLink: {
-    marginLeft: 4,
+    fontSize: moderateScale(13),
   },
   signInLinkText: {
     color: '#10B981',
-    fontSize: 14,
+    fontSize: moderateScale(12),
     fontWeight: '600',
-  },
-  
-  backButton: {
-    alignItems: 'flex-start',
-    marginTop: 16,
-  },
-  backText: {
-    color: '#6B7280',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-
-  // error styles
-  errorContainer: {
-    justifyContent: 'center',
-    minHeight: 20,
-    marginTop: -6,
-  },
-
-  errorText: {
-    color: '#EF4444',
-    fontSize: 13,
-    textAlign: 'left',
-    fontWeight: '500',
   },
 
   buttonDisabled: {
-    opacity: 0.6,
+    backgroundColor: '#9CA3AF',
   },
-  // password requirements
-  passwordRequirements: {
-    marginBottom: 24,
-  },
-  requirementsTitle: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  requirementItem: {
-    fontSize: 11,
-    color: '#9CA3AF',
-    lineHeight: 16,
-  },
-})
+});
