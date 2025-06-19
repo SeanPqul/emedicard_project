@@ -1,189 +1,153 @@
-import { useSignIn, useSSO } from '@clerk/clerk-expo'
-import { Ionicons } from '@expo/vector-icons'
-import { Link, useRouter } from 'expo-router'
-import React from 'react'
+import React from 'react';
 import {
-  Alert,
-  Image,
+  KeyboardAvoidingView,
+  View,
   Text,
   TextInput,
   TouchableOpacity,
-  View
-} from 'react-native'
-import { styles } from '@/assets/styles/auth-styles/sign-in'
-import { ViewStyle, TextStyle, ImageStyle } from 'react-native'
-import GoogleSignInButton from '@/assets/svgs/google-ctn-logo.svg'
-
+  Image,
+  Alert,
+  Platform,
+} from 'react-native';
+import { useSignIn, useSSO } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
+import { Link, useRouter } from 'expo-router';
+import GoogleSignInButton from '@/assets/svgs/google-ctn-logo.svg';
+import { styles } from '@/assets/styles/auth-styles/sign-in';
 
 export default function SignInPage() {
-  const { signIn, setActive, isLoaded } = useSignIn()
-  const { startSSOFlow } = useSSO()
-  const router = useRouter()
+  const { signIn, setActive, isLoaded } = useSignIn();
+  const { startSSOFlow } = useSSO();
+  const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = React.useState('')
-  const [password, setPassword] = React.useState('')
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [errorMessage, setErrorMessage] = React.useState('')
-  const [showPassword, setShowPassword] = React.useState(false)
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [showPwd, setShowPwd] = React.useState(false);
 
-  // Handle the submission of the sign-in form
-  const onSignInPress = async () => {
-    if (!isLoaded) return
-
-    // Clear any previous errors
-    setErrorMessage('')
-    setIsLoading(true)
-    
+  const onSignIn = async () => {
+    if (!isLoaded) return;
+    setError(''); setLoading(true);
     try {
-      const signInAttempt = await signIn.create({
-        identifier: emailAddress,
-        password,
-      })
-
-      if (signInAttempt.status === 'complete') {
-        await setActive({ session: signInAttempt.createdSessionId })
-        router.replace('/(tabs)')
-      } 
-      else {
-        console.error(JSON.stringify(signInAttempt, null, 2))
-        setErrorMessage('Please complete additional verification steps.')
+      const attempt = await signIn.create({ identifier: email, password });
+      if (attempt.status === 'complete') {
+        await setActive({ session: attempt.createdSessionId });
+        router.replace('/(tabs)');
+      } else {
+        setError('Please complete additional verification steps.');
       }
-    } catch (err) {
-      console.error(JSON.stringify(err, null, 2))
-      // Generic error message for security
-      setErrorMessage('Invalid email or password.')
+    } catch {
+      setError('Invalid email or password.');
     } finally {
-      setIsLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleGoogleSignIn = async () => {
+  const onGoogle = async () => {
     try {
-      const { createdSessionId, setActive } = await startSSOFlow({ 
-        strategy: "oauth_google" 
-      })
-      
-      if (setActive && createdSessionId) {
-        setActive({ session: createdSessionId })
-        router.replace("/(tabs)")
+      const { createdSessionId, setActive: activate } = await startSSOFlow({ strategy: 'oauth_google' });
+      if (activate && createdSessionId) {
+        activate({ session: createdSessionId });
+        router.replace('/(tabs)');
       }
-    } catch (error) {
-      console.error("OAuth error:", error)
-      Alert.alert('Error', 'Google sign in failed. Please try again.')
+    } catch {
+      Alert.alert('Error', 'Google sign in failed. Please try again.');
     }
-  }
+  };
 
   return (
-    
-    <View style={styles.container as ViewStyle}>
-      {/* Organization Logos */}
-      <View style={styles.orgLogosContainer as ViewStyle}>
-        <View style={styles.orgLogo as ViewStyle}>
-          <View style={styles.healthLogo as ViewStyle}>
-            <Image 
-              source={require('../../assets/images/cho-logo.png')} 
-              style={styles.logoImage as ImageStyle}
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={styles.orgText as TextStyle}>CITY HEALTH OFFICE</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      {/* Logos */}
+      <View style={styles.orgLogosContainer}>
+        <View style={styles.orgLogo}>
+          <Image
+            source={require('../../assets/images/cho-logo.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.orgText}>CITY HEALTH OFFICE</Text>
         </View>
-        
-        <View style={styles.orgLogo as ViewStyle}>
-          <View style={styles.cityLogo as ViewStyle}>
-            <Image 
-              source={require('../../assets/images/davao-city-logo.png')} 
-              style={styles.logoImage as ImageStyle}
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={styles.orgText as TextStyle}>DAVAO CITY</Text>
+        <View style={styles.orgLogo}>
+          <Image
+            source={require('../../assets/images/davao-city-logo.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.orgText}>DAVAO CITY</Text>
         </View>
       </View>
 
       {/* Title */}
-      <Text style={styles.title as TextStyle}>eMediCard</Text>
-      <Text style={styles.subtitle as TextStyle}>A Mobile-Base Health Card{'\n'}Management System</Text>
+      <Text style={styles.title}>eMediCard</Text>
+      <Text style={styles.subtitle}>
+        A Mobile-Base Health Card{'\n'}Management System
+      </Text>
 
-      {/* Sign In Form */}
-      <View style={styles.formContainer as ViewStyle}>
+      {/* Form */}
+      <View style={styles.formContainer}>
         <TextInput
-          style={styles.input as TextStyle}
-          autoCapitalize="none"
-          value={emailAddress}
+          style={styles.input}
           placeholder="Enter email"
           placeholderTextColor="#9CA3AF"
-          onChangeText={(email) => {
-            setEmailAddress(email);
-            // Clear error when user starts typing
-            if (errorMessage) setErrorMessage('');
-          }}
+          autoCapitalize="none"
           keyboardType="email-address"
+          value={email}
+          onChangeText={t => { setEmail(t); if (error) setError(''); }}
         />
-        
-        <View style={styles.passwordContainer as ViewStyle}>
+
+        <View style={styles.passwordContainer}>
           <TextInput
-            style={styles.passwordInput as TextStyle}
-            value={password}
+            style={styles.passwordInput}
             placeholder="Enter password"
             placeholderTextColor="#9CA3AF"
-            secureTextEntry={!showPassword}
-            onChangeText={(password) => {
-              setPassword(password);
-              // Clear error when user starts typing
-              if (errorMessage) setErrorMessage('');
-            }}
+            secureTextEntry={!showPwd}
+            value={password}
+            onChangeText={t => { setPassword(t); if (error) setError(''); }}
           />
-          <TouchableOpacity
-            style={styles.eyeIcon as ViewStyle}
-            onPress={() => setShowPassword(!showPassword)}
-          >
-            <Ionicons
-              name={showPassword ? 'eye' : 'eye-off'}
-              size={24}
-              color="#9CA3AF"
-            />
+          <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPwd(v => !v)}>
+            <Ionicons name={showPwd ? 'eye' : 'eye-off'} size={styles.eyeIcon.size} color="#9CA3AF" />
           </TouchableOpacity>
         </View>
 
-        {/* Error Message and Forgot Password Row */}
-        <View style={styles.errorForgotContainer as ViewStyle}>
-          <View style={styles.errorContainer as ViewStyle}>
-            {errorMessage ? (
-              <Text style={styles.errorText as TextStyle}>{errorMessage}</Text>
-            ) : null}
+        <View style={styles.errorForgotContainer}>
+          <View style={styles.errorContainer}>
+            {error.length > 0 && <Text style={styles.errorText}>{error}</Text>}
           </View>
-          <Link href="/" style={styles.forgotPasswordLink as TextStyle}>
-            <Text style={styles.forgotPasswordText as TextStyle}>Forgot password?</Text>
+          <Link href="/">
+            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
           </Link>
         </View>
 
-        <TouchableOpacity 
-          style={[styles.signInButton as ViewStyle, isLoading && styles.buttonDisabled as ViewStyle]} 
-          onPress={onSignInPress}
-          disabled={isLoading || !emailAddress || !password}
+        <TouchableOpacity
+          style={[styles.signInButton, loading && styles.buttonDisabled]}
+          onPress={onSignIn}
+          disabled={loading || !email || !password}
         >
-          <Text style={styles.signInButtonText as TextStyle}>
-            {isLoading ? 'Signing In...' : 'Log in'}
+          <Text style={styles.signInButtonText}>
+            {loading ? 'Signing In…' : 'Log in'}
           </Text>
         </TouchableOpacity>
 
-        {/* Or Login With */}
-        <Text style={styles.orText as TextStyle}>or Login with</Text>
+        <Text style={styles.orText}>or Login with</Text>
 
-        {/* Google Sign In with Complete SVG */}
-        <TouchableOpacity style={styles.googleButton as ViewStyle} onPress={handleGoogleSignIn}>
-          <GoogleSignInButton width={200} height={50}/>
+        <TouchableOpacity style={styles.googleButton} onPress={onGoogle}>
+          <GoogleSignInButton
+            width={styles.googleIcon.width}
+            height={styles.googleIcon.height}
+          />
         </TouchableOpacity>
 
-        {/* Sign Up Link */}
-        <View style={styles.signUpContainer as ViewStyle}>
-          <Text style={styles.signUpText as TextStyle}>Dont have an account? </Text>
+        <View style={styles.signUpContainer}>
+          <Text style={styles.signUpText}>Dont have an account? </Text>
           <Link href="/(auth)/sign-up" replace>
-            <Text style={styles.signUpLinkText as TextStyle}>Sign up</Text>
+            <Text style={styles.signUpLinkText}>Sign up</Text>
           </Link>
         </View>
       </View>
-    </View>
-  )
+    </KeyboardAvoidingView>
+  );
 }
