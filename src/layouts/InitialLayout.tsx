@@ -14,10 +14,14 @@ export default function InitialLayout() {
     const inAuthScreen = segments[0] === "(auth)"
     
     // If not signed in and not in auth screen, redirect to sign-in
-    //if(!isSignedIn && !inAuthScreen) router.replace("/(auth)/sign-in")
+    if(!isSignedIn && !inAuthScreen) {
+      router.replace("/(auth)/sign-in")
+    }
       
     // If signed in and in auth screen, redirect to home
-    //else if (isSignedIn && inAuthScreen) router.replace("/(tabs)")
+    else if (isSignedIn && inAuthScreen) {
+      router.replace("/(tabs)")
+    }
   
     }, [isLoaded, isSignedIn, router, segments])
 

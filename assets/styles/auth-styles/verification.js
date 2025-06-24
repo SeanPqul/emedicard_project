@@ -1,74 +1,78 @@
-import { StyleSheet} from 'react-native'
-
+import { StyleSheet } from 'react-native';
+import { moderateScale, verticalScale } from '@/src/utils/scaling-utils';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 
 export const styles = StyleSheet.create({
-  content: {
+  container: {
     flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    paddingHorizontal: wp('5%'),
+    paddingBottom: hp('5%'),
+  },
+  content: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
-    backgroundColor: '#FFFFFF',
   },
   
   // Email Icon Container
   iconContainer: {
-    width: 120,
-    height: 120,
+    width: moderateScale(100),
+    height: moderateScale(100),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: hp('3%'),
   },
   emailIcon: {
-    width: 90,
-    height: 90,
+    width: moderateScale(80),
+    height: moderateScale(80),
   },
   
   // Title and Subtitle
   title: {
-    fontSize: 32,
+    fontSize: moderateScale(24),
     fontWeight: 'bold',
     color: '#1F2937',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 8,
-    lineHeight: 24,
-    paddingHorizontal: 20,
+    marginBottom: verticalScale(8),
+    lineHeight: moderateScale(18),
+    paddingHorizontal: wp('5%'),
   },
   emailText: {
-    fontSize: 15,
+    fontSize: moderateScale(14),
     color: '#9CA3AF',
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: hp('4%'),
   },
 
   // Form Container
   formContainer: {
-    width: '100%',
-    maxWidth: 400,
+    width: wp('90%'),
+    alignSelf: 'center',
   },
 
   // OTP Input Container
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
-    paddingHorizontal: 8,
+    marginBottom: verticalScale(4),
   },
   otpInput: {
-    width: 48,
-    height: 56,
+    width: wp('12.5%'), 
+    height: hp('7%'),
     backgroundColor: '#F9FAFB',
-    borderWidth: 2,
+    borderWidth: moderateScale(2),
     borderColor: '#E5E7EB',
-    borderRadius: 12,
+    borderRadius: moderateScale(10),
     textAlign: 'center',
-    fontSize: 24,
+    fontSize: moderateScale(20),
     fontWeight: 'bold',
     color: '#1F2937',
   },
@@ -85,12 +89,12 @@ export const styles = StyleSheet.create({
   errorContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 20,
-    marginBottom : 8,
+    minHeight: hp('2.2%'),
+    marginBottom: verticalScale(6),
   },
   errorText: {
     color: '#EF4444',
-    fontSize: 13,
+    fontSize: moderateScale(13),
     textAlign: 'center',
     fontWeight: '500',
   },
@@ -98,38 +102,43 @@ export const styles = StyleSheet.create({
   // Verify Button
   verifyButton: {
     backgroundColor: '#10B981',
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: moderateScale(10),
+    height: hp('6.5%'),
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: hp('3%'),
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: moderateScale(8),
+    elevation: 8,
   },
   verifyButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: 'white',
+    fontSize: moderateScale(16),
+    fontWeight: 'bold',
   },
   buttonDisabled: {
     backgroundColor: '#9CA3AF',
-    opacity: 0.6,
   },
 
   // Resend Section
   resendContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: hp('3%'),
   },
   resendText: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: '#6B7280',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   resendButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: verticalScale(8),
+    paddingHorizontal: moderateScale(16),
   },
   resendButtonText: {
     color: '#10B981',
-    fontSize: 14,
+    fontSize: moderateScale(12),
     fontWeight: '600',
   },
   resendButtonDisabled: {
@@ -139,9 +148,10 @@ export const styles = StyleSheet.create({
   // Back Button
   backContainer: {
     alignItems: 'center',
-    paddingTop: 16,
+    paddingTop: hp('2%'),
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
+    width: wp('90%'),
   },
   backLink: {
     width: '100%',
@@ -150,13 +160,13 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: verticalScale(12),
   },
   backText: {
     color: '#6B7280',
-    fontSize: 14,
+    fontSize: moderateScale(12),
     fontWeight: '500',
-    marginLeft: 8,
+    marginLeft: moderateScale(8),
   },
 
   // Success Screen
@@ -165,12 +175,12 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F0F9FF',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: wp('5%'),
   },
   successContent: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 32,
+    borderRadius: moderateScale(20),
+    padding: wp('8%'),
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -178,34 +188,33 @@ export const styles = StyleSheet.create({
       height: 4,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     elevation: 8,
-    maxWidth: 400,
-    width: '100%',
+    width: wp('90%'),
   },
   successIcon: {
-    marginBottom: 24,
+    marginBottom: hp('3%'),
   },
   successTitle: {
-    fontSize: 24,
+    fontSize: moderateScale(20),
     fontWeight: 'bold',
     color: '#1F2937',
-    marginBottom: 12,
+    marginBottom: verticalScale(12),
     textAlign: 'center',
   },
   successSubtitle: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 24,
+    marginBottom: hp('3%'),
+    lineHeight: moderateScale(18),
   },
   loadingContainer: {
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: '#10B981',
     fontWeight: '500',
   },
-})
+});

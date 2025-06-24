@@ -1,4 +1,4 @@
-import { moderateScale, scale, verticalScale } from '@/src/utils/scaling-utils';
+import { moderateScale, verticalScale } from '@/src/utils/scaling-utils';
 import { StyleSheet } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 

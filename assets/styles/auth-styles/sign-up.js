@@ -1,5 +1,5 @@
+import { moderateScale, verticalScale } from '@/src/utils/scaling-utils';
 import { StyleSheet } from 'react-native';
-import { moderateScale, scale, verticalScale } from '@/src/utils/scaling-utils';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 
 export const styles = StyleSheet.create({
@@ -8,8 +8,8 @@ export const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'center',
     paddingHorizontal: wp('5%'),
-    paddingBottom: hp('8%'),
-    paddingTop: hp('6%'),
+    paddingBottom: hp('4%'),
+    paddingTop: hp('3%'),
   },
 
   orgLogosContainer: {

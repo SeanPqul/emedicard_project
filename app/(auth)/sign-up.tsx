@@ -1,39 +1,39 @@
-import React from 'react';
+import { styles } from "@/assets/styles/auth-styles/sign-up";
+import GoogleSignInButton from "@/assets/svgs/google-ctn-logo.svg";
+import { useSignUp, useSSO } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+import { Link, useRouter } from "expo-router";
+import React from "react";
 import {
-  View,
+  Alert,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
-  Alert,
-} from 'react-native';
-import { useSignUp, useSSO } from '@clerk/clerk-expo';
-import { Ionicons } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
-import GoogleSignInButton from '@/assets/svgs/google-ctn-logo.svg';
-import { styles } from '@/assets/styles/auth-styles/sign-up';
+  View,
+} from "react-native";
 
 export default function SignUpPage() {
   const { isLoaded, signUp } = useSignUp();
   const { startSSOFlow } = useSSO();
   const router = useRouter();
 
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [showPwd, setShowPwd] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
+  const [error, setError] = React.useState("");
 
   const onSignUp = async () => {
     if (!isLoaded) return;
-    setError(''); setLoading(true);
+    setError("");
+    setLoading(true);
     try {
       await signUp.create({ emailAddress: email, password });
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-      router.replace({ pathname: '/(auth)/verification', params: { email } });
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      router.replace({ pathname: "/(auth)/verification", params: { email } });
     } catch (err: any) {
-      // your existing error parsing…
-      setError('An error occurred. Please try again.');
+      setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -41,13 +41,15 @@ export default function SignUpPage() {
 
   const onGoogle = async () => {
     try {
-      const { createdSessionId, setActive } = await startSSOFlow({ strategy: 'oauth_google' });
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_google",
+      });
       if (setActive && createdSessionId) {
         setActive({ session: createdSessionId });
-        router.replace('/(tabs)');
+        router.replace("/(tabs)");
       }
     } catch {
-      Alert.alert('Error', 'Google sign up failed. Please try again.');
+      Alert.alert("Error", "Google sign up failed. Please try again.");
     }
   };
 
@@ -58,7 +60,7 @@ export default function SignUpPage() {
         <View style={styles.orgLogo}>
           <View style={styles.healthLogo}>
             <Image
-              source={require('../../assets/images/cho-logo.png')}
+              source={require("../../assets/images/cho-logo.png")}
               style={styles.logoImage}
               resizeMode="contain"
             />
@@ -68,7 +70,7 @@ export default function SignUpPage() {
         <View style={styles.orgLogo}>
           <View style={styles.cityLogo}>
             <Image
-              source={require('../../assets/images/davao-city-logo.png')}
+              source={require("../../assets/images/davao-city-logo.png")}
               style={styles.logoImage}
               resizeMode="contain"
             />
@@ -80,7 +82,7 @@ export default function SignUpPage() {
       {/* Title */}
       <Text style={styles.title}>Sign Up</Text>
       <Text style={styles.subtitle}>
-        Register in app to manage{'\n'}your health card applications
+        Register in app to manage{"\n"}your health card applications
       </Text>
 
       {/* Form */}
@@ -92,7 +94,10 @@ export default function SignUpPage() {
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
-          onChangeText={t => { setEmail(t); if (error) setError(''); }}
+          onChangeText={(t) => {
+            setEmail(t);
+            if (error) setError("");
+          }}
         />
 
         <View style={styles.passwordContainer}>
@@ -102,11 +107,17 @@ export default function SignUpPage() {
             placeholderTextColor="#9CA3AF"
             secureTextEntry={!showPwd}
             value={password}
-            onChangeText={t => { setPassword(t); if (error) setError(''); }}
+            onChangeText={(t) => {
+              setPassword(t);
+              if (error) setError("");
+            }}
           />
-          <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPwd(v => !v)}>
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowPwd((v) => !v)}
+          >
             <Ionicons
-              name={showPwd ? 'eye' : 'eye-off'}
+              name={showPwd ? "eye" : "eye-off"}
               size={styles.eyeIcon.size}
               color="#9CA3AF"
             />
@@ -120,8 +131,12 @@ export default function SignUpPage() {
         <View style={styles.passwordRequirements}>
           <Text style={styles.requirementsTitle}>Password must contain:</Text>
           <Text style={styles.requirementItem}>• At least 8 characters</Text>
-          <Text style={styles.requirementItem}>• One uppercase letter (A-Z)</Text>
-          <Text style={styles.requirementItem}>• One lowercase letter (a-z)</Text>
+          <Text style={styles.requirementItem}>
+            • One uppercase letter (A-Z)
+          </Text>
+          <Text style={styles.requirementItem}>
+            • One lowercase letter (a-z)
+          </Text>
           <Text style={styles.requirementItem}>• One number (0-9)</Text>
         </View>
 
@@ -131,7 +146,7 @@ export default function SignUpPage() {
           disabled={loading || !email || !password}
         >
           <Text style={styles.signUpButtonText}>
-            {loading ? 'Signing Up…' : 'Continue'}
+            {loading ? "Signing Up…" : "Continue"}
           </Text>
         </TouchableOpacity>
 
