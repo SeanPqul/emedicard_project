@@ -17,5 +17,5 @@
     "app/(tabs)/index.tsx", 
     "app/(auth)/sign-in.tsx",
     "types/**/*.d.ts"
-  ]
+, "assets/styles/auth-styles/sign-in.js", "assets/styles/auth-styles/sign-up.js"  ]
 }

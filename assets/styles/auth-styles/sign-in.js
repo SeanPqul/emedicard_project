@@ -1,3 +1,4 @@
+import { FONT_SIZES, FONT_WEIGHTS } from '@/constant/fontSizes';
 import { moderateScale, verticalScale } from '@/src/utils/scaling-utils';
 import { StyleSheet } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
@@ -7,7 +8,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     justifyContent: 'center',
-    paddingHorizontal: wp('5%'), //
+    paddingHorizontal: wp('5%'),
     paddingBottom: hp('5%'),
   },
 
@@ -15,6 +16,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: hp('4%'),
+    marginBottom : hp('5%')
   },
   orgLogo: {
     alignItems: 'center',
@@ -25,21 +27,21 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(8.8),
   },
   orgText: {
-    fontSize: moderateScale(13),  
+    fontSize: FONT_SIZES.caption,
     color: '#6B7280',
     fontWeight: '600',
     textAlign: 'center',
   },
 
   title: {
-    fontSize: moderateScale(32), 
+    fontSize: FONT_SIZES.headline, 
     fontWeight: 'bold',
     color: '#1F2937',
     textAlign: 'center',
     marginBottom: verticalScale(4),
   },
   subtitle: {
-    fontSize: moderateScale(16),  
+    fontSize: FONT_SIZES.body,  
     color: '#6B7280',
     textAlign: 'center',
     lineHeight: moderateScale(19.5), 
@@ -57,7 +59,7 @@ export const styles = StyleSheet.create({
     borderRadius: moderateScale(11),     
     paddingHorizontal: moderateScale(13), 
     paddingVertical: verticalScale(13),   
-    fontSize: moderateScale(17.5),         
+    fontSize: FONT_SIZES.body,         
     marginBottom: verticalScale(13),      
     color: '#1F2937',
   },
@@ -74,14 +76,13 @@ export const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(13),
     paddingVertical: verticalScale(13),
     paddingRight: moderateScale(44),     
-    fontSize: moderateScale(17.5),
+    fontSize: FONT_SIZES.body,
     color: '#1F2937',
   },
   eyeIcon: {
     position: 'absolute',
     right: moderateScale(13),      
-    top: verticalScale(13),         
-    size: moderateScale(23),           
+    top: verticalScale(13),              
   },
 
   errorForgotContainer: {
@@ -96,19 +97,19 @@ export const styles = StyleSheet.create({
   },
   errorText: {
     color: '#EF4444',
-    fontSize: moderateScale(14),   
+    fontSize: FONT_SIZES.caption,   
     fontWeight: '500',
   },
   forgotPasswordText: {
     color: '#10B981',
-    fontSize: moderateScale(15),   
-    fontWeight: '500',
+    fontSize: FONT_SIZES.action,   
+    fontWeight: FONT_WEIGHTS.medium,
   },
 
   signInButton: {
     backgroundColor: '#10B981',
     borderRadius: moderateScale(11),
-    height: hp('7.15%'),               
+    height: hp('6.5%'),               
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: hp('3%'),          
@@ -123,15 +124,15 @@ export const styles = StyleSheet.create({
   },
   signInButtonText: {
     color: 'white',
-    fontSize: moderateScale(18),      
+    fontSize: FONT_SIZES.body,      
     fontWeight: 'bold',
   },
 
   orText: {
     textAlign: 'center',
     color: '#9CA3AF',
-    fontSize: moderateScale(13.2),      
-    marginBottom: verticalScale(17.6),  
+    fontSize: FONT_SIZES.caption,      
+    marginBottom: verticalScale(17),  
   },
 
   googleButton: {
@@ -140,8 +141,8 @@ export const styles = StyleSheet.create({
   },
 
   googleIcon: {
-    width: wp('55%'),                   
-    height: hp('7.15%'),                
+    width: wp('50%'),                   
+    height: hp('6%'),                
   },
 
   signUpContainer: {
@@ -150,11 +151,11 @@ export const styles = StyleSheet.create({
   },
   signUpText: {
     color: '#6B7280',
-    fontSize: moderateScale(14),      
+    fontSize: FONT_SIZES.caption,      
   },
   signUpLinkText: {
     color: '#10B981',
-    fontSize: moderateScale(13),      
-    fontWeight: '600',
+    fontSize: FONT_SIZES.caption,      
+    fontWeight: FONT_WEIGHTS.bold,
   },
 });

@@ -23,6 +23,9 @@ export default function VerificationPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isVerified, setIsVerified] = useState(false);
   const [error, setError] = useState("");
+  const [countdown, setCountdown] = useState(5);
+  const [showContinueButton, setShowContinueButton] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const params = useLocalSearchParams();
 
   const inputRefs = useRef<(TextInput | null)[]>([]);
@@ -45,8 +48,33 @@ export default function VerificationPage() {
         toValue: 1,
         useNativeDriver: true,
       }).start();
+      
+      // Start countdown
+      const countdownTimer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownTimer);
+            // Activate session and redirect after countdown
+            if (sessionId && setActive) {
+              setActive({ session: sessionId });
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      // Show continue button after 1 second
+      const buttonTimer = setTimeout(() => {
+        setShowContinueButton(true);
+      }, 1000);
+
+      return () => {
+        clearInterval(countdownTimer);
+        clearTimeout(buttonTimer);
+      };
     }
-  }, [isVerified, scaleAnim]);
+  }, [isVerified, scaleAnim, sessionId, setActive]);
 
   const handleCodeChange = (text: string, index: number) => {
     if (text.length > 1) text = text.slice(-1);
@@ -90,8 +118,8 @@ export default function VerificationPage() {
 
       if (attempt.status === "complete") {
         setIsVerified(true);
-        await setActive({ session: attempt.createdSessionId });
-        setTimeout(() => router.replace("/(tabs)"), 2000);
+        // Store session ID but don't activate yet - wait for countdown
+        setSessionId(attempt.createdSessionId);
       } else {
         setError("Verification incomplete. Please try again.");
       }
@@ -134,6 +162,13 @@ export default function VerificationPage() {
 
   const isCodeComplete = code.every((digit) => digit !== "");
 
+  const handleContinue = async () => {
+    // Activate session when user clicks continue
+    if (sessionId && setActive) {
+      await setActive({ session: sessionId });
+    }
+  };
+
   if (isVerified) {
     return (
       <View style={styles.successContainer}>
@@ -147,8 +182,18 @@ export default function VerificationPage() {
           <Text style={styles.successSubtitle}>
             Your account has been verified. Redirecting to your dashboard...
           </Text>
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading...</Text>
+          <View style={styles.countdownContainer}>
+            <Text style={styles.countdownText}>
+              Redirecting in {countdown} second{countdown !== 1 ? 's' : ''}
+            </Text>
+            {showContinueButton && (
+              <TouchableOpacity
+                style={styles.continueButton}
+                onPress={handleContinue}
+              >
+                <Text style={styles.continueButtonText}>Continue Now</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </Animated.View>
       </View>

@@ -1,4 +1,4 @@
-import { styles } from "@/assets/styles/auth-styles/sign-up";
+import { styles } from "../../assets/styles/auth-styles/sign-up";
 import GoogleSignInButton from "@/assets/svgs/google-ctn-logo.svg";
 import { useSignUp, useSSO } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,14 +26,51 @@ export default function SignUpPage() {
 
   const onSignUp = async () => {
     if (!isLoaded) return;
-    setError("");
+    
+    // Clear any previous errors
+    setError('');
     setLoading(true);
+    
     try {
-      await signUp.create({ emailAddress: email, password });
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      await signUp.create({
+        emailAddress: email,
+        password,
+      });
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      
       router.replace({ pathname: "/(auth)/verification", params: { email } });
     } catch (err: any) {
-      setError("An error occurred. Please try again.");
+      console.error(JSON.stringify(err, null, 2));
+      
+      // Handle specific error types
+      if (err.errors && err.errors.length > 0) {
+        // Handle multiple errors - prioritize email errors first, then password
+        const emailError = err.errors.find((e: any) => e.meta?.paramName === 'email_address');
+        const passwordError = err.errors.find((e: any) => e.meta?.paramName === 'password');
+        
+        if (emailError) {
+          switch (emailError.code) {
+            case 'form_identifier_exists':
+            case 'email_address_taken':
+              setError('The email you entered is already registered.');
+              break;
+            case 'form_param_format_invalid':
+            case 'form_identifier_invalid':
+              setError('Please enter a valid email address.');
+              break;
+            default:
+              setError(emailError.longMessage || emailError.message || 'Invalid email address.');
+          }
+        } else if (passwordError) {
+          setError('Invalid password. Please try again.');
+        } else {
+          // Fallback for other errors
+          const error = err.errors[0];
+          setError(error.longMessage || error.message || 'An error occurred during sign up.');
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -58,23 +95,19 @@ export default function SignUpPage() {
       {/* Logos */}
       <View style={styles.orgLogosContainer}>
         <View style={styles.orgLogo}>
-          <View style={styles.healthLogo}>
-            <Image
-              source={require("../../assets/images/cho-logo.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-          </View>
+          <Image
+            source={require("../../assets/images/cho-logo.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={styles.orgText}>CITY HEALTH OFFICE</Text>
         </View>
         <View style={styles.orgLogo}>
-          <View style={styles.cityLogo}>
-            <Image
-              source={require("../../assets/images/davao-city-logo.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-          </View>
+          <Image
+            source={require("../../assets/images/davao-city-logo.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={styles.orgText}>DAVAO CITY</Text>
         </View>
       </View>

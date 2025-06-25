@@ -1,5 +1,6 @@
-import { StyleSheet } from 'react-native';
+import { FONT_SIZES } from '@/constant/fontSizes';
 import { moderateScale, verticalScale } from '@/src/utils/scaling-utils';
+import { StyleSheet } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 
 export const styles = StyleSheet.create({
@@ -30,14 +31,14 @@ export const styles = StyleSheet.create({
   
   // Title and Subtitle
   title: {
-    fontSize: moderateScale(24),
+    fontSize: FONT_SIZES.headline,
     fontWeight: 'bold',
     color: '#1F2937',
     marginBottom: verticalScale(8),
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: moderateScale(14),
+    fontSize: FONT_SIZES.action,
     color: '#6B7280',
     textAlign: 'center',
     marginBottom: verticalScale(8),
@@ -45,7 +46,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: wp('5%'),
   },
   emailText: {
-    fontSize: moderateScale(14),
+    fontSize: FONT_SIZES.action,
     color: '#9CA3AF',
     fontWeight: '600',
     textAlign: 'center',
@@ -94,7 +95,7 @@ export const styles = StyleSheet.create({
   },
   errorText: {
     color: '#EF4444',
-    fontSize: moderateScale(13),
+    fontSize: FONT_SIZES.caption,
     textAlign: 'center',
     fontWeight: '500',
   },
@@ -103,7 +104,7 @@ export const styles = StyleSheet.create({
   verifyButton: {
     backgroundColor: '#10B981',
     borderRadius: moderateScale(10),
-    height: hp('6.5%'),
+    height: hp('6%'),
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: hp('3%'),
@@ -115,7 +116,7 @@ export const styles = StyleSheet.create({
   },
   verifyButtonText: {
     color: 'white',
-    fontSize: moderateScale(16),
+    fontSize: FONT_SIZES.body,
     fontWeight: 'bold',
   },
   buttonDisabled: {
@@ -128,7 +129,7 @@ export const styles = StyleSheet.create({
     marginBottom: hp('3%'),
   },
   resendText: {
-    fontSize: moderateScale(12),
+    fontSize: FONT_SIZES.caption,
     color: '#6B7280',
     marginBottom: verticalScale(8),
   },
@@ -138,7 +139,7 @@ export const styles = StyleSheet.create({
   },
   resendButtonText: {
     color: '#10B981',
-    fontSize: moderateScale(12),
+    fontSize: FONT_SIZES.action,
     fontWeight: '600',
   },
   resendButtonDisabled: {
@@ -164,7 +165,7 @@ export const styles = StyleSheet.create({
   },
   backText: {
     color: '#6B7280',
-    fontSize: moderateScale(12),
+    fontSize: FONT_SIZES.action,
     fontWeight: '500',
     marginLeft: moderateScale(8),
   },
@@ -216,5 +217,35 @@ export const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     color: '#10B981',
     fontWeight: '500',
+  },
+  
+  // Countdown and Continue Button
+  countdownContainer: {
+    alignItems: 'center',
+    marginTop: hp('2%'),
+  },
+  countdownText: {
+    fontSize: moderateScale(14),
+    color: '#6B7280',
+    fontWeight: '500',
+    marginBottom: verticalScale(16),
+    textAlign: 'center',
+  },
+  continueButton: {
+    backgroundColor: '#10B981',
+    borderRadius: moderateScale(8),
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: moderateScale(24),
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: moderateScale(4),
+    elevation: 4,
+  },
+  continueButtonText: {
+    color: 'white',
+    fontSize: FONT_SIZES.action,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

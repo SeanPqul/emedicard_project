@@ -1,3 +1,4 @@
+import { FONT_SIZES, FONT_WEIGHTS } from '@/constant/fontSizes';
 import { moderateScale, verticalScale } from '@/src/utils/scaling-utils';
 import { StyleSheet } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
@@ -9,7 +10,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: wp('5%'),
     paddingBottom: hp('4%'),
-    paddingTop: hp('3%'),
+    paddingTop: hp('4%'),
   },
 
   orgLogosContainer: {
@@ -20,48 +21,27 @@ export const styles = StyleSheet.create({
   orgLogo: {
     alignItems: 'center',
   },
-  healthLogo: {
-    width: moderateScale(80),
-    height: moderateScale(80),
-    borderRadius: moderateScale(40),
-    backgroundColor: '#E8F5E8',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: moderateScale(2),
-    borderColor: '#10B981',
-    marginBottom: verticalScale(8),
-  },
-  cityLogo: {
-    width: moderateScale(80),
-    height: moderateScale(80),
-    borderRadius: moderateScale(40),
-    backgroundColor: '#E8F5E8',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: moderateScale(2),
-    borderColor: '#F59E0B',
-    marginBottom: verticalScale(8),
-  },
   logoImage: {
-    width: moderateScale(80),
-    height: moderateScale(80),
+    width: moderateScale(100),       
+    height: moderateScale(100),
+    marginBottom: verticalScale(8),
   },
   orgText: {
-    fontSize: moderateScale(12),
-    fontWeight: '600',
+    fontSize: FONT_SIZES.caption,  
     color: '#6B7280',
+    fontWeight: FONT_WEIGHTS.bold,
     textAlign: 'center',
   },
 
   title: {
-    fontSize: moderateScale(24),
+    fontSize: FONT_SIZES.headline,
     fontWeight: 'bold',
     color: '#1F2937',
     textAlign: 'center',
     marginBottom: verticalScale(12),
   },
   subtitle: {
-    fontSize: moderateScale(14),
+    fontSize: FONT_SIZES.body,
     color: '#6B7280',
     textAlign: 'center',
     lineHeight: moderateScale(18),
@@ -76,12 +56,12 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: moderateScale(10),
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: verticalScale(12),
-    fontSize: moderateScale(16),
+    borderRadius: moderateScale(11),
+    paddingHorizontal: moderateScale(13),
+    paddingVertical: verticalScale(13),
+    fontSize: FONT_SIZES.body,
     color: '#1F2937',
-    marginBottom: verticalScale(12),
+    marginBottom: verticalScale(13),
   },
 
   passwordContainer: {
@@ -96,24 +76,23 @@ export const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(12),
     paddingVertical: verticalScale(12),
     paddingRight: moderateScale(40),
-    fontSize: moderateScale(16),
+    fontSize: FONT_SIZES.body,
     color: '#1F2937',
   },
   eyeIcon: {
     position: 'absolute',
-    right: moderateScale(12),
-    top: verticalScale(12),
-    size: moderateScale(20),
-    padding: moderateScale(4),
+    right: moderateScale(13),
+    top: verticalScale(13),
+    size: moderateScale(23),
   },
 
   errorContainer: {
-    minHeight: verticalScale(16),
+    minHeight: verticalScale(18),
     marginBottom: verticalScale(-2),
   },
   errorText: {
     color: '#EF4444',
-    fontSize: moderateScale(13),
+    fontSize: FONT_SIZES.caption,
     fontWeight: '500',
   },
 
@@ -121,21 +100,21 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(16),
   },
   requirementsTitle: {
-    fontSize: moderateScale(12),
+    fontSize: FONT_SIZES.micro,
     color: '#6B7280',
-    fontWeight: '500',
+    fontWeight: FONT_WEIGHTS.medium,
     marginBottom: verticalScale(4),
   },
   requirementItem: {
-    fontSize: moderateScale(11),
+    fontSize: FONT_SIZES.micro,
     color: '#9CA3AF',
     lineHeight: moderateScale(16),
   },
 
   signUpButton: {
     backgroundColor: '#10B981',
-    borderRadius: moderateScale(10),
-    height: hp('6.5%'), // Match sign in button height
+    borderRadius: moderateScale(11),
+    height: hp('6.5%'), 
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: hp('3%'),
@@ -147,15 +126,15 @@ export const styles = StyleSheet.create({
   },
   signUpButtonText: {
     color: 'white',
-    fontSize: moderateScale(16),
-    fontWeight: 'bold',
+    fontSize: FONT_SIZES.body,
+    fontWeight: FONT_WEIGHTS.bold,
   },
 
   orText: {
     textAlign: 'center',
     color: '#9CA3AF',
-    fontSize: moderateScale(12),
-    marginBottom: verticalScale(16),
+    fontSize: FONT_SIZES.caption,
+    marginBottom: verticalScale(17),
   },
   googleButton: {
     alignItems: 'center',
@@ -163,7 +142,7 @@ export const styles = StyleSheet.create({
   },
   googleIcon: {
     width: wp('50%'),
-    height: hp('6.5%'),
+    height: hp('6%'),
   },
 
   signInContainer: {
@@ -172,12 +151,12 @@ export const styles = StyleSheet.create({
   },
   signInText: {
     color: '#6B7280',
-    fontSize: moderateScale(13),
+    fontSize: FONT_SIZES.caption,
   },
   signInLinkText: {
     color: '#10B981',
-    fontSize: moderateScale(12),
-    fontWeight: '600',
+    fontSize: FONT_SIZES.caption,
+    fontWeight: FONT_WEIGHTS.bold,
   },
 
   buttonDisabled: {

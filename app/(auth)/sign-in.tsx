@@ -1,5 +1,6 @@
 import { styles } from "@/assets/styles/auth-styles/sign-in";
 import GoogleSignInButton from "@/assets/svgs/google-ctn-logo.svg";
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { useSignIn, useSSO } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
@@ -59,109 +60,109 @@ export default function SignInPage() {
   };
 
   return (
-      <View style={styles.container}>
-        {/* Logos */}
-        <View style={styles.orgLogosContainer}>
-          <View style={styles.orgLogo}>
-            <Image
-              source={require("../../assets/images/cho-logo.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-            <Text style={styles.orgText}>CITY HEALTH OFFICE</Text>
-          </View>
-          <View style={styles.orgLogo}>
-            <Image
-              source={require("../../assets/images/davao-city-logo.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-            <Text style={styles.orgText}>DAVAO CITY</Text>
-          </View>
+    <View style={styles.container}>
+      {/* Logos */}
+      <View style={styles.orgLogosContainer}>
+        <View style={styles.orgLogo}>
+          <Image
+            source={require("../../assets/images/cho-logo.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.orgText}>CITY HEALTH OFFICE</Text>
         </View>
+        <View style={styles.orgLogo}>
+          <Image
+            source={require("../../assets/images/davao-city-logo.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.orgText}>DAVAO CITY</Text>
+        </View>
+      </View>
 
-        {/* Title */}
-        <Text style={styles.title}>eMediCard</Text>
-        <Text style={styles.subtitle}>
-          A Mobile-Base Health Card{"\n"}Management System
-        </Text>
+      {/* Title */}
+      <Text style={styles.title}>eMediCard</Text>
+      <Text style={styles.subtitle}>
+        A Mobile-Base Health Card{"\n"}Management System
+      </Text>
 
-        {/* Form */}
-        <View style={styles.formContainer}>
+      {/* Form */}
+      <View style={styles.formContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter email"
+          placeholderTextColor="#9CA3AF"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={(t) => {
+            setEmail(t);
+            if (error) setError("");
+          }}
+        />
+
+        <View style={styles.passwordContainer}>
           <TextInput
-            style={styles.input}
-            placeholder="Enter email"
+            style={styles.passwordInput}
+            placeholder="Enter password"
             placeholderTextColor="#9CA3AF"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
+            secureTextEntry={!showPwd}
+            value={password}
             onChangeText={(t) => {
-              setEmail(t);
+              setPassword(t);
               if (error) setError("");
             }}
           />
-
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              placeholder="Enter password"
-              placeholderTextColor="#9CA3AF"
-              secureTextEntry={!showPwd}
-              value={password}
-              onChangeText={(t) => {
-                setPassword(t);
-                if (error) setError("");
-              }}
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPwd((v) => !v)}
-            >
-              <Ionicons
-                name={showPwd ? "eye" : "eye-off"}
-                size={styles.eyeIcon.size}
-                color="#9CA3AF"
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.errorForgotContainer}>
-            <View style={styles.errorContainer}>
-              {error.length > 0 && (
-                <Text style={styles.errorText}>{error}</Text>
-              )}
-            </View>
-            <Link href="/">
-              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-            </Link>
-          </View>
-
           <TouchableOpacity
-            style={[styles.signInButton, loading && styles.buttonDisabled]}
-            onPress={onSignIn}
-            disabled={loading || !email || !password}
+            style={styles.eyeIcon}
+            onPress={() => setShowPwd((v) => !v)}
           >
-            <Text style={styles.signInButtonText}>
-              {loading ? "Signing In…" : "Log in"}
-            </Text>
-          </TouchableOpacity>
-
-          <Text style={styles.orText}>or Login with</Text>
-
-          <TouchableOpacity style={styles.googleButton} onPress={onGoogle}>
-            <GoogleSignInButton
-              width={styles.googleIcon.width}
-              height={styles.googleIcon.height}
+            <Ionicons
+              name={showPwd ? "eye" : "eye-off"}
+              size={23}
+              color="#9CA3AF"
             />
           </TouchableOpacity>
+        </View>
 
-          <View style={styles.signUpContainer}>
-            <Text style={styles.signUpText}>Dont have an account? </Text>
-            <Link href="/(auth)/sign-up" replace>
-              <Text style={styles.signUpLinkText}>Sign up</Text>
-            </Link>
+        <View style={styles.errorForgotContainer}>
+          <View style={styles.errorContainer}>
+            {error.length > 0 && (
+              <Text style={styles.errorText}>{error}</Text>
+            )}
           </View>
+          <Link href="/">
+            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+          </Link>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.signInButton, loading && styles.buttonDisabled]}
+          onPress={onSignIn}
+          disabled={loading || !email || !password}
+        >
+          <Text style={styles.signInButtonText}>
+            {loading ? "Signing In…" : "Log in"}
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.orText}>or Login with</Text>
+
+        <TouchableOpacity style={styles.googleButton} onPress={onGoogle}>
+          <GoogleSignInButton
+            width={wp('50%')}
+            height={hp('6%')}
+          />
+        </TouchableOpacity>
+
+        <View style={styles.signUpContainer}>
+          <Text style={styles.signUpText}>Dont have an account? </Text>
+          <Link href="/(auth)/sign-up" replace>
+            <Text style={styles.signUpLinkText}>Sign up</Text>
+          </Link>
         </View>
       </View>
+    </View>
   );
 }
