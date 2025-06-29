@@ -1,5 +1,5 @@
-import { styles } from "../../assets/styles/auth-styles/sign-up";
 import GoogleSignInButton from "@/assets/svgs/google-ctn-logo.svg";
+import { moderateScale } from "@/src/utils/scaling-utils";
 import { useSignUp, useSSO } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { styles } from "../../assets/styles/auth-styles/sign-up";
 
 export default function SignUpPage() {
   const { isLoaded, signUp } = useSignUp();
@@ -24,52 +25,82 @@ export default function SignUpPage() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 
+  // Password validation function
+  const validatePassword = (pwd: string) => {
+    const minLength = pwd.length >= 8;
+    const hasUppercase = /[A-Z]/.test(pwd);
+    const hasLowercase = /[a-z]/.test(pwd);
+    const hasNumber = /\d/.test(pwd);
+    
+    return {
+      minLength,
+      hasUppercase,
+      hasLowercase,
+      hasNumber,
+      isValid: minLength && hasUppercase && hasLowercase && hasNumber
+    };
+  };
+
+  const passwordValidation = validatePassword(password);
+
   const onSignUp = async () => {
     if (!isLoaded) return;
-    
+
     // Clear any previous errors
-    setError('');
+    setError("");
     setLoading(true);
-    
+
     try {
       await signUp.create({
         emailAddress: email,
         password,
       });
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-      
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
       router.replace({ pathname: "/(auth)/verification", params: { email } });
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
-      
+
       // Handle specific error types
       if (err.errors && err.errors.length > 0) {
         // Handle multiple errors - prioritize email errors first, then password
-        const emailError = err.errors.find((e: any) => e.meta?.paramName === 'email_address');
-        const passwordError = err.errors.find((e: any) => e.meta?.paramName === 'password');
-        
+        const emailError = err.errors.find(
+          (e: any) => e.meta?.paramName === "email_address"
+        );
+        const passwordError = err.errors.find(
+          (e: any) => e.meta?.paramName === "password"
+        );
+
         if (emailError) {
           switch (emailError.code) {
-            case 'form_identifier_exists':
-            case 'email_address_taken':
-              setError('The email you entered is already registered.');
+            case "form_identifier_exists":
+            case "email_address_taken":
+              setError("The email you entered is already registered.");
               break;
-            case 'form_param_format_invalid':
-            case 'form_identifier_invalid':
-              setError('Please enter a valid email address.');
+            case "form_param_format_invalid":
+            case "form_identifier_invalid":
+              setError("Please enter a valid email address.");
               break;
             default:
-              setError(emailError.longMessage || emailError.message || 'Invalid email address.');
+              setError(
+                emailError.longMessage ||
+                  emailError.message ||
+                  "Invalid email address."
+              );
           }
         } else if (passwordError) {
-          setError('Invalid password. Please try again.');
+          setError("Invalid password. Please try again.");
         } else {
           // Fallback for other errors
           const error = err.errors[0];
-          setError(error.longMessage || error.message || 'An error occurred during sign up.');
+          setError(
+            error.longMessage ||
+              error.message ||
+              "An error occurred during sign up."
+          );
         }
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -120,22 +151,36 @@ export default function SignUpPage() {
 
       {/* Form */}
       <View style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter email"
-          placeholderTextColor="#9CA3AF"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={(t) => {
-            setEmail(t);
-            if (error) setError("");
-          }}
-        />
-
-        <View style={styles.passwordContainer}>
+        <View style={styles.input}>
+          <Ionicons
+            name="mail-outline"
+            size={moderateScale(20)}
+            color="#9CA3AF"
+            style={styles.inputIcon}
+            />
           <TextInput
-            style={styles.passwordInput}
+            style={styles.inputWithIcon}
+            placeholder="Enter email"
+            placeholderTextColor="#9CA3AF"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={(t) => {
+              setEmail(t);
+              if (error) setError("");
+            }}
+            />
+        </View>
+        
+        <View style={styles.input}>
+          <Ionicons
+            name="lock-closed-outline"
+            size={moderateScale(20)}
+            color="#9CA3AF"
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.inputWithIcon}
             placeholder="Enter password"
             placeholderTextColor="#9CA3AF"
             secureTextEntry={!showPwd}
@@ -151,7 +196,7 @@ export default function SignUpPage() {
           >
             <Ionicons
               name={showPwd ? "eye" : "eye-off"}
-              size={styles.eyeIcon.size}
+              size={23}
               color="#9CA3AF"
             />
           </TouchableOpacity>
@@ -163,14 +208,30 @@ export default function SignUpPage() {
 
         <View style={styles.passwordRequirements}>
           <Text style={styles.requirementsTitle}>Password must contain:</Text>
-          <Text style={styles.requirementItem}>• At least 8 characters</Text>
-          <Text style={styles.requirementItem}>
+          <Text style={[
+            styles.requirementItem,
+            passwordValidation.minLength && styles.requirementMet
+          ]}>
+            • At least 8 characters
+          </Text>
+          <Text style={[
+            styles.requirementItem,
+            passwordValidation.hasUppercase && styles.requirementMet
+          ]}>
             • One uppercase letter (A-Z)
           </Text>
-          <Text style={styles.requirementItem}>
+          <Text style={[
+            styles.requirementItem,
+            passwordValidation.hasLowercase && styles.requirementMet
+          ]}>
             • One lowercase letter (a-z)
           </Text>
-          <Text style={styles.requirementItem}>• One number (0-9)</Text>
+          <Text style={[
+            styles.requirementItem,
+            passwordValidation.hasNumber && styles.requirementMet
+          ]}>
+            • One number (0-9)
+          </Text>
         </View>
 
         <TouchableOpacity
@@ -183,7 +244,11 @@ export default function SignUpPage() {
           </Text>
         </TouchableOpacity>
 
-        <Text style={styles.orText}>or Sign up with</Text>
+        <View style={styles.orContainer}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>or Sign up with</Text>
+          <View style={styles.line} />
+        </View>
 
         <TouchableOpacity style={styles.googleButton} onPress={onGoogle}>
           <GoogleSignInButton

@@ -48,7 +48,7 @@ export default function VerificationPage() {
         toValue: 1,
         useNativeDriver: true,
       }).start();
-      
+
       // Start countdown
       const countdownTimer = setInterval(() => {
         setCountdown((prev) => {
@@ -184,7 +184,7 @@ export default function VerificationPage() {
           </Text>
           <View style={styles.countdownContainer}>
             <Text style={styles.countdownText}>
-              Redirecting in {countdown} second{countdown !== 1 ? 's' : ''}
+              Redirecting in {countdown} second{countdown !== 1 ? "s" : ""}
             </Text>
             {showContinueButton && (
               <TouchableOpacity

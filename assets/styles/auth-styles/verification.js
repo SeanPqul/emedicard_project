@@ -125,22 +125,28 @@ export const styles = StyleSheet.create({
 
   // Resend Section
   resendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: hp('3%'),
+    //marginBottom: hp('3%')
   },
   resendText: {
     fontSize: FONT_SIZES.caption,
     color: '#6B7280',
-    marginBottom: verticalScale(8),
+    //marginBottom: verticalScale(8),
+    marginRight: moderateScale(4),
+    textAlignVertical: 'center'
   },
   resendButton: {
-    paddingVertical: verticalScale(8),
-    paddingHorizontal: moderateScale(16),
+    //paddingVertical: verticalScale(8),
+    //paddingHorizontal: moderateScale(16),
   },
   resendButtonText: {
     color: '#10B981',
-    fontSize: FONT_SIZES.action,
+    fontSize: FONT_SIZES.caption,
     fontWeight: '600',
+    textAlign: 'center',
+    textAlignVertical: 'center'
   },
   resendButtonDisabled: {
     color: '#9CA3AF',
@@ -149,13 +155,12 @@ export const styles = StyleSheet.create({
   // Back Button
   backContainer: {
     alignItems: 'center',
-    paddingTop: hp('2%'),
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    //paddingTop: hp('2%'),
+    //borderTopColor: '#E5E7EB',
     width: wp('90%'),
   },
   backLink: {
-    width: '100%',
+    //width: '100%',
   },
   backButton: {
     flexDirection: 'row',
@@ -165,8 +170,8 @@ export const styles = StyleSheet.create({
   },
   backText: {
     color: '#6B7280',
-    fontSize: FONT_SIZES.action,
-    fontWeight: '500',
+    fontSize: FONT_SIZES.caption,
+    //fontWeight: '500',
     marginLeft: moderateScale(8),
   },
 

@@ -52,43 +52,44 @@ export const styles = StyleSheet.create({
     width: wp('90%'),
     alignSelf: 'center',
   },
-  input: {
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: moderateScale(11),
-    paddingHorizontal: moderateScale(13),
-    paddingVertical: verticalScale(13),
-    fontSize: FONT_SIZES.body,
-    color: '#1F2937',
-    marginBottom: verticalScale(13),
+
+  inputIcon: {
+    marginRight: moderateScale(12),
   },
 
-  passwordContainer: {
-    position: 'relative',
-    marginBottom: verticalScale(4),
-  },
-  passwordInput: {
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: moderateScale(10),
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: verticalScale(12),
-    paddingRight: moderateScale(40),
+  inputWithIcon: {
+    flex: 1,
     fontSize: FONT_SIZES.body,
-    color: '#1F2937',
+    color: "#1F2937",
   },
+
+  input: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderColor: "#E5E7EB",
+    borderRadius: moderateScale(12),
+    paddingHorizontal: moderateScale(13),
+    paddingVertical: verticalScale(8),
+    marginBottom: verticalScale(13),
+    fontSize: FONT_SIZES.body,
+    shadowColor: "#000",
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+
   eyeIcon: {
     position: 'absolute',
     right: moderateScale(13),
-    top: verticalScale(13),
-    size: moderateScale(23),
+    //top: verticalScale(13),
+    //size: moderateScale(23),
   },
 
   errorContainer: {
-    minHeight: verticalScale(18),
-    marginBottom: verticalScale(-2),
+    minHeight: verticalScale(16),
+    marginTop: verticalScale(-8),
   },
   errorText: {
     color: '#EF4444',
@@ -110,6 +111,10 @@ export const styles = StyleSheet.create({
     color: '#9CA3AF',
     lineHeight: moderateScale(16),
   },
+  requirementMet: {
+    color: '#10B981',
+    fontWeight: FONT_WEIGHTS.medium,
+  },
 
   signUpButton: {
     backgroundColor: '#10B981',
@@ -130,12 +135,6 @@ export const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHTS.bold,
   },
 
-  orText: {
-    textAlign: 'center',
-    color: '#9CA3AF',
-    fontSize: FONT_SIZES.caption,
-    marginBottom: verticalScale(17),
-  },
   googleButton: {
     alignItems: 'center',
     marginBottom: verticalScale(12),
@@ -161,5 +160,28 @@ export const styles = StyleSheet.create({
 
   buttonDisabled: {
     backgroundColor: '#9CA3AF',
+  },
+
+  //dash line
+  orContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: verticalScale(17),
+    width: '100%'
+  },
+
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E5E7EB",
+    marginTop: verticalScale(4)
+  },
+
+  orText: {
+    //textAlign: 'center',
+    marginHorizontal: 10,
+    color: '#9CA3AF',
+    fontSize: FONT_SIZES.caption,
   },
 });

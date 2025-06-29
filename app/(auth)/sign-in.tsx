@@ -1,6 +1,6 @@
 import { styles } from "@/assets/styles/auth-styles/sign-in";
 import GoogleSignInButton from "@/assets/svgs/google-ctn-logo.svg";
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
+import { moderateScale } from "@/src/utils/scaling-utils";
 import { useSignIn, useSSO } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
@@ -13,6 +13,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from "react-native-responsive-screen";
 
 export default function SignInPage() {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -89,22 +93,36 @@ export default function SignInPage() {
 
       {/* Form */}
       <View style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter email"
-          placeholderTextColor="#9CA3AF"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={(t) => {
-            setEmail(t);
-            if (error) setError("");
-          }}
-        />
-
-        <View style={styles.passwordContainer}>
+        <View style={styles.input}>
+          <Ionicons
+            name="mail-outline"
+            size={moderateScale(20)}
+            color="#9CA3AF"
+            style={styles.inputIcon}
+          />
           <TextInput
-            style={styles.passwordInput}
+            style={styles.inputWithIcon}
+            placeholder="Enter email"
+            placeholderTextColor="#9CA3AF"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={(t) => {
+              setEmail(t);
+              if (error) setError("");
+            }}
+          />
+        </View>
+
+        <View style={styles.input}>
+          <Ionicons
+            name="lock-closed-outline"
+            size={moderateScale(20)}
+            color="#9CA3AF"
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.inputWithIcon}
             placeholder="Enter password"
             placeholderTextColor="#9CA3AF"
             secureTextEntry={!showPwd}
@@ -128,11 +146,9 @@ export default function SignInPage() {
 
         <View style={styles.errorForgotContainer}>
           <View style={styles.errorContainer}>
-            {error.length > 0 && (
-              <Text style={styles.errorText}>{error}</Text>
-            )}
+            {error.length > 0 && <Text style={styles.errorText}>{error}</Text>}
           </View>
-          <Link href="/">
+          <Link href="/(auth)/reset-password" replace>
             <Text style={styles.forgotPasswordText}>Forgot password?</Text>
           </Link>
         </View>
@@ -147,13 +163,14 @@ export default function SignInPage() {
           </Text>
         </TouchableOpacity>
 
-        <Text style={styles.orText}>or Login with</Text>
+        <View style={styles.orContainer}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>or Login with</Text>
+          <View style={styles.line} />
+        </View>
 
         <TouchableOpacity style={styles.googleButton} onPress={onGoogle}>
-          <GoogleSignInButton
-            width={wp('50%')}
-            height={hp('6%')}
-          />
+          <GoogleSignInButton width={wp("50%")} height={hp("6%")} />
         </TouchableOpacity>
 
         <View style={styles.signUpContainer}>
