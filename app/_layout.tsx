@@ -1,26 +1,17 @@
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { ClerkProvider } from '@clerk/clerk-expo'
-import { tokenCache } from '@clerk/clerk-expo/token-cache'
-import { StatusBar } from "react-native";
 import InitialLayout from "@/src/layouts/InitialLayout";
-
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
-
-if (!publishableKey) {
-  throw new Error(
-    'Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env'
-  )
-}
+import ClerkAndConvexProvider from "@/src/provider/ClerkAndConvexProvider";
+import { StatusBar } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+    <ClerkAndConvexProvider>
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }}>
           <StatusBar backgroundColor="#10B981" barStyle="dark-content" />
           <InitialLayout />
         </SafeAreaView>
       </SafeAreaProvider>
-    </ClerkProvider>
+    </ClerkAndConvexProvider>
   );
 }
