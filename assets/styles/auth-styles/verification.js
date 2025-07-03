@@ -178,7 +178,7 @@ export const styles = StyleSheet.create({
   // Success Screen
   successContainer: {
     flex: 1,
-    backgroundColor: '#F0F9FF',
+    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: wp('5%'),

@@ -7,7 +7,7 @@
         "./*"
       ]
     },
-    "typeRoots": ["./types", "./node_modules/@types"]
+    "typeRoots": ["src/types", "./node_modules/@types"]
   },
   "include": [
     "**/*.ts",
@@ -16,6 +16,6 @@
     "expo-env.d.ts",
     "app/(tabs)/index.tsx", 
     "app/(auth)/sign-in.tsx",
-    "types/**/*.d.ts"
+    "src/types/**/*.d.ts"
 , "assets/styles/auth-styles/sign-in.js", "assets/styles/auth-styles/sign-up.js"  ]
 }
