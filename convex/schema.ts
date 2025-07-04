@@ -5,6 +5,7 @@ export default defineSchema({
 
     //Users
     users: defineTable({
+<<<<<<< HEAD
         username: v.string(),
         fullname: v.string(),
         email: v.string(),
@@ -12,6 +13,13 @@ export default defineSchema({
         gender: v.optional(v.string()),
         birthDate: v.optional(v.string()),
         phoneNumber: v.optional(v.string()),
+=======
+        fullname: v.string(),
+        email: v.string(),
+        gender: v.string(),
+        birthDate: v.number(),
+        phoneNumber: v.number(),
+>>>>>>> f10c049d6a476af7ebb670dbde521a253320934d
         clerkId: v.string(),    
     })
     .index("by_clerk_id", ["clerkId"]),
@@ -92,7 +100,11 @@ export default defineSchema({
     })
     .index("by_user", ["userId"])
     .index("by_form", ["formId"]),
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> f10c049d6a476af7ebb670dbde521a253320934d
     //Orientation for yellow (food)
     orientations: defineTable({
         formId: v.id("forms"),
@@ -139,4 +151,8 @@ export default defineSchema({
         ipAddress: v.optional(v.string())   
     })
     .index("by_healthcard", ["healthCardId"])
+<<<<<<< HEAD
 }) 
+=======
+}) 
+>>>>>>> f10c049d6a476af7ebb670dbde521a253320934d
