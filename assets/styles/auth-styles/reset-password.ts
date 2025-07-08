@@ -114,7 +114,7 @@ export const styles = StyleSheet.create({
     height: moderateScale(45),
     backgroundColor: '#F3F4F6',
     borderRadius: moderateScale(8),
-    fontSize: FONT_SIZES.title,
+    fontSize: moderateScale(20),
     fontWeight: FONT_WEIGHTS.bold,
     color: '#1F2937',
     textAlign: 'center',

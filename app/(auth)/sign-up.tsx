@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { styles } from "../../assets/styles/auth-styles/sign-up";
 
-export default function SignUpPage() {
+export default function SignUpScreen() {
   const { isLoaded, signUp } = useSignUp();
   const { startSSOFlow } = useSSO();
   const router = useRouter();

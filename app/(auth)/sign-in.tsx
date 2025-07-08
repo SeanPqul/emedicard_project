@@ -18,7 +18,7 @@ import {
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
 
-export default function SignInPage() {
+export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
   const { startSSOFlow } = useSSO();
   const router = useRouter();
