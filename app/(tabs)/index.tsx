@@ -238,12 +238,6 @@ export default function Dashboard() {
               subtitle="Show health card QR"
               onPress={() => router.push('/qr-code')}
             />
-            <ActionButton
-              icon="settings-outline"
-              title="Admin - Seed DB"
-              subtitle="Setup database"
-              onPress={() => router.push('/admin-seed')}
-            />
           </View>
         </View>
 

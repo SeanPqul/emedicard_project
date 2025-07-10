@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -31,15 +31,41 @@ interface JobCategory {
 
 export default function DocumentRequirements() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [isSeeding, setIsSeeding] = useState(false);
   
   const jobCategories = useQuery(api.jobCategories.getAllJobCategories);
   const requirementsByCategory = useQuery(
     api.requirements.getRequirementsByJobCategory,
     selectedCategoryId ? { jobCategoryId: selectedCategoryId as any } : "skip"
   );
+  const seedDatabase = useMutation(api.seedData.seedJobCategoriesAndRequirements);
+
+  // Auto-seed database if empty
+  useEffect(() => {
+    const autoSeed = async () => {
+      if (jobCategories !== undefined && jobCategories.length === 0 && !isSeeding) {
+        setIsSeeding(true);
+        try {
+          await seedDatabase();
+          console.log('Database auto-seeded successfully');
+        } catch (error) {
+          console.error('Auto-seed failed:', error);
+        } finally {
+          setIsSeeding(false);
+        }
+      }
+    };
+
+    autoSeed();
+  }, [jobCategories, isSeeding]);
 
   const handleCategorySelect = (categoryId: string) => {
-    setSelectedCategoryId(categoryId);
+    // Toggle collapse/expand
+    if (selectedCategoryId === categoryId) {
+      setSelectedCategoryId(null); // Collapse if already selected
+    } else {
+      setSelectedCategoryId(categoryId); // Expand if not selected
+    }
   };
 
   const getHealthCardTypeName = (category: JobCategory) => {
@@ -222,8 +248,19 @@ export default function DocumentRequirements() {
           </View>
         )}
 
+        {/* Loading/Seeding State */}
+        {isSeeding && (
+          <View style={styles.loadingState}>
+            <Ionicons name="sync-outline" size={64} color="#2E86AB" />
+            <Text style={styles.loadingTitle}>Setting up database...</Text>
+            <Text style={styles.loadingDescription}>
+              Initializing health card categories and requirements. This will only take a moment.
+            </Text>
+          </View>
+        )}
+
         {/* Empty State */}
-        {!selectedCategoryId && (
+        {!selectedCategoryId && !isSeeding && jobCategories && jobCategories.length > 0 && (
           <View style={styles.emptyState}>
             <Ionicons name="document-outline" size={64} color="#6C757D" />
             <Text style={styles.emptyTitle}>Select a Health Card Type</Text>
@@ -519,6 +556,24 @@ const styles = StyleSheet.create({
     color: '#2E86AB',
     fontSize: 16,
     fontWeight: '600',
+  },
+  loadingState: {
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 40,
+  },
+  loadingTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2E86AB',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  loadingDescription: {
+    fontSize: 14,
+    color: '#6C757D',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   emptyState: {
     alignItems: 'center',

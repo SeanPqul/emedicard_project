@@ -1,6 +1,6 @@
 import { mutation } from "./_generated/server";
 
-export const seedJobCategories = mutation({
+export const seedJobCategoriesAndRequirements = mutation({
   args: {},
   handler: async (ctx) => {
     // Check if job categories already exist
@@ -38,18 +38,196 @@ export const seedJobCategories = mutation({
       console.log(`Created job category: ${category.name}`);
     }
 
-    return { 
-      message: "Job categories seeded successfully",
-      categories: categoryIds
-    };
-  },
-});
+    // Create requirements for each job category
+    const requirementsData = [
+      // Food Handler (Yellow Card) Requirements
+      {
+        jobCategoryId: categoryIds[0],
+        name: "Valid Government ID",
+        description: "Any valid government-issued ID (Driver's License, Passport, etc.)",
+        icon: "card-outline",
+        required: true,
+        fieldName: "validId"
+      },
+      {
+        jobCategoryId: categoryIds[0],
+        name: "2x2 ID Picture",
+        description: "Recent colored 2x2 ID picture with white background",
+        icon: "camera-outline",
+        required: true,
+        fieldName: "picture"
+      },
+      {
+        jobCategoryId: categoryIds[0],
+        name: "Chest X-ray",
+        description: "Recent chest X-ray result (not older than 6 months)",
+        icon: "medical-outline",
+        required: true,
+        fieldName: "chestXrayId"
+      },
+      {
+        jobCategoryId: categoryIds[0],
+        name: "Urinalysis",
+        description: "Complete urinalysis test result",
+        icon: "flask-outline",
+        required: true,
+        fieldName: "urinalysisId"
+      },
+      {
+        jobCategoryId: categoryIds[0],
+        name: "Stool Examination",
+        description: "Stool examination for parasites and bacteria",
+        icon: "analytics-outline",
+        required: true,
+        fieldName: "stoolId"
+      },
+      {
+        jobCategoryId: categoryIds[0],
+        name: "Cedula",
+        description: "Community Tax Certificate (Cedula)",
+        icon: "document-text-outline",
+        required: true,
+        fieldName: "cedulaId"
+      },
+      
+      // General Worker (Green Card) Requirements
+      {
+        jobCategoryId: categoryIds[1],
+        name: "Valid Government ID",
+        description: "Any valid government-issued ID (Driver's License, Passport, etc.)",
+        icon: "card-outline",
+        required: true,
+        fieldName: "validId"
+      },
+      {
+        jobCategoryId: categoryIds[1],
+        name: "2x2 ID Picture",
+        description: "Recent colored 2x2 ID picture with white background",
+        icon: "camera-outline",
+        required: true,
+        fieldName: "picture"
+      },
+      {
+        jobCategoryId: categoryIds[1],
+        name: "Chest X-ray",
+        description: "Recent chest X-ray result (not older than 6 months)",
+        icon: "medical-outline",
+        required: true,
+        fieldName: "chestXrayId"
+      },
+      {
+        jobCategoryId: categoryIds[1],
+        name: "Urinalysis",
+        description: "Complete urinalysis test result",
+        icon: "flask-outline",
+        required: true,
+        fieldName: "urinalysisId"
+      },
+      {
+        jobCategoryId: categoryIds[1],
+        name: "Stool Examination",
+        description: "Stool examination for parasites and bacteria",
+        icon: "analytics-outline",
+        required: true,
+        fieldName: "stoolId"
+      },
+      {
+        jobCategoryId: categoryIds[1],
+        name: "Cedula",
+        description: "Community Tax Certificate (Cedula)",
+        icon: "document-text-outline",
+        required: true,
+        fieldName: "cedulaId"
+      },
+      {
+        jobCategoryId: categoryIds[1],
+        name: "Drug Test",
+        description: "Drug test result (Required for Security Guards)",
+        icon: "shield-outline",
+        required: false,
+        fieldName: "drugTestId"
+      },
+      {
+        jobCategoryId: categoryIds[1],
+        name: "Neuropsychiatric Test",
+        description: "Neuropsychiatric evaluation (Required for Security Guards)",
+        icon: "brain-outline",
+        required: false,
+        fieldName: "neuroExamId"
+      },
+      
+      // Skin-to-Skin Contact (Pink Card) Requirements
+      {
+        jobCategoryId: categoryIds[2],
+        name: "Valid Government ID",
+        description: "Any valid government-issued ID (Driver's License, Passport, etc.)",
+        icon: "card-outline",
+        required: true,
+        fieldName: "validId"
+      },
+      {
+        jobCategoryId: categoryIds[2],
+        name: "2x2 ID Picture",
+        description: "Recent colored 2x2 ID picture with white background",
+        icon: "camera-outline",
+        required: true,
+        fieldName: "picture"
+      },
+      {
+        jobCategoryId: categoryIds[2],
+        name: "Chest X-ray",
+        description: "Recent chest X-ray result (not older than 6 months)",
+        icon: "medical-outline",
+        required: true,
+        fieldName: "chestXrayId"
+      },
+      {
+        jobCategoryId: categoryIds[2],
+        name: "Urinalysis",
+        description: "Complete urinalysis test result",
+        icon: "flask-outline",
+        required: true,
+        fieldName: "urinalysisId"
+      },
+      {
+        jobCategoryId: categoryIds[2],
+        name: "Stool Examination",
+        description: "Stool examination for parasites and bacteria",
+        icon: "analytics-outline",
+        required: true,
+        fieldName: "stoolId"
+      },
+      {
+        jobCategoryId: categoryIds[2],
+        name: "Cedula",
+        description: "Community Tax Certificate (Cedula)",
+        icon: "document-text-outline",
+        required: true,
+        fieldName: "cedulaId"
+      },
+      {
+        jobCategoryId: categoryIds[2],
+        name: "Hepatitis B Antibody Test",
+        description: "Hepatitis B surface antibody test result",
+        icon: "shield-checkmark-outline",
+        required: true,
+        fieldName: "hepatitisBId"
+      }
+    ];
 
-export const seedRequirements = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // This will be used to populate document requirements for each job category
-    // For now, we'll just create the job categories
-    return { message: "Requirements seeding not implemented yet" };
+    // Insert requirements
+    const requirementIds = [];
+    for (const requirement of requirementsData) {
+      const requirementId = await ctx.db.insert("documentRequirements", requirement);
+      requirementIds.push(requirementId);
+    }
+
+    console.log(`Created ${requirementIds.length} document requirements`);
+
+    return { 
+      message: "Job categories and requirements seeded successfully",
+      categories: categoryIds,
+      requirements: requirementIds
+    };
   },
 });

@@ -23,6 +23,17 @@ export default defineSchema({
         requireOrientation: v.string()
     }),
 
+    //Document requirements for each job category
+    documentRequirements: defineTable({
+        jobCategoryId: v.id("jobCategory"),
+        name: v.string(),
+        description: v.string(),
+        icon: v.string(),
+        required: v.boolean(),
+        fieldName: v.string()
+    })
+    .index("by_job_category", ["jobCategoryId"]),
+
     //User form
     forms: defineTable({
         userId: v.id("users"),

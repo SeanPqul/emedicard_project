@@ -21,7 +21,30 @@ export const getRequirementsByJobCategory = query({
       throw new Error("Job category not found");
     }
 
-    // Base requirements for all health cards
+    // Try to get requirements from database first
+    const dbRequirements = await ctx.db
+      .query("documentRequirements")
+      .withIndex("by_job_category", (q) => q.eq("jobCategoryId", args.jobCategoryId))
+      .collect();
+
+    if (dbRequirements.length > 0) {
+      // Return database requirements
+      const transformedRequirements = dbRequirements.map(req => ({
+        name: req.name,
+        description: req.description,
+        icon: req.icon,
+        required: req.required,
+        fieldName: req.fieldName
+      }));
+
+      return {
+        jobCategory,
+        requirements: transformedRequirements,
+        totalRequirements: dbRequirements.length
+      };
+    }
+
+    // Fallback to hardcoded requirements if database is empty
     const baseRequirements = [
       {
         name: "Valid ID",
@@ -54,7 +77,7 @@ export const getRequirementsByJobCategory = query({
       {
         name: "Stool Examination",
         description: "Stool examination test result",
-        icon: "medical-outline",
+        icon: "analytics-outline",
         required: true,
         fieldName: "stoolId"
       },
@@ -70,31 +93,31 @@ export const getRequirementsByJobCategory = query({
     let additionalRequirements = [];
 
     // Add job-category specific requirements
-    if (jobCategory.name.toLowerCase().includes("security") || jobCategory.name.toLowerCase().includes("guard")) {
+    if (jobCategory.name.toLowerCase().includes("general")) {
       additionalRequirements.push(
         {
-          name: "Neuropsychiatric Examination",
-          description: "Neuropsychiatric evaluation result (for Security Guards only)",
-          icon: "brain-outline",
-          required: true,
-          fieldName: "neuroExamId"
+          name: "Drug Test",
+          description: "Drug test result (Required for Security Guards)",
+          icon: "shield-outline",
+          required: false,
+          fieldName: "drugTestId"
         },
         {
-          name: "Drug Test",
-          description: "Drug test result (for Security Guards only)",
-          icon: "medical-outline",
-          required: true,
-          fieldName: "drugTestId"
+          name: "Neuropsychiatric Test",
+          description: "Neuropsychiatric evaluation (Required for Security Guards)",
+          icon: "brain-outline",
+          required: false,
+          fieldName: "neuroExamId"
         }
       );
     }
 
-    // Add Hepatitis B for Pink health cards
-    if (jobCategory.colorCode.toLowerCase() === "#ffc0cb" || jobCategory.name.toLowerCase().includes("pink")) {
+    // Add Hepatitis B for Pink health cards (skin-to-skin contact)
+    if (jobCategory.colorCode === "#FF69B4" || jobCategory.name.toLowerCase().includes("skin")) {
       additionalRequirements.push({
-        name: "Hepatitis B Test",
-        description: "Hepatitis B surface antigen test result (for Pink health cards only)",
-        icon: "medical-outline",
+        name: "Hepatitis B Antibody Test",
+        description: "Hepatitis B surface antibody test result",
+        icon: "shield-checkmark-outline",
         required: true,
         fieldName: "hepatitisBId"
       });
