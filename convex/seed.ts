@@ -253,7 +253,7 @@ export const setupCategories = mutation({
         jobCategoryId: categoryIds[1],
         name: "Neuropsychiatric Test",
         description: "Neuropsychiatric evaluation (for Security Guards)",
-        icon: "brain-outline",
+        icon: "medical-outline",
         required: false,
         fieldName: "neuroExamId"
       },

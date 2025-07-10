@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
+import { useMutation, useQuery } from 'convex/react';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useUser } from '@clerk/clerk-expo';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { CustomTextInput, CustomButton } from '../../src/components';
 import { styles } from '../../assets/styles/tabs-styles/apply';
+import { api } from '../../convex/_generated/api';
+import { CustomButton, CustomTextInput } from '../../src/components';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';
@@ -91,12 +91,20 @@ export default function Apply() {
   };
 
   const handleNext = () => {
+    console.log('handleNext called, currentStep:', currentStep);
+    console.log('formData:', formData);
+    
     if (validateCurrentStep()) {
+      console.log('Validation passed');
       if (currentStep < STEP_TITLES.length - 1) {
+        console.log('Moving to next step:', currentStep + 1);
         setCurrentStep(currentStep + 1);
       } else {
+        console.log('Submitting form');
         handleSubmit();
       }
+    } else {
+      console.log('Validation failed, errors:', errors);
     }
   };
 
@@ -224,21 +232,19 @@ export default function Apply() {
       <View style={styles.stepContent}>
         <Text style={styles.stepHeading}>Select Job Category</Text>
         <Text style={styles.stepDescription}>
-          Choose the category that best describes your job. eMediCard uses color-coded classifications:
-          Yellow (Food Handlers), Green (Non-Food Workers), Pink (Skin-to-Skin Contact Jobs).
-        </Text>
-        <Text style={styles.categoryNote}>
-          📋 Reference: As defined in eMediCard project documentation for Davao City health card system.
+          Choose the category that best describes your job. Yellow for Food Handlers, Green for Non-Food Workers, and Pink for Skin-to-Skin Contact Jobs
         </Text>
         
         <View style={styles.categoryGrid}>
-          {jobCategories?.map((category) => (
+          {jobCategories?.map((category, index) => (
             <TouchableOpacity
               key={category._id}
               style={[
                 styles.categoryCard,
                 formData.jobCategory === category._id && styles.categoryCardSelected,
-                { borderColor: category.colorCode }
+                { borderColor: category.colorCode },
+                // If it's the third item and there are 3 items total, center it
+                jobCategories.length === 3 && index === 2 && styles.categoryCardCentered
               ]}
               onPress={() => setFormData({ ...formData, jobCategory: category._id })}
             >
@@ -420,30 +426,41 @@ export default function Apply() {
 
   return (
     <View style={styles.container}>
-      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#212529" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>New Application</Text>
+        <View style={styles.headerRight} />
+      </View>
+
+      {/* Step Indicator */}
+      {renderStepIndicator()}
+
+      {/* Content with Keyboard Avoiding */}
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#212529" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>New Application</Text>
-          <View style={styles.headerRight} />
-        </View>
-
-        {/* Step Indicator */}
-        {renderStepIndicator()}
-
-        {/* Content */}
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {renderCurrentStep()}
+        <ScrollView 
+          style={styles.content} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ 
+            paddingBottom: 100, // Space for fixed navigation buttons + tab bar
+            flexGrow: 1 // Ensure content can expand
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.contentWrapper}>
+            {renderCurrentStep()}
+          </View>
         </ScrollView>
+      </KeyboardAvoidingView>
 
-        {/* Navigation Buttons */}
-        <View style={styles.navigationButtons}>
+      {/* Navigation Buttons - Fixed at bottom */}
+      <View style={styles.navigationButtons}>
           {currentStep > 0 && (
             <TouchableOpacity 
               style={styles.previousButton} 
@@ -453,14 +470,35 @@ export default function Apply() {
             </TouchableOpacity>
           )}
           
-          <CustomButton
-            title={currentStep === STEP_TITLES.length - 1 ? 'Submit Application' : 'Next'}
+          {/* Debug: Add a simple TouchableOpacity button as fallback */}
+          <TouchableOpacity
+            style={[{
+              backgroundColor: '#2E86AB',
+              paddingVertical: 15,
+              paddingHorizontal: 30,
+              borderRadius: 8,
+              flex: 1,
+              marginLeft: currentStep > 0 ? 0 : 0,
+              alignItems: 'center',
+            }]}
             onPress={handleNext}
-            loading={loading}
-            style={[styles.nextButton, currentStep === 0 && styles.nextButtonFull]}
-          />
+            disabled={loading}
+          >
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+              {loading ? 'Loading...' : (currentStep === STEP_TITLES.length - 1 ? 'Submit Application' : 'Next')}
+            </Text>
+          </TouchableOpacity>
+          
+          {/* Original CustomButton (hidden for debugging) */}
+          {false && (
+            <CustomButton
+              title={currentStep === STEP_TITLES.length - 1 ? 'Submit Application' : 'Next'}
+              onPress={handleNext}
+              loading={loading}
+              style={[styles.nextButton, currentStep === 0 && styles.nextButtonFull]}
+            />
+          )}
         </View>
-      </KeyboardAvoidingView>
     </View>
   );
 }

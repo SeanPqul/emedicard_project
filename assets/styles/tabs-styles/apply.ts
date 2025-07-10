@@ -10,6 +10,10 @@ export const styles = StyleSheet.create({
   keyboardAvoidingView: {
     flex: 1,
   },
+  contentWrapper: {
+    minHeight: '100%',
+    paddingBottom: 20,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -31,7 +35,7 @@ export const styles = StyleSheet.create({
   stepIndicator: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: '#FFFFFF',
@@ -41,6 +45,7 @@ export const styles = StyleSheet.create({
   stepItem: {
     alignItems: 'center',
     flex: 1,
+    position: 'relative',
   },
   stepCircle: {
     width: 32,
@@ -49,6 +54,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    zIndex: 2,
   },
   stepCircleActive: {
     backgroundColor: '#2E86AB',
@@ -81,10 +87,10 @@ export const styles = StyleSheet.create({
   stepLine: {
     position: 'absolute',
     top: 16,
-    left: '50%',
-    width: '100%',
+    left: '60%',
+    width: '80%',
     height: 2,
-    zIndex: -1,
+    zIndex: 1,
   },
   stepLineActive: {
     backgroundColor: '#2E86AB',
@@ -94,10 +100,11 @@ export const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
   },
   stepContent: {
     flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   stepHeading: {
     fontSize: 24,
@@ -164,15 +171,17 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 30, // Increased bottom margin
   },
   categoryCard: {
     width: (width - 52) / 2,
+    minHeight: 150, // Increased min height
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 20, // Increased bottom margin
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#E9ECEF',
     shadowColor: '#000',
@@ -184,6 +193,10 @@ export const styles = StyleSheet.create({
   },
   categoryCardSelected: {
     borderWidth: 2,
+  },
+  categoryCardCentered: {
+    alignSelf: 'center',
+    width: (width - 52) / 2,
   },
   categoryIcon: {
     width: 48,
@@ -308,6 +321,15 @@ export const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E9ECEF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    position: 'absolute',
+    bottom: 58, // Position above the tab bar (58px tab bar height)
+    left: 0,
+    right: 0,
   },
   previousButton: {
     paddingHorizontal: 24,
@@ -333,5 +355,20 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#DC3545',
     marginTop: 4,
+  },
+  feeNote: {
+    fontSize: 12,
+    color: '#6C757D',
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
+  categoryNote: {
+    fontSize: 12,
+    color: '#6C757D',
+    marginBottom: 16,
+    fontStyle: 'italic',
+    backgroundColor: '#F8F9FA',
+    padding: 8,
+    borderRadius: 6,
   },
 });

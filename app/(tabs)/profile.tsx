@@ -13,6 +13,7 @@ import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { SignOutButton, ProfileLink } from '../../src/components';
 import { styles } from '../../assets/styles/tabs-styles/profile';
+import { getUserDisplayName } from '../../src/utils/user-utils';
 
 export default function Profile() {
   const { user } = useUser();
@@ -26,7 +27,10 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Profile Header */}
         <View style={styles.header}>
           <View style={styles.profilePictureContainer}>
@@ -39,7 +43,7 @@ export default function Profile() {
               <Ionicons name="pencil" size={16} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.userName}>{user?.fullName || userProfile?.fullname}</Text>
+          <Text style={styles.userName}>{getUserDisplayName(user, userProfile)}</Text>
           <Text style={styles.userEmail}>{user?.primaryEmailAddress?.emailAddress || userProfile?.email}</Text>
           <Text style={styles.memberSince}>Member since {new Date(user?.createdAt || Date.now()).getFullYear()}</Text>
         </View>
@@ -109,12 +113,6 @@ export default function Profile() {
             title="About eMediCard"
             description="App version, project documentation, and system information"
             onPress={() => router.push('/about')}
-          />
-          <ProfileLink
-            icon="document-outline"
-            title="eMediCard Documentation"
-            description="View project documentation and system requirements"
-            onPress={() => router.push('/documentation')}
           />
         </View>
 

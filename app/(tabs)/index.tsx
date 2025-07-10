@@ -6,6 +6,7 @@ import { Image } from 'expo-image';
 import { StatCard, ActionButton, ActivityItem, EmptyState } from '../../src/components';
 import { styles } from '../../assets/styles/tabs-styles/dashboard';
 import { useDashboard } from '@/src/hooks';
+import { getUserDisplayName } from '../../src/utils/user-utils';
 
 export default function Dashboard() {
   const { 
@@ -51,7 +52,9 @@ export default function Dashboard() {
             </View>
             <View style={styles.welcomeText}>
               <Text style={styles.greeting}>Good {getGreeting()}</Text>
-              <Text style={styles.userName}>{user?.fullName || userProfile?.fullname}</Text>
+              <Text style={styles.userName}>
+                {getUserDisplayName(user, userProfile)}
+              </Text>
               <Text style={styles.currentTime}>
                 {currentTime.toLocaleDateString()} • {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </Text>

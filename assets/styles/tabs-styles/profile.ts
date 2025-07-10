@@ -5,6 +5,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FA',
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 50, // Extra padding to prevent cutoff on small screens
+  },
   header: {
     backgroundColor: '#FFFFFF',
     paddingVertical: 24,
@@ -75,8 +79,9 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F8F9FA',
   },
   signOutSection: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
     marginTop: 12,
-    marginBottom: 20,
   },
 });

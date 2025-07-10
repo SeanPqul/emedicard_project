@@ -6,11 +6,23 @@ export const theme = {
       200: '#BBF7D0',
       300: '#86EFAC',
       400: '#4ADE80',
-      500: '#10B981',
+      500: '#10B981', // Main primary color
       600: '#059669',
       700: '#047857',
       800: '#065F46',
       900: '#064E3B',
+    },
+    secondary: {
+      50: '#EFF6FF',
+      100: '#DBEAFE',
+      200: '#BFDBFE',
+      300: '#93C5FD',
+      400: '#60A5FA',
+      500: '#3B82F6',
+      600: '#2563EB',
+      700: '#1D4ED8',
+      800: '#1E40AF',
+      900: '#1E3A8A',
     },
     gray: {
       50: '#F9FAFB',
@@ -27,8 +39,20 @@ export const theme = {
     semantic: {
       success: '#10B981',
       warning: '#F59E0B',
-      error: '#EF4444',
+      error: '#DC3545',
       info: '#3B82F6',
+    },
+    // Job Category Colors from UI Design Prompt
+    jobCategories: {
+      foodHandler: '#FFD700', // Gold/Yellow
+      securityGuard: '#4169E1', // Royal Blue
+      others: '#6B46C1', // Purple
+    },
+    // Additional UI Colors
+    ui: {
+      white: '#FFFFFF',
+      black: '#000000',
+      transparent: 'transparent',
     },
     background: {
       primary: '#FFFFFF',

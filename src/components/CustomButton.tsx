@@ -12,6 +12,9 @@ interface CustomButtonProps extends TouchableOpacityProps {
   buttonStyle?: ViewStyle | ViewStyle[];
   textStyle?: TextStyle;
   children?: React.ReactNode; // Add children prop
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  accessibilityRole?: 'button' | 'link' | 'none';
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = ({
@@ -24,6 +27,9 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
   textStyle,
   disabled,
   children, // Add children to props
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityRole = 'button',
   ...props
 }) => {
   const getButtonStyle = (): ViewStyle => {
@@ -120,6 +126,13 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
     <TouchableOpacity
       style={[getButtonStyle(), buttonStyle]}
       disabled={disabled || loading}
+      accessibilityLabel={accessibilityLabel || title || 'Button'}
+      accessibilityHint={accessibilityHint}
+      accessibilityRole={accessibilityRole}
+      accessibilityState={{
+        disabled: disabled || loading,
+        busy: loading,
+      }}
       {...props}
     >
       {renderContent()}

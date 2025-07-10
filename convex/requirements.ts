@@ -105,7 +105,7 @@ export const getRequirementsByJobCategory = query({
         {
           name: "Neuropsychiatric Test",
           description: "Neuropsychiatric evaluation (Required for Security Guards)",
-          icon: "brain-outline",
+          icon: "medical-outline",
           required: false,
           fieldName: "neuroExamId"
         }
