@@ -1,25 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-  StatusBar,
-  Dimensions,
-  Modal,
-  ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Dimensions, Modal, ActivityIndicator } from 'react-native';
+import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../convex/_generated/api';
-import { CustomButton } from '../src/components';
+import { api } from '../../../convex/_generated/api';
+import { CustomButton } from '../../../src/components';
 
 const { width } = Dimensions.get('window');
 
@@ -283,8 +272,7 @@ export default function UploadDocumentsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+    <BaseScreenLayout>
       
       {/* Header */}
       <View style={styles.header}>
@@ -435,7 +423,7 @@ export default function UploadDocumentsScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </BaseScreenLayout>
   );
 }
 

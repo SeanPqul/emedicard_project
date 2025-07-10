@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  StatusBar,
-  Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../convex/_generated/api';
 import { Ionicons } from '@expo/vector-icons';
+import { useMutation, useQuery } from 'convex/react';
 import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { api } from '../../../convex/_generated/api';
 
 interface Requirement {
   name: string;
@@ -92,8 +89,7 @@ export default function DocumentRequirements() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+    <View style={styles.container}>
       
       {/* Header */}
       <View style={styles.header}>
@@ -169,7 +165,7 @@ export default function DocumentRequirements() {
               <View style={styles.summaryItem}>
                 <Ionicons name="card-outline" size={16} color="#F18F01" />
                 <Text style={styles.summaryText}>
-                  Fee: ₱60 (₱50 + ₱10 service fee)
+                  Fee: ₱60
                 </Text>
               </View>
             </View>
@@ -224,7 +220,7 @@ export default function DocumentRequirements() {
               <View style={styles.paymentNote}>
                 <Ionicons name="information-circle-outline" size={16} color="#6C757D" />
                 <Text style={styles.paymentNoteText}>
-                  For Barangay Hall or City Hall payments, you'll need to upload your Official Receipt (OR) during the application process.
+                  For Barangay Hall or City Hall payments, you&apos;ll need to upload your Official Receipt (OR) during the application process.
                 </Text>
               </View>
             </View>
@@ -270,7 +266,7 @@ export default function DocumentRequirements() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

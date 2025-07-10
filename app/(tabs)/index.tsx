@@ -1,135 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  StatusBar,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useUser } from '@clerk/clerk-expo';
-import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { StatCard, ActionButton, ActivityItem, EmptyState } from '../../src/components';
 import { styles } from '../../assets/styles/tabs-styles/dashboard';
-
-// Types for our data
-interface DashboardStats {
-  activeApplications: number;
-  pendingPayments: number;
-  upcomingOrientations: number;
-  validHealthCards: number;
-  pendingAmount: number;
-  nextOrientationDate?: string;
-}
-
-interface RecentActivity {
-  id: string;
-  type: 'application' | 'payment' | 'orientation' | 'card_issued';
-  title: string;
-  description: string;
-  timestamp: string;
-  status: 'success' | 'pending' | 'warning' | 'error';
-}
+import { useDashboard } from '@/src/hooks';
 
 export default function Dashboard() {
-  const { user } = useUser();
-  const [refreshing, setRefreshing] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const { 
+    user, 
+    userProfile, 
+    dashboardStats, 
+    recentActivities, 
+    currentTime, 
+    unreadNotificationsCount,
+    isLoading, 
+    refreshing, 
+    onRefresh, 
+    getGreeting 
+  } = useDashboard();
 
-  // Convex queries
-  const userProfile = useQuery(api.users.getCurrentUser);
-  const userApplications = useQuery(api.forms.getUserApplications);
-  const userNotifications = useQuery(api.notifications.getUserNotifications);
-  const userPayments = useQuery(api.payments.getUserPayments);
-  const userHealthCards = useQuery(api.healthCards.getUserHealthCards);
-
-  // Update time every minute
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Calculate dashboard stats
-  const getDashboardStats = (): DashboardStats => {
-    const activeApplications = userApplications?.filter(app => 
-      app.status === 'Submitted' || app.status === 'Under Review'
-    ).length || 0;
-
-    const pendingPayments = userPayments?.filter(payment => 
-      payment.status === 'Pending'
-    ).length || 0;
-
-    const pendingAmount = userPayments?.filter(payment => 
-      payment.status === 'Pending'
-    ).reduce((sum, payment) => sum + payment.netAmount, 0) || 0;
-
-    const validHealthCards = userHealthCards?.filter(card => 
-      card.expiresAt > Date.now()
-    ).length || 0;
-
-    const upcomingOrientations = 0; // TODO: Implement orientations query
-
-    return {
-      activeApplications,
-      pendingPayments,
-      upcomingOrientations,
-      validHealthCards,
-      pendingAmount,
-    };
-  };
-
-  // Get recent activities
-  const getRecentActivities = (): RecentActivity[] => {
-    const activities: RecentActivity[] = [];
-    
-    // Add from notifications
-    userNotifications?.slice(0, 3).forEach(notification => {
-      activities.push({
-        id: notification._id,
-        type: 'application',
-        title: notification.messag, // Note: typo in schema
-        description: `Notification received`,
-        timestamp: new Date().toISOString(), // TODO: Add timestamp to schema
-        status: 'pending'
-      });
-    });
-
-    // Add from payments
-    userPayments?.slice(0, 2).forEach(payment => {
-      activities.push({
-        id: payment._id,
-        type: 'payment',
-        title: `Payment ${payment.status}`,
-        description: `₱${payment.netAmount} via ${payment.method}`,
-        timestamp: new Date().toISOString(),
-        status: payment.status === 'Complete' ? 'success' : payment.status === 'Failed' ? 'error' : 'pending'
-      });
-    });
-
-    return activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  };
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    // Refetch data
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
-  };
-
-  const stats = getDashboardStats();
-  const recentActivities = getRecentActivities();
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Loading dashboard...</Text>
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+    <View style={styles.container}>
       
       <ScrollView
         style={styles.scrollView}
@@ -159,10 +60,10 @@ export default function Dashboard() {
           
           <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/(tabs)/notification')}>
             <Ionicons name="notifications-outline" size={24} color="#212529" />
-            {(userNotifications?.filter(n => !n.read).length || 0) > 0 && (
+            {unreadNotificationsCount > 0 && (
               <View style={styles.notificationBadge}>
                 <Text style={styles.notificationBadgeText}>
-                  {userNotifications?.filter(n => !n.read).length}
+                  {unreadNotificationsCount}
                 </Text>
               </View>
             )}
@@ -175,7 +76,7 @@ export default function Dashboard() {
             <StatCard
               icon="document-text-outline"
               title="Active Applications"
-              value={stats.activeApplications.toString()}
+              value={dashboardStats.activeApplications.toString()}
               subtitle="In progress"
               color="#2E86AB"
               onPress={() => router.push('/(tabs)/application')}
@@ -183,28 +84,28 @@ export default function Dashboard() {
             <StatCard
               icon="card-outline"
               title="Pending Payments"
-              value={stats.pendingPayments.toString()}
-              subtitle={`₱${stats.pendingAmount}`}
+              value={dashboardStats.pendingPayments.toString()}
+              subtitle={`₱${dashboardStats.pendingAmount}`}
               color="#F18F01"
-              onPress={() => router.push('/payment')}
+              onPress={() => router.push('/screens/shared/payment')}
             />
           </View>
           <View style={styles.statsRow}>
             <StatCard
               icon="calendar-outline"
               title="Upcoming Orientations"
-              value={stats.upcomingOrientations.toString()}
-              subtitle={stats.nextOrientationDate || "None scheduled"}
+              value={dashboardStats.upcomingOrientations.toString()}
+              subtitle={dashboardStats.nextOrientationDate || "None scheduled"}
               color="#A23B72"
-              onPress={() => router.push('/orientation')}
+              onPress={() => router.push('/screens/shared/orientation')}
             />
             <StatCard
               icon="shield-checkmark-outline"
               title="Valid Health Cards"
-              value={stats.validHealthCards.toString()}
+              value={dashboardStats.validHealthCards.toString()}
               subtitle="Active cards"
               color="#28A745"
-              onPress={() => router.push('/health-cards')}
+              onPress={() => router.push('/screens/shared/health-cards')}
             />
           </View>
         </View>
@@ -224,19 +125,19 @@ export default function Dashboard() {
               icon="document-text-outline"
               title="Document Requirements"
               subtitle="View required documents"
-              onPress={() => router.push('/document-requirements')}
+              onPress={() => router.push('/screens/shared/document-requirements')}
             />
             <ActionButton
               icon="card-outline"
               title="Make Payment"
               subtitle="Pay application fees"
-              onPress={() => router.push('/payment')}
+              onPress={() => router.push('/screens/shared/payment')}
             />
             <ActionButton
               icon="qr-code-outline"
               title="View QR Code"
               subtitle="Show health card QR"
-              onPress={() => router.push('/qr-code')}
+              onPress={() => router.push('/screens/shared/qr-code')}
             />
           </View>
         </View>
@@ -245,7 +146,7 @@ export default function Dashboard() {
         <View style={styles.recentActivityContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <TouchableOpacity onPress={() => router.push('/activity')}>
+            <TouchableOpacity onPress={() => router.push('/screens/shared/activity')}>
               <Text style={styles.viewAllText}>View All</Text>
             </TouchableOpacity>
           </View>
@@ -265,14 +166,7 @@ export default function Dashboard() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
-// Helper Functions
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Morning';
-  if (hour < 17) return 'Afternoon';
-  return 'Evening';
-};

@@ -6,7 +6,7 @@ export const getUserNotifications = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Not authenticated");
+      return [];
     }
 
     const user = await ctx.db
@@ -15,7 +15,8 @@ export const getUserNotifications = query({
       .unique();
 
     if (!user) {
-      throw new Error("User not found");
+      // Return empty array instead of throwing error for new users
+      return [];
     }
 
     const notifications = await ctx.db

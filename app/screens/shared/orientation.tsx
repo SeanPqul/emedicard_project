@@ -1,22 +1,14 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  StatusBar,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { CustomButton } from '../src/components';
+import { CustomButton } from '../../../src/components';
 
 export default function OrientationScreen() {
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+    <BaseScreenLayout>
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -52,7 +44,7 @@ export default function OrientationScreen() {
         </View>
 
       </ScrollView>
-    </SafeAreaView>
+    </BaseScreenLayout>
   );
 }
 

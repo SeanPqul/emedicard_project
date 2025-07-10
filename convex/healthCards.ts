@@ -6,7 +6,7 @@ export const getUserHealthCards = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Not authenticated");
+      return [];
     }
 
     const user = await ctx.db
@@ -15,7 +15,7 @@ export const getUserHealthCards = query({
       .unique();
 
     if (!user) {
-      throw new Error("User not found");
+      return [];
     }
 
     const userForms = await ctx.db

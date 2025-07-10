@@ -1,7 +1,7 @@
-import { moderateScale } from '@/src/utils/scaling-utils';
 import React from 'react';
 import { Text, TextStyle, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { theme } from '@/src/styles/theme';
 
 interface CustomButtonProps extends TouchableOpacityProps {
   title?: string; // Make title optional
@@ -28,36 +28,33 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
 }) => {
   const getButtonStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      borderRadius: moderateScale(11),
+      borderRadius: theme.borderRadius.lg,
       justifyContent: 'center',
       alignItems: 'center',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: moderateScale(8),
-      elevation: 8,
+      ...theme.shadows.medium,
     };
 
     // Size variations
     const sizeStyles = {
-      small: { height: hp('5%'), paddingHorizontal: moderateScale(16) },
-      medium: { height: hp('6.5%'), paddingHorizontal: moderateScale(20) },
-      large: { height: hp('7.5%'), paddingHorizontal: moderateScale(24) },
+      small: { height: hp('5%'), paddingHorizontal: theme.spacing.md },
+      medium: { height: hp('6.5%'), paddingHorizontal: theme.spacing.lg },
+      large: { height: hp('7.5%'), paddingHorizontal: theme.spacing.xl },
     };
 
     // Variant styles
     const variantStyles = {
       primary: {
-        backgroundColor: '#10B981',
-        shadowColor: '#10B981',
+        backgroundColor: theme.colors.primary[500],
+        shadowColor: theme.colors.primary[500],
       },
       secondary: {
-        backgroundColor: '#6B7280',
-        shadowColor: '#6B7280',
+        backgroundColor: theme.colors.gray[500],
+        shadowColor: theme.colors.gray[500],
       },
       outline: {
         backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: '#10B981',
+        borderColor: theme.colors.primary[500],
         shadowOpacity: 0,
         elevation: 0,
       },
@@ -69,7 +66,7 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
       }
     };
 
-    const disabledStyle = (disabled || loading) ? { backgroundColor: '#9CA3AF' } : {};
+    const disabledStyle = (disabled || loading) ? { backgroundColor: theme.colors.gray[400] } : {};
 
     return {
       ...baseStyle,
@@ -81,14 +78,13 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
 
   const getTextStyle = (): TextStyle => {
     const baseStyle: TextStyle = {
-      fontSize: 16,
-      fontWeight: 'bold',
+      ...theme.typography.button,
     };
 
     const variantTextStyles = {
-      primary: { color: 'white' },
-      secondary: { color: 'white' },
-      outline: { color: '#10B981' },
+      primary: { color: theme.colors.text.inverse },
+      secondary: { color: theme.colors.text.inverse },
+      outline: { color: theme.colors.primary[500] },
       none: {},
     };
 

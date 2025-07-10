@@ -1,9 +1,12 @@
+// Form Components
 import { CustomButton } from "./CustomButton";
 import { CustomTextInput } from "./CustomTextInput";
+import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
+
+// UI Components
 import { Divider } from "./Divider";
 import { ErrorText } from "./ErrorText";
 import { LinkText } from "./LinkText";
-import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
 import { OtpInputUI } from "./OtpInputUI";
 import { SignOutButton } from "./SignOutButton";
 import { VerificationPage } from "./VerificationPage";
@@ -16,15 +19,19 @@ import { ProfileLink } from "./ProfileLink";
 import { EmptyState } from "./EmptyState";
 
 export {
+    // Form Components
     CustomButton,
     CustomTextInput,
+    PasswordStrengthIndicator,
+    
+    // UI Components
     Divider,
     ErrorText,
     LinkText,
-    PasswordStrengthIndicator,
     OtpInputUI,
     SignOutButton,
     VerificationPage,
+    
     // Dashboard Components
     StatCard,
     ActionButton,

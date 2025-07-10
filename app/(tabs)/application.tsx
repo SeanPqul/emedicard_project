@@ -4,11 +4,9 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  StatusBar,
   TextInput,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '@clerk/clerk-expo';
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -356,8 +354,7 @@ export default function Applications() {
   const filteredApplications = getFilteredAndSortedApplications();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+    <View style={styles.container}>
       
       {renderHeader()}
       
@@ -384,6 +381,6 @@ export default function Applications() {
       >
         <Ionicons name="add" size={24} color="#FFFFFF" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -1,16 +1,9 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  StatusBar,
-  Alert,
-  TouchableOpacity,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { CustomButton } from '../src/components';
+import { CustomButton } from '../../../src/components';
 
 export default function QRScannerScreen() {
   const [scanning, setScanning] = useState(false);
@@ -33,8 +26,7 @@ export default function QRScannerScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+    <BaseScreenLayout>
       
       {/* Header */}
       <View style={styles.header}>
@@ -67,7 +59,7 @@ export default function QRScannerScreen() {
           </View>
         </View>
       </View>
-    </SafeAreaView>
+    </BaseScreenLayout>
   );
 }
 

@@ -6,7 +6,7 @@ export const getUserPayments = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Not authenticated");
+      return []; // Return empty if not authenticated
     }
 
     const user = await ctx.db
@@ -15,13 +15,17 @@ export const getUserPayments = query({
       .unique();
 
     if (!user) {
-      throw new Error("User not found");
+      return []; // Return empty if user does not exist in DB yet
     }
 
     const userForms = await ctx.db
       .query("forms")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
+
+    if (userForms.length === 0) {
+      return [];
+    }
 
     const formIds = userForms.map((form) => form._id);
 
@@ -35,7 +39,7 @@ export const getUserPayments = query({
       })
     );
 
-    return payments.filter(Boolean);
+    return payments.filter(Boolean) as any[];
   },
 });
 

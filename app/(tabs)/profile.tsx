@@ -4,9 +4,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  StatusBar,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser, useClerk } from '@clerk/clerk-expo';
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -27,8 +25,7 @@ export default function Profile() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+    <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <View style={styles.header}>
@@ -59,7 +56,7 @@ export default function Profile() {
             icon="shield-checkmark-outline"
             title="Health Cards"
             description="View and manage your health cards"
-            onPress={() => router.push('/health-cards')}
+            onPress={() => router.push('/screens/shared/health-cards')}
           />
           <ProfileLink
             icon="document-text-outline"
@@ -126,6 +123,6 @@ export default function Profile() {
           <SignOutButton />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

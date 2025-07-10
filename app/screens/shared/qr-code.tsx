@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  StatusBar,
-  TouchableOpacity,
-  Share,
-  Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
+import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
+import { api } from '../../../convex/_generated/api';
 import QRCode from 'react-native-qrcode-svg';
 
 export default function QRCodeScreen() {
@@ -36,12 +28,11 @@ export default function QRCodeScreen() {
   };
 
   const handleScanQR = () => {
-    router.push('/qr-scanner');
+    router.push('/screens/shared/qr-scanner');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+    <BaseScreenLayout>
       
       {/* Header */}
       <View style={styles.header}>
@@ -97,7 +88,7 @@ export default function QRCodeScreen() {
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </BaseScreenLayout>
   );
 }
 

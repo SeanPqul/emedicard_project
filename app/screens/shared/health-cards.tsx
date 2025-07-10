@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  StatusBar,
-  Share,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Share } from 'react-native';
+import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
-import { EmptyState } from '../src/components';
+import { api } from '../../../convex/_generated/api';
+import { EmptyState } from '../../../src/components';
 import QRCode from 'react-native-qrcode-svg';
 
 interface HealthCard {
@@ -91,8 +83,7 @@ export default function HealthCardsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+    <BaseScreenLayout>
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -189,7 +180,7 @@ export default function HealthCardsScreen() {
           />
         )}
       </ScrollView>
-    </SafeAreaView>
+    </BaseScreenLayout>
   );
 }
 

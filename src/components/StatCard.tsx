@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { theme } from '@/src/styles/theme';
 
 interface StatCardProps {
   icon: string;
@@ -21,7 +22,7 @@ export const StatCard: React.FC<StatCardProps> = ({
 }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <View style={[styles.icon, { backgroundColor: color + '20' }]}>
+      <View style={[styles.icon, { backgroundColor: theme.colors.primary[100] }]}>
         <Ionicons name={icon as any} size={24} color={color} />
       </View>
       <Text style={styles.value}>{value}</Text>
@@ -34,38 +35,33 @@ export const StatCard: React.FC<StatCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+    marginHorizontal: theme.spacing.xs,
+    ...theme.shadows.medium,
   },
   icon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: theme.spacing.sm,
   },
   value: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#212529',
-    marginBottom: 4,
+    ...theme.typography.h2,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.xs,
   },
   title: {
-    fontSize: 14,
+    ...theme.typography.bodySmall,
     fontWeight: '600',
-    color: '#212529',
-    marginBottom: 2,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.xs / 2,
   },
   subtitle: {
-    fontSize: 12,
-    color: '#6C757D',
+    ...theme.typography.caption,
+    color: theme.colors.text.secondary,
   },
 });
