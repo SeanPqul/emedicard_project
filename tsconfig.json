@@ -17,5 +17,5 @@
     "app/(tabs)/index.tsx", 
     "app/(auth)/sign-in.tsx",
     "src/types/**/*.d.ts"
-, "assets/styles/auth-styles/sign-in.ts", "assets/styles/auth-styles/sign-up.ts", "src/components/index.js", "src/components/Divider.js", "src/components/index.js", "src/components/Components.js"  ]
+, "assets/styles/auth-styles/sign-in.ts", "assets/styles/auth-styles/sign-up.ts", "src/components/index.js", "src/components/Divider.js", "src/components/index.js", "src/components/Components.js", "app/upload-documents.tsx"  ]
 }

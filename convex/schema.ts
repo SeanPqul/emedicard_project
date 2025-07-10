@@ -49,7 +49,10 @@ export default defineSchema({
 
         //additional for security guard
         neuroExamId: v.optional(v.id("_storage")),
-        drugTestId: v.optional(v.id("_storage"))
+        drugTestId: v.optional(v.id("_storage")),
+        
+        //additional for pink health card (hepatitis B test)
+        hepatitisBId: v.optional(v.id("_storage"))
     })
     .index("by_form", ["formId"]),
 
