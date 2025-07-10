@@ -46,28 +46,23 @@ export default function DocumentRequirements() {
     const colorMap: { [key: string]: string } = {
       '#FFD700': 'Yellow Card',
       '#FFFF00': 'Yellow Card',
-      '#4169E1': 'Blue Card',
-      '#0000FF': 'Blue Card',
-      '#FFC0CB': 'Pink Card',
-      '#FF69B4': 'Pink Card',
       '#008000': 'Green Card',
       '#00FF00': 'Green Card',
+      '#FF69B4': 'Pink Card',
+      '#FFC0CB': 'Pink Card',
     };
     
     return colorMap[category.colorCode] || `${category.name} Card`;
   };
 
   const getPaymentMethods = (category: JobCategory) => {
-    const cardType = getHealthCardTypeName(category);
-    if (cardType.includes('Yellow') || cardType.includes('Green') || cardType.includes('Pink')) {
-      return [
-        { method: 'GCash', description: 'Mobile payment via GCash' },
-        { method: 'Maya', description: 'Mobile payment via Maya (PayMaya)' },
-        { method: 'Barangay Hall', description: 'Pay at Barangay Hall (Cash/OR)' },
-        { method: 'City Hall (Sangunian)', description: 'Pay at City Hall Sangunian Office (Cash/OR)' }
-      ];
-    }
-    return [];
+    // All health card types use the same payment methods
+    return [
+      { method: 'GCash', description: 'Mobile payment via GCash' },
+      { method: 'Maya', description: 'Mobile payment via Maya (PayMaya)' },
+      { method: 'Barangay Hall', description: 'Pay at Barangay Hall (Cash/OR)' },
+      { method: 'City Hall (Sangunian)', description: 'Pay at City Hall Sangunian Office (Cash/OR)' }
+    ];
   };
 
   return (

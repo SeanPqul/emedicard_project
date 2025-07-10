@@ -20,6 +20,7 @@ import type * as jobCategories from "../jobCategories.js";
 import type * as notifications from "../notifications.js";
 import type * as payments from "../payments.js";
 import type * as requirements from "../requirements.js";
+import type * as seedData from "../seedData.js";
 import type * as users from "../users.js";
 
 /**
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   payments: typeof payments;
   requirements: typeof requirements;
+  seedData: typeof seedData;
   users: typeof users;
 }>;
 export declare const api: FilterApi<
