@@ -2,6 +2,7 @@ import { moderateScale } from '@/src/utils/scaling-utils';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
+import { theme } from '@/src/styles/theme';
 
 interface CustomTextInputProps extends TextInputProps {
   leftIcon?: keyof typeof Ionicons.glyphMap;
@@ -11,6 +12,10 @@ interface CustomTextInputProps extends TextInputProps {
   inputStyle?: any;
   iconColor?: string;
   iconSize?: number;
+  label?: string;
+  error?: boolean;
+  rightIconAccessibilityLabel?: string;
+  rightIconAccessibilityHint?: string;
 }
 
 export const CustomTextInput: React.FC<CustomTextInputProps> = ({
@@ -19,40 +24,41 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({
   onRightIconPress,
   containerStyle,
   inputStyle,
-  iconColor = '#9CA3AF',
+  iconColor = theme.colors.text.tertiary,
   iconSize = moderateScale(20),
   style,
+  label,
+  error,
+  rightIconAccessibilityLabel,
+  rightIconAccessibilityHint,
   ...props
 }) => {
   const defaultStyles = {
   container: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    backgroundColor: '#F9FAFB',
-    borderColor: '#E5E7EB',
-    borderRadius: moderateScale(12),
-    paddingHorizontal: moderateScale(13),
-    paddingVertical: moderateScale(8),
-    shadowColor: '#000',
-    shadowOffset: { width: 1, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 1,
-    elevation: 1,
+    backgroundColor: theme.colors.background.secondary,
+    borderColor: error ? theme.colors.semantic.error : theme.colors.border.light,
+    borderWidth: 1,
+    borderRadius: theme.borderRadius.lg,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    ...theme.shadows.small,
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: '#1F2937',
+    ...theme.typography.body,
+    color: theme.colors.text.primary,
   },
   inputWithLeftIcon: {
-    marginLeft: moderateScale(12),
+    marginLeft: theme.spacing.sm,
   },
   leftIcon: {
     marginRight: 0,
   },
   rightIcon: {
     position: 'absolute' as const,
-    right: moderateScale(13),
+    right: theme.spacing.md,
   }}
   
   return (
@@ -68,17 +74,26 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({
       <TextInput
         style={[defaultStyles.input, leftIcon && defaultStyles.inputWithLeftIcon, inputStyle]}
         placeholderTextColor={iconColor}
+        accessibilityLabel={label || props.placeholder}
+        accessibilityRole="text"
+        accessibilityState={{
+          disabled: props.editable === false,
+        }}
         {...props}
       />
       {rightIcon && (
         <TouchableOpacity
           style={defaultStyles.rightIcon}
           onPress={onRightIconPress}
+          accessibilityLabel={rightIconAccessibilityLabel || `${rightIcon} button`}
+          accessibilityHint={rightIconAccessibilityHint}
+          accessibilityRole="button"
         >
           <Ionicons
             name={rightIcon}
             size={iconSize}
             color={iconColor}
+            accessibilityElementsHidden={true}
           />
         </TouchableOpacity>
       )}

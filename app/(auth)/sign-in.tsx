@@ -1,22 +1,18 @@
 import { styles } from "@/assets/styles/auth-styles/sign-in";
 import GoogleSignInButton from "@/assets/svgs/google-ctn-logo.svg";
-import { moderateScale } from "@/src/utils/scaling-utils";
 import { useSignIn, useSSO } from "@clerk/clerk-expo";
-import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import React from "react";
+import { Alert, Image, Text, View } from "react-native";
 import {
-  Alert,
-  Image,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import {
-  heightPercentageToDP as hp,
-  widthPercentageToDP as wp,
+    heightPercentageToDP as hp,
+    widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
+import {
+    CustomButton,
+    CustomTextInput,
+    Divider
+} from "../../src/components";
 
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -27,12 +23,17 @@ export default function SignInScreen() {
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
-  const [showPwd, setShowPwd] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const clearError = () => {
+    if (error) setError("");
+  };
 
   const onSignIn = async () => {
     if (!isLoaded) return;
     setError("");
     setLoading(true);
+
     try {
       const attempt = await signIn.create({ identifier: email, password });
       if (attempt.status === "complete") {
@@ -49,7 +50,7 @@ export default function SignInScreen() {
     }
   };
 
-  const onGoogle = async () => {
+  const onGoogleSignIn = async () => {
     try {
       const { createdSessionId, setActive: activate } = await startSSOFlow({
         strategy: "oauth_google",
@@ -62,6 +63,8 @@ export default function SignInScreen() {
       Alert.alert("Error", "Google sign in failed. Please try again.");
     }
   };
+
+  const isFormValid = email && password;
 
   return (
     <View style={styles.container}>
@@ -93,56 +96,32 @@ export default function SignInScreen() {
 
       {/* Form */}
       <View style={styles.formContainer}>
-        <View style={styles.input}>
-          <Ionicons
-            name="mail-outline"
-            size={moderateScale(20)}
-            color="#9CA3AF"
-            style={styles.inputIcon}
-          />
-          <TextInput
-            style={styles.inputWithIcon}
-            placeholder="Enter email"
-            placeholderTextColor="#9CA3AF"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={(t) => {
-              setEmail(t);
-              if (error) setError("");
-            }}
-          />
-        </View>
+        <CustomTextInput
+          leftIcon="mail-outline"
+          placeholder="Enter email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            clearError();
+          }}
+          containerStyle={styles.input}
+        />
 
-        <View style={styles.input}>
-          <Ionicons
-            name="lock-closed-outline"
-            size={moderateScale(20)}
-            color="#9CA3AF"
-            style={styles.inputIcon}
-          />
-          <TextInput
-            style={styles.inputWithIcon}
-            placeholder="Enter password"
-            placeholderTextColor="#9CA3AF"
-            secureTextEntry={!showPwd}
-            value={password}
-            onChangeText={(t) => {
-              setPassword(t);
-              if (error) setError("");
-            }}
-          />
-          <TouchableOpacity
-            style={styles.eyeIcon}
-            onPress={() => setShowPwd((v) => !v)}
-          >
-            <Ionicons
-              name={showPwd ? "eye" : "eye-off"}
-              size={23}
-              color="#9CA3AF"
-            />
-          </TouchableOpacity>
-        </View>
+        <CustomTextInput
+          leftIcon="lock-closed-outline"
+          rightIcon={showPassword ? "eye" : "eye-off"}
+          onRightIconPress={() => setShowPassword(!showPassword)}
+          placeholder="Enter password"
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={(text) => {
+            setPassword(text);
+            clearError();
+          }}
+          containerStyle={styles.input}
+        />
 
         <View style={styles.errorForgotContainer}>
           <View style={styles.errorContainer}>
@@ -153,28 +132,28 @@ export default function SignInScreen() {
           </Link>
         </View>
 
-        <TouchableOpacity
-          style={[styles.signInButton, loading && styles.buttonDisabled]}
+        <CustomButton
+          title="Log in"
+          loadingText="Signing In…"
+          loading={loading}
+          disabled={!isFormValid || loading}
           onPress={onSignIn}
-          disabled={loading || !email || !password}
+          buttonStyle={styles.signInButton}
+          textStyle={styles.signInButtonText}
+        />
+
+        <Divider text="or Login with" />
+
+        <CustomButton
+          variant="none"
+          onPress={onGoogleSignIn}
+          buttonStyle={styles.googleButton}
         >
-          <Text style={styles.signInButtonText}>
-            {loading ? "Signing In…" : "Log in"}
-          </Text>
-        </TouchableOpacity>
-
-        <View style={styles.orContainer}>
-          <View style={styles.line} />
-          <Text style={styles.orText}>or Login with</Text>
-          <View style={styles.line} />
-        </View>
-
-        <TouchableOpacity style={styles.googleButton} onPress={onGoogle}>
           <GoogleSignInButton width={wp("50%")} height={hp("6%")} />
-        </TouchableOpacity>
+        </CustomButton>
 
         <View style={styles.signUpContainer}>
-          <Text style={styles.signUpText}>Dont have an account? </Text>
+          <Text style={styles.signUpText}>Don&apos;t have an account? </Text>
           <Link href="/(auth)/sign-up" replace>
             <Text style={styles.signUpLinkText}>Sign up</Text>
           </Link>

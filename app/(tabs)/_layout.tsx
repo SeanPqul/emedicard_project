@@ -1,23 +1,28 @@
 import React from 'react'
 import { Tabs } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { COLORS } from '@/constant/theme';
+import { theme } from '@/src/styles/theme';
 
 export default function TabLayout() {
   return (
     <Tabs 
       screenOptions={{tabBarShowLabel : false,
         headerShown: false,
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.grey,
+        tabBarActiveTintColor: theme.colors.primary[500],
+        tabBarInactiveTintColor: theme.colors.gray[400],
         tabBarStyle: {
           position: 'absolute',
           bottom: 0,
-          height: 50,
+          height: 58,
           paddingBottom: 8,
-          backgroundColor: COLORS.white,
-          borderTopWidth: 0,
-          elevation: 0,
+          backgroundColor: theme.colors.ui.white,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.border.light,
+          elevation: 5,
+          shadowColor: theme.colors.ui.black,
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
         },
       }}
     >
@@ -33,7 +38,7 @@ export default function TabLayout() {
       />
       <Tabs.Screen name="apply"
         options={{
-          tabBarIcon: ({size}) => <Ionicons name="add-circle" size={size} color={COLORS.primary} />,
+          tabBarIcon: ({size}) => <Ionicons name="add-circle" size={size} color={theme.colors.primary[500]} />,
         }}
       />
       <Tabs.Screen name="notification"
