@@ -1,9 +1,10 @@
 import { StyleSheet } from "react-native";
+import { theme, getColor, getSpacing, getTypography, getBorderRadius, getShadow } from "../../../src/styles/theme";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: getColor('background.secondary'),
   },
   scrollView: {
     flex: 1,
@@ -12,11 +13,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16, // Reduced padding to allow more room
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: getSpacing('md'),
+    paddingVertical: getSpacing('md'),
+    backgroundColor: getColor('background.primary'),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: getColor('border.light'),
   },
   headerLeft: {
     flexDirection: 'row',
@@ -26,83 +27,78 @@ export const styles = StyleSheet.create({
   profilePicture: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-    backgroundColor: '#E9ECEF',
+    borderRadius: getBorderRadius('full'),
+    marginRight: getSpacing('sm'),
+    backgroundColor: getColor('border.light'),
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileImage: {
     width: 50,
     height: 50,
-    borderRadius: 25,
+    borderRadius: getBorderRadius('full'),
   },
   welcomeText: {
     flex: 1,
-    marginRight: 8, // Add small margin
-    minWidth: 0, // Allow text to shrink if needed
+    marginRight: getSpacing('sm'),
+    minWidth: 0,
   },
   greeting: {
-    fontSize: 14,
-    color: '#6C757D',
-    fontWeight: '400',
+    ...getTypography('bodySmall'),
+    color: getColor('text.secondary'),
   },
   userName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
-    marginTop: 2,
+    ...getTypography('h4'),
+    color: getColor('text.primary'),
+    marginTop: getSpacing('xs') / 2,
   },
   currentTime: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginTop: 2,
+    ...getTypography('caption'),
+    color: getColor('text.secondary'),
+    marginTop: getSpacing('xs') / 2,
   },
   notificationButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    //backgroundColor: '#F8F9FA',
+    borderRadius: getBorderRadius('full'),
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    marginRight: -12, // Adjust this value: 0=closer to text, 16=further from text
-    // marginRight: 0, // Uncomment and adjust to control space from screen edge
+    marginRight: -getSpacing('sm'),
   },
   notificationBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    //backgroundColor: '#DC3545',
-    borderRadius: 10,
+    top: getSpacing('sm'),
+    right: getSpacing('sm'),
+    backgroundColor: getColor('semantic.error'),
+    borderRadius: getBorderRadius('full'),
     minWidth: 20,
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   notificationBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 12,
+    ...getTypography('caption'),
+    color: getColor('text.inverse'),
     fontWeight: '600',
   },
   statsContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: getSpacing('lg'),
+    paddingVertical: getSpacing('md'),
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: getSpacing('sm'),
   },
   quickActionsContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingHorizontal: getSpacing('lg'),
+    paddingBottom: getSpacing('md'),
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
-    marginBottom: 12,
+    ...getTypography('h4'),
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('sm'),
   },
   actionsGrid: {
     flexDirection: 'row',
@@ -110,27 +106,23 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   recentActivityContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: getSpacing('lg'),
+    paddingBottom: getSpacing('lg'),
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: getSpacing('sm'),
   },
   viewAllText: {
-    fontSize: 14,
-    color: '#2E86AB',
+    ...getTypography('bodySmall'),
+    color: getColor('accent.medicalBlue'),
     fontWeight: '600',
   },
   activityList: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+    ...getShadow('medium'),
   },
 });

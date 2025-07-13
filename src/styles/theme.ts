@@ -50,22 +50,33 @@ export const theme = {
     },
     accent: {
       primaryGreen: '#10B981', // AppBar, Primary Buttons
+      medicalBlue: '#2E86AB', // Medical/Healthcare theme
       accentSky: '#107B5D', // Background highlights, Icons
       secondaryPale: '#D4F1FF', // Cards, Info Sections
       background: '#EDF7FA', // App background
       highlightYellow: '#FFEB3B', // Alerts, QR highlights
+      safetyGreen: '#28A745', // Success states
+      warningOrange: '#F18F01', // Warning states
     },
     semanticUI: {
       primaryButton: '#10B981',
+      secondaryButton: '#6C757D',
       disabled: '#BDBDBD',
       alert: '#FFEB3B',
       errorText: '#DC3545',
+      successText: '#28A745',
+      warningText: '#FFC107',
+      infoText: '#17A2B8',
       infoCard: '#D4F1FF',
+      dangerCard: '#F8D7DA',
+      successCard: '#D4EDDA',
+      warningCard: '#FFF3CD',
     },
     jobCategories: {
-      foodHandler: '#FFD700',
-      securityGuard: '#4169E1',
-      others: '#6B46C1',
+      foodHandler: '#FFD700', // Yellow for food handlers
+      securityGuard: '#4169E1', // Royal Blue for security guards
+      others: '#6B46C1', // Purple for other categories
+      pink: '#FF69B4', // Pink for skin-to-skin contact jobs
     },
     ui: {
       white: '#FFFFFF',

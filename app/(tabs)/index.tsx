@@ -7,6 +7,7 @@ import { StatCard, ActionButton, ActivityItem, EmptyState } from '../../src/comp
 import { styles } from '../../assets/styles/tabs-styles/dashboard';
 import { useDashboard } from '@/src/hooks';
 import { getUserDisplayName } from '../../src/utils/user-utils';
+import { getColor } from '../../src/styles/theme';
 
 export default function Dashboard() {
   const { 
@@ -62,7 +63,7 @@ export default function Dashboard() {
           </View>
           
           <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/(tabs)/notification')}>
-            <Ionicons name="notifications-outline" size={24} color="#212529" />
+            <Ionicons name="notifications-outline" size={24} color={getColor('text.primary')} />
             {unreadNotificationsCount > 0 && (
               <View style={styles.notificationBadge}>
                 <Text style={styles.notificationBadgeText}>
@@ -81,7 +82,7 @@ export default function Dashboard() {
               title="Active Applications"
               value={dashboardStats.activeApplications.toString()}
               subtitle="In progress"
-              color="#2E86AB"
+              color={getColor('accent.medicalBlue')}
               onPress={() => router.push('/(tabs)/application')}
             />
             <StatCard
@@ -89,7 +90,7 @@ export default function Dashboard() {
               title="Pending Payments"
               value={dashboardStats.pendingPayments.toString()}
               subtitle={`₱${dashboardStats.pendingAmount}`}
-              color="#F18F01"
+              color={getColor('accent.warningOrange')}
               onPress={() => router.push('/screens/shared/payment')}
             />
           </View>
@@ -99,7 +100,7 @@ export default function Dashboard() {
               title="Upcoming Orientations"
               value={dashboardStats.upcomingOrientations.toString()}
               subtitle={dashboardStats.nextOrientationDate || "None scheduled"}
-              color="#A23B72"
+              color={getColor('accent.primaryGreen')}
               onPress={() => router.push('/screens/shared/orientation')}
             />
             <StatCard
@@ -107,7 +108,7 @@ export default function Dashboard() {
               title="Valid Health Cards"
               value={dashboardStats.validHealthCards.toString()}
               subtitle="Active cards"
-              color="#28A745"
+              color={getColor('accent.safetyGreen')}
               onPress={() => router.push('/screens/shared/health-cards')}
             />
           </View>
