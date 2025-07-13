@@ -6,7 +6,7 @@ export const theme = {
       200: '#BBF7D0',
       300: '#86EFAC',
       400: '#4ADE80',
-      500: '#10B981', // Main primary color
+      500: '#10B981', // Main primary green
       600: '#059669',
       700: '#047857',
       800: '#065F46',
@@ -36,19 +36,37 @@ export const theme = {
       800: '#1F2937',
       900: '#111827',
     },
+    neutral: {
+      100: '#F5F5F5',
+      200: '#E0E0E0',
+      300: '#BDBDBD',
+      400: '#9E9E9E',
+    },
     semantic: {
       success: '#10B981',
       warning: '#F59E0B',
       error: '#DC3545',
       info: '#3B82F6',
     },
-    // Job Category Colors from UI Design Prompt
-    jobCategories: {
-      foodHandler: '#FFD700', // Gold/Yellow
-      securityGuard: '#4169E1', // Royal Blue
-      others: '#6B46C1', // Purple
+    accent: {
+      primaryGreen: '#10B981', // AppBar, Primary Buttons
+      accentSky: '#107B5D', // Background highlights, Icons
+      secondaryPale: '#D4F1FF', // Cards, Info Sections
+      background: '#EDF7FA', // App background
+      highlightYellow: '#FFEB3B', // Alerts, QR highlights
     },
-    // Additional UI Colors
+    semanticUI: {
+      primaryButton: '#10B981',
+      disabled: '#BDBDBD',
+      alert: '#FFEB3B',
+      errorText: '#DC3545',
+      infoCard: '#D4F1FF',
+    },
+    jobCategories: {
+      foodHandler: '#FFD700',
+      securityGuard: '#4169E1',
+      others: '#6B46C1',
+    },
     ui: {
       white: '#FFFFFF',
       black: '#000000',
@@ -162,19 +180,17 @@ export const theme = {
   },
 } as const;
 
-// Export type for theme
 export type Theme = typeof theme;
 
-// Utility functions for theme access
 export const getColor = (colorPath: string) => {
   const keys = colorPath.split('.');
   let current: any = theme.colors;
-  
+
   for (const key of keys) {
     current = current[key];
     if (!current) return undefined;
   }
-  
+
   return current;
 };
 
