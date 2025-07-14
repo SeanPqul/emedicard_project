@@ -15,7 +15,6 @@ import {
 import { styles } from '../../assets/styles/tabs-styles/apply';
 import { api } from '../../convex/_generated/api';
 import { CustomButton, CustomTextInput } from '../../src/components';
-import { getColor } from '../../src/styles/theme';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';
@@ -430,7 +429,7 @@ export default function Apply() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
+          <Ionicons name="arrow-back" size={24} color="#212529" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>New Application</Text>
         <View style={styles.headerRight} />
@@ -474,7 +473,7 @@ export default function Apply() {
           {/* Debug: Add a simple TouchableOpacity button as fallback */}
           <TouchableOpacity
             style={[{
-              backgroundColor: getColor('accent.medicalBlue'),
+              backgroundColor: '#2E86AB',
               paddingVertical: 15,
               paddingHorizontal: 30,
               borderRadius: 8,
