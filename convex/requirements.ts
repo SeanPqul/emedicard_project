@@ -188,6 +188,256 @@ export const updateRequirements = mutation({
   },
 });
 
+// Generate upload URL for files
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+// Upload a single document
+export const uploadDocument = mutation({
+  args: {
+    formId: v.id("forms"),
+    fieldName: v.string(),
+    storageId: v.id("_storage"),
+    fileName: v.string(),
+    fileType: v.string(),
+    fileSize: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'image/jpeg',
+      'image/jpg', 
+      'image/png',
+      'application/pdf'
+    ];
+    
+    if (!allowedTypes.includes(args.fileType)) {
+      throw new Error(`Invalid file type: ${args.fileType}. Allowed types: ${allowedTypes.join(', ')}`);
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (args.fileSize > maxSize) {
+      throw new Error(`File size exceeds limit. Maximum size: 10MB`);
+    }
+
+    // Verify form exists and user owns it
+    const form = await ctx.db.get(args.formId);
+    if (!form) {
+      throw new Error("Form not found");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user || form.userId !== user._id) {
+      throw new Error("Not authorized to upload documents for this form");
+    }
+
+    // Check if requirements record exists
+    let requirements = await ctx.db
+      .query("requirements")
+      .withIndex("by_form", (q) => q.eq("formId", args.formId))
+      .unique();
+
+    // Create requirements record if it doesn't exist
+    if (!requirements) {
+      // Create a minimal requirements record - we'll update it with the actual file
+      const defaultStorageId = args.storageId; // Use the current file as default for all required fields
+      
+      const requirementId = await ctx.db.insert("requirements", {
+        formId: args.formId,
+        validId: args.fieldName === "validId" ? args.storageId : defaultStorageId,
+        picture: args.fieldName === "picture" ? args.storageId : defaultStorageId,
+        chestXrayId: args.fieldName === "chestXrayId" ? args.storageId : defaultStorageId,
+        urinalysisId: args.fieldName === "urinalysisId" ? args.storageId : defaultStorageId,
+        stoolId: args.fieldName === "stoolId" ? args.storageId : defaultStorageId,
+        cedulaId: args.fieldName === "cedulaId" ? args.storageId : defaultStorageId,
+        neuroExamId: args.fieldName === "neuroExamId" ? args.storageId : undefined,
+        drugTestId: args.fieldName === "drugTestId" ? args.storageId : undefined,
+        hepatitisBId: args.fieldName === "hepatitisBId" ? args.storageId : undefined,
+      });
+      
+      requirements = await ctx.db.get(requirementId);
+    } else {
+      // Update existing requirements record
+      await ctx.db.patch(requirements._id, {
+        [args.fieldName]: args.storageId,
+      });
+    }
+
+    return {
+      requirementId: requirements!._id,
+      fieldName: args.fieldName,
+      storageId: args.storageId,
+      fileName: args.fileName,
+      fileType: args.fileType,
+      fileSize: args.fileSize,
+    };
+  },
+});
+
+// Update a single document field
+export const updateDocumentField = mutation({
+  args: {
+    formId: v.id("forms"),
+    fieldName: v.string(),
+    storageId: v.id("_storage"),
+    fileName: v.string(),
+    fileType: v.string(),
+    fileSize: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'image/jpeg',
+      'image/jpg', 
+      'image/png',
+      'application/pdf'
+    ];
+    
+    if (!allowedTypes.includes(args.fileType)) {
+      throw new Error(`Invalid file type: ${args.fileType}. Allowed types: ${allowedTypes.join(', ')}`);
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (args.fileSize > maxSize) {
+      throw new Error(`File size exceeds limit. Maximum size: 10MB`);
+    }
+
+    // Verify form exists and user owns it
+    const form = await ctx.db.get(args.formId);
+    if (!form) {
+      throw new Error("Form not found");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user || form.userId !== user._id) {
+      throw new Error("Not authorized to update documents for this form");
+    }
+
+    // Get existing requirements
+    let requirements = await ctx.db
+      .query("requirements")
+      .withIndex("by_form", (q) => q.eq("formId", args.formId))
+      .unique();
+
+    if (!requirements) {
+      throw new Error("Requirements record not found. Please upload documents first.");
+    }
+
+    // Update the specific field
+    await ctx.db.patch(requirements._id, {
+      [args.fieldName]: args.storageId,
+    });
+
+    return {
+      requirementId: requirements._id,
+      fieldName: args.fieldName,
+      storageId: args.storageId,
+      fileName: args.fileName,
+      fileType: args.fileType,
+      fileSize: args.fileSize,
+    };
+  },
+});
+
+// Delete a document
+export const deleteDocument = mutation({
+  args: {
+    formId: v.id("forms"),
+    fieldName: v.string(),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Verify form exists and user owns it
+    const form = await ctx.db.get(args.formId);
+    if (!form) {
+      throw new Error("Form not found");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user || form.userId !== user._id) {
+      throw new Error("Not authorized to delete documents for this form");
+    }
+
+    // Get existing requirements
+    const requirements = await ctx.db
+      .query("requirements")
+      .withIndex("by_form", (q) => q.eq("formId", args.formId))
+      .unique();
+
+    if (!requirements) {
+      throw new Error("Requirements record not found");
+    }
+
+    // Delete the file from storage
+    await ctx.storage.delete(args.storageId);
+
+    // Update the requirements record to remove the reference
+    await ctx.db.patch(requirements._id, {
+      [args.fieldName]: undefined,
+    });
+
+    return { success: true };
+  },
+});
+
+// Get document metadata
+export const getDocumentMetadata = query({
+  args: {
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get file URL from storage
+    const fileUrl = await ctx.storage.getUrl(args.storageId);
+    
+    return {
+      storageId: args.storageId,
+      url: fileUrl,
+    };
+  },
+});
+
 export const getRequirementsByFormId = query({
   args: { formId: v.id("forms") },
   handler: async (ctx, args) => {

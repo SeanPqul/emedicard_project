@@ -3,62 +3,36 @@ import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { CustomButton } from '../../../src/components';
+import { QRCodeScanner } from '../../../src/components/QRCodeScanner';
 
 export default function QRScannerScreen() {
-  const [scanning, setScanning] = useState(false);
+  const [scannerActive, setScannerActive] = useState(true);
 
-  const handleSimulateScan = () => {
-    setScanning(true);
-    
-    // Simulate scanning process
-    setTimeout(() => {
-      setScanning(false);
-      Alert.alert(
-        'QR Code Scanned',
-        'Health Card: HC-FH-2024-001\nStatus: Valid\nExpiry: 2025-01-15',
-        [
-          { text: 'Scan Again', onPress: () => {} },
-          { text: 'OK', onPress: () => router.back() },
-        ]
-      );
-    }, 2000);
+  const handleScan = (data) => {
+    const qrData = JSON.parse(data);
+    Alert.alert(
+      'QR Code Scanned',
+      `Card ID: ${qrData.cardId}\nType: ${qrData.type}\nStatus: ${qrData.status}\nExpiry Date: ${qrData.expiryDate}`,
+      [
+        { text: 'OK', onPress: () => router.back() }
+      ]
+    );
+  };
+
+  const handleClose = () => {
+    setScannerActive(false);
+    router.back();
   };
 
   return (
     <BaseScreenLayout>
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#212529" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>QR Scanner</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      {/* Content */}
-      <View style={styles.content}>
-        <View style={styles.scannerContainer}>
-          <View style={styles.scannerFrame}>
-            <Ionicons name="qr-code-outline" size={100} color="#6C757D" />
-          </View>
-          
-          <Text style={styles.instructionsTitle}>Health Card QR Scanner</Text>
-          <Text style={styles.instructionsText}>
-            This feature will scan QR codes to verify health cards.
-            Camera integration coming soon.
-          </Text>
-          
-          <View style={styles.buttonContainer}>
-            <CustomButton
-              title={scanning ? 'Scanning...' : 'Simulate Scan'}
-              onPress={handleSimulateScan}
-              disabled={scanning}
-            />
-          </View>
-        </View>
-      </View>
+      <QRCodeScanner
+        onScan={handleScan}
+        onClose={handleClose}
+        active={scannerActive}
+        title='Scan Health Card'
+        subtitle='Align the QR code within the frame to scan'
+      />
     </BaseScreenLayout>
   );
 }

@@ -90,6 +90,49 @@ export default function Notifications() {
     }
   };
 
+  const handleNotificationNavigation = (notification: NotificationItem) => {
+    switch (notification.type) {
+      case 'MissingDoc':
+        if (notification.formsId) {
+          router.push({
+            pathname: '/(screens)/(shared)/upload-documents',
+            params: { formId: notification.formsId }
+          });
+        }
+        break;
+      case 'PaymentReceived':
+        if (notification.formsId) {
+          router.push({
+            pathname: '/(screens)/(shared)/payment',
+            params: { formId: notification.formsId }
+          });
+        }
+        break;
+      case 'OrientationScheduled':
+        if (notification.formsId) {
+          router.push({
+            pathname: '/(screens)/(shared)/orientation',
+            params: { formId: notification.formsId }
+          });
+        }
+        break;
+      case 'CardIssue':
+        router.push('/(screens)/(shared)/health-cards');
+        break;
+      case 'FormApproved':
+        if (notification.formsId) {
+          router.push({
+            pathname: '/(tabs)/application',
+            params: { highlightId: notification.formsId }
+          });
+        }
+        break;
+      default:
+        // Fallback to application screen
+        router.push('/(tabs)/application');
+    }
+  };
+
   const getFilteredNotifications = () => {
     if (!notifications) return [];
 
@@ -242,9 +285,7 @@ export default function Notifications() {
             handleMarkAsRead(notification._id);
           }
           // Navigate to relevant screen based on notification type
-          if (notification.formsId) {
-            router.push(`/application/${notification.formsId}`);
-          }
+          handleNotificationNavigation(notification);
         }}
       >
         <View style={[

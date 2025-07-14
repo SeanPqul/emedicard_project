@@ -1,54 +1,58 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Share } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Share, Alert, Platform, Linking } from 'react-native';
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { EmptyState } from '../../../src/components';
+import { EmptyState, CustomButton } from '../../../src/components';
 import QRCode from 'react-native-qrcode-svg';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import * as MediaLibrary from 'expo-media-library';
+import { captureRef } from 'react-native-view-shot';
+import { Id } from '../../../convex/_generated/dataModel';
 
-interface HealthCard {
-  id: string;
-  type: 'food_handler' | 'security_guard';
-  status: 'active' | 'expired' | 'pending';
-  issuedDate: string;
-  expiryDate: string;
-  qrCodeData: string;
+interface HealthCardData {
+  _id: string;
+  formId: string;
+  cardUrl: string;
+  issuedAt: number;
+  expiresAt: number;
+  verificationToken: string;
+  form?: any;
+  jobCategory?: any;
 }
 
 export default function HealthCardsScreen() {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [downloadingCard, setDownloadingCard] = useState<string | null>(null);
+  const [printingCard, setPrintingCard] = useState<string | null>(null);
+  const [sharingCard, setSharingCard] = useState<string | null>(null);
 
-  // Mock data - replace with Convex query
-  const userHealthCards: HealthCard[] = [
-    {
-      id: '1',
-      type: 'food_handler',
-      status: 'active',
-      issuedDate: '2024-01-15',
-      expiryDate: '2025-01-15',
-      qrCodeData: 'HC-FH-2024-001',
-    },
-    {
-      id: '2',
-      type: 'security_guard',
-      status: 'expired',
-      issuedDate: '2023-06-10',
-      expiryDate: '2024-06-10',
-      qrCodeData: 'HC-SG-2023-002',
-    },
-  ];
+  // Convex queries
+  const userHealthCards = useQuery(api.healthCards.getUserHealthCards);
+  const createVerificationLog = useMutation(api.verificationLogs.createVerificationLog);
 
-  const getCardColor = (type: string) => {
-    switch (type) {
-      case 'food_handler':
-        return '#FFD700';
-      case 'security_guard':
-        return '#4169E1';
-      default:
-        return '#6B46C1';
+  const getCardColor = (jobCategory: any) => {
+    if (jobCategory?.colorCode) {
+      return jobCategory.colorCode;
     }
+    // Fallback colors
+    if (jobCategory?.name.toLowerCase().includes('food')) {
+      return '#FFD700';
+    } else if (jobCategory?.name.toLowerCase().includes('security')) {
+      return '#4169E1';
+    }
+    return '#6B46C1';
+  };
+
+  const getCardStatus = (card: HealthCardData) => {
+    const now = Date.now();
+    if (card.expiresAt < now) {
+      return 'expired';
+    }
+    return 'active';
   };
 
   const getStatusColor = (status: string) => {
@@ -64,18 +68,138 @@ export default function HealthCardsScreen() {
     }
   };
 
-  const handleShareCard = async (card: HealthCard) => {
+  const generateVerificationUrl = (card: HealthCardData) => {
+    return `https://yourdomain.com/verify/${card.verificationToken}`;
+  };
+
+  const handleShareCard = async (card: HealthCardData) => {
     try {
+      setSharingCard(card._id);
+      const verificationUrl = generateVerificationUrl(card);
+      const status = getCardStatus(card);
+      
       const result = await Share.share({
-        message: `Health Card: ${card.qrCodeData}\nStatus: ${card.status}\nExpiry: ${card.expiryDate}`,
+        message: `Health Card Verification\n\nCard ID: ${card.verificationToken}\nStatus: ${status}\nExpiry: ${formatDate(card.expiresAt)}\n\nVerify at: ${verificationUrl}`,
+        url: verificationUrl,
       });
+      
+      if (result.action === Share.sharedAction) {
+        // Log the share activity
+        await createVerificationLog({
+          healthCardId: card._id as Id<"healthCards">,
+          userAgent: `Mobile App - Share`,
+          ipAddress: undefined,
+        });
+      }
     } catch (error) {
       console.error('Error sharing card:', error);
+      Alert.alert('Error', 'Failed to share card. Please try again.');
+    } finally {
+      setSharingCard(null);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const handleDownloadCard = async (card: HealthCardData) => {
+    try {
+      setDownloadingCard(card._id);
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Permission to access media library is required to download cards.');
+        return;
+      }
+
+      // Generate card as image using view-shot
+      const cardHtml = generateCardHtml(card);
+      const { uri } = await Print.printToFileAsync({ html: cardHtml });
+      
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      await MediaLibrary.createAlbumAsync('Health Cards', asset, false);
+      
+      Alert.alert('Success', 'Health card downloaded to your gallery!');
+    } catch (error) {
+      console.error('Error downloading card:', error);
+      Alert.alert('Error', 'Failed to download card. Please try again.');
+    } finally {
+      setDownloadingCard(null);
+    }
+  };
+
+  const handlePrintCard = async (card: HealthCardData) => {
+    try {
+      setPrintingCard(card._id);
+      
+      const cardHtml = generateCardHtml(card);
+      
+      const { uri } = await Print.printToFileAsync({ html: cardHtml });
+      
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri);
+      } else {
+        Alert.alert('Print', 'Generated PDF ready for printing!');
+      }
+    } catch (error) {
+      console.error('Error printing card:', error);
+      Alert.alert('Error', 'Failed to generate printable card. Please try again.');
+    } finally {
+      setPrintingCard(null);
+    }
+  };
+
+  const generateCardHtml = (card: HealthCardData) => {
+    const status = getCardStatus(card);
+    const verificationUrl = generateVerificationUrl(card);
+    
+    return `
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+            .card { 
+              width: 300px; 
+              height: 200px; 
+              border: 2px solid #333; 
+              border-radius: 10px; 
+              padding: 20px; 
+              margin: 0 auto;
+              background: linear-gradient(135deg, ${getCardColor(card.jobCategory)}, ${getCardColor(card.jobCategory)}dd);
+              color: white;
+              position: relative;
+            }
+            .card-header { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+            .card-id { font-size: 14px; margin-bottom: 5px; }
+            .card-dates { font-size: 12px; margin-bottom: 5px; }
+            .qr-code { position: absolute; top: 20px; right: 20px; width: 60px; height: 60px; }
+            .status { 
+              position: absolute; 
+              top: 10px; 
+              right: 10px; 
+              background: ${getStatusColor(status)}; 
+              color: white; 
+              padding: 4px 8px; 
+              border-radius: 4px; 
+              font-size: 10px;
+            }
+            .verification-url { font-size: 10px; position: absolute; bottom: 10px; left: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="status">${status.toUpperCase()}</div>
+            <div class="card-header">${card.jobCategory?.name || 'Health Card'}</div>
+            <div class="card-id">ID: ${card.verificationToken}</div>
+            <div class="card-dates">Issued: ${formatDate(card.issuedAt)}</div>
+            <div class="card-dates">Expires: ${formatDate(card.expiresAt)}</div>
+            <div class="verification-url">Verify: ${verificationUrl}</div>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -94,82 +218,105 @@ export default function HealthCardsScreen() {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {userHealthCards.length > 0 ? (
-          userHealthCards.map((card) => (
-            <View key={card.id} style={styles.cardContainer}>
-              <View style={[styles.cardHeader, { backgroundColor: getCardColor(card.type) }]}>
-                <Text style={styles.cardType}>
-                  {card.type === 'food_handler' ? 'Food Handler' : 'Security Guard'}
-                </Text>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(card.status) }]}>
-                  <Text style={styles.statusText}>
-                    {card.status.charAt(0).toUpperCase() + card.status.slice(1)}
+        {userHealthCards && userHealthCards.length > 0 ? (
+          userHealthCards.map((card) => {
+            const status = getCardStatus(card);
+            const cardColor = getCardColor(card.jobCategory);
+            const verificationUrl = generateVerificationUrl(card);
+            
+            return (
+              <View key={card._id} style={styles.cardContainer}>
+                <View style={[styles.cardHeader, { backgroundColor: cardColor }]}>
+                  <Text style={styles.cardType}>
+                    {card.jobCategory?.name || 'Health Card'}
                   </Text>
-                </View>
-              </View>
-
-              <View style={styles.cardContent}>
-                <View style={styles.cardInfo}>
-                  <Text style={styles.cardId}>Card ID: {card.qrCodeData}</Text>
-                  <Text style={styles.cardDates}>
-                    Issued: {formatDate(card.issuedDate)}
-                  </Text>
-                  <Text style={styles.cardDates}>
-                    Expires: {formatDate(card.expiryDate)}
-                  </Text>
+                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(status) }]}>
+                    <Text style={styles.statusText}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </Text>
+                  </View>
                 </View>
 
-                <TouchableOpacity
-                  style={styles.qrCodeContainer}
-                  onPress={() => setSelectedCard(selectedCard === card.id ? null : card.id)}
-                >
-                  {selectedCard === card.id ? (
-                    <View style={styles.qrCodeWrapper}>
-                      <QRCode
-                        value={card.qrCodeData}
-                        size={120}
-                        color="#000000"
-                        backgroundColor="#FFFFFF"
-                      />
-                    </View>
-                  ) : (
-                    <View style={styles.qrCodePlaceholder}>
-                      <Ionicons name="qr-code-outline" size={48} color="#6C757D" />
-                      <Text style={styles.qrCodeText}>Tap to view QR</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              </View>
+                <View style={styles.cardContent}>
+                  <View style={styles.cardInfo}>
+                    <Text style={styles.cardId}>Card ID: {card.verificationToken}</Text>
+                    <Text style={styles.cardDates}>
+                      Issued: {formatDate(card.issuedAt)}
+                    </Text>
+                    <Text style={styles.cardDates}>
+                      Expires: {formatDate(card.expiresAt)}
+                    </Text>
+                  </View>
 
-              <View style={styles.cardActions}>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => handleShareCard(card)}
-                >
-                  <Ionicons name="share-outline" size={20} color="#2E86AB" />
-                  <Text style={styles.actionButtonText}>Share</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => {/* Download logic */}}
-                >
-                  <Ionicons name="download-outline" size={20} color="#2E86AB" />
-                  <Text style={styles.actionButtonText}>Download</Text>
-                </TouchableOpacity>
-
-                {card.status === 'expired' && (
                   <TouchableOpacity
-                    style={[styles.actionButton, styles.renewButton]}
-                    onPress={() => router.push('/(tabs)/apply')}
+                    style={styles.qrCodeContainer}
+                    onPress={() => setSelectedCard(selectedCard === card._id ? null : card._id)}
                   >
-                    <Ionicons name="refresh-outline" size={20} color="#FFFFFF" />
-                    <Text style={[styles.actionButtonText, styles.renewButtonText]}>Renew</Text>
+                    {selectedCard === card._id ? (
+                      <View style={styles.qrCodeWrapper}>
+                        <QRCode
+                          value={verificationUrl}
+                          size={120}
+                          color="#000000"
+                          backgroundColor="#FFFFFF"
+                        />
+                      </View>
+                    ) : (
+                      <View style={styles.qrCodePlaceholder}>
+                        <Ionicons name="qr-code-outline" size={48} color="#6C757D" />
+                        <Text style={styles.qrCodeText}>Tap to view QR</Text>
+                      </View>
+                    )}
                   </TouchableOpacity>
-                )}
+                </View>
+
+                <View style={styles.cardActions}>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleShareCard(card)}
+                    disabled={sharingCard === card._id}
+                  >
+                    <Ionicons name="share-outline" size={20} color="#2E86AB" />
+                    <Text style={styles.actionButtonText}>
+                      {sharingCard === card._id ? 'Sharing...' : 'Share'}
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleDownloadCard(card)}
+                    disabled={downloadingCard === card._id}
+                  >
+                    <Ionicons name="download-outline" size={20} color="#2E86AB" />
+                    <Text style={styles.actionButtonText}>
+                      {downloadingCard === card._id ? 'Downloading...' : 'Download'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handlePrintCard(card)}
+                    disabled={printingCard === card._id}
+                  >
+                    <Ionicons name="print-outline" size={20} color="#2E86AB" />
+                    <Text style={styles.actionButtonText}>
+                      {printingCard === card._id ? 'Printing...' : 'Print'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {status === 'expired' && (
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.renewButton]}
+                      onPress={() => router.push('/(tabs)/apply')}
+                    >
+                      <Ionicons name="refresh-outline" size={20} color="#FFFFFF" />
+                      <Text style={[styles.actionButtonText, styles.renewButtonText]}>Renew</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
-            </View>
-          ))
+            );
+          })
         ) : (
           <EmptyState
             icon="shield-outline"

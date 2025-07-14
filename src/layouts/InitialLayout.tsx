@@ -4,12 +4,17 @@ import { useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { generateDisplayNameFromEmail, hasPlaceholderName } from "../utils/user-utils";
+import { useDeepLink } from "../hooks/useDeepLink";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export default function InitialLayout() {
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
   const segments = useSegments();
   const router = useRouter();
+  
+  // Initialize deep linking
+  useDeepLink();
   
   // Convex queries and mutations
   const userProfile = useQuery(api.users.getCurrentUser);
@@ -65,7 +70,26 @@ export default function InitialLayout() {
   
     }, [isLoaded, isSignedIn, router, segments])
 
-    if (!isLoaded) return null;
+    if (!isLoaded) {
+      return (
+        <LoadingSpinner 
+          visible={true} 
+          message="Loading..." 
+          fullScreen 
+          type="pulse" 
+          icon="shield-checkmark" 
+        />
+      );
+    }
     
-    return <Stack screenOptions={{ headerShown: false }} />;
+    return (
+      <Stack 
+        screenOptions={{ 
+          headerShown: false,
+          animation: 'slide_from_right',
+          gestureEnabled: true,
+          gestureDirection: 'horizontal'
+        }} 
+      />
+    );
 }

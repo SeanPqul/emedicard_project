@@ -18,10 +18,12 @@ import type * as healthCards from "../healthCards.js";
 import type * as http from "../http.js";
 import type * as jobCategories from "../jobCategories.js";
 import type * as notifications from "../notifications.js";
+import type * as orientations from "../orientations.js";
 import type * as payments from "../payments.js";
 import type * as requirements from "../requirements.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
+import type * as verificationLogs from "../verificationLogs.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -37,10 +39,12 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   jobCategories: typeof jobCategories;
   notifications: typeof notifications;
+  orientations: typeof orientations;
   payments: typeof payments;
   requirements: typeof requirements;
   seed: typeof seed;
   users: typeof users;
+  verificationLogs: typeof verificationLogs;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

@@ -1,1 +1,1 @@
-export { default } from './screens/UIShowcase';
+export { default } from './(screens)/UIShowcase';

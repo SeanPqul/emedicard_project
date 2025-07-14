@@ -25,11 +25,21 @@ import { AccessibleView } from "./accessibility/AccessibleView";
 import { ErrorBoundary } from "./error/ErrorBoundary";
 import { Toast } from "./feedback/Toast";
 import type { ToastType, ToastProps } from "./feedback/Toast";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { ErrorState, NetworkErrorState, ServerErrorState, UploadErrorState, PaymentErrorState } from "./ErrorState";
+import type { ErrorType } from "./ErrorState";
 
 // Animated Components
 import { AnimatedCard } from "./animated/AnimatedCard";
 import { SkeletonLoader, SkeletonGroup } from "./animated/SkeletonLoader";
 import { PageTransition, StaggerChildren } from "./animated/PageTransition";
+
+// Responsive Components
+import { ResponsiveLayout, ResponsiveRow, ResponsiveColumn, ResponsiveGrid } from "./responsive/ResponsiveLayout";
+
+// Enhanced UI Components
+import { DragDropUpload } from "./DragDropUpload";
+import { QRCodeScanner } from "./QRCodeScanner";
 
 export {
     // Form Components
@@ -58,15 +68,31 @@ export {
     // Error & Feedback Components
     ErrorBoundary,
     Toast,
+    LoadingSpinner,
+    ErrorState,
+    NetworkErrorState,
+    ServerErrorState,
+    UploadErrorState,
+    PaymentErrorState,
     
     // Animated Components
     AnimatedCard,
     SkeletonLoader,
     SkeletonGroup,
     PageTransition,
-    StaggerChildren
+    StaggerChildren,
+    
+    // Responsive Components
+    ResponsiveLayout,
+    ResponsiveRow,
+    ResponsiveColumn,
+    ResponsiveGrid,
+    
+    // Enhanced UI Components
+    DragDropUpload,
+    QRCodeScanner
 };
 
 // Export types
-export type { ToastType, ToastProps };
+export type { ToastType, ToastProps, ErrorType };
 

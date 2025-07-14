@@ -1,3 +1,42 @@
+/**
+ * Application Management Screen - eMediCard Application
+ * 
+ * IMPLEMENTATION NOTES:
+ * - Implements application listing and tracking as per UI_DESIGN_PROMPT.md (lines 105-140)
+ * - Follows filter and search functionality specifications from design documentation
+ * - Displays application status with visual progress indicators
+ * - Supports application tracking with real-time status updates
+ * - Aligns with eMediCard documentation for application management workflow
+ * 
+ * DOCUMENTATION REFERENCES:
+ * - UI_DESIGN_PROMPT.md: Applications management screen structure
+ * - UI_UX_IMPLEMENTATION_GUIDE.md: Filter implementation and accessibility
+ * - emedicarddocumentation.txt: Application status workflow and tracking
+ * 
+ * APPLICATION STATUS WORKFLOW (per documentation):
+ * - Submitted: Application received and awaiting review
+ * - Under Review: Being reviewed by CHO administrators
+ * - Approved: Application approved, health card will be issued
+ * - Rejected: Application rejected, user can view remarks and reapply
+ * 
+ * FILTER CAPABILITIES:
+ * - Search by application ID, position, organization, or job category
+ * - Filter by status (All, Submitted, Under Review, Approved, Rejected)
+ * - Sort by date, status, or category
+ * - Real-time updates via Convex queries
+ * 
+ * ACCESSIBILITY FEATURES:
+ * - Search functionality with clear input feedback
+ * - Status indicators with color coding and icons
+ * - Touch targets meet 44x44 pixel minimum
+ * - Screen reader compatible with descriptive labels
+ * 
+ * FUTURE ENHANCEMENTS:
+ * - Add push notifications for status changes
+ * - Implement document re-upload functionality for rejected applications
+ * - Add application cancellation feature
+ */
+
 import React, { useState } from 'react';
 import {
   View,

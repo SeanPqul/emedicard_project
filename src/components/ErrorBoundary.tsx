@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme.colors.danger[600],
+    color: theme.colors.semantic.error,
     marginBottom: theme.spacing.md,
     textAlign: 'center',
   },
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: theme.colors.danger[600],
+    color: theme.colors.semantic.error,
     marginBottom: theme.spacing.sm,
   },
   errorText: {

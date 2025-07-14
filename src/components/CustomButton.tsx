@@ -1,5 +1,40 @@
+/**
+ * CustomButton Component - eMediCard Application
+ * 
+ * IMPLEMENTATION NOTES:
+ * - Follows UI_UX_IMPLEMENTATION_GUIDE.md accessibility standards
+ * - Implements minimum 44x44 pixel touch targets for accessibility
+ * - Provides multiple variants (primary, secondary, outline, none) per design system
+ * - Includes loading states with proper accessibility indicators
+ * - Supports theme-based styling from src/styles/theme.ts
+ * 
+ * DOCUMENTATION REFERENCES:
+ * - UI_UX_IMPLEMENTATION_GUIDE.md: CustomButton usage and accessibility (lines 84-104)
+ * - UI_DESIGN_PROMPT.md: Button specifications and design system
+ * - emedicarddocumentation.txt: Interactive element requirements
+ * 
+ * ACCESSIBILITY COMPLIANCE:
+ * - Minimum touch target size: 44x44 pixels (per WCAG guidelines)
+ * - Proper accessibility labels and hints
+ * - Screen reader compatible with accessibilityRole and accessibilityState
+ * - Loading states with busy indicator for screen readers
+ * - Support for accessibilityLabel, accessibilityHint, and accessibilityState
+ * 
+ * DESIGN SYSTEM INTEGRATION:
+ * - Uses theme colors, typography, spacing, and border radius
+ * - Consistent button variants across the application
+ * - Responsive sizing with small, medium, and large options
+ * - Proper disabled and loading states
+ * 
+ * FEATURES:
+ * - Loading indicator with customizable color
+ * - Children support for custom button content
+ * - Flexible styling with buttonStyle and textStyle props
+ * - Proper disabled state handling
+ */
+
 import React from 'react';
-import { Text, TextStyle, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native';
+import { Text, TextStyle, TouchableOpacity, TouchableOpacityProps, ViewStyle, ActivityIndicator } from 'react-native';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { theme } from '@/src/styles/theme';
 
@@ -15,6 +50,8 @@ interface CustomButtonProps extends TouchableOpacityProps {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   accessibilityRole?: 'button' | 'link' | 'none';
+  minimumTouchTarget?: boolean; // Ensure 44x44 minimum touch target
+  loadingIndicatorColor?: string;
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = ({
@@ -30,6 +67,8 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
   accessibilityLabel,
   accessibilityHint,
   accessibilityRole = 'button',
+  minimumTouchTarget = true,
+  loadingIndicatorColor,
   ...props
 }) => {
   const getButtonStyle = (): ViewStyle => {
@@ -38,6 +77,9 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
       justifyContent: 'center',
       alignItems: 'center',
       ...theme.shadows.medium,
+      // Ensure minimum touch target size for accessibility
+      minHeight: minimumTouchTarget ? 44 : undefined,
+      minWidth: minimumTouchTarget ? 44 : undefined,
     };
 
     // Size variations
@@ -103,9 +145,16 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
   const renderContent = () => {
     if (loading) {
       return (
-        <Text style={[getTextStyle(), textStyle]}>
-          {loadingText || 'Loading...'}
-        </Text>
+        <>
+          <ActivityIndicator 
+            size="small" 
+            color={loadingIndicatorColor || theme.colors.text.inverse}
+            style={{ marginRight: theme.spacing.xs }}
+          />
+          <Text style={[getTextStyle(), textStyle]}>
+            {loadingText || 'Loading...'}
+          </Text>
+        </>
       );
     }
 

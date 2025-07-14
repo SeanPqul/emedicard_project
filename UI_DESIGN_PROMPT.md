@@ -300,34 +300,11 @@ Functionality:
 ## 🎨 **DESIGN SYSTEM SPECIFICATIONS**
 
 ### **Color Palette:**
-```
-Primary Colors:
-- Medical Blue: #2E86AB
-- Safety Green: #A23B72
-- Warning Orange: #F18F01
-- Success Green: #C73E1D
-
-Job Category Colors:
-- Food Handler: #FFD700 (Gold/Yellow)
-- Security Guard: #4169E1 (Royal Blue)
-- Others: #6B46C1 (Purple)
-
-UI Colors:
-- Background: #F8F9FA
-- Surface: #FFFFFF
-- Text Primary: #212529
-- Text Secondary: #6C757D
-- Error: #DC3545
-- Warning: #FFC107
-- Success: #28A745
+``` use the theme.ts
 ```
 
 ### **Typography:**
-```
-Headings: Inter/System Bold
-Body: Inter/System Regular
-Captions: Inter/System Light
-Button Text: Inter/System Medium
+```use the theme.ts
 ```
 
 ### **Component Specifications:**
@@ -353,6 +330,7 @@ Icons:
 ```
 
 ---
+
 
 ## 🚀 **IMPLEMENTATION PRIORITIES**
 

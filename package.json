@@ -52,7 +52,11 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "react-router-native": "^6.30.0",
-    "svix": "^1.69.0"
+    "svix": "^1.69.0",
+    "expo-print": "~14.1.4",
+    "expo-sharing": "~13.1.5",
+    "expo-media-library": "~17.1.7",
+    "react-native-view-shot": "4.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

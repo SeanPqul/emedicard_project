@@ -353,4 +353,48 @@ export const styles = StyleSheet.create({
     padding: getSpacing('sm'),
     borderRadius: getBorderRadius('sm'),
   },
+  // Upload Documents Step Styles
+  documentUploadPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: getSpacing('xl'),
+    paddingHorizontal: getSpacing('lg'),
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+    borderWidth: 2,
+    borderColor: getColor('border.light'),
+    borderStyle: 'dashed',
+    ...getShadow('medium'),
+  },
+  documentUploadText: {
+    ...getTypography('body'),
+    fontWeight: '600',
+    color: getColor('text.primary'),
+    marginTop: getSpacing('md'),
+  },
+  documentUploadSubtext: {
+    ...getTypography('bodySmall'),
+    color: getColor('text.secondary'),
+    marginTop: getSpacing('xs'),
+    textAlign: 'center',
+  },
+  uploadInstructions: {
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+    padding: getSpacing('md'),
+    marginTop: getSpacing('lg'),
+    ...getShadow('medium'),
+  },
+  uploadInstructionsTitle: {
+    ...getTypography('body'),
+    fontWeight: '600',
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('sm'),
+  },
+  uploadInstructionsItem: {
+    ...getTypography('bodySmall'),
+    color: getColor('text.secondary'),
+    marginBottom: getSpacing('xs'),
+    paddingLeft: getSpacing('sm'),
+  },
 });

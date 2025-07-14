@@ -1,3 +1,40 @@
+/**
+ * Apply Screen - eMediCard Application
+ * 
+ * IMPLEMENTATION NOTES:
+ * - Multi-step form following UI_DESIGN_PROMPT.md specifications (lines 66-103)
+ * - Implements health card classification system from emedicarddocumentation.txt
+ * - Step-by-step wizard: Application Type → Job Category → Personal Details → Upload Documents → Review
+ * - Supports Yellow (food handlers), Green (non-food), Pink (skin contact) card types
+ * - Document upload with validation per job category requirements
+ * - Follows accessibility guidelines from UI_UX_IMPLEMENTATION_GUIDE.md
+ * 
+ * DOCUMENTATION REFERENCES:
+ * - UI_DESIGN_PROMPT.md: Application screen structure and step indicator
+ * - emedicarddocumentation.txt: Health card classification system (lines 217-226)
+ * - UI_UX_IMPLEMENTATION_GUIDE.md: Form validation and accessibility standards
+ * 
+ * HEALTH CARD CATEGORIES (per documentation):
+ * - Yellow: Food handlers (require orientation with sanitary inspector)
+ * - Green: Non-food industry workers (security guards, receptionists, BPO staff)
+ * - Pink: Skin-to-skin contact jobs (barbers, massage therapists, tattoo artists)
+ * 
+ * REQUIRED DOCUMENTS (per emedicarddocumentation.txt):
+ * - Chest X-ray, CBC, urinalysis, fecalysis, drug test
+ * - Neuropsychiatric test, Hepatitis B antibody test
+ * - Valid ID, Community Tax Certificate, health card receipt (OR), 1x1 picture
+ * 
+ * PAYMENT PROCESSING:
+ * - ₱10 transaction fee automatically added (per documentation line 213-215)
+ * - Supports GCash and manual payment receipt upload
+ * 
+ * ACCESSIBILITY COMPLIANCE:
+ * - Keyboard navigation support
+ * - Screen reader compatible
+ * - Form validation with descriptive error messages
+ * - Touch targets meet 44x44 pixel minimum
+ */
+
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
@@ -11,10 +48,18 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Modal,
+  Dimensions,
 } from 'react-native';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { styles } from '../../assets/styles/tabs-styles/apply';
 import { api } from '../../convex/_generated/api';
+import { Id } from '../../convex/_generated/dataModel';
 import { CustomButton, CustomTextInput } from '../../src/components';
+import { useDocumentUpload } from '../../src/hooks/useDocumentUpload';
+import { getColor, getTypography, getSpacing, getBorderRadius, getShadow } from '../../src/styles/theme';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';
@@ -38,6 +83,7 @@ const STEP_TITLES = [
   'Application Type',
   'Job Category', 
   'Personal Details',
+  'Upload Documents',
   'Review & Submit'
 ];
 
@@ -55,11 +101,37 @@ export default function Apply() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [loading, setLoading] = useState(false);
+  
+  // Upload documents state
+  const [selectedDocuments, setSelectedDocuments] = useState<Record<string, any>>({});
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, Id<"_storage">>>({});
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [tempFormId, setTempFormId] = useState<string | null>(null);
 
   // Convex queries and mutations
   const jobCategories = useQuery(api.jobCategories?.getAllJobCategories);
   const createForm = useMutation(api.forms.createForm);
   const userProfile = useQuery(api.users.getCurrentUser);
+  const requirementsByJobCategory = useQuery(api.requirements.getRequirementsByJobCategory, 
+    formData.jobCategory ? { jobCategoryId: formData.jobCategory as any } : 'skip'
+  );
+  
+  // Document upload hook (only initialize when we have a form ID)
+  const documentUploadHook = useDocumentUpload(tempFormId as Id<"forms">);
+  const {
+    uploadFile,
+    replaceFile,
+    removeFile,
+    retryUpload,
+    getUploadState,
+  } = tempFormId ? documentUploadHook : {
+    uploadFile: () => Promise.reject(new Error('No form ID')),
+    replaceFile: () => Promise.reject(new Error('No form ID')),
+    removeFile: () => Promise.reject(new Error('No form ID')),
+    retryUpload: () => Promise.reject(new Error('No form ID')),
+    getUploadState: () => ({ uploading: false, progress: 0, error: null, success: false }),
+  };
 
   const validateCurrentStep = (): boolean => {
     const newErrors: Partial<FormData> = {};
@@ -82,7 +154,80 @@ export default function Apply() {
         }
         break;
       case 3:
-        // Review step - validation already done
+        // Upload Documents step - validate required documents
+        const documentRequirements = requirementsByJobCategory?.requirements || [];
+        const requiredDocuments = documentRequirements.filter(doc => doc.required);
+        const missingDocuments = requiredDocuments.filter(doc => !selectedDocuments[doc.fieldName]);
+        
+        if (missingDocuments.length > 0) {
+          Alert.alert(
+            'Missing Required Documents',
+            `Please upload the following required documents: ${missingDocuments.map(doc => doc.name).join(', ')}`,
+            [{ text: 'OK' }]
+          );
+          return false;
+        }
+        
+        // Check for any upload errors
+        const documentsWithErrors = Object.keys(selectedDocuments).filter(docKey => 
+          getUploadState(docKey)?.error
+        );
+        
+        if (documentsWithErrors.length > 0) {
+          Alert.alert(
+            'Upload Errors',
+            'Please fix the upload errors before proceeding.',
+            [{ text: 'OK' }]
+          );
+          return false;
+        }
+        
+        break;
+      case 4:
+        // Review step - comprehensive validation before submission
+        const docRequirements = requirementsByJobCategory?.requirements || [];
+        const requiredDocs = docRequirements.filter(doc => doc.required);
+        const missingDocs = requiredDocs.filter(doc => !selectedDocuments[doc.fieldName]);
+        const docsWithErrors = Object.keys(selectedDocuments).filter(docKey => getUploadState(docKey)?.error);
+        const uploading = Object.keys(selectedDocuments).some(docKey => getUploadState(docKey)?.uploading);
+        
+        if (missingDocs.length > 0) {
+          Alert.alert(
+            'Missing Required Documents',
+            `Please upload the following required documents: ${missingDocs.map(doc => doc.name).join(', ')}`,
+            [{ text: 'OK' }]
+          );
+          return false;
+        }
+        
+        if (docsWithErrors.length > 0) {
+          Alert.alert(
+            'Upload Errors',
+            'Please fix the upload errors before submitting.',
+            [{ text: 'OK' }]
+          );
+          return false;
+        }
+        
+        if (uploading) {
+          Alert.alert(
+            'Upload in Progress',
+            'Please wait for all documents to finish uploading before submitting.',
+            [{ text: 'OK' }]
+          );
+          return false;
+        }
+        
+        // Validate all previous steps data
+        if (!formData.jobCategory || !formData.position.trim() || !formData.organization.trim()) {
+          Alert.alert(
+            'Incomplete Application',
+            'Please ensure all required fields are completed.',
+            [{ text: 'OK' }]
+          );
+          return false;
+        }
+        
         break;
     }
     
@@ -90,21 +235,50 @@ export default function Apply() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+const handleNext = async () => {
     console.log('handleNext called, currentStep:', currentStep);
     console.log('formData:', formData);
     
     if (validateCurrentStep()) {
       console.log('Validation passed');
       if (currentStep < STEP_TITLES.length - 1) {
+        // If moving to upload documents step (step 3), create a temporary form
+        if (currentStep === 2 && !tempFormId) {
+          try {
+            setLoading(true);
+            const selectedCategory = jobCategories?.find(cat => cat._id === formData.jobCategory);
+            if (!selectedCategory) {
+              throw new Error('Invalid job category selected');
+            }
+
+            const formId = await createForm({
+              applicationType: formData.applicationType,
+              jobCategory: formData.jobCategory as any,
+              position: formData.position,
+              organization: formData.organization,
+              civilStatus: formData.civilStatus,
+            });
+            
+            setTempFormId(formId);
+            setLoading(false);
+          } catch (error) {
+            console.error('Error creating temporary form:', error);
+            Alert.alert('Error', 'Failed to create form. Please try again.');
+            setLoading(false);
+            return;
+          }
+        }
+
         console.log('Moving to next step:', currentStep + 1);
         setCurrentStep(currentStep + 1);
+        renderStepIndicator();  // Ensure active step is indicated visually
       } else {
         console.log('Submitting form');
         handleSubmit();
       }
     } else {
       console.log('Validation failed, errors:', errors);
+      // Optionally, visually highlight the first error for user prompt
     }
   };
 
@@ -119,19 +293,6 @@ export default function Apply() {
     
     setLoading(true);
     try {
-      const selectedCategory = jobCategories?.find(cat => cat._id === formData.jobCategory);
-      if (!selectedCategory) {
-        throw new Error('Invalid job category selected');
-      }
-
-      const formId = await createForm({
-        applicationType: formData.applicationType,
-        jobCategory: formData.jobCategory as any,
-        position: formData.position,
-        organization: formData.organization,
-        civilStatus: formData.civilStatus,
-      });
-
       Alert.alert(
         'Application Submitted',
         'Your application has been submitted successfully. You will receive a notification once it is reviewed.',
@@ -148,6 +309,156 @@ export default function Apply() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Document upload helper functions
+  const handleDocumentPicker = async (documentId: string) => {
+    setSelectedDocumentId(documentId);
+    setShowImagePicker(true);
+  };
+
+  const pickFromCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission required', 'Camera permission is required to take photos');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && selectedDocumentId) {
+      handleDocumentSelected(result.assets[0], selectedDocumentId);
+    }
+    setShowImagePicker(false);
+  };
+
+  const pickFromGallery = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission required', 'Gallery permission is required to select photos');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && selectedDocumentId) {
+      handleDocumentSelected(result.assets[0], selectedDocumentId);
+    }
+    setShowImagePicker(false);
+  };
+
+  const pickDocument = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ['application/pdf', 'image/*'],
+      copyToCacheDirectory: true,
+    });
+
+    if (!result.canceled && selectedDocumentId) {
+      handleDocumentSelected(result.assets[0], selectedDocumentId);
+    }
+    setShowImagePicker(false);
+  };
+
+  const handleDocumentSelected = async (file: any, documentId: string) => {
+    if (!tempFormId) {
+      Alert.alert('Error', 'Form not created yet. Please try again.');
+      return;
+    }
+
+    // Convert file to the format expected by the upload hook
+    const fileBlob = await fetch(file.uri).then(response => response.blob());
+    const fileObject = new File([fileBlob], file.name || `document_${documentId}.${file.type?.split('/')[1] || 'jpg'}`, {
+      type: file.type || 'image/jpeg',
+    });
+
+    try {
+      const isReplacing = selectedDocuments[documentId] && uploadedFiles[documentId];
+      
+      if (isReplacing) {
+        // Replace existing file
+        const result = await replaceFile(fileObject, documentId);
+        setUploadedFiles(prev => ({
+          ...prev,
+          [documentId]: result.storageId,
+        }));
+      } else {
+        // Upload new file
+        const result = await uploadFile(fileObject, documentId);
+        setUploadedFiles(prev => ({
+          ...prev,
+          [documentId]: result.storageId,
+        }));
+      }
+
+      // Update selected documents for UI
+      setSelectedDocuments(prev => ({
+        ...prev,
+        [documentId]: file,
+      }));
+
+      Alert.alert('Success', 'Document uploaded successfully!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to upload document. Please try again.');
+    }
+  };
+
+  const handleRemoveDocument = async (documentId: string) => {
+    const storageId = uploadedFiles[documentId];
+    if (!storageId) {
+      // If no uploaded file, just remove from local state
+      setSelectedDocuments(prev => {
+        const newDocs = { ...prev };
+        delete newDocs[documentId];
+        return newDocs;
+      });
+      return;
+    }
+
+    Alert.alert(
+      'Remove Document',
+      'Are you sure you want to remove this document?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Remove', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeFile(documentId, storageId);
+              
+              // Remove from local state
+              setSelectedDocuments(prev => {
+                const newDocs = { ...prev };
+                delete newDocs[documentId];
+                return newDocs;
+              });
+              
+              setUploadedFiles(prev => {
+                const newFiles = { ...prev };
+                delete newFiles[documentId];
+                return newFiles;
+              });
+              
+              Alert.alert('Success', 'Document removed successfully!');
+            } catch (error) {
+              console.error('Remove error:', error);
+              Alert.alert('Error', 'Failed to remove document. Please try again.');
+            }
+          }
+        },
+      ]
+    );
   };
 
   const renderStepIndicator = () => {
@@ -341,26 +652,291 @@ export default function Apply() {
     );
   };
 
-  const renderReviewStep = () => {
-    const selectedCategory = jobCategories?.find(cat => cat._id === formData.jobCategory);
+  const renderUploadDocumentsStep = () => {
+    // Get document requirements from job category
+    const documentRequirements = requirementsByJobCategory?.requirements || [];
     
     return (
       <View style={styles.stepContent}>
-        <Text style={styles.stepHeading}>Review & Submit</Text>
+        <Text style={styles.stepHeading}>Upload Documents</Text>
         <Text style={styles.stepDescription}>
-          Please review your application details before submitting.
+          Please upload clear and readable copies of all required medical documents
+          to ensure proper processing of your {formData.applicationType?.toLowerCase()} application.
         </Text>
         
+        {/* Instructions */}
+        <View style={[styles.formGroup, { marginBottom: getSpacing('md') }]}>
+          <View style={{
+            flexDirection: 'row',
+            padding: getSpacing('md'),
+            backgroundColor: getColor('semanticUI.infoCard'),
+            borderRadius: getBorderRadius('md'),
+          }}>
+            <Ionicons name="information-circle-outline" size={24} color={getColor('primary.500')} />
+            <View style={{ flex: 1, marginLeft: getSpacing('sm') }}>
+              <Text style={{
+                ...getTypography('bodyMedium'),
+                color: getColor('primary.500'),
+                fontWeight: '600',
+                marginBottom: getSpacing('xs'),
+              }}>Document Requirements</Text>
+              <Text style={{
+                ...getTypography('bodySmall'),
+                color: getColor('primary.500'),
+                lineHeight: 16,
+              }}>⚠️ Note: Documents must be from accredited clinics and laboratories. Accepted formats: JPG, PNG, PDF</Text>
+            </View>
+          </View>
+        </View>
+        
+        {/* Document List */}
+        <View style={{ marginBottom: getSpacing('lg') }}>
+          {documentRequirements.map((document) => (
+            <View key={document.id} style={{
+              backgroundColor: getColor('background.primary'),
+              borderRadius: getBorderRadius('md'),
+              padding: getSpacing('md'),
+              marginBottom: getSpacing('md'),
+              ...getShadow('card'),
+            }}>
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: getSpacing('sm'),
+              }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{
+                    ...getTypography('bodyLarge'),
+                    fontWeight: '600',
+                    color: getColor('text.primary'),
+                    marginBottom: getSpacing('xs'),
+                  }}>
+                    {document.name}
+                    {document.required && <Text style={{ color: getColor('semantic.error') }}> *</Text>}
+                  </Text>
+                  <Text style={{
+                    ...getTypography('bodyMedium'),
+                    color: getColor('text.secondary'),
+                    marginBottom: getSpacing('xs'),
+                  }}>{document.description}</Text>
+                  <Text style={{
+                    ...getTypography('bodySmall'),
+                    color: getColor('text.secondary'),
+                    fontStyle: 'italic',
+                  }}>
+                    Formats: {document.formats ? document.formats.join(', ').toUpperCase() : 'JPG, PNG, PDF'}
+                  </Text>
+                </View>
+                <View style={{ marginLeft: getSpacing('sm') }}>
+                  {selectedDocuments[document.fieldName] ? (
+                    <Ionicons name="checkmark-circle" size={24} color={getColor('semantic.success')} />
+                  ) : (
+                    <Ionicons name="add-circle-outline" size={24} color={getColor('text.secondary')} />
+                  )}
+                </View>
+              </View>
+
+              {/* Upload Progress */}
+              {getUploadState(document.fieldName)?.uploading && (
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: getSpacing('sm'),
+                }}>
+                  <View style={{
+                    flex: 1,
+                    height: 4,
+                    backgroundColor: getColor('border.light'),
+                    borderRadius: getBorderRadius('xs'),
+                    marginRight: getSpacing('sm'),
+                  }}>
+                    <View style={{
+                      height: '100%',
+                      backgroundColor: getColor('primary.500'),
+                      borderRadius: getBorderRadius('xs'),
+                      width: `${getUploadState(document.fieldName).progress}%`,
+                    }} />
+                  </View>
+                  <Text style={{
+                    ...getTypography('bodySmall'),
+                    color: getColor('text.secondary'),
+                    minWidth: 35,
+                  }}>
+                    {getUploadState(document.fieldName).progress}%
+                  </Text>
+                </View>
+              )}
+
+              {/* Error State */}
+              {getUploadState(document.fieldName)?.error && (
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: getColor('semanticUI.dangerCard'),
+                  padding: getSpacing('sm'),
+                  borderRadius: getBorderRadius('sm'),
+                  marginBottom: getSpacing('sm'),
+                }}>
+                  <Ionicons name="alert-circle" size={16} color={getColor('semantic.error')} />
+                  <Text style={{
+                    ...getTypography('bodySmall'),
+                    color: getColor('semantic.error'),
+                    flex: 1,
+                    marginLeft: getSpacing('xs'),
+                  }}>
+                    {getUploadState(document.fieldName).error}
+                  </Text>
+                  <TouchableOpacity
+                    style={{
+                      paddingHorizontal: getSpacing('sm'),
+                      paddingVertical: getSpacing('xs'),
+                      borderRadius: getBorderRadius('xs'),
+                      backgroundColor: getColor('semantic.error'),
+                      marginLeft: getSpacing('sm'),
+                    }}
+                    onPress={() => selectedDocuments[document.fieldName] && retryUpload(selectedDocuments[document.fieldName], document.fieldName)}
+                  >
+                    <Text style={{
+                      ...getTypography('bodySmall'),
+                      color: getColor('background.primary'),
+                      fontWeight: '600',
+                    }}>Retry</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Document Preview */}
+              {selectedDocuments[document.fieldName] && !getUploadState(document.fieldName)?.uploading && (
+                <View style={{
+                  position: 'relative',
+                  marginBottom: getSpacing('sm'),
+                }}>
+                  <Image
+                    source={{ uri: selectedDocuments[document.fieldName].uri }}
+                    style={{
+                      width: '100%',
+                      height: 120,
+                      borderRadius: getBorderRadius('sm'),
+                      backgroundColor: getColor('background.secondary'),
+                    }}
+                  />
+                  <TouchableOpacity 
+                    style={{
+                      position: 'absolute',
+                      top: getSpacing('sm'),
+                      right: getSpacing('sm'),
+                      backgroundColor: getColor('background.primary'),
+                      borderRadius: getBorderRadius('sm'),
+                      padding: getSpacing('xs'),
+                    }}
+                    onPress={() => handleRemoveDocument(document.fieldName)}
+                  >
+                    <Ionicons name="close-circle" size={20} color={getColor('semantic.error')} />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Action Buttons */}
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+              }}>
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: getSpacing('lg'),
+                    paddingVertical: getSpacing('sm'),
+                    borderRadius: getBorderRadius('sm'),
+                    borderWidth: 1,
+                    borderColor: getColor('primary.500'),
+                    backgroundColor: getColor('background.primary'),
+                  }}
+                  onPress={() => handleDocumentPicker(document.fieldName)}
+                  disabled={getUploadState(document.fieldName)?.uploading}
+                >
+                  <Ionicons 
+                    name={selectedDocuments[document.fieldName] ? "refresh" : "cloud-upload-outline"} 
+                    size={20} 
+                    color={getColor('primary.500')} 
+                  />
+                  <Text style={{
+                    ...getTypography('bodyMedium'),
+                    color: getColor('primary.500'),
+                    fontWeight: '600',
+                    marginLeft: getSpacing('sm'),
+                  }}>
+                    {selectedDocuments[document.fieldName] ? 'Replace' : 'Upload'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  const renderReviewStep = () => {
+    const selectedCategory = jobCategories?.find(cat => cat._id === formData.jobCategory);
+    const documentRequirements = requirementsByJobCategory?.requirements || [];
+    const uploadedDocuments = documentRequirements.filter(doc => selectedDocuments[doc.fieldName]);
+    const missingDocuments = documentRequirements.filter(doc => doc.required && !selectedDocuments[doc.fieldName]);
+    const documentsWithErrors = Object.keys(selectedDocuments).filter(docKey => getUploadState(docKey)?.error);
+    
+    return (
+      <ScrollView style={styles.stepContent} showsVerticalScrollIndicator={false}>
+        <Text style={styles.stepHeading}>Review & Submit</Text>
+        <Text style={styles.stepDescription}>
+          Please review your application details and uploaded documents before submitting.
+        </Text>
+        
+        {/* Application Details Section */}
         <View style={styles.reviewCard}>
           <View style={styles.reviewSection}>
-            <Text style={styles.reviewSectionTitle}>Application Details</Text>
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: getSpacing('md'),
+            }}>
+              <Text style={styles.reviewSectionTitle}>Application Details</Text>
+              <TouchableOpacity 
+                style={{
+                  paddingHorizontal: getSpacing('sm'),
+                  paddingVertical: getSpacing('xs'),
+                  borderRadius: getBorderRadius('sm'),
+                  backgroundColor: getColor('primary.50'),
+                  borderWidth: 1,
+                  borderColor: getColor('primary.500'),
+                }}
+                onPress={() => setCurrentStep(0)}
+              >
+                <Text style={{
+                  ...getTypography('bodySmall'),
+                  color: getColor('primary.500'),
+                  fontWeight: '600',
+                }}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+            
             <View style={styles.reviewItem}>
               <Text style={styles.reviewLabel}>Type:</Text>
               <Text style={styles.reviewValue}>{formData.applicationType} Application</Text>
             </View>
             <View style={styles.reviewItem}>
               <Text style={styles.reviewLabel}>Job Category:</Text>
-              <Text style={styles.reviewValue}>{selectedCategory?.name}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 6,
+                  backgroundColor: selectedCategory?.colorCode || '#999',
+                  marginRight: getSpacing('sm'),
+                }} />
+                <Text style={styles.reviewValue}>{selectedCategory?.name}</Text>
+              </View>
             </View>
             <View style={styles.reviewItem}>
               <Text style={styles.reviewLabel}>Position:</Text>
@@ -376,6 +952,150 @@ export default function Apply() {
             </View>
           </View>
           
+          {/* Document Summary Section */}
+          <View style={styles.reviewSection}>
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: getSpacing('md'),
+            }}>
+              <Text style={styles.reviewSectionTitle}>Document Summary</Text>
+              <TouchableOpacity 
+                style={{
+                  paddingHorizontal: getSpacing('sm'),
+                  paddingVertical: getSpacing('xs'),
+                  borderRadius: getBorderRadius('sm'),
+                  backgroundColor: getColor('primary.50'),
+                  borderWidth: 1,
+                  borderColor: getColor('primary.500'),
+                }}
+                onPress={() => setCurrentStep(3)}
+              >
+                <Text style={{
+                  ...getTypography('bodySmall'),
+                  color: getColor('primary.500'),
+                  fontWeight: '600',
+                }}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {/* Document Status Overview */}
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: getSpacing('md'),
+              padding: getSpacing('md'),
+              backgroundColor: getColor('background.secondary'),
+              borderRadius: getBorderRadius('md'),
+            }}>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={{
+                  ...getTypography('headingSmall'),
+                  color: getColor('semantic.success'),
+                  fontWeight: '700',
+                }}>{uploadedDocuments.length}</Text>
+                <Text style={{
+                  ...getTypography('bodySmall'),
+                  color: getColor('text.secondary'),
+                }}>Uploaded</Text>
+              </View>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={{
+                  ...getTypography('headingSmall'),
+                  color: getColor('semantic.error'),
+                  fontWeight: '700',
+                }}>{missingDocuments.length}</Text>
+                <Text style={{
+                  ...getTypography('bodySmall'),
+                  color: getColor('text.secondary'),
+                }}>Missing</Text>
+              </View>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={{
+                  ...getTypography('headingSmall'),
+                  color: getColor('semantic.warning'),
+                  fontWeight: '700',
+                }}>{documentsWithErrors.length}</Text>
+                <Text style={{
+                  ...getTypography('bodySmall'),
+                  color: getColor('text.secondary'),
+                }}>Errors</Text>
+              </View>
+            </View>
+            
+            {/* Individual Document Status */}
+            {documentRequirements.map((document) => {
+              const isUploaded = selectedDocuments[document.fieldName];
+              const hasError = getUploadState(document.fieldName)?.error;
+              const isUploading = getUploadState(document.fieldName)?.uploading;
+              
+              return (
+                <View key={document.id} style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingVertical: getSpacing('sm'),
+                  borderBottomWidth: 1,
+                  borderBottomColor: getColor('border.light'),
+                }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{
+                      ...getTypography('bodyMedium'),
+                      color: getColor('text.primary'),
+                      fontWeight: '600',
+                    }}>
+                      {document.name}
+                      {document.required && <Text style={{ color: getColor('semantic.error') }}> *</Text>}
+                    </Text>
+                    {isUploaded && (
+                      <Text style={{
+                        ...getTypography('bodySmall'),
+                        color: getColor('text.secondary'),
+                      }}>
+                        File: {selectedDocuments[document.fieldName].name || 'uploaded'}
+                      </Text>
+                    )}
+                  </View>
+                  
+                  {isUploading ? (
+                    <View style={{ alignItems: 'center' }}>
+                      <Ionicons name="hourglass" size={20} color={getColor('semantic.warning')} />
+                      <Text style={{
+                        ...getTypography('bodySmall'),
+                        color: getColor('semantic.warning'),
+                      }}>Uploading...</Text>
+                    </View>
+                  ) : hasError ? (
+                    <View style={{ alignItems: 'center' }}>
+                      <Ionicons name="alert-circle" size={20} color={getColor('semantic.error')} />
+                      <Text style={{
+                        ...getTypography('bodySmall'),
+                        color: getColor('semantic.error'),
+                      }}>Error</Text>
+                    </View>
+                  ) : isUploaded ? (
+                    <View style={{ alignItems: 'center' }}>
+                      <Ionicons name="checkmark-circle" size={20} color={getColor('semantic.success')} />
+                      <Text style={{
+                        ...getTypography('bodySmall'),
+                        color: getColor('semantic.success'),
+                      }}>Uploaded</Text>
+                    </View>
+                  ) : (
+                    <View style={{ alignItems: 'center' }}>
+                      <Ionicons name="close-circle" size={20} color={getColor('semantic.error')} />
+                      <Text style={{
+                        ...getTypography('bodySmall'),
+                        color: getColor('semantic.error'),
+                      }}>Missing</Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+          
+          {/* Application Fee Section */}
           <View style={styles.reviewSection}>
             <Text style={styles.reviewSectionTitle}>Application Fee</Text>
             <Text style={styles.feeNote}>
@@ -395,6 +1115,7 @@ export default function Apply() {
             </View>
           </View>
           
+          {/* Orientation Notice */}
           {selectedCategory?.requireOrientation === 'yes' && (
             <View style={styles.orientationNotice}>
               <Ionicons name="information-circle" size={20} color="#F18F01" />
@@ -404,8 +1125,67 @@ export default function Apply() {
               </Text>
             </View>
           )}
+          
+          {/* Validation Warnings */}
+          {(missingDocuments.length > 0 || documentsWithErrors.length > 0) && (
+            <View style={{
+              backgroundColor: getColor('semanticUI.dangerCard'),
+              padding: getSpacing('md'),
+              borderRadius: getBorderRadius('md'),
+              marginTop: getSpacing('md'),
+            }}>
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: getSpacing('sm'),
+              }}>
+                <Ionicons name="warning" size={20} color={getColor('semantic.error')} />
+                <Text style={{
+                  ...getTypography('bodyMedium'),
+                  color: getColor('semantic.error'),
+                  fontWeight: '600',
+                  marginLeft: getSpacing('sm'),
+                }}>Application Incomplete</Text>
+              </View>
+              
+              {missingDocuments.length > 0 && (
+                <Text style={{
+                  ...getTypography('bodySmall'),
+                  color: getColor('semantic.error'),
+                  marginBottom: getSpacing('xs'),
+                }}>Missing required documents: {missingDocuments.map(doc => doc.name).join(', ')}</Text>
+              )}
+              
+              {documentsWithErrors.length > 0 && (
+                <Text style={{
+                  ...getTypography('bodySmall'),
+                  color: getColor('semantic.error'),
+                }}>Please fix upload errors before submitting.</Text>
+              )}
+            </View>
+          )}
+          
+          {/* Terms and Conditions */}
+          <View style={{
+            backgroundColor: getColor('background.secondary'),
+            padding: getSpacing('md'),
+            borderRadius: getBorderRadius('md'),
+            marginTop: getSpacing('md'),
+          }}>
+            <Text style={{
+              ...getTypography('bodyMedium'),
+              color: getColor('text.primary'),
+              fontWeight: '600',
+              marginBottom: getSpacing('sm'),
+            }}>Terms & Conditions</Text>
+            <Text style={{
+              ...getTypography('bodySmall'),
+              color: getColor('text.secondary'),
+              lineHeight: 18,
+            }}>By submitting this application, I confirm that all information provided is accurate and complete. I understand that false information may result in the rejection of my application or cancellation of my health card.</Text>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     );
   };
 
@@ -418,6 +1198,8 @@ export default function Apply() {
       case 2:
         return renderPersonalDetailsStep();
       case 3:
+        return renderUploadDocumentsStep();
+      case 4:
         return renderReviewStep();
       default:
         return null;
@@ -470,16 +1252,17 @@ export default function Apply() {
             </TouchableOpacity>
           )}
           
-          {/* Debug: Add a simple TouchableOpacity button as fallback */}
+          {/* Navigation Button with proper validation */}
           <TouchableOpacity
             style={[{
-              backgroundColor: '#2E86AB',
+              backgroundColor: loading ? '#999' : '#2E86AB',
               paddingVertical: 15,
               paddingHorizontal: 30,
               borderRadius: 8,
               flex: 1,
               marginLeft: currentStep > 0 ? 0 : 0,
               alignItems: 'center',
+              opacity: loading ? 0.6 : 1,
             }]}
             onPress={handleNext}
             disabled={loading}
@@ -499,6 +1282,99 @@ export default function Apply() {
             />
           )}
         </View>
+        
+        {/* Image Picker Modal */}
+        <Modal
+          visible={showImagePicker}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowImagePicker(false)}
+        >
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'flex-end',
+          }}>
+            <View style={{
+              backgroundColor: getColor('background.primary'),
+              borderTopLeftRadius: getBorderRadius('xl'),
+              borderTopRightRadius: getBorderRadius('xl'),
+              padding: getSpacing('lg'),
+            }}>
+              <Text style={{
+                ...getTypography('headingSmall'),
+                color: getColor('text.primary'),
+                textAlign: 'center',
+                marginBottom: getSpacing('lg'),
+              }}>Select Document Source</Text>
+              
+              <TouchableOpacity style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingVertical: getSpacing('md'),
+                paddingHorizontal: getSpacing('lg'),
+                borderRadius: getBorderRadius('lg'),
+                backgroundColor: getColor('background.secondary'),
+                marginBottom: getSpacing('sm'),
+              }} onPress={pickFromCamera}>
+                <Ionicons name="camera" size={24} color={getColor('primary.500')} />
+                <Text style={{
+                  ...getTypography('bodyLarge'),
+                  color: getColor('text.primary'),
+                  marginLeft: getSpacing('md'),
+                }}>Take Photo</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingVertical: getSpacing('md'),
+                paddingHorizontal: getSpacing('lg'),
+                borderRadius: getBorderRadius('lg'),
+                backgroundColor: getColor('background.secondary'),
+                marginBottom: getSpacing('sm'),
+              }} onPress={pickFromGallery}>
+                <Ionicons name="images" size={24} color={getColor('primary.500')} />
+                <Text style={{
+                  ...getTypography('bodyLarge'),
+                  color: getColor('text.primary'),
+                  marginLeft: getSpacing('md'),
+                }}>Choose from Gallery</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingVertical: getSpacing('md'),
+                paddingHorizontal: getSpacing('lg'),
+                borderRadius: getBorderRadius('lg'),
+                backgroundColor: getColor('background.secondary'),
+                marginBottom: getSpacing('sm'),
+              }} onPress={pickDocument}>
+                <Ionicons name="document" size={24} color={getColor('primary.500')} />
+                <Text style={{
+                  ...getTypography('bodyLarge'),
+                  color: getColor('text.primary'),
+                  marginLeft: getSpacing('md'),
+                }}>Select File</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={{
+                  paddingVertical: getSpacing('md'),
+                  alignItems: 'center',
+                }}
+                onPress={() => setShowImagePicker(false)}
+              >
+                <Text style={{
+                  ...getTypography('bodyLarge'),
+                  color: getColor('semantic.error'),
+                  fontWeight: '600',
+                }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
     </View>
   );
 }
