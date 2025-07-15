@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
 import { useUser } from '@clerk/clerk-expo';
 import { useQuery } from 'convex/react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../convex/_generated/api';
 import { DashboardStats, RecentActivity } from '../types';
 
@@ -114,6 +114,7 @@ export const useDashboard = () => {
     // Data
     user,
     userProfile,
+     userApplications,
     dashboardStats,
     recentActivities,
     currentTime,

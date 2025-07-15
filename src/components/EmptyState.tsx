@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { getBorderRadius, getColor, getSpacing, getTypography } from '@/src/styles/theme';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface EmptyStateProps {
   icon: string;
@@ -18,12 +19,22 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   onButtonPress,
 }) => {
   return (
-    <View style={styles.container}>
-      <Ionicons name={icon as any} size={64} color="#6C757D" />
+    <View 
+      style={styles.container}
+      accessibilityLabel={`${title}: ${subtitle}`}
+    >
+      <View style={styles.iconContainer}>
+        <Ionicons name={icon as any} size={48} color={getColor('text.tertiary')} />
+      </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
       {buttonText && onButtonPress && (
-        <TouchableOpacity style={styles.button} onPress={onButtonPress}>
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={onButtonPress}
+          accessibilityLabel={buttonText}
+          accessibilityRole="button"
+        >
           <Text style={styles.buttonText}>{buttonText}</Text>
         </TouchableOpacity>
       )}
@@ -36,32 +47,45 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 64,
+    paddingHorizontal: getSpacing('xl'),
+    paddingVertical: getSpacing('xxl'),
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: getBorderRadius('full'),
+    backgroundColor: getColor('background.secondary'),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: getSpacing('md'),
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#212529',
-    marginTop: 16,
-    marginBottom: 8,
+    ...getTypography('h4'),
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('sm'),
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6C757D',
+    ...getTypography('body'),
+    color: getColor('text.secondary'),
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: getSpacing('lg'),
     lineHeight: 24,
   },
   button: {
-    backgroundColor: '#2E86AB',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: getColor('accent.medicalBlue'),
+    paddingHorizontal: getSpacing('lg'),
+    paddingVertical: getSpacing('md'),
+    borderRadius: getBorderRadius('md'),
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
+    ...getTypography('button'),
+    color: getColor('text.inverse'),
     fontWeight: '600',
   },
 });

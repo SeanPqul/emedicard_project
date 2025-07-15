@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@/src/styles/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/src/styles/theme';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface StatCardProps {
   icon: string;
@@ -21,8 +21,14 @@ export const StatCard: React.FC<StatCardProps> = ({
   onPress 
 }) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
-      <View style={[styles.icon, { backgroundColor: theme.colors.primary[100] }]}>
+    <TouchableOpacity 
+      style={styles.container} 
+      onPress={onPress}
+      accessibilityLabel={`${title}: ${value} ${subtitle}`}
+      accessibilityHint={`Tap to view ${title.toLowerCase()}`}
+      accessibilityRole="button"
+    >
+      <View style={[styles.icon, { backgroundColor: color + '20' }]}>
         <Ionicons name={icon as any} size={24} color={color} />
       </View>
       <Text style={styles.value}>{value}</Text>
@@ -35,33 +41,37 @@ export const StatCard: React.FC<StatCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background.primary,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.md,
-    marginHorizontal: theme.spacing.xs,
-    ...theme.shadows.medium,
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+    padding: getSpacing('md'),
+    marginHorizontal: getSpacing('xs'),
+    minHeight: 120,
+    justifyContent: 'center',
+    ...getShadow('medium'),
   },
   icon: {
-    width: 40,
-    height: 40,
-    borderRadius: theme.borderRadius.full,
+    width: 48,
+    height: 48,
+    borderRadius: getBorderRadius('full'),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.sm,
+    marginBottom: getSpacing('sm'),
   },
   value: {
-    ...theme.typography.h2,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.xs,
+    ...getTypography('h2'),
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('xs'),
+    fontWeight: '700',
   },
   title: {
-    ...theme.typography.bodySmall,
+    ...getTypography('bodySmall'),
     fontWeight: '600',
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.xs / 2,
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('xs') / 2,
   },
   subtitle: {
-    ...theme.typography.caption,
-    color: theme.colors.text.secondary,
+    ...getTypography('caption'),
+    color: getColor('text.secondary'),
+    lineHeight: 16,
   },
 });

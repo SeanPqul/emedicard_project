@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { theme, getColor, getSpacing, getTypography, getBorderRadius, getShadow } from "../../../src/styles/theme";
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from "../../../src/styles/theme";
 
 export const styles = StyleSheet.create({
   container: {
@@ -124,5 +124,114 @@ export const styles = StyleSheet.create({
     backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
     ...getShadow('medium'),
+  },
+  // Current Application Status Styles
+  currentApplicationContainer: {
+    marginHorizontal: getSpacing('lg'),
+    marginVertical: getSpacing('md'),
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+    padding: getSpacing('md'),
+    ...getShadow('medium'),
+  },
+  currentApplicationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: getSpacing('md'),
+  },
+  categoryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: getColor('accent.medicalBlue'),
+    paddingHorizontal: getSpacing('sm'),
+    paddingVertical: getSpacing('xs'),
+    borderRadius: getBorderRadius('full'),
+  },
+  categoryText: {
+    ...getTypography('caption'),
+    color: getColor('text.inverse'),
+    fontWeight: '600',
+    marginLeft: getSpacing('xs'),
+  },
+  applicationId: {
+    ...getTypography('caption'),
+    color: getColor('text.secondary'),
+  },
+  progressContainer: {
+    marginTop: getSpacing('sm'),
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: getSpacing('sm'),
+  },
+  progressTitle: {
+    ...getTypography('bodySmall'),
+    color: getColor('text.primary'),
+    fontWeight: '600',
+  },
+  progressStatus: {
+    ...getTypography('caption'),
+    color: getColor('text.secondary'),
+    textTransform: 'uppercase' as const,
+    fontWeight: '600',
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: getColor('background.secondary'),
+    borderRadius: getBorderRadius('full'),
+    marginBottom: getSpacing('xs'),
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: getBorderRadius('full'),
+  },
+  progressText: {
+    ...getTypography('caption'),
+    color: getColor('text.secondary'),
+  },
+  // Health Card Status Styles
+  healthCardStatusContainer: {
+    paddingHorizontal: getSpacing('lg'),
+    paddingBottom: getSpacing('lg'),
+  },
+  healthCardPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+    padding: getSpacing('md'),
+    ...getShadow('medium'),
+  },
+  healthCardIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: getBorderRadius('full'),
+    backgroundColor: getColor('accent.safetyGreen') + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: getSpacing('md'),
+  },
+  healthCardInfo: {
+    flex: 1,
+  },
+  healthCardTitle: {
+    ...getTypography('bodySmall'),
+    color: getColor('text.primary'),
+    fontWeight: '600',
+    marginBottom: getSpacing('xs') / 2,
+  },
+  healthCardSubtitle: {
+    ...getTypography('caption'),
+    color: getColor('text.secondary'),
+  },
+  healthCardButton: {
+    width: 44,
+    height: 44,
+    borderRadius: getBorderRadius('full'),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

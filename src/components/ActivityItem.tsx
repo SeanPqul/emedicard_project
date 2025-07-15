@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { getBorderRadius, getColor, getSpacing, getTypography } from '@/src/styles/theme';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface RecentActivity {
   id: string;
@@ -28,23 +29,41 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
 
   const getStatusColor = () => {
     switch (activity.status) {
-      case 'success': return '#28A745';
-      case 'error': return '#DC3545';
-      case 'warning': return '#FFC107';
-      default: return '#6C757D';
+      case 'success': return getColor('semantic.success');
+      case 'error': return getColor('semantic.error');
+      case 'warning': return getColor('semantic.warning');
+      default: return getColor('text.secondary');
+    }
+  };
+
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)}h ago`;
+    } else {
+      return date.toLocaleDateString();
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View 
+      style={styles.container}
+      accessibilityLabel={`${activity.title}: ${activity.description}`}
+      accessibilityHint={`Activity from ${formatTime(activity.timestamp)}`}
+    >
       <View style={[styles.icon, { backgroundColor: getStatusColor() + '20' }]}>
-        <Ionicons name={getActivityIcon() as any} size={16} color={getStatusColor()} />
+        <Ionicons name={getActivityIcon() as any} size={18} color={getStatusColor()} />
       </View>
       <View style={styles.content}>
         <Text style={styles.title}>{activity.title}</Text>
         <Text style={styles.description}>{activity.description}</Text>
         <Text style={styles.time}>
-          {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {formatTime(activity.timestamp)}
         </Text>
       </View>
     </View>
@@ -55,35 +74,37 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: getSpacing('md'),
+    paddingVertical: getSpacing('sm'),
     borderBottomWidth: 1,
-    borderBottomColor: '#F8F9FA',
+    borderBottomColor: getColor('border.light'),
   },
   icon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: getBorderRadius('full'),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: getSpacing('md'),
   },
   content: {
     flex: 1,
   },
   title: {
-    fontSize: 14,
+    ...getTypography('bodySmall'),
     fontWeight: '600',
-    color: '#212529',
-    marginBottom: 2,
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('xs') / 2,
   },
   description: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginBottom: 2,
+    ...getTypography('caption'),
+    color: getColor('text.secondary'),
+    marginBottom: getSpacing('xs') / 2,
+    lineHeight: 16,
   },
   time: {
+    ...getTypography('caption'),
+    color: getColor('text.tertiary'),
     fontSize: 11,
-    color: '#6C757D',
   },
 });

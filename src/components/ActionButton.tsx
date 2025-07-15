@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@/src/styles/theme';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -29,12 +30,17 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         style
       ]} 
       onPress={onPress}
+      accessibilityLabel={`${title}: ${subtitle}`}
+      accessibilityHint={`Tap to ${subtitle.toLowerCase()}`}
+      accessibilityRole="button"
     >
-      <Ionicons 
-        name={icon as any} 
-        size={24} 
-        color={isPrimary ? "#FFFFFF" : "#2E86AB"} 
-      />
+      <View style={[styles.iconContainer, isPrimary && styles.primaryIconContainer]}>
+        <Ionicons 
+          name={icon as any} 
+          size={24} 
+          color={isPrimary ? getColor('text.inverse') : getColor('accent.medicalBlue')} 
+        />
+      </View>
       <Text style={[
         styles.title,
         isPrimary && styles.primaryTitle
@@ -54,38 +60,48 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: (width - 52) / 2,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+    padding: getSpacing('md'),
+    marginBottom: getSpacing('md'),
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    minHeight: 100,
+    justifyContent: 'center',
+    ...getShadow('medium'),
   },
   primaryContainer: {
-    backgroundColor: '#2E86AB',
+    backgroundColor: getColor('accent.medicalBlue'),
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: getBorderRadius('full'),
+    backgroundColor: getColor('accent.medicalBlue') + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: getSpacing('sm'),
+  },
+  primaryIconContainer: {
+    backgroundColor: getColor('text.inverse') + '20',
   },
   title: {
-    fontSize: 14,
+    ...getTypography('bodySmall'),
     fontWeight: '600',
-    color: '#212529',
-    marginTop: 8,
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('xs') / 2,
     textAlign: 'center',
   },
   primaryTitle: {
-    color: '#FFFFFF',
+    color: getColor('text.inverse'),
   },
   subtitle: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginTop: 2,
+    ...getTypography('caption'),
+    color: getColor('text.secondary'),
     textAlign: 'center',
+    lineHeight: 16,
   },
   primarySubtitle: {
-    color: '#FFFFFF',
+    color: getColor('text.inverse'),
     opacity: 0.8,
   },
 });

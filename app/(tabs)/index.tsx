@@ -41,6 +41,7 @@ export default function Dashboard() {
   const { 
     user, 
     userProfile, 
+    userApplications,
     dashboardStats, 
     recentActivities, 
     currentTime, 
@@ -58,6 +59,59 @@ export default function Dashboard() {
       </View>
     );
   }
+
+  // Get current job category from user applications
+  const currentApplication = userApplications?.find((app: any) => 
+    app.status === 'Submitted' || app.status === 'Under Review' || app.status === 'Approved'
+  );
+  
+  const getJobCategoryColor = (category: string) => {
+    switch (category?.toLowerCase()) {
+      case 'food handler':
+      case 'food':
+        return getColor('jobCategories.foodHandler');
+      case 'security guard':
+      case 'security':
+        return getColor('jobCategories.securityGuard');
+      case 'pink':
+      case 'skin contact':
+        return getColor('jobCategories.pink');
+      default:
+        return getColor('jobCategories.others');
+    }
+  };
+
+  const getJobCategoryIcon = (category: string) => {
+    switch (category?.toLowerCase()) {
+      case 'food handler':
+      case 'food':
+        return 'restaurant-outline';
+      case 'security guard':
+      case 'security':
+        return 'shield-outline';
+      case 'pink':
+      case 'skin contact':
+        return 'hand-left-outline';
+      default:
+        return 'briefcase-outline';
+    }
+  };
+
+  const getApplicationProgress = () => {
+    if (!currentApplication) return null;
+    
+    const steps = ['Submitted', 'Under Review', 'Approved'];
+    const currentStep = steps.indexOf(currentApplication.status);
+    
+    return {
+      currentStep: currentStep + 1,
+      totalSteps: steps.length,
+      status: currentApplication.status,
+      nextStep: currentStep < steps.length - 1 ? steps[currentStep + 1] : null
+    };
+  };
+
+  const progress = getApplicationProgress();
 
   return (
     <View style={styles.container}>
@@ -90,7 +144,12 @@ export default function Dashboard() {
             </View>
           </View>
           
-          <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/(tabs)/notification')}>
+          <TouchableOpacity 
+            style={styles.notificationButton} 
+            onPress={() => router.push('/(tabs)/notification')}
+            accessibilityLabel="Notifications"
+            accessibilityHint="View your notifications"
+          >
             <Ionicons name="notifications-outline" size={24} color={getColor('text.primary')} />
             {unreadNotificationsCount > 0 && (
               <View style={styles.notificationBadge}>
@@ -102,8 +161,54 @@ export default function Dashboard() {
           </TouchableOpacity>
         </View>
 
+        {/* Current Application Status - Enhanced */}
+        {currentApplication && (
+          <View style={styles.currentApplicationContainer}>
+            <View style={styles.currentApplicationHeader}>
+              <View style={styles.categoryBadge}>
+                                 <Ionicons 
+                   name={getJobCategoryIcon(currentApplication.jobCategory?.name || '') as any} 
+                   size={16} 
+                   color={getColor('text.inverse')} 
+                 />
+                 <Text style={styles.categoryText}>
+                   {currentApplication.jobCategory?.name || 'Unknown Category'}
+                 </Text>
+              </View>
+              <Text style={styles.applicationId}>
+                ID: {currentApplication._id.slice(-8)}
+              </Text>
+            </View>
+            
+            {progress && (
+              <View style={styles.progressContainer}>
+                <View style={styles.progressHeader}>
+                  <Text style={styles.progressTitle}>Application Progress</Text>
+                  <Text style={styles.progressStatus}>{progress.status}</Text>
+                </View>
+                <View style={styles.progressBar}>
+                  <View 
+                    style={[
+                      styles.progressFill, 
+                      { 
+                        width: `${(progress.currentStep / progress.totalSteps) * 100}%`,
+                        backgroundColor: getJobCategoryColor(currentApplication.jobCategory?.name || '')
+                      }
+                    ]} 
+                  />
+                </View>
+                <Text style={styles.progressText}>
+                  Step {progress.currentStep} of {progress.totalSteps}
+                  {progress.nextStep && ` • Next: ${progress.nextStep}`}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
         {/* Quick Stats Cards */}
         <View style={styles.statsContainer}>
+          <Text style={styles.sectionTitle}>Overview</Text>
           <View style={styles.statsRow}>
             <StatCard
               icon="document-text-outline"
@@ -178,7 +283,10 @@ export default function Dashboard() {
         <View style={styles.recentActivityContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <TouchableOpacity onPress={() => router.push('/(screens)/(shared)/activity')}>
+            <TouchableOpacity 
+              onPress={() => router.push('/(screens)/(shared)/activity')}
+              accessibilityLabel="View all activities"
+            >
               <Text style={styles.viewAllText}>View All</Text>
             </TouchableOpacity>
           </View>
@@ -197,6 +305,33 @@ export default function Dashboard() {
             />
           )}
         </View>
+
+        {/* Health Card Status - Enhanced */}
+        {dashboardStats.validHealthCards > 0 && (
+          <View style={styles.healthCardStatusContainer}>
+            <Text style={styles.sectionTitle}>Your Health Cards</Text>
+            <View style={styles.healthCardPreview}>
+              <View style={styles.healthCardIcon}>
+                <Ionicons name="shield-checkmark" size={32} color={getColor('accent.safetyGreen')} />
+              </View>
+              <View style={styles.healthCardInfo}>
+                <Text style={styles.healthCardTitle}>
+                  {dashboardStats.validHealthCards} Active Health Card{dashboardStats.validHealthCards > 1 ? 's' : ''}
+                </Text>
+                <Text style={styles.healthCardSubtitle}>
+                  Tap to view and manage your health cards
+                </Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.healthCardButton}
+                onPress={() => router.push('/(screens)/(shared)/health-cards')}
+                accessibilityLabel="View health cards"
+              >
+                <Ionicons name="chevron-forward" size={20} color={getColor('text.secondary')} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
