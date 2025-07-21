@@ -307,8 +307,8 @@ export default function Applications() {
         
         <View style={styles.cardContent}>
           <Text style={styles.jobCategory}>{application.jobCategory?.name}</Text>
-          <Text style={styles.position}>Position:{application.form?.position}</Text>
-          <Text style={styles.organization}>Company:{application.form?.organization}</Text>
+          <Text style={styles.position}>Position: {application.form?.position}</Text>
+          <Text style={styles.organization}>Company: {application.form?.organization}</Text>
           
           <View style={styles.applicationDetails}>
             <View style={styles.detailItem}>
@@ -403,6 +403,9 @@ export default function Applications() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ 
+          paddingBottom: 50 // Add padding to account for FAB + tab bar
+        }}
       >
         {filteredApplications.length === 0 ? (
           renderEmptyState()

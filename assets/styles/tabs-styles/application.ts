@@ -104,14 +104,19 @@ export const styles = StyleSheet.create({
     backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('lg'),
-    marginBottom: getSpacing('md'),
+    marginBottom: getSpacing('lg'), // Increased spacing between cards
     ...getShadow('medium'),
+    borderWidth: 1,
+    borderColor: 'transparent', // Will be used for hover/press states
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: getSpacing('md'),
+    alignItems: 'center', // Better vertical alignment
+    marginBottom: getSpacing('lg'), // More breathing room
+    paddingBottom: getSpacing('sm'),
+    borderBottomWidth: 1,
+    borderBottomColor: getColor('border.light') + '30', // Subtle divider
   },
   cardHeaderLeft: {
     flexDirection: 'row',
@@ -134,7 +139,7 @@ export const styles = StyleSheet.create({
     ...getTypography('bodySmall'),
     fontWeight: '700',
     color: getColor('text.primary'),
-    marginBottom: getSpacing('xxs'),
+    marginBottom: getSpacing('xs'),
   },
   applicationDate: {
     ...getTypography('caption'),

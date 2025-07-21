@@ -38,28 +38,27 @@
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
+import * as DocumentPicker from 'expo-document-picker';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
-  Modal,
-  Dimensions,
+  View
 } from 'react-native';
-import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
 import { styles } from '../../assets/styles/tabs-styles/apply';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { CustomButton, CustomTextInput } from '../../src/components';
 import { useDocumentUpload } from '../../src/hooks/useDocumentUpload';
-import { getColor, getTypography, getSpacing, getBorderRadius, getShadow } from '../../src/styles/theme';
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../../src/styles/theme';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';
@@ -688,12 +687,11 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
                 />
               </View>
               <Text style={styles.categoryName}>{category.name}</Text>
-              <Text style={styles.categoryRequirement}>
-                {category.requireOrientation === 'yes' 
-                  ? '📚 Mandatory Food Safety Orientation Required' 
-                  : '✓ No Orientation Required'
-                }
-              </Text>
+              {category.requireOrientation === 'Yes' && (
+                <Text style={styles.categoryRequirement}>
+                  Food Safety Orientation Required
+                </Text>
+              )}
               {formData.jobCategory === category._id && (
                 <View style={styles.categorySelected}>
                   <Ionicons name="checkmark-circle" size={20} color={category.colorCode} />
@@ -793,7 +791,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
             <Ionicons name="information-circle-outline" size={24} color={getColor('primary.500')} />
             <View style={{ flex: 1, marginLeft: getSpacing('sm') }}>
               <Text style={{
-                ...getTypography('bodyMedium'),
+...getTypography('body'),
                 color: getColor('primary.500'),
                 fontWeight: '600',
                 marginBottom: getSpacing('xs'),
@@ -825,7 +823,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
               }}>
                 <View style={{ flex: 1 }}>
                   <Text style={{
-                    ...getTypography('bodyLarge'),
+...getTypography('body'),
                     fontWeight: '600',
                     color: getColor('text.primary'),
                     marginBottom: getSpacing('xs'),
@@ -1420,7 +1418,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
               padding: getSpacing('lg'),
             }}>
               <Text style={{
-                ...getTypography('headingSmall'),
+...getTypography('h4'),
                 color: getColor('text.primary'),
                 textAlign: 'center',
                 marginBottom: getSpacing('lg'),
@@ -1437,7 +1435,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
               }} onPress={pickFromCamera}>
                 <Ionicons name="camera" size={24} color={getColor('primary.500')} />
                 <Text style={{
-                  ...getTypography('bodyLarge'),
+...getTypography('body'),
                   color: getColor('text.primary'),
                   marginLeft: getSpacing('md'),
                 }}>Take Photo</Text>
@@ -1454,7 +1452,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
               }} onPress={pickFromGallery}>
                 <Ionicons name="images" size={24} color={getColor('primary.500')} />
                 <Text style={{
-                  ...getTypography('bodyLarge'),
+...getTypography('body'),
                   color: getColor('text.primary'),
                   marginLeft: getSpacing('md'),
                 }}>Choose from Gallery</Text>
@@ -1471,7 +1469,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
               }} onPress={pickDocument}>
                 <Ionicons name="document" size={24} color={getColor('primary.500')} />
                 <Text style={{
-                  ...getTypography('bodyLarge'),
+...getTypography('body'),
                   color: getColor('text.primary'),
                   marginLeft: getSpacing('md'),
                 }}>Select File</Text>
@@ -1485,7 +1483,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
                 onPress={() => setShowImagePicker(false)}
               >
                 <Text style={{
-                  ...getTypography('bodyLarge'),
+...getTypography('body'),
                   color: getColor('semantic.error'),
                   fontWeight: '600',
                 }}>Cancel</Text>

@@ -98,7 +98,7 @@ export default function DocumentRequirements() {
           style={styles.backButton} 
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color={getColor('textPrimary')} />
+          <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Document Requirements</Text>
         <View style={styles.headerSpacer} />
@@ -134,7 +134,7 @@ export default function DocumentRequirements() {
                   <Text style={styles.cardType}>{getHealthCardTypeName(category)}</Text>
                   {category.requireOrientation === 'Yes' && (
                     <View style={styles.orientationBadge}>
-                      <Ionicons name="school-outline" size={12} color={getColor('primaryMain')} />
+                      <Ionicons name="school-outline" size={12} color={getColor('primary.main')} />
                       <Text style={styles.orientationText}>Orientation Required</Text>
                     </View>
                   )}
@@ -143,7 +143,7 @@ export default function DocumentRequirements() {
               <Ionicons 
                 name={selectedCategoryId === category._id ? "chevron-up" : "chevron-down"} 
                 size={20} 
-                color={getColor('textSecondary')}
+color={getColor('text.secondary')}
               />
             </TouchableOpacity>
           ))}
@@ -158,13 +158,13 @@ export default function DocumentRequirements() {
             
             <View style={styles.requirementsSummary}>
               <View style={styles.summaryItem}>
-                <Ionicons name="document-text-outline" size={16} color={getColor('primaryMain')} />
+                <Ionicons name="document-text-outline" size={16} color={getColor('primary.main')} />
                 <Text style={styles.summaryText}>
                   {requirementsByCategory.totalRequirements} Documents Required
                 </Text>
               </View>
               <View style={styles.summaryItem}>
-                <Ionicons name="card-outline" size={16} color={getColor('warningMain')} />
+                <Ionicons name="card-outline" size={16} color={getColor('warning.main')} />
                 <Text style={styles.summaryText}>
                   Fee: ₱60
                 </Text>
@@ -179,7 +179,7 @@ export default function DocumentRequirements() {
                     <Ionicons 
                       name={requirement.icon as any} 
                       size={24} 
-                      color={getColor('primaryMain')}
+                      color={getColor('primary.main')}
                     />
                   </View>
                   <View style={styles.requirementDetails}>
@@ -208,7 +208,7 @@ export default function DocumentRequirements() {
                         'business-outline'
                       } 
                       size={20} 
-                      color={getColor('successMain')}
+                      color={getColor('success.main')}
                     />
                   </View>
                   <View style={styles.paymentDetails}>
@@ -219,7 +219,7 @@ export default function DocumentRequirements() {
               ))}
               
               <View style={styles.paymentNote}>
-                <Ionicons name="information-circle-outline" size={16} color={getColor('textSecondary')} />
+                <Ionicons name="information-circle-outline" size={16} color={getColor('text.secondary')} />
                 <Text style={styles.paymentNoteText}>
                   For Barangay Hall or City Hall payments, you&apos;ll need to upload your Official Receipt (OR) during the application process.
                 </Text>
@@ -248,7 +248,7 @@ export default function DocumentRequirements() {
         {/* Loading/Seeding State */}
         {isSeeding && (
           <View style={styles.loadingState}>
-            <Ionicons name="sync-outline" size={64} color={getColor('primaryMain')} />
+            <Ionicons name="sync-outline" size={64} color={getColor('primary.main')} />
             <Text style={styles.loadingTitle}>Setting up database...</Text>
             <Text style={styles.loadingDescription}>
               Initializing health card categories and requirements. This will only take a moment.
@@ -259,7 +259,7 @@ export default function DocumentRequirements() {
         {/* Empty State */}
         {!selectedCategoryId && !isSeeding && jobCategories && jobCategories.length > 0 && (
           <View style={styles.emptyState}>
-            <Ionicons name="document-outline" size={64} color={getColor('textSecondary')} />
+            <Ionicons name="document-outline" size={64} color={getColor('text.secondary')} />
             <Text style={styles.emptyTitle}>Select a Health Card Type</Text>
             <Text style={styles.emptyDescription}>
               Choose from the available health card types above to view the specific document requirements.
@@ -274,29 +274,29 @@ export default function DocumentRequirements() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: getColor('backgroundSecondary'),
+    backgroundColor: getColor('background.secondary'),
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: getSpacing('lg'),
     paddingVertical: getSpacing('md'),
-    backgroundColor: getColor('backgroundPrimary'),
+    backgroundColor: getColor('background.primary'),
     borderBottomWidth: 1,
-    borderBottomColor: getColor('borderLight'),
+    borderBottomColor: getColor('border.light'),
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: getBorderRadius('full'),
-    backgroundColor: getColor('backgroundSecondary'),
+    backgroundColor: getColor('background.secondary'),
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     flex: 1,
     ...getTypography('h3'),
-    color: getColor('textPrimary'),
+    color: getColor('text.primary'),
     textAlign: 'center',
     marginHorizontal: getSpacing('md'),
   },
@@ -309,19 +309,19 @@ const styles = StyleSheet.create({
   instructionsContainer: {
     margin: getSpacing('lg'),
     padding: getSpacing('md'),
-    backgroundColor: getColor('primaryLight'),
+    backgroundColor: getColor('primary.light'),
     borderRadius: getBorderRadius('lg'),
     borderLeftWidth: 4,
-    borderLeftColor: getColor('primaryMain'),
+    borderLeftColor: getColor('primary.main'),
   },
   instructionsTitle: {
-    ...getTypography('bodyLarge'),
-    color: getColor('textPrimary'),
+...getTypography('body'),
+    color: getColor('text.primary'),
     marginBottom: getSpacing('xs'),
   },
   instructionsText: {
     ...getTypography('body'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     lineHeight: 20,
   },
   categoryContainer: {
@@ -330,11 +330,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...getTypography('h3'),
-    color: getColor('textPrimary'),
+    color: getColor('text.primary'),
     marginBottom: getSpacing('md'),
   },
   categoryCard: {
-    backgroundColor: getColor('backgroundPrimary'),
+    backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),
     marginBottom: getSpacing('sm'),
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
   },
   selectedCategoryCard: {
-    borderColor: getColor('primaryMain'),
+    borderColor: getColor('primary.main'),
     borderWidth: 2,
   },
   categoryInfo: {
@@ -363,14 +363,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   categoryName: {
-    ...getTypography('bodyLarge'),
-    color: getColor('textPrimary'),
-    marginBottom: getSpacing('xxs'),
+...getTypography('body'),
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('xs'),
   },
   cardType: {
     ...getTypography('body'),
-    color: getColor('textSecondary'),
-    marginBottom: getSpacing('xxs'),
+    color: getColor('text.secondary'),
+    marginBottom: getSpacing('xs'),
   },
   orientationBadge: {
     flexDirection: 'row',
@@ -378,15 +378,15 @@ const styles = StyleSheet.create({
   },
   orientationText: {
     ...getTypography('caption'),
-    color: getColor('primaryMain'),
-    marginLeft: getSpacing('xxs'),
+    color: getColor('primary.main'),
+    marginLeft: getSpacing('xs'),
   },
   requirementsContainer: {
     paddingHorizontal: getSpacing('lg'),
     marginBottom: getSpacing('lg'),
   },
   requirementsSummary: {
-    backgroundColor: getColor('backgroundPrimary'),
+    backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),
     marginBottom: getSpacing('md'),
@@ -399,14 +399,14 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     ...getTypography('body'),
-    color: getColor('textPrimary'),
+    color: getColor('text.primary'),
     marginLeft: getSpacing('xs'),
   },
   documentsList: {
     marginBottom: getSpacing('lg'),
   },
   requirementItem: {
-    backgroundColor: getColor('backgroundPrimary'),
+    backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),
     marginBottom: getSpacing('sm'),
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: getBorderRadius('full'),
-    backgroundColor: getColor('primaryLight'),
+    backgroundColor: getColor('primary.light'),
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: getSpacing('sm'),
@@ -427,30 +427,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   requirementName: {
-    ...getTypography('bodyLarge'),
-    color: getColor('textPrimary'),
-    marginBottom: getSpacing('xxs'),
+...getTypography('body'),
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('xs'),
   },
   requirementDescription: {
     ...getTypography('body'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     lineHeight: 18,
     marginBottom: getSpacing('xs'),
   },
   requiredBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: getColor('successLight'),
+    backgroundColor: getColor('success.light'),
     paddingHorizontal: getSpacing('xs'),
-    paddingVertical: getSpacing('xxs'),
+    paddingVertical: getSpacing('xs'),
     borderRadius: getBorderRadius('xs'),
   },
   requiredText: {
     ...getTypography('caption'),
-    color: getColor('successMain'),
+    color: getColor('success.main'),
     fontWeight: '500',
   },
   paymentContainer: {
-    backgroundColor: getColor('backgroundPrimary'),
+    backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),
     marginBottom: getSpacing('lg'),
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   },
   paymentTitle: {
     ...getTypography('bodyLarge'),
-    color: getColor('textPrimary'),
+    color: getColor('text.primary'),
     marginBottom: getSpacing('sm'),
   },
   paymentOption: {
@@ -466,13 +466,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: getSpacing('xs'),
     borderBottomWidth: 1,
-    borderBottomColor: getColor('backgroundSecondary'),
+    borderBottomColor: getColor('background.secondary'),
   },
   paymentIcon: {
     width: 32,
     height: 32,
     borderRadius: getBorderRadius('md'),
-    backgroundColor: getColor('successLight'),
+    backgroundColor: getColor('success.light'),
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: getSpacing('sm'),
@@ -482,24 +482,24 @@ const styles = StyleSheet.create({
   },
   paymentMethod: {
     ...getTypography('body'),
-    color: getColor('textPrimary'),
+    color: getColor('text.primary'),
     fontWeight: '600',
   },
   paymentDescription: {
     ...getTypography('caption'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
   },
   paymentNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginTop: getSpacing('sm'),
     padding: getSpacing('sm'),
-    backgroundColor: getColor('warningLight'),
+    backgroundColor: getColor('warning.light'),
     borderRadius: getBorderRadius('sm'),
   },
   paymentNoteText: {
     ...getTypography('caption'),
-    color: getColor('warningDark'),
+    color: getColor('warning.dark'),
     marginLeft: getSpacing('xs'),
     flex: 1,
     lineHeight: 16,
@@ -508,59 +508,59 @@ const styles = StyleSheet.create({
     marginBottom: getSpacing('xl'),
   },
   primaryButton: {
-    backgroundColor: getColor('primaryMain'),
+    backgroundColor: getColor('primary.main'),
     borderRadius: getBorderRadius('sm'),
     paddingVertical: getSpacing('md'),
     alignItems: 'center',
     marginBottom: getSpacing('sm'),
   },
   primaryButtonText: {
-    ...getTypography('buttonPrimary'),
-    color: getColor('textWhite'),
+...getTypography('button'),
+    color: getColor('text.white'),
   },
   secondaryButton: {
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: getColor('primaryMain'),
+    borderColor: getColor('primary.main'),
     borderRadius: getBorderRadius('sm'),
     paddingVertical: getSpacing('sm'),
     alignItems: 'center',
   },
   secondaryButtonText: {
-    ...getTypography('buttonSecondary'),
-    color: getColor('primaryMain'),
+...getTypography('button'),
+    color: getColor('primary.main'),
   },
   loadingState: {
     alignItems: 'center',
-    paddingVertical: getSpacing('3xl'),
+    paddingVertical: getSpacing('xxxl'),
     paddingHorizontal: getSpacing('xl'),
   },
   loadingTitle: {
     ...getTypography('h3'),
-    color: getColor('primaryMain'),
+    color: getColor('primary.main'),
     marginTop: getSpacing('md'),
     marginBottom: getSpacing('xs'),
   },
   loadingDescription: {
     ...getTypography('body'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     textAlign: 'center',
     lineHeight: 20,
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: getSpacing('3xl'),
+    paddingVertical: getSpacing('xxxl'),
     paddingHorizontal: getSpacing('xl'),
   },
   emptyTitle: {
     ...getTypography('h3'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     marginTop: getSpacing('md'),
     marginBottom: getSpacing('xs'),
   },
   emptyDescription: {
     ...getTypography('body'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     textAlign: 'center',
     lineHeight: 20,
   },

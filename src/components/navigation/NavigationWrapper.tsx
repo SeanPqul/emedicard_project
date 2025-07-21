@@ -29,7 +29,7 @@ export const NavigationWrapper: React.FC<NavigationWrapperProps> = ({
   loadingMessage = 'Loading...',
   errorTitle,
   errorMessage,
-  backgroundColor = getColor('backgroundSecondary'),
+  backgroundColor = getColor('background.secondary'),
 }) => {
   const handleBackPress = () => {
     if (onBackPress) {
@@ -80,7 +80,7 @@ export const NavigationWrapper: React.FC<NavigationWrapperProps> = ({
             accessibilityRole="button"
             accessibilityLabel="Go back"
           >
-            <Ionicons name="arrow-back" size={24} color={getColor('textPrimary')} />
+            <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
           </TouchableOpacity>
         </View>
       )}
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: getColor('backgroundPrimary'),
+    backgroundColor: getColor('background.primary'),
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',

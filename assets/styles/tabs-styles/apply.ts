@@ -1,5 +1,5 @@
-import { StyleSheet, Dimensions } from "react-native";
-import { theme, getColor, getSpacing, getTypography, getBorderRadius, getShadow } from "../../../src/styles/theme";
+import { Dimensions, StyleSheet } from "react-native";
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from "../../../src/styles/theme";
 
 const { width } = Dimensions.get('window');
 
@@ -174,7 +174,7 @@ export const styles = StyleSheet.create({
     backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),
-    marginBottom: getSpacing('lg'),
+    marginBottom: getSpacing('sm'),
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,

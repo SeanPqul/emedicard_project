@@ -6,7 +6,7 @@ export const theme = {
       200: '#BBF7D0',
       300: '#86EFAC',
       400: '#4ADE80',
-      500: '#10B981', // Main primary green
+      500: '#10B981', // Main primary green 
       600: '#059669',
       700: '#047857',
       800: '#065F46',

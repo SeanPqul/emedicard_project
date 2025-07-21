@@ -96,7 +96,7 @@ export const StepNavigation: React.FC<StepNavigationProps> = ({
                   ]}
                 >
                   {isCompleted ? (
-                    <Ionicons name="checkmark" size={16} color={getColor('backgroundPrimary')} />
+                    <Ionicons name="checkmark" size={16} color={getColor('background.primary')} />
                   ) : (
                     <Text
                       style={[
@@ -170,7 +170,7 @@ export const StepNavigation: React.FC<StepNavigationProps> = ({
             accessibilityRole="button"
             accessibilityLabel="Cancel"
           >
-            <Ionicons name="close" size={20} color={getColor('textSecondary')} />
+            <Ionicons name="close" size={20} color={getColor('text.secondary')} />
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -198,7 +198,7 @@ export const StepNavigation: React.FC<StepNavigationProps> = ({
               accessibilityRole="button"
               accessibilityLabel={previousButtonText}
             >
-              <Ionicons name="chevron-back" size={20} color={getColor('textSecondary')} />
+              <Ionicons name="chevron-back" size={20} color={getColor('text.secondary')} />
               <Text style={styles.previousButtonText}>{previousButtonText}</Text>
             </TouchableOpacity>
           )}
@@ -215,7 +215,7 @@ export const StepNavigation: React.FC<StepNavigationProps> = ({
               accessibilityLabel={nextButtonText}
             >
               <Text style={styles.nextButtonText}>{nextButtonText}</Text>
-              <Ionicons name="chevron-forward" size={20} color={getColor('backgroundPrimary')} />
+              <Ionicons name="chevron-forward" size={20} color={getColor('background.primary')} />
             </TouchableOpacity>
           )}
         </View>
@@ -233,9 +233,9 @@ export const StepNavigation: React.FC<StepNavigationProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: getColor('backgroundPrimary'),
+    backgroundColor: getColor('background.primary'),
     borderTopWidth: 1,
-    borderTopColor: getColor('borderLight'),
+    borderTopColor: getColor('border.light'),
   },
   stepIndicatorContainer: {
     flexDirection: 'row',
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: getSpacing('lg'),
     paddingVertical: getSpacing('md'),
-    backgroundColor: getColor('backgroundSecondary'),
+    backgroundColor: getColor('background.secondary'),
   },
   stepItem: {
     flex: 1,
@@ -260,9 +260,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: getColor('backgroundPrimary'),
+    backgroundColor: getColor('background.primary'),
     borderWidth: 2,
-    borderColor: getColor('borderDefault'),
+    borderColor: getColor('border.default'),
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: getSpacing('xs'),
@@ -276,34 +276,34 @@ const styles = StyleSheet.create({
     borderColor: getColor('success'),
   },
   stepCircleDisabled: {
-    backgroundColor: getColor('backgroundSecondary'),
-    borderColor: getColor('borderLight'),
+    backgroundColor: getColor('background.secondary'),
+    borderColor: getColor('border.light'),
     opacity: 0.5,
   },
   stepNumber: {
     ...getTypography('bodySmall'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     fontWeight: '600',
   },
   stepNumberActive: {
-    color: getColor('backgroundPrimary'),
+    color: getColor('background.primary'),
   },
   stepNumberDisabled: {
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     opacity: 0.5,
   },
   stepTitle: {
     ...getTypography('bodySmall'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     textAlign: 'center',
     maxWidth: 80,
   },
   stepTitleActive: {
-    color: getColor('textPrimary'),
+    color: getColor('text.primary'),
     fontWeight: '600',
   },
   stepTitleDisabled: {
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     opacity: 0.5,
   },
   stepConnector: {
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     right: -50,
     width: 100,
     height: 2,
-    backgroundColor: getColor('borderDefault'),
+    backgroundColor: getColor('border.default'),
     zIndex: -1,
   },
   stepConnectorCompleted: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     ...getTypography('bodyMedium'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     marginLeft: getSpacing('xs'),
   },
   skipButton: {
@@ -365,11 +365,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: getSpacing('md'),
     paddingVertical: getSpacing('sm'),
     borderRadius: getBorderRadius('sm'),
-    backgroundColor: getColor('backgroundSecondary'),
+    backgroundColor: getColor('background.secondary'),
   },
   previousButtonText: {
     ...getTypography('bodyMedium'),
-    color: getColor('textSecondary'),
+    color: getColor('text.secondary'),
     marginLeft: getSpacing('xs'),
   },
   nextButton: {
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     ...getTypography('bodyMedium'),
-    color: getColor('backgroundPrimary'),
+    color: getColor('background.primary'),
     fontWeight: '600',
     marginRight: getSpacing('xs'),
   },

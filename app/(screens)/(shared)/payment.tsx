@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Dimensions, Image, TextInput, Platform } from 'react-native';
-import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import { CustomButton, EmptyState } from '../../../src/components';
+import { useMutation, useQuery } from 'convex/react';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
+import { CustomButton } from '../../../src/components';
+import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 
 const { width } = Dimensions.get('window');
 
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   },
   paymentOptionSelected: {
     borderColor: '#10B981',
-    backgroundColor: '#10B98108',
+    //backgroundColor: '#10B98108',
   },
   paymentButton: {
     width: '100%',
