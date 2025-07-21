@@ -112,6 +112,7 @@ export default function Apply() {
   // Convex queries and mutations
   const jobCategories = useQuery(api.jobCategories?.getAllJobCategories);
   const createForm = useMutation(api.forms.createForm);
+  const submitApplication = useMutation(api.forms.submitApplicationForm);
   const userProfile = useQuery(api.users.getCurrentUser);
   const requirementsByJobCategory = useQuery(api.requirements.getRequirementsByJobCategory, 
     formData.jobCategory ? { jobCategoryId: formData.jobCategory as any } : 'skip'
@@ -291,21 +292,109 @@ const handleNext = async () => {
   const handleSubmit = async () => {
     if (!validateCurrentStep()) return;
     
+    if (!tempFormId) {
+      Alert.alert('Error', 'Form not created. Please try again.');
+      return;
+    }
+    
     setLoading(true);
     try {
+      // Show payment method selection
       Alert.alert(
-        'Application Submitted',
-        'Your application has been submitted successfully. You will receive a notification once it is reviewed.',
+        'Payment Method',
+        'Please select your payment method for the ₱60 application fee (₱50 + ₱10 service fee):',
         [
           {
-            text: 'OK',
-            onPress: () => router.push('/(tabs)/application')
-          }
+            text: 'GCash',
+            onPress: () => handlePaymentMethodSelected('Gcash'),
+          },
+          {
+            text: 'Maya',
+            onPress: () => handlePaymentMethodSelected('Maya'),
+          },
+          {
+            text: 'Barangay Hall',
+            onPress: () => handlePaymentMethodSelected('BaranggayHall'),
+          },
+          {
+            text: 'City Hall',
+            onPress: () => handlePaymentMethodSelected('CityHall'),
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
         ]
       );
     } catch (error) {
       console.error('Error submitting application:', error);
       Alert.alert('Error', 'Failed to submit application. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentMethodSelected = (paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall') => {
+    // For digital payments, show reference number input
+    if (paymentMethod === 'Gcash' || paymentMethod === 'Maya') {
+      Alert.prompt(
+        'Payment Reference',
+        `Please enter your ${paymentMethod} reference number:`,
+        async (referenceNumber) => {
+          if (referenceNumber && referenceNumber.trim()) {
+            await submitApplicationWithPayment(paymentMethod, referenceNumber.trim());
+          } else {
+            Alert.alert('Invalid Reference', 'Please provide a valid reference number.');
+            setLoading(false);
+          }
+        }
+      );
+    } else {
+      // For manual payments, just use a placeholder reference
+      const referenceNumber = `MANUAL-${Date.now()}`;
+      Alert.alert(
+        'Manual Payment',
+        `Please proceed to ${paymentMethod === 'BaranggayHall' ? 'Barangay Hall' : 'City Hall'} to complete your payment. Your reference number is: ${referenceNumber}`,
+        [
+          {
+            text: 'OK',
+            onPress: () => submitApplicationWithPayment(paymentMethod, referenceNumber),
+          },
+        ]
+      );
+    }
+  };
+
+  const submitApplicationWithPayment = async (
+    paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall',
+    referenceNumber: string
+  ) => {
+    try {
+      const result = await submitApplication({
+        formId: tempFormId as Id<"forms">,
+        paymentMethod,
+        paymentReferenceNumber: referenceNumber,
+      });
+
+      if (result.success) {
+        Alert.alert(
+          'Application Submitted Successfully!',
+          `Your application has been submitted with payment reference: ${referenceNumber}\n\nTotal Amount: ₱${result.totalAmount}\nPayment Method: ${result.paymentMethod}\n\n${result.requiresOrientation ? '📚 Note: Food safety orientation is required for your health card category.' : ''}\n\nYou will receive notifications about your application status.`,
+          [
+            {
+              text: 'View Applications',
+              onPress: () => router.push('/(tabs)/application'),
+            },
+          ]
+        );
+      } else {
+        throw new Error('Submission failed');
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      Alert.alert(
+        'Submission Error',
+        error instanceof Error ? error.message : 'Failed to submit application. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -317,7 +406,7 @@ const handleNext = async () => {
     setShowImagePicker(true);
   };
 
-  const pickFromCamera = async () => {
+const pickFromCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission required', 'Camera permission is required to take photos');
@@ -331,13 +420,13 @@ const handleNext = async () => {
       quality: 0.8,
     });
 
-    if (!result.canceled && selectedDocumentId) {
+    if (!result.canceled && result.assets && result.assets.length > 0 && selectedDocumentId) {
       handleDocumentSelected(result.assets[0], selectedDocumentId);
     }
     setShowImagePicker(false);
   };
 
-  const pickFromGallery = async () => {
+const pickFromGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission required', 'Gallery permission is required to select photos');
@@ -351,7 +440,7 @@ const handleNext = async () => {
       quality: 0.8,
     });
 
-    if (!result.canceled && selectedDocumentId) {
+    if (!result.canceled && result.assets && result.assets.length > 0 && selectedDocumentId) {
       handleDocumentSelected(result.assets[0], selectedDocumentId);
     }
     setShowImagePicker(false);
@@ -369,20 +458,48 @@ const handleNext = async () => {
     setShowImagePicker(false);
   };
 
-  const handleDocumentSelected = async (file: any, documentId: string) => {
+const handleDocumentSelected = async (file: any, documentId: string) => {
+    console.log('handleDocumentSelected called with:', { file, documentId });
+    
     if (!tempFormId) {
       Alert.alert('Error', 'Form not created yet. Please try again.');
       return;
     }
 
-    // Convert file to the format expected by the upload hook
-    const fileBlob = await fetch(file.uri).then(response => response.blob());
-    const fileObject = new File([fileBlob], file.name || `document_${documentId}.${file.type?.split('/')[1] || 'jpg'}`, {
-      type: file.type || 'image/jpeg',
-    });
+    if (!file || !file.uri) {
+      console.error('Invalid file object:', file);
+      Alert.alert('Error', 'Invalid file selected. Please try again.');
+      return;
+    }
 
     try {
+      // Convert file to the format expected by the upload hook
+      console.log('Fetching file blob from:', file.uri);
+      const fileBlob = await fetch(file.uri).then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file: ${response.status}`);
+        }
+        return response.blob();
+      });
+      
+      // Fix file type detection
+      let fileType = file.type || file.mimeType || 'image/jpeg';
+      if (fileType === 'image') {
+        fileType = 'image/jpeg'; // Default to JPEG for generic image type
+      }
+      
+      const fileExtension = file.fileName?.split('.').pop()?.toLowerCase() || 
+                           fileType.split('/')[1] || 'jpg';
+      
+      const fileName = file.fileName || file.name || `document_${documentId}.${fileExtension}`;
+      console.log('Creating file object:', { fileName, fileType, size: fileBlob.size });
+      
+      const fileObject = new File([fileBlob], fileName, {
+        type: fileType,
+      });
+
       const isReplacing = selectedDocuments[documentId] && uploadedFiles[documentId];
+      console.log('Upload mode:', isReplacing ? 'replacing' : 'new upload');
       
       if (isReplacing) {
         // Replace existing file
@@ -406,9 +523,10 @@ const handleNext = async () => {
         [documentId]: file,
       }));
 
+      console.log('Upload successful for document:', documentId);
       Alert.alert('Success', 'Document uploaded successfully!');
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Upload error details:', error);
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to upload document. Please try again.');
     }
   };
@@ -691,8 +809,8 @@ const handleNext = async () => {
         
         {/* Document List */}
         <View style={{ marginBottom: getSpacing('lg') }}>
-          {documentRequirements.map((document) => (
-            <View key={document.id} style={{
+          {documentRequirements.map((document, index) => (
+            <View key={document.fieldName || `doc-${index}`} style={{
               backgroundColor: getColor('background.primary'),
               borderRadius: getBorderRadius('md'),
               padding: getSpacing('md'),
@@ -1025,13 +1143,13 @@ const handleNext = async () => {
             </View>
             
             {/* Individual Document Status */}
-            {documentRequirements.map((document) => {
+            {documentRequirements.map((document, index) => {
               const isUploaded = selectedDocuments[document.fieldName];
               const hasError = getUploadState(document.fieldName)?.error;
               const isUploading = getUploadState(document.fieldName)?.uploading;
               
               return (
-                <View key={document.id} style={{
+                <View key={document.fieldName || `review-doc-${index}`} style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   paddingVertical: getSpacing('sm'),

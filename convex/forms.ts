@@ -127,3 +127,172 @@ export const updateForm = mutation({
     return formId;
   },
 });
+
+export const submitApplicationForm = mutation({
+  args: {
+    formId: v.id("forms"),
+    paymentMethod: v.union(
+      v.literal("Gcash"),
+      v.literal("Maya"),
+      v.literal("BaranggayHall"),
+      v.literal("CityHall")
+    ),
+    paymentReferenceNumber: v.string(),
+    paymentReceiptId: v.optional(v.id("_storage")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get user
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Validate form exists and belongs to user
+    const form = await ctx.db.get(args.formId);
+    if (!form) {
+      throw new Error("Form not found");
+    }
+
+    if (form.userId !== user._id) {
+      throw new Error("Not authorized to submit this form");
+    }
+
+    // Check if application already exists
+    const existingApplication = await ctx.db
+      .query("applicationForms")
+      .withIndex("by_form", (q) => q.eq("formId", args.formId))
+      .unique();
+
+    if (existingApplication) {
+      throw new Error("Application has already been submitted");
+    }
+
+    // Validate that all required documents are uploaded
+    const requirements = await ctx.db
+      .query("requirements")
+      .withIndex("by_form", (q) => q.eq("formId", args.formId))
+      .unique();
+
+    if (!requirements) {
+      throw new Error("No documents uploaded. Please upload required documents first.");
+    }
+
+    // Check required fields based on job category
+    const jobCategory = await ctx.db.get(form.jobCategory);
+    if (!jobCategory) {
+      throw new Error("Invalid job category");
+    }
+
+    // Validate required documents are present
+    const requiredFields = ["validId", "picture", "chestXrayId", "urinalysisId", "stoolId", "cedulaId"];
+    
+    // Add specific requirements based on job category
+    if (jobCategory.name.toLowerCase().includes("security") || jobCategory.name.toLowerCase().includes("guard")) {
+      requiredFields.push("neuroExamId", "drugTestId");
+    }
+    
+    if (jobCategory.colorCode.toLowerCase() === "#ffc0cb" || jobCategory.name.toLowerCase().includes("pink")) {
+      requiredFields.push("hepatitisBId");
+    }
+
+    // Check all required fields are present
+    for (const field of requiredFields) {
+      if (!requirements[field as keyof typeof requirements]) {
+        throw new Error(`Missing required document: ${field}. Please upload all required documents.`);
+      }
+    }
+
+    // Check if payment already exists
+    const existingPayment = await ctx.db
+      .query("payments")
+      .withIndex("by_form", (q) => q.eq("formId", args.formId))
+      .unique();
+
+    if (existingPayment) {
+      throw new Error("Payment already submitted for this form");
+    }
+
+    // Calculate payment amounts
+    const baseAmount = 50; // Base application fee
+    const serviceFee = 10; // Service fee
+    const totalAmount = baseAmount + serviceFee;
+
+    try {
+      // Create payment record
+      const paymentId = await ctx.db.insert("payments", {
+        formId: args.formId,
+        amount: baseAmount,
+        serviceFee: serviceFee,
+        netAmount: totalAmount,
+        method: args.paymentMethod,
+        referenceNumber: args.paymentReferenceNumber,
+        receiptId: args.paymentReceiptId,
+        status: "Pending",
+      });
+
+      // Create application form record
+      const applicationId = await ctx.db.insert("applicationForms", {
+        userId: user._id,
+        formId: args.formId,
+        status: "Submitted",
+        approvedAt: Date.now(),
+      });
+
+      // Create notification for user
+      await ctx.db.insert("notifications", {
+        userId: user._id,
+        formsId: args.formId,
+        type: "PaymentReceived",
+        message: `Application submitted successfully! Payment of ₱${totalAmount} via ${args.paymentMethod} is being processed. Reference: ${args.paymentReferenceNumber}`,
+        read: false,
+      });
+
+      // If orientation is required, create a placeholder orientation record
+      if (jobCategory.requireOrientation === "yes") {
+        const orientationSchedule = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days from now
+        const qrCode = `emedicard-orientation-${args.formId}-${Date.now()}`;
+        
+        await ctx.db.insert("orientations", {
+          formId: args.formId,
+          scheduleAt: orientationSchedule,
+          qrCodeUrl: qrCode,
+          checkInTime: 0,
+          checkOutTime: 0,
+        });
+
+        // Add orientation notification
+        await ctx.db.insert("notifications", {
+          userId: user._id,
+          formsId: args.formId,
+          type: "OrientationScheduled",
+          message: `Food safety orientation scheduled for ${new Date(orientationSchedule).toLocaleDateString()}. You will receive more details soon.`,
+          read: false,
+        });
+      }
+
+      return {
+        success: true,
+        applicationId,
+        paymentId,
+        message: "Application submitted successfully! You will receive notifications about the processing status.",
+        requiresOrientation: jobCategory.requireOrientation === "yes",
+        totalAmount,
+        paymentMethod: args.paymentMethod,
+        referenceNumber: args.paymentReferenceNumber,
+      };
+
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      throw new Error(error instanceof Error ? error.message : "Failed to submit application. Please try again.");
+    }
+  },
+});

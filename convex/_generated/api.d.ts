@@ -21,7 +21,6 @@ import type * as notifications from "../notifications.js";
 import type * as orientations from "../orientations.js";
 import type * as payments from "../payments.js";
 import type * as requirements from "../requirements.js";
-import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 import type * as verificationLogs from "../verificationLogs.js";
 
@@ -42,7 +41,6 @@ declare const fullApi: ApiFromModules<{
   orientations: typeof orientations;
   payments: typeof payments;
   requirements: typeof requirements;
-  seed: typeof seed;
   users: typeof users;
   verificationLogs: typeof verificationLogs;
 }>;

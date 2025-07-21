@@ -37,22 +37,22 @@
  * - Add application cancellation feature
  */
 
+import { useUser } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from 'convex/react';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
   RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useUser } from '@clerk/clerk-expo';
-import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { EmptyState } from '../../src/components';
 import { styles } from '../../assets/styles/tabs-styles/application';
+import { api } from '../../convex/_generated/api';
+import { EmptyState } from '../../src/components';
 
 type FilterStatus = 'All' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
 type SortOption = 'Date' | 'Status' | 'Category';
@@ -307,8 +307,8 @@ export default function Applications() {
         
         <View style={styles.cardContent}>
           <Text style={styles.jobCategory}>{application.jobCategory?.name}</Text>
-          <Text style={styles.position}>{application.form?.position}</Text>
-          <Text style={styles.organization}>{application.form?.organization}</Text>
+          <Text style={styles.position}>Position:{application.form?.position}</Text>
+          <Text style={styles.organization}>Company:{application.form?.organization}</Text>
           
           <View style={styles.applicationDetails}>
             <View style={styles.detailItem}>

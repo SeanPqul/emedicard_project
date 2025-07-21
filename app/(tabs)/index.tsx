@@ -1,31 +1,3 @@
-/**
- * Dashboard Screen - eMediCard Application
- * 
- * IMPLEMENTATION NOTES:
- * - Follows UI_DESIGN_PROMPT.md specifications for dashboard layout
- * - Implements responsive design as per UI_UX_IMPLEMENTATION_GUIDE.md
- * - Header section with user profile, greeting, and notification badge
- * - Quick stats cards showing application metrics (2x2 grid layout)
- * - Quick actions section with primary action buttons
- * - Recent activity feed with empty state handling
- * - Aligns with eMediCard documentation requirements for user dashboard
- * 
- * DOCUMENTATION REFERENCES:
- * - UI_DESIGN_PROMPT.md: Dashboard screen structure (lines 24-63)
- * - UI_UX_IMPLEMENTATION_GUIDE.md: Responsive layout implementation
- * - emedicarddocumentation.txt: User workflow and system objectives
- * 
- * ACCESSIBILITY COMPLIANCE:
- * - Touch targets meet 44x44 pixel minimum
- * - Screen reader compatible with proper accessibility labels
- * - Color contrast meets WCAG AA standards
- * 
- * FUTURE ENHANCEMENTS:
- * - Add real-time notifications as per system requirements
- * - Implement QR code functionality for health card verification
- * - Add orientation scheduling alerts for Yellow card holders
- */
-
 import { useDashboard } from '@/src/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -118,6 +90,10 @@ export default function Dashboard() {
       
       <ScrollView
         style={styles.scrollView}
+        contentContainerStyle={{
+          paddingBottom: 50, // Space for tab bar + extra padding
+          flexGrow: 1
+        }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }

@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet } from "react-native";
-import { theme, getColor, getSpacing, getTypography, getBorderRadius, getShadow } from "../../../src/styles/theme";
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from "../../../src/styles/theme";
 
 const { width } = Dimensions.get('window');
 
@@ -29,10 +29,12 @@ export const styles = StyleSheet.create({
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: getSpacing('sm'),
+    paddingHorizontal: getSpacing('md'),
     paddingVertical: getSpacing('xs'),
     borderRadius: getBorderRadius('full'),
     backgroundColor: getColor('accent.medicalBlue') + '20',
+    marginRight: getSpacing('xs'),
+    maxWidth: 100,
   },
   filterButtonText: {
     ...getTypography('bodySmall'),
@@ -100,20 +102,21 @@ export const styles = StyleSheet.create({
   },
   applicationCard: {
     backgroundColor: getColor('background.primary'),
-    borderRadius: getBorderRadius('xl'),
-    padding: getSpacing('md'),
+    borderRadius: getBorderRadius('lg'),
+    padding: getSpacing('lg'),
     marginBottom: getSpacing('md'),
     ...getShadow('medium'),
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: getSpacing('sm'),
+    alignItems: 'flex-start',
+    marginBottom: getSpacing('md'),
   },
   cardHeaderLeft: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    flex: 1,
   },
   categoryIndicator: {
     width: 32,
@@ -125,23 +128,26 @@ export const styles = StyleSheet.create({
   },
   cardHeaderInfo: {
     flex: 1,
+    marginLeft: getSpacing('xs'),
   },
   applicationId: {
-    ...getTypography('body'),
-    fontWeight: '600',
+    ...getTypography('bodySmall'),
+    fontWeight: '700',
     color: getColor('text.primary'),
+    marginBottom: getSpacing('xxs'),
   },
   applicationDate: {
     ...getTypography('caption'),
     color: getColor('text.secondary'),
-    marginTop: getSpacing('xs') / 2,
+    fontSize: 12,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: getSpacing('sm'),
     paddingVertical: getSpacing('xs'),
-    borderRadius: getBorderRadius('lg'),
+    borderRadius: getBorderRadius('full'),
+    alignSelf: 'flex-start',
   },
   statusText: {
     ...getTypography('caption'),
@@ -149,32 +155,37 @@ export const styles = StyleSheet.create({
     marginLeft: getSpacing('xs'),
   },
   cardContent: {
-    marginBottom: getSpacing('sm'),
+    marginBottom: getSpacing('md'),
   },
   jobCategory: {
     ...getTypography('h4'),
     color: getColor('text.primary'),
-    marginBottom: getSpacing('xs'),
+    fontWeight: '700',
+    marginBottom: getSpacing('sm'),
   },
   position: {
     ...getTypography('body'),
-    fontWeight: '500',
-    color: getColor('text.secondary'),
-    marginBottom: getSpacing('xs') / 2,
+    fontWeight: '600',
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('xs'),
   },
   organization: {
     ...getTypography('bodySmall'),
     color: getColor('text.secondary'),
-    marginBottom: getSpacing('sm'),
+    marginBottom: getSpacing('md'),
   },
   applicationDetails: {
-    marginBottom: getSpacing('sm'),
+    backgroundColor: getColor('background.tertiary'),
+    borderRadius: getBorderRadius('md'),
+    padding: getSpacing('sm'),
+    marginBottom: getSpacing('md'),
   },
   detailItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: getSpacing('xs'),
+    borderBottomWidth: 0,
   },
   detailLabel: {
     ...getTypography('bodySmall'),
@@ -184,8 +195,9 @@ export const styles = StyleSheet.create({
   detailValue: {
     ...getTypography('bodySmall'),
     color: getColor('text.primary'),
-    flex: 2,
+    fontWeight: '600',
     textAlign: 'right',
+    maxWidth: '60%',
   },
   remarksContainer: {
     backgroundColor: getColor('semanticUI.warningCard'),
