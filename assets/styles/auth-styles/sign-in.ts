@@ -5,11 +5,12 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
+import { theme, getColor, getSpacing, getTypography, getBorderRadius, getShadow } from "../../../src/styles/theme";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: getColor('background.primary'),
     justifyContent: "center",
     paddingHorizontal: wp("5%"),
     paddingBottom: hp("5%"),
@@ -31,7 +32,7 @@ export const styles = StyleSheet.create({
   },
   orgText: {
     fontSize: FONT_SIZES.caption,
-    color: "#6B7280",
+    color: getColor('text.secondary'),
     fontWeight: "600",
     textAlign: "center",
   },
@@ -39,13 +40,13 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: FONT_SIZES.headline,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: getColor('text.primary'),
     textAlign: "center",
     marginBottom: verticalScale(4),
   },
   subtitle: {
     fontSize: FONT_SIZES.body,
-    color: "#6B7280",
+    color: getColor('text.secondary'),
     textAlign: "center",
     lineHeight: moderateScale(19.5),
     marginBottom: verticalScale(22),
@@ -63,23 +64,19 @@ export const styles = StyleSheet.create({
   inputWithIcon: {
     flex: 1,
     fontSize: FONT_SIZES.body,
-    color: "#1F2937",
+    color: getColor('text.primary'),
   },
   input: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    borderColor: "#E5E7EB",
-    borderRadius: moderateScale(12),
+    backgroundColor: getColor('background.tertiary'),
+    borderColor: getColor('border.light'),
+    borderRadius: getBorderRadius('lg'),
     paddingHorizontal: moderateScale(13),
     paddingVertical: verticalScale(8),
     marginBottom: verticalScale(13),
     fontSize: FONT_SIZES.body,
-    shadowColor: "#000",
-    shadowOffset: { width: 1, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 1,
-    elevation: 1,
+    ...getShadow('small'),
   },
 
   eyeIcon: {
@@ -99,34 +96,30 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   errorText: {
-    color: "#EF4444",
+    color: getColor('semanticUI.errorText'),
     fontSize: FONT_SIZES.caption,
     fontWeight: "500",
   },
   forgotPasswordText: {
-    color: "#10B981",
+    color: getColor('accent.primaryGreen'),
     fontSize: FONT_SIZES.action,
     fontWeight: FONT_WEIGHTS.medium,
   },
 
   signInButton: {
-    backgroundColor: "#10B981",
-    borderRadius: moderateScale(11),
+    backgroundColor: getColor('semanticUI.primaryButton'),
+    borderRadius: getBorderRadius('lg'),
     height: hp("6.5%"),
     justifyContent: "center",
     alignItems: "center",
     marginBottom: hp("3%"),
-    shadowColor: "#10B981",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: moderateScale(8.5),
-    elevation: 8,
+    ...getShadow('medium'),
   },
   buttonDisabled: {
-    backgroundColor: "#9CA3AF",
+    backgroundColor: getColor('semanticUI.disabled'),
   },
   signInButtonText: {
-    color: "white",
+    color: getColor('text.inverse'),
     fontSize: FONT_SIZES.body,
     fontWeight: "bold",
   },
@@ -146,11 +139,11 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   signUpText: {
-    color: "#6B7280",
+    color: getColor('text.secondary'),
     fontSize: FONT_SIZES.caption,
   },
   signUpLinkText: {
-    color: "#10B981",
+    color: getColor('accent.primaryGreen'),
     fontSize: FONT_SIZES.caption,
     fontWeight: FONT_WEIGHTS.bold,
   },
@@ -167,14 +160,13 @@ export const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: getColor('border.light'),
     marginTop: verticalScale(4)
   },
 
   orText: {
     marginHorizontal: 10,
-    //textAlign: "center",
-    color: "#9CA3AF",
+    color: getColor('text.tertiary'),
     fontSize: FONT_SIZES.caption,
   },
 });

@@ -8,10 +8,18 @@
     "scheme": "emedicardproject",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "deepLinking": {
+      "enabled": true,
+      "prefixes": [
+        "emedicardproject://",
+        "https://emedicard.app"
+      ]
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.emedicard.project",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

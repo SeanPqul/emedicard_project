@@ -23,6 +23,17 @@ export default defineSchema({
         requireOrientation: v.string()
     }),
 
+    //Document requirements for each job category
+    documentRequirements: defineTable({
+        jobCategoryId: v.id("jobCategory"),
+        name: v.string(),
+        description: v.string(),
+        icon: v.string(),
+        required: v.boolean(),
+        fieldName: v.string()
+    })
+    .index("by_job_category", ["jobCategoryId"]),
+
     //User form
     forms: defineTable({
         userId: v.id("users"),
@@ -37,7 +48,7 @@ export default defineSchema({
     })
     .index("by_user", ["userId"]),
     
-    //Requirements
+    //Requirements for the application
     requirements : defineTable ({
         formId: v.id("forms"),
         validId: v.id("_storage"),
@@ -49,7 +60,10 @@ export default defineSchema({
 
         //additional for security guard
         neuroExamId: v.optional(v.id("_storage")),
-        drugTestId: v.optional(v.id("_storage"))
+        drugTestId: v.optional(v.id("_storage")),
+        
+        //additional for pink health card (hepatitis B test)
+        hepatitisBId: v.optional(v.id("_storage"))
     })
     .index("by_form", ["formId"]),
 
@@ -77,7 +91,7 @@ export default defineSchema({
     })
     .index("by_form", ["formId"]),
 
-    //Application forms of applicants
+    //Application forms of applicants. This is for admin side to track
     applicationForms: defineTable ({
         userId: v.id("users"),
         formId: v.id("forms"),
@@ -95,7 +109,7 @@ export default defineSchema({
     //Orientation for yellow (food)
     orientations: defineTable({
         formId: v.id("forms"),
-        scheudleAt: v.number(),
+        scheduleAt: v.number(),
         qrCodeUrl: v.string(), // session QR to scan
         checkInTime: v.number(), //inspector to scan for time in
         checkOutTime: v.number() //inspector to scan for time out
@@ -125,7 +139,7 @@ export default defineSchema({
             v.literal("OrientationScheduled"),
             v.literal("CardIssue")
         ),
-        messag: v.string(),
+        message: v.string(),
         read: v.boolean(),
     })
     .index("by_user", ["userId"]),

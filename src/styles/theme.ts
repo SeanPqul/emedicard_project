@@ -1,0 +1,222 @@
+export const theme = {
+  colors: {
+    primary: {
+      50: '#F0FDF4',
+      100: '#DCFCE7',
+      200: '#BBF7D0',
+      300: '#86EFAC',
+      400: '#4ADE80',
+      500: '#10B981', // Main primary green 
+      600: '#059669',
+      700: '#047857',
+      800: '#065F46',
+      900: '#064E3B',
+    },
+    secondary: {
+      50: '#EFF6FF',
+      100: '#DBEAFE',
+      200: '#BFDBFE',
+      300: '#93C5FD',
+      400: '#60A5FA',
+      500: '#3B82F6',
+      600: '#2563EB',
+      700: '#1D4ED8',
+      800: '#1E40AF',
+      900: '#1E3A8A',
+    },
+    gray: {
+      50: '#F9FAFB',
+      100: '#F3F4F6',
+      200: '#E5E7EB',
+      300: '#D1D5DB',
+      400: '#9CA3AF',
+      500: '#6B7280',
+      600: '#4B5563',
+      700: '#374151',
+      800: '#1F2937',
+      900: '#111827',
+    },
+    neutral: {
+      100: '#F5F5F5',
+      200: '#E0E0E0',
+      300: '#BDBDBD',
+      400: '#9E9E9E',
+    },
+    semantic: {
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#DC3545',
+      info: '#3B82F6',
+    },
+    accent: {
+      primaryGreen: '#10B981', // AppBar, Primary Buttons
+      medicalBlue: '#2E86AB', // Medical/Healthcare theme
+      accentSky: '#107B5D', // Background highlights, Icons
+      secondaryPale: '#D4F1FF', // Cards, Info Sections
+      background: '#EDF7FA', // App background
+      highlightYellow: '#FFEB3B', // Alerts, QR highlights
+      safetyGreen: '#28A745', // Success states
+      warningOrange: '#F18F01', // Warning states
+    },
+    semanticUI: {
+      primaryButton: '#10B981',
+      secondaryButton: '#6C757D',
+      disabled: '#BDBDBD',
+      alert: '#FFEB3B',
+      errorText: '#DC3545',
+      successText: '#28A745',
+      warningText: '#FFC107',
+      infoText: '#17A2B8',
+      infoCard: '#D4F1FF',
+      dangerCard: '#F8D7DA',
+      successCard: '#D4EDDA',
+      warningCard: '#FFF3CD',
+    },
+    jobCategories: {
+      foodHandler: '#FFD700', // Yellow for food handlers
+      securityGuard: '#4169E1', // Royal Blue for security guards
+      others: '#6B46C1', // Purple for other categories
+      pink: '#FF69B4', // Pink for skin-to-skin contact jobs
+    },
+    ui: {
+      white: '#FFFFFF',
+      black: '#000000',
+      transparent: 'transparent',
+    },
+    background: {
+      primary: '#FFFFFF',
+      secondary: '#F8F9FA',
+      tertiary: '#F3F4F6',
+    },
+    text: {
+      primary: '#111827',
+      secondary: '#6B7280',
+      tertiary: '#9CA3AF',
+      inverse: '#FFFFFF',
+    },
+    border: {
+      light: '#E5E7EB',
+      medium: '#D1D5DB',
+      dark: '#9CA3AF',
+    },
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+    xxl: 48,
+    xxxl: 64,
+  },
+  typography: {
+    h1: {
+      fontSize: 32,
+      fontWeight: '700' as const,
+      lineHeight: 40,
+    },
+    h2: {
+      fontSize: 24,
+      fontWeight: '600' as const,
+      lineHeight: 32,
+    },
+    h3: {
+      fontSize: 20,
+      fontWeight: '600' as const,
+      lineHeight: 28,
+    },
+    h4: {
+      fontSize: 18,
+      fontWeight: '600' as const,
+      lineHeight: 24,
+    },
+    body: {
+      fontSize: 16,
+      fontWeight: '400' as const,
+      lineHeight: 24,
+    },
+    bodySmall: {
+      fontSize: 14,
+      fontWeight: '400' as const,
+      lineHeight: 20,
+    },
+    caption: {
+      fontSize: 12,
+      fontWeight: '400' as const,
+      lineHeight: 16,
+    },
+    button: {
+      fontSize: 16,
+      fontWeight: '600' as const,
+      lineHeight: 24,
+    },
+  },
+  borderRadius: {
+    none: 0,
+    sm: 4,
+    md: 8,
+    lg: 12,
+    xl: 16,
+    xxl: 24,
+    full: 9999,
+  },
+  shadows: {
+    small: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    medium: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    large: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.15,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+  },
+  breakpoints: {
+    sm: 480,
+    md: 768,
+    lg: 1024,
+    xl: 1280,
+  },
+} as const;
+
+export type Theme = typeof theme;
+
+export const getColor = (colorPath: string) => {
+  const keys = colorPath.split('.');
+  let current: any = theme.colors;
+
+  for (const key of keys) {
+    current = current[key];
+    if (!current) return undefined;
+  }
+
+  return current;
+};
+
+export const getSpacing = (size: keyof typeof theme.spacing) => {
+  return theme.spacing[size];
+};
+
+export const getTypography = (variant: keyof typeof theme.typography) => {
+  return theme.typography[variant];
+};
+
+export const getBorderRadius = (size: keyof typeof theme.borderRadius) => {
+  return theme.borderRadius[size];
+};
+
+export const getShadow = (size: keyof typeof theme.shadows) => {
+  return theme.shadows[size];
+};
