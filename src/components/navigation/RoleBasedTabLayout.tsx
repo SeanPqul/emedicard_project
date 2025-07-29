@@ -31,17 +31,17 @@ export default function RoleBasedTabLayout() {
         tabBarActiveTintColor: theme.colors.primary[500],
         tabBarInactiveTintColor: theme.colors.gray[400],
         tabBarStyle: {
-          height: 40,
-          paddingTop: 2,
-          paddingBottom: 2,
+          height: 50,
+          paddingTop: 6,
+          paddingBottom: 0,
           paddingHorizontal: 0,
           backgroundColor: theme.colors.ui.white,
           borderTopWidth: 0.5,
           borderTopColor: theme.colors.border.light,
           elevation: 0,
           shadowOpacity: 0,
-          minHeight: 40,
-          maxHeight: 40,
+          minHeight: 50,
+          maxHeight: 50,
         },
       }}
     >

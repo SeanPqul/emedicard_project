@@ -1,9 +1,9 @@
+import { ErrorBoundary } from "@/src/components/ErrorBoundary";
+import { ToastProvider } from "@/src/contexts/ToastContext";
 import InitialLayout from "@/src/layouts/InitialLayout";
 import ClerkAndConvexProvider from "@/src/provider/ClerkAndConvexProvider";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { ToastProvider } from "@/src/contexts/ToastContext";
-import { ErrorBoundary } from "@/src/components/ErrorBoundary";
 
 export default function RootLayout() {
   return (

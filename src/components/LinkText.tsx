@@ -1,4 +1,4 @@
-import { FONT_SIZES, FONT_WEIGHTS } from '@/constant/fontSizes';
+import { FONT_SIZES, FONT_WEIGHTS } from '@/src/constants/customFontSizes';
 import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
 
