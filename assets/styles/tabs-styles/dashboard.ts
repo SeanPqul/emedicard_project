@@ -91,19 +91,10 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: getSpacing('sm'),
   },
-  quickActionsContainer: {
-    paddingHorizontal: getSpacing('lg'),
-    paddingBottom: getSpacing('md'),
-  },
   sectionTitle: {
     ...getTypography('h4'),
     color: getColor('text.primary'),
     marginBottom: getSpacing('sm'),
-  },
-  actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
   },
   recentActivityContainer: {
     paddingHorizontal: getSpacing('lg'),
@@ -192,46 +183,46 @@ export const styles = StyleSheet.create({
     ...getTypography('caption'),
     color: getColor('text.secondary'),
   },
-  // Health Card Status Styles
-  healthCardStatusContainer: {
+  // Primary Actions Styles
+  primaryActionsContainer: {
     paddingHorizontal: getSpacing('lg'),
-    paddingBottom: getSpacing('lg'),
+    paddingVertical: getSpacing('lg'),
+    backgroundColor: getColor('background.secondary'),
+    marginTop: getSpacing('sm'),
   },
-  healthCardPreview: {
+  primaryActionsRow: {
+    marginTop: getSpacing('md'),
+  },
+  // Collapsible panel styles
+  collapsibleHeader: {
+    paddingVertical: getSpacing('xs'),
+  },
+  expandButtonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: getColor('background.primary'),
-    borderRadius: getBorderRadius('lg'),
-    padding: getSpacing('md'),
-    ...getShadow('medium'),
+    gap: getSpacing('xs'),
   },
-  healthCardIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: getBorderRadius('full'),
-    backgroundColor: getColor('accent.safetyGreen') + '20',
-    justifyContent: 'center',
+  viewFullActivityLink: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: getSpacing('md'),
+    justifyContent: 'center',
+    paddingVertical: getSpacing('md'),
+    marginTop: getSpacing('sm'),
+    borderTopWidth: 1,
+    borderTopColor: getColor('border.light'),
+    gap: getSpacing('xs'),
   },
-  healthCardInfo: {
-    flex: 1,
-  },
-  healthCardTitle: {
+  viewFullActivityText: {
     ...getTypography('bodySmall'),
-    color: getColor('text.primary'),
+    color: getColor('accent.medicalBlue'),
     fontWeight: '600',
-    marginBottom: getSpacing('xs') / 2,
   },
-  healthCardSubtitle: {
-    ...getTypography('caption'),
-    color: getColor('text.secondary'),
-  },
-  healthCardButton: {
-    width: 44,
-    height: 44,
-    borderRadius: getBorderRadius('full'),
-    justifyContent: 'center',
-    alignItems: 'center',
+  // Activity item card styling
+  activityCard: {
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('md'),
+    padding: getSpacing('md'),
+    marginBottom: getSpacing('sm'),
+    ...getShadow('small'),
   },
 });

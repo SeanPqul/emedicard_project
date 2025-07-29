@@ -1,5 +1,6 @@
 // Form Components
 import { CustomButton } from "./CustomButton";
+import { CTAButton } from "./CTAButton";
 import { CustomTextInput } from "./CustomTextInput";
 import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
 
@@ -10,6 +11,7 @@ import { LinkText } from "./LinkText";
 import { OtpInputUI } from "./OtpInputUI";
 import { SignOutButton } from "./SignOutButton";
 import VerificationPage from "./VerificationPage";
+import { DashboardHeader } from "./ui/DashboardHeader";
 
 // Dashboard Components
 import { StatCard } from "./StatCard";
@@ -44,6 +46,7 @@ import { QRCodeScanner } from "./QRCodeScanner";
 export {
     // Form Components
     CustomButton,
+    CTAButton,
     CustomTextInput,
     PasswordStrengthIndicator,
     
@@ -54,6 +57,7 @@ export {
     OtpInputUI,
     SignOutButton,
     VerificationPage,
+    DashboardHeader,
     
     // Dashboard Components
     StatCard,

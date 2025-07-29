@@ -1,42 +1,3 @@
-/**
- * Application Management Screen - eMediCard Application
- * 
- * IMPLEMENTATION NOTES:
- * - Implements application listing and tracking as per UI_DESIGN_PROMPT.md (lines 105-140)
- * - Follows filter and search functionality specifications from design documentation
- * - Displays application status with visual progress indicators
- * - Supports application tracking with real-time status updates
- * - Aligns with eMediCard documentation for application management workflow
- * 
- * DOCUMENTATION REFERENCES:
- * - UI_DESIGN_PROMPT.md: Applications management screen structure
- * - UI_UX_IMPLEMENTATION_GUIDE.md: Filter implementation and accessibility
- * - emedicarddocumentation.txt: Application status workflow and tracking
- * 
- * APPLICATION STATUS WORKFLOW (per documentation):
- * - Submitted: Application received and awaiting review
- * - Under Review: Being reviewed by CHO administrators
- * - Approved: Application approved, health card will be issued
- * - Rejected: Application rejected, user can view remarks and reapply
- * 
- * FILTER CAPABILITIES:
- * - Search by application ID, position, organization, or job category
- * - Filter by status (All, Submitted, Under Review, Approved, Rejected)
- * - Sort by date, status, or category
- * - Real-time updates via Convex queries
- * 
- * ACCESSIBILITY FEATURES:
- * - Search functionality with clear input feedback
- * - Status indicators with color coding and icons
- * - Touch targets meet 44x44 pixel minimum
- * - Screen reader compatible with descriptive labels
- * 
- * FUTURE ENHANCEMENTS:
- * - Add push notifications for status changes
- * - Implement document re-upload functionality for rejected applications
- * - Add application cancellation feature
- */
-
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
@@ -121,7 +82,8 @@ export default function Applications() {
         app.form?.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
         app.form?.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
         app.jobCategory?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app._id.toLowerCase().includes(searchQuery.toLowerCase())
+        app._id.toLowerCase().includes(searchQuery.toLowerCase())  ||
+        app.form?.applicationType.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -415,14 +377,6 @@ export default function Applications() {
           </View>
         )}
       </ScrollView>
-      
-      {/* Floating Action Button */}
-      <TouchableOpacity 
-        style={styles.fab}
-        onPress={() => router.push('/(tabs)/apply')}
-      >
-        <Ionicons name="add" size={24} color="#FFFFFF" />
-      </TouchableOpacity>
     </View>
   );
 }

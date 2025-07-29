@@ -13,6 +13,7 @@ import { CustomButton } from '../../../src/components';
 import { DragDropUpload } from '../../../src/components/DragDropUpload';
 import { getColor, getTypography, getSpacing, getBorderRadius, getShadow } from '../../../src/styles/theme';
 import { useDocumentUpload } from '../../../src/hooks/useDocumentUpload';
+import { cacheDocument, removeCachedDocument, clearFormCache } from '../../../src/utils/documentCache';
 
 const { width } = Dimensions.get('window');
 
@@ -24,6 +25,7 @@ interface DocumentRequirement {
   formats: string[];
   uploaded?: boolean;
   fileUrl?: string;
+  fieldName: string;
 }
 
 interface UploadProgress {
@@ -34,12 +36,11 @@ interface UploadProgress {
 
 export default function UploadDocumentsScreen() {
   const [selectedDocuments, setSelectedDocuments] = useState<Record<string, any>>({});
-  const [uploadedFiles, setUploadedFiles] = useState<Record<string, Id<"_storage">>>({});
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, Id<'_storage'>>>({});
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [canSkip, setCanSkip] = useState(false);
 
-  // Get navigation parameters
   const params = useLocalSearchParams();
   const formId = params.formId as string;
   const applicationType = params.applicationType as string;
@@ -47,32 +48,42 @@ export default function UploadDocumentsScreen() {
   const position = params.position as string;
   const organization = params.organization as string;
 
-  // Convex queries
   const formData = useQuery(api.forms.getFormById, formId ? { formId: formId as any } : 'skip');
-  const requirementsByForm = useQuery(api.requirements.getRequirementsByFormId, formId ? { formId: formId as any } : 'skip');
   const requirementsByJobCategory = useQuery(api.requirements.getRequirementsByJobCategory, 
-    formData?.jobCategory ? { jobCategoryId: formData.jobCategory } : 'skip'
+    formData?.jobCategory ? { jobCategoryId: formData.jobCategory as any } : 'skip'
   );
-  
-  // Document upload hook
+
   const {
     uploadFile,
     replaceFile,
     removeFile,
     retryUpload,
     getUploadState,
-  } = useDocumentUpload(formId as Id<"forms">);
+    cacheFileForUpload,
+    batchUploadCachedDocuments,
+  } = useDocumentUpload(formId as Id<'forms'>);
 
-  // Set canSkip to false for new/renewed applications to prevent skipping
   useEffect(() => {
     if (applicationType === 'New' || applicationType === 'Renew') {
       setCanSkip(false);
     }
   }, [applicationType]);
 
-  // Get document requirements from Convex
   const documentRequirements = requirementsByJobCategory?.requirements || [];
-  const uploadedRequirements = requirementsByForm?.uploadedRequirements;
+
+  const cacheDocumentBeforeUpload = async (file: any, documentId: string) => {
+    try {
+      await cacheFileForUpload(file, documentId);
+      setSelectedDocuments(prev => ({
+        ...prev,
+        [documentId]: file,
+      }));
+      Alert.alert('Success', 'Document cached successfully!');
+    } catch (error) {
+      console.error('Cache error:', error);
+      Alert.alert('Error', 'Failed to cache document. Please try again.');
+    }
+  };
 
   const handleDocumentPicker = async (documentId: string) => {
     setSelectedDocumentId(documentId);
@@ -94,12 +105,12 @@ export default function UploadDocumentsScreen() {
     });
 
     if (!result.canceled && selectedDocumentId) {
-      handleDocumentSelected(result.assets[0], selectedDocumentId);
+      cacheDocumentBeforeUpload(result.assets[0], selectedDocumentId);
     }
     setShowImagePicker(false);
   };
 
-  const handleFileSelection = (files) => {
+  const handleFileSelection = (files: any[]) => {
     if (!selectedDocumentId || files.length === 0) return;
     handleDocumentSelected(files[0], selectedDocumentId);
   };
@@ -137,48 +148,17 @@ export default function UploadDocumentsScreen() {
   };
 
   const handleDocumentSelected = async (file: any, documentId: string) => {
-    // Convert file to the format expected by the upload hook
-    const fileBlob = await fetch(file.uri).then(response => response.blob());
-    const fileObject = new File([fileBlob], file.name || `document_${documentId}.${file.type?.split('/')[1] || 'jpg'}`, {
-      type: file.type || 'image/jpeg',
-    });
-
     try {
-      const isReplacing = selectedDocuments[documentId] && uploadedFiles[documentId];
-      
-      if (isReplacing) {
-        // Replace existing file
-        const result = await replaceFile(fileObject, documentId);
-        setUploadedFiles(prev => ({
-          ...prev,
-          [documentId]: result.storageId,
-        }));
-      } else {
-        // Upload new file
-        const result = await uploadFile(fileObject, documentId);
-        setUploadedFiles(prev => ({
-          ...prev,
-          [documentId]: result.storageId,
-        }));
-      }
-
-      // Update selected documents for UI
-      setSelectedDocuments(prev => ({
-        ...prev,
-        [documentId]: file,
-      }));
-
-      Alert.alert('Success', 'Document uploaded successfully!');
+      await cacheDocumentBeforeUpload(file, documentId);
     } catch (error) {
-      console.error('Upload error:', error);
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to upload document. Please try again.');
+      console.error('Document selection error:', error);
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to process document. Please try again.');
     }
   };
 
   const handleRemoveDocument = async (documentId: string) => {
     const storageId = uploadedFiles[documentId];
     if (!storageId) {
-      // If no uploaded file, just remove from local state
       setSelectedDocuments(prev => {
         const newDocs = { ...prev };
         delete newDocs[documentId];
@@ -198,20 +178,16 @@ export default function UploadDocumentsScreen() {
           onPress: async () => {
             try {
               await removeFile(documentId, storageId);
-              
-              // Remove from local state
               setSelectedDocuments(prev => {
                 const newDocs = { ...prev };
                 delete newDocs[documentId];
                 return newDocs;
               });
-              
               setUploadedFiles(prev => {
                 const newFiles = { ...prev };
                 delete newFiles[documentId];
                 return newFiles;
               });
-              
               Alert.alert('Success', 'Document removed successfully!');
             } catch (error) {
               console.error('Remove error:', error);
@@ -232,22 +208,32 @@ export default function UploadDocumentsScreen() {
       return;
     }
 
-    // Check if any uploads are still in progress
     const uploadingDocs = documentRequirements.filter(doc => getUploadState(doc.fieldName)?.uploading);
     if (uploadingDocs.length > 0) {
       Alert.alert('Upload in Progress', 'Please wait for all document uploads to complete before submitting.');
       return;
     }
 
-    // Check if any uploads have errors
-    const errorDocs = documentRequirements.filter(doc => getUploadState(doc.fieldName)?.error);
+    const errorDocs = documentRequirements.filter(doc => { 
+      const state = getUploadState(doc.fieldName);
+      return state.error || (state.progress < 100 && !state.uploading);
+    });
+    
     if (errorDocs.length > 0) {
       Alert.alert('Upload Errors', 'Please fix upload errors before submitting. Use the retry button to try again.');
       return;
     }
 
     try {
-      // Submit documents to Convex
+      const { successful, failed } = await batchUploadCachedDocuments();
+
+      if (failed.length > 0) {
+        Alert.alert('Submission Error', `Failed to upload ${failed.length} documents. Please try again.`);
+        return;
+      }
+      
+      clearFormCache(formId);
+
       Alert.alert('Success', 'Documents submitted successfully! Your application is now under review.', [
         { text: 'OK', onPress: () => router.push('/(tabs)/application') }
       ]);
@@ -312,20 +298,64 @@ export default function UploadDocumentsScreen() {
             acceptedFormats={['jpg', 'png', 'pdf']}
             maxFiles={1}
             disabled={!selectedDocumentId}
-            loading={getUploadState(selectedDocumentId)?.uploading}
+            loading={selectedDocumentId ? getUploadState(selectedDocumentId)?.uploading : false}
           />
         </View>
 
         {/* Document List */}
         <View style={styles.documentsContainer}>
-          {/* Document list content would go here */}
+          {documentRequirements.map((doc) => (
+            <View key={doc.fieldName} style={styles.documentCard}>
+              <View style={styles.documentHeader}>
+                <View style={styles.documentInfo}>
+                  <Text style={styles.documentName}>
+                    {doc.name}
+                    {doc.required && <Text style={styles.requiredMark}> *</Text>}
+                  </Text>
+                  <Text style={styles.documentDescription}>{doc.description}</Text>
+                  <Text style={styles.documentFormats}>
+                    Accepted formats: JPG, PNG, PDF
+                  </Text>
+                </View>
+              </View>
+
+              {/* Document Actions */}
+              <View style={styles.documentActions}>
+                <TouchableOpacity 
+                  style={styles.uploadButton}
+                  onPress={() => handleDocumentPicker(doc.fieldName)}
+                >
+                  <Ionicons name="cloud-upload" size={20} color={getColor('primary.500')} />
+                  <Text style={styles.uploadButtonText}>
+                    {selectedDocuments[doc.fieldName] ? 'Replace Document' : 'Upload Document'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Show selected document preview */}
+              {selectedDocuments[doc.fieldName] && (
+                <View style={styles.documentPreview}>
+                  <Text style={styles.documentName}>Selected: {selectedDocuments[doc.fieldName].name}</Text>
+                  <TouchableOpacity 
+                    style={styles.removeButton}
+                    onPress={() => handleRemoveDocument(doc.fieldName)}
+                  >
+                    <Ionicons name="trash" size={16} color={getColor('semantic.error')} />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          ))}
         </View>
 
         {/* Submit Button */}
         <View style={styles.submitContainer}>
           <CustomButton
             title="Submit Documents"
-            onPress={handleSubmitDocuments}
+            onPress={() => batchUploadCachedDocuments().then(handleSubmitDocuments).catch(error => {
+              console.error('Batch upload error:', error);
+              Alert.alert('Error', 'Batch upload failed. Please try again.');
+            })}
             disabled={Object.keys(selectedDocuments).length === 0}
           />
         </View>
@@ -519,6 +549,12 @@ const styles = StyleSheet.create({
   documentPreview: {
     position: 'relative',
     marginBottom: getSpacing('sm'),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: getSpacing('sm'),
+    backgroundColor: getColor('background.secondary'),
+    borderRadius: getBorderRadius('sm'),
   },
   previewImage: {
     width: '100%',
@@ -527,9 +563,6 @@ const styles = StyleSheet.create({
     backgroundColor: getColor('background.secondary'),
   },
   removeButton: {
-    position: 'absolute',
-    top: getSpacing('sm'),
-    right: getSpacing('sm'),
     backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('sm'),
     padding: getSpacing('xs'),

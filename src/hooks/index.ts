@@ -13,6 +13,9 @@ export { useAnimation } from './useAnimation';
 // Performance monitoring hooks
 export { usePerformanceMonitor } from './usePerformanceMonitor';
 
+// Role-based navigation hooks
+export { useRoleBasedNavigation } from './useRoleBasedNavigation';
+
 // Form hooks (to be created)
 // export { useForm } from './useForm';
 // export { useFormValidation } from './useFormValidation';

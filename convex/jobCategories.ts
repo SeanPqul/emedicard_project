@@ -13,7 +13,7 @@ export const createJobCategory = mutation({
   args: {
     name: v.string(),
     colorCode: v.string(),
-    requireOrientation: v.string(),
+    requireOrientation: v.boolean(),
   },
   handler: async (ctx, args) => {
     const categoryId = await ctx.db.insert("jobCategory", {
@@ -39,7 +39,7 @@ export const updateJobCategory = mutation({
     categoryId: v.id("jobCategory"),
     name: v.optional(v.string()),
     colorCode: v.optional(v.string()),
-    requireOrientation: v.optional(v.string()),
+    requireOrientation: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const { categoryId, ...updates } = args;

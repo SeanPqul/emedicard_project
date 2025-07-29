@@ -12,13 +12,24 @@ interface StatCardProps {
   onPress: () => void;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ 
-  icon, 
-  title, 
-  value, 
-  subtitle, 
-  color, 
-  onPress 
+/**
+ * StatCard Component - Interactive statistics display card
+ * 
+ * REFACTORED: Enhanced touch target size and visual prominence
+ * - Minimum height increased to 140px for better touch accessibility
+ * - Added activeOpacity for better touch feedback
+ * - Icon background uses 20% opacity of accent color
+ * 
+ * @param {StatCardProps} props - Component props
+ * @returns {React.ReactElement} Rendered stat card
+ */
+export const StatCard: React.FC<StatCardProps> = ({
+  icon,
+  title,
+  value,
+  subtitle,
+  color,
+  onPress,
 }) => {
   return (
     <TouchableOpacity 
@@ -27,6 +38,7 @@ export const StatCard: React.FC<StatCardProps> = ({
       accessibilityLabel={`${title}: ${value} ${subtitle}`}
       accessibilityHint={`Tap to view ${title.toLowerCase()}`}
       accessibilityRole="button"
+      activeOpacity={0.7}
     >
       <View style={[styles.icon, { backgroundColor: color + '20' }]}>
         <Ionicons name={icon as any} size={24} color={color} />
@@ -43,11 +55,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
-    padding: getSpacing('md'),
+    padding: getSpacing('lg'),
     marginHorizontal: getSpacing('xs'),
-    minHeight: 120,
+    minHeight: 140,
     justifyContent: 'center',
     ...getShadow('medium'),
+    // Enhanced touch target
+    minWidth: 150,
   },
   icon: {
     width: 48,

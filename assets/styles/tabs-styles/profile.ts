@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { theme, getColor, getSpacing, getTypography, getBorderRadius, getShadow } from "../../../src/styles/theme";
+import { getBorderRadius, getColor, getSpacing, getTypography } from "../../../src/styles/theme";
 
 export const styles = StyleSheet.create({
   container: {
@@ -8,7 +8,6 @@ export const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: getSpacing('xxxl'),
   },
   header: {
     backgroundColor: getColor('background.primary'),

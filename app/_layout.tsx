@@ -10,7 +10,7 @@ export default function RootLayout() {
     <ErrorBoundary>
       <ClerkAndConvexProvider>
         <SafeAreaProvider>
-          <SafeAreaView style={{ flex: 1 }}>
+          <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
             <StatusBar backgroundColor="#10B981" barStyle="dark-content" />
             <ToastProvider>
               <InitialLayout />

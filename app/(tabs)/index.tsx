@@ -1,28 +1,68 @@
 import { useDashboard } from '@/src/hooks';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import React from 'react';
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Animated, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { styles } from '../../assets/styles/tabs-styles/dashboard';
-import { ActionButton, ActivityItem, EmptyState, StatCard } from '../../src/components';
-import { getColor } from '../../src/styles/theme';
+import { ActivityItem, CTAButton, EmptyState, StatCard } from '../../src/components';
+import { DashboardHeader } from '../../src/components/ui/DashboardHeader';
+import { getColor, getSpacing } from '../../src/styles/theme';
 import { getUserDisplayName } from '../../src/utils/user-utils';
 
 export default function Dashboard() {
   const { 
     user, 
-    userProfile, 
+    userProfile,
     userApplications,
-    dashboardStats, 
-    recentActivities, 
-    currentTime, 
+    dashboardStats,
+    recentActivities,
+    currentTime,
     unreadNotificationsCount,
-    isLoading, 
-    refreshing, 
-    onRefresh, 
+    isLoading,
+    refreshing,
+    onRefresh,
     getGreeting 
   } = useDashboard();
+
+  // Animation state for collapsible activity panel
+  const [expanded, setExpanded] = useState(false);
+  const animatedHeight = useState(new Animated.Value(0))[0];
+  const animatedOpacity = useState(new Animated.Value(1))[0];
+  const animatedRotation = useState(new Animated.Value(0))[0];
+  
+  // Calculate heights based on activity items (approximately 80px per item)
+  // Shows 2 items when collapsed, all items when expanded
+  const itemHeight = 80;
+  const emptyStateHeight = 150; // Height for empty state
+  const hasActivities = recentActivities.length > 0;
+  const collapsedHeight = hasActivities ? Math.min(recentActivities.length, 2) * itemHeight : emptyStateHeight;
+  const expandedHeight = hasActivities ? recentActivities.length * itemHeight : emptyStateHeight;
+  
+  useEffect(() => {
+    // Animate height and rotation together
+    Animated.parallel([
+      Animated.timing(animatedHeight, {
+        toValue: expanded ? expandedHeight : collapsedHeight,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedRotation, {
+        toValue: expanded ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [expanded, expandedHeight, collapsedHeight]);
+  
+  // Initialize height to collapsed state
+  useEffect(() => {
+    animatedHeight.setValue(collapsedHeight);
+  }, [collapsedHeight]);
+  
+  const rotateAnimation = animatedRotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
 
   if (isLoading) {
     return (
@@ -91,51 +131,23 @@ export default function Dashboard() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
-          paddingBottom: 50, // Space for tab bar + extra padding
           flexGrow: 1
         }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         showsVerticalScrollIndicator={false}
+        testID="dashboard-scroll-view"
       >
-        {/* Header Section */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <View style={styles.profilePicture}>
-              <Image
-                source={{ uri: user?.imageUrl || userProfile?.image }}
-                style={styles.profileImage}
-                placeholder="👤"
-              />
-            </View>
-            <View style={styles.welcomeText}>
-              <Text style={styles.greeting}>Good {getGreeting()}</Text>
-              <Text style={styles.userName}>
-                {getUserDisplayName(user, userProfile)}
-              </Text>
-              <Text style={styles.currentTime}>
-                {currentTime.toLocaleDateString()} • {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Text>
-            </View>
-          </View>
-          
-          <TouchableOpacity 
-            style={styles.notificationButton} 
-            onPress={() => router.push('/(tabs)/notification')}
-            accessibilityLabel="Notifications"
-            accessibilityHint="View your notifications"
-          >
-            <Ionicons name="notifications-outline" size={24} color={getColor('text.primary')} />
-            {unreadNotificationsCount > 0 && (
-              <View style={styles.notificationBadge}>
-                <Text style={styles.notificationBadgeText}>
-                  {unreadNotificationsCount}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
+        {/* Header Section - Extracted to reusable component */}
+        {/* Features: profile display, greeting, notifications, quick actions menu */}
+        <DashboardHeader
+          greeting={`Good ${getGreeting()}`}
+          userName={getUserDisplayName(user, userProfile)}
+          userImage={user?.imageUrl || userProfile?.image}
+          currentTime={currentTime}
+          unreadNotificationsCount={unreadNotificationsCount}
+        />
 
         {/* Current Application Status - Enhanced */}
         {currentApplication && (
@@ -182,23 +194,25 @@ export default function Dashboard() {
           </View>
         )}
 
-        {/* Quick Stats Cards */}
+        {/* My Health Card - Unified Interactive Section */}
+        {/* REFACTORED: Combined overview stats into single "My Health Card" section */}
+        {/* Each card now serves as both display and navigation element */}
         <View style={styles.statsContainer}>
-          <Text style={styles.sectionTitle}>Overview</Text>
+          <Text style={styles.sectionTitle}>My Health Card</Text>
           <View style={styles.statsRow}>
             <StatCard
               icon="document-text-outline"
-              title="Active Applications"
+              title="Applications"
               value={dashboardStats.activeApplications.toString()}
-              subtitle="In progress"
+              subtitle={dashboardStats.activeApplications > 0 ? "Active" : "No active applications"}
               color={getColor('accent.medicalBlue')}
               onPress={() => router.push('/(tabs)/application')}
             />
             <StatCard
               icon="card-outline"
-              title="Pending Payments"
-              value={dashboardStats.pendingPayments.toString()}
-              subtitle={`₱${dashboardStats.pendingAmount}`}
+              title="Payments"
+              value={dashboardStats.pendingPayments > 0 ? dashboardStats.pendingPayments.toString() : "0"}
+              subtitle={dashboardStats.pendingPayments > 0 ? `₱${dashboardStats.pendingAmount} pending` : "Make payment"}
               color={getColor('accent.warningOrange')}
               onPress={() => router.push('/(screens)/(shared)/payment')}
             />
@@ -206,108 +220,130 @@ export default function Dashboard() {
           <View style={styles.statsRow}>
             <StatCard
               icon="calendar-outline"
-              title="Upcoming Orientations"
-              value={dashboardStats.upcomingOrientations.toString()}
-              subtitle={dashboardStats.nextOrientationDate || "None scheduled"}
+              title="Orientation"
+              value={dashboardStats.upcomingOrientations > 0 ? dashboardStats.nextOrientationDate?.split(' ')[0] || "Scheduled" : "None"}
+              subtitle={dashboardStats.upcomingOrientations > 0 ? "Next schedule" : "No orientation scheduled"}
               color={getColor('accent.primaryGreen')}
               onPress={() => router.push('/(screens)/(shared)/orientation')}
             />
             <StatCard
-              icon="shield-checkmark-outline"
-              title="Valid Health Cards"
-              value={dashboardStats.validHealthCards.toString()}
-              subtitle="Active cards"
-              color={getColor('accent.safetyGreen')}
-              onPress={() => router.push('/(screens)/(shared)/health-cards')}
-            />
-          </View>
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.quickActionsContainer}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.actionsGrid}>
-            <ActionButton
-              icon="add-circle-outline"
-              title="New Application"
-              subtitle="Apply for health card"
-              onPress={() => router.push('/(tabs)/apply')}
-              isPrimary
-            />
-            <ActionButton
-              icon="document-text-outline"
-              title="Document Requirements"
-              subtitle="View required documents"
-              onPress={() => router.push('/(screens)/(shared)/document-requirements')}
-            />
-            <ActionButton
-              icon="card-outline"
-              title="Make Payment"
-              subtitle="Pay application fees"
-              onPress={() => router.push('/(screens)/(shared)/payment')}
-            />
-            <ActionButton
               icon="qr-code-outline"
-              title="View QR Code"
-              subtitle="Show health card QR"
+              title="Digital Health Card"
+              value={dashboardStats.validHealthCards > 0 ? "Active" : "Inactive"}
+              subtitle={dashboardStats.validHealthCards > 0 ? "Tap to view QR" : "No active card"}
+              color={getColor('accent.safetyGreen')}
               onPress={() => router.push('/(screens)/(shared)/qr-code')}
             />
           </View>
         </View>
 
-        {/* Recent Activity */}
-        <View style={styles.recentActivityContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <TouchableOpacity 
-              onPress={() => router.push('/(screens)/(shared)/activity')}
-              accessibilityLabel="View all activities"
-            >
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
-          </View>
-          
-          {recentActivities.length > 0 ? (
-            <View style={styles.activityList}>
-              {recentActivities.map((activity) => (
-                <ActivityItem key={activity.id} activity={activity} />
-              ))}
-            </View>
-          ) : (
-            <EmptyState
-              icon="document-outline"
-              title="No recent activity"
-              subtitle="Your activities will appear here"
+        {/* Primary Actions Row - Prominent CTA Buttons */}
+        {/* REFACTORED: Replaced grid of ActionButtons with vertical stack of CTAButtons */}
+        {/* Enhanced touch targets (64px height) and clearer visual hierarchy */}
+        <View style={styles.primaryActionsContainer}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.primaryActionsRow}>
+            <CTAButton
+              title="Apply for Health Card"
+              subtitle="Start new application"
+              icon="add-circle-outline"
+              variant="primary"
+              onPress={() => router.push('/(tabs)/apply')}
+              accessibilityLabel="Apply for Health Card"
+              accessibilityHint="Start a new health card application"
             />
+            <View style={{ height: getSpacing('md') }} />
+            <CTAButton
+              title="Renew Health Card"
+              subtitle="Renew existing card"
+              icon="refresh-outline"
+              variant="secondary"
+              size="medium"
+              onPress={() => router.push('/(tabs)/application')}
+              accessibilityLabel="Renew Health Card"
+              accessibilityHint="Renew your existing health card"
+            />
+            <View style={{ height: getSpacing('md') }} />
+            <CTAButton
+              title="View Digital Card"
+              subtitle="Show QR code"
+              icon="qr-code-outline"
+              variant={dashboardStats.validHealthCards > 0 ? "primary" : "outline"}
+              size="medium"
+              disabled={dashboardStats.validHealthCards === 0}
+              onPress={() => router.push('/(screens)/(shared)/qr-code')}
+              accessibilityLabel="View Digital Card"
+              accessibilityHint={dashboardStats.validHealthCards > 0 ? "View your digital health card QR code" : "No active health card available"}
+            />
+          </View>
+        </View>
+
+        {/* Recent Activity - Collapsible Panel */}
+        {/* NEW FEATURE: Collapsible activity list with smooth animations */}
+        {/* Shows 2 items by default, expands to show all with chevron animation */}
+        <View style={styles.recentActivityContainer}>
+          <TouchableOpacity 
+            onPress={() => setExpanded(!expanded)} 
+            accessibilityLabel="Toggle activity list"
+            style={styles.collapsibleHeader}
+            activeOpacity={0.7}
+          >
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent Activity</Text>
+              <View style={styles.expandButtonContainer}>
+                <Text style={styles.viewAllText}>
+                  {expanded ? 'Show Less' : `View All (${recentActivities.length})`}
+                </Text>
+                <Animated.View style={{ transform: [{ rotate: rotateAnimation }] }}>
+                  <Ionicons 
+                    name="chevron-down" 
+                    size={20} 
+                    color={getColor('accent.medicalBlue')} 
+                  />
+                </Animated.View>
+              </View>
+            </View>
+          </TouchableOpacity>
+          
+          <Animated.View style={[{ height: animatedHeight, overflow: 'hidden' }]}>
+            {recentActivities.length > 0 ? (
+              <View style={styles.activityList}>
+                {recentActivities.map((activity, index) => (
+                  <Animated.View
+                    key={activity.id}
+                    style={{
+                      opacity: expanded || index < 2 ? 1 : 0,
+                      marginBottom: getSpacing('sm'),
+                    }}
+                  >
+                    <View style={styles.activityCard}>
+                      <ActivityItem activity={activity} />
+                    </View>
+                  </Animated.View>
+                ))}
+              </View>
+            ) : (
+              <EmptyState
+                icon="document-outline"
+                title="No recent activity"
+                subtitle="Your activities will appear here"
+              />
+            )}
+          </Animated.View>
+          
+          {/* View full activity link */}
+          {recentActivities.length > 2 && (
+            <TouchableOpacity 
+              style={styles.viewFullActivityLink}
+              onPress={() => router.push('/(screens)/(shared)/activity')}
+              accessibilityLabel="View full activity history"
+            >
+              <Text style={styles.viewFullActivityText}>View Full Activity History</Text>
+              <Ionicons name="arrow-forward" size={16} color={getColor('accent.medicalBlue')} />
+            </TouchableOpacity>
           )}
         </View>
 
-        {/* Health Card Status - Enhanced */}
-        {dashboardStats.validHealthCards > 0 && (
-          <View style={styles.healthCardStatusContainer}>
-            <Text style={styles.sectionTitle}>Your Health Cards</Text>
-            <View style={styles.healthCardPreview}>
-              <View style={styles.healthCardIcon}>
-                <Ionicons name="shield-checkmark" size={32} color={getColor('accent.safetyGreen')} />
-              </View>
-              <View style={styles.healthCardInfo}>
-                <Text style={styles.healthCardTitle}>
-                  {dashboardStats.validHealthCards} Active Health Card{dashboardStats.validHealthCards > 1 ? 's' : ''}
-                </Text>
-                <Text style={styles.healthCardSubtitle}>
-                  Tap to view and manage your health cards
-                </Text>
-              </View>
-              <TouchableOpacity 
-                style={styles.healthCardButton}
-                onPress={() => router.push('/(screens)/(shared)/health-cards')}
-                accessibilityLabel="View health cards"
-              >
-                <Ionicons name="chevron-forward" size={20} color={getColor('text.secondary')} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
       </ScrollView>
     </View>
   );

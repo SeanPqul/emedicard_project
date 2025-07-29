@@ -1,4 +1,7 @@
 // User Related Types
+export type UserRole = 'applicant' | 'inspector';
+// Note: Admin functionality is handled via separate web interface
+
 export interface User {
   _id: string;
   username: string;
@@ -8,6 +11,7 @@ export interface User {
   gender?: string;
   birthDate?: string;
   phoneNumber?: string;
+  role: UserRole;
   clerkId: string;
 }
 
@@ -57,6 +61,21 @@ export interface HealthCard {
   verificationToken: string;
 }
 
+export interface HealthCardData {
+  _id: string;
+  form: {
+    _id: string;
+    applicationType: 'New' | 'Renew';
+    position: string;
+    organization: string;
+    status: 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
+  } | null;
+  cardUrl?: string;
+  issuedAt?: number;
+  expiresAt?: number;
+  verificationToken?: string;
+}
+
 // Notification Related Types
 export interface Notification {
   _id: string;
@@ -73,7 +92,7 @@ export interface JobCategory {
   _id: string;
   name: string;
   colorCode: string;
-  requireOrientation: string;
+  requireOrientation: boolean;
 }
 
 export interface DocumentRequirement {

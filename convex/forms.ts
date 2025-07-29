@@ -19,24 +19,32 @@ export const getUserApplications = query({
       return [];
     }
 
-    const applications = await ctx.db
-      .query("applicationForms")
+    // Get forms directly instead of through applicationForms
+    const forms = await ctx.db
+      .query("forms")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
-    const applicationDetails = await Promise.all(
-      applications.map(async (app) => {
-        const form = await ctx.db.get(app.formId);
-        const jobCategory = form ? await ctx.db.get(form.jobCategory) : null;
+    const formsWithDetails = await Promise.all(
+      forms.map(async (form) => {
+        const jobCategory = await ctx.db.get(form.jobCategory);
+        
+        // Get document count for this form
+        const documents = await ctx.db
+          .query("formDocuments")
+          .withIndex("by_form", (q) => q.eq("formId", form._id))
+          .collect();
+        
         return {
-          ...app,
-          form,
+          ...form,
           jobCategory,
+          documentCount: documents.length,
+          submittedAt: form.status !== "Submitted" ? undefined : form.updatedAt || form._creationTime,
         };
       })
     );
 
-    return applicationDetails;
+    return formsWithDetails;
   },
 });
 
@@ -70,6 +78,7 @@ export const createForm = mutation({
       position: args.position,
       organization: args.organization,
       civilStatus: args.civilStatus,
+      status: "Submitted",
     });
 
     return formId;
@@ -166,48 +175,35 @@ export const submitApplicationForm = mutation({
       throw new Error("Not authorized to submit this form");
     }
 
-    // Check if application already exists
-    const existingApplication = await ctx.db
-      .query("applicationForms")
-      .withIndex("by_form", (q) => q.eq("formId", args.formId))
-      .unique();
-
-    if (existingApplication) {
+    // Check if form is already submitted
+    if (form.status === "Submitted" || form.status === "Under Review" || form.status === "Approved") {
       throw new Error("Application has already been submitted");
     }
 
-    // Validate that all required documents are uploaded
-    const requirements = await ctx.db
-      .query("requirements")
-      .withIndex("by_form", (q) => q.eq("formId", args.formId))
-      .unique();
-
-    if (!requirements) {
-      throw new Error("No documents uploaded. Please upload required documents first.");
-    }
-
-    // Check required fields based on job category
+    // Get job category
     const jobCategory = await ctx.db.get(form.jobCategory);
     if (!jobCategory) {
       throw new Error("Invalid job category");
     }
 
-    // Validate required documents are present
-    const requiredFields = ["validId", "picture", "chestXrayId", "urinalysisId", "stoolId", "cedulaId"];
-    
-    // Add specific requirements based on job category
-    if (jobCategory.name.toLowerCase().includes("security") || jobCategory.name.toLowerCase().includes("guard")) {
-      requiredFields.push("neuroExamId", "drugTestId");
-    }
-    
-    if (jobCategory.colorCode.toLowerCase() === "#ffc0cb" || jobCategory.name.toLowerCase().includes("pink")) {
-      requiredFields.push("hepatitisBId");
-    }
+    // Get required document types for this job category
+    const requiredDocuments = await ctx.db
+      .query("documentRequirements")
+      .withIndex("by_job_category", (q) => q.eq("jobCategoryId", form.jobCategory))
+      .filter((q) => q.eq(q.field("required"), true))
+      .collect();
 
-    // Check all required fields are present
-    for (const field of requiredFields) {
-      if (!requirements[field as keyof typeof requirements]) {
-        throw new Error(`Missing required document: ${field}. Please upload all required documents.`);
+    // Get uploaded documents for this form
+    const uploadedDocuments = await ctx.db
+      .query("formDocuments")
+      .withIndex("by_form", (q) => q.eq("formId", args.formId))
+      .collect();
+
+    // Check if all required documents are uploaded
+    for (const reqDoc of requiredDocuments) {
+      const uploadedDoc = uploadedDocuments.find(d => d.documentRequirementId === reqDoc._id);
+      if (!uploadedDoc) {
+        throw new Error(`Missing required document: ${reqDoc.name}. Please upload all required documents.`);
       }
     }
 
@@ -237,27 +233,27 @@ export const submitApplicationForm = mutation({
         referenceNumber: args.paymentReferenceNumber,
         receiptId: args.paymentReceiptId,
         status: "Pending",
+        updatedAt: Date.now(),
       });
 
-      // Create application form record
-      const applicationId = await ctx.db.insert("applicationForms", {
-        userId: user._id,
-        formId: args.formId,
+      // Update form status to Submitted
+      await ctx.db.patch(args.formId, {
         status: "Submitted",
-        approvedAt: Date.now(),
+        updatedAt: Date.now(),
       });
 
       // Create notification for user
       await ctx.db.insert("notifications", {
         userId: user._id,
         formsId: args.formId,
-        type: "PaymentReceived",
+        title: "Application Submitted",
         message: `Application submitted successfully! Payment of ₱${totalAmount} via ${args.paymentMethod} is being processed. Reference: ${args.paymentReferenceNumber}`,
+        type: "PaymentReceived",
         read: false,
       });
 
-      // If orientation is required, create a placeholder orientation record
-      if (jobCategory.requireOrientation === "yes") {
+      // If orientation is required, create orientation record
+      if (jobCategory.requireOrientation) {
         const orientationSchedule = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days from now
         const qrCode = `emedicard-orientation-${args.formId}-${Date.now()}`;
         
@@ -265,26 +261,26 @@ export const submitApplicationForm = mutation({
           formId: args.formId,
           scheduleAt: orientationSchedule,
           qrCodeUrl: qrCode,
-          checkInTime: 0,
-          checkOutTime: 0,
+          status: "Scheduled",
         });
 
         // Add orientation notification
         await ctx.db.insert("notifications", {
           userId: user._id,
           formsId: args.formId,
-          type: "OrientationScheduled",
+          title: "Orientation Scheduled",
           message: `Food safety orientation scheduled for ${new Date(orientationSchedule).toLocaleDateString()}. You will receive more details soon.`,
+          type: "OrientationScheduled",
           read: false,
         });
       }
 
       return {
         success: true,
-        applicationId,
+        formId: args.formId,
         paymentId,
         message: "Application submitted successfully! You will receive notifications about the processing status.",
-        requiresOrientation: jobCategory.requireOrientation === "yes",
+        requiresOrientation: jobCategory.requireOrientation,
         totalAmount,
         paymentMethod: args.paymentMethod,
         referenceNumber: args.paymentReferenceNumber,

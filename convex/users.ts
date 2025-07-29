@@ -10,6 +10,10 @@ export const createUser = mutation({
         gender: v.optional(v.string()),
         birthDate: v.optional(v.string()),
         phoneNumber: v.optional(v.string()),
+        role: v.optional(v.union(
+            v.literal("applicant"),
+            v.literal("inspector"),
+        )),
         clerkId: v.string()
     },
     handler: async(ctx, args) => {
@@ -20,9 +24,10 @@ export const createUser = mutation({
 
         if (existingUser) return
         
-        //create user in db
+        //create user in db with default role as 'applicant'
         await ctx.db.insert("users", {
-            ...args
+            ...args,
+            role: args.role || "applicant"
         });
     }
 });
@@ -74,5 +79,66 @@ export const updateUser = mutation({
 
         await ctx.db.patch(user._id, updates);
         return user._id;
+    }
+});
+
+// Admin function to update user roles
+export const updateUserRole = mutation({
+    args: {
+        userId: v.id("users"),
+        role: v.union(
+            v.literal("applicant"),
+            v.literal("inspector"),
+        )
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            throw new Error("Not authenticated");
+        }
+
+        // Check if current user is admin
+        const currentUser = await ctx.db
+            .query("users")
+            .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        throw new Error("Unauthorized: Operation not allowed");
+
+        await ctx.db.patch(args.userId, { role: args.role });
+        return args.userId;
+    }
+});
+
+// Query to get users by role (admin only)
+export const getUsersByRole = query({
+    args: {
+        role: v.optional(v.union(
+            v.literal("applicant"),
+            v.literal("inspector"),
+        ))
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            throw new Error("Not authenticated");
+        }
+
+        // Check if current user is admin
+        const currentUser = await ctx.db
+            .query("users")
+            .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        throw new Error("Unauthorized: Operation not allowed");
+
+        if (args.role) {
+            return await ctx.db
+                .query("users")
+                .withIndex("by_role", (q) => q.eq("role", args.role))
+                .collect();
+        } else {
+            return await ctx.db.query("users").collect();
+        }
     }
 });
