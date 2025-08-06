@@ -1,5 +1,5 @@
-import { FONT_SIZES, FONT_WEIGHTS } from '@/src/constants/customFontSizes';
-import { moderateScale, verticalScale } from '@/src/utils/scaling-utils';
+import { FONT_SIZES, FONT_WEIGHTS } from '@/src/utils/fontSizes';
+import { moderateScale, verticalScale } from '@/src/utils/designSystem';
 import { StyleSheet } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 

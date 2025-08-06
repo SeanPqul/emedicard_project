@@ -109,12 +109,12 @@ export function useVerificationLogsRealtime() {
 // Real-time document requirements
 export function useDocumentRequirementsRealtime(formId?: Id<"forms">) {
   const requirements = useQuery(
-    api.requirements.getFormRequirements,
+    api.documentRequirements.getFormDocuments,
     formId ? { formId } : "skip"
   );
-  const uploadDocument = useMutation(api.requirements.uploadDocument);
-  const updateDocument = useMutation(api.requirements.updateDocumentField);
-  const deleteDocument = useMutation(api.requirements.deleteDocument);
+  const uploadDocument = useMutation(api.documentRequirements.uploadDocument);
+  const updateDocument = useMutation(api.documentRequirements.updateDocument);
+  const deleteDocument = useMutation(api.documentRequirements.deleteDocument);
 
   return {
     requirements,
@@ -284,8 +284,8 @@ export function useQRScannerRealtime() {
 
 // Real-time file upload with error handling
 export function useFileUploadRealtime() {
-  const generateUploadUrl = useMutation(api.requirements.generateUploadUrl);
-  const uploadDocument = useMutation(api.requirements.uploadDocument);
+  const generateUploadUrl = useMutation(api.documentRequirements.generateUploadUrl);
+  const uploadDocument = useMutation(api.documentRequirements.uploadDocument);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);

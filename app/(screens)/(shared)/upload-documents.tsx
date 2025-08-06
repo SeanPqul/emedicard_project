@@ -49,7 +49,7 @@ export default function UploadDocumentsScreen() {
   const organization = params.organization as string;
 
   const formData = useQuery(api.forms.getFormById, formId ? { formId: formId as any } : 'skip');
-  const requirementsByJobCategory = useQuery(api.requirements.getRequirementsByJobCategory, 
+  const requirementsByJobCategory = useQuery(api.documentRequirements.getRequirementsByJobCategory, 
     formData?.jobCategory ? { jobCategoryId: formData.jobCategory as any } : 'skip'
   );
 

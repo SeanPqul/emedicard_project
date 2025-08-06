@@ -2,6 +2,7 @@ import { httpRouter } from "convex/server";
 import { Webhook } from "svix";
 import { api } from "./_generated/api";
 import { httpAction } from "./_generated/server";
+import { createUserStorage } from '../src/utils/storage';
 
 const http = httpRouter();
 
@@ -53,7 +54,7 @@ http.route({
             const name = `${first_name || ""} ${last_name || ""}`.trim();
 
             try {
-                await ctx.runMutation(api.users.createUser, {
+                await ctx.runMutation(api.users.createUser.createUser, {
                     email,
                     fullname: name,
                     image: image_url,

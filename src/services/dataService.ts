@@ -1,5 +1,5 @@
-import { api } from '../../convex/_generated/api';
 import { ConvexReactClient } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 
 // Interface for data service to abstract away Convex implementation
@@ -12,7 +12,7 @@ export interface IDataService {
   // Application operations
   getUserApplications(): Promise<any[]>;
   createApplication(data: any): Promise<void>;
-  updateApplicationStatus(id: string, status: string): Promise<void>;
+  updateApplicationStatus(id: Id<"forms">, status: string): Promise<void>;
   
   // Payment operations
   getUserPayments(): Promise<any[]>;
@@ -23,7 +23,7 @@ export interface IDataService {
   
   // Notification operations
   getUserNotifications(): Promise<any[]>;
-  markNotificationAsRead(id: string): Promise<void>;
+  markNotificationAsRead(id: Id<"notifications">): Promise<void>;
   markAllNotificationsAsRead(): Promise<void>;
 }
 
@@ -32,51 +32,51 @@ export class ConvexDataService implements IDataService {
   constructor(private client: ConvexReactClient) {}
   
   async getCurrentUser() {
-    return this.client.query(api.users.getCurrentUser);
+    return this.client.query(api.users.getCurrentUser.getCurrentUser);
   }
   
   async createUser(userData: any) {
-    await this.client.mutation(api.users.createUser, userData);
+    await this.client.mutation(api.users.createUser.createUser, userData);
   }
   
   async updateUser(userData: any) {
-    await this.client.mutation(api.users.updateUser, userData);
+    await this.client.mutation(api.users.updateUser.updateUser, userData);
   }
   
   async getUserApplications() {
-    return this.client.query(api.forms.getUserApplications) || [];
+    return this.client.query(api.forms.getUserApplications.getUserApplications) || [];
   }
   
   async createApplication(data: any) {
-    await this.client.mutation(api.forms.createApplication, data);
+    await this.client.mutation(api.forms.createForm.createForm, data);
   }
   
-  async updateApplicationStatus(id: string, status: string) {
-    await this.client.mutation(api.forms.updateApplicationStatus, { id, status });
+  async updateApplicationStatus(id: Id<"forms">, status: string) {
+    await this.client.mutation(api.forms.updateForm.updateForm, { formId: id, status });
   }
   
   async getUserPayments() {
-    return this.client.query(api.payments.getUserPayments) || [];
+    return this.client.query(api.payments.getUserPayments.getUserPayments) || [];
   }
   
   async createPayment(data: any) {
-    await this.client.mutation(api.payments.createPayment, data);
+    await this.client.mutation(api.payments.createPayment.createPayment, data);
   }
   
   async getUserHealthCards() {
-    return this.client.query(api.healthCards.getUserHealthCards) || [];
+    return this.client.query(api.healthCards.getUserCards.getUserHealthCards) || [];
   }
   
   async getUserNotifications() {
-    return this.client.query(api.notifications.getUserNotifications) || [];
+    return this.client.query(api.notifications.getUserNotifications.getUserNotifications) || [];
   }
   
-  async markNotificationAsRead(id: string) {
-    await this.client.mutation(api.notifications.markAsRead, { id });
+  async markNotificationAsRead(id: Id<"notifications">) {
+    await this.client.mutation(api.notifications.markAsRead.markNotificationAsRead, { notificationId: id });
   }
   
   async markAllNotificationsAsRead() {
-    await this.client.mutation(api.notifications.markAllAsRead);
+    await this.client.mutation(api.notifications.markAllAsRead.markAllNotificationsAsRead);
   }
 }
 
@@ -107,7 +107,7 @@ export class MockDataService implements IDataService {
     console.log('Mock: Creating application', data);
   }
   
-  async updateApplicationStatus(id: string, status: string) {
+  async updateApplicationStatus(id: Id<"forms">, status: string) {
     console.log('Mock: Updating application status', id, status);
   }
   
@@ -127,7 +127,7 @@ export class MockDataService implements IDataService {
     return [];
   }
   
-  async markNotificationAsRead(id: string) {
+  async markNotificationAsRead(id: Id<"notifications">) {
     console.log('Mock: Marking notification as read', id);
   }
   

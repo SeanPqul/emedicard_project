@@ -2,6 +2,7 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "skipLibCheck": true,
     "paths": {
       "@/*": [
         "./*"
@@ -16,6 +17,15 @@
     "expo-env.d.ts",
     "app/(tabs)/index.tsx", 
     "app/(auth)/sign-in.tsx",
-    "src/types/**/*.d.ts"
-, "assets/styles/auth-styles/sign-in.ts", "assets/styles/auth-styles/sign-up.ts", "src/components/index.js", "src/components/Divider.js", "src/components/index.js", "src/components/Components.js", "app/upload-documents.tsx"  ]
+    "src/types/**/*.d.ts",
+    "assets/styles/auth-styles/sign-in.ts", 
+    "assets/styles/auth-styles/sign-up.ts", 
+    "src/components/index.js", 
+    "src/components/Divider.js", 
+    "src/components/Components.js", 
+    "app/upload-documents.tsx"
+  ],
+  "exclude": [
+    "convex/**/*"
+  ]
 }

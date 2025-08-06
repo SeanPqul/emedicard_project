@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Animated, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { FeedbackSystem, useFeedback } from '../../src/components/feedback/FeedbackSystem';
 import { styles } from '../../assets/styles/tabs-styles/dashboard';
 import { ActivityItem, CTAButton, EmptyState, StatCard } from '../../src/components';
 import { DashboardHeader } from '../../src/components/ui/DashboardHeader';
@@ -10,7 +11,7 @@ import { getColor, getSpacing } from '../../src/styles/theme';
 import { getUserDisplayName } from '../../src/utils/user-utils';
 
 export default function Dashboard() {
-  const { 
+  const {
     user, 
     userProfile,
     userApplications,
@@ -23,6 +24,8 @@ export default function Dashboard() {
     onRefresh,
     getGreeting 
   } = useDashboard();
+
+  const { messages, showSuccess, showError, dismissFeedback } = useFeedback();
 
   // Animation state for collapsible activity panel
   const [expanded, setExpanded] = useState(false);
@@ -344,7 +347,8 @@ export default function Dashboard() {
           )}
         </View>
 
-      </ScrollView>
+    </ScrollView>
+    <FeedbackSystem messages={messages} onDismiss={dismissFeedback} />
     </View>
   );
 }

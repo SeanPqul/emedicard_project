@@ -38,7 +38,7 @@
  * - Proper icon spacing and accessibility
  */
 
-import { moderateScale } from '@/src/utils/scaling-utils';
+import { moderateScale, verticalScale } from '@/src/utils/designSystem';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';

@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FeedbackSystem, useFeedback } from '../../../src/components/feedback/FeedbackSystem';
 import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
 import { CustomButton } from '../../../src/components';
@@ -35,13 +36,14 @@ export default function PaymentScreen() {
   const [referenceNumber, setReferenceNumber] = useState('');
   const [uploadedReceipt, setUploadedReceipt] = useState<UploadedReceipt | null>(null);
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
+  const { messages, showSuccess, showError, showWarning, dismissFeedback } = useFeedback();
   
   // Convex queries and mutations
   const form = useQuery(api.forms.getFormById, formId ? { formId: formId as Id<"forms"> } : "skip");
   const existingPayment = useQuery(api.payments.getPaymentByFormId, formId ? { formId: formId as Id<"forms"> } : "skip");
   const createPayment = useMutation(api.payments.createPayment);
   const updatePaymentStatus = useMutation(api.payments.updatePaymentStatus);
-  const generateUploadUrl = useMutation(api.requirements.generateUploadUrl);
+  const generateUploadUrl = useMutation(api.documentRequirements.generateUploadUrl);
   
   // Payment methods with real fees
   const paymentMethods: PaymentMethod[] = [
@@ -238,17 +240,15 @@ export default function PaymentScreen() {
       }
 
       setIsSubmitting(false);
-      Alert.alert(
+      showSuccess(
         'Payment Processed',
-        `Your payment has been ${method.id === 'Gcash' || method.id === 'Maya' ? 'processed' : 'recorded'}. Reference: ${finalReferenceNumber}`,
-        [
-          { text: 'OK', onPress: () => router.back() }
-        ]
+        `Your payment has been ${method.id === 'Gcash' || method.id === 'Maya' ? 'processed' : 'recorded'}. Reference: ${finalReferenceNumber}`
       );
+      setTimeout(() => router.back(), 2000);
     } catch (error) {
       setIsSubmitting(false);
       console.error('Payment error:', error);
-      Alert.alert('Payment Error', 'Failed to process payment. Please try again.');
+      showError('Payment Error', 'Failed to process payment. Please try again.');
     }
   };
 
@@ -424,6 +424,7 @@ export default function PaymentScreen() {
           />
         </View>
       </ScrollView>
+      <FeedbackSystem messages={messages} onDismiss={dismissFeedback} />
     </BaseScreenLayout>
   );
 }

@@ -42,6 +42,8 @@ import { ResponsiveLayout, ResponsiveRow, ResponsiveColumn, ResponsiveGrid } fro
 // Enhanced UI Components
 import { DragDropUpload } from "./DragDropUpload";
 import { QRCodeScanner } from "./QRCodeScanner";
+import { UnauthorizedAccess } from "./UnauthorizedAccess";
+import { FeedbackSystem, useFeedback } from "./feedback/FeedbackSystem";
 
 export {
     // Form Components
@@ -94,7 +96,10 @@ export {
     
     // Enhanced UI Components
     DragDropUpload,
-    QRCodeScanner
+    QRCodeScanner,
+    UnauthorizedAccess,
+    FeedbackSystem,
+    useFeedback
 };
 
 // Export types

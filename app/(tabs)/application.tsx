@@ -61,7 +61,7 @@ export default function Applications() {
   const [showFilters, setShowFilters] = useState(false);
 
   // Convex queries
-  const applications = useQuery(api.forms.getUserApplications) as ApplicationWithDetails[] | undefined;
+  const applications = useQuery(api["forms/getUserApplications"]) as ApplicationWithDetails[] | undefined;
 
   const onRefresh = async () => {
     setRefreshing(true);

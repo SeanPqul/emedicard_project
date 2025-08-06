@@ -300,7 +300,7 @@ This showcase demonstrates all components in the eMediCard design system with re
 
 #### Page with Transition
 ```tsx
-const ApplicationScreen = () => {
+const ApplicationDetailsScreen = () => {
   return (
     <PageTransition type="fade" duration={400}>
       <View style={styles.container}>

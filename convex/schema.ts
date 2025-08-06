@@ -12,10 +12,11 @@ export default defineSchema({
     gender: v.optional(v.string()),
     birthDate: v.optional(v.string()),
     phoneNumber: v.optional(v.string()),
-    role: v.union(
+    role: v.optional(v.union(
       v.literal("applicant"),
-      v.literal("inspector")
-    ),
+      v.literal("inspector"),
+      v.literal("admin"),
+    )),
     clerkId: v.string(),  //
     updatedAt: v.optional(v.number()), // For tracking profile updates
   }).index("by_clerk_id", ["clerkId"])
@@ -25,18 +26,24 @@ export default defineSchema({
   jobCategory: defineTable({
     name: v.string(),
     colorCode: v.string(),
-    requireOrientation: v.boolean() 
+    requireOrientation: v.optional(v.union(v.boolean(), v.string()))
   }),
+
+  jobCategoryRequirements: defineTable({
+    jobCategoryId: v.id("jobCategory"),
+    documentRequirementId: v.id("documentRequirements"),
+    required: v.boolean(),
+  }).index("by_category", ["jobCategoryId"])
+    .index("by_requirement", ["documentRequirementId"]),
 
   // Document requirements for each job category (e.g., valid ID, x-ray)
   documentRequirements: defineTable({
-    jobCategoryId: v.id("jobCategory"),
     name: v.string(),
     description: v.string(),
     icon: v.string(),
     required: v.boolean(),
     fieldName: v.string()
-  }).index("by_job_category", ["jobCategoryId"]),
+  }).index("by_field_name", ["fieldName"]),
 
   // Application form (base record for each user's application)
   forms: defineTable({
@@ -49,12 +56,7 @@ export default defineSchema({
     position: v.string(),
     organization: v.string(),
     civilStatus: v.string(),
-    status: v.union(
-      v.literal("Submitted"),
-      v.literal("Under Review"),
-      v.literal("Approved"),
-      v.literal("Rejected")
-    ),
+    status: v.string(), // e.g., "Pending", "Approved", "Rejected"
     approvedAt: v.optional(v.number()), // Only when approved
     remarks: v.optional(v.string()),    // Admin notes
     updatedAt: v.optional(v.number()),
@@ -64,19 +66,15 @@ export default defineSchema({
   formDocuments: defineTable({
     formId: v.id("forms"),
     documentRequirementId: v.id("documentRequirements"), // Links to specific requirement
-    type: v.string(), // e.g., "validId", "urinalysis", "xray", etc.
     fileName: v.string(), // Original filename
     fileId: v.id("_storage"), // Convex storage reference
     uploadedAt: v.number(),
-    status: v.union(
-      v.literal("Pending"), // Awaiting review
-      v.literal("Approved"),
-      v.literal("Rejected")
-    ),
+    status: v.string(), // e.g., "Pending", "Approved", "Rejected"
     remarks: v.optional(v.string()), // Admin feedback on document
+    reviewBy: v.optional(v.id("users")), // Who reviewed the document
+    reviewAt: v.optional(v.number()), // When the document was reviewed
   }).index("by_form", ["formId"])
-    .index("by_form_type", ["formId", "type"])
-    .index("by_requirement", ["documentRequirementId"]),
+    .index("by_form_type", ["formId", "documentRequirementId"]),
 
   // Payments
   payments: defineTable({
@@ -130,13 +128,12 @@ export default defineSchema({
   notifications: defineTable({
     userId: v.id("users"),
     formsId: v.optional(v.id("forms")),
-    title: v.string(),
+    title: v.optional(v.string()),
     message: v.string(),
     type: v.string(),  // e.g., "MissingDoc", "Payment", "Approval"
     read: v.boolean(),
     actionUrl: v.optional(v.string()),  // If clicking the notif opens a screen
-  }).index("by_user", ["userId"])
-    .index("by_user_time", ["userId", "_creationTime"]), // Sort recent first
+  }).index("by_user", ["userId"]), // Sort recent first with _creationTime automatically added
 
   // QR Scan Logs (for verification history)
   verificationLogs: defineTable({

@@ -10,7 +10,7 @@ import { useRoleBasedNavigation } from '@/src/hooks/useRoleBasedNavigation';
 import { useRouter } from 'expo-router';
 
 export default function InspectorDashboard() {
-  const userProfile = useQuery(api.users.getCurrentUser);
+  const userProfile = useQuery(api["users/getCurrent"].getCurrentUser);
   const { canAccessScreen } = useRoleBasedNavigation(userProfile?.role);
   const router = useRouter();
 

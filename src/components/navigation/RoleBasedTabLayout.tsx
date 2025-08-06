@@ -8,7 +8,7 @@ import { useRoleBasedNavigation } from '../../hooks/useRoleBasedNavigation';
 import { LoadingSpinner } from '../LoadingSpinner';
 
 export default function RoleBasedTabLayout() {
-  const userProfile = useQuery(api.users.getCurrentUser);
+  const userProfile = useQuery(api["users/getCurrent"].getCurrentUser);
   const { visibleTabs } = useRoleBasedNavigation(userProfile?.role);
 
   if (!userProfile) {

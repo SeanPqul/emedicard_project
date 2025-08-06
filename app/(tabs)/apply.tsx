@@ -1,40 +1,3 @@
-/**
- * Apply Screen - eMediCard Application
- * 
- * IMPLEMENTATION NOTES:
- * - Multi-step form following UI_DESIGN_PROMPT.md specifications (lines 66-103)
- * - Implements health card classification system from emedicarddocumentation.txt
- * - Step-by-step wizard: Application Type → Job Category → Personal Details → Upload Documents → Review
- * - Supports Yellow (food handlers), Green (non-food), Pink (skin contact) card types
- * - Document upload with validation per job category requirements
- * - Follows accessibility guidelines from UI_UX_IMPLEMENTATION_GUIDE.md
- * 
- * DOCUMENTATION REFERENCES:
- * - UI_DESIGN_PROMPT.md: Application screen structure and step indicator
- * - emedicarddocumentation.txt: Health card classification system (lines 217-226)
- * - UI_UX_IMPLEMENTATION_GUIDE.md: Form validation and accessibility standards
- * 
- * HEALTH CARD CATEGORIES (per documentation):
- * - Yellow: Food handlers (require orientation with sanitary inspector)
- * - Green: Non-food industry workers (security guards, receptionists, BPO staff)
- * - Pink: Skin-to-skin contact jobs (barbers, massage therapists, tattoo artists)
- * 
- * REQUIRED DOCUMENTS (per emedicarddocumentation.txt):
- * - Chest X-ray, CBC, urinalysis, fecalysis, drug test
- * - Neuropsychiatric test, Hepatitis B antibody test
- * - Valid ID, Community Tax Certificate, health card receipt (OR), 1x1 picture
- * 
- * PAYMENT PROCESSING:
- * - ₱10 transaction fee automatically added (per documentation line 213-215)
- * - Supports GCash and manual payment receipt upload
- * 
- * ACCESSIBILITY COMPLIANCE:
- * - Keyboard navigation support
- * - Screen reader compatible
- * - Form validation with descriptive error messages
- * - Touch targets meet 44x44 pixel minimum
- */
-
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
@@ -42,7 +5,9 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { validateApplicationStep } from '../../src/utils/applicationValidation';
+import { pickImageFromCamera, pickDocument, pickImageFromGallery } from '../../src/utils/fileUploadUtils';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -52,7 +17,10 @@ import {
   Text,
   TouchableOpacity,
   View
-} from 'react-native';
+, Dimensions } from 'react-native';
+import { FeedbackSystem, useFeedback } from '../../src/components/feedback/FeedbackSystem';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { styles } from '../../assets/styles/tabs-styles/apply';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
@@ -90,6 +58,24 @@ const CIVIL_STATUS_OPTIONS: CivilStatus[] = ['Single', 'Married', 'Divorced', 'W
 
 export default function Apply() {
   const { user } = useUser();
+  const insets = useSafeAreaInsets();
+  const screenHeight = Dimensions.get('window').height;
+  
+  // Calculate responsive tab bar height
+  const getTabBarHeight = () => {
+    // Standard tab bar heights for different devices
+    const baseTabBarHeight = Platform.OS === 'ios' ? 83 : 60;
+    
+    // For devices with safe area insets (like iPhone X and newer)
+    if (insets.bottom > 0) {
+      return baseTabBarHeight;
+    }
+    
+    // For older devices without safe area insets
+    return baseTabBarHeight - 20;
+  };
+  
+  const tabBarHeight = getTabBarHeight();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     applicationType: 'New',
@@ -100,6 +86,7 @@ export default function Apply() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [loading, setLoading] = useState(false);
+  const { messages, showSuccess, showError, showWarning, dismissFeedback } = useFeedback();
   
   // Upload documents state
   const [selectedDocuments, setSelectedDocuments] = useState<Record<string, any>>({});
@@ -113,7 +100,7 @@ export default function Apply() {
   const createForm = useMutation(api.forms.createForm);
   const submitApplication = useMutation(api.forms.submitApplicationForm);
   const userProfile = useQuery(api.users.getCurrentUser);
-  const requirementsByJobCategory = useQuery(api.requirements.getRequirementsByJobCategory, 
+  const requirementsByJobCategory = useQuery(api.documentRequirements.getRequirementsByJobCategory,
     formData.jobCategory ? { jobCategoryId: formData.jobCategory as any } : 'skip'
   );
   
@@ -133,109 +120,20 @@ export default function Apply() {
     getUploadState: () => ({ uploading: false, progress: 0, error: null, success: false }),
   };
 
-  const validateCurrentStep = (): boolean => {
-    const newErrors: Partial<FormData> = {};
-    
-    switch (currentStep) {
-      case 0:
-        // Application type is always valid (radio button)
-        break;
-      case 1:
-        if (!formData.jobCategory) {
-          newErrors.jobCategory = 'Please select a job category';
-        }
-        break;
-      case 2:
-        if (!formData.position.trim()) {
-          newErrors.position = 'Position is required';
-        }
-        if (!formData.organization.trim()) {
-          newErrors.organization = 'Organization is required';
-        }
-        break;
-      case 3:
-        // Upload Documents step - validate required documents
-        const documentRequirements = requirementsByJobCategory?.requirements || [];
-        const requiredDocuments = documentRequirements.filter(doc => doc.required);
-        const missingDocuments = requiredDocuments.filter(doc => !selectedDocuments[doc.fieldName]);
-        
-        if (missingDocuments.length > 0) {
-          Alert.alert(
-            'Missing Required Documents',
-            `Please upload the following required documents: ${missingDocuments.map(doc => doc.name).join(', ')}`,
-            [{ text: 'OK' }]
-          );
-          return false;
-        }
-        
-        // Check for any upload errors
-        const documentsWithErrors = Object.keys(selectedDocuments).filter(docKey => 
-          getUploadState(docKey)?.error
-        );
-        
-        if (documentsWithErrors.length > 0) {
-          Alert.alert(
-            'Upload Errors',
-            'Please fix the upload errors before proceeding.',
-            [{ text: 'OK' }]
-          );
-          return false;
-        }
-        
-        break;
-      case 4:
-        // Review step - comprehensive validation before submission
-        const docRequirements = requirementsByJobCategory?.requirements || [];
-        const requiredDocs = docRequirements.filter(doc => doc.required);
-        const missingDocs = requiredDocs.filter(doc => !selectedDocuments[doc.fieldName]);
-        const docsWithErrors = Object.keys(selectedDocuments).filter(docKey => getUploadState(docKey)?.error);
-        const uploading = Object.keys(selectedDocuments).some(docKey => getUploadState(docKey)?.uploading);
-        
-        if (missingDocs.length > 0) {
-          Alert.alert(
-            'Missing Required Documents',
-            `Please upload the following required documents: ${missingDocs.map(doc => doc.name).join(', ')}`,
-            [{ text: 'OK' }]
-          );
-          return false;
-        }
-        
-        if (docsWithErrors.length > 0) {
-          Alert.alert(
-            'Upload Errors',
-            'Please fix the upload errors before submitting.',
-            [{ text: 'OK' }]
-          );
-          return false;
-        }
-        
-        if (uploading) {
-          Alert.alert(
-            'Upload in Progress',
-            'Please wait for all documents to finish uploading before submitting.',
-            [{ text: 'OK' }]
-          );
-          return false;
-        }
-        
-        // Validate all previous steps data
-        if (!formData.jobCategory || !formData.position.trim() || !formData.organization.trim()) {
-          Alert.alert(
-            'Incomplete Application',
-            'Please ensure all required fields are completed.',
-            [{ text: 'OK' }]
-          );
-          return false;
-        }
-        
-        break;
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  // Use extracted validation logic
+  const validateCurrentStep = useCallback((): boolean => {
+    const { isValid, errors } = validateApplicationStep(
+      formData, 
+      currentStep, 
+      requirementsByJobCategory?.requirements || [], 
+      selectedDocuments, 
+      getUploadState
+    );
+    setErrors(errors);
+    return isValid;
+  }, [formData, currentStep, selectedDocuments, requirementsByJobCategory, getUploadState]);
 
-const handleNext = async () => {
+  const handleNext = async () => {
     console.log('handleNext called, currentStep:', currentStep);
     console.log('formData:', formData);
     
@@ -523,10 +421,10 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
       }));
 
       console.log('Upload successful for document:', documentId);
-      Alert.alert('Success', 'Document uploaded successfully!');
+      showSuccess('Document Uploaded', 'Your document has been uploaded successfully!');
     } catch (error) {
       console.error('Upload error details:', error);
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to upload document. Please try again.');
+      showError('Upload Failed', error instanceof Error ? error.message : 'Failed to upload document. Please try again.');
     }
   };
 
@@ -567,10 +465,10 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
                 return newFiles;
               });
               
-              Alert.alert('Success', 'Document removed successfully!');
+              showSuccess('Document Removed', 'Document has been removed successfully!');
             } catch (error) {
               console.error('Remove error:', error);
-              Alert.alert('Error', 'Failed to remove document. Please try again.');
+              showError('Remove Failed', 'Failed to remove document. Please try again.');
             }
           }
         },
@@ -1346,7 +1244,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
           style={styles.content} 
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ 
-            paddingBottom: 100, // Space for fixed navigation buttons + tab bar
+            paddingBottom: tabBarHeight + 20, // Dynamic space based on tab bar height
             flexGrow: 1 // Ensure content can expand
           }}
           keyboardShouldPersistTaps="handled"
@@ -1358,7 +1256,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
       </KeyboardAvoidingView>
 
       {/* Navigation Buttons - Fixed at bottom */}
-      <View style={styles.navigationButtons}>
+      <View style={[styles.navigationButtons, { bottom: Math.max(0, tabBarHeight - 20) }]}>
           {currentStep > 0 && (
             <TouchableOpacity 
               style={styles.previousButton} 
@@ -1491,6 +1389,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
             </View>
           </View>
         </Modal>
+        <FeedbackSystem messages={messages} onDismiss={dismissFeedback} />
     </View>
   );
 }

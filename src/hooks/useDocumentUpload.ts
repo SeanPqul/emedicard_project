@@ -21,22 +21,26 @@ interface UploadState {
 }
 
 interface DocumentUploadResult {
-  requirementId: Id<"requirements">;
+  requirementId: Id<"documentRequirements">;
   fieldName: string;
   storageId: Id<"_storage">;
   fileName: string;
   fileType: string;
   fileSize: number;
+  status?: "Pending" | "Approved" | "Rejected";
+  reviewBy?: Id<"users">;
+  reviewAt?: number;
+  remarks?: string;
 }
 
 export const useDocumentUpload = (formId: Id<"forms">) => {
   const [uploadStates, setUploadStates] = useState<Record<string, UploadState>>({});
   const [cachedDocuments, setCachedDocuments] = useState<CachedDocument[]>([]);
   
-  const generateUploadUrl = useMutation(api.requirements.generateUploadUrl);
-  const uploadDocument = useMutation(api.requirements.uploadDocument);
-  const updateDocumentField = useMutation(api.requirements.updateDocumentField);
-  const deleteDocument = useMutation(api.requirements.deleteDocument);
+  const generateUploadUrl = useMutation(api.documentRequirements.generateUploadUrl);
+  const uploadDocument = useMutation(api.documentRequirements.uploadDocument);
+  const updateDocument = useMutation(api.documentRequirements.updateDocument);
+  const deleteDocument = useMutation(api.documentRequirements.deleteDocument);
 
   // Load cached documents on mount
   useEffect(() => {
@@ -230,7 +234,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       const { storageId } = await uploadResponse.json();
 
       // Update document field
-      const result = await updateDocumentField({
+      const result = await updateDocument({
         formId,
         fieldName,
         storageId,
@@ -258,7 +262,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       });
       throw error;
     }
-  }, [formId, generateUploadUrl, updateDocumentField, validateFile, setUploadState]);
+  }, [formId, generateUploadUrl, updateDocument, validateFile, setUploadState]);
 
   const removeFile = useCallback(async (
     fieldName: string,
@@ -429,7 +433,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       
       // Save document metadata to Convex using the new formDocuments model
       const result = {
-        requirementId: documentRequirementId as Id<"requirements">, // Legacy compatibility
+        requirementId: documentRequirementId as Id<"documentRequirements">,
         fieldName,
         storageId,
         fileName: cachedDoc.fileName,

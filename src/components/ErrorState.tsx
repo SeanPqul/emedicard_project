@@ -41,12 +41,12 @@ interface ErrorStateProps {
   showSupportContact?: boolean;
   icon?: keyof typeof Ionicons.glyphMap;
   variant?: 'inline' | 'fullscreen' | 'card';
-  actions?: Array<{
+  actions?: {
     text: string;
     onPress: () => void;
     variant?: 'primary' | 'secondary' | 'danger';
     loading?: boolean;
-  }>;
+  }[];
 }
 
 export const ErrorState: React.FC<ErrorStateProps> = ({

@@ -33,7 +33,7 @@ export default function DocumentRequirements() {
   
   const jobCategories = useQuery(api.jobCategories.getAllJobCategories);
   const requirementsByCategory = useQuery(
-    api.requirements.getRequirementsByJobCategory,
+    api.documentRequirements.getRequirementsByJobCategory,
     selectedCategoryId ? { jobCategoryId: selectedCategoryId as any } : "skip"
   );
   const seedDatabase = useMutation(api.seedData.seedJobCategoriesAndRequirements);

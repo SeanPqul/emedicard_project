@@ -309,9 +309,9 @@ export const styles = StyleSheet.create({
     borderTopColor: getColor('border.light'),
     ...getShadow('large'),
     position: 'absolute',
-    bottom: 58,
     left: 0,
     right: 0,
+    // bottom will be set dynamically with safe area insets
   },
   previousButton: {
     paddingHorizontal: getSpacing('lg'),
