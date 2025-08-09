@@ -16,7 +16,7 @@ export interface Notification {
   userId: string;
   formsId?: string;
   title?: string;
-  message: string; // Note: keeping "messag" typo for backward compatibility in existing data
+  message: string;
   type: NotificationType;
   priority?: NotificationPriority;
   read: boolean;

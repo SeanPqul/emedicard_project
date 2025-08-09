@@ -1,10 +1,24 @@
+/**
+ * @deprecated This file is deprecated. Use src/api/* modules instead.
+ * 
+ * This ConvexService class has been replaced by feature-scoped API modules
+ * in the src/api/ directory. Each API module (users.api.ts, forms.api.ts, etc.)
+ * provides focused functionality for specific features.
+ * 
+ * Migration:
+ * - Replace ConvexService.getCurrentUser() with getCurrentUser() from src/api/users.api.ts
+ * - Replace ConvexService.getUserApplications() with getUserForms() from src/api/forms.api.ts
+ * - Replace ConvexService.getUserPayments() with getUserPayments() from src/api/payments.api.ts
+ * - And so on...
+ */
+
 import { api } from '../../convex/_generated/api';
 import { ConvexReactClient } from 'convex/react';
 import { User, Application, Payment, HealthCard, Notification } from '../types';
 
 /**
- * Service layer for Convex database operations
- * Centralizes all database queries and mutations
+ * @deprecated Service layer for Convex database operations
+ * @deprecated Use src/api/* modules instead
  */
 export class ConvexService {
   private static client: ConvexReactClient;
@@ -36,7 +50,7 @@ export class ConvexService {
   // Application Operations
   static async getUserApplications(): Promise<Application[]> {
     try {
-      return await this.client.query(api.forms.getUserApplications.getUserApplications) || [];
+      return (await this.client.query(api.forms.getUserApplications.getUserApplications)) || [];
     } catch (error) {
       console.error('Error fetching user applications:', error);
       return [];
@@ -65,7 +79,7 @@ export class ConvexService {
   // Payment Operations
   static async getUserPayments(): Promise<Payment[]> {
     try {
-      return await this.client.query(api.payments.getUserPayments.getUserPayments) || [];
+      return (await this.client.query(api.payments.getUserPayments.getUserPayments)) || [];
     } catch (error) {
       console.error('Error fetching user payments:', error);
       return [];
@@ -96,7 +110,7 @@ export class ConvexService {
   // Health Card Operations
   static async getUserHealthCards(): Promise<HealthCard[]> {
     try {
-      return await this.client.query(api.healthCards.getUserCards.getUserHealthCards) || [];
+      return (await this.client.query(api.healthCards.getUserCards.getUserCards)) || [];
     } catch (error) {
       console.error('Error fetching user health cards:', error);
       return [];
@@ -115,7 +129,7 @@ export class ConvexService {
   // Notification Operations
   static async getUserNotifications(): Promise<Notification[]> {
     try {
-      return await this.client.query(api.notifications.getUserNotifications.getUserNotifications) || [];
+      return (await this.client.query(api.notifications.getUserNotifications.getUserNotifications)) || [];
     } catch (error) {
       console.error('Error fetching user notifications:', error);
       return [];
@@ -124,7 +138,7 @@ export class ConvexService {
 
   static async markNotificationAsRead(notificationId: string): Promise<boolean> {
     try {
-      await this.client.mutation(api.notifications.markAsRead.markNotificationAsRead, { notificationId });
+      await this.client.mutation(api.notifications.markAsRead.markAsRead, { notificationId });
       return true;
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -134,10 +148,8 @@ export class ConvexService {
 
   static async markAllNotificationsAsRead(): Promise<boolean> {
     try {
-      // Note: markAllAsRead function doesn't exist in your Convex functions
-      // You may need to implement this function in your Convex backend
-      console.warn('markAllNotificationsAsRead function not implemented in Convex backend');
-      return false;
+      await this.client.mutation(api.notifications.markAllAsRead.markAllAsRead);
+      return true;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
       return false;

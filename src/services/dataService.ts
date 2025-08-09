@@ -1,8 +1,24 @@
+/**
+ * @deprecated This file is deprecated. Use src/api/* modules instead.
+ * 
+ * This data service abstraction has been replaced by feature-scoped API modules
+ * in the src/api/ directory. Each API module provides focused functionality
+ * and better type safety.
+ * 
+ * Migration:
+ * - Replace IDataService.getCurrentUser() with getCurrentUser() from src/api/users.api.ts
+ * - Replace IDataService.getUserApplications() with getUserForms() from src/api/forms.api.ts
+ * - Replace IDataService.getUserPayments() with getUserPayments() from src/api/payments.api.ts
+ * - And so on...
+ */
+
 import { ConvexReactClient } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 
-// Interface for data service to abstract away Convex implementation
+/**
+ * @deprecated Interface for data service - use src/api/* modules instead
+ */
 export interface IDataService {
   // User operations
   getCurrentUser(): Promise<any>;

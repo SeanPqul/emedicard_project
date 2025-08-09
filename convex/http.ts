@@ -2,7 +2,6 @@ import { httpRouter } from "convex/server";
 import { Webhook } from "svix";
 import { api } from "./_generated/api";
 import { httpAction } from "./_generated/server";
-import { createUserStorage } from '../src/utils/storage';
 
 const http = httpRouter();
 
@@ -22,7 +21,7 @@ http.route({
         const svix_timestamp = request.headers.get("svix-timestamp");
 
         if (!svix_id || !svix_signature || !svix_timestamp) {
-            return new Response("Error occured -- no svix headers", {
+            return new Response("Error occurred -- no svix headers", {
                 status: 400,
             });
         }
@@ -42,7 +41,7 @@ http.route({
             }) as any;
         } catch (err) {
             console.error("Error verifying webhook: ", err)
-            return new Response("Error occured", {status: 400})
+            return new Response("Error occurred", {status: 400})
         }
 
         const eventType = evt.type;

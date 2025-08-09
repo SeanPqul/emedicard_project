@@ -1,9 +1,13 @@
+// Convex ID types for type safety
+export type Id<T extends string> = string & { readonly __tableName: T };
+
 // User Related Types
-export type UserRole = 'applicant' | 'inspector';
+export type UserRole = 'applicant' | 'inspector' | 'admin';
 // Note: Admin functionality is handled via separate web interface
 
 export interface User {
-  _id: string;
+  _id: Id<"users">;
+  _creationTime: number;
   username: string;
   fullname: string;
   email: string;
@@ -17,10 +21,10 @@ export interface User {
 
 // Application Related Types
 export interface Application {
-  _id: string;
-  userId: string;
+  _id: Id<"forms">;
+  userId: Id<"users">;
   applicationType: 'New' | 'Renew';
-  jobCategory: string;
+  jobCategory: Id<"jobCategory">;
   position: string;
   organization: string;
   civilStatus: string;
@@ -30,9 +34,9 @@ export interface Application {
 }
 
 export interface ApplicationForm {
-  _id: string;
-  userId: string;
-  formId: string;
+  _id: Id<"forms">;
+  userId: Id<"users">;
+  formId: Id<"forms">;
   status: 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
   approvedAt: number;
   remarks?: string;
@@ -40,21 +44,21 @@ export interface ApplicationForm {
 
 // Payment Related Types
 export interface Payment {
-  _id: string;
-  formId: string;
+  _id: Id<"payments">;
+  formId: Id<"forms">;
   amount: number;
   serviceFee: number;
   netAmount: number;
   method: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
   referenceNumber: string;
-  receiptId?: string;
+  receiptId?: Id<"_storage">;
   status: 'Pending' | 'Complete' | 'Failed';
 }
 
 // Health Card Related Types
 export interface HealthCard {
-  _id: string;
-  formId: string;
+  _id: Id<"healthCards">;
+  formId: Id<"forms">;
   cardUrl: string;
   issuedAt: number;
   expiresAt: number;
@@ -62,9 +66,9 @@ export interface HealthCard {
 }
 
 export interface HealthCardData {
-  _id: string;
+  _id: Id<"healthCards">;
   form: {
-    _id: string;
+    _id: Id<"forms">;
     applicationType: 'New' | 'Renew';
     position: string;
     organization: string;
@@ -78,26 +82,26 @@ export interface HealthCardData {
 
 // Notification Related Types
 export interface Notification {
-  _id: string;
-  userId: string;
-  formsId?: string;
+  _id: Id<"notifications">;
+  userId: Id<"users">;
+  formsId?: Id<"forms">;
   type: 'MissingDoc' | 'PaymentReceived' | 'FormApproved' | 'OrientationScheduled' | 'CardIssue';
-  messag: string; // Note: keeping original typo from schema
+  message: string;
   read: boolean;
   createdAt?: number;
 }
 
 // Job Category Types
 export interface JobCategory {
-  _id: string;
+  _id: Id<"jobCategory">;
   name: string;
   colorCode: string;
   requireOrientation: boolean;
 }
 
 export interface DocumentRequirement {
-  _id: string;
-  jobCategoryId: string;
+  _id: Id<"documentRequirements">;
+  jobCategoryId: Id<"jobCategory">;
   name: string;
   description: string;
   icon: string;
