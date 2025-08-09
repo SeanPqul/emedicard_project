@@ -43,7 +43,7 @@ export default function PaymentScreen() {
   const existingPayment = useQuery(api.payments.getPaymentByFormId, formId ? { formId: formId as Id<"forms"> } : "skip");
   const createPayment = useMutation(api.payments.createPayment);
   const updatePaymentStatus = useMutation(api.payments.updatePaymentStatus);
-  const generateUploadUrl = useMutation(api.documentRequirements.generateUploadUrl);
+  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   
   // Payment methods with real fees
   const paymentMethods: PaymentMethod[] = [

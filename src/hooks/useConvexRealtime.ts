@@ -284,7 +284,7 @@ export function useQRScannerRealtime() {
 
 // Real-time file upload with error handling
 export function useFileUploadRealtime() {
-  const generateUploadUrl = useMutation(api.documentRequirements.generateUploadUrl);
+  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const uploadDocument = useMutation(api.documentRequirements.uploadDocument);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState(false);

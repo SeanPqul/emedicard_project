@@ -23,7 +23,7 @@ interface NotificationItem {
   userId: string;
   formsId?: string;
   type: 'MissingDoc' | 'PaymentReceived' | 'FormApproved' | 'OrientationScheduled' | 'CardIssue';
-  messag: string; // Note: typo in schema
+  message: string;
   read: boolean;
 }
 
@@ -304,7 +304,7 @@ export default function Notifications() {
           </View>
           
           <Text style={styles.notificationMessage}>
-            {notification.messag}
+            {notification.message}
           </Text>
           
           {notification.formsId && (

@@ -37,7 +37,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
   const [uploadStates, setUploadStates] = useState<Record<string, UploadState>>({});
   const [cachedDocuments, setCachedDocuments] = useState<CachedDocument[]>([]);
   
-  const generateUploadUrl = useMutation(api.documentRequirements.generateUploadUrl);
+  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const uploadDocument = useMutation(api.documentRequirements.uploadDocument);
   const updateDocument = useMutation(api.documentRequirements.updateDocument);
   const deleteDocument = useMutation(api.documentRequirements.deleteDocument);
