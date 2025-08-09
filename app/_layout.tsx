@@ -1,18 +1,23 @@
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { ClerkProvider } from '@clerk/clerk-expo'
-import { tokenCache } from '@clerk/clerk-expo/token-cache'
+import { ErrorBoundary } from "@/src/components/ErrorBoundary";
+import { ToastProvider } from "@/src/contexts/ToastContext";
+import InitialLayout from "@/src/layouts/InitialLayout";
+import ClerkAndConvexProvider from "@/src/provider/ClerkAndConvexProvider";
 import { StatusBar } from "react-native";
-import InitialLayout from "@/src/components/InitialLayout";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   return (
-    <ClerkProvider tokenCache={tokenCache}>
-      <SafeAreaProvider>
-        <SafeAreaView style={{ flex: 1 }}>
-          <StatusBar backgroundColor="#10B981" barStyle="dark-content" />
-          <InitialLayout />
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </ClerkProvider>
+    <ErrorBoundary>
+      <ClerkAndConvexProvider>
+        <SafeAreaProvider>
+          <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
+            <StatusBar backgroundColor="#10B981" barStyle="dark-content" />
+            <ToastProvider>
+              <InitialLayout />
+            </ToastProvider>
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </ClerkAndConvexProvider>
+    </ErrorBoundary>
   );
 }

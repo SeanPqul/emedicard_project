@@ -1,0 +1,153 @@
+/**
+ * @deprecated This file is deprecated. Use src/api/* modules instead.
+ * 
+ * This data service abstraction has been replaced by feature-scoped API modules
+ * in the src/api/ directory. Each API module provides focused functionality
+ * and better type safety.
+ * 
+ * Migration:
+ * - Replace IDataService.getCurrentUser() with getCurrentUser() from src/api/users.api.ts
+ * - Replace IDataService.getUserApplications() with getUserForms() from src/api/forms.api.ts
+ * - Replace IDataService.getUserPayments() with getUserPayments() from src/api/payments.api.ts
+ * - And so on...
+ */
+
+import { ConvexReactClient } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { Id } from '../../convex/_generated/dataModel';
+
+/**
+ * @deprecated Interface for data service - use src/api/* modules instead
+ */
+export interface IDataService {
+  // User operations
+  getCurrentUser(): Promise<any>;
+  createUser(userData: any): Promise<void>;
+  updateUser(userData: any): Promise<void>;
+  
+  // Application operations
+  getUserApplications(): Promise<any[]>;
+  createApplication(data: any): Promise<void>;
+  updateApplicationStatus(id: Id<"forms">, status: string): Promise<void>;
+  
+  // Payment operations
+  getUserPayments(): Promise<any[]>;
+  createPayment(data: any): Promise<void>;
+  
+  // Health card operations
+  getUserHealthCards(): Promise<any[]>;
+  
+  // Notification operations
+  getUserNotifications(): Promise<any[]>;
+  markNotificationAsRead(id: Id<"notifications">): Promise<void>;
+  markAllNotificationsAsRead(): Promise<void>;
+}
+
+// Convex implementation of the data service
+export class ConvexDataService implements IDataService {
+  constructor(private client: ConvexReactClient) {}
+  
+  async getCurrentUser() {
+    return this.client.query(api.users.getCurrentUser.getCurrentUser);
+  }
+  
+  async createUser(userData: any) {
+    await this.client.mutation(api.users.createUser.createUser, userData);
+  }
+  
+  async updateUser(userData: any) {
+    await this.client.mutation(api.users.updateUser.updateUser, userData);
+  }
+  
+  async getUserApplications() {
+    return this.client.query(api.forms.getUserApplications.getUserApplications) || [];
+  }
+  
+  async createApplication(data: any) {
+    await this.client.mutation(api.forms.createForm.createForm, data);
+  }
+  
+  async updateApplicationStatus(id: Id<"forms">, status: string) {
+    await this.client.mutation(api.forms.updateForm.updateForm, { formId: id, status });
+  }
+  
+  async getUserPayments() {
+    return this.client.query(api.payments.getUserPayments.getUserPayments) || [];
+  }
+  
+  async createPayment(data: any) {
+    await this.client.mutation(api.payments.createPayment.createPayment, data);
+  }
+  
+  async getUserHealthCards() {
+    return this.client.query(api.healthCards.getUserCards.getUserHealthCards) || [];
+  }
+  
+  async getUserNotifications() {
+    return this.client.query(api.notifications.getUserNotifications.getUserNotifications) || [];
+  }
+  
+  async markNotificationAsRead(id: Id<"notifications">) {
+    await this.client.mutation(api.notifications.markAsRead.markNotificationAsRead, { notificationId: id });
+  }
+  
+  async markAllNotificationsAsRead() {
+    await this.client.mutation(api.notifications.markAllAsRead.markAllNotificationsAsRead);
+  }
+}
+
+// Factory function to create data service instances
+export function createDataService(client: ConvexReactClient): IDataService {
+  return new ConvexDataService(client);
+}
+
+// Mock implementation for testing
+export class MockDataService implements IDataService {
+  async getCurrentUser() {
+    return { id: '1', name: 'Test User', email: 'test@example.com' };
+  }
+  
+  async createUser(userData: any) {
+    console.log('Mock: Creating user', userData);
+  }
+  
+  async updateUser(userData: any) {
+    console.log('Mock: Updating user', userData);
+  }
+  
+  async getUserApplications() {
+    return [];
+  }
+  
+  async createApplication(data: any) {
+    console.log('Mock: Creating application', data);
+  }
+  
+  async updateApplicationStatus(id: Id<"forms">, status: string) {
+    console.log('Mock: Updating application status', id, status);
+  }
+  
+  async getUserPayments() {
+    return [];
+  }
+  
+  async createPayment(data: any) {
+    console.log('Mock: Creating payment', data);
+  }
+  
+  async getUserHealthCards() {
+    return [];
+  }
+  
+  async getUserNotifications() {
+    return [];
+  }
+  
+  async markNotificationAsRead(id: Id<"notifications">) {
+    console.log('Mock: Marking notification as read', id);
+  }
+  
+  async markAllNotificationsAsRead() {
+    console.log('Mock: Marking all notifications as read');
+  }
+}

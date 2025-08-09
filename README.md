@@ -1,4 +1,17 @@
-# Welcome to your Expo app 👋
+# eMediCard Mobile Application
+
+A React Native Expo application for managing health card applications and digital health cards.
+
+## Recent Updates
+
+**Dashboard Refactoring (v2.0.0)** - January 15, 2024
+- Enhanced accessibility with improved touch targets
+- New CTAButton component for primary actions
+- Extracted DashboardHeader component
+- Added collapsible activity panel with animations
+- See [MIGRATION_NOTES.md](./MIGRATION_NOTES.md) for complete details
+
+## About
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
