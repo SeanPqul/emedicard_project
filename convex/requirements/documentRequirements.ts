@@ -1,2 +1,6 @@
-// This file is deprecated - functions have been moved to requirements.ts
-// Keeping this file for compatibility but removing circular imports
+// This file provides document requirements query functionality
+export const documentRequirementsQuery = async () => {
+  // This is a placeholder for the document requirements query
+  // Implementation should be added based on actual requirements
+  return [];
+};

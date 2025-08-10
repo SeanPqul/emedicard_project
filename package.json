@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "seed:seedJobCategoriesAndRequirements": "npx convex run seed:seedJobCategoriesAndRequirements",
-    "seed:clearSeedData": "npx convex run seed:clearSeedData"
+    "seed:clearSeedData": "npx convex run seed:clearSeedData",
+    "codemod:convex-rename": "node ./scripts/run-convex-codemod.js"
   },
   "dependencies": {
     "@clerk/clerk-expo": "^2.13.2",
@@ -78,6 +79,8 @@
     "react-native-svg-transformer": "^1.5.1",
     "react-test-renderer": "^19.0.0",
     "ts-jest": "^29.4.1",
+    "ts-morph": "^26.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "~5.8.3"
   },
   "private": true

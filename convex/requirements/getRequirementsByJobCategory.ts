@@ -1,7 +1,7 @@
 import { query } from "../_generated/server";
 import { v } from "convex/values";
 
-export const getRequirementsByJobCategory = query({
+export const getRequirementsByJobCategoryQuery = query({
   args: { jobCategoryId: v.id("jobCategory") },
   handler: async (ctx, args) => {
     const jobCategory = await ctx.db.get(args.jobCategoryId);
@@ -50,4 +50,3 @@ export const getRequirementsByJobCategory = query({
     };
   },
 });
-

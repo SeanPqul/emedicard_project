@@ -1,6 +1,6 @@
 import { query } from "../_generated/server";
 
-export const getUserHealthCards = query({
+export const getUserCardsQuery = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();

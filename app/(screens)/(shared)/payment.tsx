@@ -41,8 +41,8 @@ export default function PaymentScreen() {
   // Convex queries and mutations
   const form = useQuery(api.forms.getFormById, formId ? { formId: formId as Id<"forms"> } : "skip");
   const existingPayment = useQuery(api.payments.getPaymentByFormId, formId ? { formId: formId as Id<"forms"> } : "skip");
-  const createPayment = useMutation(api.payments.createPayment);
-  const updatePaymentStatus = useMutation(api.payments.updatePaymentStatus);
+  const createPayment = useMutation(api.payments.createPaymentMutation);
+  const updatePaymentStatus = useMutation(api.payments.updatePaymentStatusMutation);
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   
   // Payment methods with real fees

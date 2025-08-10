@@ -1,0 +1,410 @@
+﻿[
+    {
+        "Path":  "convex/migrations.ts",
+        "ExportName":  "seedJobCategoriesAndRequirements",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/migrations.ts",
+        "ExportName":  "clearSeedData",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/admin/migrations.ts",
+        "ExportName":  "migrateUsersAddRole",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/admin/migrations.ts",
+        "ExportName":  "setUserRole",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/admin/migrations.ts",
+        "ExportName":  "migrateFormsAddStatus",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/admin/migrations.ts",
+        "ExportName":  "migrateJobCategoryRequireOrientation",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/admin/migrations.ts",
+        "ExportName":  "migrateNotificationsAddTitle",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/admin/migrations.ts",
+        "ExportName":  "cleanupDatabase",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/admin/migrations.ts",
+        "ExportName":  "resetDatabase",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/admin/seed.ts",
+        "ExportName":  "seedJobCategoriesAndRequirements",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/admin/seed.ts",
+        "ExportName":  "clearSeedData",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/dashboard/getDashboardData.ts",
+        "ExportName":  "getDashboardData",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/forms/createForm.ts",
+        "ExportName":  "createForm",
+        "CallType":  "mutation",
+        "CollectionReferences":  "jobCategory"
+    },
+    {
+        "Path":  "convex/forms/getById.ts",
+        "ExportName":  "getFormById",
+        "CallType":  "query",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/forms/getFormById.ts",
+        "ExportName":  "getFormById",
+        "CallType":  "query",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/forms/getUserApplications.ts",
+        "ExportName":  "getUserApplications",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/forms/submitApplicationForm.ts",
+        "ExportName":  "submitApplicationForm",
+        "CallType":  "mutation",
+        "CollectionReferences":  "_storage, forms"
+    },
+    {
+        "Path":  "convex/forms/updateForm.ts",
+        "ExportName":  "updateForm",
+        "CallType":  "mutation",
+        "CollectionReferences":  "forms, jobCategory"
+    },
+    {
+        "Path":  "convex/healthCards/getByFormId.ts",
+        "ExportName":  "getHealthCardByFormId",
+        "CallType":  "query",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/healthCards/getByVerificationToken.ts",
+        "ExportName":  "getHealthCardByVerificationToken",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/healthCards/getUserCards.ts",
+        "ExportName":  "getUserHealthCards",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/healthCards/issueHealthCard.ts",
+        "ExportName":  "issueHealthCard",
+        "CallType":  "mutation",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/healthCards/updateHealthCard.ts",
+        "ExportName":  "updateHealthCard",
+        "CallType":  "mutation",
+        "CollectionReferences":  "healthCards"
+    },
+    {
+        "Path":  "convex/jobCategories/createJobType.ts",
+        "ExportName":  "createJobCategory",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/jobCategories/deleteJobType.ts",
+        "ExportName":  "deleteJobCategory",
+        "CallType":  "mutation",
+        "CollectionReferences":  "jobCategory"
+    },
+    {
+        "Path":  "convex/jobCategories/getAllJobType.ts",
+        "ExportName":  "getAllJobCategories",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/jobCategories/getById.ts",
+        "ExportName":  "getJobCategoryById",
+        "CallType":  "query",
+        "CollectionReferences":  "jobCategory"
+    },
+    {
+        "Path":  "convex/jobCategories/updateJobType.ts",
+        "ExportName":  "updateJobCategory",
+        "CallType":  "mutation",
+        "CollectionReferences":  "jobCategory"
+    },
+    {
+        "Path":  "convex/notifications/createNotif.ts",
+        "ExportName":  "createNotification",
+        "CallType":  "mutation",
+        "CollectionReferences":  "forms, users"
+    },
+    {
+        "Path":  "convex/notifications/getUnreadCount.ts",
+        "ExportName":  "getUnreadNotificationCount",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/notifications/getUserNotifications.ts",
+        "ExportName":  "getUserNotifications",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/notifications/markAllAsRead.ts",
+        "ExportName":  "markAllNotificationsAsRead",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/notifications/markAsRead.ts",
+        "ExportName":  "markNotificationAsRead",
+        "CallType":  "mutation",
+        "CollectionReferences":  "notifications"
+    },
+    {
+        "Path":  "convex/orientations/getUserOrientations.ts",
+        "ExportName":  "getUserOrientations",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/payments/createPayment.ts",
+        "ExportName":  "createPayment",
+        "CallType":  "mutation",
+        "CollectionReferences":  "_storage, forms"
+    },
+    {
+        "Path":  "convex/payments/getByFormId.ts",
+        "ExportName":  "getPaymentByFormId",
+        "CallType":  "query",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/payments/getPaymentByFormId.ts",
+        "ExportName":  "getPaymentByFormId",
+        "CallType":  "query",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/payments/getUserPayments.ts",
+        "ExportName":  "getUserPayments",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/payments/updatePaymentStatus.ts",
+        "ExportName":  "updatePaymentStatus",
+        "CallType":  "mutation",
+        "CollectionReferences":  "payments"
+    },
+    {
+        "Path":  "convex/requirements/adminBatchReviewDocuments.ts",
+        "ExportName":  "adminBatchReviewDocuments",
+        "CallType":  "mutation",
+        "CollectionReferences":  "formDocuments"
+    },
+    {
+        "Path":  "convex/requirements/adminGetDocumentsByStatus.ts",
+        "ExportName":  "adminGetDocumentsByStatus",
+        "CallType":  "query",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/requirements/adminGetPendingDocuments.ts",
+        "ExportName":  "adminGetPendingDocuments",
+        "CallType":  "query",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/requirements/adminReviewDocument.ts",
+        "ExportName":  "adminReviewDocument",
+        "CallType":  "mutation",
+        "CollectionReferences":  "formDocuments"
+    },
+    {
+        "Path":  "convex/requirements/createJobCategoryRequirement.ts",
+        "ExportName":  "createJobCategoryRequirement",
+        "CallType":  "mutation",
+        "CollectionReferences":  "documentRequirements, jobCategory"
+    },
+    {
+        "Path":  "convex/requirements/deleteDocument.ts",
+        "ExportName":  "deleteDocument",
+        "CallType":  "mutation",
+        "CollectionReferences":  "_storage, forms"
+    },
+    {
+        "Path":  "convex/requirements/deleteJobCategoryRequirement.ts",
+        "ExportName":  "deleteJobCategoryRequirement",
+        "CallType":  "mutation",
+        "CollectionReferences":  "jobCategoryRequirements"
+    },
+    {
+        "Path":  "convex/requirements/generateUploadUrl.ts",
+        "ExportName":  "generateUploadUrl",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/requirements/getCategoryRequirements.ts",
+        "ExportName":  "queryCategoryRequirements",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/requirements/getDocumentUrl.ts",
+        "ExportName":  "queryDocumentUrl",
+        "CallType":  "query",
+        "CollectionReferences":  "formDocuments"
+    },
+    {
+        "Path":  "convex/requirements/getFormDocuments.ts",
+        "ExportName":  "queryDocuments",
+        "CallType":  "query",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/requirements/getFormDocumentsRequirementsQuery.ts",
+        "ExportName":  "queryDocuments",
+        "CallType":  "query",
+        "CollectionReferences":  "forms"
+    },
+    {
+        "Path":  "convex/requirements/getJobCategoryRequirementsQuery.ts",
+        "ExportName":  "queryJobCategory",
+        "CallType":  "query",
+        "CollectionReferences":  "jobCategory"
+    },
+    {
+        "Path":  "convex/requirements/getRequirementsByJobCategoryQuery.ts",
+        "ExportName":  "queryRequirements",
+        "CallType":  "query",
+        "CollectionReferences":  "jobCategory"
+    },
+    {
+        "Path":  "convex/requirements/updateDocumentFieldMutation.ts",
+        "ExportName":  "updateDocumentField",
+        "CallType":  "mutation",
+        "CollectionReferences":  "_storage, forms, users"
+    },
+    {
+        "Path":  "convex/requirements/updateJobCategoryMutation.ts",
+        "ExportName":  "updateJobCategory",
+        "CallType":  "mutation",
+        "CollectionReferences":  "jobCategoryRequirements"
+    },
+    {
+        "Path":  "convex/requirements/uploadDocuments.ts",
+        "ExportName":  "uploadMutation",
+        "CallType":  "mutation",
+        "CollectionReferences":  "_storage, forms, users"
+    },
+    {
+        "Path":  "convex/storage/uploadUrl.ts",
+        "ExportName":  "generateUploadUrl",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/users/createUser.ts",
+        "ExportName":  "createUser",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/users/getRole.ts",
+        "ExportName":  "getUsersByRole",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/users/getUser.ts",
+        "ExportName":  "getCurrentUser",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/users/updateRole.ts",
+        "ExportName":  "updateUserRole",
+        "CallType":  "mutation",
+        "CollectionReferences":  "users"
+    },
+    {
+        "Path":  "convex/users/updateUser.ts",
+        "ExportName":  "updateUserRole",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/verification/createVerificationLog.ts",
+        "ExportName":  "createVerificationLog",
+        "CallType":  "mutation",
+        "CollectionReferences":  "healthCards"
+    },
+    {
+        "Path":  "convex/verification/getVerificationLogsByHealthCard.ts",
+        "ExportName":  "getVerificationLogsByHealthCard",
+        "CallType":  "query",
+        "CollectionReferences":  "healthCards"
+    },
+    {
+        "Path":  "convex/verification/getVerificationLogsByUser.ts",
+        "ExportName":  "getVerificationLogsByUser",
+        "CallType":  "query",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/verification/getVerificationStats.ts",
+        "ExportName":  "getVerificationStats",
+        "CallType":  "query",
+        "CollectionReferences":  "healthCards"
+    },
+    {
+        "Path":  "convex/verification/logQRScan.ts",
+        "ExportName":  "logQRScan",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    },
+    {
+        "Path":  "convex/verification/logVerificationAttempt.ts",
+        "ExportName":  "logVerificationAttempt",
+        "CallType":  "mutation",
+        "CollectionReferences":  ""
+    }
+]

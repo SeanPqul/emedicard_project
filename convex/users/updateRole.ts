@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 
 // Admin function to update user roles
-export const updateUserRole = mutation({
+export const updateRoleMutation = mutation({
     args: {
         userId: v.id("users"),
         role: v.union(
@@ -29,3 +29,7 @@ export const updateUserRole = mutation({
         return args.userId;
     }
 });
+
+
+// @deprecated - Use updateRoleMutation instead. This alias will be removed in a future release.
+export const updateUserRole = updateRoleMutation;

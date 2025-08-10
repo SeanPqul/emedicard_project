@@ -1,7 +1,7 @@
 import { query } from "../_generated/server";
 import { v } from "convex/values";
 
-export const getVerificationLogsByUser = query({
+export const getVerificationLogsByUserQuery = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -64,3 +64,7 @@ export const getVerificationLogsByUser = query({
     return logsWithDetails.sort((a, b) => b.scannedAt - a.scannedAt);
   },
 });
+
+
+// @deprecated - Use getVerificationLogsByUserQuery instead. This alias will be removed in a future release.
+export const getVerificationLogsByUser = getVerificationLogsByUserQuery;

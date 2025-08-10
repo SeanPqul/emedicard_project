@@ -1,7 +1,7 @@
 import { query } from "../_generated/server";
 import { v } from "convex/values";
 
-export const getVerificationLogsByHealthCard = query({
+export const getVerificationLogsByHealthCardQuery = query({
   args: { healthCardId: v.id("healthCards") },
   handler: async (ctx, args) => {
     const logs = await ctx.db
@@ -13,3 +13,7 @@ export const getVerificationLogsByHealthCard = query({
     return logs;
   },
 });
+
+
+// @deprecated - Use getVerificationLogsByHealthCardQuery instead. This alias will be removed in a future release.
+export const getVerificationLogsByHealthCard = getVerificationLogsByHealthCardQuery;

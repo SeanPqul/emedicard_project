@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Log verification attempt (successful or failed)
-export const logVerificationAttempt = mutation({
+export const logVerificationAttemptMutation = mutation({
   args: {
     verificationToken: v.string(),
     success: v.boolean(),
@@ -45,3 +45,7 @@ export const logVerificationAttempt = mutation({
     }
   },
 });
+
+
+// @deprecated - Use logVerificationAttemptMutation instead. This alias will be removed in a future release.
+export const logVerificationAttempt = logVerificationAttemptMutation;

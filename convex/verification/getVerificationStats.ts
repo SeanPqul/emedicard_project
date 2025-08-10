@@ -1,7 +1,7 @@
 import { query } from "../_generated/server";
 import { v } from "convex/values";
 
-export const getVerificationStats = query({
+export const getVerificationStatsQuery = query({
   args: { healthCardId: v.id("healthCards") },
   handler: async (ctx, args) => {
     const logs = await ctx.db
@@ -33,3 +33,7 @@ export const getVerificationStats = query({
     };
   },
 });
+
+
+// @deprecated - Use getVerificationStatsQuery instead. This alias will be removed in a future release.
+export const getVerificationStats = getVerificationStatsQuery;

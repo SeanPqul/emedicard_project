@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 
-export const createPayment = mutation({
+export const createPaymentMutation = mutation({
   args: {
     formId: v.id("forms"),
     amount: v.number(),
@@ -74,3 +74,7 @@ export const createPayment = mutation({
     }
   },
 });
+
+
+// @deprecated - Use createPaymentMutation instead. This alias will be removed in a future release.
+export const createPayment = createPaymentMutation;

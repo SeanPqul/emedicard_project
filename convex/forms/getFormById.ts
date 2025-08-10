@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 
-export const getFormById = query({
+export const getFormByIdQuery = query({
   args: { formId: v.id("forms") },
   handler: async (ctx, { formId }) => {
     return await ctx.db.get(formId);

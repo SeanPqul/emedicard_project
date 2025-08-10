@@ -10,12 +10,12 @@ import { useEffect, useState } from "react";
 
 // Real-time notifications with unread count
 export function useNotificationsRealtime() {
-  const notifications = useQuery(api.notifications.getUserNotifications);
-  const unreadCount = useQuery(api.notifications.getUnreadNotificationCount);
+  const notifications = useQuery(api.notifications.getUserNotificationsQuery);
+  const unreadCount = useQuery(api.notifications.getUnreadCountQuery);
   const recentNotifications = useQuery(api.notifications.getRecentNotifications, { limit: 5 });
 
-  const markAsRead = useMutation(api.notifications.markNotificationAsRead);
-  const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
+  const markAsRead = useMutation(api.notifications.markAsReadMutation);
+  const markAllAsRead = useMutation(api.notifications.markAllAsReadMutation);
   const deleteNotification = useMutation(api.notifications.deleteNotification);
 
   return {
@@ -44,9 +44,9 @@ export function useApplicationsRealtime() {
 
 // Real-time payment status updates
 export function usePaymentsRealtime() {
-  const payments = useQuery(api.payments.getUserPayments);
-  const createPayment = useMutation(api.payments.createPayment);
-  const updatePaymentStatus = useMutation(api.payments.updatePaymentStatus);
+  const payments = useQuery(api.payments.getUserPaymentsQuery);
+  const createPayment = useMutation(api.payments.createPaymentMutation);
+  const updatePaymentStatus = useMutation(api.payments.updatePaymentStatusMutation);
   const retryPayment = useMutation(api.payments.retryPayment);
   const logPaymentAttempt = useMutation(api.payments.logPaymentAttempt);
 
@@ -76,7 +76,7 @@ export function useHealthCardsRealtime() {
 
 // Real-time orientation updates
 export function useOrientationsRealtime() {
-  const orientations = useQuery(api.orientations.getUserOrientations);
+  const orientations = useQuery(api.orientations.getUserOrientationsQuery);
   const createOrientation = useMutation(api.orientations.createOrientation);
   const checkIn = useMutation(api.orientations.updateOrientationCheckIn);
   const checkOut = useMutation(api.orientations.updateOrientationCheckOut);
@@ -113,13 +113,13 @@ export function useDocumentRequirementsRealtime(formId?: Id<"forms">) {
     formId ? { formId } : "skip"
   );
   const uploadDocument = useMutation(api.documentRequirements.uploadDocument);
-  const updateDocument = useMutation(api.documentRequirements.updateDocument);
+  const updateDocumentField = useMutation(api.requirements.updateDocumentField);
   const deleteDocument = useMutation(api.documentRequirements.deleteDocument);
 
   return {
     requirements,
     uploadDocument,
-    updateDocument,
+    updateDocumentField,
     deleteDocument,
     isLoading: requirements === undefined,
   };
@@ -175,9 +175,9 @@ export function useDashboardStatsRealtime() {
   });
 
   const applications = useQuery(api.forms.getUserApplications);
-  const payments = useQuery(api.payments.getUserPayments);
+  const payments = useQuery(api.payments.getUserPaymentsQuery);
   const healthCards = useQuery(api.healthCards.getUserHealthCards);
-  const unreadCount = useQuery(api.notifications.getUnreadNotificationCount);
+  const unreadCount = useQuery(api.notifications.getUnreadCountQuery);
 
   useEffect(() => {
     if (applications && payments && healthCards && unreadCount !== undefined) {

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 
-export const createJobCategory = mutation({
+export const createJobCategoryMutation = mutation({
   args: {
     name: v.string(),
     colorCode: v.string(),

@@ -1,8 +1,8 @@
-import { mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { mutation } from "../_generated/server";
 
 // Delete a link between a job category and a document requirement
-export const deleteJobCategoryRequirement = mutation({
+export const deleteJobCategoryRequirementMutation = mutation({
   args: {
     requirementId: v.id("jobCategoryRequirements")
   },
@@ -18,3 +18,7 @@ export const deleteJobCategoryRequirement = mutation({
     return { success: true };
   },
 });
+
+
+// @deprecated - Use deleteJobCategoryRequirementMutation instead. This alias will be removed in a future release.
+export const deleteJobCategoryRequirement = deleteJobCategoryRequirementMutation;

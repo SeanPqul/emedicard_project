@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Admin mutation to batch review multiple documents
-export const adminBatchReviewDocuments = mutation({
+export const adminBatchReviewDocumentsMutation = mutation({
   args: {
     reviews: v.array(v.object({
       documentId: v.id("formDocuments"),
@@ -62,3 +62,7 @@ export const adminBatchReviewDocuments = mutation({
   },
 });
 
+
+
+// @deprecated - Use adminBatchReviewDocumentsMutation instead. This alias will be removed in a future release.
+export const adminBatchReviewDocuments = adminBatchReviewDocumentsMutation;

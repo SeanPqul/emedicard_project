@@ -13,5 +13,5 @@ import { Id } from '../../convex/_generated/dataModel';
  * Get user orientations
  */
 export async function getUserOrientations() {
-  return convex.query(api.orientations.getUserOrientations, {});
+  return convex.query(api.orientations.getUserOrientationsQuery, {});
 }

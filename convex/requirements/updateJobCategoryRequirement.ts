@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Update an existing job category requirement
-export const updateJobCategoryRequirement = mutation({
+export const updateJobCategoryRequirementMutation = mutation({
   args: {
     requirementId: v.id("jobCategoryRequirements"),
     required: v.boolean(),

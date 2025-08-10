@@ -13,7 +13,7 @@ import { Id } from '../../convex/_generated/dataModel';
  * Get all notifications for the current user
  */
 export async function getUserNotifications() {
-  return convex.query(api.notifications.getUserNotifications, {});
+  return convex.query(api.notifications.getUserNotificationsQuery, {});
 }
 
 /**

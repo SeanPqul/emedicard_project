@@ -2,7 +2,7 @@ import { query } from "../_generated/server";
 import { v } from "convex/values";
 
 // Admin query to get documents by status
-export const adminGetDocumentsByStatus = query({
+export const adminGetDocumentsByStatusQuery = query({
   args: {
     status: v.union(v.literal("Pending"), v.literal("Approved"), v.literal("Rejected")),
     limit: v.optional(v.number()),
@@ -86,3 +86,7 @@ export const adminGetDocumentsByStatus = query({
     };
   },
 });
+
+
+// @deprecated - Use adminGetDocumentsByStatusQuery instead. This alias will be removed in a future release.
+export const adminGetDocumentsByStatus = adminGetDocumentsByStatusQuery;

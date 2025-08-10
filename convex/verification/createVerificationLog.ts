@@ -1,7 +1,7 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
-export const createVerificationLog = mutation({
+export const createVerificationLogMutation = mutation({
   args: {
     healthCardId: v.id("healthCards"),
     userAgent: v.optional(v.string()),
@@ -36,3 +36,7 @@ export const createVerificationLog = mutation({
     }
   },
 });
+
+
+// @deprecated - Use createVerificationLogMutation instead. This alias will be removed in a future release.
+export const createVerificationLog = createVerificationLogMutation;

@@ -1,6 +1,6 @@
 import { query } from "../_generated/server";
 
-export const getUnreadNotificationCount = query({
+export const getUnreadCountQuery = query({
   args: {},
   handler: async (ctx) => {
     try {
@@ -31,3 +31,7 @@ export const getUnreadNotificationCount = query({
     }
   },
 });
+
+
+// @deprecated - Use getUnreadCountQuery instead. This alias will be removed in a future release.
+export const getUnreadNotificationCount = getUnreadCountQuery;

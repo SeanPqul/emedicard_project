@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Upload a single document using the new formDocuments schema
-export const uploadDocument = mutation({
+export const uploadDocumentsMutation = mutation({
   args: {
     formId: v.id("forms"),
     fieldName: v.string(),

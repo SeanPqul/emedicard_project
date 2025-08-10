@@ -2,7 +2,7 @@ import { query } from "../_generated/server";
 import { v } from "convex/values";
 
 // Get all job category requirements for a specific job category
-export const getJobCategoryRequirements = query({
+export const getJobCategoryRequirementsQuery = query({
   args: { jobCategoryId: v.id("jobCategory") },
   handler: async (ctx, args) => {
     const jobCategoryRequirements = await ctx.db

@@ -1,7 +1,7 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
-export const adminReviewDocument = mutation({
+export const adminReviewDocumentMutation = mutation({
   args: {
     documentId: v.id("formDocuments"),
     status: v.union(v.literal("Pending"), v.literal("Approved"), v.literal("Rejected")),
@@ -38,3 +38,7 @@ export const adminReviewDocument = mutation({
     return args.documentId;
   },
 });
+
+
+// @deprecated - Use adminReviewDocumentMutation instead. This alias will be removed in a future release.
+export const adminReviewDocument = adminReviewDocumentMutation;

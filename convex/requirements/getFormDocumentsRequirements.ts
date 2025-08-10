@@ -1,8 +1,8 @@
 import { query } from "../_generated/server";
 import { v } from "convex/values";
 
-// Get form documents with requirements info
-export const getFormDocumentsById = query({
+// Get form documents with comprehensive requirements info
+export const getFormDocumentsRequirementsQuery = query({
   args: { formId: v.id("forms") },
   handler: async (ctx, args) => {
     const form = await ctx.db.get(args.formId);

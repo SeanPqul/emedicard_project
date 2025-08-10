@@ -39,7 +39,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
   
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const uploadDocument = useMutation(api.documentRequirements.uploadDocument);
-  const updateDocument = useMutation(api.documentRequirements.updateDocument);
+  const updateDocumentField = useMutation(api.requirements.updateDocumentField);
   const deleteDocument = useMutation(api.documentRequirements.deleteDocument);
 
   // Load cached documents on mount
@@ -234,7 +234,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       const { storageId } = await uploadResponse.json();
 
       // Update document field
-      const result = await updateDocument({
+      const result = await updateDocumentField({
         formId,
         fieldName,
         storageId,
@@ -262,7 +262,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       });
       throw error;
     }
-  }, [formId, generateUploadUrl, updateDocument, validateFile, setUploadState]);
+  }, [formId, generateUploadUrl, updateDocumentField, validateFile, setUploadState]);
 
   const removeFile = useCallback(async (
     fieldName: string,

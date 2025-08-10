@@ -2,7 +2,7 @@ import { query } from "../_generated/server";
 import { v } from "convex/values";
 
 // Admin query to get all pending documents for review
-export const adminGetPendingDocuments = query({
+export const adminGetPendingDocumentsQuery = query({
   args: {
     limit: v.optional(v.number()),
     formId: v.optional(v.id("forms")),
@@ -73,3 +73,7 @@ export const adminGetPendingDocuments = query({
     };
   },
 });
+
+
+// @deprecated - Use adminGetPendingDocumentsQuery instead. This alias will be removed in a future release.
+export const adminGetPendingDocuments = adminGetPendingDocumentsQuery;

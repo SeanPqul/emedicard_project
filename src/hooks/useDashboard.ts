@@ -12,8 +12,8 @@ export const useDashboard = () => {
   // Convex queries
   const userProfile = useQuery(api.users.getCurrentUser);
   const userApplications = useQuery(api.forms.getUserApplications);
-  const userNotifications = useQuery(api.notifications.getUserNotifications);
-  const userPayments = useQuery(api.payments.getUserPayments);
+  const userNotifications = useQuery(api.notifications.getUserNotificationsQuery);
+  const userPayments = useQuery(api.payments.getUserPaymentsQuery);
   const userHealthCards = useQuery(api.healthCards.getUserHealthCards);
 
   // Update time every minute

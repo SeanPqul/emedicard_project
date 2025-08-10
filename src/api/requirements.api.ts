@@ -1,40 +1,44 @@
-import { convex } from '../lib/convexClient';
+﻿import { convex } from '../lib/convexClient';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 
 /**
  * Requirements API Module
  * 
- * Feature-scoped API functions for document requirements and reviews.
+ * Feature-scoped API functions for document requirements operations.
  * Each function is small, focused, and uses Id types.
  */
 
 /**
- * Get requirements by job category
+ * Get job category requirements
  */
-export async function getRequirementsByJobCategory(jobCategoryId: Id<'jobCategories'>) {
-  return convex.query(api.requirements.getRequirementsByJobCategory, { jobCategoryId });
+export async function getJobCategoryRequirements(jobCategoryId: Id<'jobCategory'>) {
+  return convex.query(api.requirements.getJobCategoryRequirements, { jobCategoryId });
 }
 
 /**
- * Get category requirements
+ * Create job category requirement
  */
-export async function getCategoryRequirements(categoryId: Id<'jobCategories'>) {
-  return convex.query(api.requirements.getCategoryRequirements, { categoryId });
+export async function createJobCategoryRequirement(input: {
+  jobCategoryId: Id<'jobCategory'>;
+  documentRequirementId: Id<'documentRequirements'>;
+  required: boolean;
+}) {
+  return convex.mutation(api.requirements.createJobCategoryRequirementMutation, input);
 }
 
 /**
- * Get form documents
+ * Get form documents (basic list)
  */
 export async function getFormDocuments(formId: Id<'forms'>) {
   return convex.query(api.requirements.getFormDocuments, { formId });
 }
 
 /**
- * Get form documents by ID
+ * Get form documents with comprehensive requirements info
  */
-export async function getFormDocumentsById(formId: Id<'forms'>) {
-  return convex.query(api.requirements.getFormDocumentsById, { formId });
+export async function getFormDocumentsWithRequirements(formId: Id<'forms'>) {
+  return convex.query(api.requirements.getFormDocumentsWithRequirements, { formId });
 }
 
 /**
@@ -51,20 +55,28 @@ export async function uploadDocument(input: {
 }
 
 /**
- * Update document
+ * Update document field (replacement document)
  */
-export async function updateDocument(documentId: Id<'documents'>, updates: {
-  metadata?: Record<string, any>;
-  documentType?: string;
+export async function updateDocumentField(input: {
+  formId: Id<'forms'>;
+  fieldName: string;
+  storageId: Id<'_storage'>;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  status?: 'Pending' | 'Approved' | 'Rejected';
+  reviewBy?: Id<'users'>;
+  reviewAt?: number;
+  remarks?: string;
 }) {
-  return convex.mutation(api.requirements.updateDocument, { documentId, ...updates });
+  return convex.mutation(api.requirements.updateDocumentField, input);
 }
 
 /**
  * Delete document
  */
 export async function deleteDocument(documentId: Id<'documents'>) {
-  return convex.mutation(api.requirements.deleteDocument, { documentId });
+  return convex.mutation(api.requirements.deleteDocumentMutation, { documentId });
 }
 
 /**
@@ -78,26 +90,26 @@ export async function getDocumentUrl(storageId: string) {
  * Admin: Review document
  */
 export async function adminReviewDocument(documentId: Id<'documents'>, status: string, comments?: string) {
-  return convex.mutation(api.requirements.adminReviewDocument, { documentId, status, comments });
+  return convex.mutation(api.requirements.adminReviewDocumentMutation, { documentId, status, comments });
 }
 
 /**
  * Admin: Get pending documents
  */
 export async function adminGetPendingDocuments() {
-  return convex.query(api.requirements.adminGetPendingDocuments, {});
+  return convex.query(api.requirements.adminGetPendingDocumentsQuery, {});
 }
 
 /**
  * Admin: Get documents by status
  */
 export async function adminGetDocumentsByStatus(status: string) {
-  return convex.query(api.requirements.adminGetDocumentsByStatus, { status });
+  return convex.query(api.requirements.adminGetDocumentsByStatusQuery, { status });
 }
 
 /**
  * Admin: Batch review documents
  */
 export async function adminBatchReviewDocuments(documentIds: Id<'documents'>[], status: string, comments?: string) {
-  return convex.mutation(api.requirements.adminBatchReviewDocuments, { documentIds, status, comments });
+  return convex.mutation(api.requirements.adminBatchReviewDocumentsMutation, { documentIds, status, comments });
 }

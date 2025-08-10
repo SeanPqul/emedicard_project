@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 
-export const updatePaymentStatus = mutation({
+export const updatePaymentStatusMutation = mutation({
   args: {
     paymentId: v.id("payments"),
     status: v.union(v.literal("Pending"), v.literal("Complete"), v.literal("Failed")),
@@ -13,3 +13,7 @@ export const updatePaymentStatus = mutation({
     return paymentId;
   },
 });
+
+
+// @deprecated - Use updatePaymentStatusMutation instead. This alias will be removed in a future release.
+export const updatePaymentStatus = updatePaymentStatusMutation;

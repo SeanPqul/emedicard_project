@@ -13,7 +13,7 @@ import { Id } from '../../convex/_generated/dataModel';
  * Get current user profile
  */
 export async function getCurrentUser() {
-  return convex.query(api.users.getCurrentUser, {});
+  return convex.query(api.users.getCurrentUser.getCurrentUserQuery, {});
 }
 
 /**
@@ -24,12 +24,25 @@ export async function createUser(input: {
   email: string;
   firstName: string;
   lastName: string;
-  role?: string;
+  username: string;
+  image: string;
+  role?: "applicant" | "inspector";
   phoneNumber?: string;
   address?: string;
-  dateOfBirth?: string;
+  gender?: string;
+  birthDate?: string;
 }) {
-  return convex.mutation(api.users.createUser, input);
+  return convex.mutation(api.users.createUser.createUserMutation, {
+    clerkId: input.clerkId,
+    email: input.email,
+    username: input.username,
+    fullname: `${input.firstName} ${input.lastName}`,
+    image: input.image,
+    role: input.role,
+    phoneNumber: input.phoneNumber,
+    gender: input.gender,
+    birthDate: input.birthDate,
+  });
 }
 
 /**

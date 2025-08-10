@@ -2,7 +2,7 @@ import { query } from "../_generated/server";
 import { v } from "convex/values";
 
 // Get document URL from storage
-export const getDocumentUrl = query({
+export const getDocumentUrlQuery = query({
   args: {
     documentId: v.id("formDocuments"),
   },
@@ -30,3 +30,7 @@ export const getDocumentUrl = query({
     };
   },
 });
+
+
+// @deprecated - Use getDocumentUrlQuery instead. This alias will be removed in a future release.
+export const queryDocumentUrl = getDocumentUrlQuery;

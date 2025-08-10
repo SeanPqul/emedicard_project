@@ -1,7 +1,7 @@
 import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
 
-export const submitApplicationForm = mutation({
+export const submitApplicationFormMutation = mutation({
   args: {
     formId: v.id("forms"),
     paymentMethod: v.union(

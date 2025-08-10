@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Enhanced QR scanning with location and device tracking
-export const logQRScan = mutation({
+export const logQRScanMutation = mutation({
   args: {
     verificationToken: v.string(),
     scanLocation: v.optional(v.object({
@@ -70,3 +70,7 @@ export const logQRScan = mutation({
     }
   },
 });
+
+
+// @deprecated - Use logQRScanMutation instead. This alias will be removed in a future release.
+export const logQRScan = logQRScanMutation;

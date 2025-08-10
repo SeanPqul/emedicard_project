@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 
-export const updateUser = mutation({
+export const updateUserMutation = mutation({
     args: {
         fullname: v.optional(v.string()),
         username: v.optional(v.string()),
@@ -33,3 +33,7 @@ export const updateUser = mutation({
         return user._id;
     }
 });
+
+
+// @deprecated - Use updateUserMutation instead. This alias will be removed in a future release.
+export const updateUserRole = updateUserMutation;

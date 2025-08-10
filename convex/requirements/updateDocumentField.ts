@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Update a document field (replacement document)
-export const updateDocumentField = mutation({
+export const updateDocumentFieldMutation = mutation({
   args: {
     formId: v.id("forms"),
     fieldName: v.string(),

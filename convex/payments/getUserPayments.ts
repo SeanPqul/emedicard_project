@@ -1,6 +1,6 @@
 import { query } from "../_generated/server";
 
-export const getUserPayments = query({
+export const getUserPaymentsQuery = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -63,3 +63,7 @@ export const getUserPayments = query({
     return paymentsWithFormDetails.filter(Boolean);
   },
 });
+
+
+// @deprecated - Use getUserPaymentsQuery instead. This alias will be removed in a future release.
+export const getUserPayments = getUserPaymentsQuery;

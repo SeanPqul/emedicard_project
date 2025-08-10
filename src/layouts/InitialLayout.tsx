@@ -19,7 +19,7 @@ export default function InitialLayout() {
   
   // Convex queries and mutations
   const userProfile = useQuery(api.users.getCurrentUser);
-  const createUser = useMutation(api.users.createUser);
+  const createUser = useMutation(api.users.createUserMutation);
   const updateUser = useMutation(api.users.updateUser);
   
   // Role-based navigation hook

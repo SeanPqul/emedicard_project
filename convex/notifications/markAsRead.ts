@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 
-export const markNotificationAsRead = mutation({
+export const markAsReadMutation = mutation({
   args: {
     notificationId: v.id("notifications"),
   },
@@ -28,3 +28,7 @@ export const markNotificationAsRead = mutation({
     await ctx.db.patch(args.notificationId, { read: true });
   },
 });
+
+
+// @deprecated - Use markAsReadMutation instead. This alias will be removed in a future release.
+export const markNotificationAsRead = markAsReadMutation;

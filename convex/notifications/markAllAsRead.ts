@@ -1,6 +1,6 @@
 import { mutation } from "../_generated/server";
 
-export const markAllNotificationsAsRead = mutation({
+export const markAllAsReadMutation = mutation({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -27,3 +27,7 @@ export const markAllNotificationsAsRead = mutation({
     }
   },
 });
+
+
+// @deprecated - Use markAllAsReadMutation instead. This alias will be removed in a future release.
+export const markAllNotificationsAsRead = markAllAsReadMutation;

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 
-export const getHealthCardByVerificationToken = query({
+export const getByVerificationTokenQuery = query({
   args: { verificationToken: v.string() },
   handler: async (ctx, args) => {
     const healthCard = await ctx.db

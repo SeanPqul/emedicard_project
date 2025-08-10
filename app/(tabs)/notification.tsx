@@ -61,9 +61,9 @@ export default function Notifications() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Convex queries and mutations
-  const notifications = useQuery(api.notifications.getUserNotifications) as NotificationItem[] | undefined;
-  const markAsRead = useMutation(api.notifications.markNotificationAsRead);
-  const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
+  const notifications = useQuery(api.notifications.getUserNotificationsQuery) as NotificationItem[] | undefined;
+  const markAsRead = useMutation(api.notifications.markAsReadMutation);
+  const markAllAsRead = useMutation(api.notifications.markAllAsReadMutation);
 
   const onRefresh = async () => {
     setRefreshing(true);

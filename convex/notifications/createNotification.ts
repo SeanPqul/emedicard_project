@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 
-export const createNotification = mutation({
+export const createNotificationMutation = mutation({
   args: {
     userId: v.id("users"),
     formsId: v.optional(v.id("forms")),

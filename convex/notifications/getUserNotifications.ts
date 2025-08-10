@@ -1,6 +1,6 @@
 import { query } from "../_generated/server";
 
-export const getUserNotifications = query({
+export const getUserNotificationsQuery = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -27,3 +27,7 @@ export const getUserNotifications = query({
     return notifications;
   },
 });
+
+
+// @deprecated - Use getUserNotificationsQuery instead. This alias will be removed in a future release.
+export const getUserNotifications = getUserNotificationsQuery;

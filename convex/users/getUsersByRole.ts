@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { query } from "../_generated/server";
 
 // Query to get users by role (inspector only - admins should use web platform)
-export const getUsersByRole = query({
+export const getUsersByRoleQuery = query({
     args: {
         role: v.optional(v.union(
             v.literal("applicant"),

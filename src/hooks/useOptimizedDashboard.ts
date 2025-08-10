@@ -29,7 +29,7 @@ export const useOptimizedDashboard = () => {
   // Cached job categories query (only when cache is invalid or missing)
   const shouldFetchJobCategories = !mobileCacheManager.isJobCategoriesCacheValid();
   const jobCategoriesQuery = useQuery(
-    shouldFetchJobCategories ? api.jobCategories.getAllJobType : null
+    shouldFetchJobCategories ? api.jobCategories.getAllJobCategories : null
   );
 
   // Load cached job categories on mount

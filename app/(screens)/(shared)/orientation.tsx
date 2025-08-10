@@ -16,7 +16,7 @@ export default function OrientationScreen() {
   const [checkingOut, setCheckingOut] = useState(false);
   
   // Convex queries and mutations
-  const orientations = useQuery(api.orientations.getUserOrientations);
+  const orientations = useQuery(api.orientations.getUserOrientationsQuery);
   const orientationForForm = useQuery(
     api.orientations.getOrientationByFormId,
     formId ? { formId: formId as Id<"forms"> } : "skip"

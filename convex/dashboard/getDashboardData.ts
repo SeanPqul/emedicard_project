@@ -1,6 +1,7 @@
 import { query } from "../_generated/server";
+import { Doc, Id } from "../_generated/dataModel";
 
-export const getDashboardData = query({
+export const getDashboardDataQuery = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -13,8 +14,8 @@ export const getDashboardData = query({
       
     if (!user) return null;
     
-    // Parallelize independent queries for better performance
-    const [forms, notifications, healthCards] = await Promise.all([
+    // First, get forms and notifications in parallel
+    const [forms, notifications]: [Doc<"forms">[], Doc<"notifications">[]] = await Promise.all([
       ctx.db
         .query("forms")
         .withIndex("by_user", (q) => q.eq("userId", user._id))
@@ -24,14 +25,14 @@ export const getDashboardData = query({
         .withIndex("by_user", (q) => q.eq("userId", user._id))
         .order("desc")
         .take(10), // Limit to recent notifications
-      ctx.db
-        .query("healthCards")
-        .collect()
-        .then(cards => cards.filter(card => {
-          // Find matching form to check if it's user's card
-          return forms.some(form => form._id === card.formId);
-        }))
     ]);
+    
+    // Then get health cards using the forms data
+    const allHealthCards = await ctx.db.query("healthCards").collect();
+    const healthCards = allHealthCards.filter(card => {
+      // Find matching form to check if it's user's card
+      return forms.some((form: Doc<"forms">) => form._id === card.formId);
+    });
     
     // Get payments for user's forms
     const payments = await Promise.all(
@@ -129,7 +130,7 @@ export const getDashboardData = query({
       payments: payments.slice(-3).map(payment => {
         if (!payment) return null;
         
-        const relatedForm = forms.find(f => f._id === payment.formId);
+        const relatedForm = forms.find((f: Doc<"forms">) => f._id === payment.formId);
         return {
           _id: payment._id,
           _creationTime: payment._creationTime,

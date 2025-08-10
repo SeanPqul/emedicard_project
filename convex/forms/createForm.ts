@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 
-export const createForm = mutation({
+export const createFormMutation = mutation({
   args: {
     applicationType: v.union(v.literal("New"), v.literal("Renew")),
     jobCategory: v.id("jobCategory"),

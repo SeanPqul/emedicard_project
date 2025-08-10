@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 
-export const getHealthCardByFormId = query({
+export const getByFormIdQuery = query({
   args: { formId: v.id("forms") },
   handler: async (ctx, args) => {
     const healthCard = await ctx.db

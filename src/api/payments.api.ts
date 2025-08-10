@@ -31,21 +31,21 @@ export async function createPayment(input: {
   referenceNumber: string;
   receiptId?: Id<'_storage'>;
 }) {
-  return convex.mutation(api.payments.createPayment, input);
+  return convex.mutation(api.payments.createPaymentMutation, input);
 }
 
 /**
  * Update payment status
  */
 export async function updatePaymentStatus(paymentId: Id<'payments'>, status: 'Pending' | 'Complete' | 'Failed') {
-  return convex.mutation(api.payments.updatePaymentStatus, { paymentId, status });
+  return convex.mutation(api.payments.updatePaymentStatusMutation, { paymentId, status });
 }
 
 /**
  * Get all payments for the current user
  */
 export async function getUserPayments() {
-  return convex.query(api.payments.getUserPayments, {});
+  return convex.query(api.payments.getUserPaymentsQuery, {});
 }
 
 /**

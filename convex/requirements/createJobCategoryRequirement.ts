@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Create a link between a job category and a document requirement
-export const createJobCategoryRequirement = mutation({
+export const createJobCategoryRequirementMutation = mutation({
   args: {
     jobCategoryId: v.id("jobCategory"),
     documentRequirementId: v.id("documentRequirements"),
@@ -30,3 +30,7 @@ export const createJobCategoryRequirement = mutation({
     return newRequirementId;
   },
 });
+
+
+// @deprecated - Use createJobCategoryRequirementMutation instead. This alias will be removed in a future release.
+export const createJobCategoryRequirement = createJobCategoryRequirementMutation;

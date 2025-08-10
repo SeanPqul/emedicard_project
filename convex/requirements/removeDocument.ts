@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Delete a document using formDocuments schema (uses the client interface)
-export const deleteDocument = mutation({
+export const deleteDocumentMutation = mutation({
   args: {
     formId: v.id("forms"),
     fieldName: v.string(),
@@ -68,3 +68,7 @@ export const deleteDocument = mutation({
     return { success: true };
   },
 });
+
+
+// @deprecated - Use deleteDocumentMutation instead. This alias will be removed in a future release.
+export const deleteDocument = deleteDocumentMutation;

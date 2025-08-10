@@ -1,7 +1,10 @@
 // Re-export all verification log functions from their individual files
-export { createVerificationLog } from "./createVerificationLog";
-export { logQRScan } from "./logQRScan";
-export { logVerificationAttempt } from "./logVerificationAttempt";
-export { getVerificationLogsByHealthCard } from "./getVerificationLogsByHealthCard";
-export { getVerificationLogsByUser } from "./getVerificationLogsByUser";
-export { getVerificationStats } from "./getVerificationStats";
+export { createVerificationLogMutation } from "./createVerificationLog";
+export { logQRScanMutation } from "./logQRScan";
+export { logVerificationAttemptMutation } from "./logVerificationAttempt";
+export { getVerificationLogsByHealthCardQuery } from "./getVerificationLogsByHealthCard";
+export { getVerificationLogsByUserQuery } from "./getVerificationLogsByUser";
+export { getVerificationStatsQuery } from "./getVerificationStats";
+
+
+// This file re-exports all verification functions for convenient imports

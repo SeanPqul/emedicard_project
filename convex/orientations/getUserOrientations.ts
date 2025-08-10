@@ -1,6 +1,6 @@
 import { query } from "../_generated/server";
 
-export const getUserOrientations = query({
+export const getUserOrientationsQuery = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -26,3 +26,7 @@ export const getUserOrientations = query({
     return [];
   },
 });
+
+
+// @deprecated - Use getUserOrientationsQuery instead. This alias will be removed in a future release.
+export const getUserOrientations = getUserOrientationsQuery;
