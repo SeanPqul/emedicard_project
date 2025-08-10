@@ -53,7 +53,7 @@ import type * as requirements_getDocumentUrl from "../requirements/getDocumentUr
 import type * as requirements_getFormDocumentsRequirements from "../requirements/getFormDocumentsRequirements.js";
 import type * as requirements_getJobCategoryRequirements from "../requirements/getJobCategoryRequirements.js";
 import type * as requirements_getRequirementsByJobCategory from "../requirements/getRequirementsByJobCategory.js";
-import type * as requirements_deleteJobCategoryRequirement from "../requirements/JobCategoryRequirement.js";
+import type * as requirements_deleteJobCategoryRequirement from "../requirements/removeJobCategoryRequirement.js";
 import type * as requirements_deleteDocument from "../requirements/removeDocument.js";
 import type * as requirements_updateDocumentField from "../requirements/updateDocumentField.js";
 import type * as requirements_updateJobCategory from "../requirements/updateJobCategory.js";

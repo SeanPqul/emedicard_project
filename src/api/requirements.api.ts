@@ -12,33 +12,33 @@ import { Id } from '../../convex/_generated/dataModel';
 /**
  * Get job category requirements
  */
-export async function getJobCategoryRequirements(jobCategoryId: Id<'jobCategory'>) {
-  return convex.query(api.requirements.getJobCategoryRequirements, { jobCategoryId });
+export async function getJobCategoryRequirements(jobCategoryId: Id<'jobCategories'>) {
+  return convex.query(api.requirements.getJobCategoryRequirements.getJobCategoryRequirementsQuery, { jobCategoryId });
 }
 
 /**
  * Create job category requirement
  */
 export async function createJobCategoryRequirement(input: {
-  jobCategoryId: Id<'jobCategory'>;
+  jobCategoryId: Id<'jobCategories'>;
   documentRequirementId: Id<'documentRequirements'>;
   required: boolean;
 }) {
-  return convex.mutation(api.requirements.createJobCategoryRequirementMutation, input);
+  return convex.mutation(api.requirements.createJobCategoryRequirement.createJobCategoryRequirementMutation, input);
 }
 
 /**
  * Get form documents (basic list)
  */
 export async function getFormDocuments(formId: Id<'forms'>) {
-  return convex.query(api.requirements.getFormDocuments, { formId });
+  return convex.query(api.requirements.getFormDocumentsRequirements.getFormDocumentsRequirementsQuery, { formId });
 }
 
 /**
  * Get form documents with comprehensive requirements info
  */
 export async function getFormDocumentsWithRequirements(formId: Id<'forms'>) {
-  return convex.query(api.requirements.getFormDocumentsWithRequirements, { formId });
+  return convex.query(api.requirements.getFormDocumentsRequirements.getFormDocumentsWithRequirementsQuery, { formId });
 }
 
 /**
@@ -51,7 +51,7 @@ export async function uploadDocument(input: {
   documentType: string;
   metadata?: Record<string, any>;
 }) {
-  return convex.mutation(api.requirements.uploadDocument, input);
+  return convex.mutation(api.requirements.uploadDocuments.uploadDocumentsMutation, input);
 }
 
 /**
@@ -69,47 +69,47 @@ export async function updateDocumentField(input: {
   reviewAt?: number;
   remarks?: string;
 }) {
-  return convex.mutation(api.requirements.updateDocumentField, input);
+  return convex.mutation(api.requirements.updateDocumentField.updateDocumentFieldMutation, input);
 }
 
 /**
  * Delete document
  */
 export async function deleteDocument(documentId: Id<'documents'>) {
-  return convex.mutation(api.requirements.deleteDocumentMutation, { documentId });
+  return convex.mutation(api.requirements.deleteDocument.deleteDocumentMutation, { documentId });
 }
 
 /**
  * Get document URL
  */
 export async function getDocumentUrl(storageId: string) {
-  return convex.query(api.requirements.getDocumentUrl, { storageId });
+  return convex.query(api.requirements.getDocumentUrl.getDocumentUrlQuery, { storageId });
 }
 
 /**
  * Admin: Review document
  */
 export async function adminReviewDocument(documentId: Id<'documents'>, status: string, comments?: string) {
-  return convex.mutation(api.requirements.adminReviewDocumentMutation, { documentId, status, comments });
+  return convex.mutation(api.requirements.adminReviewDocument.adminReviewDocumentMutation, { documentId, status, comments });
 }
 
 /**
  * Admin: Get pending documents
  */
 export async function adminGetPendingDocuments() {
-  return convex.query(api.requirements.adminGetPendingDocumentsQuery, {});
+  return convex.query(api.requirements.adminGetPendingDocuments.adminGetPendingDocumentsQuery, {});
 }
 
 /**
  * Admin: Get documents by status
  */
 export async function adminGetDocumentsByStatus(status: string) {
-  return convex.query(api.requirements.adminGetDocumentsByStatusQuery, { status });
+  return convex.query(api.requirements.adminGetDocumentsByStatus.adminGetDocumentsByStatusQuery, { status });
 }
 
 /**
  * Admin: Batch review documents
  */
 export async function adminBatchReviewDocuments(documentIds: Id<'documents'>[], status: string, comments?: string) {
-  return convex.mutation(api.requirements.adminBatchReviewDocumentsMutation, { documentIds, status, comments });
+  return convex.mutation(api.requirements.adminBatchReviewDocuments.adminBatchReviewDocumentsMutation, { documentIds, status, comments });
 }

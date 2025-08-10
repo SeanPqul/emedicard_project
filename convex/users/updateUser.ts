@@ -33,7 +33,3 @@ export const updateUserMutation = mutation({
         return user._id;
     }
 });
-
-
-// @deprecated - Use updateUserMutation instead. This alias will be removed in a future release.
-export const updateUserRole = updateUserMutation;

@@ -16,7 +16,7 @@ export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
  * Get payment by form ID
  */
 export async function getPaymentByFormId(formId: Id<'forms'>) {
-  return convex.query(api.payments.getPaymentByFormId, { formId });
+  return convex.query(api.payments.getPaymentByFormId.getPaymentByFormIdQuery, { formId });
 }
 
 /**
@@ -31,21 +31,21 @@ export async function createPayment(input: {
   referenceNumber: string;
   receiptId?: Id<'_storage'>;
 }) {
-  return convex.mutation(api.payments.createPaymentMutation, input);
+  return convex.mutation(api.payments.createPayment.createPaymentMutation, input);
 }
 
 /**
  * Update payment status
  */
 export async function updatePaymentStatus(paymentId: Id<'payments'>, status: 'Pending' | 'Complete' | 'Failed') {
-  return convex.mutation(api.payments.updatePaymentStatusMutation, { paymentId, status });
+  return convex.mutation(api.payments.updatePaymentStatus.updatePaymentStatusMutation, { paymentId, status });
 }
 
 /**
  * Get all payments for the current user
  */
 export async function getUserPayments() {
-  return convex.query(api.payments.getUserPaymentsQuery, {});
+  return convex.query(api.payments.getUserPayments.getUserPaymentsQuery, {});
 }
 
 /**

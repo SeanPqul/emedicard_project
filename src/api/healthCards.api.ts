@@ -13,21 +13,21 @@ import { Id } from '../../convex/_generated/dataModel';
  * Get health card by verification token (for QR code scanning)
  */
 export async function getByVerificationToken(token: string) {
-  return convex.query(api.healthCards.getHealthCardByVerificationToken, { verificationToken: token });
+  return convex.query(api.healthCards.getByVerificationToken.getByVerificationTokenQuery, { verificationToken: token });
 }
 
 /**
  * Get all health cards for the current user
  */
 export async function getUserCards() {
-  return convex.query(api.healthCards.getUserHealthCards, {});
+  return convex.query(api.healthCards.getUserCards.getUserCardsQuery, {});
 }
 
 /**
  * Get health card by form ID
  */
 export async function getHealthCardByFormId(formId: Id<'forms'>) {
-  return convex.query(api.healthCards.getByFormId, { formId });
+  return convex.query(api.healthCards.getByFormId.getByFormIdQuery, { formId });
 }
 
 /**
@@ -35,10 +35,12 @@ export async function getHealthCardByFormId(formId: Id<'forms'>) {
  */
 export async function issueHealthCard(input: {
   formId: Id<'forms'>;
-  expiryDate: number;
-  metadata?: Record<string, any>;
+  cardUrl: string;
+  issuedAt: number;
+  expiresAt: number;
+  verificationToken: string;
 }) {
-  return convex.mutation(api.healthCards.issueHealthCard, input);
+  return convex.mutation(api.healthCards.issueHealthCard.issueHealthCardMutation, input);
 }
 
 /**
@@ -46,8 +48,7 @@ export async function issueHealthCard(input: {
  */
 export async function updateHealthCardStatus(
   cardId: Id<'healthCards'>,
-  status: string
 ) {
-  return convex.mutation(api.healthCards.updateHealthCard, { cardId, status });
+  return convex.mutation(api.healthCards.updateHealthCard.updateHealthCardMutation, { healthCardId: cardId});
 }
 

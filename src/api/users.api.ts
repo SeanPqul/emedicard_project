@@ -1,6 +1,6 @@
 import { convex } from '../lib/convexClient';
 import { api } from '../../convex/_generated/api';
-import { Id } from '../../convex/_generated/dataModel';
+import { Id } from '../../convex/_generated/dataModel'
 
 /**
  * Users API Module
@@ -57,20 +57,23 @@ export async function updateUser(updates: {
   profileImage?: string;
   metadata?: Record<string, any>;
 }) {
-  return convex.mutation(api.users.updateUser, updates);
+  return convex.mutation(api.users.updateUser.updateUserMutation, updates);
 }
 
 /**
  * Update user role (admin only)
  */
-export async function updateUserRole(userId: Id<'users'>, role: string) {
-  return convex.mutation(api.users.updateRole, { userId, role });
+export async function updateUserRole(
+  userId: Id<'users'>,
+  role: "admin" | "applicant" | "inspector"
+) {
+  return convex.mutation(api.users.updateRole.updateRoleMutation, { userId, role });
 }
 
 /**
  * Get users by role
  */
-export async function getUsersByRole(role: string) {
-  return convex.query(api.users.getUsersByRole, { role });
+export async function getUsersByRole(role: "applicant" | "inspector" | "admin") {
+  return convex.query(api.users.getUsersByRole.getUsersByRoleQuery, { role });
 }
 

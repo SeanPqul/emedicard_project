@@ -14,39 +14,49 @@ import { Id } from '../../convex/_generated/dataModel';
  */
 export async function createForm(input: {
   applicationType: 'New' | 'Renew';
-  jobCategory: Id<'jobCategories'>;
+  jobCategory: Id<'jobCategory'>;
   position: string;
   organization: string;
   civilStatus: string;
 }) {
-  return convex.mutation(api.forms.createForm, input);
+  return convex.mutation(api.forms.createForm.createFormMutation, input);
 }
 
 /**
  * Get form by ID
  */
 export async function getFormById(formId: Id<'forms'>) {
-  return convex.query(api.forms.getById, { formId });
+  return convex.query(api.forms.getFormById.getFormByIdQuery, { formId });
 }
 
 /**
  * Get all applications for the current user
  */
 export async function getUserApplications() {
-  return convex.query(api.forms.getUserApplications, {});
+  return convex.query(api.forms.getUserApplications.getUserApplicationsQuery, {});
 }
 
 /**
  * Update form data
  */
 export async function updateForm(formId: Id<'forms'>, updates: any) {
-  return convex.mutation(api.forms.updateForm, { formId, ...updates });
+  return convex.mutation(api.forms.updateForm.updateFormMutation, { formId, ...updates });
 }
 
 /**
  * Submit application form
  */
-export async function submitApplicationForm(formId: Id<'forms'>) {
-  return convex.mutation(api.forms.submitApplicationForm, { formId });
+export async function submitApplicationForm(
+  formId: Id<'forms'>,
+  paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall',
+  paymentReferenceNumber: string,
+  paymentReceiptId?: Id<'_storage'>,
+) {
+  return convex.mutation(api.forms.submitApplicationForm.submitApplicationFormMutation, {
+    formId,
+    paymentMethod,
+    paymentReferenceNumber,
+    paymentReceiptId,
+  });
 }
 

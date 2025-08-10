@@ -43,7 +43,7 @@ export const config = {
   // UI Configuration
   ui: {
     animations: {
-      duration: 300,
+      duration: 200,
       useNativeDriver: true,
     },
     loadingTimeout: 10000, // 10 seconds

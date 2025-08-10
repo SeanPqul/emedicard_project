@@ -17,7 +17,7 @@ export async function createVerificationLog(input: {
   location?: string;
   metadata?: Record<string, any>;
 }) {
-  return convex.mutation(api.verification.createVerificationLogMutation, input);
+  return convex.mutation(api.verification.createVerificationLog.createVerificationLogMutation, input);
 }
 
 /**
@@ -28,7 +28,7 @@ export async function logQRScan(input: {
   location?: string;
   scanResult: string;
 }) {
-  return convex.mutation(api.verification.logQRScanMutation, input);
+  return convex.mutation(api.verification.logQRScan.logQRScanMutation, input);
 }
 
 /**
@@ -39,26 +39,26 @@ export async function logVerificationAttempt(input: {
   success: boolean;
   errorMessage?: string;
 }) {
-  return convex.mutation(api.verification.logVerificationAttemptMutation, input);
+  return convex.mutation(api.verification.logVerificationAttempt.logVerificationAttemptMutation, input);
 }
 
 /**
  * Get verification logs by health card
  */
 export async function getVerificationLogsByHealthCard(healthCardId: Id<'healthCards'>) {
-  return convex.query(api.verification.getVerificationLogsByHealthCardQuery, { healthCardId });
+  return convex.query(api.verification.getVerificationLogsByHealthCard.getVerificationLogsByHealthCardQuery, { healthCardId });
 }
 
 /**
  * Get verification logs by user
  */
 export async function getVerificationLogsByUser() {
-  return convex.query(api.verification.getVerificationLogsByUserQuery, {});
+  return convex.query(api.verification.getVerificationLogsByUser.getVerificationLogsByUserQuery, {});
 }
 
 /**
  * Get verification stats
  */
 export async function getVerificationStats() {
-  return convex.query(api.verification.getVerificationStatsQuery, {});
+  return convex.query(api.verification.getVerificationStats.getVerificationStatsQuery, {});
 }

@@ -13,6 +13,6 @@ import { Id } from '../../convex/_generated/dataModel';
  * Generate upload URL for file storage
  */
 export async function generateUploadUrl() {
-  return convex.mutation(api.storage.generateUploadUrl, {});
+  return convex.mutation(api.storage.generateUploadUrl.generateUploadUrlMutation, {});
 }
 

@@ -13,14 +13,14 @@ import { Id } from '../../convex/_generated/dataModel';
  * Get all notifications for the current user
  */
 export async function getUserNotifications() {
-  return convex.query(api.notifications.getUserNotificationsQuery, {});
+  return convex.query(api.notifications.getUserNotifications.getUserNotificationsQuery, {});
 }
 
 /**
  * Get unread notification count
  */
 export async function getUnreadNotificationCount() {
-  return convex.query(api.notifications.getUnreadCount, {});
+  return convex.query(api.notifications.getUnreadCount.getUnreadCountQuery, {});
 }
 
 /**
@@ -33,20 +33,20 @@ export async function createNotification(input: {
   priority?: string;
   metadata?: Record<string, any>;
 }) {
-  return convex.mutation(api.notifications.createNotif, input);
+  return convex.mutation(api.notifications.createNotification.createNotificationMutation, input);
 }
 
 /**
  * Mark a notification as read
  */
 export async function markNotificationAsRead(notificationId: Id<'notifications'>) {
-  return convex.mutation(api.notifications.markAsRead, { notificationId });
+  return convex.mutation(api.notifications.markAsRead.markAsReadMutation, { notificationId });
 }
 
 /**
  * Mark all notifications as read
  */
 export async function markAllNotificationsAsRead() {
-  return convex.mutation(api.notifications.markAllAsRead, {});
+  return convex.mutation(api.notifications.markAllAsRead.markAllAsReadMutation, {});
 }
 
