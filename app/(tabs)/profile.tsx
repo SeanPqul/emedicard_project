@@ -18,7 +18,7 @@ import { getUserDisplayName } from '../../src/utils/user-utils';
 export default function Profile() {
   const { user } = useUser();
   const { signOut } = useClerk();
-  const userProfile = useQuery(api.users.getCurrentUser.getCurrentUser);
+  const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
 
   const handleSignOut = async () => {
     await signOut();

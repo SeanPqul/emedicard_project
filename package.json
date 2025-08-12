@@ -22,6 +22,7 @@
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
     "convex": "^1.25.2",
+    "dotenv": "^17.2.1",
     "expo": "53.0.20",
     "expo-auth-session": "^6.2.1",
     "expo-blur": "~14.1.5",

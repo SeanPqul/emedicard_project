@@ -29,9 +29,9 @@ export async function getUnreadNotificationCount() {
 export async function createNotification(input: {
   title: string;
   message: string;
-  type: string;
-  priority?: string;
-  metadata?: Record<string, any>;
+  type: "MissingDoc" | "PaymentReceived" | "FormApproved" | "OrientationScheduled" | "CardIssue";
+  userId: Id<'users'>;
+  formsId?: Id<'forms'>;
 }) {
   return convex.mutation(api.notifications.createNotification.createNotificationMutation, input);
 }

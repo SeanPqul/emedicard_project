@@ -12,7 +12,7 @@ import { Id } from '../../convex/_generated/dataModel';
 /**
  * Get job category requirements
  */
-export async function getJobCategoryRequirements(jobCategoryId: Id<'jobCategories'>) {
+export async function getJobCategoryRequirements(jobCategoryId: Id<'jobCategory'>) {
   return convex.query(api.requirements.getJobCategoryRequirements.getJobCategoryRequirementsQuery, { jobCategoryId });
 }
 
@@ -20,7 +20,7 @@ export async function getJobCategoryRequirements(jobCategoryId: Id<'jobCategorie
  * Create job category requirement
  */
 export async function createJobCategoryRequirement(input: {
-  jobCategoryId: Id<'jobCategories'>;
+  jobCategoryId: Id<'jobCategory'>;
   documentRequirementId: Id<'documentRequirements'>;
   required: boolean;
 }) {
@@ -38,7 +38,7 @@ export async function getFormDocuments(formId: Id<'forms'>) {
  * Get form documents with comprehensive requirements info
  */
 export async function getFormDocumentsWithRequirements(formId: Id<'forms'>) {
-  return convex.query(api.requirements.getFormDocumentsRequirements.getFormDocumentsWithRequirementsQuery, { formId });
+  return convex.query(api.requirements.getFormDocumentsRequirements.getFormDocumentsRequirementsQuery, { formId });
 }
 
 /**
@@ -51,7 +51,7 @@ export async function uploadDocument(input: {
   documentType: string;
   metadata?: Record<string, any>;
 }) {
-  return convex.mutation(api.requirements.uploadDocuments.uploadDocumentsMutation, input);
+  return convex.mutation(api.requirements.uploadDocument.uploadDocumentMutation, input);
 }
 
 /**

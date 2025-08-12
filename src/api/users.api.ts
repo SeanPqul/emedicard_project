@@ -13,7 +13,7 @@ import { Id } from '../../convex/_generated/dataModel'
  * Get current user profile
  */
 export async function getCurrentUser() {
-  return convex.query(api.users.getCurrentUser.getCurrentUserQuery, {});
+  return await convex.query(api.users.getCurrentUser.getCurrentUserQuery, {});
 }
 
 /**

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { styles } from '../../assets/styles/tabs-styles/profile';
-import { getTypography, getSpacing, getColor } from '../../src/styles/theme';
+import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { styles } from '../../../../assets/styles/tabs-styles/profile';
+import { getColor, getSpacing, getTypography } from '../../../../src/styles/theme';
 
 export default function EditProfile() {
   const [name, setName] = useState('');
@@ -13,15 +13,15 @@ export default function EditProfile() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit Profile</Text>
+      <Text style={editProfileStyles.title}>Edit Profile</Text>
       <TextInput
-        style={styles.input}
+        style={editProfileStyles.input}
         placeholder="Name"
         value={name}
         onChangeText={setName}
       />
       <TextInput
-        style={styles.input}
+        style={editProfileStyles.input}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}

@@ -4,13 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '@/src/styles/theme';
 import { StatCard } from '@/src/components/StatCard';
 import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import { api } from '../../../convex/_generated/api';
 import { LoadingSpinner } from '@/src/components/LoadingSpinner';
 import { useRoleBasedNavigation } from '@/src/hooks/useRoleBasedNavigation';
 import { useRouter } from 'expo-router';
 
 export default function InspectorDashboard() {
-  const userProfile = useQuery(api.users.getCurrentUser);
+  const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
   const { canAccessScreen } = useRoleBasedNavigation(userProfile?.role);
   const router = useRouter();
 

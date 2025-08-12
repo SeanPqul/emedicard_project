@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { styles } from '../../assets/styles/tabs-styles/profile';
-import { getTypography, getSpacing, getColor } from '../../src/styles/theme';
+import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { styles } from '../../../../assets/styles/tabs-styles/profile';
+import { getColor, getSpacing, getTypography } from '../../../../src/styles/theme';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -18,23 +18,23 @@ export default function ChangePassword() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Change Password</Text>
+      <Text style={changePasswordStyles.title}>Change Password</Text>
       <TextInput
-        style={styles.input}
+        style={changePasswordStyles.input}
         placeholder="Current Password"
         secureTextEntry
         value={currentPassword}
         onChangeText={setCurrentPassword}
       />
       <TextInput
-        style={styles.input}
+        style={changePasswordStyles.input}
         placeholder="New Password"
         secureTextEntry
         value={newPassword}
         onChangeText={setNewPassword}
       />
       <TextInput
-        style={styles.input}
+        style={changePasswordStyles.input}
         placeholder="Confirm Password"
         secureTextEntry
         value={confirmPassword}

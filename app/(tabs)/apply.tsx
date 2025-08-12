@@ -99,7 +99,7 @@ export default function Apply() {
   const jobCategories = useQuery(api.jobCategories?.getAllJobCategories);
   const createForm = useMutation(api.forms.createForm);
   const submitApplication = useMutation(api.forms.submitApplicationForm);
-  const userProfile = useQuery(api.users.getCurrentUser);
+  const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
   const requirementsByJobCategory = useQuery(api.documentRequirements.getRequirementsByJobCategory,
     formData.jobCategory ? { jobCategoryId: formData.jobCategory as any } : 'skip'
   );

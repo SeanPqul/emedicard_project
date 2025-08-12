@@ -10,11 +10,11 @@ export const useDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Convex queries
-  const userProfile = useQuery(api.users.getCurrentUser);
-  const userApplications = useQuery(api.forms.getUserApplications);
-  const userNotifications = useQuery(api.notifications.getUserNotificationsQuery);
-  const userPayments = useQuery(api.payments.getUserPaymentsQuery);
-  const userHealthCards = useQuery(api.healthCards.getUserHealthCards);
+  const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
+  const userApplications = useQuery(api.forms.getUserApplications.getUserApplicationsQuery);
+  const userNotifications = useQuery(api.notifications.getUserNotifications.getUserNotificationsQuery);
+  const userPayments = useQuery(api.payments.getUserPayments.getUserPaymentsQuery);
+  const userHealthCards = useQuery(api.healthCards.getUserCards.getUserCardsQuery);
 
   // Update time every minute
   useEffect(() => {

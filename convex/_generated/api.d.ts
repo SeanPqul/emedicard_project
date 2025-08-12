@@ -53,8 +53,8 @@ import type * as requirements_getDocumentUrl from "../requirements/getDocumentUr
 import type * as requirements_getFormDocumentsRequirements from "../requirements/getFormDocumentsRequirements.js";
 import type * as requirements_getJobCategoryRequirements from "../requirements/getJobCategoryRequirements.js";
 import type * as requirements_getRequirementsByJobCategory from "../requirements/getRequirementsByJobCategory.js";
-import type * as requirements_deleteJobCategoryRequirement from "../requirements/removeJobCategoryRequirement.js";
-import type * as requirements_deleteDocument from "../requirements/removeDocument.js";
+import type * as requirements_removeDocument from "../requirements/removeDocument.js";
+import type * as requirements_removeJobCategoryRequirement from "../requirements/removeJobCategoryRequirement.js";
 import type * as requirements_updateDocumentField from "../requirements/updateDocumentField.js";
 import type * as requirements_updateJobCategory from "../requirements/updateJobCategory.js";
 import type * as requirements_updateJobCategoryRequirement from "../requirements/updateJobCategoryRequirement.js";
@@ -117,13 +117,13 @@ declare const fullApi: ApiFromModules<{
   "requirements/adminGetPendingDocuments": typeof requirements_adminGetPendingDocuments;
   "requirements/adminReviewDocument": typeof requirements_adminReviewDocument;
   "requirements/createJobCategoryRequirement": typeof requirements_createJobCategoryRequirement;
-  "requirements/deleteDocument": typeof requirements_deleteDocument;
-  "requirements/deleteJobCategoryRequirement": typeof requirements_deleteJobCategoryRequirement;
   "requirements/documentRequirements": typeof requirements_documentRequirements;
   "requirements/getDocumentUrl": typeof requirements_getDocumentUrl;
   "requirements/getFormDocumentsRequirements": typeof requirements_getFormDocumentsRequirements;
   "requirements/getJobCategoryRequirements": typeof requirements_getJobCategoryRequirements;
   "requirements/getRequirementsByJobCategory": typeof requirements_getRequirementsByJobCategory;
+  "requirements/removeDocument": typeof requirements_removeDocument;
+  "requirements/removeJobCategoryRequirement": typeof requirements_removeJobCategoryRequirement;
   "requirements/updateDocumentField": typeof requirements_updateDocumentField;
   "requirements/updateJobCategory": typeof requirements_updateJobCategory;
   "requirements/updateJobCategoryRequirement": typeof requirements_updateJobCategoryRequirement;

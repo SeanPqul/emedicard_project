@@ -19,8 +19,8 @@ export async function getAllJobCategories() {
 /**
  * Get job category by ID
  */
-export async function getJobCategoryById(jobCategoryId: Id<'jobCategories'>) {
-  return convex.query(api.jobCategories.getJobCategoryById.getJobCategoryByIdQuery, { jobCategoryId });
+export async function getJobCategoryById(jobCategoryId: Id<'jobCategory'>) {
+  return convex.query(api.jobCategories.getJobCategoryById.getJobCategoryByIdQuery, { categoryId: jobCategoryId });
 }
 
 /**
@@ -28,6 +28,8 @@ export async function getJobCategoryById(jobCategoryId: Id<'jobCategories'>) {
  */
 export async function createJobCategory(input: {
   name: string;
+  colorCode: string;
+  requireOrientation: boolean;
   description?: string;
   requirements?: string[];
 }) {
@@ -37,17 +39,17 @@ export async function createJobCategory(input: {
 /**
  * Update a job category
  */
-export async function updateJobCategory(jobCategoryId: Id<'jobCategories'>, updates: {
+export async function updateJobCategory(jobCategoryId: Id<'jobCategory'>, updates: {
   name?: string;
   description?: string;
   requirements?: string[];
 }) {
-  return convex.mutation(api.jobCategories.updateJobCategory.updateJobCategoryMutation, { jobCategoryId, ...updates });
+  return convex.mutation(api.jobCategories.updateJobCategory.updateJobCategoryMutation, { categoryId: jobCategoryId, ...updates });
 }
 
 /**
  * Delete a job category
  */
-export async function deleteJobCategory(jobCategoryId: Id<'jobCategories'>) {
-  return convex.mutation(api.jobCategories.deleteJobCategory.deleteJobCategoryMutation, { jobCategoryId });
+export async function deleteJobCategory(jobCategoryId: Id<'jobCategory'>) {
+  return convex.mutation(api.jobCategories.deleteJobCategory.deleteJobCategoryMutation, { categoryId: jobCategoryId });
 }
