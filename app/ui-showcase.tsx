@@ -1,1 +1,1 @@
-export { default } from './(screens)/(dev)/UIShowcase';
+export { default } from './(screens)/(dev)/UI-showcase';

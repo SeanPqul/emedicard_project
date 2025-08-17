@@ -1,10 +1,10 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { getColor, getTypography, getSpacing, getBorderRadius } from '../../styles/theme';
-import { LoadingSpinner } from '../LoadingSpinner';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { getBorderRadius, getColor, getSpacing, getTypography } from '../../styles/theme';
 import { ErrorState } from '../ErrorState';
+import { LoadingSpinner } from '../LoadingSpinner';
 
 interface StepNavigationProps {
   currentStep: number;
@@ -153,7 +153,7 @@ export const StepNavigation: React.FC<StepNavigationProps> = ({
         <View style={styles.errorContainer}>
           <ErrorState
             error={error}
-            onRetry={onRetry}
+            onRetry={onRetry || (() => {})}
             variant="inline"
             showDetails={false}
           />
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     paddingVertical: getSpacing('sm'),
   },
   cancelButtonText: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('button'),
     color: getColor('text.secondary'),
     marginLeft: getSpacing('xs'),
   },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     paddingVertical: getSpacing('sm'),
   },
   skipButtonText: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('button'),
     color: getColor('interactive'),
   },
   previousButton: {
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     backgroundColor: getColor('background.secondary'),
   },
   previousButtonText: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('button'),
     color: getColor('text.secondary'),
     marginLeft: getSpacing('xs'),
   },
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
     backgroundColor: getColor('interactive'),
   },
   nextButtonText: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('button'),
     color: getColor('background.primary'),
     fontWeight: '600',
     marginRight: getSpacing('xs'),

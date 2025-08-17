@@ -1,5 +1,5 @@
-// src/screens/auth/verification.tsx
-import { styles } from "@/assets/styles/auth-styles/verification";
+// src/screens/auth-verification.tsx
+import { styles } from "@/src/styles/screens/auth-verification";
 import { useSignUp } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -89,6 +89,7 @@ export default function VerificationPage() {
       const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [resendCooldown]);
 
   const onVerifyPress = async () => {

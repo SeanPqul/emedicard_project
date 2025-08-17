@@ -1,20 +1,21 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { theme } from '../styles/theme';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '@/src/styles/theme';
 
-interface Props {
+interface ErrorBoundaryProps {
   children: ReactNode;
-  fallback?: ReactNode;
+  fallback?: (error: Error, resetError: () => void) => ReactNode;
 }
 
-interface State {
+interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
       hasError: false,
@@ -23,20 +24,16 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return {
-      hasError: true,
-      error,
-      errorInfo: null,
-    };
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error, errorInfo: null };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
-    this.setState({
-      error,
-      errorInfo,
-    });
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    this.setState({ errorInfo });
+
+    // You can log the error to an error reporting service here
+    // For example: logErrorToService(error, errorInfo);
   }
 
   resetError = () => {
@@ -48,32 +45,45 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   render() {
-    if (this.state.hasError) {
-      if (this.props.fallback) {
-        return <>{this.props.fallback}</>;
+    const { hasError, error } = this.state;
+    const { children, fallback } = this.props;
+
+    if (hasError && error) {
+      if (fallback) {
+        return fallback(error, this.resetError);
       }
 
       return (
         <View style={styles.container}>
           <ScrollView contentContainerStyle={styles.content}>
-            <Text style={styles.title}>Oops! Something went wrong</Text>
-            <Text style={styles.message}>
-              We&apos;re sorry for the inconvenience. Please try again.
-            </Text>
+            <View style={styles.iconContainer}>
+              <Ionicons 
+                name="warning-outline" 
+                size={64} 
+                color={theme.colors.semantic.error} 
+              />
+            </View>
             
-            {__DEV__ && this.state.error && (
+            <Text style={styles.title}>Oops! Something went wrong</Text>
+            <Text style={styles.subtitle}>
+              We encountered an unexpected error. Please try again.
+            </Text>
+
+            {__DEV__ && (
               <View style={styles.errorDetails}>
                 <Text style={styles.errorTitle}>Error Details:</Text>
-                <Text style={styles.errorText}>{this.state.error.toString()}</Text>
-                {this.state.errorInfo && (
-                  <Text style={styles.stackTrace}>
-                    {this.state.errorInfo.componentStack}
-                  </Text>
-                )}
+                <Text style={styles.errorMessage}>{error.toString()}</Text>
               </View>
             )}
 
-            <TouchableOpacity style={styles.button} onPress={this.resetError}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={this.resetError}
+              activeOpacity={0.8}
+              accessibilityLabel="Try again"
+              accessibilityHint="Resets the application to try again"
+              accessibilityRole="button"
+            >
               <Text style={styles.buttonText}>Try Again</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -81,7 +91,7 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.props.children;
+    return children;
   }
 }
 
@@ -91,57 +101,53 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.primary,
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: theme.spacing.xl,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.semantic.error,
-    marginBottom: theme.spacing.md,
-    textAlign: 'center',
-  },
-  message: {
-    fontSize: 16,
-    color: theme.colors.text.primary,
+  iconContainer: {
     marginBottom: theme.spacing.xl,
+  },
+  title: {
+    ...theme.typography.h2,
+    color: theme.colors.text.primary,
     textAlign: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  subtitle: {
+    ...theme.typography.body,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: theme.spacing.xl,
+  },
+  errorDetails: {
+    backgroundColor: theme.colors.background.tertiary,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.xl,
+    maxWidth: '100%',
+  },
+  errorTitle: {
+    ...theme.typography.bodySmall,
+    fontWeight: '600',
+    color: theme.colors.semantic.error,
+    marginBottom: theme.spacing.sm,
+  },
+  errorMessage: {
+    ...theme.typography.caption,
+    color: theme.colors.text.secondary,
+    fontFamily: 'monospace',
   },
   button: {
     backgroundColor: theme.colors.primary[500],
     paddingHorizontal: theme.spacing.xl,
     paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
+    ...theme.shadows.medium,
   },
   buttonText: {
+    ...theme.typography.button,
     color: theme.colors.text.inverse,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  errorDetails: {
-    backgroundColor: theme.colors.background.secondary,
-    padding: theme.spacing.md,
-    borderRadius: theme.borderRadius.sm,
-    marginBottom: theme.spacing.xl,
-    maxWidth: '100%',
-  },
-  errorTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: theme.colors.semantic.error,
-    marginBottom: theme.spacing.sm,
-  },
-  errorText: {
-    fontSize: 12,
-    color: theme.colors.text.primary,
-    fontFamily: 'monospace',
-    marginBottom: theme.spacing.sm,
-  },
-  stackTrace: {
-    fontSize: 10,
-    color: theme.colors.text.secondary,
-    fontFamily: 'monospace',
   },
 });

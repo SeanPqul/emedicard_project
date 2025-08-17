@@ -12,6 +12,8 @@ export const generateDisplayNameFromEmail = (email: string): string => {
   
   const emailUsername = email.split('@')[0];
   
+  if (!emailUsername) return 'User';
+  
   // Convert email username to a readable display name
   // e.g., "john.doe" becomes "John Doe", "user_123" becomes "User 123"
   return emailUsername

@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMutation, useQuery } from 'convex/react';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -9,8 +8,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { api } from '../../../convex/_generated/api';
 import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../../../src/styles/theme';
+import { JobCategory } from '../../../src/types';
+import { useJobCategories } from '../../../src/hooks/useJobCategories';
 
 interface Requirement {
   name: string;
@@ -20,23 +20,18 @@ interface Requirement {
   fieldName: string;
 }
 
-interface JobCategory {
-  _id: string;
-  name: string;
-  colorCode: string;
-  requireOrientation: string;
-}
-
 export default function DocumentRequirements() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [isSeeding, setIsSeeding] = useState(false);
   
-  const jobCategories = useQuery(api.jobCategories.getAllJobCategories);
-  const requirementsByCategory = useQuery(
-    api.documentRequirements.getRequirementsByJobCategory,
-    selectedCategoryId ? { jobCategoryId: selectedCategoryId as any } : "skip"
-  );
-  const seedDatabase = useMutation(api.seedData.seedJobCategoriesAndRequirements);
+  // Use our API hook instead of direct Convex calls
+  const {
+    jobCategories,
+    requirementsByCategory,
+    seedJobCategoriesAndRequirements,
+    isLoading,
+    isLoadingRequirements
+  } = useJobCategories(selectedCategoryId || undefined);
 
   // Auto-seed database if empty
   useEffect(() => {
@@ -44,7 +39,7 @@ export default function DocumentRequirements() {
       if (jobCategories !== undefined && jobCategories.length === 0 && !isSeeding) {
         setIsSeeding(true);
         try {
-          await seedDatabase();
+          await seedJobCategoriesAndRequirements();
           console.log('Database auto-seeded successfully');
         } catch (error) {
           console.error('Auto-seed failed:', error);
@@ -117,7 +112,7 @@ export default function DocumentRequirements() {
         <View style={styles.categoryContainer}>
           <Text style={styles.sectionTitle}>Select Health Card Type</Text>
           
-          {jobCategories?.map((category) => (
+          {jobCategories?.map((category: JobCategory) => (
             <TouchableOpacity
               key={category._id}
               style={[

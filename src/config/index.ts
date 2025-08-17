@@ -1,95 +1,103 @@
-// Centralized configuration management
-export const config = {
+/**
+ * Consolidated Application Configuration
+ * 
+ * Central configuration for all app-wide settings, constants, and environment variables.
+ */
+
+// ===== APPLICATION CONFIGURATION =====
+
+export const APP_CONFIG = {
+  // App Information
+  name: 'eMediCard',
+  version: '1.0.0',
+  
   // API Configuration
   api: {
-    convexUrl: process.env.EXPO_PUBLIC_CONVEX_URL!,
-    clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!,
     timeout: 30000, // 30 seconds
     retryAttempts: 3,
+    retryDelay: 1000, // 1 second
   },
   
-  // App Configuration
-  app: {
-    name: 'eMediCard',
-    version: '1.0.0',
-    environment: __DEV__ ? 'development' : 'production',
-    enablePerformanceMonitoring: __DEV__,
-    enableErrorReporting: !__DEV__,
+  // File Upload Configuration
+  upload: {
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    allowedImageTypes: ['image/jpeg', 'image/png', 'image/jpg'],
+    allowedDocumentTypes: ['application/pdf', 'image/jpeg', 'image/png'],
+    maxFilesPerUpload: 5,
   },
   
-  // Feature Flags
-  features: {
-    enableLazyLoading: true,
-    enableOfflineMode: false,
-    enableBiometricAuth: false,
-    enablePushNotifications: true,
-    enableAnalytics: !__DEV__,
-  },
-  
-  // Performance Settings
-  performance: {
-    imageCache: {
-      maxSize: 50 * 1024 * 1024, // 50MB
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    },
-    listOptimization: {
-      initialNumToRender: 10,
-      maxToRenderPerBatch: 10,
-      windowSize: 21,
-      removeClippedSubviews: true,
-    },
+  // Form Configuration
+  forms: {
+    autoSaveInterval: 30000, // 30 seconds
+    maxSteps: 5,
+    validationDebounce: 500, // 0.5 seconds
   },
   
   // UI Configuration
   ui: {
-    animations: {
-      duration: 200,
-      useNativeDriver: true,
-    },
-    loadingTimeout: 10000, // 10 seconds
-    debounceDelay: 300, // 300ms
+    animationDuration: 300,
+    toastDuration: 4000,
+    loadingTimeout: 10000,
   },
   
   // Storage Keys
-  storage: {
-    userPreferences: '@emedicard:preferences',
-    authToken: '@emedicard:auth',
-    onboardingComplete: '@emedicard:onboarding',
-    theme: '@emedicard:theme',
+  storageKeys: {
+    user: 'user_profile',
+    auth: 'auth_tokens',
+    forms: 'saved_forms',
+    preferences: 'user_preferences',
   },
   
-  // Validation Rules
-  validation: {
-    password: {
-      minLength: 8,
-      requireUppercase: true,
-      requireLowercase: true,
-      requireNumbers: true,
-      requireSpecialChars: true,
-    },
-    username: {
-      minLength: 3,
-      maxLength: 20,
-      pattern: /^[a-zA-Z0-9_]+$/,
-    },
-    phone: {
-      pattern: /^(\+63|0)\d{10}$/,
-    },
+  // Development flags
+  dev: {
+    enableLogging: __DEV__,
+    showPerformanceMetrics: false,
+    enableTestMode: false,
   },
-};
+} as const;
 
-// Helper functions for configuration access
-export const getApiConfig = () => config.api;
-export const getAppConfig = () => config.app;
-export const getFeatureFlags = () => config.features;
-export const getPerformanceConfig = () => config.performance;
-export const getUIConfig = () => config.ui;
-export const getStorageKeys = () => config.storage;
-export const getValidationRules = () => config.validation;
+// ===== ENVIRONMENT CONFIGURATION =====
 
-// Environment checks
-export const isDevelopment = () => __DEV__;
-export const isProduction = () => !__DEV__;
-export const isFeatureEnabled = (feature: keyof typeof config.features) => {
-  return config.features[feature];
-};
+export const ENV_CONFIG = {
+  // Environment Detection
+  isDevelopment: __DEV__,
+  isProduction: !__DEV__,
+  
+  // Build Configuration
+  buildNumber: '1',
+  buildDate: new Date().toISOString(),
+  
+  // Feature Flags
+  features: {
+    enableBiometrics: true,
+    enablePushNotifications: true,
+    enableAnalytics: !__DEV__,
+    enableCrashReporting: !__DEV__,
+  },
+  
+  // Performance Settings
+  performance: {
+    enableHermes: true,
+    enableFlipper: __DEV__,
+    enableReactDevTools: __DEV__,
+  },
+  
+  // Debugging
+  debug: {
+    enableReduxLogger: __DEV__,
+    enableNetworkLogging: __DEV__,
+    showDevMenu: __DEV__,
+  },
+} as const;
+
+// ===== TYPE EXPORTS =====
+
+export type AppConfig = typeof APP_CONFIG;
+export type EnvConfig = typeof ENV_CONFIG;
+
+// ===== CONSOLIDATED CONFIG =====
+
+export const CONFIG = {
+  app: APP_CONFIG,
+  env: ENV_CONFIG,
+} as const;

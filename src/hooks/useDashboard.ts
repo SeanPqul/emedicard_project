@@ -62,15 +62,15 @@ export const useDashboard = () => {
     ).length || 0;
 
     const pendingPayments = userPayments?.filter(payment => 
-      payment.status === 'Pending'
+      payment && payment.status === 'Pending'
     ).length || 0;
 
     const pendingAmount = userPayments?.filter(payment => 
-      payment.status === 'Pending'
-    ).reduce((sum, payment) => sum + payment.netAmount, 0) || 0;
+      payment && payment.status === 'Pending'
+    ).reduce((sum, payment) => sum + payment!.netAmount, 0) || 0;
 
     const validHealthCards = userHealthCards?.filter(card => 
-      card.expiresAt > Date.now()
+      card.expiresAt && card.expiresAt > Date.now()
     ).length || 0;
 
     const upcomingOrientations = 0; // TODO: Implement orientations query
@@ -93,9 +93,9 @@ export const useDashboard = () => {
       activities.push({
         id: notification._id,
         type: 'notification',
-        title: notification.message || notification.messag || 'New Notification', // Handle typo in schema
+        title: notification.message || 'New Notification', // Handle typo in schema
         description: getNotificationDescription(notification),
-        timestamp: notification.createdAt || new Date(Date.now() - Math.random() * 86400000).toISOString(), // Use actual timestamp or recent fallback
+        timestamp: new Date(notification._creationTime).toISOString(), // Use actual timestamp or recent fallback
         status: notification.read ? 'success' : 'pending'
       });
     });
@@ -106,20 +106,21 @@ export const useDashboard = () => {
         id: application._id,
         type: 'application',
         title: `Health Card Application ${application.status}`,
-        description: `Application for ${application.applicationType || 'health card'} is now ${application.status.toLowerCase()}`,
-        timestamp: application.updatedAt || application.createdAt || new Date(Date.now() - Math.random() * 172800000).toISOString(),
+        description: `Application for ${application.form.applicationType || 'health card'} is now ${application.status.toLowerCase()}`,
+        timestamp: new Date(application.submittedAt || application._creationTime).toISOString(),
         status: getApplicationActivityStatus(application.status)
       });
     });
 
     // Add from payments
-    userPayments?.slice(0, 2).forEach(payment => {
+    userPayments?.filter(Boolean).slice(0, 2).forEach(payment => {
+      if (!payment) return; // Type guard to ensure payment is not null
       activities.push({
         id: payment._id,
         type: 'payment',
         title: `Payment ${payment.status}`,
         description: `₱${payment.netAmount.toFixed(2)} payment via ${payment.method}`,
-        timestamp: payment.updatedAt || payment.createdAt || new Date(Date.now() - Math.random() * 259200000).toISOString(),
+        timestamp: new Date(payment.updatedAt || payment._creationTime).toISOString(),
         status: payment.status === 'Complete' ? 'success' : payment.status === 'Failed' ? 'error' : 'pending'
       });
     });

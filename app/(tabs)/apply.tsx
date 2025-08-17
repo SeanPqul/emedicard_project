@@ -1,6 +1,6 @@
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
-import { useMutation, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import * as DocumentPicker from 'expo-document-picker';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -21,24 +21,22 @@ import {
 import { FeedbackSystem, useFeedback } from '../../src/components/feedback/FeedbackSystem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { styles } from '../../assets/styles/tabs-styles/apply';
-import { api } from '../../convex/_generated/api';
+import { styles } from '../../src/styles/screens/tabs-apply-forms';
+import { modalStyles } from '../../src/styles/components/modals';
 import { Id } from '../../convex/_generated/dataModel';
 import { CustomButton, CustomTextInput } from '../../src/components';
 import { useDocumentUpload } from '../../src/hooks/useDocumentUpload';
 import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../../src/styles/theme';
+import { useJobCategories } from '../../src/hooks/useJobCategories';
+import { useApplications } from '../../src/hooks/useApplications';
+import { useRequirements } from '../../src/hooks/useRequirements';
+import { useUsers } from '../../src/hooks/useUsers';
+import { JobCategory, User, DocumentRequirement, SelectedDocuments, DocumentFile } from '../../src/types';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';
 
-interface JobCategory {
-  _id: string;
-  name: string;
-  colorCode: string;
-  requireOrientation: string;
-}
-
-interface FormData {
+interface ApplicationFormData {
   applicationType: ApplicationType;
   jobCategory: string;
   position: string;
@@ -77,32 +75,68 @@ export default function Apply() {
   
   const tabBarHeight = getTabBarHeight();
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ApplicationFormData>({
     applicationType: 'New',
     jobCategory: '',
     position: '',
     organization: '',
     civilStatus: 'Single',
   });
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [errors, setErrors] = useState<Partial<ApplicationFormData>>({});
   const [loading, setLoading] = useState(false);
   const { messages, showSuccess, showError, showWarning, dismissFeedback } = useFeedback();
   
   // Upload documents state
-  const [selectedDocuments, setSelectedDocuments] = useState<Record<string, any>>({});
+  const [selectedDocuments, setSelectedDocuments] = useState<SelectedDocuments>({});
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, Id<"_storage">>>({});
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [tempFormId, setTempFormId] = useState<string | null>(null);
 
-  // Convex queries and mutations
-  const jobCategories = useQuery(api.jobCategories?.getAllJobCategories);
-  const createForm = useMutation(api.forms.createForm);
-  const submitApplication = useMutation(api.forms.submitApplicationForm);
-  const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
-  const requirementsByJobCategory = useQuery(api.documentRequirements.getRequirementsByJobCategory,
-    formData.jobCategory ? { jobCategoryId: formData.jobCategory as any } : 'skip'
-  );
+  // API queries and state management
+  const [jobCategoriesData, setJobCategoriesData] = useState<JobCategory[]>([]);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [requirementsByJobCategory, setRequirementsByJobCategory] = useState<DocumentRequirement[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+
+  // Load initial data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingData(true);
+        const [categoriesData, profileData] = await Promise.all([
+          jobCategories.getAllJobCategories(),
+          users.getCurrentUser()
+        ]);
+        setJobCategoriesData(categoriesData || []);
+        setUserProfile(profileData);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+        showError('Failed to load application data');
+      } finally {
+        setLoadingData(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  // Load requirements when job category changes
+  useEffect(() => {
+    if (formData.jobCategory) {
+      const loadRequirements = async () => {
+        try {
+          const reqData = await requirements.getJobCategoryRequirements(formData.jobCategory as Id<'jobCategory'>);
+          setRequirementsByJobCategory(reqData || []);
+        } catch (error) {
+          console.error('Error loading requirements:', error);
+          showError('Failed to load document requirements');
+        }
+      };
+      loadRequirements();
+    } else {
+      setRequirementsByJobCategory([]);
+    }
+  }, [formData.jobCategory]);
   
   // Document upload hook (only initialize when we have a form ID)
   const documentUploadHook = useDocumentUpload(tempFormId as Id<"forms">);
@@ -134,24 +168,20 @@ export default function Apply() {
   }, [formData, currentStep, selectedDocuments, requirementsByJobCategory, getUploadState]);
 
   const handleNext = async () => {
-    console.log('handleNext called, currentStep:', currentStep);
-    console.log('formData:', formData);
-    
     if (validateCurrentStep()) {
-      console.log('Validation passed');
       if (currentStep < STEP_TITLES.length - 1) {
         // If moving to upload documents step (step 3), create a temporary form
         if (currentStep === 2 && !tempFormId) {
           try {
             setLoading(true);
-            const selectedCategory = jobCategories?.find(cat => cat._id === formData.jobCategory);
+            const selectedCategory = jobCategoriesData?.find(cat => cat._id === formData.jobCategory);
             if (!selectedCategory) {
               throw new Error('Invalid job category selected');
             }
 
-            const formId = await createForm({
+            const formId = await forms.createForm({
               applicationType: formData.applicationType,
-              jobCategory: formData.jobCategory as any,
+              jobCategory: formData.jobCategory as Id<'jobCategory'>,
               position: formData.position,
               organization: formData.organization,
               civilStatus: formData.civilStatus,
@@ -167,16 +197,11 @@ export default function Apply() {
           }
         }
 
-        console.log('Moving to next step:', currentStep + 1);
         setCurrentStep(currentStep + 1);
         renderStepIndicator();  // Ensure active step is indicated visually
       } else {
-        console.log('Submitting form');
         handleSubmit();
       }
-    } else {
-      console.log('Validation failed, errors:', errors);
-      // Optionally, visually highlight the first error for user prompt
     }
   };
 
@@ -266,11 +291,11 @@ export default function Apply() {
     referenceNumber: string
   ) => {
     try {
-      const result = await submitApplication({
-        formId: tempFormId as Id<"forms">,
+      const result = await forms.submitApplicationForm(
+        tempFormId as Id<"forms">,
         paymentMethod,
-        paymentReferenceNumber: referenceNumber,
-      });
+        referenceNumber
+      );
 
       if (result.success) {
         Alert.alert(
@@ -356,8 +381,6 @@ const pickFromGallery = async () => {
   };
 
 const handleDocumentSelected = async (file: any, documentId: string) => {
-    console.log('handleDocumentSelected called with:', { file, documentId });
-    
     if (!tempFormId) {
       Alert.alert('Error', 'Form not created yet. Please try again.');
       return;
@@ -371,7 +394,6 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
 
     try {
       // Convert file to the format expected by the upload hook
-      console.log('Fetching file blob from:', file.uri);
       const fileBlob = await fetch(file.uri).then(response => {
         if (!response.ok) {
           throw new Error(`Failed to fetch file: ${response.status}`);
@@ -389,14 +411,12 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
                            fileType.split('/')[1] || 'jpg';
       
       const fileName = file.fileName || file.name || `document_${documentId}.${fileExtension}`;
-      console.log('Creating file object:', { fileName, fileType, size: fileBlob.size });
       
       const fileObject = new File([fileBlob], fileName, {
         type: fileType,
       });
 
       const isReplacing = selectedDocuments[documentId] && uploadedFiles[documentId];
-      console.log('Upload mode:', isReplacing ? 'replacing' : 'new upload');
       
       if (isReplacing) {
         // Replace existing file
@@ -420,7 +440,6 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
         [documentId]: file,
       }));
 
-      console.log('Upload successful for document:', documentId);
       showSuccess('Document Uploaded', 'Your document has been uploaded successfully!');
     } catch (error) {
       console.error('Upload error details:', error);
@@ -562,7 +581,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
         </Text>
         
         <View style={styles.categoryGrid}>
-          {jobCategories?.map((category, index) => (
+          {jobCategoriesData?.map((category, index) => (
             <TouchableOpacity
               key={category._id}
               style={[
@@ -679,70 +698,32 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
         </Text>
         
         {/* Instructions */}
-        <View style={[styles.formGroup, { marginBottom: getSpacing('md') }]}>
-          <View style={{
-            flexDirection: 'row',
-            padding: getSpacing('md'),
-            backgroundColor: getColor('semanticUI.infoCard'),
-            borderRadius: getBorderRadius('md'),
-          }}>
+        <View style={styles.formGroup}>
+          <View style={styles.infoCard}>
             <Ionicons name="information-circle-outline" size={24} color={getColor('primary.500')} />
-            <View style={{ flex: 1, marginLeft: getSpacing('sm') }}>
-              <Text style={{
-...getTypography('body'),
-                color: getColor('primary.500'),
-                fontWeight: '600',
-                marginBottom: getSpacing('xs'),
-              }}>Document Requirements</Text>
-              <Text style={{
-                ...getTypography('bodySmall'),
-                color: getColor('primary.500'),
-                lineHeight: 16,
-              }}>⚠️ Note: Documents must be from accredited clinics and laboratories. Accepted formats: JPG, PNG, PDF</Text>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoTitle}>Document Requirements</Text>
+              <Text style={styles.infoText}>⚠️ Note: Documents must be from accredited clinics and laboratories. Accepted formats: JPG, PNG, PDF</Text>
             </View>
           </View>
         </View>
         
         {/* Document List */}
-        <View style={{ marginBottom: getSpacing('lg') }}>
+        <View style={styles.formGroupWithMargin}>
           {documentRequirements.map((document, index) => (
-            <View key={document.fieldName || `doc-${index}`} style={{
-              backgroundColor: getColor('background.primary'),
-              borderRadius: getBorderRadius('md'),
-              padding: getSpacing('md'),
-              marginBottom: getSpacing('md'),
-              ...getShadow('card'),
-            }}>
-              <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginBottom: getSpacing('sm'),
-              }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{
-...getTypography('body'),
-                    fontWeight: '600',
-                    color: getColor('text.primary'),
-                    marginBottom: getSpacing('xs'),
-                  }}>
+            <View key={document.fieldName || `doc-${index}`} style={styles.documentCard}>
+              <View style={styles.documentHeader}>
+                <View style={styles.documentInfo}>
+                  <Text style={styles.documentTitle}>
                     {document.name}
-                    {document.required && <Text style={{ color: getColor('semantic.error') }}> *</Text>}
+                    {document.required && <Text style={styles.requiredAsterisk}> *</Text>}
                   </Text>
-                  <Text style={{
-                    ...getTypography('bodyMedium'),
-                    color: getColor('text.secondary'),
-                    marginBottom: getSpacing('xs'),
-                  }}>{document.description}</Text>
-                  <Text style={{
-                    ...getTypography('bodySmall'),
-                    color: getColor('text.secondary'),
-                    fontStyle: 'italic',
-                  }}>
+                  <Text style={styles.documentDescription}>{document.description}</Text>
+                  <Text style={styles.documentFormats}>
                     Formats: {document.formats ? document.formats.join(', ').toUpperCase() : 'JPG, PNG, PDF'}
                   </Text>
                 </View>
-                <View style={{ marginLeft: getSpacing('sm') }}>
+                <View style={styles.documentStatus}>
                   {selectedDocuments[document.fieldName] ? (
                     <Ionicons name="checkmark-circle" size={24} color={getColor('semantic.success')} />
                   ) : (
@@ -753,30 +734,14 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
 
               {/* Upload Progress */}
               {getUploadState(document.fieldName)?.uploading && (
-                <View style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: getSpacing('sm'),
-                }}>
-                  <View style={{
-                    flex: 1,
-                    height: 4,
-                    backgroundColor: getColor('border.light'),
-                    borderRadius: getBorderRadius('xs'),
-                    marginRight: getSpacing('sm'),
-                  }}>
-                    <View style={{
-                      height: '100%',
-                      backgroundColor: getColor('primary.500'),
-                      borderRadius: getBorderRadius('xs'),
-                      width: `${getUploadState(document.fieldName).progress}%`,
-                    }} />
+                <View style={styles.progressContainer}>
+                  <View style={styles.progressBar}>
+                    <View style={[
+                      styles.progressFill,
+                      { width: `${getUploadState(document.fieldName).progress}%` }
+                    ]} />
                   </View>
-                  <Text style={{
-                    ...getTypography('bodySmall'),
-                    color: getColor('text.secondary'),
-                    minWidth: 35,
-                  }}>
+                  <Text style={styles.progressText}>
                     {getUploadState(document.fieldName).progress}%
                   </Text>
                 </View>
@@ -784,66 +749,29 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
 
               {/* Error State */}
               {getUploadState(document.fieldName)?.error && (
-                <View style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: getColor('semanticUI.dangerCard'),
-                  padding: getSpacing('sm'),
-                  borderRadius: getBorderRadius('sm'),
-                  marginBottom: getSpacing('sm'),
-                }}>
+                <View style={styles.errorContainer}>
                   <Ionicons name="alert-circle" size={16} color={getColor('semantic.error')} />
-                  <Text style={{
-                    ...getTypography('bodySmall'),
-                    color: getColor('semantic.error'),
-                    flex: 1,
-                    marginLeft: getSpacing('xs'),
-                  }}>
+                  <Text style={styles.errorMessage}>
                     {getUploadState(document.fieldName).error}
                   </Text>
                   <TouchableOpacity
-                    style={{
-                      paddingHorizontal: getSpacing('sm'),
-                      paddingVertical: getSpacing('xs'),
-                      borderRadius: getBorderRadius('xs'),
-                      backgroundColor: getColor('semantic.error'),
-                      marginLeft: getSpacing('sm'),
-                    }}
+                    style={styles.retryButton}
                     onPress={() => selectedDocuments[document.fieldName] && retryUpload(selectedDocuments[document.fieldName], document.fieldName)}
                   >
-                    <Text style={{
-                      ...getTypography('bodySmall'),
-                      color: getColor('background.primary'),
-                      fontWeight: '600',
-                    }}>Retry</Text>
+                    <Text style={styles.retryButtonText}>Retry</Text>
                   </TouchableOpacity>
                 </View>
               )}
 
               {/* Document Preview */}
               {selectedDocuments[document.fieldName] && !getUploadState(document.fieldName)?.uploading && (
-                <View style={{
-                  position: 'relative',
-                  marginBottom: getSpacing('sm'),
-                }}>
+                <View style={styles.documentPreview}>
                   <Image
                     source={{ uri: selectedDocuments[document.fieldName].uri }}
-                    style={{
-                      width: '100%',
-                      height: 120,
-                      borderRadius: getBorderRadius('sm'),
-                      backgroundColor: getColor('background.secondary'),
-                    }}
+                    style={styles.documentImage}
                   />
                   <TouchableOpacity 
-                    style={{
-                      position: 'absolute',
-                      top: getSpacing('sm'),
-                      right: getSpacing('sm'),
-                      backgroundColor: getColor('background.primary'),
-                      borderRadius: getBorderRadius('sm'),
-                      padding: getSpacing('xs'),
-                    }}
+                    style={styles.removeDocumentButton}
                     onPress={() => handleRemoveDocument(document.fieldName)}
                   >
                     <Ionicons name="close-circle" size={20} color={getColor('semantic.error')} />
@@ -852,21 +780,9 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
               )}
 
               {/* Action Buttons */}
-              <View style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}>
+              <View style={styles.uploadButtonContainer}>
                 <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingHorizontal: getSpacing('lg'),
-                    paddingVertical: getSpacing('sm'),
-                    borderRadius: getBorderRadius('sm'),
-                    borderWidth: 1,
-                    borderColor: getColor('primary.500'),
-                    backgroundColor: getColor('background.primary'),
-                  }}
+                  style={styles.uploadButton}
                   onPress={() => handleDocumentPicker(document.fieldName)}
                   disabled={getUploadState(document.fieldName)?.uploading}
                 >
@@ -875,12 +791,7 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
                     size={20} 
                     color={getColor('primary.500')} 
                   />
-                  <Text style={{
-                    ...getTypography('bodyMedium'),
-                    color: getColor('primary.500'),
-                    fontWeight: '600',
-                    marginLeft: getSpacing('sm'),
-                  }}>
+                  <Text style={styles.uploadButtonText}>
                     {selectedDocuments[document.fieldName] ? 'Replace' : 'Upload'}
                   </Text>
                 </TouchableOpacity>
@@ -909,29 +820,13 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
         {/* Application Details Section */}
         <View style={styles.reviewCard}>
           <View style={styles.reviewSection}>
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: getSpacing('md'),
-            }}>
+            <View style={styles.reviewSectionHeader}>
               <Text style={styles.reviewSectionTitle}>Application Details</Text>
               <TouchableOpacity 
-                style={{
-                  paddingHorizontal: getSpacing('sm'),
-                  paddingVertical: getSpacing('xs'),
-                  borderRadius: getBorderRadius('sm'),
-                  backgroundColor: getColor('primary.50'),
-                  borderWidth: 1,
-                  borderColor: getColor('primary.500'),
-                }}
+                style={styles.editButton}
                 onPress={() => setCurrentStep(0)}
               >
-                <Text style={{
-                  ...getTypography('bodySmall'),
-                  color: getColor('primary.500'),
-                  fontWeight: '600',
-                }}>Edit</Text>
+                <Text style={styles.editButtonText}>Edit</Text>
               </TouchableOpacity>
             </View>
             
@@ -941,14 +836,8 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
             </View>
             <View style={styles.reviewItem}>
               <Text style={styles.reviewLabel}>Job Category:</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: 6,
-                  backgroundColor: selectedCategory?.colorCode || '#999',
-                  marginRight: getSpacing('sm'),
-                }} />
+              <View style={styles.reviewItemWithIndicator}>
+                <View style={[styles.categoryColorIndicator, { backgroundColor: selectedCategory?.colorCode || '#999' }]} />
                 <Text style={styles.reviewValue}>{selectedCategory?.name}</Text>
               </View>
             </View>
@@ -968,73 +857,29 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
           
           {/* Document Summary Section */}
           <View style={styles.reviewSection}>
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: getSpacing('md'),
-            }}>
+            <View style={styles.reviewSectionHeader}>
               <Text style={styles.reviewSectionTitle}>Document Summary</Text>
               <TouchableOpacity 
-                style={{
-                  paddingHorizontal: getSpacing('sm'),
-                  paddingVertical: getSpacing('xs'),
-                  borderRadius: getBorderRadius('sm'),
-                  backgroundColor: getColor('primary.50'),
-                  borderWidth: 1,
-                  borderColor: getColor('primary.500'),
-                }}
+                style={styles.editButton}
                 onPress={() => setCurrentStep(3)}
               >
-                <Text style={{
-                  ...getTypography('bodySmall'),
-                  color: getColor('primary.500'),
-                  fontWeight: '600',
-                }}>Edit</Text>
+                <Text style={styles.editButtonText}>Edit</Text>
               </TouchableOpacity>
             </View>
             
             {/* Document Status Overview */}
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginBottom: getSpacing('md'),
-              padding: getSpacing('md'),
-              backgroundColor: getColor('background.secondary'),
-              borderRadius: getBorderRadius('md'),
-            }}>
-              <View style={{ alignItems: 'center' }}>
-                <Text style={{
-                  ...getTypography('headingSmall'),
-                  color: getColor('semantic.success'),
-                  fontWeight: '700',
-                }}>{uploadedDocuments.length}</Text>
-                <Text style={{
-                  ...getTypography('bodySmall'),
-                  color: getColor('text.secondary'),
-                }}>Uploaded</Text>
+            <View style={styles.documentOverview}>
+              <View style={styles.overviewItem}>
+                <Text style={[styles.overviewNumber, styles.overviewNumberSuccess]}>{uploadedDocuments.length}</Text>
+                <Text style={styles.overviewLabel}>Uploaded</Text>
               </View>
-              <View style={{ alignItems: 'center' }}>
-                <Text style={{
-                  ...getTypography('headingSmall'),
-                  color: getColor('semantic.error'),
-                  fontWeight: '700',
-                }}>{missingDocuments.length}</Text>
-                <Text style={{
-                  ...getTypography('bodySmall'),
-                  color: getColor('text.secondary'),
-                }}>Missing</Text>
+              <View style={styles.overviewItem}>
+                <Text style={[styles.overviewNumber, styles.overviewNumberError]}>{missingDocuments.length}</Text>
+                <Text style={styles.overviewLabel}>Missing</Text>
               </View>
-              <View style={{ alignItems: 'center' }}>
-                <Text style={{
-                  ...getTypography('headingSmall'),
-                  color: getColor('semantic.warning'),
-                  fontWeight: '700',
-                }}>{documentsWithErrors.length}</Text>
-                <Text style={{
-                  ...getTypography('bodySmall'),
-                  color: getColor('text.secondary'),
-                }}>Errors</Text>
+              <View style={styles.overviewItem}>
+                <Text style={[styles.overviewNumber, styles.overviewNumberWarning]}>{documentsWithErrors.length}</Text>
+                <Text style={styles.overviewLabel}>Errors</Text>
               </View>
             </View>
             
@@ -1045,63 +890,38 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
               const isUploading = getUploadState(document.fieldName)?.uploading;
               
               return (
-                <View key={document.fieldName || `review-doc-${index}`} style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingVertical: getSpacing('sm'),
-                  borderBottomWidth: 1,
-                  borderBottomColor: getColor('border.light'),
-                }}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{
-                      ...getTypography('bodyMedium'),
-                      color: getColor('text.primary'),
-                      fontWeight: '600',
-                    }}>
+                <View key={document.fieldName || `review-doc-${index}`} style={styles.documentStatusItem}>
+                  <View style={styles.documentStatusContent}>
+                    <Text style={styles.documentStatusTitle}>
                       {document.name}
-                      {document.required && <Text style={{ color: getColor('semantic.error') }}> *</Text>}
+                      {document.required && <Text style={styles.requiredAsterisk}> *</Text>}
                     </Text>
                     {isUploaded && (
-                      <Text style={{
-                        ...getTypography('bodySmall'),
-                        color: getColor('text.secondary'),
-                      }}>
+                      <Text style={styles.documentStatusFile}>
                         File: {selectedDocuments[document.fieldName].name || 'uploaded'}
                       </Text>
                     )}
                   </View>
                   
                   {isUploading ? (
-                    <View style={{ alignItems: 'center' }}>
+                    <View style={styles.documentStatusIndicator}>
                       <Ionicons name="hourglass" size={20} color={getColor('semantic.warning')} />
-                      <Text style={{
-                        ...getTypography('bodySmall'),
-                        color: getColor('semantic.warning'),
-                      }}>Uploading...</Text>
+                      <Text style={[styles.documentStatusText, { color: getColor('semantic.warning') }]}>Uploading...</Text>
                     </View>
                   ) : hasError ? (
-                    <View style={{ alignItems: 'center' }}>
+                    <View style={styles.documentStatusIndicator}>
                       <Ionicons name="alert-circle" size={20} color={getColor('semantic.error')} />
-                      <Text style={{
-                        ...getTypography('bodySmall'),
-                        color: getColor('semantic.error'),
-                      }}>Error</Text>
+                      <Text style={[styles.documentStatusText, { color: getColor('semantic.error') }]}>Error</Text>
                     </View>
                   ) : isUploaded ? (
-                    <View style={{ alignItems: 'center' }}>
+                    <View style={styles.documentStatusIndicator}>
                       <Ionicons name="checkmark-circle" size={20} color={getColor('semantic.success')} />
-                      <Text style={{
-                        ...getTypography('bodySmall'),
-                        color: getColor('semantic.success'),
-                      }}>Uploaded</Text>
+                      <Text style={[styles.documentStatusText, { color: getColor('semantic.success') }]}>Uploaded</Text>
                     </View>
                   ) : (
-                    <View style={{ alignItems: 'center' }}>
+                    <View style={styles.documentStatusIndicator}>
                       <Ionicons name="close-circle" size={20} color={getColor('semantic.error')} />
-                      <Text style={{
-                        ...getTypography('bodySmall'),
-                        color: getColor('semantic.error'),
-                      }}>Missing</Text>
+                      <Text style={[styles.documentStatusText, { color: getColor('semantic.error') }]}>Missing</Text>
                     </View>
                   )}
                 </View>
@@ -1142,61 +962,26 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
           
           {/* Validation Warnings */}
           {(missingDocuments.length > 0 || documentsWithErrors.length > 0) && (
-            <View style={{
-              backgroundColor: getColor('semanticUI.dangerCard'),
-              padding: getSpacing('md'),
-              borderRadius: getBorderRadius('md'),
-              marginTop: getSpacing('md'),
-            }}>
-              <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: getSpacing('sm'),
-              }}>
+            <View style={styles.validationWarning}>
+              <View style={styles.validationHeader}>
                 <Ionicons name="warning" size={20} color={getColor('semantic.error')} />
-                <Text style={{
-                  ...getTypography('bodyMedium'),
-                  color: getColor('semantic.error'),
-                  fontWeight: '600',
-                  marginLeft: getSpacing('sm'),
-                }}>Application Incomplete</Text>
+                <Text style={styles.validationTitle}>Application Incomplete</Text>
               </View>
               
               {missingDocuments.length > 0 && (
-                <Text style={{
-                  ...getTypography('bodySmall'),
-                  color: getColor('semantic.error'),
-                  marginBottom: getSpacing('xs'),
-                }}>Missing required documents: {missingDocuments.map(doc => doc.name).join(', ')}</Text>
+                <Text style={styles.validationMessage}>Missing required documents: {missingDocuments.map(doc => doc.name).join(', ')}</Text>
               )}
               
               {documentsWithErrors.length > 0 && (
-                <Text style={{
-                  ...getTypography('bodySmall'),
-                  color: getColor('semantic.error'),
-                }}>Please fix upload errors before submitting.</Text>
+                <Text style={styles.validationMessage}>Please fix upload errors before submitting.</Text>
               )}
             </View>
           )}
           
           {/* Terms and Conditions */}
-          <View style={{
-            backgroundColor: getColor('background.secondary'),
-            padding: getSpacing('md'),
-            borderRadius: getBorderRadius('md'),
-            marginTop: getSpacing('md'),
-          }}>
-            <Text style={{
-              ...getTypography('bodyMedium'),
-              color: getColor('text.primary'),
-              fontWeight: '600',
-              marginBottom: getSpacing('sm'),
-            }}>Terms & Conditions</Text>
-            <Text style={{
-              ...getTypography('bodySmall'),
-              color: getColor('text.secondary'),
-              lineHeight: 18,
-            }}>By submitting this application, I confirm that all information provided is accurate and complete. I understand that false information may result in the rejection of my application or cancellation of my health card.</Text>
+          <View style={styles.termsContainer}>
+            <Text style={styles.termsTitle}>Terms & Conditions</Text>
+            <Text style={styles.termsText}>By submitting this application, I confirm that all information provided is accurate and complete. I understand that false information may result in the rejection of my application or cancellation of my health card.</Text>
           </View>
         </View>
       </ScrollView>
@@ -1219,6 +1004,14 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
         return null;
     }
   };
+
+  if (loadingData) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Loading application data...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -1268,20 +1061,18 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
           
           {/* Navigation Button with proper validation */}
           <TouchableOpacity
-            style={[{
-              backgroundColor: loading ? '#999' : '#2E86AB',
-              paddingVertical: 15,
-              paddingHorizontal: 30,
-              borderRadius: 8,
-              flex: 1,
-              marginLeft: currentStep > 0 ? 0 : 0,
-              alignItems: 'center',
-              opacity: loading ? 0.6 : 1,
-            }]}
+            style={[
+              styles.nextButton,
+              currentStep === 0 && styles.nextButtonFull,
+              { 
+                backgroundColor: loading ? getColor('border.medium') : getColor('accent.medicalBlue'),
+                opacity: loading ? 0.6 : 1,
+              }
+            ]}
             onPress={handleNext}
             disabled={loading}
           >
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+            <Text style={styles.nextButtonText}>
               {loading ? 'Loading...' : (currentStep === STEP_TITLES.length - 1 ? 'Submit Application' : 'Next')}
             </Text>
           </TouchableOpacity>
@@ -1304,87 +1095,30 @@ const handleDocumentSelected = async (file: any, documentId: string) => {
           animationType="slide"
           onRequestClose={() => setShowImagePicker(false)}
         >
-          <View style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'flex-end',
-          }}>
-            <View style={{
-              backgroundColor: getColor('background.primary'),
-              borderTopLeftRadius: getBorderRadius('xl'),
-              borderTopRightRadius: getBorderRadius('xl'),
-              padding: getSpacing('lg'),
-            }}>
-              <Text style={{
-...getTypography('h4'),
-                color: getColor('text.primary'),
-                textAlign: 'center',
-                marginBottom: getSpacing('lg'),
-              }}>Select Document Source</Text>
+          <View style={modalStyles.modalOverlay}>
+            <View style={modalStyles.modalContainer}>
+              <Text style={modalStyles.modalTitle}>Select Document Source</Text>
               
-              <TouchableOpacity style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingVertical: getSpacing('md'),
-                paddingHorizontal: getSpacing('lg'),
-                borderRadius: getBorderRadius('lg'),
-                backgroundColor: getColor('background.secondary'),
-                marginBottom: getSpacing('sm'),
-              }} onPress={pickFromCamera}>
+              <TouchableOpacity style={modalStyles.imagePickerOption} onPress={pickFromCamera}>
                 <Ionicons name="camera" size={24} color={getColor('primary.500')} />
-                <Text style={{
-...getTypography('body'),
-                  color: getColor('text.primary'),
-                  marginLeft: getSpacing('md'),
-                }}>Take Photo</Text>
+                <Text style={modalStyles.imagePickerOptionText}>Take Photo</Text>
               </TouchableOpacity>
               
-              <TouchableOpacity style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingVertical: getSpacing('md'),
-                paddingHorizontal: getSpacing('lg'),
-                borderRadius: getBorderRadius('lg'),
-                backgroundColor: getColor('background.secondary'),
-                marginBottom: getSpacing('sm'),
-              }} onPress={pickFromGallery}>
+              <TouchableOpacity style={modalStyles.imagePickerOption} onPress={pickFromGallery}>
                 <Ionicons name="images" size={24} color={getColor('primary.500')} />
-                <Text style={{
-...getTypography('body'),
-                  color: getColor('text.primary'),
-                  marginLeft: getSpacing('md'),
-                }}>Choose from Gallery</Text>
+                <Text style={modalStyles.imagePickerOptionText}>Choose from Gallery</Text>
               </TouchableOpacity>
               
-              <TouchableOpacity style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingVertical: getSpacing('md'),
-                paddingHorizontal: getSpacing('lg'),
-                borderRadius: getBorderRadius('lg'),
-                backgroundColor: getColor('background.secondary'),
-                marginBottom: getSpacing('sm'),
-              }} onPress={pickDocument}>
+              <TouchableOpacity style={modalStyles.imagePickerOption} onPress={pickDocument}>
                 <Ionicons name="document" size={24} color={getColor('primary.500')} />
-                <Text style={{
-...getTypography('body'),
-                  color: getColor('text.primary'),
-                  marginLeft: getSpacing('md'),
-                }}>Select File</Text>
+                <Text style={modalStyles.imagePickerOptionText}>Select File</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
-                style={{
-                  paddingVertical: getSpacing('md'),
-                  alignItems: 'center',
-                }}
+                style={modalStyles.modalCancelButton}
                 onPress={() => setShowImagePicker(false)}
               >
-                <Text style={{
-...getTypography('body'),
-                  color: getColor('semantic.error'),
-                  fontWeight: '600',
-                }}>Cancel</Text>
+                <Text style={modalStyles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>

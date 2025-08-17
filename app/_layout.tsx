@@ -4,13 +4,14 @@ import InitialLayout from "@/src/layouts/InitialLayout";
 import ClerkAndConvexProvider from "@/src/provider/ClerkAndConvexProvider";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { layoutStyles } from "@/src/styles/layouts/root-layout";
 
 export default function RootLayout() {
   return (
     <ErrorBoundary>
       <ClerkAndConvexProvider>
         <SafeAreaProvider>
-          <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
+          <SafeAreaView style={layoutStyles.safeAreaView} edges={['top', 'left', 'right']}>
             <StatusBar backgroundColor="#10B981" barStyle="dark-content" />
             <ToastProvider>
               <InitialLayout />

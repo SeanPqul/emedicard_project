@@ -92,7 +92,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <View style={styles.headerLeft}>
           <View style={styles.profilePicture}>
             <Image
-              source={{ uri: userImage }}
+              source={userImage ? { uri: userImage } : null}
               style={styles.profileImage}
               placeholder="👤"
             />

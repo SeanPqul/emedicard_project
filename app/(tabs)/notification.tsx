@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,24 +8,19 @@ import {
   Alert,
 } from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { EmptyState } from '../../src/components';
-import { styles } from '../../assets/styles/tabs-styles/notification';
+import { styles } from '../../src/styles/screens/tabs-notification';
+import { useNotifications } from '../../src/hooks/useNotifications';
+import { Notification } from '../../src/types';
+import { Id } from '../../convex/_generated/dataModel';
 
 type NotificationCategory = 'All' | 'Unread' | 'Applications' | 'Payments' | 'Orientations';
 
-interface NotificationItem {
-  _id: string;
+type NotificationItem = Notification & {
   _creationTime: number;
-  userId: string;
-  formsId?: string;
-  type: 'MissingDoc' | 'PaymentReceived' | 'FormApproved' | 'OrientationScheduled' | 'CardIssue';
-  message: string;
-  read: boolean;
-}
+};
 
 const NOTIFICATION_CATEGORIES: NotificationCategory[] = [
   'All', 'Unread', 'Applications', 'Payments', 'Orientations'
@@ -59,30 +54,55 @@ export default function Notifications() {
   const { user } = useUser();
   const [selectedCategory, setSelectedCategory] = useState<NotificationCategory>('All');
   const [refreshing, setRefreshing] = useState(false);
+  const [notificationsData, setNotificationsData] = useState<NotificationItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Convex queries and mutations
-  const notifications = useQuery(api.notifications.getUserNotificationsQuery) as NotificationItem[] | undefined;
-  const markAsRead = useMutation(api.notifications.markAsReadMutation);
-  const markAllAsRead = useMutation(api.notifications.markAllAsReadMutation);
+  // Load notifications
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const loadNotifications = async () => {
+    try {
+      setLoading(true);
+      const data = await notifications.getUserNotifications();
+      setNotificationsData(data || []);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      Alert.alert('Error', 'Failed to load notifications');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadNotifications();
+    setRefreshing(false);
   };
 
-  const handleMarkAsRead = async (notificationId: string) => {
+  const handleMarkAsRead = async (notificationId: Id<'notifications'>) => {
     try {
-      await markAsRead({ notificationId });
+      await notifications.markNotificationAsRead(notificationId);
+      // Update local state
+      setNotificationsData(prev => 
+        prev.map(notif => 
+          notif._id === notificationId ? { ...notif, read: true } : notif
+        )
+      );
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      Alert.alert('Error', 'Failed to mark notification as read');
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
-      await markAllAsRead();
+      await notifications.markAllNotificationsAsRead();
+      // Update local state
+      setNotificationsData(prev => 
+        prev.map(notif => ({ ...notif, read: true }))
+      );
       Alert.alert('Success', 'All notifications marked as read');
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -134,9 +154,9 @@ export default function Notifications() {
   };
 
   const getFilteredNotifications = () => {
-    if (!notifications) return [];
+    if (!notificationsData) return [];
 
-    let filtered = notifications;
+    let filtered = notificationsData;
 
     switch (selectedCategory) {
       case 'Unread':
@@ -215,7 +235,7 @@ export default function Notifications() {
   };
 
   const renderHeader = () => {
-    const unreadCount = notifications?.filter(n => !n.read).length || 0;
+    const unreadCount = notificationsData?.filter(n => !n.read).length || 0;
     
     return (
       <View style={styles.header}>
@@ -240,9 +260,9 @@ export default function Notifications() {
           {NOTIFICATION_CATEGORIES.map((category) => {
             const isSelected = selectedCategory === category;
             const categoryCount = category === 'All' 
-              ? notifications?.length || 0
+              ? notificationsData?.length || 0
               : category === 'Unread'
-              ? notifications?.filter(n => !n.read).length || 0
+              ? notificationsData?.filter(n => !n.read).length || 0
               : getFilteredNotifications().length;
               
             return (
@@ -334,6 +354,14 @@ export default function Notifications() {
       />
     );
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Text>Loading notifications...</Text>
+      </View>
+    );
+  }
 
   const notificationsByDate = getNotificationsByDate();
   const hasNotifications = Object.keys(notificationsByDate).length > 0;

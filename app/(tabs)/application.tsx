@@ -1,8 +1,7 @@
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from 'convex/react';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   RefreshControl,
   ScrollView,
@@ -10,22 +9,18 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
-import { styles } from '../../assets/styles/tabs-styles/application';
-import { api } from '../../convex/_generated/api';
+import { styles } from '../../src/styles/screens/tabs-application';
 import { EmptyState } from '../../src/components';
+import { useApplications } from '../../src/hooks/useApplications';
+import { Application } from '../../src/types';
 
 type FilterStatus = 'All' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
 type SortOption = 'Date' | 'Status' | 'Category';
 
-interface ApplicationWithDetails {
-  _id: string;
+type ApplicationWithDetails = Application & {
   _creationTime: number;
-  userId: string;
-  formId: string;
-  status: 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
-  approvedAt?: number;
-  remarks?: string;
   form?: {
     _id: string;
     applicationType: 'New' | 'Renew';
@@ -40,7 +35,7 @@ interface ApplicationWithDetails {
     colorCode: string;
     requireOrientation: string;
   };
-}
+};
 
 const STATUS_COLORS = {
   Submitted: '#2E86AB',
@@ -59,16 +54,31 @@ export default function Applications() {
   const [selectedSort, setSelectedSort] = useState<SortOption>('Date');
   const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [applications, setApplications] = useState<ApplicationWithDetails[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Convex queries
-  const applications = useQuery(api.forms.getUserApplications.getUserApplications) as ApplicationWithDetails[] | undefined;
+  // Load applications
+  useEffect(() => {
+    loadApplications();
+  }, []);
+
+  const loadApplications = async () => {
+    try {
+      setLoading(true);
+      const data = await forms.getUserApplications();
+      setApplications(data || []);
+    } catch (error) {
+      console.error('Error loading applications:', error);
+      Alert.alert('Error', 'Failed to load applications');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // The query will automatically refetch
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadApplications();
+    setRefreshing(false);
   };
 
   const getFilteredAndSortedApplications = () => {
@@ -351,6 +361,14 @@ export default function Applications() {
       />
     );
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Loading applications...</Text>
+      </View>
+    );
+  }
 
   const filteredApplications = getFilteredAndSortedApplications();
 

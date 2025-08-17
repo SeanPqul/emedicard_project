@@ -14,7 +14,6 @@ export default function InspectorLayout() {
           fontSize: 18,
         },
         headerShadowVisible: true,
-        headerBackTitleVisible: false,
       }}
     >
       <Stack.Screen 

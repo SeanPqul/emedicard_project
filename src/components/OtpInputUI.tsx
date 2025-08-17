@@ -9,7 +9,7 @@ import {
     View,
 } from "react-native";
 // Use the same styles or create a new generic style sheet
-import { styles } from "@/assets/styles/auth-styles/verification"; // You can reuse styles
+import { styles } from "@/src/styles/screens/auth-verification"; // You can reuse styles
 
 // Define the props this component will accept
 interface OtpInputUIProps {

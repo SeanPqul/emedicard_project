@@ -1,4 +1,4 @@
-import { styles } from "@/assets/styles/auth-styles/sign-in";
+import { styles } from "@/src/styles/screens/auth-sign-in";
 import GoogleSignInButton from "@/assets/svgs/google-ctn-logo.svg";
 import { useSignIn, useSSO } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";

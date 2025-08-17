@@ -15,6 +15,7 @@ export enum AppErrorType {
 export class AppError extends Error {
   public type: AppErrorType;
   public originalError?: Error;
+  code: any;
   
   constructor(
     type: AppErrorType, 

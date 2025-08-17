@@ -11,7 +11,7 @@ import {
 } from '../lib/payment/paymentFlow';
 
 // Error handling
-import { AppError } from '../lib/errors';
+import { AppError, AppErrorType } from '../lib/errors';
 
 // Types
 import { Id } from '../../convex/_generated/dataModel';
@@ -165,7 +165,7 @@ export function usePaymentFlow(options: UsePaymentFlowOptions = {}): UsePaymentF
     } catch (error) {
       const appError = error instanceof AppError 
         ? error 
-        : new AppError('Payment submission failed', 'UNKNOWN');
+        : new AppError(AppErrorType.UNKNOWN, 'Payment submission failed');
 
       updateState({ 
         isSubmitting: false,
@@ -289,7 +289,7 @@ export function usePaymentManager(
     withReceipt: boolean = true
   ): Promise<PaymentFlowResult | null> => {
     if (!paymentMethod.selectedMethod || !paymentMethod.referenceNumber.trim()) {
-      const error = new AppError('Please select a payment method and enter a reference number', 'VALIDATION');
+      const error = new AppError(AppErrorType.VALIDATION_FAILED, 'Please select a payment method and enter a reference number');
       options.onError?.(error);
       return null;
     }

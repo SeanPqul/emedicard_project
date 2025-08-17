@@ -13,6 +13,8 @@ import { CustomButton } from '../../../src/components';
 import { DragDropUpload } from '../../../src/components/DragDropUpload';
 import { getColor, getTypography, getSpacing, getBorderRadius, getShadow } from '../../../src/styles/theme';
 import { useDocumentUpload } from '../../../src/hooks/useDocumentUpload';
+import { useApplications } from '../../../src/hooks/useApplications';
+import { useRequirements } from '../../../src/hooks/useRequirements';
 import { cacheDocument, removeCachedDocument, clearFormCache } from '../../../src/utils/documentCache';
 
 const { width } = Dimensions.get('window');
@@ -48,10 +50,12 @@ export default function UploadDocumentsScreen() {
   const position = params.position as string;
   const organization = params.organization as string;
 
-  const formData = useQuery(api.forms.getFormById, formId ? { formId: formId as any } : 'skip');
-  const requirementsByJobCategory = useQuery(api.documentRequirements.getRequirementsByJobCategory, 
-    formData?.jobCategory ? { jobCategoryId: formData.jobCategory as any } : 'skip'
-  );
+  // Use our API hooks instead of direct Convex calls
+  const applications = useApplications(formId);
+  const requirements = useRequirements(undefined, formId);
+  
+  const formData = applications.data.form;
+  const isLoadingForm = applications.isLoadingForm;
 
   const {
     uploadFile,
@@ -69,7 +73,7 @@ export default function UploadDocumentsScreen() {
     }
   }, [applicationType]);
 
-  const documentRequirements = requirementsByJobCategory?.requirements || [];
+  const documentRequirements = requirements.data.formDocuments || [];
 
   const cacheDocumentBeforeUpload = async (file: any, documentId: string) => {
     try {

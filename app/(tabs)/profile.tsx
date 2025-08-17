@@ -1,29 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useUser, useClerk } from '@clerk/clerk-expo';
-import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { SignOutButton, ProfileLink } from '../../src/components';
-import { styles } from '../../assets/styles/tabs-styles/profile';
+import { styles } from '../../src/styles/screens/tabs-profile';
 import { getUserDisplayName } from '../../src/utils/user-utils';
+import { useUsers } from '../../src/hooks/useUsers';
+import { User } from '../../src/types';
 
 export default function Profile() {
   const { user } = useUser();
   const { signOut } = useClerk();
-  const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      setLoading(true);
+      const profile = await users.getCurrentUser();
+      setUserProfile(profile);
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      Alert.alert('Error', 'Failed to load user profile');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
     router.replace('/(auth)/sign-in');
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Text>Loading profile...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

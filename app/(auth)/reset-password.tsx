@@ -1,6 +1,7 @@
-// src/screens/auth/reset-password.tsx
+// src/screens/auth-reset-password.tsx
 
 import { moderateScale } from '../../src/utils/designSystem';
+import { layoutPatterns } from '../../src/styles/theme';
 import { useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -14,7 +15,7 @@ import {
 } from 'react-native';
 import { OtpInputUI } from '../../src/components/OtpInputUI'; // Our reusable component
 // Make sure this style file contains styles for all steps
-import { styles } from '../../assets/styles/auth-styles/reset-password';
+import { styles } from '../../src/styles/screens/auth-reset-password';
 
 // Define the steps for the password reset flow
 type ResetStep = 'enterEmail' | 'enterCode' | 'changePassword';
@@ -297,5 +298,5 @@ export default function PasswordResetScreen() {
     }
   }
 
-  return <View style={{flex: 1}}>{renderStep()}</View>;
+  return <View style={layoutPatterns.flex1}>{renderStep()}</View>;
 }

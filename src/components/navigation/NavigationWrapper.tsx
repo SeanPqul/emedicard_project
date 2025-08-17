@@ -58,9 +58,9 @@ export const NavigationWrapper: React.FC<NavigationWrapperProps> = ({
       return (
         <ErrorState
           error={error}
-          title={errorTitle}
-          message={errorMessage}
-          onRetry={onRetry}
+          title={errorTitle ?? 'An error occurred'}
+          message={errorMessage ?? ''}
+          onRetry={onRetry ?? (() => {})}
           showDetails={__DEV__}
           variant="fullscreen"
         />

@@ -2,8 +2,7 @@
 // End-to-end example combining upload + createPayment with resilience
 
 import * as ImagePicker from "expo-image-picker";
-import { generateUploadUrl } from "../../api/storage.api";
-import { createPayment, getPaymentByFormId } from "../../api/payments.api";
+// Services removed - use hooks directly for payment flow operations
 import { withNetwork, retryAsync } from "../network";
 import { AppError } from "../errors";
 import { Id } from "../../../convex/_generated/dataModel";
@@ -27,7 +26,7 @@ export interface PaymentFlowResult {
  */
 async function uploadReceiptAsync(local: { uri: string; name: string; type: string }): Promise<Id<"_storage">> {
   try {
-    const uploadUrl = await withNetwork(() => generateUploadUrl());
+    const uploadUrl = await withNetwork(() => storageService.generateUploadUrl());
     
     const formData = new FormData();
     formData.append("file", { 
@@ -123,7 +122,7 @@ export async function submitPayment({
 }: PaymentSubmissionData): Promise<PaymentFlowResult> {
   try {
     // Step 1: Prevent duplicate payment
-    const existing = await withNetwork(() => getPaymentByFormId(formId));
+    const existing = await withNetwork(() => paymentsService.getPaymentByFormId(formId));
     if (existing) {
       return {
         paymentId: existing._id,
@@ -151,7 +150,7 @@ export async function submitPayment({
     // Step 4: Create payment with network resilience
     const paymentId = await withNetwork(() =>
       retryAsync(
-        () => createPayment({ 
+        () => paymentsService.createPayment({ 
           formId, 
           amount, 
           serviceFee, 
@@ -190,7 +189,7 @@ export async function submitPaymentWithoutReceipt({
 }: PaymentSubmissionData): Promise<PaymentFlowResult> {
   try {
     // Prevent duplicate payment
-    const existing = await withNetwork(() => getPaymentByFormId(formId));
+    const existing = await withNetwork(() => paymentsService.getPaymentByFormId(formId));
     if (existing) {
       return {
         paymentId: existing._id,
@@ -205,7 +204,7 @@ export async function submitPaymentWithoutReceipt({
     // Create payment with network resilience
     const paymentId = await withNetwork(() =>
       retryAsync(
-        () => createPayment({ 
+        () => paymentsService.createPayment({ 
           formId, 
           amount, 
           serviceFee, 

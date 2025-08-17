@@ -9,22 +9,22 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 // Components
-import { CustomButton } from '../CustomButton';
+import { CustomButton } from '../ui/Button';
 import { CustomTextInput } from '../CustomTextInput';
 import { ErrorState } from '../ErrorState';
-import { SkeletonLoader, SkeletonGroup } from '../animated/SkeletonLoader';
+import { SkeletonLoader, SkeletonGroup } from '../SkeletonLoader';
 import { LoadingSpinner } from '../LoadingSpinner';
 
 // Hooks
 import { 
   usePaymentManager, 
-  PaymentMethod,
 } from '../../hooks/usePaymentFlow';
 
 // Utilities
 import { 
   getPaymentMethodDisplayName,
   getServiceFee,
+  PaymentMethod,
 } from '../../lib/payment/paymentFlow';
 
 // Types and styling
@@ -146,8 +146,8 @@ export const ImprovedPaymentScreen: React.FC<ImprovedPaymentScreenProps> = ({
           value={payment.referenceNumber}
           onChangeText={payment.setReferenceNumber}
           placeholder="Enter reference number"
-          disabled={payment.isLoading}
-          required
+          editable={!payment.isLoading}
+          showRequiredIndicator
           autoCapitalize="characters"
         />
       </View>
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     borderBottomColor: getColor('border.primary'),
   },
   headerTitle: {
-    ...getTypography('headingMedium'),
+    ...getTypography('h2'),
     color: getColor('text.primary'),
     flex: 1,
     textAlign: 'center',
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     borderColor: getColor('border.secondary'),
   },
   summaryTitle: {
-    ...getTypography('headingSmall'),
+    ...getTypography('h3'),
     color: getColor('text.primary'),
     marginBottom: getSpacing('md'),
   },
@@ -361,11 +361,11 @@ const styles = StyleSheet.create({
     paddingVertical: getSpacing('xs'),
   },
   summaryLabel: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.secondary'),
   },
   summaryValue: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '500',
   },
@@ -376,12 +376,12 @@ const styles = StyleSheet.create({
     paddingTop: getSpacing('sm'),
   },
   totalLabel: {
-    ...getTypography('bodyLarge'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '600',
   },
   totalValue: {
-    ...getTypography('bodyLarge'),
+    ...getTypography('body'),
     color: getColor('primary.500'),
     fontWeight: '700',
   },
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     margin: getSpacing('lg'),
   },
   sectionTitle: {
-    ...getTypography('headingSmall'),
+    ...getTypography('h3'),
     color: getColor('text.primary'),
     marginBottom: getSpacing('md'),
   },
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   methodName: {
-    ...getTypography('bodyLarge'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '500',
   },
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   loadingText: {
-    ...getTypography('bodyLarge'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     marginTop: getSpacing('md'),
     fontWeight: '500',

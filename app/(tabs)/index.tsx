@@ -4,10 +4,10 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Animated, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { FeedbackSystem, useFeedback } from '../../src/components/feedback/FeedbackSystem';
-import { styles } from '../../assets/styles/tabs-styles/dashboard';
+import { styles } from '../../src/styles/screens/tabs-dashboard';
 import { ActivityItem, CTAButton, EmptyState, StatCard } from '../../src/components';
 import { DashboardHeader } from '../../src/components/ui/DashboardHeader';
-import { getColor, getSpacing } from '../../src/styles/theme';
+import { getColor, getSpacing, layoutPatterns } from '../../src/styles/theme';
 import { getUserDisplayName } from '../../src/utils/user-utils';
 
 export default function Dashboard() {
@@ -69,7 +69,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.container, styles.loadingContainer]}>
         <Text>Loading dashboard...</Text>
       </View>
     );
@@ -255,7 +255,7 @@ export default function Dashboard() {
               accessibilityLabel="Apply for Health Card"
               accessibilityHint="Start a new health card application"
             />
-            <View style={{ height: getSpacing('md') }} />
+            <View style={layoutPatterns.spacer('md')} />
             <CTAButton
               title="Renew Health Card"
               subtitle="Renew existing card"
@@ -266,7 +266,7 @@ export default function Dashboard() {
               accessibilityLabel="Renew Health Card"
               accessibilityHint="Renew your existing health card"
             />
-            <View style={{ height: getSpacing('md') }} />
+            <View style={layoutPatterns.spacer('md')} />
             <CTAButton
               title="View Digital Card"
               subtitle="Show QR code"

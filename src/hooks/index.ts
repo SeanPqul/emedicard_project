@@ -1,33 +1,26 @@
-// Dashboard hooks
+// =============================================================================
+// HOOKS INDEX - Central export point for all application hooks
+// =============================================================================
+
+// API Integration Hooks (using new service architecture)
+export { useHealthCards } from './useHealthCards';
+export { useApplications } from './useApplications';
+export { useJobCategories } from './useJobCategories';
+export { usePayments } from './usePayments';
+export { useRequirements } from './useRequirements';
+export { useNotifications } from './useNotifications';
+export { useUsers } from './useUsers';
+export { useVerification } from './useVerification';
+export { useStorage } from './useStorage';
+
+// Feature Hooks
 export { useDashboard } from './useDashboard';
-
-// Document upload hooks
+export { useOptimizedDashboard } from './useOptimizedDashboard';
 export { useDocumentUpload } from './useDocumentUpload';
+export { usePaymentFlow } from './usePaymentFlow';
 
-// Deep linking hooks
+// Utility Hooks
 export { useDeepLink } from './useDeepLink';
-
-// Animation hooks
 export { useAnimation } from './useAnimation';
-
-// Performance monitoring hooks
-export { usePerformanceMonitor } from './usePerformanceMonitor';
-
-// Role-based navigation hooks
+export { useNetwork } from './useNetwork';
 export { useRoleBasedNavigation } from './useRoleBasedNavigation';
-
-// Form hooks (to be created)
-// export { useForm } from './useForm';
-// export { useFormValidation } from './useFormValidation';
-
-// Auth hooks (to be created)
-// export { useAuth } from './useAuth';
-
-// Application hooks (to be created)
-// export { useApplications } from './useApplications';
-
-// Payment hooks (to be created)
-// export { usePayments } from './usePayments';
-
-// Notification hooks (to be created)
-// export { useNotifications } from './useNotifications';

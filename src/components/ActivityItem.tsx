@@ -16,7 +16,7 @@ interface ActivityItemProps {
   activity: RecentActivity;
 }
 
-export const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
+export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity }) => {
   const getActivityIcon = () => {
     switch (activity.type) {
       case 'application': return 'document-text-outline';
@@ -68,7 +68,9 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
       </View>
     </View>
   );
-};
+});
+
+ActivityItem.displayName = 'ActivityItem';
 
 const styles = StyleSheet.create({
   container: {

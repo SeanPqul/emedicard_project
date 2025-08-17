@@ -28,19 +28,19 @@ interface DocumentUploadResult {
   fileType: string;
   fileSize: number;
   status?: "Pending" | "Approved" | "Rejected";
-  reviewBy?: Id<"users">;
-  reviewAt?: number;
-  remarks?: string;
+  reviewBy?: Id<"users"> | undefined;
+  reviewAt?: number | undefined;
+  remarks?: string | undefined;
 }
 
 export const useDocumentUpload = (formId: Id<"forms">) => {
   const [uploadStates, setUploadStates] = useState<Record<string, UploadState>>({});
   const [cachedDocuments, setCachedDocuments] = useState<CachedDocument[]>([]);
   
-  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-  const uploadDocument = useMutation(api.documentRequirements.uploadDocument);
-  const updateDocumentField = useMutation(api.requirements.updateDocumentField);
-  const deleteDocument = useMutation(api.documentRequirements.deleteDocument);
+  const generateUploadUrl = useMutation(api.storage.generateUploadUrl.generateUploadUrlMutation);
+  const uploadDocument = useMutation(api.requirements.uploadDocuments.uploadDocumentsMutation);
+  const updateDocumentField = useMutation(api.requirements.updateDocumentField.updateDocumentFieldMutation);
+  const deleteDocument = useMutation(api.requirements.removeDocument.deleteDocumentMutation);
 
   // Load cached documents on mount
   useEffect(() => {
@@ -80,10 +80,18 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
   }, []);
 
   const setUploadState = useCallback((fieldName: string, state: Partial<UploadState>) => {
-    setUploadStates(prev => ({
-      ...prev,
-      [fieldName]: { ...prev[fieldName], ...state }
-    }));
+    setUploadStates(prev => {
+      const currentState = prev[fieldName] || {
+        uploading: false,
+        progress: 0,
+        error: null,
+        success: false,
+      };
+      return {
+        ...prev,
+        [fieldName]: { ...currentState, ...state },
+      };
+    });
   }, []);
 
   const uploadFile = useCallback(async (
@@ -117,12 +125,11 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       // Simulate progress updates
       const progressInterval = setInterval(() => {
         setUploadStates(prev => {
-          const currentState = prev[fieldName] || { uploading: false, progress: 0, error: null, success: false };
+          const currentState: UploadState = prev[fieldName] || { uploading: false, progress: 0, error: null, success: false };
           if (currentState.progress < 90) {
             return {
               ...prev,
               [fieldName]: {
-                ...currentState,
                 uploading: true,
                 progress: currentState.progress + 10,
                 error: null,
@@ -379,7 +386,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       // Update status to uploading
       updateCachedDocumentStatus(formId, fieldName, { 
         status: 'uploading',
-        error: undefined 
+        error: null 
       });
       
       setUploadState(fieldName, {
@@ -445,7 +452,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       updateCachedDocumentStatus(formId, fieldName, {
         status: 'uploaded',
         convexStorageId: storageId,
-        error: undefined
+        error: null
       });
       
       // Update UI state
@@ -552,7 +559,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
     // Reset error state
     updateCachedDocumentStatus(formId, fieldName, {
       status: 'cached',
-      error: undefined
+      error: null
     });
     
     return uploadCachedDocument(fieldName);

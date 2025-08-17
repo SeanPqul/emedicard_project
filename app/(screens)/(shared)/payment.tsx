@@ -1,15 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMutation, useQuery } from 'convex/react';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { FeedbackSystem, useFeedback } from '../../../src/components/feedback/FeedbackSystem';
-import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
 import { CustomButton } from '../../../src/components';
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
+import { usePayments, useApplications } from '../../../src/hooks/api';
 
 const { width } = Dimensions.get('window');
 
@@ -38,12 +37,9 @@ export default function PaymentScreen() {
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
   const { messages, showSuccess, showError, showWarning, dismissFeedback } = useFeedback();
   
-  // Convex queries and mutations
-  const form = useQuery(api.forms.getFormById, formId ? { formId: formId as Id<"forms"> } : "skip");
-  const existingPayment = useQuery(api.payments.getPaymentByFormId, formId ? { formId: formId as Id<"forms"> } : "skip");
-  const createPayment = useMutation(api.payments.createPaymentMutation);
-  const updatePaymentStatus = useMutation(api.payments.updatePaymentStatusMutation);
-  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+  // Use our API hooks instead of direct Convex calls
+  const { existingPayment, createPayment, updatePaymentStatus, generateUploadUrl, isLoadingFormPayment } = usePayments(formId);
+  const { form, isLoadingForm } = useApplications(formId);
   
   // Payment methods with real fees
   const paymentMethods: PaymentMethod[] = [
@@ -260,7 +256,7 @@ export default function PaymentScreen() {
           <Ionicons name="arrow-back" size={24} color="#212529" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Make Payment</Text>
-        <View style={{ width: 24 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -675,6 +671,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#212529',
+  },
+  headerSpacer: {
+    width: 24,
   },
 });
 

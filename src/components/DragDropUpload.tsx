@@ -1,17 +1,16 @@
-import React, { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  TouchableOpacity,
-  Alert,
-  Platform,
-  Dimensions,
-} from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { theme, getColor, getSpacing, getBorderRadius, getShadow, getTypography } from '../styles/theme';
-import { CustomButton } from './CustomButton';
+import React, { useCallback, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../styles/theme';
+import { CustomButton } from './ui/Button';
 
 interface DragDropUploadProps {
   onFilesSelected: (files: any[]) => void;
@@ -75,35 +74,28 @@ export const DragDropUpload: React.FC<DragDropUploadProps> = ({
     animateBorderColor(0);
   }, [disabled, loading, animateScale, animateBorderColor]);
 
-  const handlePress = useCallback(() => {
+  const handlePress = useCallback(async () => {
     if (disabled || loading) return;
-    
-    // Simulate file picker
-    Alert.alert(
-      'Select Files',
-      'Choose your upload method',
-      [
-        { text: 'Camera', onPress: () => simulateFileSelection('camera') },
-        { text: 'Gallery', onPress: () => simulateFileSelection('gallery') },
-        { text: 'Files', onPress: () => simulateFileSelection('files') },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
-  }, [disabled, loading]);
 
-  const simulateFileSelection = useCallback((source: string) => {
-    // Simulate file selection based on source
-    const mockFiles = [
-      {
-        name: `document_${Date.now()}.pdf`,
-        size: 1024 * 1024 * 2, // 2MB
-        type: 'application/pdf',
-        uri: 'file://mock-file-path',
-        source,
-      },
-    ];
-    onFilesSelected(mockFiles);
-  }, [onFilesSelected]);
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: acceptedFormats.map(format => {
+          if (format === 'pdf') return 'application/pdf';
+          if (format === 'jpeg' || format === 'jpg') return 'image/jpeg';
+          if (format === 'png') return 'image/png';
+          return '*/*';
+        }),
+        multiple: maxFiles > 1,
+      });
+
+      if (!result.canceled && result.assets) {
+        onFilesSelected(result.assets);
+      }
+    } catch (error) {
+      console.error('Error picking document:', error);
+      Alert.alert('Error', 'Could not select files. Please try again.');
+    }
+  }, [disabled, loading, onFilesSelected, acceptedFormats, maxFiles]);
 
   const borderColor = borderColorAnim.interpolate({
     inputRange: [0, 1],

@@ -7,16 +7,16 @@ interface EmptyStateProps {
   icon: string;
   title: string;
   subtitle: string;
-  buttonText?: string;
-  onButtonPress?: () => void;
+  actionText?: string;
+  onActionPress?: () => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
   title,
   subtitle,
-  buttonText,
-  onButtonPress,
+  actionText,
+  onActionPress,
 }) => {
   return (
     <View 
@@ -28,14 +28,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
-      {buttonText && onButtonPress && (
+      {actionText && onActionPress && (
         <TouchableOpacity 
           style={styles.button} 
-          onPress={onButtonPress}
-          accessibilityLabel={buttonText}
+          onPress={onActionPress}
+          accessibilityLabel={actionText}
           accessibilityRole="button"
         >
-          <Text style={styles.buttonText}>{buttonText}</Text>
+          <Text style={styles.buttonText}>{actionText}</Text>
         </TouchableOpacity>
       )}
     </View>

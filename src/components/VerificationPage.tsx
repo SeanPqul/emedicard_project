@@ -1,4 +1,4 @@
-import { styles } from "@/assets/styles/auth-styles/verification";
+import { styles } from "@/src/styles/screens/auth-verification";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";

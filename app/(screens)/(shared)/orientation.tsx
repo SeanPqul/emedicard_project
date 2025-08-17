@@ -3,11 +3,10 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, RefreshCon
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { CustomButton, EmptyState } from '../../../src/components';
 import { Id } from '../../../convex/_generated/dataModel';
 import QRCode from 'react-native-qrcode-svg';
+// useOrientations hook removed - implement direct API calls if needed
 
 export default function OrientationScreen() {
   const { formId } = useLocalSearchParams<{ formId: string }>();
@@ -15,15 +14,16 @@ export default function OrientationScreen() {
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   
-  // Convex queries and mutations
-  const orientations = useQuery(api.orientations.getUserOrientationsQuery);
-  const orientationForForm = useQuery(
-    api.orientations.getOrientationByFormId,
-    formId ? { formId: formId as Id<"forms"> } : "skip"
-  );
-  const updateCheckIn = useMutation(api.orientations.updateOrientationCheckIn);
-  const updateCheckOut = useMutation(api.orientations.updateOrientationCheckOut);
-  const completeOrientation = useMutation(api.orientations.completeOrientation);
+  // Use our API hook instead of direct Convex calls
+  const {
+    orientations,
+    orientationForForm,
+    updateCheckIn,
+    updateCheckOut,
+    completeOrientation,
+    isLoading,
+    isLoadingFormOrientation
+  } = useOrientations(formId);
   
   const onRefresh = async () => {
     setRefreshing(true);
@@ -221,6 +221,17 @@ export default function OrientationScreen() {
       </View>
     );
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <BaseScreenLayout>
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+          <Text>Loading orientations...</Text>
+        </View>
+      </BaseScreenLayout>
+    );
+  }
   
   return (
     <BaseScreenLayout>
@@ -229,7 +240,7 @@ export default function OrientationScreen() {
           <Ionicons name="arrow-back" size={24} color="#212529" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Orientation</Text>
-        <View style={{ width: 24 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView 
@@ -471,6 +482,9 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginLeft: 12,
     flex: 1,
+  },
+  headerSpacer: {
+    width: 24,
   },
 });
 

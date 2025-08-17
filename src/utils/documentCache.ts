@@ -13,7 +13,7 @@ export interface CachedDocument {
   uploadedAt: number;
   status: 'cached' | 'uploading' | 'uploaded' | 'failed';
   convexStorageId?: Id<"_storage">; // Set after successful upload to Convex
-  error?: string; // Error message if upload failed
+  error?: string | null; // Error message if upload failed
   retryCount: number;
 }
 
@@ -202,13 +202,15 @@ export const cleanupOldCache = (): void => {
   
   Object.keys(state).forEach(formId => {
     const formCache = state[formId];
-    Object.keys(formCache).forEach(fieldName => {
-      const doc = formCache[fieldName];
-      if (doc.uploadedAt < sevenDaysAgo) {
-        removeCachedDocument(formId, fieldName);
-        cleanedCount++;
-      }
-    });
+    if (formCache) {
+      Object.keys(formCache).forEach(fieldName => {
+        const doc = formCache[fieldName];
+        if (doc && doc.uploadedAt < sevenDaysAgo) {
+          removeCachedDocument(formId, fieldName);
+          cleanedCount++;
+        }
+      });
+    }
   });
   
   if (cleanedCount > 0) {
@@ -235,14 +237,18 @@ export const getCacheStats = (): {
   
   Object.keys(state).forEach(formId => {
     const formCache = state[formId];
-    const formDocCount = Object.keys(formCache).length;
-    stats.byForm[formId] = formDocCount;
-    
-    Object.values(formCache).forEach(doc => {
-      stats.totalDocuments++;
-      stats.totalSize += doc.fileSize;
-      stats.byStatus[doc.status]++;
-    });
+    if (formCache) {
+      const formDocCount = Object.keys(formCache).length;
+      stats.byForm[formId] = formDocCount;
+      
+      Object.values(formCache).forEach(doc => {
+        if (doc) {
+          stats.totalDocuments++;
+          stats.totalSize += doc.fileSize;
+          stats.byStatus[doc.status]++;
+        }
+      });
+    }
   });
   
   return stats;
@@ -260,7 +266,11 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
       const result = reader.result as string;
       // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
       const base64 = result.split(',')[1];
-      resolve(base64);
+      if (base64) {
+        resolve(base64);
+      } else {
+        reject(new Error('Failed to convert blob to base64'));
+      }
     };
     reader.onerror = reject;
     reader.readAsDataURL(blob);

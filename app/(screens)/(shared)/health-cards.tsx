@@ -3,14 +3,13 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Share, Alert, Pla
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { EmptyState, CustomButton } from '../../../src/components';
 import QRCode from 'react-native-qrcode-svg';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { captureRef } from 'react-native-view-shot';
+import { useHealthCards } from '../../../src/hooks/useHealthCards';
 import { Id } from '../../../convex/_generated/dataModel';
 
 interface HealthCardData {
@@ -30,9 +29,8 @@ export default function HealthCardsScreen() {
   const [printingCard, setPrintingCard] = useState<string | null>(null);
   const [sharingCard, setSharingCard] = useState<string | null>(null);
 
-  // Convex queries
-  const userHealthCards = useQuery(api.healthCards.getUserHealthCards);
-  const createVerificationLog = useMutation(api.verificationLogs.createVerificationLog);
+  // Use our new simplified hook
+  const { data: userHealthCards, isLoading, mutations: { createVerificationLog } } = useHealthCards();
 
   const getCardColor = (jobCategory: any) => {
     if (jobCategory?.colorCode) {
@@ -87,8 +85,8 @@ export default function HealthCardsScreen() {
         // Log the share activity
         await createVerificationLog({
           healthCardId: card._id as Id<"healthCards">,
-          userAgent: `Mobile App - Share`,
-          ipAddress: undefined,
+          location: 'Mobile App - Share',
+          notes: 'Card shared from mobile app',
         });
       }
     } catch (error) {
@@ -206,6 +204,17 @@ export default function HealthCardsScreen() {
     });
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <BaseScreenLayout>
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+          <Text>Loading health cards...</Text>
+        </View>
+      </BaseScreenLayout>
+    );
+  }
+
   return (
     <BaseScreenLayout>
 
@@ -214,7 +223,7 @@ export default function HealthCardsScreen() {
           <Ionicons name="arrow-back" size={24} color="#212529" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Health Cards</Text>
-        <View style={{ width: 24 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -322,8 +331,8 @@ export default function HealthCardsScreen() {
             icon="shield-outline"
             title="No Health Cards"
             subtitle="You don't have any health cards yet."
-            buttonText="Apply for Health Card"
-            onButtonPress={() => router.push('/(tabs)/apply')}
+            actionText="Apply for Health Card"
+            onActionPress={() => router.push('/(tabs)/apply')}
           />
         )}
       </ScrollView>
@@ -459,5 +468,8 @@ const styles = StyleSheet.create({
   },
   renewButtonText: {
     color: '#FFFFFF',
+  },
+  headerSpacer: {
+    width: 24,
   },
 });

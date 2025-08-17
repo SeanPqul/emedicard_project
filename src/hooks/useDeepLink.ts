@@ -25,17 +25,17 @@ export const useDeepLink = () => {
       
       // Handle different deep link patterns
       if (hostname === 'notification' || path?.startsWith('/notification/')) {
-        handleNotificationDeepLink(queryParams);
+        handleNotificationDeepLink(queryParams ?? {});
       } else if (hostname === 'application' || path?.startsWith('/application/')) {
-        handleApplicationDeepLink(queryParams);
+        handleApplicationDeepLink(queryParams ?? {});
       } else if (hostname === 'health-card' || path?.startsWith('/health-card/')) {
-        handleHealthCardDeepLink(queryParams);
+        handleHealthCardDeepLink(queryParams ?? {});
       } else if (hostname === 'orientation' || path?.startsWith('/orientation/')) {
-        handleOrientationDeepLink(queryParams);
+        handleOrientationDeepLink(queryParams ?? {});
       } else if (hostname === 'payment' || path?.startsWith('/payment/')) {
-        handlePaymentDeepLink(queryParams);
+        handlePaymentDeepLink(queryParams ?? {});
       } else if (hostname === 'upload' || path?.startsWith('/upload/')) {
-        handleUploadDeepLink(queryParams);
+        handleUploadDeepLink(queryParams ?? {});
       }
     };
 

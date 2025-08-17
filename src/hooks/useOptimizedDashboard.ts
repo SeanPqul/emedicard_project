@@ -18,18 +18,20 @@ import { useNetwork } from './useNetwork';
 
 export const useOptimizedDashboard = () => {
   const { user } = useUser();
-  const { isConnected, isWifiConnected } = useNetwork();
+  const { isConnected, networkState } = useNetwork();
+  const isWifiConnected = networkState.type === 'wifi';
   const [refreshing, setRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [cachedJobCategories, setCachedJobCategories] = useState<JobCategory[] | null>(null);
 
   // Primary aggregated query that minimizes round-trips
-  const dashboardData = useQuery(api.dashboard.getDashboardData);
+  const dashboardData = useQuery(api.dashboard.getDashboardData.getDashboardDataQuery);
   
   // Cached job categories query (only when cache is invalid or missing)
   const shouldFetchJobCategories = !mobileCacheManager.isJobCategoriesCacheValid();
   const jobCategoriesQuery = useQuery(
-    shouldFetchJobCategories ? api.jobCategories.getAllJobCategories : null
+    api.jobCategories.getAllJobCategories.getAllJobCategoriesQuery,
+    shouldFetchJobCategories ? {} : 'skip'
   );
 
   // Load cached job categories on mount
@@ -68,7 +70,7 @@ export const useOptimizedDashboard = () => {
     return descriptions[notification.type as keyof typeof descriptions] || descriptions.default;
   }, []);
 
-  const getApplicationActivityStatus = useMemo(() => (status: string) => {
+  const getApplicationActivityStatus = useMemo(() => (status: string): 'success' | 'pending' | 'error' => {
     const statusMap = {
       'Approved': 'success',
       'Complete': 'success',
@@ -76,7 +78,7 @@ export const useOptimizedDashboard = () => {
       'Cancelled': 'error',
       'default': 'pending'
     };
-    return statusMap[status as keyof typeof statusMap] || statusMap.default;
+    return (statusMap[status as keyof typeof statusMap] || statusMap.default) as 'success' | 'pending' | 'error';
   }, []);
 
   // Dashboard stats from aggregated query (pre-calculated on server)
@@ -113,7 +115,7 @@ export const useOptimizedDashboard = () => {
         type: 'notification',
         title: notification.message || notification.title || 'New Notification',
         description: getNotificationDescription(notification),
-        timestamp: notification._creationTime || new Date(Date.now() - Math.random() * 86400000).toISOString(),
+        timestamp: new Date(notification._creationTime || 0).toISOString(),
         status: notification.read ? 'success' : 'pending'
       });
     });
@@ -125,21 +127,23 @@ export const useOptimizedDashboard = () => {
         type: 'application',
         title: `Health Card Application ${application.status}`,
         description: `Application for ${application.applicationType || 'health card'} is now ${application.status.toLowerCase()}`,
-        timestamp: application._creationTime || new Date(Date.now() - Math.random() * 172800000).toISOString(),
+        timestamp: new Date(application._creationTime || 0).toISOString(),
         status: getApplicationActivityStatus(application.status)
       });
     });
 
     // Add from payments (pre-limited on server)
     dashboardData.payments?.forEach(payment => {
-      activities.push({
-        id: payment._id,
-        type: 'payment',
-        title: `Payment ${payment.status}`,
-        description: `₱${payment.netAmount.toFixed(2)} payment via ${payment.method}`,
-        timestamp: payment.updatedAt || payment._creationTime || new Date(Date.now() - Math.random() * 259200000).toISOString(),
-        status: payment.status === 'Complete' ? 'success' : payment.status === 'Failed' ? 'error' : 'pending'
-      });
+      if (payment) {
+        activities.push({
+          id: payment._id,
+          type: 'payment',
+          title: `Payment ${payment.status}`,
+          description: `₱${payment.netAmount.toFixed(2)} payment via ${payment.method}`,
+          timestamp: new Date(payment.updatedAt || payment._creationTime || 0).toISOString(),
+          status: payment.status === 'Complete' ? 'success' : payment.status === 'Failed' ? 'error' : 'pending'
+        });
+      }
     });
 
     return activities
@@ -184,7 +188,7 @@ export const useOptimizedDashboard = () => {
 
   // Helper to get job category by ID (optimized with memoization)
   const getJobCategoryById = useMemo(() => (id: string) => {
-    return jobCategories.find(cat => cat._id === id);
+    return jobCategories.find((cat: JobCategory) => cat._id === id);
   }, [jobCategories]);
 
   return {
@@ -200,7 +204,6 @@ export const useOptimizedDashboard = () => {
     
     // Network status
     isConnected,
-    isWifiConnected,
     
     // States
     isLoading,

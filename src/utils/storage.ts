@@ -60,7 +60,6 @@ try {
     id: 'encrypted-storage',
     encryptionKey: 'your-encryption-key-here', // In production, get this from secure storage
   });
-  console.log('✅ MMKV storage initialized successfully');
 } catch (error) {
   console.warn('⚠️ MMKV failed to initialize, using fallback storage:', error);
   storage = new FallbackStorage();
@@ -216,7 +215,6 @@ export const trimStorage = (): void => {
   if (keyCount >= 100) {
     // MMKV v2 doesn't have trim(), so we'll clear expired items instead
     cacheUtils.clearExpired();
-    console.log(`✨ Storage maintenance completed. Key count: ${keyCount}`);
   }
 };
 
@@ -225,7 +223,6 @@ export const trimStorage = (): void => {
  */
 export const encryptStorage = (encryptionKey: string): void => {
   storage.recrypt(encryptionKey);
-  console.log('🔐 Storage encrypted with new key');
 };
 
 /**
@@ -233,7 +230,6 @@ export const encryptStorage = (encryptionKey: string): void => {
  */
 export const removeEncryption = (): void => {
   storage.recrypt(undefined);
-  console.log('🔓 Storage encryption removed');
 };
 
 /**
@@ -302,9 +298,7 @@ export const cacheUtils = {
       }
     });
     
-    if (removedCount > 0) {
-      console.log(`🧹 Cleared ${removedCount} expired cache items`);
-    }
+    // Cleaned up expired cache items silently
   },
 };
 

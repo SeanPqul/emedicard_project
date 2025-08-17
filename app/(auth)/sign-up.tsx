@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { styles } from "../../assets/styles/auth-styles/sign-up";
+import { styles } from "../../src/styles/screens/auth-sign-up";
 
 export default function SignUpScreen() {
   const { isLoaded, signUp } = useSignUp();
