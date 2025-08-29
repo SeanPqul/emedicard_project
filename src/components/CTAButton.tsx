@@ -16,10 +16,10 @@ import {
   TouchableOpacityProps, 
   ViewStyle,
   Dimensions,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from './ui/Button';
-import { Column, Row } from './layout';
 import { Text } from './ui/Text';
 import { getColor, getSpacing, colorWithOpacity } from '@/src/styles';
 
@@ -112,7 +112,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
   };
 
   const renderCustomContent = () => (
-    <Row spacing="sm" align="center" justify="center">
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: getSpacing('sm') }}>
       {icon && (
         <Ionicons 
           name={icon as any} 
@@ -120,7 +120,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
           color={getIconColor()} 
         />
       )}
-      <Column align="center">
+      <View style={{ flexDirection: 'column', alignItems: 'center' }}>
         <Text 
           variant={size === 'large' ? 'h4' : 'button'}
           weight="bold"
@@ -141,8 +141,8 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
             {subtitle}
           </Text>
         )}
-      </Column>
-    </Row>
+      </View>
+    </View>
   );
 
   return (

@@ -111,21 +111,29 @@ export const validateApplicationStep = (
   currentStep: number,
   documentRequirements: DocumentRequirement[] = [],
   selectedDocuments: SelectedDocuments = {},
-  getUploadState?: (docKey: string) => { uploading?: boolean; error?: string | null }
+  getUploadState?: (docKey: string) => { uploading?: boolean; error?: string | null; success?: boolean; queued?: boolean }
 ): { isValid: boolean; errors: Partial<ApplicationFormData> } => {
   const newErrors: Partial<ApplicationFormData> = {};
   
   switch (currentStep) {
     case 0:
+      // Application type validation (no errors expected here)
+      if (!formData.applicationType) {
+        // This shouldn't happen as it defaults to 'New', but just in case
+        // We can't assign string to ApplicationType, so we'll handle this differently
+        return { isValid: false, errors: { ...newErrors, position: 'Please select an application type' } };
+      }
       break;
       
     case 1:
+      // Job category validation
       if (!formData.jobCategory) {
         newErrors.jobCategory = 'Please select a job category';
       }
       break;
       
     case 2:
+      // Personal details validation
       if (!formData.position.trim()) {
         newErrors.position = 'Position is required';
       }
@@ -135,33 +143,59 @@ export const validateApplicationStep = (
       break;
       
     case 3:
+      // Document upload validation with queue checking
       const requiredDocuments = documentRequirements.filter(doc => doc.required);
-      const missingDocuments = requiredDocuments.filter(doc => !selectedDocuments[doc.fieldName]);
+      
+      // Check for missing required documents
+      const missingDocuments = requiredDocuments.filter(doc => {
+        const uploadState = getUploadState ? getUploadState(doc.fieldName) : null;
+        // Document is missing if it's not queued and not successfully uploaded
+        return !uploadState || (!uploadState.queued && !uploadState.success);
+      });
       
       if (missingDocuments.length > 0) {
-        Alert.alert(
-          'Missing Required Documents',
-          `Please upload the following required documents: ${missingDocuments.map(doc => doc.name).join(', ')}`,
-          [{ text: 'OK' }]
-        );
+        // Don't show alert here - let the caller handle it
         return { isValid: false, errors: newErrors };
       }
       
+      // Check for upload errors that need to be fixed
       if (getUploadState) {
-        const documentsWithErrors = Object.keys(selectedDocuments).filter(docKey => 
-          getUploadState(docKey)?.error
-        );
+        const documentsWithErrors = documentRequirements.filter(doc => {
+          const uploadState = getUploadState(doc.fieldName);
+          return uploadState?.error;
+        });
         
         if (documentsWithErrors.length > 0) {
-          Alert.alert('Upload Errors', 'Please fix the upload errors before proceeding.', [{ text: 'OK' }]);
+          // Don't show alert here - let the caller handle it
+          return { isValid: false, errors: newErrors };
+        }
+        
+        // Check for currently uploading documents (should prevent navigation during upload)
+        const uploadingDocuments = documentRequirements.filter(doc => {
+          const uploadState = getUploadState(doc.fieldName);
+          return uploadState?.uploading;
+        });
+        
+        if (uploadingDocuments.length > 0) {
           return { isValid: false, errors: newErrors };
         }
       }
       break;
       
     case 4:
+      // Final review validation
       if (!validateFormData(formData)) {
-        Alert.alert('Incomplete Application', 'Please ensure all required fields are completed.', [{ text: 'OK' }]);
+        return { isValid: false, errors: newErrors };
+      }
+      
+      // Additional validation for required documents in review step
+      const allRequiredDocuments = documentRequirements.filter(doc => doc.required);
+      const finalMissingDocuments = allRequiredDocuments.filter(doc => {
+        const uploadState = getUploadState ? getUploadState(doc.fieldName) : null;
+        return !uploadState || (!uploadState.queued && !uploadState.success);
+      });
+      
+      if (finalMissingDocuments.length > 0) {
         return { isValid: false, errors: newErrors };
       }
       break;

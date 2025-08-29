@@ -5,10 +5,10 @@ import { Id } from '../../convex/_generated/dataModel';
 type ConvexId<T extends string> = Id<T>;
 type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
 
-export function usePayments(formId?: string) {
+export function usePayments(applicationId?: string) {
   const existingPayment = useQuery(
-    api.payments.getPaymentByFormId.getPaymentByFormIdQuery, 
-    formId ? { formId: formId as ConvexId<"forms"> } : "skip"
+    api.payments.getPaymentByFormId.getPaymentByApplicationIdQuery, 
+    applicationId ? { applicationId: applicationId as ConvexId<"applications"> } : "skip"
   );
   const userPayments = useQuery(api.payments.getUserPayments.getUserPaymentsQuery);
 
@@ -17,7 +17,7 @@ export function usePayments(formId?: string) {
   const generateUploadUrlMutation = useMutation(api.storage.generateUploadUrl.generateUploadUrlMutation);
 
   const createPayment = async (input: {
-    formId: ConvexId<'forms'>;
+    applicationId: ConvexId<'applications'>;
     amount: number;
     serviceFee: number;
     netAmount: number;
@@ -44,10 +44,8 @@ export function usePayments(formId?: string) {
       existingPayment,
       userPayments,
     },
-    isLoading: formId ? existingPayment === undefined : userPayments === undefined,
-    isLoadingFormPayment: formId ? existingPayment === undefined : false,
-    
-    service: paymentsService,
+    isLoading: applicationId ? existingPayment === undefined : userPayments === undefined,
+    isLoadingApplicationPayment: applicationId ? existingPayment === undefined : false,
     
     mutations: {
       createPayment,

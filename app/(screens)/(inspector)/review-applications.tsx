@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { theme } from '@/src/styles/theme';
+import { View, Text } from 'react-native';
 import { LoadingSpinner } from '@/src/components/LoadingSpinner';
 import { useRoleBasedNavigation } from '@/src/hooks/useRoleBasedNavigation';
 import { useRouter } from 'expo-router';
-import { User } from '@/src/types';
+import { User } from '@/src/types/domain/user';
 import { useUsers } from '../../../src/hooks/useUsers';
+import { styles } from '@/src/styles/screens/inspector-review-applications';
 
 export default function ReviewApplications() {
   // Use new hooks pattern
@@ -14,7 +14,7 @@ export default function ReviewApplications() {
   const router = useRouter();
 
   React.useEffect(() => {
-    if (userProfile && !canAccessScreen('reviewApplications')) {
+    if (userProfile && !canAccessScreen('review-applications')) {
       router.replace('/(tabs)');
     }
   }, [userProfile, canAccessScreen, router]);
@@ -60,43 +60,3 @@ export default function ReviewApplications() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background.primary,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: theme.colors.text.primary,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-    lineHeight: 24,
-  },
-  unauthorizedContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  unauthorizedText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.semantic.error,
-  },
-});

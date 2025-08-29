@@ -13,7 +13,7 @@ import { router } from 'expo-router';
 import { EmptyState } from '../../src/components';
 import { styles } from '../../src/styles/screens/tabs-notification';
 import { useNotifications } from '../../src/hooks/useNotifications';
-import { Notification } from '../../src/types';
+import { Notification } from '../../src/types/domain';
 import { Id } from '../../convex/_generated/dataModel';
 
 type NotificationCategory = 'All' | 'Unread' | 'Applications' | 'Payments' | 'Orientations';

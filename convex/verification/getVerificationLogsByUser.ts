@@ -19,17 +19,17 @@ export const getVerificationLogsByUserQuery = query({
     }
 
     const userForms = await ctx.db
-      .query("forms")
+      .query("applications")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
-    const formIds = userForms.map((form) => form._id);
+    const applicationIds = userForms.map((application) => application._id);
 
     const healthCards = await Promise.all(
-      formIds.map(async (formId) => {
+      applicationIds.map(async (applicationId) => {
         const card = await ctx.db
           .query("healthCards")
-          .withIndex("by_form", (q) => q.eq("formId", formId))
+          .withIndex("by_application", (q) => q.eq("applicationId", applicationId))
           .unique();
         return card;
       })
@@ -41,7 +41,7 @@ export const getVerificationLogsByUserQuery = query({
       cardIds.map(async (cardId) => {
         const logs = await ctx.db
           .query("verificationLogs")
-          .withIndex("by_healthcard", (q) => q.eq("healthCardId", cardId))
+          .withIndex("by_health_card", (q) => q.eq("healthCardId", cardId))
           .collect();
         return logs;
       })
@@ -50,12 +50,12 @@ export const getVerificationLogsByUserQuery = query({
     const logsWithDetails = await Promise.all(
       allLogs.flat().map(async (log) => {
         const healthCard = await ctx.db.get(log.healthCardId);
-        const form = healthCard ? await ctx.db.get(healthCard.formId) : null;
-        const jobCategory = form ? await ctx.db.get(form.jobCategory) : null;
+        const application = healthCard ? await ctx.db.get(healthCard.applicationId) : null;
+        const jobCategory = application ? await ctx.db.get(application.jobCategoryId) : null;
         return {
           ...log,
           healthCard,
-          form,
+          application,
           jobCategory,
         };
       })

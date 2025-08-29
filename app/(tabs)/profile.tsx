@@ -1,48 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { useUser, useClerk } from '@clerk/clerk-expo';
+import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { SignOutButton, ProfileLink } from '../../src/components';
+import { router } from 'expo-router';
+import React from 'react';
+import {
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { ProfileLink, SignOutButton } from '../../src/components';
+import { useUsers } from '../../src/hooks/useUsers';
 import { styles } from '../../src/styles/screens/tabs-profile';
 import { getUserDisplayName } from '../../src/utils/user-utils';
-import { useUsers } from '../../src/hooks/useUsers';
-import { User } from '../../src/types';
 
 export default function Profile() {
   const { user } = useUser();
-  const { signOut } = useClerk();
-  const [userProfile, setUserProfile] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadUserProfile();
-  }, []);
-
-  const loadUserProfile = async () => {
-    try {
-      setLoading(true);
-      const profile = await users.getCurrentUser();
-      setUserProfile(profile);
-    } catch (error) {
-      console.error('Error loading user profile:', error);
-      Alert.alert('Error', 'Failed to load user profile');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.replace('/(auth)/sign-in');
-  };
+  const { data, isLoading: loading } = useUsers();
+  const userProfile = data?.currentUser ?? null;
 
   if (loading) {
     return (
@@ -62,7 +37,7 @@ export default function Profile() {
         <View style={styles.header}>
           <View style={styles.profilePictureContainer}>
             <Image
-              source={{ uri: user?.imageUrl || userProfile?.image }}
+              source={user?.imageUrl || userProfile?.image || null}
               style={styles.profilePicture}
               placeholder="👤"
             />

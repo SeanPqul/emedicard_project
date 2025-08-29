@@ -1,7 +1,7 @@
-import { FONT_SIZES, FONT_WEIGHTS } from '@/src/utils/fontSizes';
-import { moderateScale, verticalScale } from '@/src/utils/designSystem';
+import { FONT_SIZES, FONT_WEIGHTS } from '@/src/utils/responsive';
+import { moderateScale, verticalScale } from '@/src/utils/responsive';
 import { StyleSheet } from 'react-native';
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from '@/src/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {

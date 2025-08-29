@@ -1,6 +1,13 @@
-import NetInfo from "@react-native-community/netinfo";
+// DISABLED: @react-native-community/netinfo due to native module linking issues
+// import NetInfo from "@react-native-community/netinfo";
+import { Platform } from "react-native";
 import { AppError } from "./errors";
 import { appStorage } from "./storage/mmkv";
+
+// DISABLED: NetInfo functionality - always return false to use fallbacks
+const isNetInfoAvailable = () => {
+  return false; // Always use fallback implementations
+};
 
 export interface NetworkState {
   isConnected: boolean;
@@ -16,31 +23,71 @@ export interface RetryOptions {
 }
 
 export async function getNetworkState(): Promise<NetworkState> {
-  const state = await NetInfo.fetch();
-  return {
-    isConnected: !!state.isConnected,
-    isInternetReachable: !!state.isInternetReachable,
-    type: state.type || 'unknown'
-  };
+  if (!isNetInfoAvailable()) {
+    return {
+      isConnected: true,
+      isInternetReachable: true,
+      type: 'unknown'
+    };
+  }
+
+  // DISABLED: NetInfo usage commented out
+  // try {
+  //   const state = await NetInfo.fetch();
+  //   return {
+  //     isConnected: !!state.isConnected,
+  //     isInternetReachable: !!state.isInternetReachable,
+  //     type: state.type || 'unknown'
+  //   };
+  // } catch (error) {
+  //   console.warn('NetInfo fetch failed, using fallback:', error);
+    return {
+      isConnected: true,
+      isInternetReachable: true,
+      type: 'unknown'
+    };
+  // }
 }
 
 export async function isOnline(): Promise<boolean> {
-  const state = await NetInfo.fetch();
-  const online = !!state.isConnected && !!state.isInternetReachable;
-  appStorage.set("lastOnline", online ? "1" : "0");
-  return online;
+  if (!isNetInfoAvailable()) {
+    return true;
+  }
+
+  // DISABLED: NetInfo usage commented out
+  // try {
+  //   const state = await NetInfo.fetch();
+  //   const online = !!state.isConnected && !!state.isInternetReachable;
+  //   if (appStorage) {
+  //     appStorage.set("lastOnline", online ? "1" : "0");
+  //   }
+  //   return online;
+  // } catch (error) {
+  //   console.warn('NetInfo isOnline failed, using fallback:', error);
+    return true;
+  // }
 }
 
 export function addNetworkListener(callback: (state: NetworkState) => void): () => void {
-  const unsubscribe = NetInfo.addEventListener(state => {
-    callback({
-      isConnected: !!state.isConnected,
-      isInternetReachable: !!state.isInternetReachable,
-      type: state.type || 'unknown'
-    });
-  });
-  
-  return unsubscribe;
+  if (!isNetInfoAvailable()) {
+    return () => {};
+  }
+
+  // DISABLED: NetInfo usage commented out
+  // try {
+  //   const unsubscribe = NetInfo.addEventListener(state => {
+  //     callback({
+  //       isConnected: !!state.isConnected,
+  //       isInternetReachable: !!state.isInternetReachable,
+  //       type: state.type || 'unknown'
+  //     });
+  //   });
+  //   
+  //   return unsubscribe;
+  // } catch (error) {
+  //   console.warn('NetInfo addEventListener failed, using fallback:', error);
+    return () => {};
+  // }
 }
 
 export async function withNetwork<T>(fn: () => Promise<T>): Promise<T> {

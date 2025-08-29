@@ -125,10 +125,10 @@ export const useOptimizedDashboard = () => {
       activities.push({
         id: application._id,
         type: 'application',
-        title: `Health Card Application ${application.status}`,
-        description: `Application for ${application.applicationType || 'health card'} is now ${application.status.toLowerCase()}`,
+        title: `Health Card Application ${application.status || 'Pending'}`,
+        description: `Application for ${application.applicationType || 'health card'} is now ${application.status?.toLowerCase() || 'pending'}`,
         timestamp: new Date(application._creationTime || 0).toISOString(),
-        status: getApplicationActivityStatus(application.status)
+        status: getApplicationActivityStatus(application.status || 'pending')
       });
     });
 

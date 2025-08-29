@@ -13,14 +13,16 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as admin_clearNotifications from "../admin/clearNotifications.js";
+import type * as admin_dataMigration from "../admin/dataMigration.js";
 import type * as admin_migrations from "../admin/migrations.js";
 import type * as admin_seed from "../admin/seed.js";
+import type * as applications_createApplication from "../applications/createApplication.js";
+import type * as applications_getApplicationById from "../applications/getApplicationById.js";
+import type * as applications_getUserApplications from "../applications/getUserApplications.js";
+import type * as applications_submitApplication from "../applications/submitApplication.js";
+import type * as applications_updateApplication from "../applications/updateApplication.js";
 import type * as dashboard_getDashboardData from "../dashboard/getDashboardData.js";
-import type * as forms_createForm from "../forms/createForm.js";
-import type * as forms_getFormById from "../forms/getFormById.js";
-import type * as forms_getUserApplications from "../forms/getUserApplications.js";
-import type * as forms_submitApplicationForm from "../forms/submitApplicationForm.js";
-import type * as forms_updateForm from "../forms/updateForm.js";
 import type * as healthCards_getByFormId from "../healthCards/getByFormId.js";
 import type * as healthCards_getByVerificationToken from "../healthCards/getByVerificationToken.js";
 import type * as healthCards_getUserCards from "../healthCards/getUserCards.js";
@@ -58,6 +60,7 @@ import type * as requirements_removeJobCategoryRequirement from "../requirements
 import type * as requirements_updateDocumentField from "../requirements/updateDocumentField.js";
 import type * as requirements_updateJobCategory from "../requirements/updateJobCategory.js";
 import type * as requirements_updateJobCategoryRequirement from "../requirements/updateJobCategoryRequirement.js";
+import type * as requirements_uploadDocumentWithFile from "../requirements/uploadDocumentWithFile.js";
 import type * as requirements_uploadDocuments from "../requirements/uploadDocuments.js";
 import type * as storage_generateUploadUrl from "../storage/generateUploadUrl.js";
 import type * as users_createUser from "../users/createUser.js";
@@ -82,14 +85,16 @@ import type * as verification_verificationLogs from "../verification/verificatio
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "admin/clearNotifications": typeof admin_clearNotifications;
+  "admin/dataMigration": typeof admin_dataMigration;
   "admin/migrations": typeof admin_migrations;
   "admin/seed": typeof admin_seed;
+  "applications/createApplication": typeof applications_createApplication;
+  "applications/getApplicationById": typeof applications_getApplicationById;
+  "applications/getUserApplications": typeof applications_getUserApplications;
+  "applications/submitApplication": typeof applications_submitApplication;
+  "applications/updateApplication": typeof applications_updateApplication;
   "dashboard/getDashboardData": typeof dashboard_getDashboardData;
-  "forms/createForm": typeof forms_createForm;
-  "forms/getFormById": typeof forms_getFormById;
-  "forms/getUserApplications": typeof forms_getUserApplications;
-  "forms/submitApplicationForm": typeof forms_submitApplicationForm;
-  "forms/updateForm": typeof forms_updateForm;
   "healthCards/getByFormId": typeof healthCards_getByFormId;
   "healthCards/getByVerificationToken": typeof healthCards_getByVerificationToken;
   "healthCards/getUserCards": typeof healthCards_getUserCards;
@@ -127,6 +132,7 @@ declare const fullApi: ApiFromModules<{
   "requirements/updateDocumentField": typeof requirements_updateDocumentField;
   "requirements/updateJobCategory": typeof requirements_updateJobCategory;
   "requirements/updateJobCategoryRequirement": typeof requirements_updateJobCategoryRequirement;
+  "requirements/uploadDocumentWithFile": typeof requirements_uploadDocumentWithFile;
   "requirements/uploadDocuments": typeof requirements_uploadDocuments;
   "storage/generateUploadUrl": typeof storage_generateUploadUrl;
   "users/createUser": typeof users_createUser;

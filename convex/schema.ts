@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-
+  
   // Users
   users: defineTable({
     username: v.string(),
@@ -17,80 +17,84 @@ export default defineSchema({
       v.literal("inspector"),
       v.literal("admin"),
     )),
-    clerkId: v.string(),  //
+    managedCategories: v.optional(
+      v.array(v.id("jobCategories"))
+    ),
+    clerkId: v.string(),
     updatedAt: v.optional(v.number()), // For tracking profile updates
   }).index("by_clerk_id", ["clerkId"])
     .index("by_role", ["role"]),
 
   // Job categories (e.g., food handler, security guard, etc.)
-  jobCategory: defineTable({
+  jobCategories: defineTable({
     name: v.string(),
     colorCode: v.string(),
     requireOrientation: v.optional(v.union(v.boolean(), v.string()))
   }),
 
-  jobCategoryRequirements: defineTable({
-    jobCategoryId: v.id("jobCategory"),
-    documentRequirementId: v.id("documentRequirements"),
-    required: v.boolean(),
-  }).index("by_category", ["jobCategoryId"])
-    .index("by_requirement", ["documentRequirementId"]),
-
-  // Document requirements for each job category (e.g., valid ID, x-ray)
-  documentRequirements: defineTable({
+  // Document types that can be uploaded (e.g., valid ID, x-ray)
+  documentTypes: defineTable({
     name: v.string(),
     description: v.string(),
     icon: v.string(),
-    required: v.boolean(),
-    fieldName: v.string()
-  }).index("by_field_name", ["fieldName"]),
+    isRequired: v.boolean(),
+    fieldIdentifier: v.string() // "validId", "chestXrayId", etc.
+  }).index("by_field_identifier", ["fieldIdentifier"]),
 
-  // Application form (base record for each user's application)
-  forms: defineTable({
+  // Links job categories to required document types
+  jobCategoryDocuments: defineTable({
+    jobCategoryId: v.id("jobCategories"),
+    documentTypeId: v.id("documentTypes"),
+    isRequired: v.boolean(),
+  }).index("by_job_category", ["jobCategoryId"])
+    .index("by_document_type", ["documentTypeId"]),
+
+  // Health card applications (renamed from 'forms' for clarity)
+  applications: defineTable({
     userId: v.id("users"),
     applicationType: v.union(
       v.literal("New"), 
       v.literal("Renew")
     ),
-    jobCategory: v.id("jobCategory"),
+    jobCategoryId: v.id("jobCategories"),
     position: v.string(),
     organization: v.string(),
     civilStatus: v.string(),
-    status: v.string(), // e.g., "Pending", "Approved", "Rejected"
-    approvedAt: v.optional(v.number()), // Only when approved
-    remarks: v.optional(v.string()),    // Admin notes
+    applicationStatus: v.string(), // "Pending", "Approved", "Rejected"
+    approvedAt: v.optional(v.number()),
+    adminRemarks: v.optional(v.string()), // Admin notes
     updatedAt: v.optional(v.number()),
   }).index("by_user", ["userId"]),
 
-  // Document uploads for forms - centralized document storage
-  formDocuments: defineTable({
-    formId: v.id("forms"),
-    documentRequirementId: v.id("documentRequirements"), // Links to specific requirement
-    fileName: v.string(), // Original filename
-    fileId: v.id("_storage"), // Convex storage reference
+  // Document uploads for applications
+  documentUploads: defineTable({
+    applicationId: v.id("applications"),
+    documentTypeId: v.id("documentTypes"),
+    originalFileName: v.string(),
+    storageFileId: v.id("_storage"), // Convex storage reference
     uploadedAt: v.number(),
-    status: v.string(), // e.g., "Pending", "Approved", "Rejected"
-    remarks: v.optional(v.string()), // Admin feedback on document
-    reviewBy: v.optional(v.id("users")), // Who reviewed the document
-    reviewAt: v.optional(v.number()), // When the document was reviewed
-  }).index("by_form", ["formId"])
-    .index("by_form_type", ["formId", "documentRequirementId"]),
+    reviewStatus: v.string(), // "Pending", "Approved", "Rejected"
+    adminRemarks: v.optional(v.string()), // Admin feedback on document
+    reviewedBy: v.optional(v.id("users")), // Who reviewed the document
+    reviewedAt: v.optional(v.number()), // When document was reviewed
+  }).index("by_application", ["applicationId"])
+    .index("by_application_document", ["applicationId", "documentTypeId"]),
 
-  // Payments
+  // Payments for applications
   payments: defineTable({
-    formId: v.id("forms"),
+    applicationId: v.id("applications"),
     amount: v.number(),
     serviceFee: v.number(),
     netAmount: v.number(),
-    method: v.union(
+    paymentMethod: v.union(
       v.literal("Gcash"),
       v.literal("Maya"),
       v.literal("BaranggayHall"),
       v.literal("CityHall")
     ),
     referenceNumber: v.string(),
-    receiptId: v.optional(v.id("_storage")),
-    status: v.union(
+    receiptStorageId: v.optional(v.id("_storage")),
+    paymentStatus: v.union(
       v.literal("Pending"),
       v.literal("Complete"),
       v.literal("Failed"),
@@ -98,53 +102,53 @@ export default defineSchema({
       v.literal("Cancelled")
     ),
     updatedAt: v.optional(v.number()),
-  }).index("by_form", ["formId"]),
+  }).index("by_application", ["applicationId"]),
 
-  // Orientation for food handler
+  // Orientation scheduling for food handlers
   orientations: defineTable({
-    formId: v.id("forms"),
-    scheduleAt: v.number(),
+    applicationId: v.id("applications"),
+    scheduledAt: v.number(),
     qrCodeUrl: v.string(),
     checkInTime: v.optional(v.number()),
     checkOutTime: v.optional(v.number()),
-    status: v.union(
+    orientationStatus: v.union(
       v.literal("Scheduled"),
       v.literal("Completed"),
       v.literal("Missed")
     ),
-  }).index("by_form", ["formId"]),
+  }).index("by_application", ["applicationId"]),
 
-  // Healthcard issuance
+  // Health card issuance
   healthCards: defineTable({
-    formId: v.id("forms"),
+    applicationId: v.id("applications"),
     cardUrl: v.string(),
     issuedAt: v.number(),
     expiresAt: v.number(),
     verificationToken: v.string(),
-  }).index("by_form", ["formId"])
-    .index("by_verificationToken", ["verificationToken"]),
+  }).index("by_application", ["applicationId"])
+    .index("by_verification_token", ["verificationToken"]),
 
-  // Notifications
+  // Notifications for users
   notifications: defineTable({
     userId: v.id("users"),
-    formsId: v.optional(v.id("forms")),
+    applicationId: v.optional(v.id("applications")),
     title: v.optional(v.string()),
     message: v.string(),
-    type: v.string(),  // e.g., "MissingDoc", "Payment", "Approval"
-    read: v.boolean(),
-    actionUrl: v.optional(v.string()),  // If clicking the notif opens a screen
-  }).index("by_user", ["userId"]), // Sort recent first with _creationTime automatically added
+    notificationType: v.string(), // "MissingDoc", "Payment", "Approval"
+    isRead: v.boolean(),
+    actionUrl: v.optional(v.string()),
+  }).index("by_user", ["userId"]),
 
-  // QR Scan Logs (for verification history)
+  // QR verification logs
   verificationLogs: defineTable({
     healthCardId: v.id("healthCards"),
     scannedAt: v.number(),
     userAgent: v.optional(v.string()),
     ipAddress: v.optional(v.string()),
-    status: v.union(
+    verificationStatus: v.union(
       v.literal("Success"),
       v.literal("Failed")
     ),
-  }).index("by_healthcard", ["healthCardId"]),
+  }).index("by_health_card", ["healthCardId"]),
 
 });

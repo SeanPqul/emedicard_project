@@ -10,7 +10,7 @@ import { Id } from "../../../convex/_generated/dataModel";
 export type PaymentMethod = "Gcash" | "Maya" | "BaranggayHall" | "CityHall";
 
 export interface PaymentSubmissionData {
-  formId: Id<"forms">;
+  applicationId: Id<"applications">;
   method: PaymentMethod;
   referenceNumber: string;
 }
@@ -116,13 +116,13 @@ function calculatePaymentAmounts(method: PaymentMethod) {
  * - Type-safe with proper Id types
  */
 export async function submitPayment({
-  formId,
+  applicationId,
   method,
   referenceNumber,
 }: PaymentSubmissionData): Promise<PaymentFlowResult> {
   try {
     // Step 1: Prevent duplicate payment
-    const existing = await withNetwork(() => paymentsService.getPaymentByFormId(formId));
+    const existing = await withNetwork(() => paymentsService.getPaymentByApplicationId(applicationId));
     if (existing) {
       return {
         paymentId: existing._id,
@@ -151,7 +151,7 @@ export async function submitPayment({
     const paymentId = await withNetwork(() =>
       retryAsync(
         () => paymentsService.createPayment({ 
-          formId, 
+          applicationId, 
           amount, 
           serviceFee, 
           netAmount, 
@@ -183,13 +183,13 @@ export async function submitPayment({
  * For cases where receipt is not required
  */
 export async function submitPaymentWithoutReceipt({
-  formId,
+  applicationId,
   method,
   referenceNumber,
 }: PaymentSubmissionData): Promise<PaymentFlowResult> {
   try {
     // Prevent duplicate payment
-    const existing = await withNetwork(() => paymentsService.getPaymentByFormId(formId));
+    const existing = await withNetwork(() => paymentsService.getPaymentByApplicationId(applicationId));
     if (existing) {
       return {
         paymentId: existing._id,
@@ -205,7 +205,7 @@ export async function submitPaymentWithoutReceipt({
     const paymentId = await withNetwork(() =>
       retryAsync(
         () => paymentsService.createPayment({ 
-          formId, 
+          applicationId, 
           amount, 
           serviceFee, 
           netAmount, 

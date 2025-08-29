@@ -16,7 +16,7 @@ export const logVerificationAttemptMutation = mutation({
         // If successful, create regular verification log
         const healthCard = await ctx.db
           .query("healthCards")
-          .withIndex("by_verificationToken", (q) => q.eq("verificationToken", args.verificationToken))
+          .withIndex("by_verification_token", (q) => q.eq("verificationToken", args.verificationToken))
           .unique();
 
         if (healthCard) {
@@ -25,7 +25,7 @@ export const logVerificationAttemptMutation = mutation({
             scannedAt: Date.now(),
             userAgent: args.userAgent,
             ipAddress: args.ipAddress,
-            status: "Success",
+            verificationStatus: "Success",
           });
         }
       }

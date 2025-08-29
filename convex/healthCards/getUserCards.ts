@@ -17,18 +17,18 @@ export const getUserCardsQuery = query({
       return [];
     }
 
-    const userForms = await ctx.db
-      .query("forms")
+    const userApplications = await ctx.db
+      .query("applications")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
-    const formIds = userForms.map((form) => form._id);
+    const applicationIds = userApplications.map((application) => application._id);
 
     const healthCards = await Promise.all(
-      formIds.map(async (formId) => {
+      applicationIds.map(async (applicationId) => {
         const card = await ctx.db
           .query("healthCards")
-          .withIndex("by_form", (q) => q.eq("formId", formId))
+          .withIndex("by_application", (q) => q.eq("applicationId", applicationId))
           .unique();
         return card;
       })
@@ -36,11 +36,11 @@ export const getUserCardsQuery = query({
 
     const cardsWithDetails = await Promise.all(
       healthCards.filter(Boolean).map(async (card) => {
-        const form = await ctx.db.get(card!.formId);
-        const jobCategory = form ? await ctx.db.get(form.jobCategory) : null;
+        const application = await ctx.db.get(card!.applicationId);
+        const jobCategory = application ? await ctx.db.get(application.jobCategoryId) : null;
         return {
           ...card,
-          form,
+          application,
           jobCategory,
         };
       })

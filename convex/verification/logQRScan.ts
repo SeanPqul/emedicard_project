@@ -23,7 +23,7 @@ export const logQRScanMutation = mutation({
       // Find health card by verification token
       const healthCard = await ctx.db
         .query("healthCards")
-        .withIndex("by_verificationToken", (q) => q.eq("verificationToken", args.verificationToken))
+        .withIndex("by_verification_token", (q) => q.eq("verificationToken", args.verificationToken))
         .unique();
 
       if (!healthCard) {
@@ -42,20 +42,20 @@ export const logQRScanMutation = mutation({
         scannedAt: currentTime,
         userAgent: args.userAgent,
         ipAddress: args.ipAddress,
-        status: "Success",
+        verificationStatus: "Success",
       });
 
-      // Get form and user details for the response
-      const form = await ctx.db.get(healthCard.formId);
-      const user = form ? await ctx.db.get(form.userId) : null;
-      const jobCategory = form ? await ctx.db.get(form.jobCategory) : null;
+      // Get application and user details for the response
+      const application = await ctx.db.get(healthCard.applicationId);
+      const user = application ? await ctx.db.get(application.userId) : null;
+      const jobCategory = application ? await ctx.db.get(application.jobCategoryId) : null;
 
       return {
         logId,
         healthCard: {
           ...healthCard,
           user,
-          form,
+          application,
           jobCategory,
         },
         scanInfo: {

@@ -3,7 +3,7 @@ import { storage, setObject, getObject, removeItem, getAllKeys } from './storage
 
 export interface CachedDocument {
   id: string; // Unique identifier for cached document
-  formId: string;
+  applicationId: string;
   fieldName: string; // e.g., 'validId', 'urinalysis', etc.
   fileName: string;
   fileType: string;
@@ -18,7 +18,7 @@ export interface CachedDocument {
 }
 
 export interface DocumentCacheState {
-  [formId: string]: {
+  [applicationId: string]: {
     [fieldName: string]: CachedDocument;
   };
 }
@@ -30,7 +30,7 @@ const GLOBAL_CACHE_KEY = 'document_cache_state';
  * Cache a document in MMKV before upload
  */
 export const cacheDocument = async (
-  formId: string,
+  applicationId: string,
   fieldName: string,
   file: {
     uri: string;
@@ -46,8 +46,8 @@ export const cacheDocument = async (
     const base64Data = await blobToBase64(blob);
 
     const cachedDoc: CachedDocument = {
-      id: `${formId}_${fieldName}_${Date.now()}`,
-      formId,
+      id: `${applicationId}_${fieldName}_${Date.now()}`,
+      applicationId,
       fieldName,
       fileName: file.name,
       fileType: file.type,
@@ -60,13 +60,13 @@ export const cacheDocument = async (
     };
 
     // Store in MMKV
-    const cacheKey = `${CACHE_KEY_PREFIX}${formId}_${fieldName}`;
+    const cacheKey = `${CACHE_KEY_PREFIX}${applicationId}_${fieldName}`;
     setObject(cacheKey, cachedDoc);
 
     // Update global state
-    updateGlobalCacheState(formId, fieldName, cachedDoc);
+    updateGlobalCacheState(applicationId, fieldName, cachedDoc);
 
-    console.log(`📦 Document cached: ${fieldName} for form ${formId}`);
+    console.log(`📦 Document cached: ${fieldName} for application ${applicationId}`);
     return cachedDoc;
   } catch (error) {
     console.error('Failed to cache document:', error);
@@ -75,51 +75,109 @@ export const cacheDocument = async (
 };
 
 /**
- * Get cached document by form and field name
+ * Get cached document by form and field name with enhanced error handling
  */
 export const getCachedDocument = (
   formId: string,
   fieldName: string
 ): CachedDocument | null => {
-  const cacheKey = `${CACHE_KEY_PREFIX}${formId}_${fieldName}`;
-  return getObject<CachedDocument>(cacheKey);
+  try {
+    const cacheKey = `${CACHE_KEY_PREFIX}${formId}_${fieldName}`;
+    const doc = getObject<CachedDocument>(cacheKey);
+    
+    // Validate document structure
+    if (doc && (!doc.id || !doc.applicationId || !doc.fieldName)) {
+      console.warn(`Invalid cached document structure for ${fieldName}, removing from cache`);
+      removeItem(cacheKey);
+      return null;
+    }
+    
+    return doc;
+  } catch (error) {
+    console.error(`Error retrieving cached document ${fieldName}:`, error);
+    return null;
+  }
 };
 
 /**
- * Get all cached documents for a form
+ * Get all cached documents for a form with performance optimization
  */
 export const getCachedDocumentsByForm = (formId: string): CachedDocument[] => {
-  const state = getGlobalCacheState();
-  const formCache = state[formId];
-  
-  if (!formCache) return [];
-  
-  return Object.values(formCache);
+  try {
+    // Use direct key matching for better performance
+    const allKeys = getAllKeys();
+    const formKeys = allKeys.filter(key => 
+      key.startsWith(CACHE_KEY_PREFIX) && key.includes(`${formId}_`)
+    );
+    
+    const documents: CachedDocument[] = [];
+    
+    for (const key of formKeys) {
+      const doc = getObject<CachedDocument>(key);
+      if (doc && doc.applicationId === formId) {
+        // Validate document integrity
+        if (doc.id && doc.fieldName && doc.status) {
+          documents.push(doc);
+        } else {
+          // Clean up corrupted documents
+          console.warn(`Removing corrupted document cache: ${key}`);
+          removeItem(key);
+        }
+      }
+    }
+    
+    return documents.sort((a, b) => b.uploadedAt - a.uploadedAt);
+  } catch (error) {
+    console.error(`Error retrieving cached documents for form ${formId}:`, error);
+    return [];
+  }
 };
 
 /**
- * Update cached document status
+ * Update cached document status with atomic operations and validation
  */
 export const updateCachedDocumentStatus = (
   formId: string,
   fieldName: string,
   updates: Partial<Pick<CachedDocument, 'status' | 'convexStorageId' | 'error' | 'retryCount'>>
-): void => {
-  const cacheKey = `${CACHE_KEY_PREFIX}${formId}_${fieldName}`;
-  const cachedDoc = getObject<CachedDocument>(cacheKey);
-  
-  if (!cachedDoc) {
-    console.warn(`No cached document found for ${fieldName} in form ${formId}`);
-    return;
-  }
+): boolean => {
+  try {
+    const cacheKey = `${CACHE_KEY_PREFIX}${formId}_${fieldName}`;
+    const cachedDoc = getObject<CachedDocument>(cacheKey);
+    
+    if (!cachedDoc) {
+      console.warn(`No cached document found for ${fieldName} in form ${formId}`);
+      return false;
+    }
 
-  const updatedDoc = { ...cachedDoc, ...updates };
-  setObject(cacheKey, updatedDoc);
-  
-  // Update global state
-  updateGlobalCacheState(formId, fieldName, updatedDoc);
-  
-  console.log(`📝 Updated cached document status: ${fieldName} -> ${updates.status}`);
+    // Validate updates
+    if (updates.status && !['cached', 'uploading', 'uploaded', 'failed'].includes(updates.status)) {
+      console.error(`Invalid status update: ${updates.status}`);
+      return false;
+    }
+
+    const updatedDoc: CachedDocument = {
+      ...cachedDoc,
+      ...updates,
+      // Always update timestamp on status change
+      uploadedAt: updates.status ? Date.now() : cachedDoc.uploadedAt
+    };
+    
+    setObject(cacheKey, updatedDoc);
+    
+    // Update global state with better error handling
+    try {
+      updateGlobalCacheState(formId, fieldName, updatedDoc);
+    } catch (globalStateError) {
+      console.warn('Failed to update global cache state, but document was cached:', globalStateError);
+    }
+    
+    console.log(`📝 Updated cached document status: ${fieldName} -> ${updates.status}`);
+    return true;
+  } catch (error) {
+    console.error(`Error updating cached document status for ${fieldName}:`, error);
+    return false;
+  }
 };
 
 /**
@@ -252,6 +310,162 @@ export const getCacheStats = (): {
   });
   
   return stats;
+};
+
+// ====== ENHANCED CACHE MANAGEMENT (2024 BEST PRACTICES) ======
+
+/**
+ * Reactive cache listener for real-time updates
+ * Based on MMKV 2024 patterns
+ */
+export interface CacheListener {
+  onDocumentCached: (formId: string, fieldName: string, doc: CachedDocument) => void;
+  onDocumentUpdated: (formId: string, fieldName: string, doc: CachedDocument) => void;
+  onDocumentRemoved: (formId: string, fieldName: string) => void;
+}
+
+const cacheListeners = new Set<CacheListener>();
+
+/**
+ * Add cache listener for reactive updates
+ */
+export const addCacheListener = (listener: CacheListener): () => void => {
+  cacheListeners.add(listener);
+  
+  // Return cleanup function
+  return () => {
+    cacheListeners.delete(listener);
+  };
+};
+
+/**
+ * Notify all listeners of cache changes
+ */
+const notifyListeners = (
+  type: keyof CacheListener,
+  formId: string,
+  fieldName: string,
+  doc?: CachedDocument
+) => {
+  cacheListeners.forEach(listener => {
+    try {
+      if (type === 'onDocumentRemoved') {
+        listener.onDocumentRemoved(formId, fieldName);
+      } else if (doc) {
+        listener[type](formId, fieldName, doc);
+      }
+    } catch (error) {
+      console.error('Error in cache listener:', error);
+    }
+  });
+};
+
+/**
+ * Enhanced cache document with reactive notifications
+ */
+export const cacheDocumentReactive = async (
+  applicationId: string,
+  fieldName: string,
+  file: {
+    uri: string;
+    name: string;
+    type: string;
+    size: number;
+  }
+): Promise<CachedDocument> => {
+  const doc = await cacheDocument(applicationId, fieldName, file);
+  
+  // Notify listeners
+  notifyListeners('onDocumentCached', applicationId, fieldName, doc);
+  
+  return doc;
+};
+
+/**
+ * Enhanced update with reactive notifications
+ */
+export const updateCachedDocumentStatusReactive = (
+  formId: string,
+  fieldName: string,
+  updates: Partial<Pick<CachedDocument, 'status' | 'convexStorageId' | 'error' | 'retryCount'>>
+): boolean => {
+  const success = updateCachedDocumentStatus(formId, fieldName, updates);
+  
+  if (success) {
+    const updatedDoc = getCachedDocument(formId, fieldName);
+    if (updatedDoc) {
+      notifyListeners('onDocumentUpdated', formId, fieldName, updatedDoc);
+    }
+  }
+  
+  return success;
+};
+
+/**
+ * Enhanced remove with reactive notifications
+ */
+export const removeCachedDocumentReactive = (formId: string, fieldName: string): void => {
+  removeCachedDocument(formId, fieldName);
+  notifyListeners('onDocumentRemoved', formId, fieldName);
+};
+
+/**
+ * Batch operations for better performance
+ */
+export const batchUpdateDocumentStatus = (
+  updates: Array<{
+    formId: string;
+    fieldName: string;
+    updates: Partial<Pick<CachedDocument, 'status' | 'convexStorageId' | 'error' | 'retryCount'>>;
+  }>
+): { success: number; failed: number } => {
+  let success = 0;
+  let failed = 0;
+  
+  updates.forEach(({ formId, fieldName, updates: docUpdates }) => {
+    if (updateCachedDocumentStatusReactive(formId, fieldName, docUpdates)) {
+      success++;
+    } else {
+      failed++;
+    }
+  });
+  
+  console.log(`Batch update completed: ${success} success, ${failed} failed`);
+  return { success, failed };
+};
+
+/**
+ * Smart cache cleanup with size-based optimization
+ */
+export const smartCacheCleanup = (): {
+  removedCount: number;
+  freedSize: number;
+} => {
+  const stats = getCacheStats();
+  let removedCount = 0;
+  let freedSize = 0;
+  
+  // Clean up failed uploads older than 24 hours
+  const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+  
+  Object.keys(getGlobalCacheState()).forEach(formId => {
+    const docs = getCachedDocumentsByForm(formId);
+    
+    docs.forEach(doc => {
+      const shouldRemove = 
+        (doc.status === 'failed' && doc.uploadedAt < oneDayAgo) ||
+        (doc.status === 'uploaded' && doc.uploadedAt < (Date.now() - (7 * 24 * 60 * 60 * 1000)));
+      
+      if (shouldRemove) {
+        freedSize += doc.fileSize;
+        removeCachedDocumentReactive(formId, doc.fieldName);
+        removedCount++;
+      }
+    });
+  });
+  
+  console.log(`Smart cleanup: removed ${removedCount} documents, freed ${freedSize} bytes`);
+  return { removedCount, freedSize };
 };
 
 // Helper functions

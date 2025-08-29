@@ -25,7 +25,7 @@ export const markAsReadMutation = mutation({
       throw new Error("Not authorized to update this notification");
     }
 
-    await ctx.db.patch(args.notificationId, { read: true });
+    await ctx.db.patch(args.notificationId, { isRead: true });
   },
 });
 

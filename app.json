@@ -8,13 +8,7 @@
     "scheme": "emedicardproject",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "deepLinking": {
-      "enabled": true,
-      "prefixes": [
-        "emedicardproject://",
-        "https://emedicard.app"
-      ]
-    },
+    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true
     },

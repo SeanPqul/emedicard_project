@@ -26,7 +26,7 @@ export const createVerificationLogMutation = mutation({
         scannedAt: currentTime,
         userAgent: args.userAgent,
         ipAddress: args.ipAddress,
-        status: "Success",
+        verificationStatus: "Success",
       });
 
       return logId;

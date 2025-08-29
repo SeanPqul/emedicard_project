@@ -83,19 +83,3 @@ export interface FeedbackContextType {
   feedback: FeedbackState | null;
 }
 
-// ===== SKELETON LOADER TYPES =====
-export interface SkeletonLoaderProps {
-  width?: number | string;
-  height?: number | string;
-  borderRadius?: number;
-  backgroundColor?: string;
-  highlightColor?: string;
-  duration?: number;
-  style?: ViewStyle;
-}
-
-export interface SkeletonGroupProps {
-  children: React.ReactNode;
-  loading: boolean;
-  fallback?: React.ReactNode;
-}

@@ -3,8 +3,8 @@ import { v } from "convex/values";
 
 export const adminReviewDocumentMutation = mutation({
   args: {
-    documentId: v.id("formDocuments"),
-    status: v.union(v.literal("Pending"), v.literal("Approved"), v.literal("Rejected")),
+    documentId: v.id("documentUploads"),
+    reviewStatus: v.union(v.literal("Pending"), v.literal("Approved"), v.literal("Rejected")),
     remarks: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -29,10 +29,10 @@ export const adminReviewDocumentMutation = mutation({
     }
 
     await ctx.db.patch(args.documentId, {
-      status: args.status,
-      remarks: args.remarks,
-      reviewBy: currentUser._id,
-      reviewAt: Date.now(),
+      reviewStatus: args.reviewStatus,
+      adminRemarks: args.remarks,
+      reviewedBy: currentUser._id,
+      reviewedAt: Date.now(),
     });
 
     return args.documentId;

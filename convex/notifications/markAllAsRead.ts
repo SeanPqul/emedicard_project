@@ -19,11 +19,11 @@ export const markAllAsReadMutation = mutation({
     const notifications = await ctx.db
       .query("notifications")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .filter((q) => q.eq(q.field("read"), false))
+      .filter((q) => q.eq(q.field("isRead"), false))
       .collect();
 
     for (const notification of notifications) {
-      await ctx.db.patch(notification._id, { read: true });
+      await ctx.db.patch(notification._id, { isRead: true });
     }
   },
 });

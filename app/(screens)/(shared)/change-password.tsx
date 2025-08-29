@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
-import { styles } from '@/src/styles/screens/tabs-profile';
-import { getColor, getSpacing, getTypography } from '@/src/styles/theme';
+import { Alert, Button, Text, TextInput, View } from 'react-native';
+import { styles as tabsProfileStyles } from '@/src/styles/screens/tabs-profile';
+import { getColor } from '@/src/styles/theme';
+import { styles } from '@/src/styles/screens/shared-change-password';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -17,24 +18,24 @@ export default function ChangePassword() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={changePasswordStyles.title}>Change Password</Text>
+    <View style={tabsProfileStyles.container}>
+      <Text style={styles.title}>Change Password</Text>
       <TextInput
-        style={changePasswordStyles.input}
+        style={styles.input}
         placeholder="Current Password"
         secureTextEntry
         value={currentPassword}
         onChangeText={setCurrentPassword}
       />
       <TextInput
-        style={changePasswordStyles.input}
+        style={styles.input}
         placeholder="New Password"
         secureTextEntry
         value={newPassword}
         onChangeText={setNewPassword}
       />
       <TextInput
-        style={changePasswordStyles.input}
+        style={styles.input}
         placeholder="Confirm Password"
         secureTextEntry
         value={confirmPassword}
@@ -44,20 +45,3 @@ export default function ChangePassword() {
     </View>
   );
 }
-
-const changePasswordStyles = StyleSheet.create({
-  title: {
-    ...getTypography('h4'),
-    textAlign: 'center',
-    marginVertical: getSpacing('md'),
-    color: getColor('text.primary'),
-  },
-  input: {
-    borderColor: getColor('border.light'),
-    borderWidth: 1,
-    borderRadius: 4,
-    marginBottom: getSpacing('sm'),
-    padding: getSpacing('sm'),
-  },
-});
-

@@ -3,30 +3,15 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { FeedbackSystem, useFeedback } from '../../../src/components/feedback/FeedbackSystem';
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FeedbackSystem, useFeedback, CustomButton } from '../../../src/components/';
 import { Id } from '../../../convex/_generated/dataModel';
-import { CustomButton } from '../../../src/components';
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
-import { usePayments, useApplications } from '../../../src/hooks/api';
+import { usePayments, useApplications } from '../../../src/hooks/';
+import { getColor } from '../../../src/styles/theme';
+import { styles } from '../../../src/styles/screens/shared-payment';
+import { PAYMENT_METHODS, DIGITAL_PAYMENT_METHODS, MANUAL_PAYMENT_METHODS, type PaymentMethod, type UploadedReceipt } from '../../../src/constants';
 
-const { width } = Dimensions.get('window');
-
-interface PaymentMethod {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  fee: number;
-  serviceFee?: number;
-}
-
-interface UploadedReceipt {
-  uri: string;
-  name: string;
-  type: string;
-  size: number;
-}
 
 export default function PaymentScreen() {
   const { formId } = useLocalSearchParams<{ formId: string }>();
@@ -41,16 +26,9 @@ export default function PaymentScreen() {
   const { existingPayment, createPayment, updatePaymentStatus, generateUploadUrl, isLoadingFormPayment } = usePayments(formId);
   const { form, isLoadingForm } = useApplications(formId);
   
-  // Payment methods with real fees
-  const paymentMethods: PaymentMethod[] = [
-    { id: 'Gcash', name: 'GCash', description: 'Pay with GCash mobile wallet', icon: 'wallet', fee: 50, serviceFee: 5 },
-    { id: 'Maya', name: 'Maya', description: 'Pay with Maya (formerly PayMaya)', icon: 'card', fee: 50, serviceFee: 5 },
-    { id: 'BaranggayHall', name: 'Barangay Hall', description: 'Pay at the Barangay Hall', icon: 'home', fee: 50 },
-    { id: 'CityHall', name: 'City Hall', description: 'Pay at the City Hall', icon: 'business', fee: 50 },
-  ];
 
   const getSelectedMethodDetails = () => {
-    return paymentMethods.find(method => method.id === selectedPaymentMethod);
+    return PAYMENT_METHODS.find(method => method.id === selectedPaymentMethod);
   };
 
   const calculateTotal = () => {
@@ -191,14 +169,14 @@ export default function PaymentScreen() {
     }
 
     // Validate requirements for different payment methods
-    if (method.id === 'BaranggayHall' || method.id === 'CityHall') {
+    if (MANUAL_PAYMENT_METHODS.includes(method.id as any)) {
       if (!uploadedReceipt) {
         Alert.alert('Receipt Required', 'Please upload a receipt for manual payment methods.');
         return;
       }
     }
 
-    if ((method.id === 'Gcash' || method.id === 'Maya') && !referenceNumber.trim()) {
+    if (DIGITAL_PAYMENT_METHODS.includes(method.id as any) && !referenceNumber.trim()) {
       Alert.alert('Reference Number Required', 'Please enter the reference number for your payment.');
       return;
     }
@@ -228,7 +206,7 @@ export default function PaymentScreen() {
       });
 
       // For digital payments, mark as complete immediately
-      if (method.id === 'Gcash' || method.id === 'Maya') {
+      if (DIGITAL_PAYMENT_METHODS.includes(method.id as any)) {
         await updatePaymentStatus({
           paymentId,
           status: 'Complete',
@@ -238,7 +216,7 @@ export default function PaymentScreen() {
       setIsSubmitting(false);
       showSuccess(
         'Payment Processed',
-        `Your payment has been ${method.id === 'Gcash' || method.id === 'Maya' ? 'processed' : 'recorded'}. Reference: ${finalReferenceNumber}`
+        `Your payment has been ${DIGITAL_PAYMENT_METHODS.includes(method.id as any) ? 'processed' : 'recorded'}. Reference: ${finalReferenceNumber}`
       );
       setTimeout(() => router.back(), 2000);
     } catch (error) {
@@ -253,7 +231,7 @@ export default function PaymentScreen() {
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#212529" />
+          <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Make Payment</Text>
         <View style={styles.headerSpacer} />
@@ -262,7 +240,7 @@ export default function PaymentScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Payment Method Selection */}
         <Text style={styles.sectionTitle}>Select Payment Method</Text>
-        {paymentMethods.map(method => (
+        {PAYMENT_METHODS.map(method => (
           <TouchableOpacity 
             key={method.id} 
             style={[
@@ -274,7 +252,7 @@ export default function PaymentScreen() {
             <Ionicons 
               name={method.icon} 
               size={24} 
-              color={selectedPaymentMethod === method.id ? '#10B981' : '#6C757D'} 
+              color={selectedPaymentMethod === method.id ? getColor('success.main') : getColor('text.secondary')} 
             />
             <View style={styles.paymentDetails}>
               <Text style={styles.paymentName}>{method.name}</Text>
@@ -282,7 +260,7 @@ export default function PaymentScreen() {
               <Text style={styles.paymentFee}>₱{method.fee}</Text>
             </View>
             {selectedPaymentMethod === method.id && (
-              <Ionicons name="checkmark" size={20} color="#10B981" />
+              <Ionicons name="checkmark" size={20} color={getColor('success.main')} />
             )}
           </TouchableOpacity>
         ))}
@@ -310,7 +288,7 @@ export default function PaymentScreen() {
             </View>
             
             {/* Reference Number Input for Digital Payments */}
-            {(selectedPaymentMethod === 'Gcash' || selectedPaymentMethod === 'Maya') && (
+            {selectedPaymentMethod && DIGITAL_PAYMENT_METHODS.includes(selectedPaymentMethod as any) && (
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>Reference Number *</Text>
                 <TextInput
@@ -318,13 +296,13 @@ export default function PaymentScreen() {
                   value={referenceNumber}
                   onChangeText={setReferenceNumber}
                   placeholder="Enter transaction reference number"
-                  placeholderTextColor="#6C757D"
+                  placeholderTextColor={getColor('text.secondary')}
                 />
               </View>
             )}
             
             {/* Receipt Upload for Manual Payments */}
-            {(selectedPaymentMethod === 'BaranggayHall' || selectedPaymentMethod === 'CityHall') && (
+            {selectedPaymentMethod && MANUAL_PAYMENT_METHODS.includes(selectedPaymentMethod as any) && (
               <View style={styles.uploadContainer}>
                 <Text style={styles.inputLabel}>Receipt Upload *</Text>
                 <TouchableOpacity 
@@ -332,7 +310,7 @@ export default function PaymentScreen() {
                   onPress={handleReceiptUpload}
                   disabled={isUploadingReceipt}
                 >
-                  <Ionicons name="camera-outline" size={24} color="#2E86AB" />
+                  <Ionicons name="camera-outline" size={24} color={getColor('primary.main')} />
                   <Text style={styles.uploadButtonText}>
                     {isUploadingReceipt ? 'Uploading...' : 'Upload Receipt'}
                   </Text>
@@ -341,14 +319,14 @@ export default function PaymentScreen() {
                 {uploadedReceipt && (
                   <View style={styles.uploadedFileContainer}>
                     <View style={styles.uploadedFileInfo}>
-                      <Ionicons name="document-text" size={20} color="#10B981" />
+                      <Ionicons name="document-text" size={20} color={getColor('success.main')} />
                       <Text style={styles.uploadedFileName}>{uploadedReceipt.name}</Text>
                     </View>
                     <TouchableOpacity 
                       onPress={() => setUploadedReceipt(null)}
                       style={styles.removeButton}
                     >
-                      <Ionicons name="close-circle" size={20} color="#DC3545" />
+                      <Ionicons name="close-circle" size={20} color={getColor('error.main')} />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -399,7 +377,7 @@ export default function PaymentScreen() {
                 <Text style={styles.paymentStatusText}>Status: {existingPayment.status}</Text>
                 <View style={[
                   styles.statusBadge,
-                  { backgroundColor: existingPayment.status === 'Complete' ? '#10B981' : '#F59E0B' }
+                  { backgroundColor: existingPayment.status === 'Complete' ? getColor('success.main') : getColor('warning.main') }
                 ]}>
                   <Text style={styles.statusBadgeText}>{existingPayment.status}</Text>
                 </View>
@@ -424,256 +402,3 @@ export default function PaymentScreen() {
     </BaseScreenLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
-  },
-  scrollView: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  paymentOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  paymentDetails: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  paymentName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#212529',
-  },
-  paymentDescription: {
-    fontSize: 14,
-    color: '#6C757D',
-  },
-  submitContainer: {
-    paddingVertical: 30,
-    paddingHorizontal: 10,
-    paddingBottom: 40,
-  },
-  paymentOptionSelected: {
-    borderColor: '#10B981',
-    //backgroundColor: '#10B98108',
-  },
-  paymentButton: {
-    width: '100%',
-    height: 56,
-    minHeight: 56,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  paymentFee: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#10B981',
-    marginTop: 4,
-  },
-  paymentDetailsContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  feeBreakdown: {
-    marginBottom: 20,
-  },
-  feeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  feeLabel: {
-    fontSize: 14,
-    color: '#6C757D',
-  },
-  feeValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#212529',
-  },
-  totalRow: {
-    borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
-    paddingTop: 12,
-    marginTop: 8,
-  },
-  totalLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#212529',
-  },
-  totalValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#10B981',
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#212529',
-    marginBottom: 8,
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#E9ECEF',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    backgroundColor: '#FFFFFF',
-    color: '#212529',
-  },
-  uploadContainer: {
-    marginBottom: 20,
-  },
-  uploadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderWidth: 2,
-    borderColor: '#2E86AB',
-    borderStyle: 'dashed',
-    borderRadius: 8,
-    backgroundColor: '#F8F9FA',
-  },
-  uploadButtonText: {
-    fontSize: 14,
-    color: '#2E86AB',
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  uploadedFileContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#E8F5E8',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 12,
-  },
-  uploadedFileInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  uploadedFileName: {
-    fontSize: 14,
-    color: '#10B981',
-    marginLeft: 8,
-    flex: 1,
-  },
-  removeButton: {
-    padding: 4,
-  },
-  instructionsContainer: {
-    backgroundColor: '#F8F9FA',
-    padding: 16,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  instructionsTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#212529',
-    marginBottom: 8,
-  },
-  instructionsText: {
-    fontSize: 14,
-    color: '#6C757D',
-    lineHeight: 20,
-  },
-  existingPaymentContainer: {
-    marginTop: 20,
-  },
-  paymentStatusCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  paymentStatusHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  paymentStatusText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#212529',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  paymentReference: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginBottom: 4,
-  },
-  paymentAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#212529',
-  },
-  headerSpacer: {
-    width: 24,
-  },
-});
-

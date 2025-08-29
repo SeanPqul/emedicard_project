@@ -5,7 +5,7 @@ import { v } from "convex/values";
 export const adminGetPendingDocumentsQuery = query({
   args: {
     limit: v.optional(v.number()),
-    formId: v.optional(v.id("forms")),
+    applicationId: v.optional(v.id("applications")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -26,16 +26,16 @@ export const adminGetPendingDocumentsQuery = query({
     // Get pending documents
     let allDocuments;
     
-    // If formId is provided, filter by form
-    if (args.formId) {
+    // If applicationId is provided, filter by application
+    if (args.applicationId) {
       allDocuments = await ctx.db
-        .query("formDocuments")
-        .withIndex("by_form", (q) => q.eq("formId", args.formId!))
+        .query("documentUploads")
+        .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId!))
         .collect();
     } else {
-      allDocuments = await ctx.db.query("formDocuments").collect();
+      allDocuments = await ctx.db.query("documentUploads").collect();
     }
-    const pendingDocuments = allDocuments.filter(doc => doc.status === "Pending");
+    const pendingDocuments = allDocuments.filter(doc => doc.reviewStatus === "Pending");
     
     // Apply limit if provided
     const limitedDocuments = args.limit 
@@ -45,17 +45,17 @@ export const adminGetPendingDocumentsQuery = query({
     // Get additional information for each document
     const documentsWithDetails = await Promise.all(
       limitedDocuments.map(async (doc) => {
-        const form = await ctx.db.get(doc.formId);
-        const requirement = await ctx.db.get(doc.documentRequirementId);
+        const application = await ctx.db.get(doc.applicationId);
+        const requirement = await ctx.db.get(doc.documentTypeId);
         
         let applicant = null;
-        if (form) {
-          applicant = await ctx.db.get(form.userId);
+        if (application) {
+          applicant = await ctx.db.get(application.userId);
         }
         
         return {
           ...doc,
-          form,
+          application,
           requirement,
           applicant: applicant ? {
             _id: applicant._id,

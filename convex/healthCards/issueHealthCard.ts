@@ -3,7 +3,7 @@ import { mutation } from "../_generated/server";
 
 export const issueHealthCardMutation = mutation({
   args: {
-    formId: v.id("forms"),
+    applicationId: v.id("applications"),
     cardUrl: v.string(),
     issuedAt: v.number(),
     expiresAt: v.number(),
@@ -11,7 +11,7 @@ export const issueHealthCardMutation = mutation({
   },
   handler: async (ctx, args) => {
     const healthCardId = await ctx.db.insert("healthCards", {
-      formId: args.formId,
+      applicationId: args.applicationId,
       cardUrl: args.cardUrl,
       issuedAt: args.issuedAt,
       expiresAt: args.expiresAt,

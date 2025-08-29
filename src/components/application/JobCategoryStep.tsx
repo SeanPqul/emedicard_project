@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../../styles/theme';
-import { JobCategory } from '../../types';
+import { JobCategory } from '../../types/domain/application';
 
 interface JobCategoryStepProps {
   jobCategories: JobCategory[];
@@ -10,7 +10,7 @@ interface JobCategoryStepProps {
   onJobCategorySelect: (categoryId: string) => void;
 }
 
-export const JobCategoryStep: React.FC<JobCategoryStepProps> = React.memo(({
+const JobCategoryStepComponent: React.FC<JobCategoryStepProps> = ({
   jobCategories,
   selectedJobCategory,
   onJobCategorySelect,
@@ -61,7 +61,7 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = React.memo(({
               alignItems: 'center',
               minHeight: 120,
               marginBottom: getSpacing('md'),
-              ...getShadow('card'),
+              ...getShadow('medium'),
             }}
             onPress={() => onJobCategorySelect(category._id)}
             accessibilityRole="radio"
@@ -131,4 +131,8 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = React.memo(({
       </ScrollView>
     </View>
   );
-});
+};
+
+JobCategoryStepComponent.displayName = 'JobCategoryStep';
+
+export const JobCategoryStep = React.memo(JobCategoryStepComponent);

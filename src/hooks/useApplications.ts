@@ -4,58 +4,63 @@ import { Id } from '../../convex/_generated/dataModel';
 
 type ConvexId<T extends string> = Id<T>;
 
-export function useApplications(formId?: string) {
-  const form = useQuery(
-    api.forms.getFormById.getFormByIdQuery, 
-    formId ? { formId: formId as ConvexId<"forms"> } : "skip"
+export function useApplications(applicationId?: string) {
+  const application = useQuery(
+    api.applications.getApplicationById.getApplicationByIdQuery, 
+    applicationId ? { applicationId: applicationId as ConvexId<"applications"> } : "skip"
   );
-  const userApplications = useQuery(api.forms.getUserApplications.getUserApplicationsQuery);
-  const createFormMutation = useMutation(api.forms.createForm.createFormMutation);
-  const updateFormMutation = useMutation(api.forms.updateForm.updateFormMutation);
-  const submitApplicationMutation = useMutation(api.forms.submitApplicationForm.submitApplicationFormMutation);
+  const userApplications = useQuery(api.applications.getUserApplications.getUserApplicationsQuery);
+  const createApplicationMutation = useMutation(api.applications.createApplication.createApplicationMutation);
+  const updateApplicationMutation = useMutation(api.applications.updateApplication.updateApplicationMutation);
+  const submitApplicationMutation = useMutation(api.applications.submitApplication.submitApplicationMutation);
 
-  const createForm = async (input: {
+  const createApplication = async (input: {
     applicationType: 'New' | 'Renew';
-    jobCategory: ConvexId<'jobCategory'>;
+    jobCategoryId: ConvexId<'jobCategories'>;
     position: string;
     organization: string;
     civilStatus: string;
   }) => {
-    return createFormMutation(input);
+    return createApplicationMutation(input);
   };
 
-  const updateForm = async (formId: ConvexId<'forms'>, updates: any) => {
-    return updateFormMutation({ formId, ...updates });
+  const updateApplication = async (applicationId: ConvexId<'applications'>, updates: any) => {
+    return updateApplicationMutation({ applicationId, ...updates });
   };
 
   const submitApplicationForm = async (
-    formId: ConvexId<'forms'>,
+    applicationId: ConvexId<'applications'>,
     paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall',
     paymentReferenceNumber: string,
-    paymentReceiptId?: ConvexId<'_storage'>
+    receiptStorageId?: ConvexId<'_storage'>
   ) => {
     return submitApplicationMutation({
-      formId,
+      applicationId,
       paymentMethod,
       paymentReferenceNumber,
-      ...(paymentReceiptId !== undefined && { paymentReceiptId }),
+      ...(receiptStorageId !== undefined && { paymentReceiptId: receiptStorageId }),
     });
   };
 
   return {
     data: {
-      form,
+      application,
       userApplications,
+      // Backwards compatibility
+      form: application,
     },
     isLoading: userApplications === undefined,
-    isLoadingForm: formId ? form === undefined : false,
-    
-    service: applicationsService,
+    isLoadingApplication: applicationId ? application === undefined : false,
+    // Backwards compatibility
+    isLoadingForm: applicationId ? application === undefined : false,
     
     mutations: {
-      createForm,
-      updateForm,
+      createApplication,
+      updateApplication,
       submitApplicationForm,
+      // Backwards compatibility aliases
+      createForm: createApplication,
+      updateForm: updateApplication,
     }
   };
 }

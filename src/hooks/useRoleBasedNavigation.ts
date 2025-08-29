@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { UserRole } from '../types';
+import { UserRole } from '../types/domain/user';
 
 export interface RolePermissions {
   canAccessApplicantTabs: boolean;
@@ -31,7 +31,7 @@ export function useRoleBasedNavigation(userRole?: UserRole) {
           canManageUsers: false,
           canApproveApplications: true,
           canViewAnalytics: false,
-          defaultRoute: '/(tabs)/inspectorDashboard',
+          defaultRoute: '/(screens)/(inspector)/inspector-dashboard',
         };
       
       case 'applicant':
@@ -88,22 +88,11 @@ export function useRoleBasedNavigation(userRole?: UserRole) {
       );
     }
 
-    // Inspector tabs - Dashboard-focused with minimal navigation
+    // Inspector tabs - No tabs navigation for inspectors
+    // Inspectors use (screens)/(inspector) routes only
     if (permissions.canAccessInspectorTabs) {
-      baseTabs.push(
-        {
-          name: 'inspectorDashboard',
-          icon: 'analytics',
-          label: 'Dashboard',
-          visible: true,
-        },
-        {
-          name: 'profile',
-          icon: 'person',
-          label: 'Profile',
-          visible: true,
-        }
-      );
+      // Inspectors don't get tab navigation - they use full screen routes
+      // No tabs to add for inspectors
     }
 
     // Note: Admin functionality is handled via web interface, not mobile app
@@ -112,22 +101,31 @@ export function useRoleBasedNavigation(userRole?: UserRole) {
   }, [permissions]);
 
   const canAccessScreen = (screenName: string): boolean => {
-    const inspectorScreens = ['inspectorDashboard', 'reviewApplications', 'inspection-queue', 'scanner'];
-    const applicantScreens = ['index', 'application', 'apply', 'notification'];
+    // Inspector-only screens
+    const inspectorOnlyScreens = ['inspector-dashboard', 'review-applications', 'inspection-queue', 'scanner'];
+    
+    // Applicant tab screens
+    const applicantTabScreens = ['index', 'application', 'apply', 'notification'];
+    
+    // Shared screens - both roles can access
+    const universalSharedScreens = ['(shared)', 'edit', 'change-password', 'qr-scanner'];
+    
+    // Applicant-only shared screens
+    const applicantSharedScreens = ['activity', 'document-requirements', 'health-cards', 'orientation', 'payment', 'qr-code', 'upload-documents'];
 
-    if (inspectorScreens.includes(screenName)) {
-      return permissions.canAccessInspectorTabs;
+    if (permissions.canAccessInspectorTabs) {
+      return inspectorOnlyScreens.includes(screenName) || 
+             universalSharedScreens.includes(screenName) || 
+             screenName === 'profile';
     }
     
-    if (applicantScreens.includes(screenName)) {
-      return permissions.canAccessApplicantTabs;
+    if (permissions.canAccessApplicantTabs) {
+      return applicantTabScreens.includes(screenName) || 
+             universalSharedScreens.includes(screenName) ||
+             applicantSharedScreens.includes(screenName) ||
+             screenName === 'profile';
     }
-
-    if (screenName === 'profile') {
-      return true; // All roles can access profile
-    }
-
-    // Admin screens are not accessible via mobile app
+    
     return false;
   };
 

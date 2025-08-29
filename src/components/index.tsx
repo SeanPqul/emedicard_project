@@ -20,9 +20,6 @@ import { ActivityItem } from "./ActivityItem";
 import { ProfileLink } from "./ProfileLink";
 import { EmptyState } from "./EmptyState";
 
-// Accessibility Components
-import { AccessibleView } from "./AccessibleView";
-
 // Error & Feedback Components
 import { ErrorBoundary } from "./ErrorBoundary";
 import { Toast } from "./Toast";
@@ -31,18 +28,12 @@ import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorState, NetworkErrorState, ServerErrorState, UploadErrorState, PaymentErrorState } from "./ErrorState";
 import type { ErrorType } from "./ErrorState";
 
-// Animated Components
-import { AnimatedCard } from "./AnimatedCard";
-import { SkeletonLoader, SkeletonGroup } from "./SkeletonLoader";
-import { PageTransition, StaggerChildren } from "./PageTransition";
-
 // Responsive Components
 import { ResponsiveLayout, ResponsiveRow, ResponsiveColumn, ResponsiveGrid } from "./ResponsiveLayout";
 
 // Enhanced UI Components
 import { DragDropUpload } from "./DragDropUpload";
 import { QRCodeScanner } from "./QRCodeScanner";
-import { UnauthorizedAccess } from "./UnauthorizedAccess";
 import { FeedbackSystem, useFeedback } from "./FeedbackSystem";
 
 export {
@@ -68,9 +59,6 @@ export {
     ProfileLink,
     EmptyState,
     
-    // Accessibility Components
-    AccessibleView,
-    
     // Error & Feedback Components
     ErrorBoundary,
     Toast,
@@ -81,13 +69,6 @@ export {
     UploadErrorState,
     PaymentErrorState,
     
-    // Animated Components
-    AnimatedCard,
-    SkeletonLoader,
-    SkeletonGroup,
-    PageTransition,
-    StaggerChildren,
-    
     // Responsive Components
     ResponsiveLayout,
     ResponsiveRow,
@@ -97,7 +78,6 @@ export {
     // Enhanced UI Components
     DragDropUpload,
     QRCodeScanner,
-    UnauthorizedAccess,
     FeedbackSystem,
     useFeedback
 };

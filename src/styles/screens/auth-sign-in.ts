@@ -1,10 +1,10 @@
-import { FONT_SIZES, FONT_WEIGHTS } from '@/src/utils/fontSizes';
-import { moderateScale, verticalScale } from "@/src/utils/designSystem";
+import { FONT_SIZES, FONT_WEIGHTS } from '@/src/utils/responsive';
+import { moderateScale, verticalScale } from "@/src/utils/responsive";
 import { StyleSheet } from "react-native";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
-} from "react-native-responsive-screen";
+} from "@/src/utils/responsive";
 import { theme, getColor, getSpacing, getTypography, getBorderRadius, getShadow } from "@/src/styles/theme";
 
 export const styles = StyleSheet.create({

@@ -3,13 +3,14 @@ import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import {
-  cacheDocument,
+  cacheDocumentReactive,
   getCachedDocument,
   getCachedDocumentsByForm,
-  updateCachedDocumentStatus,
-  removeCachedDocument,
+  updateCachedDocumentStatusReactive,
+  removeCachedDocumentReactive,
   clearFormCache,
   base64ToBlob,
+  smartCacheCleanup,
   type CachedDocument,
 } from '../utils/documentCache';
 
@@ -21,8 +22,9 @@ interface UploadState {
 }
 
 interface DocumentUploadResult {
-  requirementId: Id<"documentRequirements">;
+  requirementId: Id<"documentTypes">;
   fieldName: string;
+  fieldIdentifier: string; // Add this for API compatibility
   storageId: Id<"_storage">;
   fileName: string;
   fileType: string;
@@ -33,7 +35,7 @@ interface DocumentUploadResult {
   remarks?: string | undefined;
 }
 
-export const useDocumentUpload = (formId: Id<"forms">) => {
+export const useDocumentUpload = (applicationId: Id<"applications">) => {
   const [uploadStates, setUploadStates] = useState<Record<string, UploadState>>({});
   const [cachedDocuments, setCachedDocuments] = useState<CachedDocument[]>([]);
   
@@ -42,10 +44,13 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
   const updateDocumentField = useMutation(api.requirements.updateDocumentField.updateDocumentFieldMutation);
   const deleteDocument = useMutation(api.requirements.removeDocument.deleteDocumentMutation);
 
-  // Load cached documents on mount
+  // Load cached documents on mount with smart cleanup
   useEffect(() => {
     const loadCachedDocuments = () => {
-      const cached = getCachedDocumentsByForm(formId);
+      // Perform smart cleanup first
+      smartCacheCleanup();
+      
+      const cached = getCachedDocumentsByForm(applicationId);
       setCachedDocuments(cached);
       
       // Initialize upload states for cached documents
@@ -62,7 +67,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
     };
     
     loadCachedDocuments();
-  }, [formId]);
+  }, [applicationId]);
 
   const validateFile = useCallback((file: any, fieldName: string) => {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
@@ -152,9 +157,9 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       const { storageId } = await uploadResponse.json();
 
       // Save document metadata
-      const result = await uploadDocument({
-        formId,
-        fieldName,
+      const uploadResult = await uploadDocument({
+        applicationId,
+        fieldIdentifier: fieldName,
         storageId,
         fileName: file.name,
         fileType: file.type,
@@ -169,6 +174,21 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
         success: true
       });
 
+      // Map API response to DocumentUploadResult interface
+      const result: DocumentUploadResult = {
+        requirementId: uploadResult.requirementId,
+        fieldName: fieldName, // Use the original fieldName parameter
+        fieldIdentifier: uploadResult.fieldIdentifier,
+        storageId: uploadResult.storageId,
+        fileName: uploadResult.fileName,
+        fileType: uploadResult.fileType,
+        fileSize: uploadResult.fileSize,
+        status: uploadResult.status,
+        reviewBy: uploadResult.reviewBy,
+        reviewAt: uploadResult.reviewAt,
+        remarks: uploadResult.remarks
+      };
+
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
@@ -180,7 +200,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       });
       throw error;
     }
-  }, [formId, generateUploadUrl, uploadDocument, validateFile, setUploadState]);
+  }, [applicationId, generateUploadUrl, uploadDocument, validateFile, setUploadState]);
 
   const replaceFile = useCallback(async (
     file: any,
@@ -242,7 +262,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
 
       // Update document field
       const result = await updateDocumentField({
-        formId,
+        applicationId,
         fieldName,
         storageId,
         fileName: file.name,
@@ -269,7 +289,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       });
       throw error;
     }
-  }, [formId, generateUploadUrl, updateDocumentField, validateFile, setUploadState]);
+  }, [applicationId, generateUploadUrl, updateDocumentField, validateFile, setUploadState]);
 
   const removeFile = useCallback(async (
     fieldName: string,
@@ -277,7 +297,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
   ): Promise<void> => {
     try {
       await deleteDocument({
-        formId,
+        applicationId,
         fieldName,
         storageId,
       });
@@ -298,7 +318,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       });
       throw error;
     }
-  }, [formId, deleteDocument, setUploadState]);
+  }, [applicationId, deleteDocument, setUploadState]);
 
   const retryUpload = useCallback(async (
     file: any,
@@ -337,7 +357,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
     try {
       validateFile(file, fieldName);
       
-      const cachedDoc = await cacheDocument(formId, fieldName, {
+      const cachedDoc = await cacheDocumentReactive(applicationId, fieldName, {
         uri: file.uri,
         name: file.name || `document_${fieldName}.${file.type?.split('/')[1] || 'jpg'}`,
         type: file.type || 'image/jpeg',
@@ -368,23 +388,23 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       });
       throw error;
     }
-  }, [formId, validateFile, setUploadState]);
+  }, [applicationId, validateFile, setUploadState]);
   
   /**
    * Upload a cached document to Convex
    */
   const uploadCachedDocument = useCallback(async (
     fieldName: string,
-    documentRequirementId?: Id<"documentRequirements">
+    documentRequirementId?: Id<"documentTypes">
   ): Promise<DocumentUploadResult> => {
     try {
-      const cachedDoc = getCachedDocument(formId, fieldName);
+      const cachedDoc = getCachedDocument(applicationId, fieldName);
       if (!cachedDoc) {
         throw new Error('No cached document found');
       }
       
       // Update status to uploading
-      updateCachedDocumentStatus(formId, fieldName, { 
+      updateCachedDocumentStatus(applicationId, fieldName, { 
         status: 'uploading',
         error: null 
       });
@@ -439,17 +459,19 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       const { storageId } = await uploadResponse.json();
       
       // Save document metadata to Convex using the new formDocuments model
-      const result = {
-        requirementId: documentRequirementId as Id<"documentRequirements">,
+      const result: DocumentUploadResult = {
+        requirementId: documentRequirementId as Id<"documentTypes">,
         fieldName,
+        fieldIdentifier: fieldName, // Map fieldName to fieldIdentifier for consistency
         storageId,
         fileName: cachedDoc.fileName,
         fileType: cachedDoc.fileType,
         fileSize: cachedDoc.fileSize,
+        status: "Pending", // Default status
       };
       
-      // Update cached document with storage ID
-      updateCachedDocumentStatus(formId, fieldName, {
+      // Update cached document with storage ID using reactive updates
+      updateCachedDocumentStatusReactive(applicationId, fieldName, {
         status: 'uploaded',
         convexStorageId: storageId,
         error: null
@@ -468,11 +490,11 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
       
-      // Update cached document status
-      updateCachedDocumentStatus(formId, fieldName, {
+      // Update cached document status with reactive updates
+      updateCachedDocumentStatusReactive(applicationId, fieldName, {
         status: 'failed',
         error: errorMessage,
-        retryCount: (getCachedDocument(formId, fieldName)?.retryCount || 0) + 1
+        retryCount: (getCachedDocument(applicationId, fieldName)?.retryCount || 0) + 1
       });
       
       setUploadState(fieldName, {
@@ -484,7 +506,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       
       throw error;
     }
-  }, [formId, generateUploadUrl, setUploadState]);
+  }, [applicationId, generateUploadUrl, setUploadState]);
   
   /**
    * Batch upload all cached documents for the form
@@ -493,7 +515,7 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
     successful: DocumentUploadResult[];
     failed: { fieldName: string; error: string }[];
   }> => {
-    const cachedDocs = getCachedDocumentsByForm(formId);
+    const cachedDocs = getCachedDocumentsByForm(applicationId);
     const toUpload = cachedDocs.filter(doc => doc.status === 'cached' || doc.status === 'failed');
     
     const successful: DocumentUploadResult[] = [];
@@ -512,13 +534,13 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
     }
     
     return { successful, failed };
-  }, [formId, uploadCachedDocument]);
+  }, [applicationId, uploadCachedDocument]);
   
   /**
    * Remove a cached document
    */
   const removeCachedFile = useCallback((fieldName: string): void => {
-    removeCachedDocument(formId, fieldName);
+    removeCachedDocumentReactive(applicationId, fieldName);
     
     // Update local state
     setCachedDocuments(prev => prev.filter(doc => doc.fieldName !== fieldName));
@@ -529,41 +551,41 @@ export const useDocumentUpload = (formId: Id<"forms">) => {
       delete newState[fieldName];
       return newState;
     });
-  }, [formId]);
+  }, [applicationId]);
   
   /**
    * Clear all cached documents for the form
    */
   const clearAllCachedDocuments = useCallback((): void => {
-    clearFormCache(formId);
+    clearFormCache(applicationId);
     setCachedDocuments([]);
     setUploadStates({});
-  }, [formId]);
+  }, [applicationId]);
   
   /**
    * Get a cached document by field name
    */
   const getCachedFile = useCallback((fieldName: string): CachedDocument | null => {
-    return getCachedDocument(formId, fieldName);
-  }, [formId]);
+    return getCachedDocument(applicationId, fieldName);
+  }, [applicationId]);
   
   /**
    * Retry uploading a failed document
    */
   const retryCachedUpload = useCallback(async (fieldName: string): Promise<DocumentUploadResult> => {
-    const cachedDoc = getCachedDocument(formId, fieldName);
+    const cachedDoc = getCachedDocument(applicationId, fieldName);
     if (!cachedDoc) {
       throw new Error('No cached document found to retry');
     }
     
     // Reset error state
-    updateCachedDocumentStatus(formId, fieldName, {
+    updateCachedDocumentStatus(applicationId, fieldName, {
       status: 'cached',
       error: null
     });
     
     return uploadCachedDocument(fieldName);
-  }, [formId, uploadCachedDocument]);
+  }, [applicationId, uploadCachedDocument]);
 
   return {
     // Original functions

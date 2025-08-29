@@ -3,7 +3,7 @@ import { mutation } from "../_generated/server";
 
 export const updateJobCategoryMutation = mutation({
   args: {
-    categoryId: v.id("jobCategory"),
+    categoryId: v.id("jobCategories"),
     name: v.optional(v.string()),
     colorCode: v.optional(v.string()),
     requireOrientation: v.optional(v.boolean()),

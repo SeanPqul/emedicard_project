@@ -5,8 +5,8 @@ import { v } from "convex/values";
 export const adminBatchReviewDocumentsMutation = mutation({
   args: {
     reviews: v.array(v.object({
-      documentId: v.id("formDocuments"),
-      status: v.union(v.literal("Pending"), v.literal("Approved"), v.literal("Rejected")),
+      documentId: v.id("documentUploads"),
+      reviewStatus: v.union(v.literal("Pending"), v.literal("Approved"), v.literal("Rejected")),
       remarks: v.optional(v.string()),
     })),
   },
@@ -38,10 +38,10 @@ export const adminBatchReviewDocumentsMutation = mutation({
         }
 
         await ctx.db.patch(review.documentId, {
-          status: review.status,
-          remarks: review.remarks,
-          reviewBy: currentUser._id,
-          reviewAt: Date.now(),
+          reviewStatus: review.reviewStatus,
+          adminRemarks: review.remarks,
+          reviewedBy: currentUser._id,
+          reviewedAt: Date.now(),
         });
 
         reviewedDocumentIds.push(review.documentId);

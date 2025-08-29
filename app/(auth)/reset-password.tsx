@@ -1,6 +1,6 @@
 // src/screens/auth-reset-password.tsx
 
-import { moderateScale } from '../../src/utils/designSystem';
+import { moderateScale } from '../../src/utils/responsive';
 import { layoutPatterns } from '../../src/styles/theme';
 import { useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';

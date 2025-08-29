@@ -126,8 +126,8 @@ export default function VerificationPage() {
   const handleContinue = async () => {
     if (sessionId && setActive) {
       await setActive({ session: sessionId });
-      // The router.replace('/') or navigation to the main app will be handled
-      // by the Clerk provider listener, which is the standard setup.
+      // Explicitly redirect to applicant dashboard after verification
+      router.replace('/(tabs)/index');
     }
   };
 

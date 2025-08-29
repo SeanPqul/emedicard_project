@@ -12,8 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomButton } from '../ui/Button';
 import { CustomTextInput } from '../CustomTextInput';
 import { ErrorState } from '../ErrorState';
-import { SkeletonLoader, SkeletonGroup } from '../SkeletonLoader';
-import { LoadingSpinner } from '../LoadingSpinner';
+import { LoadingSpinner, SkeletonLoader } from '../LoadingSpinner';
 
 // Hooks
 import { 
@@ -78,9 +77,9 @@ export const ImprovedPaymentScreen: React.FC<ImprovedPaymentScreenProps> = ({
     if (payment.isLoading && !payment.method) {
       return (
         <View style={styles.skeletonContainer}>
-          <SkeletonLoader height={20} width="40%" style={{ marginBottom: 8 }} />
+          <SkeletonLoader count={1} height={20} style={{ marginBottom: 8 }} />
           <SkeletonGroup count={4}>
-            <SkeletonLoader height={60} variant="rectangular" />
+            <SkeletonLoader count={1} height={60} />
           </SkeletonGroup>
         </View>
       );
@@ -131,8 +130,8 @@ export const ImprovedPaymentScreen: React.FC<ImprovedPaymentScreenProps> = ({
     if (payment.isLoading && !payment.method) {
       return (
         <View style={styles.skeletonContainer}>
-          <SkeletonLoader height={20} width="40%" style={{ marginBottom: 8 }} />
-          <SkeletonLoader height={50} variant="rectangular" />
+          <SkeletonLoader count={1} height={20} style={{ marginBottom: 8 }} />
+          <SkeletonLoader count={1} height={50} />
         </View>
       );
     }
@@ -159,7 +158,7 @@ export const ImprovedPaymentScreen: React.FC<ImprovedPaymentScreenProps> = ({
       return (
         <View style={styles.skeletonContainer}>
           <SkeletonGroup count={2}>
-            <SkeletonLoader height={48} variant="rectangular" />
+            <SkeletonLoader count={1} height={48} />
           </SkeletonGroup>
         </View>
       );

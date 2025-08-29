@@ -17,7 +17,14 @@ export default function InspectorLayout() {
       }}
     >
       <Stack.Screen 
-        name="reviewApplications" 
+        name="inspector-dashboard" 
+        options={{ 
+          title: 'Inspector Dashboard',
+          headerShown: true,
+        }} 
+      />
+      <Stack.Screen 
+        name="review-applications" 
         options={{ 
           title: 'Review Applications',
           headerShown: true,

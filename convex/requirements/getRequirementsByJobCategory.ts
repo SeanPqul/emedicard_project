@@ -2,7 +2,7 @@ import { query } from "../_generated/server";
 import { v } from "convex/values";
 
 export const getRequirementsByJobCategoryQuery = query({
-  args: { jobCategoryId: v.id("jobCategory") },
+  args: { jobCategoryId: v.id("jobCategories") },
   handler: async (ctx, args) => {
     const jobCategory = await ctx.db.get(args.jobCategoryId);
     if (!jobCategory) {
@@ -11,24 +11,24 @@ export const getRequirementsByJobCategoryQuery = query({
 
     // Try to get requirements from database first
     const jobCategoryRequirements = await ctx.db
-      .query("jobCategoryRequirements")
-      .withIndex("by_category", (q) => q.eq("jobCategoryId", args.jobCategoryId))
+      .query("jobCategoryDocuments")
+      .withIndex("by_job_category", (q) => q.eq("jobCategoryId", args.jobCategoryId))
       .collect();
 
     if (jobCategoryRequirements.length > 0) {
       // Get detailed document requirements for each junction record
       const transformedRequirements = await Promise.all(
         jobCategoryRequirements.map(async (junctionRecord) => {
-          const docRequirement = await ctx.db.get(junctionRecord.documentRequirementId);
+          const docRequirement = await ctx.db.get(junctionRecord.documentTypeId);
           if (!docRequirement) {
-            throw new Error(`Document requirement ${junctionRecord.documentRequirementId} not found`);
+            throw new Error(`Document requirement ${junctionRecord.documentTypeId} not found`);
           }
           return {
             name: docRequirement.name,
             description: docRequirement.description,
             icon: docRequirement.icon,
-            required: junctionRecord.required, // From jobCategoryRequirements
-            fieldName: docRequirement.fieldName
+            required: junctionRecord.isRequired, // From jobCategoryDocuments
+            fieldName: docRequirement.fieldIdentifier
           };
         })
       );

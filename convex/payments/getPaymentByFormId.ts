@@ -1,12 +1,13 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 
-export const getPaymentByFormIdQuery = query({
-  args: { formId: v.id("forms") },
-  handler: async (ctx, { formId }) => {
+export const getPaymentByApplicationIdQuery = query({
+  args: { applicationId: v.id("applications") },
+  handler: async (ctx, { applicationId }) => {
     return await ctx.db
       .query("payments")
-      .withIndex("by_form", (q) => q.eq("formId", formId))
+      .withIndex("by_application", (q) => q.eq("applicationId", applicationId))
       .unique();
   },
 });
+

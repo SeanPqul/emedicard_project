@@ -15,24 +15,24 @@ export const getUserPaymentsQuery = query({
     
     // Get all user forms
     const userForms = await ctx.db
-      .query("forms")
+      .query("applications")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
       
     if (userForms.length === 0) return [];
     
-    // Aggregate payments with form details server-side
-    const paymentsWithFormDetails = await Promise.all(
-      userForms.map(async (form) => {
+    // Aggregate payments with application details server-side
+    const paymentsWithApplicationDetails = await Promise.all(
+      userForms.map(async (application) => {
         const payment = await ctx.db
           .query("payments")
-          .withIndex("by_form", (q) => q.eq("formId", form._id))
+          .withIndex("by_application", (q) => q.eq("applicationId", application._id))
           .unique();
           
         if (!payment) return null;
         
         // Get job category for context (minimal fields)
-        const jobCategory = await ctx.db.get(form.jobCategory);
+        const jobCategory = await ctx.db.get(application.jobCategoryId);
         
         // Return minimal payload with aggregated data
         return {
@@ -41,15 +41,15 @@ export const getUserPaymentsQuery = query({
           amount: payment.amount,
           serviceFee: payment.serviceFee,
           netAmount: payment.netAmount,
-          method: payment.method,
+          paymentMethod: payment.paymentMethod,
           referenceNumber: payment.referenceNumber,
-          status: payment.status,
+          paymentStatus: payment.paymentStatus,
           updatedAt: payment.updatedAt,
-          form: {
-            _id: form._id,
-            applicationType: form.applicationType,
-            position: form.position,
-            organization: form.organization,
+          application: {
+            _id: application._id,
+            applicationType: application.applicationType,
+            position: application.position,
+            organization: application.organization,
           },
           jobCategory: jobCategory ? {
             _id: jobCategory._id,
@@ -60,7 +60,7 @@ export const getUserPaymentsQuery = query({
       })
     );
     
-    return paymentsWithFormDetails.filter(Boolean);
+    return paymentsWithApplicationDetails.filter(Boolean);
   },
 });
 

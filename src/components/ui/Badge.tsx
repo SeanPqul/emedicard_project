@@ -9,7 +9,6 @@ import { View, Text, ViewStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { badgeVariants, badgeTextVariants, getSpacing } from '../../styles';
 import { BadgeStyleProps, BaseComponentProps } from '../../types/design-system';
-import { Row } from '../layout';
 
 interface BadgeProps extends BaseComponentProps, BadgeStyleProps {
   text: string;
@@ -81,13 +80,13 @@ export const Badge: React.FC<BadgeProps> = React.memo(({
     }
 
     return (
-      <Row spacing="xs" align="center" justify="center">
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: getSpacing('xs') }}>
         {renderIcon('left')}
         <Text style={textStyle}>
           {text}
         </Text>
         {renderIcon('right')}
-      </Row>
+      </View>
     );
   };
 

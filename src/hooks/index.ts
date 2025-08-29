@@ -14,13 +14,11 @@ export { useVerification } from './useVerification';
 export { useStorage } from './useStorage';
 
 // Feature Hooks
-export { useDashboard } from './useDashboard';
-export { useOptimizedDashboard } from './useOptimizedDashboard';
+export { useOptimizedDashboard as useDashboard } from './useOptimizedDashboard';
 export { useDocumentUpload } from './useDocumentUpload';
 export { usePaymentFlow } from './usePaymentFlow';
 
 // Utility Hooks
 export { useDeepLink } from './useDeepLink';
-export { useAnimation } from './useAnimation';
 export { useNetwork } from './useNetwork';
 export { useRoleBasedNavigation } from './useRoleBasedNavigation';

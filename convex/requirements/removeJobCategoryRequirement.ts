@@ -4,7 +4,7 @@ import { mutation } from "../_generated/server";
 // Delete a link between a job category and a document requirement
 export const deleteJobCategoryRequirementMutation = mutation({
   args: {
-    requirementId: v.id("jobCategoryRequirements")
+    requirementId: v.id("jobCategoryDocuments")
   },
   handler: async (ctx, args) => {
     const { requirementId } = args;

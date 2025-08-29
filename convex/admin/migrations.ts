@@ -60,26 +60,26 @@ export const setUserRole = mutation({
   }
 });
 
-// Migration to add status field to existing forms
-export const migrateFormsAddStatus = mutation({
+// Migration to add applicationStatus field to existing applications
+export const migrateApplicationsAddStatus = mutation({
   args: {},
   handler: async (ctx) => {
-    const forms = await ctx.db.query("forms").collect();
+    const applications = await ctx.db.query("applications").collect();
     
     let migratedCount = 0;
     
-    for (const form of forms) {
-      // If form doesn't have a status field, add it with default 'Submitted'
-      if (!form.status) {
-        await ctx.db.patch(form._id, { status: "Submitted" });
+    for (const application of applications) {
+      // If application doesn't have an applicationStatus field, add it with default 'Submitted'
+      if (!application.applicationStatus) {
+        await ctx.db.patch(application._id, { applicationStatus: "Submitted" });
         migratedCount++;
       }
     }
     
     return {
       success: true,
-      message: `Migrated ${migratedCount} forms to have status field`,
-      totalForms: forms.length,
+      message: `Migrated ${migratedCount} applications to have applicationStatus field`,
+      totalApplications: applications.length,
       migratedCount
     };
   }
@@ -89,7 +89,7 @@ export const migrateFormsAddStatus = mutation({
 export const migrateJobCategoryRequireOrientation = mutation({
   args: {},
   handler: async (ctx) => {
-    const jobCategories = await ctx.db.query("jobCategory").collect();
+    const jobCategories = await ctx.db.query("jobCategories").collect();
     
     let migratedCount = 0;
     
@@ -128,7 +128,7 @@ export const migrateNotificationsAddTitle = mutation({
       // If notification doesn't have a title field, add a default one based on type
       if (!notification.title) {
         let title = "Notification";
-        switch (notification.type) {
+        switch (notification.notificationType) {
           case "PaymentReceived":
             title = "Payment Update";
             break;
@@ -168,14 +168,14 @@ export const cleanupDatabase = mutation({
   handler: async (ctx) => {
     console.log("🧹 Cleaning up database for schema compliance...");
     
-    // Get all forms and check for any other schema issues
-    const forms = await ctx.db.query("forms").collect();
-    const formDocuments = await ctx.db.query("formDocuments").collect();
+    // Get all applications and check for any other schema issues
+    const applications = await ctx.db.query("applications").collect();
+    const documentUploads = await ctx.db.query("documentUploads").collect();
     
     let deletedDocs = 0;
     
-    // Remove any formDocuments that might have schema issues
-    for (const doc of formDocuments) {
+    // Remove any documentUploads that might have schema issues
+    for (const doc of documentUploads) {
       // Check if document has any extra fields that don't match schema
       if ((doc as any).type !== undefined) {
         await ctx.db.delete(doc._id);
@@ -183,11 +183,11 @@ export const cleanupDatabase = mutation({
       }
     }
     
-    console.log(`🗑️  Removed ${deletedDocs} problematic form documents`);
+    console.log(`🗑️  Removed ${deletedDocs} problematic document uploads`);
     
     return {
       message: "Database cleanup completed",
-      formsCount: forms.length,
+      applicationsCount: applications.length,
       deletedDocuments: deletedDocs
     };
   },
@@ -205,11 +205,11 @@ export const resetDatabase = mutation({
       "healthCards", 
       "orientations",
       "payments",
-      "formDocuments",
-      "forms",
-      "jobCategoryRequirements",
-      "documentRequirements",
-      "jobCategory",
+      "documentUploads",
+      "applications",
+      "jobCategoryDocuments",
+      "documentTypes",
+      "jobCategories",
       "notifications"
     ];
     

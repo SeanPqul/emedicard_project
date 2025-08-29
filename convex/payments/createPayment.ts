@@ -3,11 +3,11 @@ import { mutation } from "../_generated/server";
 
 export const createPaymentMutation = mutation({
   args: {
-    formId: v.id("forms"),
+    applicationId: v.id("applications"),
     amount: v.number(),
     serviceFee: v.number(),
     netAmount: v.number(),
-    method: v.union(
+    paymentMethod: v.union(
       v.literal("Gcash"),
       v.literal("Maya"),
       v.literal("BaranggayHall"),
@@ -18,20 +18,20 @@ export const createPaymentMutation = mutation({
   },
   handler: async (ctx, args) => {
     try {
-      // Validate form exists
-      const form = await ctx.db.get(args.formId);
-      if (!form) {
-        throw new Error("Form not found");
+      // Validate application exists
+      const application = await ctx.db.get(args.applicationId);
+      if (!application) {
+        throw new Error("Application not found");
       }
 
-      // Check if payment already exists for this form
+      // Check if payment already exists for this application
       const existingPayment = await ctx.db
         .query("payments")
-        .withIndex("by_form", (q) => q.eq("formId", args.formId))
+        .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
         .unique();
 
       if (existingPayment) {
-        throw new Error("Payment already exists for this form");
+        throw new Error("Payment already exists for this application");
       }
 
       // Validate payment amounts
@@ -44,26 +44,26 @@ export const createPaymentMutation = mutation({
       }
 
       const paymentId = await ctx.db.insert("payments", {
-        formId: args.formId,
+        applicationId: args.applicationId,
         amount: args.amount,
         serviceFee: args.serviceFee,
         netAmount: args.netAmount,
-        method: args.method,
+        paymentMethod: args.paymentMethod,
         referenceNumber: args.referenceNumber,
-        receiptId: args.receiptId,
-        status: "Pending",
+        receiptStorageId: args.receiptId,
+        paymentStatus: "Pending",
       });
 
       // Get user details for notification
-      const user = await ctx.db.get(form.userId);
+      const user = await ctx.db.get(application.userId);
       if (user) {
         await ctx.db.insert("notifications", {
           userId: user._id,
-          formsId: args.formId,
-          type: "PaymentReceived",
+          applicationId: args.applicationId,
+          notificationType: "PaymentReceived",
           title: "Payment Received",
-          message: `Payment submission received for ₱${args.netAmount} via ${args.method}. Reference: ${args.referenceNumber}`,
-          read: false,
+          message: `Payment submission received for ₱${args.netAmount} via ${args.paymentMethod}. Reference: ${args.referenceNumber}`,
+          isRead: false,
         });
       }
 

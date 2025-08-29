@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useHealthCardByToken } from './useHealthCard';
 import { ErrorState } from '../../components/ErrorState';
-import { SkeletonLoader, SkeletonGroup } from '../../components/animated/SkeletonLoader';
+import { SkeletonLoader } from '../../components/LoadingSpinner';
 import { getColor, getTypography, getSpacing, getBorderRadius } from '../../styles/theme';
 
 interface HealthCardExampleProps {
@@ -29,20 +29,20 @@ export const HealthCardExample: React.FC<HealthCardExampleProps> = ({ token }) =
         <View style={styles.skeletonContainer}>
           {/* Health card skeleton */}
           <View style={styles.cardSkeleton}>
-            <SkeletonLoader variant="rectangular" height={200} style={styles.cardImageSkeleton} />
+            <SkeletonLoader count={1} height={200} style={styles.cardImageSkeleton} />
             
             <View style={styles.cardContentSkeleton}>
-              <SkeletonLoader variant="text" height={24} width="60%" />
-              <SkeletonLoader variant="text" height={18} width="40%" style={{ marginTop: 8 }} />
+              <SkeletonLoader count={1} height={24} />
+              <SkeletonLoader count={1} height={18} style={{ marginTop: 8 }} />
               
               <View style={styles.detailsSection}>
                 <SkeletonGroup count={4}>
-                  <SkeletonLoader variant="text" height={16} width="100%" />
+                  <SkeletonLoader count={1} height={16} />
                 </SkeletonGroup>
               </View>
               
               <View style={styles.statusSection}>
-                <SkeletonLoader variant="rectangular" height={32} width="30%" />
+                <SkeletonLoader count={1} height={32} />
               </View>
             </View>
           </View>

@@ -14,7 +14,7 @@ import {
 import { styles } from '../../src/styles/screens/tabs-application';
 import { EmptyState } from '../../src/components';
 import { useApplications } from '../../src/hooks/useApplications';
-import { Application } from '../../src/types';
+import { Application } from '../../src/types/domain/application';
 
 type FilterStatus = 'All' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
 type SortOption = 'Date' | 'Status' | 'Category';
@@ -57,6 +57,9 @@ export default function Applications() {
   const [applications, setApplications] = useState<ApplicationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // API hooks
+  const applicationHooks = useApplications();
+
   // Load applications
   useEffect(() => {
     loadApplications();
@@ -65,8 +68,8 @@ export default function Applications() {
   const loadApplications = async () => {
     try {
       setLoading(true);
-      const data = await forms.getUserApplications();
-      setApplications(data || []);
+      // Use data from hooks
+      setApplications(applicationHooks.data.userApplications || []);
     } catch (error) {
       console.error('Error loading applications:', error);
       Alert.alert('Error', 'Failed to load applications');

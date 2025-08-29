@@ -1,10 +1,10 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
-// Delete a document using formDocuments schema (uses the client interface)
+// Delete a document using applications schema (uses the client interface)
 export const deleteDocumentMutation = mutation({
   args: {
-    formId: v.id("forms"),
+    applicationId: v.id("applications"),
     fieldName: v.string(),
     storageId: v.id("_storage"),
   },
@@ -14,10 +14,10 @@ export const deleteDocumentMutation = mutation({
       throw new Error("Not authenticated");
     }
 
-    // Verify form exists and user owns it
-    const form = await ctx.db.get(args.formId);
-    if (!form) {
-      throw new Error("Form not found");
+    // Verify application exists and user owns it
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) {
+      throw new Error("Application not found");
     }
 
     const user = await ctx.db
@@ -25,14 +25,14 @@ export const deleteDocumentMutation = mutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (!user || form.userId !== user._id) {
+    if (!user || application.userId !== user._id) {
       throw new Error("Not authorized to delete this document");
     }
 
     // Find the document requirement by fieldName
     const docRequirement = await ctx.db
-      .query("documentRequirements")
-      .withIndex("by_field_name", (q) => q.eq("fieldName", args.fieldName))
+      .query("documentTypes")
+      .withIndex("by_field_identifier", (q) => q.eq("fieldIdentifier", args.fieldName))
       .unique();
     
     if (!docRequirement) {
@@ -41,8 +41,8 @@ export const deleteDocumentMutation = mutation({
 
     // Find the document to delete
     const document = await ctx.db
-      .query("formDocuments")
-      .withIndex("by_form_type", (q) => q.eq("formId", args.formId).eq("documentRequirementId", docRequirement._id))
+      .query("documentUploads")
+      .withIndex("by_application_document", (q) => q.eq("applicationId", args.applicationId).eq("documentTypeId", docRequirement._id))
       .unique();
 
     if (!document) {
@@ -50,17 +50,17 @@ export const deleteDocumentMutation = mutation({
     }
 
     // Verify the storage ID matches (security check)
-    if (document.fileId !== args.storageId) {
+    if (document.storageFileId !== args.storageId) {
       throw new Error("Storage ID mismatch - unauthorized deletion attempt");
     }
 
     // Check if document can be deleted (business logic)
-    if (document.status === "Approved") {
+    if (document.reviewStatus === "Approved") {
       throw new Error("Cannot delete approved documents. Please contact administrator.");
     }
 
     // Delete the file from storage
-    await ctx.storage.delete(document.fileId);
+    await ctx.storage.delete(document.storageFileId);
 
     // Delete the document record
     await ctx.db.delete(document._id);

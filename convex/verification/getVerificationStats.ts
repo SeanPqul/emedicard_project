@@ -6,7 +6,7 @@ export const getVerificationStatsQuery = query({
   handler: async (ctx, args) => {
     const logs = await ctx.db
       .query("verificationLogs")
-      .withIndex("by_healthcard", (q) => q.eq("healthCardId", args.healthCardId))
+      .withIndex("by_health_card", (q) => q.eq("healthCardId", args.healthCardId))
       .collect();
 
     const totalScans = logs.length;

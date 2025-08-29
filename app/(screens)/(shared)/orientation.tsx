@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, RefreshControl } from 'react-native';
-import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { CustomButton, EmptyState } from '../../../src/components';
-import { Id } from '../../../convex/_generated/dataModel';
+import React, { useState } from 'react';
+import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-// useOrientations hook removed - implement direct API calls if needed
+import { Id } from '../../../convex/_generated/dataModel';
+import { CustomButton, EmptyState } from '../../../src/components';
+import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
+import { styles } from '../../../src/styles/screens/shared-orientation';
+import { getColor } from '../../../src/styles/theme';
+import {
+  formatOrientationDate,
+  formatTime,
+  getOrientationStatus,
+  getOrientationStatusColor,
+  getStatusText
+} from '../../../src/utils';
+// TODO: Implement useOrientations hook or replace with proper API calls
 
 export default function OrientationScreen() {
   const { formId } = useLocalSearchParams<{ formId: string }>();
@@ -14,16 +23,20 @@ export default function OrientationScreen() {
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   
-  // Use our API hook instead of direct Convex calls
-  const {
-    orientations,
-    orientationForForm,
-    updateCheckIn,
-    updateCheckOut,
-    completeOrientation,
-    isLoading,
-    isLoadingFormOrientation
-  } = useOrientations(formId);
+  // TODO: Replace with proper API hook implementation
+  const orientations = []; // Placeholder - implement useOrientations hook
+  const isLoading = false;
+  
+  // Placeholder functions - implement with proper API calls
+  const updateCheckIn = async (data: any) => {
+    console.log('Check-in:', data);
+    // TODO: Implement actual check-in API call
+  };
+  
+  const updateCheckOut = async (data: any) => {
+    console.log('Check-out:', data);
+    // TODO: Implement actual check-out API call
+  };
   
   const onRefresh = async () => {
     setRefreshing(true);
@@ -65,67 +78,10 @@ export default function OrientationScreen() {
     }
   };
   
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-  
-  const formatTime = (timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-  
-  const getOrientationStatus = (orientation: any) => {
-    if (orientation.checkInTime && orientation.checkOutTime) {
-      return 'completed';
-    } else if (orientation.checkInTime) {
-      return 'in_progress';
-    } else if (orientation.scheduleAt < Date.now()) {
-      return 'missed';
-    } else {
-      return 'scheduled';
-    }
-  };
-  
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return '#10B981';
-      case 'in_progress':
-        return '#F59E0B';
-      case 'missed':
-        return '#EF4444';
-      case 'scheduled':
-        return '#3B82F6';
-      default:
-        return '#6B7280';
-    }
-  };
-  
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'Completed';
-      case 'in_progress':
-        return 'In Progress';
-      case 'missed':
-        return 'Missed';
-      case 'scheduled':
-        return 'Scheduled';
-      default:
-        return 'Unknown';
-    }
-  };
   
   const renderOrientationCard = (orientation: any) => {
     const status = getOrientationStatus(orientation);
-    const statusColor = getStatusColor(status);
+    const statusColor = getOrientationStatusColor(status);
     const statusText = getStatusText(status);
     
     return (
@@ -141,7 +97,7 @@ export default function OrientationScreen() {
             </View>
             <View style={styles.cardHeaderInfo}>
               <Text style={styles.cardTitle}>{orientation.jobCategory?.name} Orientation</Text>
-              <Text style={styles.cardSubtitle}>{formatDate(orientation.scheduleAt)}</Text>
+              <Text style={styles.cardSubtitle}>{formatOrientationDate(orientation.scheduleAt)}</Text>
             </View>
           </View>
           
@@ -153,20 +109,20 @@ export default function OrientationScreen() {
         <View style={styles.cardContent}>
           <View style={styles.scheduleInfo}>
             <View style={styles.scheduleItem}>
-              <Ionicons name="time-outline" size={16} color="#6B7280" />
+              <Ionicons name="time-outline" size={16} color={getColor('text.secondary')} />
               <Text style={styles.scheduleText}>Scheduled: {formatTime(orientation.scheduleAt)}</Text>
             </View>
             
             {orientation.checkInTime && (
               <View style={styles.scheduleItem}>
-                <Ionicons name="checkmark-circle-outline" size={16} color="#10B981" />
+                <Ionicons name="checkmark-circle-outline" size={16} color={getColor('success.main')} />
                 <Text style={styles.scheduleText}>Checked In: {formatTime(orientation.checkInTime)}</Text>
               </View>
             )}
             
             {orientation.checkOutTime && (
               <View style={styles.scheduleItem}>
-                <Ionicons name="checkmark-done-circle-outline" size={16} color="#10B981" />
+                <Ionicons name="checkmark-done-circle-outline" size={16} color={getColor('success.main')} />
                 <Text style={styles.scheduleText}>Checked Out: {formatTime(orientation.checkOutTime)}</Text>
               </View>
             )}
@@ -212,7 +168,7 @@ export default function OrientationScreen() {
             
             {status === 'completed' && (
               <View style={styles.completionBadge}>
-                <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                <Ionicons name="checkmark-circle" size={20} color={getColor('success.main')} />
                 <Text style={styles.completionText}>Orientation Completed</Text>
               </View>
             )}
@@ -237,7 +193,7 @@ export default function OrientationScreen() {
     <BaseScreenLayout>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#212529" />
+          <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Orientation</Text>
         <View style={styles.headerSpacer} />
@@ -260,8 +216,8 @@ export default function OrientationScreen() {
             icon="calendar-outline"
             title="No Orientations Scheduled"
             subtitle="You don't have any orientations scheduled at the moment. Orientations are required for food handler positions."
-            buttonText="View Applications"
-            onButtonPress={() => router.push('/(tabs)/application')}
+            actionText="View Applications"
+            onActionPress={() => router.push('/(tabs)/application')}
           />
         )}
         
@@ -271,22 +227,22 @@ export default function OrientationScreen() {
           
           <View style={styles.infoCard}>
             <View style={styles.infoItem}>
-              <Ionicons name="information-circle-outline" size={20} color="#3B82F6" />
+              <Ionicons name="information-circle-outline" size={20} color={getColor('primary.main')} />
               <Text style={styles.infoText}>Orientation is mandatory for all food handler positions</Text>
             </View>
             
             <View style={styles.infoItem}>
-              <Ionicons name="time-outline" size={20} color="#3B82F6" />
+              <Ionicons name="time-outline" size={20} color={getColor('primary.main')} />
               <Text style={styles.infoText}>Sessions typically last 2-3 hours</Text>
             </View>
             
             <View style={styles.infoItem}>
-              <Ionicons name="qr-code-outline" size={20} color="#3B82F6" />
+              <Ionicons name="qr-code-outline" size={20} color={getColor('primary.main')} />
               <Text style={styles.infoText}>Use QR code to check in and out</Text>
             </View>
             
             <View style={styles.infoItem}>
-              <Ionicons name="document-text-outline" size={20} color="#3B82F6" />
+              <Ionicons name="document-text-outline" size={20} color={getColor('primary.main')} />
               <Text style={styles.infoText}>Completion certificate issued after successful attendance</Text>
             </View>
           </View>
@@ -296,195 +252,4 @@ export default function OrientationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
-  },
-  scrollView: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  section: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  sectionText: {
-    marginLeft: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: '#6C757D',
-  },
-  orientationCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
-  },
-  cardHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  categoryIndicator: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  cardHeaderInfo: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#212529',
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: '#6C757D',
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  cardContent: {
-    padding: 16,
-  },
-  scheduleInfo: {
-    marginBottom: 16,
-  },
-  scheduleItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  scheduleText: {
-    fontSize: 14,
-    color: '#374151',
-    marginLeft: 8,
-  },
-  qrSection: {
-    alignItems: 'center',
-    marginBottom: 20,
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-  },
-  qrTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#212529',
-    marginBottom: 12,
-  },
-  qrContainer: {
-    padding: 12,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  qrInstructions: {
-    fontSize: 12,
-    color: '#6C757D',
-    textAlign: 'center',
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  actionButton: {
-    flex: 1,
-    maxWidth: 200,
-  },
-  checkOutButton: {
-    backgroundColor: '#F59E0B',
-  },
-  completionBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E8F5E8',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  completionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#10B981',
-    marginLeft: 8,
-  },
-  infoSection: {
-    marginTop: 32,
-  },
-  infoCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#374151',
-    marginLeft: 12,
-    flex: 1,
-  },
-  headerSpacer: {
-    width: 24,
-  },
-});
 

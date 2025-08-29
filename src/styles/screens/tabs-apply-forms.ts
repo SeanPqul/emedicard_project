@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@/src/styles/theme';
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../theme';
 
 export const styles = StyleSheet.create({
   // Container and Layout
@@ -783,5 +783,24 @@ export const styles = StyleSheet.create({
   // Form container with margin bottom
   formGroupWithMargin: {
     marginBottom: getSpacing('lg'),
+  },
+  
+  // Queue status styles
+  queueStats: {
+    padding: getSpacing('md'),
+    backgroundColor: getColor('background.tertiary'),
+    borderRadius: getBorderRadius('md'),
+    marginTop: getSpacing('sm'),
+  },
+  
+  queueStatsText: {
+    ...getTypography('body'),
+    color: getColor('text.secondary'),
+    marginBottom: getSpacing('xs'),
+  },
+  
+  // Cancel button style
+  cancelButton: {
+    padding: getSpacing('xs'),
   },
 });

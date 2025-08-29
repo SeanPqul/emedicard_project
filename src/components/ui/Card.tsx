@@ -8,7 +8,6 @@ import React from 'react';
 import { TouchableOpacity, View, ViewStyle } from 'react-native';
 import { cardVariants, getSpacing } from '../../styles';
 import { DesignSystemCardProps } from '../../types/design-system';
-import { Column } from '../layout';
 
 export const Card: React.FC<DesignSystemCardProps> = React.memo(({
   children,
@@ -51,13 +50,13 @@ export const Card: React.FC<DesignSystemCardProps> = React.memo(({
   const Container = onPress ? TouchableOpacity : View;
 
   const renderContent = () => (
-    <Column>
+    <View style={{ flexDirection: 'column' }}>
       {header}
       <View style={{ flex: 1 }}>
         {children}
       </View>
       {footer}
-    </Column>
+    </View>
   );
 
   return (

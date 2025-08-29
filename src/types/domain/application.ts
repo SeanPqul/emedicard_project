@@ -16,7 +16,7 @@ export interface Application {
   _id: Id<"forms">;
   userId: Id<"users">;
   applicationType: ApplicationType;
-  jobCategory: Id<"jobCategory">;
+  jobCategory: Id<"jobCategories">;
   position: string;
   organization: string;
   civilStatus: CivilStatus;
@@ -42,10 +42,10 @@ export interface ApplicationForm {
 
 // ===== JOB CATEGORY TYPES =====
 export interface JobCategory {
-  _id: Id<"jobCategory">;
+  _id: Id<"jobCategories">;
   name: string;
   colorCode: string;
-  requireOrientation: boolean;
+  requireOrientation?: boolean | string;
   description?: string;
   requirements?: string[];
   isActive?: boolean;
@@ -56,7 +56,7 @@ export interface JobCategory {
 // ===== DOCUMENT REQUIREMENT TYPES =====
 export interface DocumentRequirement {
   _id: Id<"documentRequirements">;
-  jobCategoryId: Id<"jobCategory">;
+  jobCategoryId: Id<"jobCategories">;
   name: string;
   description: string;
   icon: string;
@@ -70,7 +70,7 @@ export interface DocumentRequirement {
 // ===== APPLICATION OPERATION TYPES =====
 export interface CreateApplicationInput {
   applicationType: ApplicationType;
-  jobCategory: Id<'jobCategory'>;
+  jobCategory: Id<'jobCategories'>;
   position: string;
   organization: string;
   civilStatus: CivilStatus;

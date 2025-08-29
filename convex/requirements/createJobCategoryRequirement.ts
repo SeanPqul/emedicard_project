@@ -4,28 +4,28 @@ import { v } from "convex/values";
 // Create a link between a job category and a document requirement
 export const createJobCategoryRequirementMutation = mutation({
   args: {
-    jobCategoryId: v.id("jobCategory"),
-    documentRequirementId: v.id("documentRequirements"),
-    required: v.boolean()
+    jobCategoryId: v.id("jobCategories"),
+    documentTypeId: v.id("documentTypes"),
+    isRequired: v.boolean()
   },
   handler: async (ctx, args) => {
-    const { jobCategoryId, documentRequirementId, required } = args;
+    const { jobCategoryId, documentTypeId, isRequired } = args;
     
     // Check if this combination already exists
     const existingRequirement = await ctx.db
-      .query("jobCategoryRequirements")
-      .withIndex("by_category", (q) => q.eq("jobCategoryId", jobCategoryId))
-      .filter((q) => q.eq(q.field("documentRequirementId"), documentRequirementId))
+      .query("jobCategoryDocuments")
+      .withIndex("by_job_category", (q) => q.eq("jobCategoryId", jobCategoryId))
+      .filter((q) => q.eq(q.field("documentTypeId"), documentTypeId))
       .unique();
     
     if (existingRequirement) {
       throw new Error("This document requirement is already linked to this job category");
     }
     
-    const newRequirementId = await ctx.db.insert("jobCategoryRequirements", {
+    const newRequirementId = await ctx.db.insert("jobCategoryDocuments", {
       jobCategoryId,
-      documentRequirementId,
-      required
+      documentTypeId,
+      isRequired
     });
     return newRequirementId;
   },

@@ -13,7 +13,8 @@ export type Brand<T, B> = T & { readonly __brand: B };
 
 // Healthcare-specific branded types
 export type UserId = Brand<string, 'UserId'>;
-export type FormId = Brand<string, 'FormId'>;
+export type ApplicationId = Brand<string, 'ApplicationId'>;
+export type FormId = Brand<string, 'FormId'>; // Keep for backward compatibility
 export type PaymentId = Brand<string, 'PaymentId'>;
 export type EmailAddress = Brand<string, 'EmailAddress'>;
 export type PhoneNumber = Brand<string, 'PhoneNumber'>;
@@ -21,7 +22,8 @@ export type VerificationToken = Brand<string, 'VerificationToken'>;
 
 // Brand creation helpers
 export const createUserId = (id: string): UserId => id as UserId;
-export const createFormId = (id: string): FormId => id as FormId;
+export const createApplicationId = (id: string): ApplicationId => id as ApplicationId;
+export const createFormId = (id: string): FormId => id as FormId; // Keep for backward compatibility
 export const createPaymentId = (id: string): PaymentId => id as PaymentId;
 export const createEmailAddress = (email: string): EmailAddress => email as EmailAddress;
 export const createPhoneNumber = (phone: string): PhoneNumber => phone as PhoneNumber;

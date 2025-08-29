@@ -1,5 +1,5 @@
 import GoogleSignInButton from "@/assets/svgs/google-ctn-logo.svg";
-import { moderateScale } from "../../src/utils/designSystem";
+import { moderateScale } from "../../src/utils/responsive";
 import { useSignUp, useSSO } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";

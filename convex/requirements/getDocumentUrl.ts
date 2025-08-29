@@ -4,7 +4,7 @@ import { v } from "convex/values";
 // Get document URL from storage
 export const getDocumentUrlQuery = query({
   args: {
-    documentId: v.id("formDocuments"),
+    documentId: v.id("documentUploads"),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -18,15 +18,15 @@ export const getDocumentUrlQuery = query({
     }
 
     // Get file URL from storage
-    const fileUrl = await ctx.storage.getUrl(document.fileId);
+    const fileUrl = await ctx.storage.getUrl(document.storageFileId);
     
     return {
       documentId: args.documentId,
-      fileName: document.fileName,
+      fileName: document.originalFileName,
       url: fileUrl,
-      status: document.status,
+      reviewStatus: document.reviewStatus,
       uploadedAt: document.uploadedAt,
-      remarks: document.remarks,
+      remarks: document.adminRemarks,
     };
   },
 });

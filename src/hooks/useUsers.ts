@@ -79,8 +79,6 @@ export function useUsers(role?: "applicant" | "inspector" | "admin") {
     isLoading: currentUser === undefined,
     isLoadingUsersByRole: role ? usersByRole === undefined : false,
     
-    service: usersService,
-    
     mutations: {
       createUser,
       updateUser,

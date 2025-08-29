@@ -10,7 +10,7 @@ interface ApplicationTypeStepProps {
   onTypeSelect: (type: ApplicationType) => void;
 }
 
-export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = React.memo(({
+const ApplicationTypeStepComponent: React.FC<ApplicationTypeStepProps> = ({
   selectedType,
   onTypeSelect,
 }) => {
@@ -46,7 +46,7 @@ export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = React.mem
         textAlign: 'center',
         lineHeight: 24,
       }}>
-        Choose whether you're applying for a new health card or renewing an existing one
+        Choose whether you&apos;re applying for a new health card or renewing an existing one
       </Text>
 
       <View style={{ gap: getSpacing('md') }}>
@@ -65,7 +65,7 @@ export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = React.mem
               padding: getSpacing('lg'),
               flexDirection: 'row',
               alignItems: 'center',
-              ...getShadow('card'),
+              ...getShadow('medium'),
             }}
             onPress={() => onTypeSelect(appType.type)}
             accessibilityRole="radio"
@@ -116,4 +116,8 @@ export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = React.mem
       </View>
     </View>
   );
-});
+};
+
+ApplicationTypeStepComponent.displayName = 'ApplicationTypeStep';
+
+export const ApplicationTypeStep = React.memo(ApplicationTypeStepComponent);

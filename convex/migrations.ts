@@ -14,17 +14,17 @@ export const seedJobCategoriesAndRequirements = mutation({
       { name: "Skin-to-Skin Contact Worker", colorCode: "#FF69B4", requireOrientation: "No" },
     ];
 
-    const jobCategoryIds: Record<string, Id<"jobCategory">> = {};
+    const jobCategoryIds: Record<string, Id<"jobCategories">> = {};
     for (const category of jobCategories) {
       const existing = await ctx.db
-        .query("jobCategory")
+        .query("jobCategories")
         .filter((q) => q.eq(q.field("name"), category.name))
         .first();
 
       if (existing) {
         jobCategoryIds[category.name] = existing._id;
       } else {
-        const id = await ctx.db.insert("jobCategory", category);
+        const id = await ctx.db.insert("jobCategories", category);
         jobCategoryIds[category.name] = id;
       }
     }
@@ -42,17 +42,17 @@ export const seedJobCategoriesAndRequirements = mutation({
       { name: "Hepatitis B Antibody Test", fieldName: "hepatitisBId", description: "Hepatitis B surface antibody test result", icon: "shield-checkmark-outline", required: false },
     ];
 
-    const documentIds: Record<string, Id<"documentRequirements">> = {};
+    const documentIds: Record<string, Id<"documentTypes">> = {};
     for (const doc of documentRequirements) {
       const existing = await ctx.db
-        .query("documentRequirements")
-        .withIndex("by_field_name", (q) => q.eq("fieldName", doc.fieldName))
+        .query("documentTypes")
+        .withIndex("by_field_identifier", (q) => q.eq("fieldIdentifier", doc.fieldName))
         .first();
 
       if (existing) {
         documentIds[doc.name] = existing._id;
       } else {
-        const id = await ctx.db.insert("documentRequirements", doc);
+        const id = await ctx.db.insert("documentTypes", {name: doc.name, description: doc.description, icon: doc.icon, isRequired: doc.required, fieldIdentifier: doc.fieldName});
         documentIds[doc.name] = id;
       }
     }
@@ -97,16 +97,16 @@ export const seedJobCategoriesAndRequirements = mutation({
 
         // Check if link already exists
         const existing = await ctx.db
-          .query("jobCategoryRequirements")
-          .withIndex("by_category", (q) => q.eq("jobCategoryId", jobCategoryId))
+          .query("jobCategoryDocuments")
+          .withIndex("by_job_category", (q) => q.eq("jobCategoryId", jobCategoryId))
           .collect();
 
-        const alreadyLinked = existing.some((e) => e.documentRequirementId === documentRequirementId);
+        const alreadyLinked = existing.some((e) => e.documentTypeId === documentRequirementId);
         if (!alreadyLinked) {
-          await ctx.db.insert("jobCategoryRequirements", {
+          await ctx.db.insert("jobCategoryDocuments", {
             jobCategoryId,
-            documentRequirementId,
-            required: req.required,
+            documentTypeId: documentRequirementId,
+            isRequired: req.required,
           });
           linkedCount++;
         }
@@ -124,20 +124,20 @@ export const seedJobCategoriesAndRequirements = mutation({
 export const clearSeedData = mutation({
   args: {},
   handler: async (ctx) => {
-    const links = await ctx.db.query("jobCategoryRequirements").collect();
+    const links = await ctx.db.query("jobCategoryDocuments").collect();
     for (const link of links) await ctx.db.delete(link._id);
 
-    const docs = await ctx.db.query("documentRequirements").collect();
+    const docs = await ctx.db.query("documentTypes").collect();
     for (const doc of docs) await ctx.db.delete(doc._id);
 
-    const categories = await ctx.db.query("jobCategory").collect();
+    const categories = await ctx.db.query("jobCategories").collect();
     for (const cat of categories) await ctx.db.delete(cat._id);
 
     return {
       message: "🧹 Seed data cleared",
       deleted: {
-        jobCategoryRequirements: links.length,
-        documentRequirements: docs.length,
+        jobCategoryDocuments: links.length,
+        documentTypes: docs.length,
         jobCategories: categories.length,
       },
     };

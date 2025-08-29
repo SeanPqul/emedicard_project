@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { getBorderRadius, getColor, getSpacing, getTypography } from '../../theme';
+import { getBorderRadius, getColor, getSpacing, getTypography } from '../../styles/theme';
 
 export const profileEditStyles = StyleSheet.create({
   // Main container

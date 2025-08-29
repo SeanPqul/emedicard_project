@@ -17,12 +17,7 @@ export * from './layouts/patterns';
 export * from './layouts/common-patterns';
 export * from './layouts/form-patterns';
 
-// Responsive design utilities
-export * from './responsive';
-
-// Screen-specific styles
-
-// Re-export responsive utilities from consolidated responsive module
+// Responsive design utilities - consolidated from new responsive structure
 export {
   moderateScale,
   verticalScale,
@@ -35,6 +30,13 @@ export {
   borderRadius,
   iconSizes,
   dimensions,
+  responsiveValue,
+  responsiveTypography,
+  designSystem,
+  getBreakpoint,
+  isTablet,
+  isMobile,
+  when,
 } from '../utils/responsive';
 
 // Named style exports for easy importing

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getColor, getTypography, getSpacing, getBorderRadius } from '../styles/theme';
-import { CustomButton } from './CustomButton';
+import { CustomButton } from './ui/Button';
 
 export type ErrorType = 
   | 'network' 

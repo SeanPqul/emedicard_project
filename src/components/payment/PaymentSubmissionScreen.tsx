@@ -13,8 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomButton } from '../CustomButton';
 import { CustomTextInput } from '../CustomTextInput';
 import { ErrorState } from '../ErrorState';
-import { SkeletonLoader, SkeletonGroup } from '../animated/SkeletonLoader';
-import { LoadingSpinner } from '../LoadingSpinner';
+import { LoadingSpinner, SkeletonLoader } from '../LoadingSpinner';
 
 // Payment flow and utilities
 import {
@@ -122,7 +121,7 @@ export const PaymentSubmissionScreen: React.FC<PaymentSubmissionScreenProps> = (
         <View style={styles.skeletonContainer}>
           <Text style={styles.sectionTitle}>Payment Method</Text>
           <SkeletonGroup count={4}>
-            <SkeletonLoader height={60} variant="rectangular" />
+            <SkeletonLoader count={1} height={60} />
           </SkeletonGroup>
         </View>
       );
@@ -173,8 +172,8 @@ export const PaymentSubmissionScreen: React.FC<PaymentSubmissionScreenProps> = (
     if (state.isSubmitting && !state.method) {
       return (
         <View style={styles.skeletonContainer}>
-          <SkeletonLoader height={20} width="40%" style={{ marginBottom: 8 }} />
-          <SkeletonLoader height={50} variant="rectangular" />
+          <SkeletonLoader count={1} height={20} style={{ marginBottom: 8 }} />
+          <SkeletonLoader count={1} height={50} />
         </View>
       );
     }
@@ -200,7 +199,7 @@ export const PaymentSubmissionScreen: React.FC<PaymentSubmissionScreenProps> = (
       return (
         <View style={styles.skeletonContainer}>
           <SkeletonGroup count={2}>
-            <SkeletonLoader height={48} variant="rectangular" />
+            <SkeletonLoader count={1} height={48} />
           </SkeletonGroup>
         </View>
       );

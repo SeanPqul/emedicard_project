@@ -3,10 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Animated, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { FeedbackSystem, useFeedback } from '../../src/components/feedback/FeedbackSystem';
+import { ActivityItem, CTAButton, DashboardHeader, EmptyState, StatCard } from '../../src/components';
+import { FeedbackSystem, useFeedback } from '../../src/components/FeedbackSystem';
+import { useNetwork } from '../../src/hooks/useNetwork';
 import { styles } from '../../src/styles/screens/tabs-dashboard';
-import { ActivityItem, CTAButton, EmptyState, StatCard } from '../../src/components';
-import { DashboardHeader } from '../../src/components/ui/DashboardHeader';
 import { getColor, getSpacing, layoutPatterns } from '../../src/styles/theme';
 import { getUserDisplayName } from '../../src/utils/user-utils';
 
@@ -26,6 +26,7 @@ export default function Dashboard() {
   } = useDashboard();
 
   const { messages, showSuccess, showError, dismissFeedback } = useFeedback();
+  const { isOnline } = useNetwork();
 
   // Animation state for collapsible activity panel
   const [expanded, setExpanded] = useState(false);
@@ -55,12 +56,12 @@ export default function Dashboard() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [expanded, expandedHeight, collapsedHeight]);
+  }, [expanded, expandedHeight, collapsedHeight, animatedHeight, animatedRotation]);
   
   // Initialize height to collapsed state
   useEffect(() => {
     animatedHeight.setValue(collapsedHeight);
-  }, [collapsedHeight]);
+  }, [animatedHeight, collapsedHeight]);
   
   const rotateAnimation = animatedRotation.interpolate({
     inputRange: [0, 1],
@@ -131,6 +132,14 @@ export default function Dashboard() {
   return (
     <View style={styles.container}>
       
+      {/* Simple Offline Banner */}
+      {!isOnline && (
+        <View style={styles.offlineBanner}>
+          <Ionicons name="wifi-off" size={16} color={getColor('ui.white')} />
+          <Text style={styles.offlineText}>You&apos;re offline</Text>
+        </View>
+      )}
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
@@ -147,7 +156,7 @@ export default function Dashboard() {
         <DashboardHeader
           greeting={`Good ${getGreeting()}`}
           userName={getUserDisplayName(user, userProfile)}
-          userImage={user?.imageUrl || userProfile?.image}
+          userImage={user?.imageUrl || userProfile?.image || ''}
           currentTime={currentTime}
           unreadNotificationsCount={unreadNotificationsCount}
         />
@@ -352,4 +361,3 @@ export default function Dashboard() {
     </View>
   );
 }
-

@@ -4,8 +4,8 @@ import { mutation } from "../_generated/server";
 export const createNotificationMutation = mutation({
   args: {
     userId: v.id("users"),
-    formsId: v.optional(v.id("forms")),
-    type: v.union(
+    applicationId: v.optional(v.id("applications")),
+    notificationType: v.union(
       v.literal("MissingDoc"),
       v.literal("PaymentReceived"),
       v.literal("FormApproved"),
@@ -18,11 +18,11 @@ export const createNotificationMutation = mutation({
   handler: async (ctx, args) => {
     const notificationId = await ctx.db.insert("notifications", {
       userId: args.userId,
-      formsId: args.formsId,
-      type: args.type,
+      applicationId: args.applicationId,
+      notificationType: args.notificationType,
       title: args.title,
       message: args.message,
-      read: false,
+      isRead: false,
     });
 
     return notificationId;

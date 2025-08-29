@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Text, TouchableOpacity, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { Text, TouchableOpacity, ActivityIndicator, ViewStyle, TextStyle, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { 
@@ -16,7 +16,6 @@ import {
 } from '../../styles';
 import { theme } from '../../styles/theme';
 import { DesignSystemButtonProps } from '../../types/design-system';
-import { Row } from '../layout';
 
 export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
   title,
@@ -107,7 +106,7 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
   const renderContent = () => {
     if (loading) {
       return (
-        <Row spacing="xs" align="center" justify="center">
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: getSpacing('xs') }}>
           <ActivityIndicator 
             size="small" 
             color={loadingIndicatorColor || buttonTextVariants[variant === 'none' ? 'ghost' : variant].color}
@@ -117,7 +116,7 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
               {loadingText}
             </Text>
           )}
-        </Row>
+        </View>
       );
     }
 
@@ -134,7 +133,7 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
     }
 
     return (
-      <Row spacing="xs" align="center" justify="center">
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: getSpacing('xs') }}>
         {renderIcon('left')}
         {title && (
           <Text style={[finalTextStyle, textStyle]}>
@@ -142,7 +141,7 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
           </Text>
         )}
         {renderIcon('right')}
-      </Row>
+      </View>
     );
   };
 

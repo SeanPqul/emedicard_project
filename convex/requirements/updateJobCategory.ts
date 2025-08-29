@@ -4,7 +4,7 @@ import { v } from "convex/values";
 // Update an existing job category requirement
 export const updateJobCategoryMutation = mutation({
   args: {
-    requirementId: v.id("jobCategoryRequirements"),
+    requirementId: v.id("jobCategoryDocuments"),
     required: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -15,7 +15,7 @@ export const updateJobCategoryMutation = mutation({
       throw new Error("Job category requirement not found");
     }
     
-    await ctx.db.patch(requirementId, { required });
+    await ctx.db.patch(requirementId, { isRequired: required });
     return requirementId;
   },
 });

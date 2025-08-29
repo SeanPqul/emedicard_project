@@ -1,11 +1,24 @@
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
-import { Id } from '../../convex/_generated/dataModel';
+import { Id, TableNames } from '../../convex/_generated/dataModel';
 
-type ConvexId<T extends string> = Id<T>;
+type ConvexId<T extends TableNames> = Id<T>;
 
-export function useJobCategories() {
-  const allJobCategories = useQuery(api.jobCategories.getAllJobCategories.getAllJobCategoriesQuery, {});
+export function useJobCategories(selectedCategoryId?: string) {
+  const allJobCategories = useQuery(api.jobCategories.getAllJobCategories.getAllJobCategoriesQuery);
+  
+  // Debug logging
+  console.log('useJobCategories - raw query result:', allJobCategories);
+  console.log('useJobCategories - query state:', {
+    isLoading: allJobCategories === undefined,
+    hasData: !!allJobCategories,
+    dataLength: allJobCategories?.length
+  });
+  
+  const requirementsByCategory = useQuery(
+    api.requirements.getRequirementsByJobCategory.getRequirementsByJobCategoryQuery,
+    selectedCategoryId ? { jobCategoryId: selectedCategoryId as ConvexId<'jobCategories'> } : 'skip'
+  );
 
   const createJobCategoryMutation = useMutation(api.jobCategories.createJobCategory.createJobCategoryMutation);
   const updateJobCategoryMutation = useMutation(api.jobCategories.updateJobCategory.updateJobCategoryMutation);
@@ -21,7 +34,7 @@ export function useJobCategories() {
     return createJobCategoryMutation(input);
   };
 
-  const updateJobCategory = async (jobCategoryId: ConvexId<'jobCategory'>, updates: {
+  const updateJobCategory = async (jobCategoryId: ConvexId<'jobCategories'>, updates: {
     name?: string;
     description?: string;
     requirements?: string[];
@@ -29,15 +42,15 @@ export function useJobCategories() {
     return updateJobCategoryMutation({ categoryId: jobCategoryId, ...updates });
   };
 
-  const deleteJobCategory = async (jobCategoryId: ConvexId<'jobCategory'>) => {
+  const deleteJobCategory = async (jobCategoryId: ConvexId<'jobCategories'>) => {
     return deleteJobCategoryMutation({ categoryId: jobCategoryId });
   };
 
   return {
-    data: allJobCategories,
+    jobCategories: allJobCategories,
+    requirementsByCategory,
     isLoading: allJobCategories === undefined,
-    
-    service: jobCategoriesService,
+    isLoadingRequirements: requirementsByCategory === undefined,
     
     mutations: {
       createJobCategory,

@@ -4,9 +4,9 @@ import { v } from "convex/values";
 // Admin query to get documents by status
 export const adminGetDocumentsByStatusQuery = query({
   args: {
-    status: v.union(v.literal("Pending"), v.literal("Approved"), v.literal("Rejected")),
+    reviewStatus: v.union(v.literal("Pending"), v.literal("Approved"), v.literal("Rejected")),
     limit: v.optional(v.number()),
-    formId: v.optional(v.id("forms")),
+    applicationId: v.optional(v.id("applications")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -27,16 +27,16 @@ export const adminGetDocumentsByStatusQuery = query({
     // Get documents by status
     let allDocuments;
     
-    // If formId is provided, filter by form
-    if (args.formId) {
+    // If applicationId is provided, filter by application
+    if (args.applicationId) {
       allDocuments = await ctx.db
-        .query("formDocuments")
-        .withIndex("by_form", (q) => q.eq("formId", args.formId!))
+        .query("documentUploads")
+        .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId!))
         .collect();
     } else {
-      allDocuments = await ctx.db.query("formDocuments").collect();
+      allDocuments = await ctx.db.query("documentUploads").collect();
     }
-    const filteredDocuments = allDocuments.filter(doc => doc.status === args.status);
+    const filteredDocuments = allDocuments.filter(doc => doc.reviewStatus === args.reviewStatus);
     
     // Apply limit if provided
     const limitedDocuments = args.limit 
@@ -46,23 +46,23 @@ export const adminGetDocumentsByStatusQuery = query({
     // Get additional information for each document
     const documentsWithDetails = await Promise.all(
       limitedDocuments.map(async (doc) => {
-        const form = await ctx.db.get(doc.formId);
-        const requirement = await ctx.db.get(doc.documentRequirementId);
+        const application = await ctx.db.get(doc.applicationId);
+        const requirement = await ctx.db.get(doc.documentTypeId);
         
         let applicant = null;
         let reviewer = null;
         
-        if (form) {
-          applicant = await ctx.db.get(form.userId);
+        if (application) {
+          applicant = await ctx.db.get(application.userId);
         }
         
-        if (doc.reviewBy) {
-          reviewer = await ctx.db.get(doc.reviewBy);
+        if (doc.reviewedBy) {
+          reviewer = await ctx.db.get(doc.reviewedBy);
         }
         
         return {
           ...doc,
-          form,
+          application,
           requirement,
           applicant: applicant ? {
             _id: applicant._id,
@@ -82,7 +82,7 @@ export const adminGetDocumentsByStatusQuery = query({
       documents: documentsWithDetails,
       totalFound: filteredDocuments.length,
       totalReturned: documentsWithDetails.length,
-      status: args.status,
+      reviewStatus: args.reviewStatus,
     };
   },
 });

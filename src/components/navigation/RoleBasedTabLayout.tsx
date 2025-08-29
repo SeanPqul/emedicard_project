@@ -11,7 +11,8 @@ export default function RoleBasedTabLayout() {
   const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
   const { visibleTabs } = useRoleBasedNavigation(userProfile?.role);
 
-  if (!userProfile) {
+  // Show loading while user profile is being fetched
+  if (userProfile === undefined) {
     return (
       <LoadingSpinner 
         visible={true} 
@@ -19,6 +20,19 @@ export default function RoleBasedTabLayout() {
         fullScreen 
         type="pulse" 
         icon="compass" 
+      />
+    );
+  }
+
+  // Handle error case when user profile fails to load
+  if (userProfile === null) {
+    return (
+      <LoadingSpinner 
+        visible={true} 
+        message="Unable to load user data..." 
+        fullScreen 
+        type="pulse" 
+        icon="warning" 
       />
     );
   }
@@ -63,57 +77,7 @@ export default function RoleBasedTabLayout() {
       ))}
       
       {/* Hide tabs that are not visible for the current role */}
-      {/* Admin functionality is handled via web interface, not mobile app */}
-      
-      {!visibleTabs.find(tab => tab.name === 'inspectorDashboard') && (
-        <Tabs.Screen 
-          name="inspectorDashboard"
-          options={{
-            href: null,
-          }}
-        />
-      )}
-      
-      {!visibleTabs.find(tab => tab.name === 'reviewApplications') && (
-        <Tabs.Screen 
-          name="reviewApplications"
-          options={{
-            href: null,
-          }}
-        />
-      )}
-      
-      {/* Hide old hyphenated routes */}
-      <Tabs.Screen 
-        name="inspector-dashboard"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen 
-        name="review-applications"
-        options={{
-          href: null,
-        }}
-      />
-      
-      {!visibleTabs.find(tab => tab.name === 'inspection-queue') && (
-        <Tabs.Screen 
-          name="inspection-queue"
-          options={{
-            href: null,
-          }}
-        />
-      )}
-      
-      {!visibleTabs.find(tab => tab.name === 'scanner') && (
-        <Tabs.Screen 
-          name="scanner"
-          options={{
-            href: null,
-          }}
-        />
-      )}
+      {/* Only hide/show existing route files */}
     </Tabs>
   );
 }

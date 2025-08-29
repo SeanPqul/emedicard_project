@@ -37,8 +37,6 @@ export type {
   ToastType,
   FeedbackState,
   FeedbackContextType,
-  SkeletonLoaderProps,
-  SkeletonGroupProps,
 } from './feedback';
 
 // Dashboard component types
@@ -91,20 +89,3 @@ export interface ResponsiveLayoutProps {
   containerStyle?: any;
 }
 
-// Animation component types
-export interface AnimatedCardProps {
-  children: React.ReactNode;
-  animationType?: 'slide' | 'fade' | 'scale' | 'bounce';
-  duration?: number;
-  delay?: number;
-  onAnimationComplete?: () => void;
-  style?: any;
-}
-
-export interface PageTransitionProps {
-  children: React.ReactNode;
-  type?: 'slide' | 'fade' | 'push' | 'modal';
-  direction?: 'left' | 'right' | 'up' | 'down';
-  duration?: number;
-  style?: any;
-}

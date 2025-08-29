@@ -13,12 +13,7 @@ export * from './api';
 // Export design system types
 export * from './design-system';
 
-// Legacy compatibility - Re-export main domain types for backward compatibility
-export type { User, UserRole } from './domain/user';
-export type { Application, ApplicationStatus, ApplicationType, JobCategory } from './domain/application';
-export type { Payment, PaymentStatus, PaymentMethod } from './domain/payment';
-export type { HealthCard, HealthCardData } from './domain/health-card';
-export type { Notification, NotificationType } from './domain';
+// Note: Legacy compatibility exports removed - import directly from domain modules
 
 // Convex ID types for type safety
 export type Id<T extends string> = string & { readonly __tableName: T };
@@ -63,6 +58,8 @@ export interface DocumentFile {
   name: string;
   type: string;
   size?: number;
+  mimeType?: string;
+  fileName?: string;
 }
 
 export interface SelectedDocuments {

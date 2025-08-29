@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, Animated, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getColor, getTypography, getSpacing, getBorderRadius, getShadow } from '../../styles/theme';
+import { getColor, getTypography, getSpacing, getBorderRadius, getShadow } from '../styles/theme';
 
 export type FeedbackType = 'success' | 'error' | 'warning' | 'info';
 
@@ -187,7 +187,7 @@ const FeedbackItem: React.FC<FeedbackItemProps> = ({ message, onDismiss }) => {
 export const useFeedback = () => {
   const [messages, setMessages] = useState<FeedbackMessage[]>([]);
 
-  const showFeedback = (
+  const showFeedback = useCallback((
     type: FeedbackType,
     title: string,
     message?: string,
@@ -205,29 +205,37 @@ export const useFeedback = () => {
     };
 
     setMessages((prev) => [...prev, newMessage]);
-  };
+  }, []);
 
-  const dismissFeedback = (id: string) => {
+  const dismissFeedback = useCallback((id: string) => {
     setMessages((prev) => prev.filter((msg) => msg.id !== id));
-  };
+  }, []);
 
-  const clearAllFeedback = () => {
+  const clearAllFeedback = useCallback(() => {
     setMessages([]);
-  };
+  }, []);
+
+  const showSuccess = useCallback((title: string, message?: string, duration?: number) =>
+    showFeedback('success', title, message, duration), [showFeedback]);
+    
+  const showError = useCallback((title: string, message?: string, duration?: number) =>
+    showFeedback('error', title, message, duration), [showFeedback]);
+    
+  const showWarning = useCallback((title: string, message?: string, duration?: number) =>
+    showFeedback('warning', title, message, duration), [showFeedback]);
+    
+  const showInfo = useCallback((title: string, message?: string, duration?: number) =>
+    showFeedback('info', title, message, duration), [showFeedback]);
 
   return {
     messages,
     showFeedback,
     dismissFeedback,
     clearAllFeedback,
-    showSuccess: (title: string, message?: string, duration?: number) =>
-      showFeedback('success', title, message, duration),
-    showError: (title: string, message?: string, duration?: number) =>
-      showFeedback('error', title, message, duration),
-    showWarning: (title: string, message?: string, duration?: number) =>
-      showFeedback('warning', title, message, duration),
-    showInfo: (title: string, message?: string, duration?: number) =>
-      showFeedback('info', title, message, duration),
+    showSuccess,
+    showError,
+    showWarning,
+    showInfo,
   };
 };
 

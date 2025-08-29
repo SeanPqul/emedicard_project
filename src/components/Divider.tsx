@@ -1,5 +1,5 @@
-import { FONT_SIZES, FONT_WEIGHTS } from '@/src/utils/fontSizes';
-import { verticalScale } from '@/src/utils/designSystem';
+import { FONT_SIZES, FONT_WEIGHTS } from '@/src/utils/responsive';
+import { verticalScale } from '@/src/utils/responsive';
 import React from 'react';
 import { Text, View } from 'react-native';
 

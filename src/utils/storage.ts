@@ -1,23 +1,40 @@
 import { MMKV } from 'react-native-mmkv';
 
-// Create a fallback storage for development when MMKV fails
+// Fallback storage for debugging scenarios
 class FallbackStorage {
   private data = new Map<string, any>();
   
   set(key: string, value: any): void {
-    this.data.set(key, value);
+    this.data.set(key, JSON.stringify(value));
   }
   
   getString(key: string): string | undefined {
-    return this.data.get(key);
+    const value = this.data.get(key);
+    try {
+      return value ? JSON.parse(value) : undefined;
+    } catch {
+      return value;
+    }
   }
   
   getNumber(key: string): number | undefined {
-    return this.data.get(key);
+    const value = this.data.get(key);
+    try {
+      const parsed = value ? JSON.parse(value) : undefined;
+      return typeof parsed === 'number' ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
   }
   
   getBoolean(key: string): boolean | undefined {
-    return this.data.get(key);
+    const value = this.data.get(key);
+    try {
+      const parsed = value ? JSON.parse(value) : undefined;
+      return typeof parsed === 'boolean' ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
   }
   
   delete(key: string): void {
@@ -41,49 +58,68 @@ class FallbackStorage {
   }
 }
 
-// Try to create MMKV instances, fall back to memory storage if it fails
+// Create storage instances with proper error handling
 let storage: MMKV | FallbackStorage;
 let encryptedStorage: MMKV | FallbackStorage;
 
 try {
-  /**
-   * Default MMKV storage instance
-   * This is the main storage instance for the app
-   */
-  storage = new MMKV();
-  
-  /**
-   * Encrypted storage instance for sensitive data
-   * Uses a basic encryption key - in production, use a secure key from Keychain/Keystore
-   */
-  encryptedStorage = new MMKV({
-    id: 'encrypted-storage',
-    encryptionKey: 'your-encryption-key-here', // In production, get this from secure storage
+  // Try to create MMKV instances
+  storage = new MMKV({
+    id: 'emedicard-storage',
+    encryptionKey: 'emedicard-secure-key-2024'
   });
+  
+  encryptedStorage = new MMKV({
+    id: 'emedicard-encrypted-storage',
+    encryptionKey: 'emedicard-secure-key-2024'
+  });
+  
+  console.log('✅ MMKV initialized successfully');
 } catch (error) {
-  console.warn('⚠️ MMKV failed to initialize, using fallback storage:', error);
+  console.warn('⚠️ MMKV failed to initialize (likely due to remote debugging), using fallback storage:', error);
   storage = new FallbackStorage();
   encryptedStorage = new FallbackStorage();
 }
 
 export { storage, encryptedStorage };
 
+// Storage monitoring and cleanup (2024 best practice)
+const STORAGE_SIZE_LIMIT = 50 * 1024 * 1024; // 50MB limit
+
+// Forward declaration - will be implemented later in the file
+let cacheUtils: any;
+
+const monitorStorageSize = () => {
+  // MMKV v2 doesn't have size property, so we'll use key count as approximation
+  const keyCount = storage.getAllKeys().length;
+  const approximateMaxKeys = 1000; // Reasonable limit for key count
+  
+  if (keyCount >= approximateMaxKeys) {
+    console.warn(`Storage has ${keyCount} keys, approaching limit. Running cleanup...`);
+    // Instead of trim(), we'll trigger our custom cleanup if available
+    if (cacheUtils?.clearExpired) {
+      cacheUtils.clearExpired();
+    }
+  }
+};
+
 /**
- * User-specific storage instance
+ * User-specific storage instance with fallback support
  * Can be used to separate data per user
  */
-export const createUserStorage = (userId: string) => {
+export const createUserStorage = (userId: string): MMKV | FallbackStorage => {
   try {
     return new MMKV({
       id: `user-${userId}-storage`,
+      encryptionKey: `user-${userId}-key-2024`
     });
   } catch (error) {
-    console.warn(`⚠️ Failed to create user storage for ${userId}, using fallback:`, error);
+    console.warn(`⚠️ Failed to create user MMKV storage for ${userId}, using fallback:`, error);
     return new FallbackStorage();
   }
 };
 
-// Storage helper interface
+// Storage helper interface with proper TypeScript typing
 interface StorageHelper {
   setItem: (key: string, value: string) => void;
   getItem: (key: string) => string | undefined;
@@ -102,17 +138,19 @@ interface StorageHelper {
 }
 
 /**
- * Set a string value in storage
+ * Set a string value in storage with automatic size monitoring
  */
 export const setItem = (key: string, value: string): void => {
   storage.set(key, value);
+  monitorStorageSize();
 };
 
 /**
- * Get a string value from storage
+ * Get a string value from storage with null safety
  */
 export const getItem = (key: string): string | undefined => {
-  return storage.getString(key);
+  const value = storage.getString(key);
+  return value ?? undefined;
 };
 
 /**
@@ -120,13 +158,15 @@ export const getItem = (key: string): string | undefined => {
  */
 export const setNumber = (key: string, value: number): void => {
   storage.set(key, value);
+  monitorStorageSize();
 };
 
 /**
- * Get a number value from storage
+ * Get a number value from storage with proper undefined handling
  */
 export const getNumber = (key: string): number | undefined => {
-  return storage.getNumber(key);
+  const value = storage.getNumber(key);
+  return value ?? undefined;
 };
 
 /**
@@ -134,37 +174,46 @@ export const getNumber = (key: string): number | undefined => {
  */
 export const setBoolean = (key: string, value: boolean): void => {
   storage.set(key, value);
+  monitorStorageSize();
 };
 
 /**
- * Get a boolean value from storage
+ * Get a boolean value from storage with proper undefined handling
  */
 export const getBoolean = (key: string): boolean | undefined => {
-  return storage.getBoolean(key);
+  const value = storage.getBoolean(key);
+  return value ?? undefined;
 };
 
 /**
  * Set an object value in storage (automatically serialized to JSON)
+ * Enhanced with better error handling and type safety
  */
 export const setObject = <T>(key: string, value: T): void => {
   try {
     const jsonValue = JSON.stringify(value);
     storage.set(key, jsonValue);
+    monitorStorageSize();
   } catch (error) {
-    console.error('Failed to serialize object for storage:', error);
-    throw error;
+    console.error(`Failed to serialize object for key "${key}":`, error);
+    throw new Error(`Storage serialization failed for key: ${key}`);
   }
 };
 
 /**
  * Get an object value from storage (automatically parsed from JSON)
+ * Enhanced with better error handling and null safety
  */
 export const getObject = <T>(key: string): T | null => {
   try {
     const jsonValue = storage.getString(key);
-    return jsonValue ? JSON.parse(jsonValue) : null;
+    if (!jsonValue) return null;
+    
+    return JSON.parse(jsonValue) as T;
   } catch (error) {
-    console.error('Failed to parse object from storage:', error);
+    console.error(`Failed to parse object from key "${key}":`, error);
+    // Clean up corrupted data
+    storage.delete(key);
     return null;
   }
 };
@@ -198,8 +247,7 @@ export const hasKey = (key: string): boolean => {
 };
 
 /**
- * Get the size of the storage in bytes
- * Note: MMKV v2 doesn't expose size property directly
+ * Get approximation of storage usage (MMKV v2 compatible)
  */
 export const getStorageSize = (): number => {
   // MMKV v2 doesn't provide size info, return keys count as approximation
@@ -207,15 +255,11 @@ export const getStorageSize = (): number => {
 };
 
 /**
- * Clean unused keys and clear memory cache
- * Should be called when storage size gets large
+ * Clean expired cache items (MMKV v2 compatible alternative to trim)
  */
 export const trimStorage = (): void => {
-  const keyCount = storage.getAllKeys().length;
-  if (keyCount >= 100) {
-    // MMKV v2 doesn't have trim(), so we'll clear expired items instead
-    cacheUtils.clearExpired();
-  }
+  const removedCount = cacheUtils.clearExpired();
+  console.log(`Storage cleanup completed: removed ${removedCount} expired items`);
 };
 
 /**
@@ -253,30 +297,31 @@ export const storageHelper: StorageHelper = {
 };
 
 /**
- * Cache utilities for common caching patterns
+ * Enhanced cache utilities with expiration and cleanup
  */
-export const cacheUtils = {
+export const cacheUtilsImpl = {
   /**
    * Set a value with expiration time
    */
-  setWithExpiry: (key: string, value: any, expiryInMs: number): void => {
+  setWithExpiry: <T>(key: string, value: T, expiryInMs: number): void => {
     const expiryTime = Date.now() + expiryInMs;
     const cacheItem = {
       value,
       expiry: expiryTime,
+      createdAt: Date.now()
     };
-    setObject(key, cacheItem);
+    setObject(`cache_${key}`, cacheItem);
   },
 
   /**
    * Get a value if not expired, null if expired or doesn't exist
    */
   getWithExpiry: <T>(key: string): T | null => {
-    const cacheItem = getObject<{ value: T; expiry: number }>(key);
+    const cacheItem = getObject<{ value: T; expiry: number; createdAt: number }>(`cache_${key}`);
     if (!cacheItem) return null;
 
     if (Date.now() > cacheItem.expiry) {
-      removeItem(key);
+      removeItem(`cache_${key}`);
       return null;
     }
 
@@ -284,22 +329,74 @@ export const cacheUtils = {
   },
 
   /**
-   * Clear expired cache items
+   * Clear expired cache items with performance optimization
    */
-  clearExpired: (): void => {
-    const keys = getAllKeys();
+  clearExpired: (): number => {
+    const keys = getAllKeys().filter(key => key.startsWith('cache_'));
     let removedCount = 0;
     
     keys.forEach(key => {
       const cacheItem = getObject<{ value: any; expiry: number }>(key);
-      if (cacheItem && cacheItem.expiry && Date.now() > cacheItem.expiry) {
+      if (cacheItem?.expiry && Date.now() > cacheItem.expiry) {
         removeItem(key);
         removedCount++;
       }
     });
     
-    // Cleaned up expired cache items silently
+    if (removedCount > 0) {
+      console.log(`Cleaned up ${removedCount} expired cache items`);
+    }
+    
+    return removedCount;
   },
+
+  /**
+   * Clear all cache items
+   */
+  clearAllCache: (): number => {
+    const keys = getAllKeys().filter(key => key.startsWith('cache_'));
+    keys.forEach(key => removeItem(key));
+    console.log(`Cleared ${keys.length} cache items`);
+    return keys.length;
+  }
+};
+
+// Assign the implementation to the forward declaration
+cacheUtils = cacheUtilsImpl;
+export { cacheUtilsImpl as cacheUtils };
+
+// Periodic cleanup task
+let cleanupInterval: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Start automatic cache cleanup (runs every 5 minutes)
+ */
+export const startAutomaticCleanup = (): void => {
+  if (cleanupInterval) return; // Already started
+  
+  cleanupInterval = setInterval(() => {
+    try {
+      cacheUtils.clearExpired();
+      
+      // Clean storage if it gets too many keys (MMKV v2 compatible)
+      const keyCount = getStorageSize();
+      if (keyCount > 800) { // Trigger at 80% of 1000 keys limit
+        trimStorage();
+      }
+    } catch (error) {
+      console.error('Error during automatic storage cleanup:', error);
+    }
+  }, 5 * 60 * 1000); // Every 5 minutes
+};
+
+/**
+ * Stop automatic cleanup
+ */
+export const stopAutomaticCleanup = (): void => {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
 };
 
 // Default export

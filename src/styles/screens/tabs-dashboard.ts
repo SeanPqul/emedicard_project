@@ -6,6 +6,19 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: getColor('background.secondary'),
   },
+  offlineBanner: {
+    backgroundColor: getColor('semantic.warning'),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: getSpacing('xs'),
+    gap: getSpacing('xs'),
+  },
+  offlineText: {
+    ...getTypography('bodySmall'),
+    color: getColor('ui.white'),
+    fontWeight: '500',
+  },
   loadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',

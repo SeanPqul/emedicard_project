@@ -46,7 +46,7 @@ export async function pickImageFromCamera() {
     quality: 0.8,
   });
 
-  return !result.cancelled ? result.assets[0] : null;
+  return !result.canceled ? result.assets[0] : null;
 }
 
 /**
@@ -68,7 +68,7 @@ export async function pickImageFromGallery() {
     quality: 0.8,
   });
 
-  return !result.cancelled ? result.assets[0] : null;
+  return !result.canceled ? result.assets[0] : null;
 }
 
 /**
@@ -81,5 +81,5 @@ export async function pickDocument() {
     copyToCacheDirectory: true,
   });
 
-  return !result.cancelled ? result.assets[0] : null;
+  return !result.canceled ? result.assets[0] : null;
 }
