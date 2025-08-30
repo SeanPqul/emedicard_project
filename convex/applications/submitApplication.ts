@@ -43,6 +43,11 @@ export const submitApplicationMutation = mutation({
     if (application.applicationStatus === "Submitted" || application.applicationStatus === "Under Review" || application.applicationStatus === "Approved") {
       throw new Error("Application has already been submitted");
     }
+    
+    // Also check for payment to prevent duplicate submissions
+    if (application.applicationStatus !== "Draft") {
+      throw new Error("Application is not in a valid state for submission");
+    }
 
     // Get job category
     const jobCategory = await ctx.db.get(application.jobCategoryId);

@@ -92,9 +92,20 @@ export const useDocumentSelection = ({
 
     try {
       // Fix file type detection
-      let fileType = file.type || file.mimeType || 'image/jpeg';
-      if (fileType === 'image') {
-        fileType = 'image/jpeg'; // Default to JPEG for generic image type
+      let fileType = file.type || file.mimeType;
+      
+      // Handle cases where type is just 'image' without subtype
+      if (!fileType || fileType === 'image' || !fileType.includes('/')) {
+        // Try to infer from file extension or URI
+        const uri = file.uri || '';
+        if (uri.toLowerCase().includes('.png')) {
+          fileType = 'image/png';
+        } else if (uri.toLowerCase().includes('.pdf')) {
+          fileType = 'application/pdf';
+        } else {
+          // Default to JPEG for images
+          fileType = 'image/jpeg';
+        }
       }
       
       const fileExtension = file.fileName?.split('.').pop()?.toLowerCase() || 

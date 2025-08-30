@@ -19,7 +19,6 @@ export function useRequirements(jobCategoryId?: string, formId?: string) {
   const updateDocumentFieldMutation = useMutation(api.requirements.updateDocumentField.updateDocumentFieldMutation);
   const deleteDocumentMutation = useMutation(api.requirements.removeDocument.deleteDocumentMutation);
   const generateUploadUrlMutation = useMutation(api.storage.generateUploadUrl.generateUploadUrlMutation);
-  const uploadDocumentWithFileAction = useAction(api.requirements.uploadDocumentWithFile.uploadDocumentWithFileAction);
 
   const uploadDocument = async (input: {
     applicationId: ConvexId<'applications'>;
@@ -63,18 +62,6 @@ export function useRequirements(jobCategoryId?: string, formId?: string) {
     return generateUploadUrlMutation();
   };
 
-  const uploadDocumentWithFile = async (input: {
-    applicationId: ConvexId<'applications'>;
-    fieldIdentifier: string;
-    fileName: string;
-    fileType: string;
-    fileSize: number;
-    fileBase64: string;
-    reviewStatus?: 'Pending' | 'Approved' | 'Rejected';
-    adminRemarks?: string;
-  }) => {
-    return uploadDocumentWithFileAction(input);
-  };
 
   return {
     data: {
@@ -90,7 +77,6 @@ export function useRequirements(jobCategoryId?: string, formId?: string) {
       updateDocumentField,
       deleteDocument,
       generateUploadUrl,
-      uploadDocumentWithFile,
     }
   };
 }

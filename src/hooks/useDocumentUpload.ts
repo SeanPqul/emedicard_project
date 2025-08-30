@@ -46,9 +46,9 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
 
   // Load cached documents on mount with smart cleanup
   useEffect(() => {
-    const loadCachedDocuments = () => {
-      // Perform smart cleanup first
-      smartCacheCleanup();
+    const loadCachedDocuments = async () => {
+      // Perform smart cleanup first (now async)
+      await smartCacheCleanup();
       
       const cached = getCachedDocumentsByForm(applicationId);
       setCachedDocuments(cached);
@@ -391,7 +391,7 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
   }, [applicationId, validateFile, setUploadState]);
   
   /**
-   * Upload a cached document to Convex
+   * Upload a cached document to Convex using direct file upload
    */
   const uploadCachedDocument = useCallback(async (
     fieldName: string,
@@ -404,7 +404,7 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
       }
       
       // Update status to uploading
-      updateCachedDocumentStatus(applicationId, fieldName, { 
+      updateCachedDocumentStatusReactive(applicationId, fieldName, { 
         status: 'uploading',
         error: null 
       });
@@ -416,8 +416,9 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
         success: false
       });
       
-      // Convert base64 back to file for upload
-      const blob = base64ToBlob(cachedDoc.base64Data, cachedDoc.fileType);
+      // Use the original file URI to create a new file object
+      const response = await fetch(cachedDoc.fileUri);
+      const blob = await response.blob();
       const file = new File([blob], cachedDoc.fileName, { type: cachedDoc.fileType });
       
       // Get upload URL
@@ -458,17 +459,15 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
       clearInterval(progressInterval);
       const { storageId } = await uploadResponse.json();
       
-      // Save document metadata to Convex using the new formDocuments model
-      const result: DocumentUploadResult = {
-        requirementId: documentRequirementId as Id<"documentTypes">,
-        fieldName,
-        fieldIdentifier: fieldName, // Map fieldName to fieldIdentifier for consistency
+      // Save document metadata to Convex using the uploadDocument mutation
+      const uploadResult = await uploadDocument({
+        applicationId,
+        fieldIdentifier: fieldName,
         storageId,
         fileName: cachedDoc.fileName,
         fileType: cachedDoc.fileType,
         fileSize: cachedDoc.fileSize,
-        status: "Pending", // Default status
-      };
+      });
       
       // Update cached document with storage ID using reactive updates
       updateCachedDocumentStatusReactive(applicationId, fieldName, {
@@ -485,7 +484,19 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
         success: true
       });
       
-      return result;
+      return {
+        requirementId: uploadResult.requirementId,
+        fieldName,
+        fieldIdentifier: uploadResult.fieldIdentifier,
+        storageId: uploadResult.storageId,
+        fileName: uploadResult.fileName,
+        fileType: uploadResult.fileType,
+        fileSize: uploadResult.fileSize,
+        status: uploadResult.status,
+        reviewBy: uploadResult.reviewBy,
+        reviewAt: uploadResult.reviewAt,
+        remarks: uploadResult.remarks
+      };
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
@@ -506,34 +517,67 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
       
       throw error;
     }
-  }, [applicationId, generateUploadUrl, setUploadState]);
+  }, [applicationId, generateUploadUrl, uploadDocument, setUploadState]);
   
   /**
-   * Batch upload all cached documents for the form
+   * Batch upload all cached documents for the form with concurrency control
    */
   const batchUploadCachedDocuments = useCallback(async (): Promise<{
     successful: DocumentUploadResult[];
     failed: { fieldName: string; error: string }[];
+    memoryCleanup: boolean;
   }> => {
     const cachedDocs = getCachedDocumentsByForm(applicationId);
     const toUpload = cachedDocs.filter(doc => doc.status === 'cached' || doc.status === 'failed');
     
+    // Check memory limits before starting
+    const memoryCheck = require('../utils/documentCache').checkMemoryLimits();
+    if (memoryCheck.exceedsLimits) {
+      console.warn('Memory limits exceeded before bulk upload:', memoryCheck.recommendations);
+      // Perform cleanup
+      await require('../utils/documentCache').smartCacheCleanup();
+    }
+    
     const successful: DocumentUploadResult[] = [];
     const failed: { fieldName: string; error: string }[] = [];
+    const concurrencyLimit = 3; // Upload max 3 files simultaneously
     
-    for (const doc of toUpload) {
-      try {
-        const result = await uploadCachedDocument(doc.fieldName);
-        successful.push(result);
-      } catch (error) {
-        failed.push({
-          fieldName: doc.fieldName,
-          error: error instanceof Error ? error.message : 'Upload failed'
-        });
+    // Process uploads in chunks to manage memory
+    for (let i = 0; i < toUpload.length; i += concurrencyLimit) {
+      const chunk = toUpload.slice(i, i + concurrencyLimit);
+      
+      // Upload chunk concurrently
+      const chunkResults = await Promise.allSettled(
+        chunk.map(doc => uploadCachedDocument(doc.fieldName))
+      );
+      
+      // Process results
+      chunkResults.forEach((result, index) => {
+        const doc = chunk[index];
+        if (result.status === 'fulfilled') {
+          successful.push(result.value);
+        } else {
+          failed.push({
+            fieldName: doc.fieldName,
+            error: result.reason instanceof Error ? result.reason.message : 'Upload failed'
+          });
+        }
+      });
+      
+      // Small delay between chunks to prevent overwhelming the system
+      if (i + concurrencyLimit < toUpload.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
     
-    return { successful, failed };
+    // Final memory cleanup
+    const finalMemoryCleanup = await require('../utils/documentCache').smartCacheCleanup();
+    
+    return { 
+      successful, 
+      failed, 
+      memoryCleanup: finalMemoryCleanup.removedCount > 0 
+    };
   }, [applicationId, uploadCachedDocument]);
   
   /**
@@ -579,13 +623,121 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
     }
     
     // Reset error state
-    updateCachedDocumentStatus(applicationId, fieldName, {
+    updateCachedDocumentStatusReactive(applicationId, fieldName, {
       status: 'cached',
       error: null
     });
     
     return uploadCachedDocument(fieldName);
   }, [applicationId, uploadCachedDocument]);
+
+  /**
+   * Enhanced bulk upload with queue management and progress tracking
+   */
+  const bulkUploadWithQueue = useCallback(async (
+    onProgress?: (progress: {
+      completed: number;
+      total: number;
+      currentFile?: string;
+      failed: number;
+    }) => void
+  ): Promise<{
+    successful: DocumentUploadResult[];
+    failed: { fieldName: string; error: string }[];
+    totalProcessed: number;
+    memoryStats: any;
+  }> => {
+    const { 
+      addToUploadQueue, 
+      getNextUploadBatch, 
+      removeFromUploadQueue, 
+      checkMemoryLimits,
+      smartCacheCleanup 
+    } = require('../utils/documentCache');
+    
+    const cachedDocs = getCachedDocumentsByForm(applicationId);
+    const toUpload = cachedDocs.filter(doc => doc.status === 'cached' || doc.status === 'failed');
+    
+    if (toUpload.length === 0) {
+      return { successful: [], failed: [], totalProcessed: 0, memoryStats: null };
+    }
+    
+    // Add documents to upload queue with priorities
+    const queueItems = toUpload.map(doc => ({
+      applicationId,
+      fieldName: doc.fieldName,
+      priority: doc.status === 'failed' ? 2 : 1, // Retry failed uploads first
+    }));
+    
+    addToUploadQueue(queueItems);
+    
+    const successful: DocumentUploadResult[] = [];
+    const failed: { fieldName: string; error: string }[] = [];
+    let totalProcessed = 0;
+    
+    // Process uploads in batches from the queue
+    while (true) {
+      const batch = getNextUploadBatch(3); // Process 3 at a time
+      if (batch.length === 0) break;
+      
+      // Check memory limits before each batch
+      const memoryCheck = checkMemoryLimits();
+      if (memoryCheck.exceedsLimits) {
+        console.warn('Memory limits exceeded during bulk upload');
+        await smartCacheCleanup();
+      }
+      
+      // Upload batch concurrently
+      const batchResults = await Promise.allSettled(
+        batch.map(item => uploadCachedDocument(item.fieldName))
+      );
+      
+      // Process batch results
+      const processedItems: { applicationId: string; fieldName: string }[] = [];
+      
+      batchResults.forEach((result, index) => {
+        const item = batch[index];
+        totalProcessed++;
+        
+        if (result.status === 'fulfilled') {
+          successful.push(result.value);
+          processedItems.push({ applicationId: item.applicationId, fieldName: item.fieldName });
+        } else {
+          failed.push({
+            fieldName: item.fieldName,
+            error: result.reason instanceof Error ? result.reason.message : 'Upload failed'
+          });
+          // Don't remove failed items from queue immediately - they might be retried
+        }
+        
+        // Report progress
+        onProgress?.({
+          completed: successful.length,
+          total: toUpload.length,
+          currentFile: item.fieldName,
+          failed: failed.length,
+        });
+      });
+      
+      // Remove successfully processed items from queue
+      if (processedItems.length > 0) {
+        removeFromUploadQueue(processedItems);
+      }
+      
+      // Small delay between batches
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    // Final cleanup and stats
+    const memoryStats = await smartCacheCleanup();
+    
+    return {
+      successful,
+      failed,
+      totalProcessed,
+      memoryStats,
+    };
+  }, [applicationId, uploadCachedDocument, getCachedDocumentsByForm]);
 
   return {
     // Original functions
@@ -605,5 +757,8 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
     getCachedFile,
     retryCachedUpload,
     cachedDocuments,
+    
+    // Enhanced bulk upload
+    bulkUploadWithQueue,
   };
 };

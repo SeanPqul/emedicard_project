@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { Id } from '../../convex/_generated/dataModel';
 import { formStorage } from '../utils/formStorage';
 import { DocumentRequirement, JobCategory } from '../types/domain/application';
-import { blobToBase64 } from '../utils/fileUtils';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
@@ -170,7 +169,7 @@ export const useSubmission = ({
       // Mark queue as submitting
       formStorage.updateQueueStatus(tempApp.queueId, 'submitting');
 
-      // Step 1: Create the application in database
+      // Validate job category first
       console.log('Job categories data:', jobCategoriesData?.length, 'items');
       console.log('Selected job category ID:', formData.jobCategory);
       console.log('Form data:', formData);
@@ -181,21 +180,15 @@ export const useSubmission = ({
         throw new Error(`Invalid job category selected. Selected: ${formData.jobCategory}, Available: ${jobCategoriesData?.length || 0} categories`);
       }
 
-      const applicationId = await applications.mutations.createApplication({
-        applicationType: formData.applicationType,
-        jobCategoryId: formData.jobCategory as Id<'jobCategories'>,
-        position: formData.position,
-        organization: formData.organization,
-        civilStatus: formData.civilStatus,
-      });
-
-      // Step 2: Upload all documents from deferred queue
+      // Step 1: Upload all documents from deferred queue FIRST
       const queue = formStorage.getDeferredQueue(tempApp.queueId);
       if (!queue) {
         throw new Error('Document queue not found');
       }
       
       const operations = Object.values(queue.uploadOperations);
+      const uploadedDocuments: { [key: string]: { storageId: string; fileName: string; fileType: string; fileSize: number } } = {};
+      
       if (operations.length === 0) {
         console.log('No documents to upload');
       } else {
@@ -206,7 +199,8 @@ export const useSubmission = ({
         
         for (const operation of operations) {
           // Skip already completed operations
-          if (operation.status === 'completed') {
+          if (operation.status === 'completed' && operation.uploadResult) {
+            uploadedDocuments[operation.documentId] = operation.uploadResult;
             successCount++;
             continue;
           }
@@ -216,58 +210,129 @@ export const useSubmission = ({
             formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'uploading', 0);
             
             // Validate file still exists and is accessible
+            console.log(`Checking file URI for ${operation.documentId}: ${operation.file.uri}`);
             try {
               const response = await fetch(operation.file.uri, { method: 'HEAD' });
               if (!response.ok) {
+                console.error(`HEAD request failed for ${operation.documentId}:`, response.status, response.statusText);
                 throw new Error(`File no longer accessible: ${response.status}`);
               }
             } catch (headError) {
+              console.error(`HEAD request error for ${operation.documentId}:`, headError);
               throw new Error(`Document file is no longer available: ${operation.file.name}`);
             }
 
             // Convert file to blob with progress tracking
-            const fileResponse = await fetch(operation.file.uri);
-            if (!fileResponse.ok) {
-              throw new Error(`Failed to read file: ${fileResponse.status}`);
+            console.log(`Fetching file for ${operation.documentId} from URI: ${operation.file.uri}`);
+            let fileResponse;
+            try {
+              fileResponse = await fetch(operation.file.uri);
+            } catch (fetchError) {
+              console.error(`Failed to fetch file for ${operation.documentId}:`, fetchError);
+              throw new Error(`Failed to fetch file: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`);
             }
             
-            const fileBlob = await fileResponse.blob();
+            if (!fileResponse.ok) {
+              console.error(`File fetch response not OK for ${operation.documentId}:`, fileResponse.status, fileResponse.statusText);
+              throw new Error(`Failed to read file: ${fileResponse.status} ${fileResponse.statusText}`);
+            }
+            
+            let fileBlob;
+            try {
+              fileBlob = await fileResponse.blob();
+            } catch (blobError) {
+              console.error(`Failed to convert to blob for ${operation.documentId}:`, blobError);
+              throw new Error(`Failed to convert file to blob: ${blobError instanceof Error ? blobError.message : 'Unknown error'}`);
+            }
             const fileSize = fileBlob.size;
+            console.log(`File blob created for ${operation.documentId}, size: ${fileSize} bytes`);
             
             // Validate file size hasn't changed
             if (operation.file.size && Math.abs(fileSize - operation.file.size) > 1024) {
               console.warn(`File size mismatch for ${operation.file.name}: expected ${operation.file.size}, got ${fileSize}`);
             }
 
-            // Update progress to 25% before converting file
+            // Update progress to 25% after file validation
             formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'uploading', 25);
-
-            // Convert file to base64 for centralized upload
-            const fileBase64 = await blobToBase64(fileBlob);
             
             // Update progress to 50% before upload
             formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'uploading', 50);
 
-            // Use centralized upload function (handles all 3 steps internally)
-            const uploadResult = await requirements.mutations.uploadDocumentWithFile({
-              applicationId: applicationId,
-              fieldIdentifier: operation.documentId,
-              fileName: operation.file.fileName || operation.file.name || 'document',
-              fileType: operation.file.type || operation.file.mimeType || 'image/jpeg',
-              fileSize: fileSize,
-              fileBase64: fileBase64,
-              reviewStatus: 'Pending',
-            });
+            // Step 1: Get upload URL from Convex
+            console.log(`Getting upload URL for ${operation.documentId}...`);
+            let uploadUrl;
+            try {
+              uploadUrl = await requirements.mutations.generateUploadUrl();
+              console.log(`Got upload URL for ${operation.documentId}`);
+            } catch (urlError) {
+              console.error(`Failed to get upload URL for ${operation.documentId}:`, urlError);
+              throw new Error(`Failed to get upload URL: ${urlError instanceof Error ? urlError.message : 'Unknown error'}`);
+            }
             
-            if (!uploadResult.success) {
-              throw new Error('Failed to upload document');
+            // Update progress to 60%
+            formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'uploading', 60);
+
+            // Step 2: Upload file directly to Convex storage
+            // Fix content-type to ensure it's a valid MIME type
+            let contentType = operation.file.type || operation.file.mimeType;
+            
+            // Validate and fix content-type
+            if (!contentType || contentType === 'image' || !contentType.includes('/')) {
+              // Try to infer from file name or URI
+              const fileUri = operation.file.uri || '';
+              const fileName = operation.file.name || operation.file.fileName || '';
+              
+              if (fileUri.toLowerCase().includes('.png') || fileName.toLowerCase().includes('.png')) {
+                contentType = 'image/png';
+              } else if (fileUri.toLowerCase().includes('.pdf') || fileName.toLowerCase().includes('.pdf')) {
+                contentType = 'application/pdf';
+              } else {
+                // Default to JPEG for images
+                contentType = 'image/jpeg';
+              }
+            }
+            
+            console.log(`Uploading ${operation.documentId} to storage, content-type: ${contentType}`);
+            let uploadResponse;
+            try {
+              uploadResponse = await fetch(uploadUrl, {
+                method: 'POST',
+                body: fileBlob,
+                headers: {
+                  'Content-Type': contentType,
+                },
+              });
+            } catch (uploadError) {
+              console.error(`Upload request failed for ${operation.documentId}:`, uploadError);
+              throw new Error(`Upload request failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
             }
 
-            // Mark operation as completed
-            formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'completed', 100);
+            if (!uploadResponse.ok) {
+              console.error(`Upload response not OK for ${operation.documentId}:`, uploadResponse.status, uploadResponse.statusText);
+              const responseText = await uploadResponse.text();
+              console.error(`Upload response body:`, responseText);
+              throw new Error(`File upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+            }
+
+            const { storageId } = await uploadResponse.json();
+            
+            // Update progress to 80%
+            formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'uploading', 80);
+
+            // Store upload result for later use (NOT saving to database yet)
+            const uploadData = {
+              storageId: storageId,
+              fileName: operation.file.fileName || operation.file.name || 'document',
+              fileType: contentType, // Use the validated content type
+              fileSize: fileSize,
+            };
+            uploadedDocuments[operation.documentId] = uploadData;
+
+            // Mark operation as completed with upload result
+            formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'completed', 100, undefined, uploadData);
             successCount++;
             
-            console.log(`✅ Successfully uploaded: ${operation.file.name}`);
+            console.log(`✅ Successfully uploaded file to storage: ${operation.file.name}`);
 
           } catch (error) {
             failureCount++;
@@ -297,20 +362,53 @@ export const useSubmission = ({
         }
       }
 
-      // Step 3: Submit application with payment (this validates all documents are uploaded)
+      // Step 2: Create the application in database ONLY after documents are uploaded successfully
+      console.log('Creating application with uploaded documents...');
+      const applicationId = await applications.mutations.createApplication({
+        applicationType: formData.applicationType,
+        jobCategoryId: formData.jobCategory as Id<'jobCategories'>,
+        position: formData.position,
+        organization: formData.organization,
+        civilStatus: formData.civilStatus,
+      });
+
+      // Step 3: Save document metadata to the created application
+      console.log('Linking uploaded documents to application...');
+      for (const [documentId, uploadData] of Object.entries(uploadedDocuments)) {
+        try {
+          await requirements.mutations.uploadDocument({
+            applicationId: applicationId,
+            fieldIdentifier: documentId,
+            storageId: uploadData.storageId,
+            fileName: uploadData.fileName,
+            fileType: uploadData.fileType,
+            fileSize: uploadData.fileSize,
+            reviewStatus: 'Pending',
+          });
+          console.log(`✅ Linked document ${documentId} to application`);
+        } catch (error) {
+          console.error(`Failed to link document ${documentId} to application:`, error);
+          // Note: We might want to delete the application if document linking fails
+          throw new Error(`Failed to link document ${documentId} to application. Please try again.`);
+        }
+      }
+
+      // Step 4: Submit application with payment (this validates all documents are uploaded)
       console.log(`Submitting application ${applicationId} with payment method ${paymentMethod}`);
       const result = await applications.mutations.submitApplicationForm(
         applicationId,
         paymentMethod,
         referenceNumber
       );
+      
+      console.log('Application submission result:', result);
 
       if (result.success) {
-        // Step 4: Mark queue as completed and clear data
+        // Step 5: Mark queue as completed and clear data
         formStorage.updateQueueStatus(tempApp.queueId, 'completed');
         formStorage.clearTempApplication();
         
-        // Step 5: Show success notification ONLY after everything is complete
+        // Step 6: Show success notification ONLY after everything is complete
         showSuccess('Application Submitted Successfully!', `Your application has been submitted with payment reference: ${referenceNumber}`);
         
         Alert.alert(

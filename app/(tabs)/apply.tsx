@@ -108,7 +108,6 @@ export default function ApplyScreen() {
 
   // Use jobCategories directly from hook to avoid timing issues
   const activeJobCategories = jobCategories.jobCategories || [];
-  console.log('Apply.tsx - activeJobCategories for submission:', activeJobCategories.length, 'items');
 
   // Submission hook
   const submission = useSubmission({

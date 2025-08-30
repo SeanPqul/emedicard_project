@@ -7,13 +7,6 @@ type ConvexId<T extends TableNames> = Id<T>;
 export function useJobCategories(selectedCategoryId?: string) {
   const allJobCategories = useQuery(api.jobCategories.getAllJobCategories.getAllJobCategoriesQuery);
   
-  // Debug logging
-  console.log('useJobCategories - raw query result:', allJobCategories);
-  console.log('useJobCategories - query state:', {
-    isLoading: allJobCategories === undefined,
-    hasData: !!allJobCategories,
-    dataLength: allJobCategories?.length
-  });
   
   const requirementsByCategory = useQuery(
     api.requirements.getRequirementsByJobCategory.getRequirementsByJobCategoryQuery,

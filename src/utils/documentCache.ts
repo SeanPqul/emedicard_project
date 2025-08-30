@@ -1,5 +1,5 @@
 import { Id } from '../../convex/_generated/dataModel';
-import { storage, setObject, getObject, removeItem, getAllKeys } from './storage';
+import { setObject, getObject, removeItem, getAllKeys } from './storage';
 
 export interface CachedDocument {
   id: string; // Unique identifier for cached document
@@ -8,8 +8,7 @@ export interface CachedDocument {
   fileName: string;
   fileType: string;
   fileSize: number;
-  fileUri: string; // Local file URI
-  base64Data: string; // Base64 encoded file data for storage
+  fileUri: string; // Local file URI - this is our file reference
   uploadedAt: number;
   status: 'cached' | 'uploading' | 'uploaded' | 'failed';
   convexStorageId?: Id<"_storage">; // Set after successful upload to Convex
@@ -25,9 +24,18 @@ export interface DocumentCacheState {
 
 const CACHE_KEY_PREFIX = 'cached_documents_';
 const GLOBAL_CACHE_KEY = 'document_cache_state';
+const TEMP_UPLOAD_QUEUE_KEY = 'temp_upload_queue';
+
+// Memory management thresholds specific to document cache
+export const DOCUMENT_MEMORY_LIMITS = {
+  MAX_CACHED_DOCUMENTS: 50, // Maximum number of documents to cache
+  MAX_CACHE_SIZE: 100 * 1024 * 1024, // 100MB max cache size
+  BULK_UPLOAD_LIMIT: 10, // Maximum documents in a single bulk upload
+  CLEANUP_INTERVAL: 5 * 60 * 1000, // 5 minutes cleanup interval
+} as const;
 
 /**
- * Cache a document in MMKV before upload
+ * Cache a document in MMKV before upload (stores file reference only, not base64)
  */
 export const cacheDocument = async (
   applicationId: string,
@@ -40,11 +48,6 @@ export const cacheDocument = async (
   }
 ): Promise<CachedDocument> => {
   try {
-    // Convert file to base64 for storage
-    const response = await fetch(file.uri);
-    const blob = await response.blob();
-    const base64Data = await blobToBase64(blob);
-
     const cachedDoc: CachedDocument = {
       id: `${applicationId}_${fieldName}_${Date.now()}`,
       applicationId,
@@ -52,8 +55,7 @@ export const cacheDocument = async (
       fileName: file.name,
       fileType: file.type,
       fileSize: file.size,
-      fileUri: file.uri,
-      base64Data,
+      fileUri: file.uri, // Just store the URI reference, not base64 data
       uploadedAt: Date.now(),
       status: 'cached',
       retryCount: 0,
@@ -66,7 +68,7 @@ export const cacheDocument = async (
     // Update global state
     updateGlobalCacheState(applicationId, fieldName, cachedDoc);
 
-    console.log(`📦 Document cached: ${fieldName} for application ${applicationId}`);
+    console.log(`📦 Document cached: ${fieldName} for application ${applicationId} (file reference only)`);
     return cachedDoc;
   } catch (error) {
     console.error('Failed to cache document:', error);
@@ -413,11 +415,11 @@ export const removeCachedDocumentReactive = (formId: string, fieldName: string):
  * Batch operations for better performance
  */
 export const batchUpdateDocumentStatus = (
-  updates: Array<{
+  updates: {
     formId: string;
     fieldName: string;
     updates: Partial<Pick<CachedDocument, 'status' | 'convexStorageId' | 'error' | 'retryCount'>>;
-  }>
+  }[]
 ): { success: number; failed: number } => {
   let success = 0;
   let failed = 0;
@@ -435,75 +437,215 @@ export const batchUpdateDocumentStatus = (
 };
 
 /**
- * Smart cache cleanup with size-based optimization
+ * Smart cache cleanup with size-based optimization and file accessibility check
  */
-export const smartCacheCleanup = (): {
+export const smartCacheCleanup = async (): Promise<{
   removedCount: number;
   freedSize: number;
-} => {
-  const stats = getCacheStats();
+  inaccessibleFiles: number;
+}> => {
   let removedCount = 0;
   let freedSize = 0;
+  let inaccessibleFiles = 0;
   
   // Clean up failed uploads older than 24 hours
   const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
   
-  Object.keys(getGlobalCacheState()).forEach(formId => {
+  const state = getGlobalCacheState();
+  
+  for (const formId of Object.keys(state)) {
     const docs = getCachedDocumentsByForm(formId);
     
-    docs.forEach(doc => {
-      const shouldRemove = 
-        (doc.status === 'failed' && doc.uploadedAt < oneDayAgo) ||
-        (doc.status === 'uploaded' && doc.uploadedAt < (Date.now() - (7 * 24 * 60 * 60 * 1000)));
+    for (const doc of docs) {
+      let shouldRemove = false;
+      
+      // Check time-based cleanup conditions
+      if (doc.status === 'failed' && doc.uploadedAt < oneDayAgo) {
+        shouldRemove = true;
+      } else if (doc.status === 'uploaded' && doc.uploadedAt < (Date.now() - (7 * 24 * 60 * 60 * 1000))) {
+        shouldRemove = true;
+      }
+      
+      // Check file accessibility for non-uploaded files
+      if (!shouldRemove && doc.status !== 'uploaded') {
+        const isAccessible = await checkFileAccessibility(doc.fileUri);
+        if (!isAccessible) {
+          shouldRemove = true;
+          inaccessibleFiles++;
+        }
+      }
       
       if (shouldRemove) {
         freedSize += doc.fileSize;
         removeCachedDocumentReactive(formId, doc.fieldName);
         removedCount++;
       }
-    });
-  });
+    }
+  }
   
-  console.log(`Smart cleanup: removed ${removedCount} documents, freed ${freedSize} bytes`);
-  return { removedCount, freedSize };
+  console.log(`Smart cleanup: removed ${removedCount} documents, freed ${freedSize} bytes, ${inaccessibleFiles} inaccessible files`);
+  return { removedCount, freedSize, inaccessibleFiles };
 };
 
 // Helper functions
 
 /**
- * Convert blob to base64 string
+ * Helper function to check if a file URI is still accessible
  */
-const blobToBase64 = (blob: Blob): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
-      const base64 = result.split(',')[1];
-      if (base64) {
-        resolve(base64);
-      } else {
-        reject(new Error('Failed to convert blob to base64'));
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
+export const checkFileAccessibility = async (fileUri: string): Promise<boolean> => {
+  try {
+    const response = await fetch(fileUri);
+    return response.ok;
+  } catch {
+    console.warn(`File URI no longer accessible: ${fileUri}`);
+    return false;
+  }
 };
 
 /**
- * Convert base64 string back to blob
+ * TEMP_UPLOAD_QUEUE management functions
  */
-export const base64ToBlob = (base64: string, mimeType: string): Blob => {
-  const byteCharacters = atob(base64);
-  const byteNumbers = new Array(byteCharacters.length);
+
+interface UploadQueueItem {
+  applicationId: string;
+  fieldName: string;
+  priority: number; // Higher number = higher priority
+  queuedAt: number;
+}
+
+/**
+ * Add documents to the temp upload queue
+ */
+export const addToUploadQueue = (items: Omit<UploadQueueItem, 'queuedAt'>[]): void => {
+  const queue = getObject<UploadQueueItem[]>(TEMP_UPLOAD_QUEUE_KEY) || [];
   
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  const newItems = items.map(item => ({
+    ...item,
+    queuedAt: Date.now(),
+  }));
+  
+  queue.push(...newItems);
+  
+  // Sort by priority (higher first) then by queued time (older first)
+  queue.sort((a, b) => {
+    if (a.priority !== b.priority) return b.priority - a.priority;
+    return a.queuedAt - b.queuedAt;
+  });
+  
+  setObject(TEMP_UPLOAD_QUEUE_KEY, queue);
+  console.log(`Added ${newItems.length} items to upload queue`);
+};
+
+/**
+ * Get next batch of documents from upload queue
+ */
+export const getNextUploadBatch = (batchSize: number = DOCUMENT_MEMORY_LIMITS.BULK_UPLOAD_LIMIT): UploadQueueItem[] => {
+  const queue = getObject<UploadQueueItem[]>(TEMP_UPLOAD_QUEUE_KEY) || [];
+  
+  if (queue.length === 0) return [];
+  
+  const batch = queue.splice(0, Math.min(batchSize, queue.length));
+  setObject(TEMP_UPLOAD_QUEUE_KEY, queue);
+  
+  console.log(`Retrieved batch of ${batch.length} items from upload queue`);
+  return batch;
+};
+
+/**
+ * Remove specific items from upload queue
+ */
+export const removeFromUploadQueue = (items: { applicationId: string; fieldName: string }[]): void => {
+  const queue = getObject<UploadQueueItem[]>(TEMP_UPLOAD_QUEUE_KEY) || [];
+  
+  const updatedQueue = queue.filter(queueItem => {
+    return !items.some(item => 
+      queueItem.applicationId === item.applicationId && 
+      queueItem.fieldName === item.fieldName
+    );
+  });
+  
+  setObject(TEMP_UPLOAD_QUEUE_KEY, updatedQueue);
+  console.log(`Removed ${queue.length - updatedQueue.length} items from upload queue`);
+};
+
+/**
+ * Clear the entire upload queue
+ */
+export const clearUploadQueue = (): void => {
+  removeItem(TEMP_UPLOAD_QUEUE_KEY);
+  console.log('Upload queue cleared');
+};
+
+/**
+ * Get upload queue statistics
+ */
+export const getUploadQueueStats = (): {
+  totalItems: number;
+  priorityDistribution: Record<number, number>;
+  oldestItem: number | undefined;
+  averageWaitTime: number;
+} => {
+  const queue = getObject<UploadQueueItem[]>(TEMP_UPLOAD_QUEUE_KEY) || [];
+  const now = Date.now();
+  
+  const priorityDistribution: Record<number, number> = {};
+  let totalWaitTime = 0;
+  let oldestItem: number | undefined;
+  
+  queue.forEach(item => {
+    priorityDistribution[item.priority] = (priorityDistribution[item.priority] || 0) + 1;
+    totalWaitTime += (now - item.queuedAt);
+    
+    if (!oldestItem || item.queuedAt < oldestItem) {
+      oldestItem = item.queuedAt;
+    }
+  });
+  
+  return {
+    totalItems: queue.length,
+    priorityDistribution,
+    oldestItem,
+    averageWaitTime: queue.length > 0 ? totalWaitTime / queue.length : 0,
+  };
+};
+
+/**
+ * Enhanced memory management with size tracking
+ */
+export const checkMemoryLimits = (): {
+  exceedsLimits: boolean;
+  totalDocuments: number;
+  totalSize: number;
+  recommendations: string[];
+} => {
+  const stats = getCacheStats();
+  const recommendations: string[] = [];
+  let exceedsLimits = false;
+  
+  if (stats.totalDocuments > DOCUMENT_MEMORY_LIMITS.MAX_CACHED_DOCUMENTS) {
+    exceedsLimits = true;
+    recommendations.push(`Too many cached documents (${stats.totalDocuments}/${DOCUMENT_MEMORY_LIMITS.MAX_CACHED_DOCUMENTS})`);
   }
   
-  const byteArray = new Uint8Array(byteNumbers);
-  return new Blob([byteArray], { type: mimeType });
+  if (stats.totalSize > DOCUMENT_MEMORY_LIMITS.MAX_CACHE_SIZE) {
+    exceedsLimits = true;
+    const sizeMB = (stats.totalSize / (1024 * 1024)).toFixed(2);
+    const limitMB = (DOCUMENT_MEMORY_LIMITS.MAX_CACHE_SIZE / (1024 * 1024)).toFixed(0);
+    recommendations.push(`Cache size too large (${sizeMB}MB/${limitMB}MB)`);
+  }
+  
+  // Check for failed documents that should be cleaned up
+  const failedCount = stats.byStatus.failed;
+  if (failedCount > 5) {
+    recommendations.push(`Many failed uploads (${failedCount}), consider retry or cleanup`);
+  }
+  
+  return {
+    exceedsLimits,
+    totalDocuments: stats.totalDocuments,
+    totalSize: stats.totalSize,
+    recommendations,
+  };
 };
 
 /**

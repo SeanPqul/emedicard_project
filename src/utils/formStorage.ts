@@ -27,6 +27,12 @@ interface UploadOperation {
   progress: number;
   error?: string;
   timestamp: number;
+  uploadResult?: {
+    storageId: string;
+    fileName: string;
+    fileType: string;
+    fileSize: number;
+  };
 }
 
 interface DeferredOperationQueue {
@@ -115,7 +121,13 @@ export const formStorage = {
     operationId: string,
     status: UploadOperation['status'],
     progress?: number,
-    error?: string
+    error?: string,
+    uploadResult?: {
+      storageId: string;
+      fileName: string;
+      fileType: string;
+      fileSize: number;
+    }
   ): boolean => {
     const queue = formStorage.getDeferredQueue(queueId);
     if (!queue) return false;
@@ -126,6 +138,7 @@ export const formStorage = {
     operation.status = status;
     if (progress !== undefined) operation.progress = progress;
     if (error !== undefined) operation.error = error;
+    if (uploadResult !== undefined) operation.uploadResult = uploadResult;
     operation.timestamp = Date.now();
 
     return storageUtils.safeSet(`deferred_queue_${queueId}`, queue, cacheStorage);

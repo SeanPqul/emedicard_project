@@ -60,7 +60,6 @@ import type * as requirements_removeJobCategoryRequirement from "../requirements
 import type * as requirements_updateDocumentField from "../requirements/updateDocumentField.js";
 import type * as requirements_updateJobCategory from "../requirements/updateJobCategory.js";
 import type * as requirements_updateJobCategoryRequirement from "../requirements/updateJobCategoryRequirement.js";
-import type * as requirements_uploadDocumentWithFile from "../requirements/uploadDocumentWithFile.js";
 import type * as requirements_uploadDocuments from "../requirements/uploadDocuments.js";
 import type * as storage_generateUploadUrl from "../storage/generateUploadUrl.js";
 import type * as users_createUser from "../users/createUser.js";
@@ -132,7 +131,6 @@ declare const fullApi: ApiFromModules<{
   "requirements/updateDocumentField": typeof requirements_updateDocumentField;
   "requirements/updateJobCategory": typeof requirements_updateJobCategory;
   "requirements/updateJobCategoryRequirement": typeof requirements_updateJobCategoryRequirement;
-  "requirements/uploadDocumentWithFile": typeof requirements_uploadDocumentWithFile;
   "requirements/uploadDocuments": typeof requirements_uploadDocuments;
   "storage/generateUploadUrl": typeof storage_generateUploadUrl;
   "users/createUser": typeof users_createUser;
