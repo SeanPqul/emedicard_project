@@ -52,44 +52,24 @@ const NOTIFICATION_TITLES = {
 
 export default function Notifications() {
   const { user } = useUser();
+  const notifications = useNotifications();
   const [selectedCategory, setSelectedCategory] = useState<NotificationCategory>('All');
   const [refreshing, setRefreshing] = useState(false);
-  const [notificationsData, setNotificationsData] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Load notifications
-  useEffect(() => {
-    loadNotifications();
-  }, []);
-
-  const loadNotifications = async () => {
-    try {
-      setLoading(true);
-      const data = await notifications.getUserNotifications();
-      setNotificationsData(data || []);
-    } catch (error) {
-      console.error('Error loading notifications:', error);
-      Alert.alert('Error', 'Failed to load notifications');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const notificationsData = notifications.data.notifications || [];
+  const loading = notifications.isLoading;
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadNotifications();
-    setRefreshing(false);
+    // The hook will automatically refetch when the component re-renders
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
   };
 
   const handleMarkAsRead = async (notificationId: Id<'notifications'>) => {
     try {
-      await notifications.markNotificationAsRead(notificationId);
-      // Update local state
-      setNotificationsData(prev => 
-        prev.map(notif => 
-          notif._id === notificationId ? { ...notif, read: true } : notif
-        )
-      );
+      await notifications.mutations.markNotificationAsRead(notificationId);
     } catch (error) {
       console.error('Error marking notification as read:', error);
       Alert.alert('Error', 'Failed to mark notification as read');
@@ -98,11 +78,7 @@ export default function Notifications() {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await notifications.markAllNotificationsAsRead();
-      // Update local state
-      setNotificationsData(prev => 
-        prev.map(notif => ({ ...notif, read: true }))
-      );
+      await notifications.mutations.markAllNotificationsAsRead();
       Alert.alert('Success', 'All notifications marked as read');
     } catch (error) {
       console.error('Error marking all notifications as read:', error);

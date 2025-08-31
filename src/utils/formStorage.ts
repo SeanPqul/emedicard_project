@@ -1,6 +1,6 @@
-import { storageUtils, cacheStorage, StorageKeys } from '../lib/storage/mmkv';
-import { SelectedDocuments } from '../types';
+import { cacheStorage, StorageKeys, storageUtils } from '../lib/storage/mmkv';
 import { ApplicationFormData } from '../shared/validation/form-validation';
+import { SelectedDocuments } from '../types';
 
 interface TempApplicationData {
   formData: ApplicationFormData;
@@ -8,6 +8,7 @@ interface TempApplicationData {
   currentStep: number;
   timestamp: number;
   queueId: string; // Unique queue identifier
+  applicationId?: string; // Draft application ID for resume capability
 }
 
 interface DocumentFile {
@@ -41,6 +42,8 @@ interface DeferredOperationQueue {
   uploadOperations: Record<string, UploadOperation>;
   status: 'draft' | 'submitting' | 'completed' | 'failed';
   timestamp: number;
+  applicationId?: string; // Reference to draft application
+  expiresAt?: number; // Expiration timestamp for cleanup
 }
 
 export const formStorage = {
@@ -58,7 +61,8 @@ export const formStorage = {
     formData: ApplicationFormData,
     selectedDocuments: SelectedDocuments,
     currentStep: number,
-    queueId?: string
+    queueId?: string,
+    applicationId?: string
   ): string => {
     const id = queueId || formStorage.generateQueueId();
     const existingQueue = formStorage.getDeferredQueue(id);
@@ -67,16 +71,23 @@ export const formStorage = {
     const uploadOperations: Record<string, UploadOperation> = {};
     Object.entries(selectedDocuments).forEach(([documentId, file]) => {
       const existingOp = existingQueue?.uploadOperations[documentId];
-      uploadOperations[documentId] = {
+      const operation: UploadOperation = {
         id: existingOp?.id || `op_${Date.now()}_${documentId}`,
         documentId,
         file: file as DocumentFile,
         status: existingOp?.status || 'pending',
-        progress: existingOp?.progress || 0,
-        error: existingOp?.error || undefined,
+        progress: existingOp?.progress ?? 0,
         timestamp: existingOp?.timestamp || Date.now(),
       };
+
+      if (existingOp?.error) {
+        operation.error = existingOp.error;
+      }
+
+      uploadOperations[documentId] = operation;
     });
+
+    const finalApplicationId = applicationId || existingQueue?.applicationId;
 
     const queue: DeferredOperationQueue = {
       id,
@@ -84,7 +95,12 @@ export const formStorage = {
       uploadOperations,
       status: existingQueue?.status || 'draft',
       timestamp: Date.now(),
+      expiresAt: existingQueue?.expiresAt || Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
     };
+
+    if (finalApplicationId) {
+      queue.applicationId = finalApplicationId;
+    }
 
     // Save queue
     storageUtils.safeSet(`deferred_queue_${id}`, queue, cacheStorage);
@@ -97,6 +113,10 @@ export const formStorage = {
       timestamp: Date.now(),
       queueId: id,
     };
+
+    if (finalApplicationId) {
+      tempData.applicationId = finalApplicationId;
+    }
     storageUtils.safeSet(StorageKeys.TEMP_FORM_DATA, tempData, cacheStorage);
 
     return id;
@@ -324,6 +344,65 @@ export const formStorage = {
     
     // Clear session to prevent restore
     storageUtils.removeKey('last_app_session', cacheStorage);
+  },
+
+  /**
+   * Set application ID for current queue
+   */
+  setApplicationId: (applicationId: string): boolean => {
+    const tempApp = formStorage.getTempApplication();
+    if (!tempApp?.queueId) return false;
+    
+    const queue = formStorage.getDeferredQueue(tempApp.queueId);
+    if (!queue) return false;
+    
+    // Update queue with application ID
+    queue.applicationId = applicationId;
+    storageUtils.safeSet(`deferred_queue_${tempApp.queueId}`, queue, cacheStorage);
+    
+    // Update temp application data
+    const updatedTempData: TempApplicationData = {
+      ...tempApp,
+      applicationId,
+      timestamp: Date.now(),
+    };
+    storageUtils.safeSet(StorageKeys.TEMP_FORM_DATA, updatedTempData, cacheStorage);
+    
+    return true;
+  },
+  
+  /**
+   * Get application ID from current queue
+   */
+  getApplicationId: (): string | null => {
+    const tempApp = formStorage.getTempApplication();
+    return tempApp?.applicationId || null;
+  },
+  
+  /**
+   * Check if current queue has a draft application
+   */
+  hasDraftApplication: (): boolean => {
+    return formStorage.getApplicationId() !== null;
+  },
+  
+  /**
+   * Save application progress with step tracking
+   */
+  saveApplicationProgress: (
+    formData: ApplicationFormData,
+    selectedDocuments: SelectedDocuments,
+    currentStep: number,
+    applicationId?: string
+  ): string => {
+    const tempApp = formStorage.getTempApplication();
+    return formStorage.saveDeferredQueue(
+      formData, 
+      selectedDocuments, 
+      currentStep, 
+      tempApp?.queueId,
+      applicationId || tempApp?.applicationId
+    );
   },
 
   /**

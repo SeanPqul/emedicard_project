@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../../../styles/screens/tabs-apply-forms';
 import { getColor } from '../../../styles/theme';
 import { DocumentRequirement } from '../../../types/domain/application';
 import { SelectedDocuments } from '../../../types';
+import { retryFailedUploads, hasFailedUploads } from '../../../utils/uploadRetry';
 
 type ApplicationType = 'New' | 'Renew';
 
@@ -32,6 +33,7 @@ interface UploadDocumentsStepProps {
   getUploadState: (documentId: string) => UploadState;
   onDocumentPicker: (documentId: string) => void;
   onRemoveDocument: (documentId: string) => void;
+  requirements?: any;
 }
 
 export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
@@ -42,7 +44,30 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
   getUploadState,
   onDocumentPicker,
   onRemoveDocument,
+  requirements,
 }) => {
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    if (!requirements) {
+      Alert.alert('Error', 'Requirements not available for retry. Please refresh the page.');
+      return;
+    }
+
+    setIsRetrying(true);
+    try {
+      const result = await retryFailedUploads(requirements);
+      if (result.success) {
+        Alert.alert('Success', 'All failed uploads have been retried successfully!');
+      } else {
+        Alert.alert('Partial Success', result.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to retry uploads. Please try again.');
+    } finally {
+      setIsRetrying(false);
+    }
+  };
   // Show loading if requirements are being fetched
   if (isLoading) {
     return (
@@ -70,6 +95,22 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
         Please upload clear and readable copies of all required medical documents
         to ensure proper processing of your {formData.applicationType?.toLowerCase() || 'health card'} application.
       </Text>
+      
+      {/* Retry Section */}
+      {hasFailedUploads() && (
+        <View style={styles.retrySection}>
+          <Text style={styles.retryText}>Some documents failed to upload</Text>
+          <TouchableOpacity 
+            style={styles.retryButton} 
+            onPress={handleRetry}
+            disabled={isRetrying}
+          >
+            <Text style={styles.retryButtonText}>
+              {isRetrying ? 'Retrying...' : 'Retry Failed Uploads'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
       
       {/* Instructions */}
       <View style={styles.formGroup}>

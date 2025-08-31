@@ -68,7 +68,7 @@ async function handleReceiptUpload(): Promise<Id<"_storage"> | undefined> {
 
     // Launch image picker
     const pick = await ImagePicker.launchImageLibraryAsync({ 
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+      mediaTypes: ImagePicker.MediaType.Images, 
       quality: 0.7,
       allowsEditing: true,
       aspect: [4, 3],

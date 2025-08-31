@@ -245,6 +245,29 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
     }
   }, [formData, selectedDocuments, currentStep]);
 
+  const resetForm = useCallback(() => {
+    // Reset form data to initial state
+    setFormData({
+      applicationType: 'New',
+      jobCategory: '',
+      position: '',
+      organization: '',
+      civilStatus: 'Single',
+    });
+    
+    // Reset selected documents
+    setSelectedDocuments({});
+    
+    // Reset current step
+    setCurrentStep(0);
+    
+    // Reset errors
+    setErrors({});
+    
+    // Clear temp application data
+    formStorage.clearTempApplication();
+  }, []);
+
   return {
     currentStep,
     setCurrentStep,
@@ -261,5 +284,6 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
     handleBackPress,
     handleCancelApplication,
     initializeForm,
+    resetForm,
   };
 };

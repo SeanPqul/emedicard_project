@@ -25,6 +25,7 @@ interface UseSubmissionProps {
   validateCurrentStep: () => boolean;
   showSuccess: (title: string, message: string) => void;
   showError: (title: string, message?: string) => void;
+  resetForm: () => void;
 }
 
 export const useSubmission = ({
@@ -36,6 +37,7 @@ export const useSubmission = ({
   validateCurrentStep,
   showSuccess,
   showError,
+  resetForm,
 }: UseSubmissionProps) => {
   const [loading, setLoading] = useState(false);
 
@@ -89,7 +91,6 @@ export const useSubmission = ({
     setLoading(true);
     try {
       // TEMPORARY: Auto-submit with test payment for testing purposes
-      console.log('Auto-submitting with test payment data...');
       const testReferenceNumber = `TEST-${Date.now()}`;
       
       Alert.alert(
@@ -151,6 +152,14 @@ export const useSubmission = ({
       return;
     }
 
+    // Check if we can resume an existing draft application
+    const existingApplicationId = formStorage.getApplicationId();
+    if (existingApplicationId) {
+      // Resuming existing draft application
+    } else {
+      // Starting new application submission process
+    }
+
     try {
       // Check if job categories are loaded
       if (!jobCategoriesData || jobCategoriesData.length === 0) {
@@ -170,17 +179,46 @@ export const useSubmission = ({
       formStorage.updateQueueStatus(tempApp.queueId, 'submitting');
 
       // Validate job category first
-      console.log('Job categories data:', jobCategoriesData?.length, 'items');
-      console.log('Selected job category ID:', formData.jobCategory);
-      console.log('Form data:', formData);
-      
       const selectedCategory = jobCategoriesData?.find(cat => cat._id === formData.jobCategory);
       if (!selectedCategory) {
-        console.log('Available categories:', jobCategoriesData?.map(cat => ({ id: cat._id, name: cat.name })));
         throw new Error(`Invalid job category selected. Selected: ${formData.jobCategory}, Available: ${jobCategoriesData?.length || 0} categories`);
       }
 
-      // Step 1: Upload all documents from deferred queue FIRST
+      // IMPROVED FLOW: Step 1 - Create draft application first (as recommended)
+      // This prevents orphaned storage files and enables resume
+
+      // Step 1: Create or get draft application first
+      let applicationId: string;
+      const existingAppId = formStorage.getApplicationId();
+      
+      if (existingAppId) {
+        applicationId = existingAppId;
+        // Update application with latest form data in case user made changes
+        await applications.mutations.updateApplication(existingAppId as Id<'applications'>, {
+          applicationType: formData.applicationType,
+          jobCategoryId: formData.jobCategory as Id<'jobCategories'>,
+          position: formData.position,
+          organization: formData.organization,
+          civilStatus: formData.civilStatus,
+        });
+      } else {
+        // Create new draft application
+        applicationId = await applications.mutations.createApplication({
+          applicationType: formData.applicationType,
+          jobCategoryId: formData.jobCategory as Id<'jobCategories'>,
+          position: formData.position,
+          organization: formData.organization,
+          civilStatus: formData.civilStatus,
+        });
+        
+        // Save application ID to local storage for future resume capability
+        formStorage.setApplicationId(applicationId);
+      }
+
+      // Save current form progress to MMKV (local draft)
+      formStorage.saveApplicationProgress(formData, tempApp.selectedDocuments, tempApp.currentStep, applicationId);
+
+      // Step 2: Upload documents with application reference
       const queue = formStorage.getDeferredQueue(tempApp.queueId);
       if (!queue) {
         throw new Error('Document queue not found');
@@ -190,9 +228,8 @@ export const useSubmission = ({
       const uploadedDocuments: { [key: string]: { storageId: string; fileName: string; fileType: string; fileSize: number } } = {};
       
       if (operations.length === 0) {
-        console.log('No documents to upload');
+        // No documents to upload
       } else {
-        console.log(`Uploading ${operations.length} documents from queue...`);
         
         let successCount = 0;
         let failureCount = 0;
@@ -210,30 +247,24 @@ export const useSubmission = ({
             formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'uploading', 0);
             
             // Validate file still exists and is accessible
-            console.log(`Checking file URI for ${operation.documentId}: ${operation.file.uri}`);
             try {
               const response = await fetch(operation.file.uri, { method: 'HEAD' });
               if (!response.ok) {
-                console.error(`HEAD request failed for ${operation.documentId}:`, response.status, response.statusText);
                 throw new Error(`File no longer accessible: ${response.status}`);
               }
             } catch (headError) {
-              console.error(`HEAD request error for ${operation.documentId}:`, headError);
               throw new Error(`Document file is no longer available: ${operation.file.name}`);
             }
 
             // Convert file to blob with progress tracking
-            console.log(`Fetching file for ${operation.documentId} from URI: ${operation.file.uri}`);
             let fileResponse;
             try {
               fileResponse = await fetch(operation.file.uri);
             } catch (fetchError) {
-              console.error(`Failed to fetch file for ${operation.documentId}:`, fetchError);
               throw new Error(`Failed to fetch file: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`);
             }
             
             if (!fileResponse.ok) {
-              console.error(`File fetch response not OK for ${operation.documentId}:`, fileResponse.status, fileResponse.statusText);
               throw new Error(`Failed to read file: ${fileResponse.status} ${fileResponse.statusText}`);
             }
             
@@ -241,15 +272,13 @@ export const useSubmission = ({
             try {
               fileBlob = await fileResponse.blob();
             } catch (blobError) {
-              console.error(`Failed to convert to blob for ${operation.documentId}:`, blobError);
               throw new Error(`Failed to convert file to blob: ${blobError instanceof Error ? blobError.message : 'Unknown error'}`);
             }
             const fileSize = fileBlob.size;
-            console.log(`File blob created for ${operation.documentId}, size: ${fileSize} bytes`);
             
             // Validate file size hasn't changed
             if (operation.file.size && Math.abs(fileSize - operation.file.size) > 1024) {
-              console.warn(`File size mismatch for ${operation.file.name}: expected ${operation.file.size}, got ${fileSize}`);
+              // File size mismatch detected but proceeding
             }
 
             // Update progress to 25% after file validation
@@ -259,13 +288,10 @@ export const useSubmission = ({
             formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'uploading', 50);
 
             // Step 1: Get upload URL from Convex
-            console.log(`Getting upload URL for ${operation.documentId}...`);
             let uploadUrl;
             try {
               uploadUrl = await requirements.mutations.generateUploadUrl();
-              console.log(`Got upload URL for ${operation.documentId}`);
             } catch (urlError) {
-              console.error(`Failed to get upload URL for ${operation.documentId}:`, urlError);
               throw new Error(`Failed to get upload URL: ${urlError instanceof Error ? urlError.message : 'Unknown error'}`);
             }
             
@@ -292,7 +318,6 @@ export const useSubmission = ({
               }
             }
             
-            console.log(`Uploading ${operation.documentId} to storage, content-type: ${contentType}`);
             let uploadResponse;
             try {
               uploadResponse = await fetch(uploadUrl, {
@@ -303,14 +328,10 @@ export const useSubmission = ({
                 },
               });
             } catch (uploadError) {
-              console.error(`Upload request failed for ${operation.documentId}:`, uploadError);
               throw new Error(`Upload request failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
             }
 
             if (!uploadResponse.ok) {
-              console.error(`Upload response not OK for ${operation.documentId}:`, uploadResponse.status, uploadResponse.statusText);
-              const responseText = await uploadResponse.text();
-              console.error(`Upload response body:`, responseText);
               throw new Error(`File upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
             }
 
@@ -331,13 +352,10 @@ export const useSubmission = ({
             // Mark operation as completed with upload result
             formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'completed', 100, undefined, uploadData);
             successCount++;
-            
-            console.log(`✅ Successfully uploaded file to storage: ${operation.file.name}`);
 
           } catch (error) {
             failureCount++;
             const errorMessage = error instanceof Error ? error.message : 'Upload failed';
-            console.error(`❌ Failed to upload document ${operation.documentId}:`, errorMessage);
             
             formStorage.updateOperationStatus(
               tempApp.queueId, 
@@ -352,8 +370,6 @@ export const useSubmission = ({
           }
         }
         
-        console.log(`Document upload summary: ${successCount} successful, ${failureCount} failed`);
-        
         // If any documents failed, abort the submission process
         if (failureCount > 0) {
           throw new Error(
@@ -362,18 +378,9 @@ export const useSubmission = ({
         }
       }
 
-      // Step 2: Create the application in database ONLY after documents are uploaded successfully
-      console.log('Creating application with uploaded documents...');
-      const applicationId = await applications.mutations.createApplication({
-        applicationType: formData.applicationType,
-        jobCategoryId: formData.jobCategory as Id<'jobCategories'>,
-        position: formData.position,
-        organization: formData.organization,
-        civilStatus: formData.civilStatus,
-      });
-
-      // Step 3: Save document metadata to the created application
-      console.log('Linking uploaded documents to application...');
+      // Step 3: Link uploaded documents to the draft application
+      
+      // Step 4: Save document metadata to the application
       for (const [documentId, uploadData] of Object.entries(uploadedDocuments)) {
         try {
           await requirements.mutations.uploadDocument({
@@ -385,23 +392,18 @@ export const useSubmission = ({
             fileSize: uploadData.fileSize,
             reviewStatus: 'Pending',
           });
-          console.log(`✅ Linked document ${documentId} to application`);
         } catch (error) {
-          console.error(`Failed to link document ${documentId} to application:`, error);
           // Note: We might want to delete the application if document linking fails
           throw new Error(`Failed to link document ${documentId} to application. Please try again.`);
         }
       }
 
       // Step 4: Submit application with payment (this validates all documents are uploaded)
-      console.log(`Submitting application ${applicationId} with payment method ${paymentMethod}`);
       const result = await applications.mutations.submitApplicationForm(
         applicationId,
         paymentMethod,
         referenceNumber
       );
-      
-      console.log('Application submission result:', result);
 
       if (result.success) {
         // Step 5: Mark queue as completed and clear data
@@ -417,7 +419,10 @@ export const useSubmission = ({
           [
             {
               text: 'View Applications',
-              onPress: () => router.push('/(tabs)/application'),
+              onPress: () => {
+                resetForm(); // Reset the form after successful submission
+                router.push('/(tabs)/application');
+              },
             },
           ]
         );
@@ -439,7 +444,7 @@ export const useSubmission = ({
     } finally {
       setLoading(false);
     }
-  }, [formData, requirementsByJobCategory, jobCategoriesData, applications, requirements, showSuccess]);
+  }, [formData, requirementsByJobCategory, jobCategoriesData, applications, requirements, showSuccess, resetForm]);
 
   return {
     loading,

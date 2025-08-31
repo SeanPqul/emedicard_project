@@ -584,8 +584,246 @@ export const styles = StyleSheet.create({
     backgroundColor: getColor('background.primary'),
     borderTopWidth: 1,
     borderTopColor: getColor('border.light'),
-    gap: getSpacing('sm'),
+    gap: getSpacing('md'),
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    ...getShadow('medium'),
   },
+
+  // Progress Card
+  progressCard: {
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('md'),
+    padding: getSpacing('md'),
+    marginHorizontal: getSpacing('lg'),
+    marginBottom: getSpacing('md'),
+    borderWidth: 1,
+    borderColor: getColor('border.light'),
+    ...getShadow('small'),
+  },
+  progressCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: getSpacing('sm'),
+  },
+  progressStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  progressStatusText: {
+    ...getTypography('body'),
+    fontWeight: '600',
+    marginLeft: getSpacing('xs'),
+  },
+  saveProgressButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: getSpacing('sm'),
+    paddingVertical: getSpacing('xs'),
+    borderRadius: getBorderRadius('sm'),
+    backgroundColor: getColor('primary.50'),
+  },
+  saveProgressText: {
+    ...getTypography('bodySmall'),
+    color: getColor('accent.medicalBlue'),
+    marginLeft: getSpacing('xs'),
+    fontWeight: '500',
+  },
+  progressBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: getSpacing('sm'),
+  },
+  progressBarBackground: {
+    flex: 1,
+    height: 6,
+    backgroundColor: getColor('border.light'),
+    borderRadius: 3,
+    marginRight: getSpacing('sm'),
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  progressPercentageText: {
+    ...getTypography('bodySmall'),
+    color: getColor('text.secondary'),
+    fontWeight: '600',
+    minWidth: 40,
+    textAlign: 'right',
+  },
+  uploadProgressContainer: {
+    marginBottom: getSpacing('xs'),
+  },
+  uploadProgressText: {
+    ...getTypography('bodySmall'),
+    color: getColor('text.secondary'),
+    marginBottom: getSpacing('xs'),
+  },
+  failedUploadsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: getSpacing('xs'),
+  },
+  failedUploadsText: {
+    ...getTypography('bodySmall'),
+    marginLeft: getSpacing('xs'),
+    marginRight: getSpacing('sm'),
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: getSpacing('xs'),
+    paddingVertical: 2,
+  },
+  retryButtonText: {
+    ...getTypography('bodySmall'),
+    marginLeft: getSpacing('xs'),
+    fontWeight: '500',
+  },
+  validationErrorsContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: getSpacing('xs'),
+  },
+  validationErrorsText: {
+    ...getTypography('bodySmall'),
+    marginLeft: getSpacing('xs'),
+    flex: 1,
+  },
+  resumeInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: getSpacing('xs'),
+    paddingTop: getSpacing('xs'),
+    borderTopWidth: 1,
+    borderTopColor: getColor('border.light'),
+  },
+  resumeInfoText: {
+    ...getTypography('bodySmall'),
+    color: getColor('text.secondary'),
+    marginLeft: getSpacing('xs'),
+    fontStyle: 'italic',
+  },
+
+  // Resume Application Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: getSpacing('lg'),
+  },
+  resumeModalContainer: {
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+    padding: getSpacing('lg'),
+    width: '100%',
+    maxWidth: 400,
+    ...getShadow('large'),
+  },
+  resumeModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: getSpacing('md'),
+  },
+  resumeModalTitle: {
+    ...getTypography('h3'),
+    color: getColor('text.primary'),
+    fontWeight: '600',
+    marginLeft: getSpacing('sm'),
+  },
+  resumeModalContent: {
+    marginBottom: getSpacing('lg'),
+  },
+  resumeModalDescription: {
+    ...getTypography('body'),
+    color: getColor('text.secondary'),
+    lineHeight: 22,
+    marginBottom: getSpacing('md'),
+  },
+  resumeProgressSummary: {
+    backgroundColor: getColor('background.secondary'),
+    borderRadius: getBorderRadius('md'),
+    padding: getSpacing('md'),
+    marginBottom: getSpacing('md'),
+  },
+  resumeProgressItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: getSpacing('xs'),
+  },
+  resumeProgressLabel: {
+    ...getTypography('bodySmall'),
+    color: getColor('text.secondary'),
+    minWidth: 100,
+  },
+  resumeProgressValue: {
+    ...getTypography('bodySmall'),
+    color: getColor('text.primary'),
+    fontWeight: '500',
+    marginLeft: getSpacing('sm'),
+  },
+  resumeWarningContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: getSpacing('sm'),
+    backgroundColor: getColor('status.warning') + '20',
+    borderRadius: getBorderRadius('sm'),
+    borderLeftWidth: 3,
+    borderLeftColor: getColor('status.warning'),
+  },
+  resumeWarningText: {
+    ...getTypography('bodySmall'),
+    marginLeft: getSpacing('xs'),
+    flex: 1,
+  },
+  resumeModalActions: {
+    flexDirection: 'row',
+    gap: getSpacing('md'),
+    marginBottom: getSpacing('md'),
+  },
+  resumeActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: getSpacing('md'),
+    borderRadius: getBorderRadius('md'),
+  },
+  resumeSecondaryButton: {
+    backgroundColor: getColor('background.secondary'),
+    borderWidth: 1,
+    borderColor: getColor('border.medium'),
+  },
+  resumePrimaryButton: {
+    backgroundColor: getColor('accent.medicalBlue'),
+  },
+  resumeSecondaryButtonText: {
+    ...getTypography('body'),
+    color: getColor('text.secondary'),
+    marginLeft: getSpacing('xs'),
+    fontWeight: '500',
+  },
+  resumePrimaryButtonText: {
+    ...getTypography('body'),
+    color: getColor('background.primary'),
+    marginLeft: getSpacing('xs'),
+    fontWeight: '600',
+  },
+  resumeCancelButton: {
+    alignItems: 'center',
+    paddingVertical: getSpacing('sm'),
+  },
+  resumeCancelButtonText: {
+    ...getTypography('body'),
+    color: getColor('text.secondary'),
+    fontWeight: '500',
+  },
+
+  // Previous Button
   previousButton: {
     paddingVertical: getSpacing('md'),
     paddingHorizontal: getSpacing('lg'),
@@ -802,5 +1040,32 @@ export const styles = StyleSheet.create({
   // Cancel button style
   cancelButton: {
     padding: getSpacing('xs'),
+  },
+
+  // Retry section styles for failed uploads
+  retrySection: {
+    backgroundColor: getColor('status.warning') + '20',
+    padding: getSpacing('md'),
+    borderRadius: getBorderRadius('md'),
+    marginBottom: getSpacing('md'),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  retryText: {
+    ...getTypography('body'),
+    color: getColor('status.warning'),
+    flex: 1,
+  },
+  retryButton: {
+    backgroundColor: getColor('accent.medicalBlue'),
+    paddingHorizontal: getSpacing('md'),
+    paddingVertical: getSpacing('sm'),
+    borderRadius: getBorderRadius('sm'),
+  },
+  retryButtonText: {
+    ...getTypography('bodySmall'),
+    color: getColor('background.primary'),
+    fontWeight: '600',
   },
 });

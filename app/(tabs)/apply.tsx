@@ -84,7 +84,8 @@ export default function ApplyScreen() {
     handlePrevious,
     handleBackPress,
     handleCancelApplication,
-    initializeForm
+    initializeForm,
+    resetForm
   } = applicationForm;
 
   // Get requirements for current job category
@@ -119,7 +120,9 @@ export default function ApplyScreen() {
     validateCurrentStep: () => validateCurrentStep(requirementsByJobCategory),
     showSuccess,
     showError,
+    resetForm,
   });
+
 
   // Load initial data
   useEffect(() => {
@@ -212,6 +215,7 @@ export default function ApplyScreen() {
             getUploadState={getUploadState}
             onDocumentPicker={documentSelection.handleDocumentPicker}
             onRemoveDocument={documentSelection.handleRemoveDocument}
+            requirements={requirements}
           />
         );
       case 4:
@@ -273,6 +277,7 @@ export default function ApplyScreen() {
           }}
           keyboardShouldPersistTaps="handled"
         >
+          
           <View style={styles.contentWrapper}>
             {renderCurrentStep()}
           </View>
@@ -317,6 +322,7 @@ export default function ApplyScreen() {
           onPickGallery={documentSelection.pickFromGallery}
           onPickDocument={documentSelection.pickDocFile}
         />
+
 
         <FeedbackSystem messages={messages} onDismiss={dismissFeedback} />
     </View>

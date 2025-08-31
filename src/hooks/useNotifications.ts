@@ -37,8 +37,6 @@ export function useNotifications() {
     },
     isLoading: userNotifications === undefined,
     
-    service: notificationsService,
-    
     mutations: {
       createNotification,
       markNotificationAsRead,
