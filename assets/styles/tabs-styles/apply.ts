@@ -251,7 +251,7 @@ export const styles = StyleSheet.create({
   },
   reviewCard: {
     backgroundColor: getColor('background.primary'),
-    borderRadius: getBorderRadius('lg'),
+    borderRadius: getBorderRadius('md'),
     padding: getSpacing('md'),
     ...getShadow('medium'),
   },
@@ -303,15 +303,26 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: getSpacing('lg'),
+<<<<<<< HEAD
     paddingVertical: getSpacing('md'),
+=======
+    paddingVertical: getSpacing('sm'),
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
     backgroundColor: getColor('background.primary'),
     borderTopWidth: 1,
     borderTopColor: getColor('border.light'),
     ...getShadow('large'),
     position: 'absolute',
+<<<<<<< HEAD
     bottom: 58,
     left: 0,
     right: 0,
+=======
+    bottom: 55, // Increased to properly clear tab bar
+    left: 0,
+    right: 0,
+    minHeight: 70, // Added minimum height for better touch targets
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   previousButton: {
     paddingHorizontal: getSpacing('lg'),

@@ -5,7 +5,11 @@ const dummyBytes = new TextEncoder().encode(DUMMY_TEXT);
 console.log("Using dummy text for seeding...");
 // Function to call Convex
 function seedDatabase() {
+<<<<<<< HEAD
   const convexRun = spawn('npx', ['convex', 'run', 'seed:all'], {
+=======
+  const convexRun = spawn('npx', ['convex', 'run', 'seed:seedData'], {
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
     stdio: 'inherit',
     shell: true,
   });

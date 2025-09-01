@@ -43,7 +43,20 @@ export const useDashboard = () => {
       card.expiresAt > Date.now()
     ).length || 0;
 
+<<<<<<< HEAD
     const upcomingOrientations = 0; // TODO: Implement orientations query
+=======
+    // Count orientations needed for food handler applications
+    const upcomingOrientations = userApplications?.filter(app => 
+      app.jobCategory?.name?.toLowerCase().includes('food') && 
+      (app.status === 'Under Review' || app.status === 'Submitted')
+    ).length || 0;
+
+    // Get next orientation date (mock implementation)
+    const nextOrientationDate = upcomingOrientations > 0 ? 
+      new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString() : 
+      null;
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
 
     return {
       activeApplications,
@@ -51,6 +64,10 @@ export const useDashboard = () => {
       upcomingOrientations,
       validHealthCards,
       pendingAmount,
+<<<<<<< HEAD
+=======
+      nextOrientationDate,
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
     };
   }, [userApplications, userPayments, userHealthCards]);
 
@@ -63,7 +80,11 @@ export const useDashboard = () => {
       activities.push({
         id: notification._id,
         type: 'application',
+<<<<<<< HEAD
         title: notification.messag, // Note: typo in schema
+=======
+        title: notification.message, // Note: typo in schema
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
         description: `Notification received`,
         timestamp: new Date().toISOString(), // TODO: Add timestamp to schema
         status: 'pending'

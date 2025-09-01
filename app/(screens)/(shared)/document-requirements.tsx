@@ -97,6 +97,10 @@ export default function DocumentRequirements() {
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => router.back()}
+<<<<<<< HEAD
+=======
+          activeOpacity={0.7}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
         >
           <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
         </TouchableOpacity>
@@ -126,6 +130,10 @@ export default function DocumentRequirements() {
                 { borderLeftColor: category.colorCode }
               ]}
               onPress={() => handleCategorySelect(category._id)}
+<<<<<<< HEAD
+=======
+              activeOpacity={0.8}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
             >
               <View style={styles.categoryInfo}>
                 <View style={[styles.colorIndicator, { backgroundColor: category.colorCode }]} />
@@ -134,7 +142,11 @@ export default function DocumentRequirements() {
                   <Text style={styles.cardType}>{getHealthCardTypeName(category)}</Text>
                   {category.requireOrientation === 'Yes' && (
                     <View style={styles.orientationBadge}>
+<<<<<<< HEAD
                       <Ionicons name="school-outline" size={12} color={getColor('primary.main')} />
+=======
+                      <Ionicons name="school-outline" size={12} color={getColor('accent.medicalBlue')} />
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
                       <Text style={styles.orientationText}>Orientation Required</Text>
                     </View>
                   )}
@@ -158,15 +170,25 @@ color={getColor('text.secondary')}
             
             <View style={styles.requirementsSummary}>
               <View style={styles.summaryItem}>
+<<<<<<< HEAD
                 <Ionicons name="document-text-outline" size={16} color={getColor('primary.main')} />
+=======
+                <Ionicons name="document-text" size={20} color={getColor('accent.medicalBlue')} />
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
                 <Text style={styles.summaryText}>
                   {requirementsByCategory.totalRequirements} Documents Required
                 </Text>
               </View>
               <View style={styles.summaryItem}>
+<<<<<<< HEAD
                 <Ionicons name="card-outline" size={16} color={getColor('warning.main')} />
                 <Text style={styles.summaryText}>
                   Fee: ₱60
+=======
+                <Ionicons name="cash" size={20} color={getColor('accent.safetyGreen')} />
+                <Text style={styles.summaryText}>
+                  Application Fee: ₱60
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
                 </Text>
               </View>
             </View>
@@ -178,8 +200,13 @@ color={getColor('text.secondary')}
                   <View style={styles.requirementIcon}>
                     <Ionicons 
                       name={requirement.icon as any} 
+<<<<<<< HEAD
                       size={24} 
                       color={getColor('primary.main')}
+=======
+                      size={28} 
+                      color={getColor('accent.medicalBlue')}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
                     />
                   </View>
                   <View style={styles.requirementDetails}>
@@ -203,12 +230,21 @@ color={getColor('text.secondary')}
                   <View style={styles.paymentIcon}>
                     <Ionicons 
                       name={
+<<<<<<< HEAD
                         payment.method.includes('GCash') ? 'phone-portrait-outline' :
                         payment.method.includes('Maya') ? 'phone-portrait-outline' :
                         'business-outline'
                       } 
                       size={20} 
                       color={getColor('success.main')}
+=======
+                        payment.method.includes('GCash') ? 'phone-portrait' :
+                        payment.method.includes('Maya') ? 'phone-portrait' :
+                        'business'
+                      } 
+                      size={24} 
+                      color={getColor('accent.safetyGreen')}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
                     />
                   </View>
                   <View style={styles.paymentDetails}>
@@ -231,6 +267,10 @@ color={getColor('text.secondary')}
               <TouchableOpacity 
                 style={styles.primaryButton}
                 onPress={() => router.push('/(tabs)/apply')}
+<<<<<<< HEAD
+=======
+                activeOpacity={0.8}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
               >
                 <Text style={styles.primaryButtonText}>Start Application</Text>
               </TouchableOpacity>
@@ -238,6 +278,10 @@ color={getColor('text.secondary')}
               <TouchableOpacity 
                 style={styles.secondaryButton}
                 onPress={() => router.push('/(tabs)/application')}
+<<<<<<< HEAD
+=======
+                activeOpacity={0.8}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
               >
                 <Text style={styles.secondaryButtonText}>View My Applications</Text>
               </TouchableOpacity>
@@ -284,14 +328,26 @@ const styles = StyleSheet.create({
     backgroundColor: getColor('background.primary'),
     borderBottomWidth: 1,
     borderBottomColor: getColor('border.light'),
+<<<<<<< HEAD
   },
   backButton: {
     width: 40,
     height: 40,
+=======
+    ...getShadow('small'),
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
     borderRadius: getBorderRadius('full'),
     backgroundColor: getColor('background.secondary'),
     justifyContent: 'center',
     alignItems: 'center',
+<<<<<<< HEAD
+=======
+    ...getShadow('small'),
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   headerTitle: {
     flex: 1,
@@ -308,6 +364,7 @@ const styles = StyleSheet.create({
   },
   instructionsContainer: {
     margin: getSpacing('lg'),
+<<<<<<< HEAD
     padding: getSpacing('md'),
     backgroundColor: getColor('primary.light'),
     borderRadius: getBorderRadius('lg'),
@@ -323,6 +380,25 @@ const styles = StyleSheet.create({
     ...getTypography('body'),
     color: getColor('text.secondary'),
     lineHeight: 20,
+=======
+    padding: getSpacing('lg'),
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('xl'),
+    borderLeftWidth: 5,
+    borderLeftColor: getColor('accent.medicalBlue'),
+    ...getShadow('medium'),
+  },
+  instructionsTitle: {
+    ...getTypography('h4'),
+    fontWeight: '700',
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('sm'),
+  },
+  instructionsText: {
+    ...getTypography('bodyMedium'),
+    color: getColor('text.secondary'),
+    lineHeight: 22,
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   categoryContainer: {
     paddingHorizontal: getSpacing('lg'),
@@ -330,6 +406,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...getTypography('h3'),
+<<<<<<< HEAD
     color: getColor('text.primary'),
     marginBottom: getSpacing('md'),
   },
@@ -347,6 +424,30 @@ const styles = StyleSheet.create({
   selectedCategoryCard: {
     borderColor: getColor('primary.main'),
     borderWidth: 2,
+=======
+    fontWeight: '700',
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('lg'),
+  },
+  categoryCard: {
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('xl'),
+    padding: getSpacing('lg'),
+    marginBottom: getSpacing('md'),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ...getShadow('medium'),
+    borderLeftWidth: 5,
+    borderWidth: 1,
+    borderColor: getColor('border.light'),
+  },
+  selectedCategoryCard: {
+    borderColor: getColor('accent.medicalBlue'),
+    borderWidth: 2,
+    ...getShadow('large'),
+    transform: [{ scale: 1.02 }],
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   categoryInfo: {
     flexDirection: 'row',
@@ -354,22 +455,43 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   colorIndicator: {
+<<<<<<< HEAD
     width: 20,
     height: 20,
     borderRadius: getBorderRadius('full'),
     marginRight: getSpacing('sm'),
+=======
+    width: 24,
+    height: 24,
+    borderRadius: getBorderRadius('full'),
+    marginRight: getSpacing('md'),
+    borderWidth: 2,
+    borderColor: getColor('background.primary'),
+    ...getShadow('small'),
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   categoryDetails: {
     flex: 1,
   },
   categoryName: {
+<<<<<<< HEAD
 ...getTypography('body'),
+=======
+    ...getTypography('bodyLarge'),
+    fontWeight: '700',
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
     color: getColor('text.primary'),
     marginBottom: getSpacing('xs'),
   },
   cardType: {
+<<<<<<< HEAD
     ...getTypography('body'),
     color: getColor('text.secondary'),
+=======
+    ...getTypography('bodyMedium'),
+    color: getColor('accent.medicalBlue'),
+    fontWeight: '600',
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
     marginBottom: getSpacing('xs'),
   },
   orientationBadge: {
@@ -378,7 +500,12 @@ const styles = StyleSheet.create({
   },
   orientationText: {
     ...getTypography('caption'),
+<<<<<<< HEAD
     color: getColor('primary.main'),
+=======
+    color: getColor('accent.medicalBlue'),
+    fontWeight: '600',
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
     marginLeft: getSpacing('xs'),
   },
   requirementsContainer: {
@@ -387,26 +514,47 @@ const styles = StyleSheet.create({
   },
   requirementsSummary: {
     backgroundColor: getColor('background.primary'),
+<<<<<<< HEAD
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),
     marginBottom: getSpacing('md'),
     ...getShadow('sm'),
+=======
+    borderRadius: getBorderRadius('xl'),
+    padding: getSpacing('lg'),
+    marginBottom: getSpacing('lg'),
+    ...getShadow('medium'),
+    borderWidth: 1,
+    borderColor: getColor('accent.safetyGreen'),
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   summaryItem: {
     flexDirection: 'row',
     alignItems: 'center',
+<<<<<<< HEAD
     marginBottom: getSpacing('xs'),
   },
   summaryText: {
     ...getTypography('body'),
     color: getColor('text.primary'),
     marginLeft: getSpacing('xs'),
+=======
+    marginBottom: getSpacing('sm'),
+    paddingVertical: getSpacing('xs'),
+  },
+  summaryText: {
+    ...getTypography('bodyMedium'),
+    fontWeight: '600',
+    color: getColor('text.primary'),
+    marginLeft: getSpacing('sm'),
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   documentsList: {
     marginBottom: getSpacing('lg'),
   },
   requirementItem: {
     backgroundColor: getColor('background.primary'),
+<<<<<<< HEAD
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),
     marginBottom: getSpacing('sm'),
@@ -422,16 +570,43 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: getSpacing('sm'),
+=======
+    borderRadius: getBorderRadius('xl'),
+    padding: getSpacing('lg'),
+    marginBottom: getSpacing('md'),
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    ...getShadow('medium'),
+    borderWidth: 1,
+    borderColor: getColor('border.light'),
+  },
+  requirementIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: getBorderRadius('full'),
+    backgroundColor: getColor('background.secondary'),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: getSpacing('md'),
+    borderWidth: 2,
+    borderColor: getColor('accent.medicalBlue'),
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   requirementDetails: {
     flex: 1,
   },
   requirementName: {
+<<<<<<< HEAD
 ...getTypography('body'),
+=======
+    ...getTypography('bodyLarge'),
+    fontWeight: '700',
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
     color: getColor('text.primary'),
     marginBottom: getSpacing('xs'),
   },
   requirementDescription: {
+<<<<<<< HEAD
     ...getTypography('body'),
     color: getColor('text.secondary'),
     lineHeight: 18,
@@ -460,10 +635,46 @@ const styles = StyleSheet.create({
     ...getTypography('bodyLarge'),
     color: getColor('text.primary'),
     marginBottom: getSpacing('sm'),
+=======
+    ...getTypography('bodyMedium'),
+    color: getColor('text.secondary'),
+    lineHeight: 20,
+    marginBottom: getSpacing('sm'),
+  },
+  requiredBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: getColor('semantic.error'),
+    paddingHorizontal: getSpacing('sm'),
+    paddingVertical: getSpacing('xs'),
+    borderRadius: getBorderRadius('full'),
+    ...getShadow('small'),
+  },
+  requiredText: {
+    ...getTypography('caption'),
+    color: getColor('text.inverse'),
+    fontWeight: '700',
+    fontSize: 10,
+  },
+  paymentContainer: {
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('xl'),
+    padding: getSpacing('lg'),
+    marginBottom: getSpacing('lg'),
+    ...getShadow('medium'),
+    borderWidth: 1,
+    borderColor: getColor('border.light'),
+  },
+  paymentTitle: {
+    ...getTypography('h4'),
+    fontWeight: '700',
+    color: getColor('text.primary'),
+    marginBottom: getSpacing('md'),
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   paymentOption: {
     flexDirection: 'row',
     alignItems: 'center',
+<<<<<<< HEAD
     paddingVertical: getSpacing('xs'),
     borderBottomWidth: 1,
     borderBottomColor: getColor('background.secondary'),
@@ -476,14 +687,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: getSpacing('sm'),
+=======
+    paddingVertical: getSpacing('md'),
+    paddingHorizontal: getSpacing('sm'),
+    borderBottomWidth: 1,
+    borderBottomColor: getColor('border.light'),
+    borderRadius: getBorderRadius('md'),
+    marginBottom: getSpacing('xs'),
+  },
+  paymentIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: getBorderRadius('full'),
+    backgroundColor: getColor('background.secondary'),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: getSpacing('md'),
+    borderWidth: 2,
+    borderColor: getColor('accent.safetyGreen'),
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   paymentDetails: {
     flex: 1,
   },
   paymentMethod: {
+<<<<<<< HEAD
     ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '600',
+=======
+    ...getTypography('bodyMedium'),
+    color: getColor('text.primary'),
+    fontWeight: '700',
+    marginBottom: 2,
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   paymentDescription: {
     ...getTypography('caption'),
@@ -492,6 +729,7 @@ const styles = StyleSheet.create({
   paymentNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+<<<<<<< HEAD
     marginTop: getSpacing('sm'),
     padding: getSpacing('sm'),
     backgroundColor: getColor('warning.light'),
@@ -503,11 +741,27 @@ const styles = StyleSheet.create({
     marginLeft: getSpacing('xs'),
     flex: 1,
     lineHeight: 16,
+=======
+    marginTop: getSpacing('md'),
+    padding: getSpacing('md'),
+    backgroundColor: getColor('background.secondary'),
+    borderRadius: getBorderRadius('lg'),
+    borderWidth: 1,
+    borderColor: getColor('accent.warningOrange'),
+  },
+  paymentNoteText: {
+    ...getTypography('bodySmall'),
+    color: getColor('accent.warningOrange'),
+    marginLeft: getSpacing('sm'),
+    flex: 1,
+    lineHeight: 18,
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   actionButtons: {
     marginBottom: getSpacing('xl'),
   },
   primaryButton: {
+<<<<<<< HEAD
     backgroundColor: getColor('primary.main'),
     borderRadius: getBorderRadius('sm'),
     paddingVertical: getSpacing('md'),
@@ -529,6 +783,33 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
 ...getTypography('button'),
     color: getColor('primary.main'),
+=======
+    backgroundColor: getColor('accent.medicalBlue'),
+    borderRadius: getBorderRadius('xl'),
+    paddingVertical: getSpacing('lg'),
+    alignItems: 'center',
+    marginBottom: getSpacing('md'),
+    ...getShadow('medium'),
+  },
+  primaryButtonText: {
+    ...getTypography('bodyLarge'),
+    fontWeight: '700',
+    color: getColor('text.inverse'),
+  },
+  secondaryButton: {
+    backgroundColor: getColor('background.primary'),
+    borderWidth: 2,
+    borderColor: getColor('accent.medicalBlue'),
+    borderRadius: getBorderRadius('xl'),
+    paddingVertical: getSpacing('md'),
+    alignItems: 'center',
+    ...getShadow('medium'),
+  },
+  secondaryButtonText: {
+    ...getTypography('bodyLarge'),
+    fontWeight: '600',
+    color: getColor('accent.medicalBlue'),
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
   },
   loadingState: {
     alignItems: 'center',

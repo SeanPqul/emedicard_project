@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // import { mutation, action } from "./_generated/server";
 // import { api } from "./_generated/api";
 // import { v } from "convex/values";
@@ -546,3 +547,152 @@
 //     }
 //   }
 // });
+=======
+import { mutation } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
+
+export const seedData = mutation({
+  args: {},
+  handler: async (ctx) => {
+    console.log("🔄 Starting database seeding...");
+
+    // 1. Seed Job Categories
+    const jobCategories = [
+      { name: "Food Handler", colorCode: "#FFD700", requireOrientation: "Yes" },
+      { name: "Non-Food Worker", colorCode: "#00FF00", requireOrientation: "No" },
+      { name: "Skin-to-Skin Contact Worker", colorCode: "#FF69B4", requireOrientation: "No" },
+    ];
+
+    const jobCategoryIds: Record<string, Id<"jobCategory">> = {};
+    for (const category of jobCategories) {
+      const existing = await ctx.db
+        .query("jobCategory")
+        .filter((q) => q.eq(q.field("name"), category.name))
+        .first();
+
+      if (existing) {
+        jobCategoryIds[category.name] = existing._id;
+      } else {
+        const id = await ctx.db.insert("jobCategory", category);
+        jobCategoryIds[category.name] = id;
+      }
+    }
+    console.log(`✅ Seeded ${Object.keys(jobCategoryIds).length} job categories.`);
+
+    // 2. Define Document Types (based on original script)
+    const documentTypes = [
+      { name: "Valid Government ID", fieldName: "validId", description: "Any valid government-issued ID", icon: "card-outline" },
+      { name: "2x2 ID Picture", fieldName: "picture", description: "Recent colored 2x2 ID picture", icon: "camera-outline" },
+      { name: "Chest X-ray", fieldName: "chestXrayId", description: "Recent chest X-ray result", icon: "medical-outline" },
+      { name: "Urinalysis", fieldName: "urinalysisId", description: "Complete urinalysis test", icon: "flask-outline" },
+      { name: "Stool Examination", fieldName: "stoolId", description: "Stool examination result", icon: "analytics-outline" },
+      { name: "Cedula", fieldName: "cedulaId", description: "Community Tax Certificate", icon: "document-text-outline" },
+      { name: "Drug Test", fieldName: "drugTestId", description: "Drug test result (for Security Guards)", icon: "shield-outline" },
+      { name: "Neuropsychiatric Test", fieldName: "neuroExamId", description: "Neuropsychiatric evaluation (for Security Guards)", icon: "medical-outline" },
+      { name: "Hepatitis B Antibody Test", fieldName: "hepatitisBId", description: "Hepatitis B surface antibody test result", icon: "shield-checkmark-outline" },
+    ];
+    
+    // Create a map for easy lookup
+    const documentTypesMap = new Map(documentTypes.map(doc => [doc.name, doc]));
+
+    // 3. Link Documents to Categories by creating Document Requirements
+    const categoryRequirementMap: Record<string, { name: string; required: boolean }[]> = {
+      "Food Handler": [
+        { name: "Valid Government ID", required: true },
+        { name: "2x2 ID Picture", required: true },
+        { name: "Chest X-ray", required: true },
+        { name: "Urinalysis", required: true },
+        { name: "Stool Examination", required: true },
+        { name: "Cedula", required: true },
+      ],
+      "Non-Food Worker": [
+        { name: "Valid Government ID", required: true },
+        { name: "2x2 ID Picture", required: true },
+        { name: "Chest X-ray", required: true },
+        { name: "Urinalysis", required: true },
+        { name: "Stool Examination", required: true },
+        { name: "Cedula", required: true },
+        { name: "Drug Test", required: false },
+        { name: "Neuropsychiatric Test", required: false },
+      ],
+      "Skin-to-Skin Contact Worker": [
+        { name: "Valid Government ID", required: true },
+        { name: "2x2 ID Picture", required: true },
+        { name: "Chest X-ray", required: true },
+        { name: "Urinalysis", required: true },
+        { name: "Stool Examination", required: true },
+        { name: "Cedula", required: true },
+        { name: "Hepatitis B Antibody Test", required: false },
+      ],
+    };
+
+    let requirementsCreated = 0;
+    for (const [categoryName, reqList] of Object.entries(categoryRequirementMap)) {
+      const jobCategoryId = jobCategoryIds[categoryName];
+      if (!jobCategoryId) {
+        console.warn(`⚠️ Could not find job category ID for "${categoryName}"`);
+        continue;
+      }
+
+      for (const req of reqList) {
+        const docDetails = documentTypesMap.get(req.name);
+        if (!docDetails) {
+          console.warn(`⚠️ Could not find document details for "${req.name}"`);
+          continue;
+        }
+
+        // Check if this requirement already exists for this category
+        const existingRequirement = await ctx.db
+          .query("documentRequirements")
+          .withIndex("by_job_category", (q) => q.eq("jobCategoryId", jobCategoryId))
+          .filter((q) => q.eq(q.field("fieldName"), docDetails.fieldName))
+          .first();
+
+        if (!existingRequirement) {
+          await ctx.db.insert("documentRequirements", {
+            jobCategoryId,
+            name: docDetails.name,
+            description: docDetails.description,
+            icon: docDetails.icon,
+            required: req.required,
+            fieldName: docDetails.fieldName,
+          });
+          requirementsCreated++;
+        }
+      }
+    }
+    console.log(`✅ Created ${requirementsCreated} new document requirements.`);
+
+    return {
+      message: "✅ Database seed complete",
+      categoriesCreated: Object.keys(jobCategoryIds).length,
+      requirementsCreated,
+    };
+  },
+});
+
+export const clearSeedData = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // Clear Document Requirements
+    const requirements = await ctx.db.query("documentRequirements").collect();
+    for (const req of requirements) {
+      await ctx.db.delete(req._id);
+    }
+
+    // Clear Job Categories
+    const categories = await ctx.db.query("jobCategory").collect();
+    for (const cat of categories) {
+      await ctx.db.delete(cat._id);
+    }
+
+    return {
+      message: "🧹 Seed data cleared",
+      deleted: {
+        documentRequirements: requirements.length,
+        jobCategories: categories.length,
+      },
+    };
+  },
+});
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)

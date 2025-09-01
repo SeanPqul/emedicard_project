@@ -137,6 +137,7 @@ export default function Dashboard() {
           </TouchableOpacity>
         </View>
 
+<<<<<<< HEAD
         {/* Current Application Status - Enhanced */}
         {currentApplication && (
           <View style={styles.currentApplicationContainer}>
@@ -153,14 +154,82 @@ export default function Dashboard() {
               </View>
               <Text style={styles.applicationId}>
                 ID: {currentApplication._id.slice(-8)}
+=======
+        {/* Priority Actions Alert */}
+        {(dashboardStats.pendingPayments > 0 || (currentApplication?.status === 'Under Review' && dashboardStats.upcomingOrientations > 0)) && (
+          <View style={styles.priorityAlertContainer}>
+            <View style={styles.priorityHeader}>
+              <Ionicons name="alert-circle" size={20} color={getColor('semantic.error')} />
+              <Text style={styles.priorityTitle}>Action Required</Text>
+            </View>
+            {dashboardStats.pendingPayments > 0 && (
+              <TouchableOpacity 
+                style={styles.priorityItem}
+                onPress={() => router.push('/(screens)/(shared)/payment')}
+              >
+                <Text style={styles.priorityText}>
+                  Complete payment of ₱{dashboardStats.pendingAmount} to proceed with your application
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={getColor('semantic.error')} />
+              </TouchableOpacity>
+            )}
+            {currentApplication?.status === 'Under Review' && dashboardStats.upcomingOrientations > 0 && (
+              <TouchableOpacity 
+                style={styles.priorityItem}
+                onPress={() => router.push('/(screens)/(shared)/orientation')}
+              >
+                <Text style={styles.priorityText}>
+                  Attend your scheduled food safety orientation
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={getColor('semantic.error')} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        {/* Enhanced Application Status */}
+        {currentApplication && (
+          <View style={styles.currentApplicationContainer}>
+            <View style={styles.currentApplicationHeader}>
+              <View style={[styles.categoryBadge, { backgroundColor: getJobCategoryColor(currentApplication.jobCategory?.name || '') }]}>
+                <Ionicons 
+                  name={getJobCategoryIcon(currentApplication.jobCategory?.name || '') as any} 
+                  size={16} 
+                  color={getColor('text.inverse')} 
+                />
+                <Text style={styles.categoryText}>
+                  {currentApplication.jobCategory?.name === 'Food Handler' ? 'Yellow Card' : 
+                   currentApplication.jobCategory?.name === 'Non-Food Worker' ? 'Green Card' :
+                   currentApplication.jobCategory?.name === 'Skin-to-Skin Contact' ? 'Pink Card' :
+                   currentApplication.jobCategory?.name || 'Health Card'}
+                </Text>
+              </View>
+              <Text style={styles.applicationId}>
+                #{currentApplication._id.slice(-6).toUpperCase()}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
               </Text>
             </View>
             
             {progress && (
               <View style={styles.progressContainer}>
                 <View style={styles.progressHeader}>
+<<<<<<< HEAD
                   <Text style={styles.progressTitle}>Application Progress</Text>
                   <Text style={styles.progressStatus}>{progress.status}</Text>
+=======
+                  <Text style={styles.progressTitle}>Application Status</Text>
+                  <View style={[styles.statusBadge, { 
+                    backgroundColor: progress.status === 'Approved' ? getColor('accent.safetyGreen') + '20' :
+                                   progress.status === 'Under Review' ? getColor('accent.warningOrange') + '20' :
+                                   getColor('accent.medicalBlue') + '20'
+                  }]}>
+                    <Text style={[styles.progressStatus, {
+                      color: progress.status === 'Approved' ? getColor('accent.safetyGreen') :
+                             progress.status === 'Under Review' ? getColor('accent.warningOrange') :
+                             getColor('accent.medicalBlue')
+                    }]}>{progress.status}</Text>
+                  </View>
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
                 </View>
                 <View style={styles.progressBar}>
                   <View 
@@ -182,12 +251,17 @@ export default function Dashboard() {
           </View>
         )}
 
+<<<<<<< HEAD
         {/* Quick Stats Cards */}
+=======
+        {/* Enhanced Overview Stats */}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
         <View style={styles.statsContainer}>
           <Text style={styles.sectionTitle}>Overview</Text>
           <View style={styles.statsRow}>
             <StatCard
               icon="document-text-outline"
+<<<<<<< HEAD
               title="Active Applications"
               value={dashboardStats.activeApplications.toString()}
               subtitle="In progress"
@@ -200,29 +274,57 @@ export default function Dashboard() {
               value={dashboardStats.pendingPayments.toString()}
               subtitle={`₱${dashboardStats.pendingAmount}`}
               color={getColor('accent.warningOrange')}
+=======
+              title="Applications"
+              value={dashboardStats.activeApplications.toString()}
+              subtitle={dashboardStats.activeApplications > 0 ? "In progress" : "Ready to apply"}
+              color={getColor('accent.medicalBlue')}
+              onPress={() => router.push('/(tabs)/application')}
+            />
+            {/* Consolidated Payment Card */}
+            <StatCard
+              icon={dashboardStats.pendingPayments > 0 ? "alert-circle-outline" : "checkmark-circle-outline"}
+              title={dashboardStats.pendingPayments > 0 ? "Payment Required" : "Payment Status"}
+              value={dashboardStats.pendingPayments > 0 ? dashboardStats.pendingPayments.toString() : "Clear"}
+              subtitle={dashboardStats.pendingPayments > 0 ? `₱${dashboardStats.pendingAmount} due` : "All payments up to date"}
+              color={dashboardStats.pendingPayments > 0 ? getColor('semantic.error') : getColor('accent.safetyGreen')}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
               onPress={() => router.push('/(screens)/(shared)/payment')}
             />
           </View>
           <View style={styles.statsRow}>
             <StatCard
               icon="calendar-outline"
+<<<<<<< HEAD
               title="Upcoming Orientations"
               value={dashboardStats.upcomingOrientations.toString()}
               subtitle={dashboardStats.nextOrientationDate || "None scheduled"}
+=======
+              title="Food Safety Orientation"
+              value={dashboardStats.upcomingOrientations.toString()}
+              subtitle={dashboardStats.upcomingOrientations > 0 ? "Scheduled" : "Not required"}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
               color={getColor('accent.primaryGreen')}
               onPress={() => router.push('/(screens)/(shared)/orientation')}
             />
             <StatCard
               icon="shield-checkmark-outline"
+<<<<<<< HEAD
               title="Valid Health Cards"
               value={dashboardStats.validHealthCards.toString()}
               subtitle="Active cards"
+=======
+              title="Health Cards"
+              value={dashboardStats.validHealthCards.toString()}
+              subtitle={dashboardStats.validHealthCards > 0 ? "Active" : "None issued"}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
               color={getColor('accent.safetyGreen')}
               onPress={() => router.push('/(screens)/(shared)/health-cards')}
             />
           </View>
         </View>
 
+<<<<<<< HEAD
         {/* Quick Actions */}
         <View style={styles.quickActionsContainer}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -252,6 +354,88 @@ export default function Dashboard() {
               subtitle="Show health card QR"
               onPress={() => router.push('/(screens)/(shared)/qr-code')}
             />
+=======
+        {/* Contextual Quick Actions */}
+        <View style={styles.quickActionsContainer}>
+          <Text style={styles.sectionTitle}>What would you like to do?</Text>
+          <View style={styles.actionsGrid}>
+            {/* Primary Action - Context Aware */}
+            {dashboardStats.activeApplications === 0 && dashboardStats.validHealthCards === 0 ? (
+              <ActionButton
+                icon="add-circle-outline"
+                title="Apply for Health Card"
+                subtitle="Start your first application"
+                onPress={() => router.push('/(tabs)/apply')}
+                isPrimary
+              />
+            ) : dashboardStats.pendingPayments > 0 ? (
+              <ActionButton
+                icon="card-outline"
+                title="Complete Payment"
+                subtitle={`₱${dashboardStats.pendingAmount} due`}
+                onPress={() => router.push('/(screens)/(shared)/payment')}
+                isPrimary
+              />
+            ) : dashboardStats.validHealthCards > 0 ? (
+              <ActionButton
+                icon="qr-code-outline"
+                title="Show Health Card"
+                subtitle="Display your QR code"
+                onPress={() => router.push('/(screens)/(shared)/qr-code')}
+                isPrimary
+              />
+            ) : (
+              <ActionButton
+                icon="refresh-outline"
+                title="Renew Health Card"
+                subtitle="Start renewal process"
+                onPress={() => router.push('/(tabs)/apply')}
+                isPrimary
+              />
+            )}
+
+            {/* Secondary Actions */}
+            <ActionButton
+              icon="document-text-outline"
+              title="Requirements Guide"
+              subtitle="What documents you need"
+              onPress={() => router.push('/(screens)/(shared)/document-requirements')}
+            />
+            
+            {/* Show Upload Documents if has active application */}
+            {dashboardStats.activeApplications > 0 ? (
+              <ActionButton
+                icon="cloud-upload-outline"
+                title="Upload Documents"
+                subtitle="Submit missing documents"
+                onPress={() => router.push('/(screens)/(shared)/upload-documents')}
+              />
+            ) : (
+              <ActionButton
+                icon="information-circle-outline"
+                title="Application Status"
+                subtitle="Track your progress"
+                onPress={() => router.push('/(tabs)/application')}
+              />
+            )}
+
+            {/* Show Orientation for Food Handlers */}
+            {currentApplication?.jobCategory?.name?.toLowerCase().includes('food') ? (
+              <ActionButton
+                icon="calendar-outline"
+                title="Food Safety Orientation"
+                subtitle="Schedule required seminar"
+                onPress={() => router.push('/(screens)/(shared)/orientation')}
+              />
+            ) : (
+              <ActionButton
+                icon="help-circle-outline"
+                title="Need Help?"
+                subtitle="Contact support"
+                onPress={() => router.push('/(tabs)/notification')}
+              />
+            )}
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
           </View>
         </View>
 
@@ -282,11 +466,23 @@ export default function Dashboard() {
           )}
         </View>
 
+<<<<<<< HEAD
         {/* Health Card Status - Enhanced */}
         {dashboardStats.validHealthCards > 0 && (
           <View style={styles.healthCardStatusContainer}>
             <Text style={styles.sectionTitle}>Your Health Cards</Text>
             <View style={styles.healthCardPreview}>
+=======
+        {/* Health Card Status or Welcome Message */}
+        {dashboardStats.validHealthCards > 0 ? (
+          <View style={styles.healthCardStatusContainer}>
+            <Text style={styles.sectionTitle}>Your Health Cards</Text>
+            <TouchableOpacity 
+              style={styles.healthCardPreview}
+              onPress={() => router.push('/(screens)/(shared)/health-cards')}
+              accessibilityLabel="View health cards"
+            >
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
               <View style={styles.healthCardIcon}>
                 <Ionicons name="shield-checkmark" size={32} color={getColor('accent.safetyGreen')} />
               </View>
@@ -295,6 +491,7 @@ export default function Dashboard() {
                   {dashboardStats.validHealthCards} Active Health Card{dashboardStats.validHealthCards > 1 ? 's' : ''}
                 </Text>
                 <Text style={styles.healthCardSubtitle}>
+<<<<<<< HEAD
                   Tap to view and manage your health cards
                 </Text>
               </View>
@@ -306,6 +503,32 @@ export default function Dashboard() {
                 <Ionicons name="chevron-forward" size={20} color={getColor('text.secondary')} />
               </TouchableOpacity>
             </View>
+=======
+                  Tap to view, download, or show QR code
+                </Text>
+              </View>
+              <View style={styles.healthCardButton}>
+                <Ionicons name="chevron-forward" size={20} color={getColor('text.secondary')} />
+              </View>
+            </TouchableOpacity>
+          </View>
+        ) : dashboardStats.activeApplications === 0 && (
+          <View style={styles.welcomeContainer}>
+            <View style={styles.welcomeIcon}>
+              <Ionicons name="medical-outline" size={48} color={getColor('accent.medicalBlue')} />
+            </View>
+            <Text style={styles.welcomeTitle}>Welcome to eMediCard</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Get your Davao City health card digitally. No more long queues - apply, track, and manage everything from your phone.
+            </Text>
+            <TouchableOpacity 
+              style={styles.welcomeButton}
+              onPress={() => router.push('/(tabs)/apply')}
+            >
+              <Text style={styles.welcomeButtonText}>Get Started</Text>
+              <Ionicons name="arrow-forward" size={16} color={getColor('text.inverse')} />
+            </TouchableOpacity>
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
           </View>
         )}
       </ScrollView>

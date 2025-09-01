@@ -17,11 +17,19 @@ if (!publishableKey) {
 export default function ClerkAndConvexProvider({children}: {children: React.ReactNode}) {
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+<<<<<<< HEAD
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
         <ClerkLoaded>
             {children}
         </ClerkLoaded>
       </ConvexProviderWithClerk>
+=======
+      <ClerkLoaded>
+        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+          {children}
+        </ConvexProviderWithClerk>
+      </ClerkLoaded>
+>>>>>>> 05b3e18 (UI Improvement and Bug fixes)
     </ClerkProvider>
   );
 }
