@@ -66,10 +66,12 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
 }) => {
   // Custom style for enhanced CTA appearance
   const ctaButtonStyle: ViewStyle = {
-    minHeight: size === 'large' ? 64 : 56,
+    minHeight: size === 'large' ? 72 : 64,
     width: fullWidth ? width - (getSpacing('lg') * 2) : 'auto',
-    paddingHorizontal: getSpacing('xl'),
-    paddingVertical: getSpacing('lg'),
+    paddingHorizontal: getSpacing('lg'),
+    paddingVertical: getSpacing('md'),
+    alignItems: 'center',
+    justifyContent: 'center',
   };
 
   // Enhanced variant mapping for medical blue theming
@@ -112,20 +114,38 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
   };
 
   const renderCustomContent = () => (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: getSpacing('sm') }}>
+    <View style={{ 
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      gap: getSpacing('sm'),
+      flex: 1,
+      paddingHorizontal: getSpacing('xs')
+    }}>
       {icon && (
         <Ionicons 
           name={icon as any} 
-          size={size === 'large' ? 28 : 24} 
+          size={size === 'large' ? 24 : 20} 
           color={getIconColor()} 
         />
       )}
-      <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+      <View style={{ 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        flex: 1,
+        minWidth: 0
+      }}>
         <Text 
-          variant={size === 'large' ? 'h4' : 'button'}
-          weight="bold"
+          variant={size === 'large' ? 'button' : 'bodySmall'}
+          weight="semibold"
           color={getTextColor()}
-          style={[{ letterSpacing: 0.5 }, textStyle]}
+          style={[{ 
+            letterSpacing: 0.3,
+            textAlign: 'center',
+            lineHeight: size === 'large' ? 20 : 18
+          }, textStyle]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
         >
           {title}
         </Text>
@@ -136,7 +156,12 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
               ? colorWithOpacity[80]('text.inverse')
               : getColor('text.secondary')
             }
-            style={{ marginTop: 2 }}
+            style={{ 
+              marginTop: 2,
+              textAlign: 'center',
+              lineHeight: 14
+            }}
+            numberOfLines={1}
           >
             {subtitle}
           </Text>

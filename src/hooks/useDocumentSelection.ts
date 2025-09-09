@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, Dispatch, SetStateAction } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
@@ -7,7 +7,7 @@ import { formStorage } from '../utils/formStorage';
 
 interface UseDocumentSelectionProps {
   selectedDocuments: SelectedDocuments;
-  setSelectedDocuments: (documents: SelectedDocuments) => void;
+  setSelectedDocuments: Dispatch<SetStateAction<SelectedDocuments>>;
   formData: any;
   currentStep: number;
   showSuccess: (title: string, message: string) => void;
@@ -38,7 +38,7 @@ export const useDocumentSelection = ({
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: 'images',
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -58,7 +58,7 @@ export const useDocumentSelection = ({
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: 'images',
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,

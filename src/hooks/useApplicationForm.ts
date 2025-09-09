@@ -15,6 +15,8 @@ interface ApplicationFormData {
   position: string;
   organization: string;
   civilStatus: CivilStatus;
+  paymentMethod?: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall' | '';
+  paymentReference?: string;
 }
 
 interface UseApplicationFormProps {

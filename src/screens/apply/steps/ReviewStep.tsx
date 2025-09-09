@@ -2,10 +2,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../../../styles/screens/tabs-apply-forms';
-import { getColor } from '../../../styles/theme';
+import { getColor, getSpacing, getBorderRadius, getTypography } from '../../../styles/theme';
 import { JobCategory, DocumentRequirement } from '../../../types/domain/application';
 import { SelectedDocuments } from '../../../types';
-import { formStorage } from '../../../utils/formStorage';
 
 type ApplicationType = 'New' | 'Renew';
 
@@ -42,6 +41,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   getUploadState,
   onEditStep,
 }) => {
+  
   const selectedCategory = jobCategoriesData?.find(cat => cat._id === formData.jobCategory);
   const documentRequirements = requirementsByJobCategory || [];
   const uploadedDocuments = documentRequirements.filter(doc => selectedDocuments[doc.fieldName]);
@@ -56,9 +56,14 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
       </Text>
       
       {/* Application Details Section */}
-      <View style={styles.reviewCard}>
+      <View style={[styles.reviewCard, { overflow: 'hidden' }]}>
         <View style={styles.reviewSection}>
-          <View style={styles.reviewSectionHeader}>
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: getSpacing('md'),
+          }}>
             <Text style={styles.reviewSectionTitle}>Application Details</Text>
             <TouchableOpacity 
               style={styles.editButton}
@@ -74,9 +79,20 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           </View>
           <View style={styles.reviewItem}>
             <Text style={styles.reviewLabel}>Job Category:</Text>
-            <View style={styles.reviewItemWithIndicator}>
-              <View style={[styles.categoryColorIndicator, { backgroundColor: selectedCategory?.colorCode || '#999' }]} />
-              <Text style={styles.reviewValue}>{selectedCategory?.name}</Text>
+            <View style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center',
+              flex: 2,
+              justifyContent: 'flex-end',
+            }}>
+              <View style={{
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: selectedCategory?.colorCode || '#F1C40F',
+                marginRight: getSpacing('sm'),
+              }} />
+              <Text style={[styles.reviewValue, { flex: 0, textAlign: 'left' }]}>{selectedCategory?.name}</Text>
             </View>
           </View>
           <View style={styles.reviewItem}>
@@ -87,7 +103,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             <Text style={styles.reviewLabel}>Organization:</Text>
             <Text style={styles.reviewValue}>{formData.organization}</Text>
           </View>
-          <View style={styles.reviewItem}>
+          <View style={[styles.reviewItem, { borderBottomWidth: 0 }]}>
             <Text style={styles.reviewLabel}>Civil Status:</Text>
             <Text style={styles.reviewValue}>{formData.civilStatus}</Text>
           </View>
@@ -95,7 +111,12 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         
         {/* Document Summary Section */}
         <View style={styles.reviewSection}>
-          <View style={styles.reviewSectionHeader}>
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: getSpacing('md'),
+          }}>
             <Text style={styles.reviewSectionTitle}>Document Summary</Text>
             <TouchableOpacity 
               style={styles.editButton}
@@ -103,22 +124,6 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             >
               <Text style={styles.editButtonText}>Edit</Text>
             </TouchableOpacity>
-          </View>
-          
-          {/* Document Status Overview */}
-          <View style={styles.documentOverview}>
-            <View style={styles.overviewItem}>
-              <Text style={[styles.overviewNumber, styles.overviewNumberSuccess]}>{uploadedDocuments.length}</Text>
-              <Text style={styles.overviewLabel}>Uploaded</Text>
-            </View>
-            <View style={styles.overviewItem}>
-              <Text style={[styles.overviewNumber, styles.overviewNumberError]}>{missingDocuments.length}</Text>
-              <Text style={styles.overviewLabel}>Missing</Text>
-            </View>
-            <View style={styles.overviewItem}>
-              <Text style={[styles.overviewNumber, styles.overviewNumberWarning]}>{documentsWithErrors.length}</Text>
-              <Text style={styles.overviewLabel}>Errors</Text>
-            </View>
           </View>
           
           {/* Individual Document Status */}
@@ -136,7 +141,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   </Text>
                   {isUploaded && (
                     <Text style={styles.documentStatusFile}>
-                      File: {selectedDocuments[document.fieldName]?.name || 'uploaded'}
+                      File: {selectedDocuments[document.fieldName]?.name || selectedDocuments[document.fieldName]?.fileName || 'selected'}
                     </Text>
                   )}
                 </View>
@@ -154,7 +159,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 ) : isUploaded ? (
                   <View style={styles.documentStatusIndicator}>
                     <Ionicons name="checkmark-circle" size={20} color={getColor('semantic.success')} />
-                    <Text style={[styles.documentStatusText, { color: getColor('semantic.success') }]}>Uploaded</Text>
+                    <Text style={[styles.documentStatusText, { color: getColor('semantic.success') }]}>Ready</Text>
                   </View>
                 ) : (
                   <View style={styles.documentStatusIndicator}>
@@ -171,17 +176,17 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         <View style={styles.reviewSection}>
           <Text style={styles.reviewSectionTitle}>Application Fee</Text>
           <Text style={styles.feeNote}>
-            As per eMediCard documentation: ₱10 transaction fee included for processing costs.
+            Includes ₱10 processing fee for secure application handling and verification.
           </Text>
           <View style={styles.reviewItem}>
             <Text style={styles.reviewLabel}>Application Fee:</Text>
             <Text style={styles.reviewValue}>₱50.00</Text>
           </View>
           <View style={styles.reviewItem}>
-            <Text style={styles.reviewLabel}>Transaction Fee:</Text>
+            <Text style={styles.reviewLabel}>Processing Fee:</Text>
             <Text style={styles.reviewValue}>₱10.00</Text>
           </View>
-          <View style={styles.reviewItem}>
+          <View style={[styles.reviewItem, { borderBottomWidth: 0 }]}>
             <Text style={styles.reviewLabel}>Total Amount:</Text>
             <Text style={[styles.reviewValue, styles.totalAmount]}>₱60.00</Text>
           </View>
@@ -197,49 +202,6 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             </Text>
           </View>
         )}
-        
-        {/* Queue Status Info */}
-        <View style={styles.reviewSection}>
-          <Text style={styles.reviewSectionTitle}>Document Upload Queue</Text>
-          {(() => {
-            const stats = formStorage.getQueueStats();
-            const queueStatusEmoji: Record<string, string> = {
-              draft: '📝',
-              submitting: '⏳',
-              completed: '✅',
-              failed: '❌'
-            };
-            
-            return (
-              <View style={styles.queueStats}>
-                <Text style={styles.queueStatsText}>
-                  📋 Documents queued: {stats.totalOperations}
-                </Text>
-                <Text style={styles.queueStatsText}>
-                  {queueStatusEmoji[stats.queueStatus] || '📊'} Queue status: {stats.queueStatus}
-                </Text>
-                {stats.pendingOperations > 0 && (
-                  <Text style={styles.queueStatsText}>
-                    ⏳ Pending: {stats.pendingOperations} documents
-                  </Text>
-                )}
-                {stats.completedOperations > 0 && (
-                  <Text style={styles.queueStatsText}>
-                    ✅ Ready: {stats.completedOperations} documents
-                  </Text>
-                )}
-                {stats.failedOperations > 0 && (
-                  <Text style={styles.queueStatsText}>
-                    ❌ Failed: {stats.failedOperations} documents (need retry)
-                  </Text>
-                )}
-                <Text style={[styles.queueStatsText, { marginTop: 8, fontStyle: 'italic' }]}>
-                  💡 All documents will be uploaded when you submit the application
-                </Text>
-              </View>
-            );
-          })()}
-        </View>
 
         {/* Validation Warnings */}
         {(missingDocuments.length > 0 || documentsWithErrors.length > 0) && (
@@ -258,12 +220,27 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             )}
           </View>
         )}
-        
-        {/* Terms and Conditions */}
-        <View style={styles.termsContainer}>
-          <Text style={styles.termsTitle}>Terms & Conditions</Text>
-          <Text style={styles.termsText}>By submitting this application, I confirm that all information provided is accurate and complete. I understand that false information may result in the rejection of my application or cancellation of my health card.</Text>
-        </View>
+      </View>
+      
+      {/* Terms and Conditions */}
+      <View style={{
+        backgroundColor: getColor('background.secondary'),
+        padding: getSpacing('md'),
+        borderRadius: getBorderRadius('md'),
+        marginTop: getSpacing('md'),
+        overflow: 'hidden',
+      }}>
+        <Text style={{
+          ...getTypography('bodyMedium'),
+          color: getColor('text.primary'),
+          fontWeight: '600',
+          marginBottom: getSpacing('sm'),
+        }}>Terms & Conditions</Text>
+        <Text style={{
+          ...getTypography('bodySmall'),
+          color: getColor('text.secondary'),
+          lineHeight: 18,
+        }}>By submitting this application, I confirm that all information provided is accurate and complete. I understand that false information may result in the rejection of my application or cancellation of my health card.</Text>
       </View>
     </ScrollView>
   );

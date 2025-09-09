@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, Animated, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getColor, getTypography, getSpacing, getBorderRadius, getShadow } from '../styles/theme';
 
 export type FeedbackType = 'success' | 'error' | 'warning' | 'info';
@@ -17,9 +18,12 @@ interface FeedbackMessage {
   };
 }
 
+export type FeedbackPosition = 'top' | 'below-header';
+
 interface FeedbackSystemProps {
   messages: FeedbackMessage[];
   onDismiss: (id: string) => void;
+  position?: FeedbackPosition;
 }
 
 const { width } = Dimensions.get('window');
@@ -27,9 +31,22 @@ const { width } = Dimensions.get('window');
 export const FeedbackSystem: React.FC<FeedbackSystemProps> = ({
   messages,
   onDismiss,
+  position = 'top',
 }) => {
+  const insets = useSafeAreaInsets();
+  
+  const getContainerStyle = () => {
+    switch (position) {
+      case 'below-header':
+        return [styles.container, { top: insets.top + 30 }];
+      case 'top':
+      default:
+        return styles.container;
+    }
+  };
+  
   return (
-    <View style={styles.container}>
+    <View style={getContainerStyle()}>
       {messages.map((message) => (
         <FeedbackItem
           key={message.id}
@@ -109,25 +126,25 @@ const FeedbackItem: React.FC<FeedbackItemProps> = ({ message, onDismiss }) => {
     switch (message.type) {
       case 'success':
         return {
-          background: getColor('semantic.success') + '20',
+          background: getColor('background.primary'),
           border: getColor('semantic.success'),
           icon: getColor('semantic.success'),
         };
       case 'error':
         return {
-          background: getColor('semantic.error') + '20',
+          background: getColor('background.primary'),
           border: getColor('semantic.error'),
           icon: getColor('semantic.error'),
         };
       case 'warning':
         return {
-          background: getColor('semantic.warning') + '20',
+          background: getColor('background.primary'),
           border: getColor('semantic.warning'),
           icon: getColor('semantic.warning'),
         };
       case 'info':
         return {
-          background: getColor('primary.500') + '20',
+          background: getColor('background.primary'),
           border: getColor('primary.500'),
           icon: getColor('primary.500'),
         };

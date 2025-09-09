@@ -132,7 +132,6 @@ export const useOptimizedDashboard = () => {
       });
     });
 
-    // Add from payments (pre-limited on server)
     dashboardData.payments?.forEach(payment => {
       if (payment) {
         activities.push({

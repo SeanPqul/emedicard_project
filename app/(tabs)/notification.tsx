@@ -266,7 +266,7 @@ export default function Notifications() {
 
   const renderNotificationItem = (notification: NotificationItem) => {
     const iconName = NOTIFICATION_ICONS[notification.type];
-    const color = NOTIFICATION_COLORS[notification.type];
+    const color = NOTIFICATION_COLORS[notification.type] ;
     const title = NOTIFICATION_TITLES[notification.type];
     
     return (

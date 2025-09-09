@@ -10,6 +10,7 @@ import {
   View,
   Dimensions
 } from 'react-native';
+import { hp } from '../../src/utils/responsive';
 import { FeedbackSystem, useFeedback } from '../../src/components/';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -33,6 +34,7 @@ import {
   JobCategoryStep,
   PersonalDetailsStep,
   UploadDocumentsStep,
+  PaymentMethodStep,
   ReviewStep
 } from '../../src/screens/apply/steps';
 
@@ -61,8 +63,6 @@ export default function ApplyScreen() {
     return baseTabBarHeight - 20;
   };
   
-  const tabBarHeight = getTabBarHeight();
-
   // API hooks
   const applications = useApplications();
   const jobCategories = useJobCategories();
@@ -126,9 +126,6 @@ export default function ApplyScreen() {
 
   // Load initial data
   useEffect(() => {
-    console.log('Loading initial data - job categories loading:', jobCategories.isLoading);
-    console.log('Job categories data:', jobCategories.jobCategories?.length, 'items');
-    
     // Wait for job categories to load before setting loading to false
     if (jobCategories.isLoading) {
       setLoadingData(true);
@@ -138,7 +135,6 @@ export default function ApplyScreen() {
     try {
       // Data is now available from hooks
       const categories = jobCategories.jobCategories || [];
-      console.log('Setting job categories:', categories.length, 'items');
       setJobCategoriesData(categories);
       setUserProfile(users.data.currentUser || null);
       
@@ -151,7 +147,7 @@ export default function ApplyScreen() {
       showError('Failed to load application data');
       setLoadingData(false);
     }
-  }, [jobCategories.jobCategories, jobCategories.isLoading, users.data.currentUser]);
+  }, [jobCategories.jobCategories, jobCategories.isLoading, users.data.currentUser, initializeForm, showError]);
 
   // Load requirements when job category changes
   useEffect(() => {
@@ -203,6 +199,7 @@ export default function ApplyScreen() {
             formData={formData}
             setFormData={setFormData}
             errors={errors}
+            jobCategoriesData={jobCategoriesData}
           />
         );
       case 3:
@@ -219,6 +216,14 @@ export default function ApplyScreen() {
           />
         );
       case 4:
+        return (
+          <PaymentMethodStep
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
+          />
+        );
+      case 5:
         return (
           <ReviewStep
             formData={formData}
@@ -272,7 +277,7 @@ export default function ApplyScreen() {
           style={styles.content} 
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ 
-            paddingBottom: tabBarHeight + 20, // Dynamic space based on tab bar height
+            paddingBottom: hp(10), // Responsive padding: navigation buttons (8%) + tab bar (8%) + buffer (3%)
             flexGrow: 1 // Ensure content can expand
           }}
           keyboardShouldPersistTaps="handled"
@@ -284,8 +289,8 @@ export default function ApplyScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Navigation Buttons - Fixed at bottom */}
-      <View style={[styles.navigationButtons, { bottom: Math.max(0, tabBarHeight - 20) }]}>
+      {/* Navigation Buttons - Responsive positioning */}
+      <View style={styles.navigationButtons}>
           {currentStep > 0 && (
             <TouchableOpacity 
               style={styles.previousButton} 
@@ -324,7 +329,7 @@ export default function ApplyScreen() {
         />
 
 
-        <FeedbackSystem messages={messages} onDismiss={dismissFeedback} />
+        <FeedbackSystem messages={messages} onDismiss={dismissFeedback} position="below-header" />
     </View>
   );
 }

@@ -159,6 +159,11 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: getSpacing('xs'),
   },
+  lockIcon: {
+    padding: getSpacing('xs'),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cardContent: {
     marginBottom: getSpacing('md'),
   },

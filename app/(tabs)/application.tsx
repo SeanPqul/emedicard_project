@@ -265,19 +265,20 @@ export default function Applications() {
             </View>
           </View>
           
-          <View style={[
-            styles.statusBadge,
-            { backgroundColor: statusColor + '20' }
-          ]}>
-            <Ionicons 
-              name={getStatusIcon(application.status)} 
-              size={12} 
-              color={statusColor}
-            />
-            <Text style={[styles.statusText, { color: statusColor }]}>
-              {application.status}
-            </Text>
-          </View>
+{application.status === 'Submitted' ? (
+            <View style={[
+              styles.statusBadge,
+              { backgroundColor: statusColor + '20' }
+            ]}>
+              <Text style={[styles.statusText, { color: statusColor }]}>
+                {application.status}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.lockIcon}>
+              <Ionicons name="lock-closed" size={16} color="#6C757D" />
+            </View>
+          )}
         </View>
         
         <View style={styles.cardContent}>
@@ -398,6 +399,14 @@ export default function Applications() {
           </View>
         )}
       </ScrollView>
+      
+      {/* Floating Action Button */}
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => router.push('/(tabs)/apply')}
+      >
+        <Ionicons name="add" size={24} color="#FFFFFF" />
+      </TouchableOpacity>
     </View>
   );
 }

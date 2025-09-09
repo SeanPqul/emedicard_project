@@ -3,6 +3,7 @@ export const STEP_TITLES = [
   'Job Category', 
   'Personal Details',
   'Upload Documents',
+  'Payment Method',
   'Review & Submit'
 ];
 

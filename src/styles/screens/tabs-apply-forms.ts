@@ -1,5 +1,8 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../theme';
+import { hp } from '../../utils/responsive';
+
+const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   // Container and Layout
@@ -55,13 +58,14 @@ export const styles = StyleSheet.create({
   stepCircle: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: getBorderRadius('full'),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: getSpacing('xs'),
+    marginBottom: getSpacing('sm'),
+    zIndex: 2,
   },
   stepCircleActive: {
-    backgroundColor: getColor('primary.500'),
+    backgroundColor: getColor('accent.medicalBlue'),
   },
   stepCircleInactive: {
     backgroundColor: getColor('border.medium'),
@@ -79,10 +83,10 @@ export const styles = StyleSheet.create({
   stepTitle: {
     ...getTypography('caption'),
     textAlign: 'center',
-    maxWidth: 80,
+    marginBottom: getSpacing('sm'),
   },
   stepTitleActive: {
-    color: getColor('primary.500'),
+    color: getColor('accent.medicalBlue'),
     fontWeight: '600',
   },
   stepTitleInactive: {
@@ -91,16 +95,16 @@ export const styles = StyleSheet.create({
   stepLine: {
     position: 'absolute',
     top: 16,
-    left: '50%',
-    right: '-50%',
+    left: '60%',
+    width: '80%',
     height: 2,
-    zIndex: -1,
+    zIndex: 1,
   },
   stepLineActive: {
-    backgroundColor: getColor('primary.500'),
+    backgroundColor: getColor('accent.medicalBlue'),
   },
   stepLineInactive: {
-    backgroundColor: getColor('border.medium'),
+    backgroundColor: getColor('border.light'),
   },
 
   // Step Content
@@ -176,28 +180,28 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: getSpacing('md'),
+    marginBottom: getSpacing('xl'),
   },
   categoryCard: {
-    width: '47%',
-    padding: getSpacing('lg'),
+    width: (width - 52) / 2,
+    minHeight: 150,
+    backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
+    padding: getSpacing('md'),
+    marginBottom: getSpacing('sm'),
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: getColor('border.light'),
-    backgroundColor: getColor('background.primary'),
-    alignItems: 'center',
+    ...getShadow('medium'),
     position: 'relative',
-    minHeight: 120,
-    ...getShadow('small'),
   },
   categoryCardSelected: {
     borderWidth: 2,
-    backgroundColor: getColor('primary.50'),
   },
   categoryCardCentered: {
-    width: '100%',
-    maxWidth: '47%',
     alignSelf: 'center',
+    width: (width - 52) / 2,
   },
   categoryIcon: {
     width: 48,
@@ -250,22 +254,22 @@ export const styles = StyleSheet.create({
   civilStatusOption: {
     paddingVertical: getSpacing('sm'),
     paddingHorizontal: getSpacing('md'),
-    borderRadius: getBorderRadius('md'),
+    borderRadius: getBorderRadius('full'),
     borderWidth: 1,
     borderColor: getColor('border.light'),
     backgroundColor: getColor('background.primary'),
     marginRight: getSpacing('sm'),
   },
   civilStatusOptionSelected: {
-    borderColor: getColor('primary.500'),
-    backgroundColor: getColor('primary.50'),
+    borderColor: getColor('accent.medicalBlue'),
+    backgroundColor: getColor('accent.medicalBlue'),
   },
   civilStatusText: {
     ...getTypography('bodySmall'),
     color: getColor('text.secondary'),
   },
   civilStatusTextSelected: {
-    color: getColor('primary.500'),
+    color: getColor('text.inverse'),
     fontWeight: '600',
   },
 
@@ -452,7 +456,7 @@ export const styles = StyleSheet.create({
   },
   totalAmount: {
     ...getTypography('body'),
-    color: getColor('primary.500'),
+    color: getColor('text.primary'),
     fontWeight: '700',
   },
 
@@ -490,21 +494,19 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   documentStatusTitle: {
-    ...getTypography('bodySmall'),
+    ...getTypography('bodyMedium'),
     color: getColor('text.primary'),
     fontWeight: '600',
   },
   documentStatusFile: {
-    ...getTypography('caption'),
+    ...getTypography('bodySmall'),
     color: getColor('text.secondary'),
   },
   documentStatusIndicator: {
     alignItems: 'center',
-    minWidth: 60,
   },
   documentStatusText: {
-    ...getTypography('caption'),
-    marginTop: getSpacing('xs'),
+    ...getTypography('bodySmall'),
   },
 
   // Fee Section
@@ -579,16 +581,19 @@ export const styles = StyleSheet.create({
   // Navigation Buttons
   navigationButtons: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: getSpacing('lg'),
-    paddingVertical: getSpacing('md'),
+    paddingVertical: getSpacing('sm'),
     backgroundColor: getColor('background.primary'),
     borderTopWidth: 1,
     borderTopColor: getColor('border.light'),
-    gap: getSpacing('md'),
+    ...getShadow('large'),
     position: 'absolute',
+    bottom: hp(0), // 9% from bottom - positioned just above tab bar
     left: 0,
     right: 0,
-    ...getShadow('medium'),
+    //minHeight: hp(8), // 8% of screen height
   },
 
   // Progress Card
@@ -825,12 +830,13 @@ export const styles = StyleSheet.create({
 
   // Previous Button
   previousButton: {
-    paddingVertical: getSpacing('md'),
     paddingHorizontal: getSpacing('lg'),
+    paddingVertical: getSpacing('sm'),
     borderRadius: getBorderRadius('md'),
     borderWidth: 1,
-    borderColor: getColor('border.medium'),
+    borderColor: getColor('border.light'),
     backgroundColor: getColor('background.primary'),
+    marginRight: getSpacing('sm'),
   },
   previousButtonText: {
     ...getTypography('body'),
@@ -845,7 +851,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   nextButtonFull: {
-    marginLeft: 0,
+    marginRight: 0,
   },
   nextButtonText: {
     ...getTypography('body'),
@@ -927,7 +933,7 @@ export const styles = StyleSheet.create({
   },
   
   overviewNumber: {
-    ...getTypography('h4'),
+    ...getTypography('headingSmall'),
     fontWeight: '700',
     marginBottom: getSpacing('xs'),
   },
