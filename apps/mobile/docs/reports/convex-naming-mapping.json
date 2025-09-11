@@ -1,0 +1,546 @@
+[
+    {
+        "currentPath": "convex/migrations.ts",
+        "currentExportName": "seedJobCategoriesAndRequirements",
+        "callType": "mutation",
+        "newPath": "convex/seedJobCategoriesAndRequirements.ts",
+        "newExportName": "seedJobCategoriesAndRequirementsMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/migrations.ts",
+        "currentExportName": "clearSeedData",
+        "callType": "mutation",
+        "newPath": "convex/clearSeedData.ts",
+        "newExportName": "clearSeedDataMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/admin/migrations.ts",
+        "currentExportName": "migrateUsersAddRole",
+        "callType": "mutation",
+        "newPath": "convex/admin/migrateUsersAddRole.ts",
+        "newExportName": "migrateUsersAddRoleMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/admin/migrations.ts",
+        "currentExportName": "setUserRole",
+        "callType": "mutation",
+        "newPath": "convex/admin/setUserRole.ts",
+        "newExportName": "setUserRoleMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/admin/migrations.ts",
+        "currentExportName": "migrateFormsAddStatus",
+        "callType": "mutation",
+        "newPath": "convex/admin/migrateFormsAddStatus.ts",
+        "newExportName": "migrateFormsAddStatusMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/admin/migrations.ts",
+        "currentExportName": "migrateJobCategoryRequireOrientation",
+        "callType": "mutation",
+        "newPath": "convex/admin/migrateJobCategoryRequireOrientation.ts",
+        "newExportName": "migrateJobCategoryRequireOrientationMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/admin/migrations.ts",
+        "currentExportName": "migrateNotificationsAddTitle",
+        "callType": "mutation",
+        "newPath": "convex/admin/migrateNotificationsAddTitle.ts",
+        "newExportName": "migrateNotificationsAddTitleMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/admin/migrations.ts",
+        "currentExportName": "cleanupDatabase",
+        "callType": "mutation",
+        "newPath": "convex/admin/cleanupDatabase.ts",
+        "newExportName": "cleanupDatabaseMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/admin/migrations.ts",
+        "currentExportName": "resetDatabase",
+        "callType": "mutation",
+        "newPath": "convex/admin/resetDatabase.ts",
+        "newExportName": "resetDatabaseMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/admin/seed.ts",
+        "currentExportName": "seedJobCategoriesAndRequirements",
+        "callType": "mutation",
+        "newPath": "convex/admin/seedJobCategoriesAndRequirements.ts",
+        "newExportName": "seedJobCategoriesAndRequirementsMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/admin/seed.ts",
+        "currentExportName": "clearSeedData",
+        "callType": "mutation",
+        "newPath": "convex/admin/clearSeedData.ts",
+        "newExportName": "clearSeedDataMutation",
+        "reason": "Extract standalone function to dedicated file with consistent naming"
+    },
+    {
+        "currentPath": "convex/dashboard/getDashboardData.ts",
+        "currentExportName": "getDashboardData",
+        "callType": "query",
+        "newPath": "convex/dashboard/dashboardData.ts",
+        "newExportName": "dashboardDataQuery",
+        "reason": "Remove 'get' prefix and add Query suffix for consistency"
+    },
+    {
+        "currentPath": "convex/forms/createForm.ts",
+        "currentExportName": "createForm",
+        "callType": "mutation",
+        "newPath": "convex/forms/createForm.ts",
+        "newExportName": "createFormMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/forms/getById.ts",
+        "currentExportName": "getFormById",
+        "callType": "query",
+        "newPath": "convex/forms/formById.ts",
+        "newExportName": "formByIdQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/forms/getFormById.ts",
+        "currentExportName": "getFormById",
+        "callType": "query",
+        "newPath": "convex/forms/formById.ts",
+        "newExportName": "formByIdQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix (duplicate entry)"
+    },
+    {
+        "currentPath": "convex/forms/getUserApplications.ts",
+        "currentExportName": "getUserApplications",
+        "callType": "query",
+        "newPath": "convex/forms/userApplications.ts",
+        "newExportName": "userApplicationsQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/forms/submitApplicationForm.ts",
+        "currentExportName": "submitApplicationForm",
+        "callType": "mutation",
+        "newPath": "convex/forms/submitApplicationForm.ts",
+        "newExportName": "submitApplicationFormMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/forms/updateForm.ts",
+        "currentExportName": "updateForm",
+        "callType": "mutation",
+        "newPath": "convex/forms/updateForm.ts",
+        "newExportName": "updateFormMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/healthCards/getByFormId.ts",
+        "currentExportName": "getHealthCardByFormId",
+        "callType": "query",
+        "newPath": "convex/healthCards/healthCardByFormId.ts",
+        "newExportName": "healthCardByFormIdQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/healthCards/getByVerificationToken.ts",
+        "currentExportName": "getHealthCardByVerificationToken",
+        "callType": "query",
+        "newPath": "convex/healthCards/healthCardByVerificationToken.ts",
+        "newExportName": "healthCardByVerificationTokenQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/healthCards/getUserCards.ts",
+        "currentExportName": "getUserHealthCards",
+        "callType": "query",
+        "newPath": "convex/healthCards/userHealthCards.ts",
+        "newExportName": "userHealthCardsQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/healthCards/issueHealthCard.ts",
+        "currentExportName": "issueHealthCard",
+        "callType": "mutation",
+        "newPath": "convex/healthCards/issueHealthCard.ts",
+        "newExportName": "issueHealthCardMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/healthCards/updateHealthCard.ts",
+        "currentExportName": "updateHealthCard",
+        "callType": "mutation",
+        "newPath": "convex/healthCards/updateHealthCard.ts",
+        "newExportName": "updateHealthCardMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/jobCategories/createJobType.ts",
+        "currentExportName": "createJobCategory",
+        "callType": "mutation",
+        "newPath": "convex/jobCategories/createJobCategory.ts",
+        "newExportName": "createJobCategoryMutation",
+        "reason": "Fix file name mismatch (jobType -> jobCategory) and add Mutation suffix"
+    },
+    {
+        "currentPath": "convex/jobCategories/deleteJobType.ts",
+        "currentExportName": "deleteJobCategory",
+        "callType": "mutation",
+        "newPath": "convex/jobCategories/deleteJobCategory.ts",
+        "newExportName": "deleteJobCategoryMutation",
+        "reason": "Fix file name mismatch (jobType -> jobCategory) and add Mutation suffix"
+    },
+    {
+        "currentPath": "convex/jobCategories/getAllJobType.ts",
+        "currentExportName": "getAllJobCategories",
+        "callType": "query",
+        "newPath": "convex/jobCategories/allJobCategories.ts",
+        "newExportName": "allJobCategoriesQuery",
+        "reason": "Fix file name mismatch (jobType -> jobCategory), remove 'get' prefix, add Query suffix"
+    },
+    {
+        "currentPath": "convex/jobCategories/getById.ts",
+        "currentExportName": "getJobCategoryById",
+        "callType": "query",
+        "newPath": "convex/jobCategories/jobCategoryById.ts",
+        "newExportName": "jobCategoryByIdQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/jobCategories/updateJobType.ts",
+        "currentExportName": "updateJobCategory",
+        "callType": "mutation",
+        "newPath": "convex/jobCategories/updateJobCategory.ts",
+        "newExportName": "updateJobCategoryMutation",
+        "reason": "Fix file name mismatch (jobType -> jobCategory) and add Mutation suffix"
+    },
+    {
+        "currentPath": "convex/notifications/createNotif.ts",
+        "currentExportName": "createNotification",
+        "callType": "mutation",
+        "newPath": "convex/notifications/createNotification.ts",
+        "newExportName": "createNotificationMutation",
+        "reason": "Expand file name abbreviation (createNotif -> createNotification) and add Mutation suffix"
+    },
+    {
+        "currentPath": "convex/notifications/getUnreadCount.ts",
+        "currentExportName": "getUnreadNotificationCount",
+        "callType": "query",
+        "newPath": "convex/notifications/unreadNotificationCount.ts",
+        "newExportName": "unreadNotificationCountQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/notifications/getUserNotifications.ts",
+        "currentExportName": "getUserNotifications",
+        "callType": "query",
+        "newPath": "convex/notifications/userNotifications.ts",
+        "newExportName": "userNotificationsQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/notifications/markAllAsRead.ts",
+        "currentExportName": "markAllNotificationsAsRead",
+        "callType": "mutation",
+        "newPath": "convex/notifications/markAllNotificationsAsRead.ts",
+        "newExportName": "markAllNotificationsAsReadMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/notifications/markAsRead.ts",
+        "currentExportName": "markNotificationAsRead",
+        "callType": "mutation",
+        "newPath": "convex/notifications/markNotificationAsRead.ts",
+        "newExportName": "markNotificationAsReadMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/orientations/getUserOrientations.ts",
+        "currentExportName": "getUserOrientations",
+        "callType": "query",
+        "newPath": "convex/orientations/userOrientations.ts",
+        "newExportName": "userOrientationsQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/payments/createPayment.ts",
+        "currentExportName": "createPayment",
+        "callType": "mutation",
+        "newPath": "convex/payments/createPayment.ts",
+        "newExportName": "createPaymentMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/payments/getByFormId.ts",
+        "currentExportName": "getPaymentByFormId",
+        "callType": "query",
+        "newPath": "convex/payments/paymentByFormId.ts",
+        "newExportName": "paymentByFormIdQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/payments/getPaymentByFormId.ts",
+        "currentExportName": "getPaymentByFormId",
+        "callType": "query",
+        "newPath": "convex/payments/paymentByFormId.ts",
+        "newExportName": "paymentByFormIdQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix (duplicate entry)"
+    },
+    {
+        "currentPath": "convex/payments/getUserPayments.ts",
+        "currentExportName": "getUserPayments",
+        "callType": "query",
+        "newPath": "convex/payments/userPayments.ts",
+        "newExportName": "userPaymentsQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/payments/updatePaymentStatus.ts",
+        "currentExportName": "updatePaymentStatus",
+        "callType": "mutation",
+        "newPath": "convex/payments/updatePaymentStatus.ts",
+        "newExportName": "updatePaymentStatusMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/requirements/adminBatchReviewDocuments.ts",
+        "currentExportName": "adminBatchReviewDocuments",
+        "callType": "mutation",
+        "newPath": "convex/requirements/adminBatchReviewDocuments.ts",
+        "newExportName": "adminBatchReviewDocumentsMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/requirements/adminGetDocumentsByStatus.ts",
+        "currentExportName": "adminGetDocumentsByStatus",
+        "callType": "query",
+        "newPath": "convex/requirements/adminDocumentsByStatus.ts",
+        "newExportName": "adminDocumentsByStatusQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/requirements/adminGetPendingDocuments.ts",
+        "currentExportName": "adminGetPendingDocuments",
+        "callType": "query",
+        "newPath": "convex/requirements/adminPendingDocuments.ts",
+        "newExportName": "adminPendingDocumentsQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/requirements/adminReviewDocument.ts",
+        "currentExportName": "adminReviewDocument",
+        "callType": "mutation",
+        "newPath": "convex/requirements/adminReviewDocument.ts",
+        "newExportName": "adminReviewDocumentMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/requirements/createJobCategoryRequirement.ts",
+        "currentExportName": "createJobCategoryRequirement",
+        "callType": "mutation",
+        "newPath": "convex/requirements/createJobCategoryRequirement.ts",
+        "newExportName": "createJobCategoryRequirementMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/requirements/deleteDocument.ts",
+        "currentExportName": "deleteDocument",
+        "callType": "mutation",
+        "newPath": "convex/requirements/deleteDocument.ts",
+        "newExportName": "deleteDocumentMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/requirements/deleteJobCategoryRequirement.ts",
+        "currentExportName": "deleteJobCategoryRequirement",
+        "callType": "mutation",
+        "newPath": "convex/requirements/deleteJobCategoryRequirement.ts",
+        "newExportName": "deleteJobCategoryRequirementMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/requirements/generateUploadUrl.ts",
+        "currentExportName": "generateUploadUrl",
+        "callType": "mutation",
+        "newPath": "convex/requirements/generateUploadUrl.ts",
+        "newExportName": "generateUploadUrlMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/requirements/getCategoryRequirements.ts",
+        "currentExportName": "queryCategoryRequirements",
+        "callType": "query",
+        "newPath": "convex/requirements/categoryRequirements.ts",
+        "newExportName": "categoryRequirementsQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, normalize export name with Query suffix"
+    },
+    {
+        "currentPath": "convex/requirements/getDocumentUrl.ts",
+        "currentExportName": "queryDocumentUrl",
+        "callType": "query",
+        "newPath": "convex/requirements/documentUrl.ts",
+        "newExportName": "documentUrlQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, normalize export name with Query suffix"
+    },
+    {
+        "currentPath": "convex/requirements/getFormDocuments.ts",
+        "currentExportName": "queryDocuments",
+        "callType": "query",
+        "newPath": "convex/requirements/formDocuments.ts",
+        "newExportName": "formDocumentsQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, normalize export name with Query suffix"
+    },
+    {
+        "currentPath": "convex/requirements/getFormDocumentsRequirementsQuery.ts",
+        "currentExportName": "queryDocuments",
+        "callType": "query",
+        "newPath": "convex/requirements/formDocumentsRequirements.ts",
+        "newExportName": "formDocumentsRequirementsQuery",
+        "reason": "Remove 'get' prefix and 'Query' suffix from file name, normalize export name with Query suffix"
+    },
+    {
+        "currentPath": "convex/requirements/getJobCategoryRequirementsQuery.ts",
+        "currentExportName": "queryJobCategory",
+        "callType": "query",
+        "newPath": "convex/requirements/jobCategoryRequirements.ts",
+        "newExportName": "jobCategoryRequirementsQuery",
+        "reason": "Remove 'get' prefix and 'Query' suffix from file name, normalize export name with Query suffix"
+    },
+    {
+        "currentPath": "convex/requirements/getRequirementsByJobCategoryQuery.ts",
+        "currentExportName": "queryRequirements",
+        "callType": "query",
+        "newPath": "convex/requirements/requirementsByJobCategory.ts",
+        "newExportName": "requirementsByJobCategoryQuery",
+        "reason": "Remove 'get' prefix and 'Query' suffix from file name, normalize export name with Query suffix"
+    },
+    {
+        "currentPath": "convex/requirements/updateDocumentFieldMutation.ts",
+        "currentExportName": "updateDocumentField",
+        "callType": "mutation",
+        "newPath": "convex/requirements/updateDocumentField.ts",
+        "newExportName": "updateDocumentFieldMutation",
+        "reason": "Remove 'Mutation' suffix from file name, normalize export name with Mutation suffix"
+    },
+    {
+        "currentPath": "convex/requirements/updateJobCategoryMutation.ts",
+        "currentExportName": "updateJobCategory",
+        "callType": "mutation",
+        "newPath": "convex/requirements/updateJobCategory.ts",
+        "newExportName": "updateJobCategoryMutation",
+        "reason": "Remove 'Mutation' suffix from file name, normalize export name with Mutation suffix"
+    },
+    {
+        "currentPath": "convex/requirements/uploadDocuments.ts",
+        "currentExportName": "uploadMutation",
+        "callType": "mutation",
+        "newPath": "convex/requirements/uploadDocuments.ts",
+        "newExportName": "uploadDocumentsMutation",
+        "reason": "Normalize export name to match file name with Mutation suffix"
+    },
+    {
+        "currentPath": "convex/storage/uploadUrl.ts",
+        "currentExportName": "generateUploadUrl",
+        "callType": "mutation",
+        "newPath": "convex/storage/generateUploadUrl.ts",
+        "newExportName": "generateUploadUrlMutation",
+        "reason": "Make file name match export name and add Mutation suffix"
+    },
+    {
+        "currentPath": "convex/users/createUser.ts",
+        "currentExportName": "createUser",
+        "callType": "mutation",
+        "newPath": "convex/users/createUser.ts",
+        "newExportName": "createUserMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/users/getRole.ts",
+        "currentExportName": "getUsersByRole",
+        "callType": "query",
+        "newPath": "convex/users/usersByRole.ts",
+        "newExportName": "usersByRoleQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/users/getUser.ts",
+        "currentExportName": "getCurrentUser",
+        "callType": "query",
+        "newPath": "convex/users/currentUser.ts",
+        "newExportName": "currentUserQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/users/updateRole.ts",
+        "currentExportName": "updateUserRole",
+        "callType": "mutation",
+        "newPath": "convex/users/updateUserRole.ts",
+        "newExportName": "updateUserRoleMutation",
+        "reason": "Make file name match export name and add Mutation suffix"
+    },
+    {
+        "currentPath": "convex/users/updateUser.ts",
+        "currentExportName": "updateUserRole",
+        "callType": "mutation",
+        "newPath": "convex/users/updateUser.ts",
+        "newExportName": "updateUserMutation",
+        "reason": "Fix export name to match file name and add Mutation suffix"
+    },
+    {
+        "currentPath": "convex/verification/createVerificationLog.ts",
+        "currentExportName": "createVerificationLog",
+        "callType": "mutation",
+        "newPath": "convex/verification/createVerificationLog.ts",
+        "newExportName": "createVerificationLogMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/verification/getVerificationLogsByHealthCard.ts",
+        "currentExportName": "getVerificationLogsByHealthCard",
+        "callType": "query",
+        "newPath": "convex/verification/verificationLogsByHealthCard.ts",
+        "newExportName": "verificationLogsByHealthCardQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/verification/getVerificationLogsByUser.ts",
+        "currentExportName": "getVerificationLogsByUser",
+        "callType": "query",
+        "newPath": "convex/verification/verificationLogsByUser.ts",
+        "newExportName": "verificationLogsByUserQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/verification/getVerificationStats.ts",
+        "currentExportName": "getVerificationStats",
+        "callType": "query",
+        "newPath": "convex/verification/verificationStats.ts",
+        "newExportName": "verificationStatsQuery",
+        "reason": "Remove 'get' prefix, use camelCase file name, add Query suffix"
+    },
+    {
+        "currentPath": "convex/verification/logQRScan.ts",
+        "currentExportName": "logQRScan",
+        "callType": "mutation",
+        "newPath": "convex/verification/logQRScan.ts",
+        "newExportName": "logQRScanMutation",
+        "reason": "Add Mutation suffix for consistency"
+    },
+    {
+        "currentPath": "convex/verification/logVerificationAttempt.ts",
+        "currentExportName": "logVerificationAttempt",
+        "callType": "mutation",
+        "newPath": "convex/verification/logVerificationAttempt.ts",
+        "newExportName": "logVerificationAttemptMutation",
+        "reason": "Add Mutation suffix for consistency"
+    }
+]

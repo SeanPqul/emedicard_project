@@ -1,0 +1,280 @@
+{
+  "naming_normalization_mapping": {
+    "convention": "file base name + Query/Mutation in export",
+    "changes": {
+      "health_cards": {
+        "getByFormId.ts": {
+          "current_export": "getHealthCardByFormId",
+          "new_export": "getByFormIdQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "getByVerificationToken.ts": {
+          "current_export": "getHealthCardByVerificationToken", 
+          "new_export": "getByVerificationTokenQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "getUserCards.ts": {
+          "current_export": "getUserHealthCards",
+          "new_export": "getUserCardsQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "issueHealthCard.ts": {
+          "current_export": "issueHealthCard",
+          "new_export": "issueHealthCardMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "updateHealthCard.ts": {
+          "current_export": "updateHealthCard",
+          "new_export": "updateHealthCardMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        }
+      },
+      "job_categories": {
+        "createJobType.ts": {
+          "current_export": "createJobCategory",
+          "new_export": "createJobCategoryMutation",
+          "new_filename": "createJobCategory.ts",
+          "type": "file_and_export_rename",
+          "status": "ready"
+        },
+        "deleteJobType.ts": {
+          "current_export": "deleteJobCategory",
+          "new_export": "deleteJobCategoryMutation",
+          "new_filename": "deleteJobCategory.ts",
+          "type": "file_and_export_rename",
+          "status": "ready"
+        },
+        "getAllJobType.ts": {
+          "current_export": "getAllJobCategories",
+          "new_export": "getAllJobCategoriesQuery",
+          "new_filename": "getAllJobCategories.ts",
+          "type": "file_and_export_rename",
+          "status": "ready"
+        },
+        "getById.ts": {
+          "current_export": "getJobCategoryById",
+          "new_export": "getJobCategoryByIdQuery",
+          "new_filename": "getJobCategoryById.ts",
+          "type": "file_and_export_rename",
+          "status": "ready"
+        },
+        "updateJobType.ts": {
+          "current_export": "updateJobCategory",
+          "new_export": "updateJobCategoryMutation",
+          "new_filename": "updateJobCategory.ts",
+          "type": "file_and_export_rename",
+          "status": "ready"
+        }
+      },
+      "notifications": {
+        "createNotif.ts": {
+          "current_export": "createNotification",
+          "new_export": "createNotificationMutation",
+          "new_filename": "createNotification.ts",
+          "type": "file_and_export_rename",
+          "status": "ready"
+        },
+        "getUnreadCount.ts": {
+          "current_export": "getUnreadNotificationCount",
+          "new_export": "getUnreadCountQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "getUserNotifications.ts": {
+          "current_export": "getUserNotifications",
+          "new_export": "getUserNotificationsQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "markAllAsRead.ts": {
+          "current_export": "markAllNotificationsAsRead",
+          "new_export": "markAllAsReadMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "markAsRead.ts": {
+          "current_export": "markNotificationAsRead",
+          "new_export": "markAsReadMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        }
+      },
+      "orientations": {
+        "getUserOrientations.ts": {
+          "current_export": "getUserOrientations",
+          "new_export": "getUserOrientationsQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        }
+      },
+      "payments": {
+        "createPayment.ts": {
+          "current_export": "createPayment",
+          "new_export": "createPaymentMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "getUserPayments.ts": {
+          "current_export": "getUserPayments",
+          "new_export": "getUserPaymentsQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "updatePaymentStatus.ts": {
+          "current_export": "updatePaymentStatus",
+          "new_export": "updatePaymentStatusMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        }
+      },
+      "requirements": {
+        "adminBatchReviewDocuments.ts": {
+          "current_export": "adminBatchReviewDocuments",
+          "new_export": "adminBatchReviewDocumentsMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "adminGetDocumentsByStatus.ts": {
+          "current_export": "adminGetDocumentsByStatus",
+          "new_export": "adminGetDocumentsByStatusQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "adminGetPendingDocuments.ts": {
+          "current_export": "adminGetPendingDocuments",
+          "new_export": "adminGetPendingDocumentsQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "adminReviewDocument.ts": {
+          "current_export": "adminReviewDocument",
+          "new_export": "adminReviewDocumentMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "createJobCategoryRequirement.ts": {
+          "current_export": "createJobCategoryRequirement",
+          "new_export": "createJobCategoryRequirementMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "deleteDocument.ts": {
+          "current_export": "deleteDocument",
+          "new_export": "deleteDocumentMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "deleteJobCategoryRequirement.ts": {
+          "current_export": "deleteJobCategoryRequirement",
+          "new_export": "deleteJobCategoryRequirementMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "documentRequirements.ts": {
+          "current_export": "deprecated",
+          "new_export": "documentRequirementsQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "getDocumentUrl.ts": {
+          "current_export": "queryDocumentUrl",
+          "new_export": "getDocumentUrlQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "updateDocumentField.ts": {
+          "current_export": "updateDocumentFieldMutation",
+          "new_export": "updateDocumentMutation",
+          "new_filename": "updateDocument.ts",
+          "type": "file_and_export_rename",
+          "status": "ready"
+        },
+        "updateJobCategory.ts": {
+          "current_export": "updateJobCategoryMutation",
+          "new_export": "updateJobCategoryRequirementMutation",
+          "new_filename": "updateJobCategoryRequirement.ts",
+          "type": "file_and_export_rename",
+          "notes": "This is the existing requirements/updateJobCategory.ts that should be kept as per task instructions"
+        }
+      },
+      "users": {
+        "createUser.ts": {
+          "current_export": "createUser",
+          "new_export": "createUserMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "updateRole.ts": {
+          "current_export": "updateUserRole",
+          "new_export": "updateRoleMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "updateUser.ts": {
+          "current_export": "updateUserRole",
+          "new_export": "updateUserMutation",
+          "type": "export_rename_only",
+          "status": "ready",
+          "notes": "Function name appears to be incorrect in source - should be updateUser, not updateUserRole"
+        }
+      },
+      "verification": {
+        "createVerificationLog.ts": {
+          "current_export": "createVerificationLog",
+          "new_export": "createVerificationLogMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "getVerificationLogsByHealthCard.ts": {
+          "current_export": "getVerificationLogsByHealthCard",
+          "new_export": "getVerificationLogsByHealthCardQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "getVerificationLogsByUser.ts": {
+          "current_export": "getVerificationLogsByUser",
+          "new_export": "getVerificationLogsByUserQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "getVerificationStats.ts": {
+          "current_export": "getVerificationStats",
+          "new_export": "getVerificationStatsQuery",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "logQRScan.ts": {
+          "current_export": "logQRScan",
+          "new_export": "logQRScanMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "logVerificationAttempt.ts": {
+          "current_export": "logVerificationAttempt",
+          "new_export": "logVerificationAttemptMutation",
+          "type": "export_rename_only",
+          "status": "ready"
+        },
+        "verificationLogs.ts": {
+          "current_exports": ["createVerificationLog", "logQRScan", "logVerificationAttempt", "getVerificationLogsByHealthCard", "getVerificationLogsByUser", "getVerificationStats"],
+          "new_export": "verificationLogsQuery",
+          "type": "re_export_file",
+          "status": "ready",
+          "notes": "This file re-exports other verification functions - needs to update based on the context of what 'verificationLogs' represents"
+        }
+      }
+    }
+  },
+  "summary": {
+    "total_files": 42,
+    "export_rename_only": 32,
+    "file_and_export_rename": 9,
+    "re_export_files": 1,
+    "modules_affected": ["health_cards", "job_categories", "notifications", "orientations", "payments", "requirements", "users", "verification"]
+  }
+}
