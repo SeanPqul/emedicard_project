@@ -53,8 +53,9 @@ ios/
 # ────────────────
 # Environment / Config
 # ────────────────
-.env*
-.env*.local
+.env
+.env.local
+!.env.example
 .clerk/
 .mcp.json
 
