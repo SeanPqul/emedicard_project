@@ -15,7 +15,7 @@ export const useStoreUser = () => {
   const [userId, setUserId] = useState<Id<"users"> | null>(null);
   
   // This mutation now correctly takes no arguments
-  const storeUser = useMutation(api.users.getOrCreateUser);
+  const storeUser = useMutation(api.users.usersMain.getOrCreateUser);
 
   useEffect(() => {
     // If the user is not logged in, do nothing.
