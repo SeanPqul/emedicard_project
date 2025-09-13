@@ -1,0 +1,80 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$", 
+        ".env*",
+        "tsconfig*.json",
+        "package.json"
+      ],
+      "outputs": [
+        "dist/**", 
+        "build/**", 
+        ".next/**", 
+        "!.next/cache/**",
+        "!.next/trace",
+        "expo-env.d.ts"
+      ],
+      "env": ["NODE_ENV", "EXPO_PUBLIC_*", "CONVEX_*"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": ["NODE_ENV", "EXPO_PUBLIC_*", "CONVEX_*"]
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$", 
+        ".eslintrc*", 
+        "eslint.config.*",
+        ".eslintignore"
+      ],
+      "outputs": [".eslintcache"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$", 
+        "tsconfig*.json",
+        "**/*.ts",
+        "**/*.tsx"
+      ]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$", 
+        "jest.config.*", 
+        "vitest.config.*",
+        "**/__tests__/**",
+        "**/*.test.*",
+        "**/*.spec.*"
+      ],
+      "outputs": ["coverage/**", "test-results/**"]
+    },
+    "clean": {
+      "cache": false
+    },
+    "format": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".prettierrc*",
+        ".prettierignore"
+      ],
+      "outputs": []
+    }
+  },
+  "globalDependencies": [
+    ".env",
+    ".env.local",
+    "tsconfig.json",
+    "package.json"
+  ],
+  "globalEnv": [
+    "NODE_ENV"
+  ]
+}

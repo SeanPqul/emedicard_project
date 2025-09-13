@@ -1,0 +1,24 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Consolidated Convex backend for eMediCard mobile and webadmin projects",
+  "main": "index.js",
+  "scripts": {
+    "dev": "convex dev",
+    "build": "convex codegen && echo \"Convex functions are deployed, not built\"",
+    "deploy": "convex deploy",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"No linter configured\"",
+    "test": "echo \"No tests yet\"",
+    "clean": "rm -rf .convex dist"
+  },
+  "dependencies": {
+    "convex": "^1.25.2",
+    "svix": "^1.76.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.13",
+    "typescript": "~5.8.3"
+  },
+  "private": true
+}

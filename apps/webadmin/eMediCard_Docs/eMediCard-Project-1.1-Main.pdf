@@ -1,0 +1,953 @@
+eMediCard: A Mobile-Base Health Card Application System 
+A Capstone Project Proposal 
+Presented to the Faculty of the 
+Information and Communications Technology Program 
+STI College Davao 
+In Partial Fulfilment 
+of the Requirements for the Degree 
+Bachelor of Science in Information Technology 
+Sean Paul S. Lapasanda 
+Rogel Henric M. Caasi 
+John Mark G. Duyag 
+Maynard Kent G. Omandac 
+May 17, 2025  
+i
+ STI College Davao  
+STI College Davao  ii 
+ 
+TABLE OF CONTENTS 
+ Page 
+Title Page i 
+Table of Contents ii 
+Introduction 1 
+ Project Context 1 
+ Purpose and Description 3 
+ Objectives 5 
+ Scope and Limitations 
+Review of Related Literature/Studies/Systems 
+7 
+10 
+Methodology 14 
+ Technical Background 14 
+ Requirements Analysis 19 
+ Requirements Documentation 21 
+ Design of Software, System, Product, and/or Processes 26 
+References 28 
+Appendices 29 
+ Appendix A 30 
+ Appendix B 
+ 
+ 
+  
+ 
+  
+INTRODUCTION 
+Project Context 
+Mobile app development is rapidly growing. From retail, telecommunications 
+and e-commerce to insurance, healthcare and government, organizations across 
+industries must meet user expectations for real-time, convenient ways to conduct 
+transactions and access information. 
+Today, mobile devices and the mobile applications that unlock their value are 
+the most popular way for people and businesses to connect to the internet. To stay 
+relevant, responsive and successful, organizations need to develop the mobile 
+applications that their customers, partners and employee’s demand. Though mobile 
+application development might seem challenging. Once selected the OS platform or 
+platforms, this needs to overcome the limitations of mobile devices and usher the app 
+all the way past the potential hurdles of distribution. Fortunately, through following a 
+few basic guidelines and best practices, this can optimize application development 
+journey. Rapid technological advancements have reformed everyday life in every 
+sector, particularly in healthcare. Modernization has resulted in innovative tools and 
+digital platforms to improve communication, data management, and service delivery. 
+Consequently, telemedicine, electronic health records, new technologies in patient 
+remote monitoring, and other innovations have evolved continuously through extensive 
+research and advancements over the past few decades.  
+These advancements are not limited to improving healthcare quality but also to 
+other ways by which patients and providers communicate. Recent studies on mobile 
+renewal systems, such as those implemented by Ghana’s National Health Insurance 
+Scheme (Akweongo et al., 2023; BMJ Glob Health) and Propel’s Medicaid renewal 
+campaign (Propel, 2023), demonstrate that moving from traditional in-person processes 
+to mobile platforms can significantly reduce waiting times and improve overall service 
+responsiveness. By enabling users to complete renewals via their smartphones, these 
+initiatives reduce administrative burdens and enhance user satisfaction through real
+1 
+STI College Davao                    
+time updates and efficient procedures. 
+In Davao City, the annual renewal of health cards for employees is a critical yet 
+challenging process. Every year especially January, thousands of workers must 
+physically visit designated venues to update their health records—a method that often 
+leads to overcrowded sites, lengthy queues, and delays that disrupt work schedules. 
+While traditional renewal methods help verify employee fitness, they frequently result 
+in missed deadlines and inefficiencies due to the sheer volume of renewals. Attempts 
+to improve access through general social media pages have also fallen short, as these 
+platforms are prone to duplication and fraudulent activity, which can compromise data 
+integrity and user trust.  
+Recent reports indicate that Davao's job growth is driven by a surge in 
+investments, a booming tourism industry, expanding infrastructure projects, and the 
+rapidly growing BPO sector. This dynamic economic environment has resulted in a 
+larger, more active workforce, intensifying the demand for an efficient health card 
+renewal process. With more employees entering the job market and a lower 
+unemployment rate, optimizing the renewal process becomes even more critical to 
+ensure that every worker remains compliant with health regulations. 
+In the article "CHO urges workers to renew health cards," posted on January 
+23, 2023, the City Health Office (CHO) reported that to accommodate the high volume 
+of applicants, they have designated venues like Gaisano Ilustre for processing health 
+cards, with daily processing numbers reaching up to 1,400 applicants. Despite these 
+efforts, the substantial number of employees required to renew their health cards 
+annually often leads to congestion and long waiting times at processing centers. 
+To address these issues, the developers propose a mobile application for health 
+card registration and renewal. This application will allow employees to update their 
+information directly from their smartphones, thereby reducing physical congestion and 
+cutting down processing time. With features such as status updates, secure digital 
+documentation, and an intuitive user interface, this will offer a reliable and accessible 
+alternative to the current in-person renewal process. 
+2 
+STI College Davao                    
+Purpose and Description 
+The purpose of this project is to develop a mobile application that facilitates the 
+registration and annual renewal of health cards for employees in Davao City. Currently, 
+the process requires thousands of employees to visit designated venues each January, 
+where they undergo health evaluations and update their records. This traditional 
+method often leads to overcrowding, long queues, and delays that disrupt work 
+schedules. It also places a heavy administrative burden on the City Health Office 
+(CHO), resulting in missed deadlines and inefficiencies. To address these challenges, 
+this project aims to replace the conventional in-person system with a mobile-based 
+solution accessible directly from employees’ smartphones. 
+The proposed application will enable users to register and submit necessary 
+information, including personal details and medical documents—such as chest X-ray, 
+CBC, urinalysis, fecalysis, drug test, neuropsychiatric test, Hepatitis B antibody test, 
+valid ID, Community Tax Certificate, health card receipt (OR), and a 1x1 picture. The 
+system is designed with an intuitive interface to support users with varying levels of 
+digital literacy. It also integrates payment options, allowing users to pay through in-app 
+platforms like GCash or submit proof of payment from designated physical locations. 
+A ₱10 transaction fee will automatically be added to the total amount during each 
+payment to cover administrative or processing costs. 
+Applicants will identify whether they are food or non-food workers through a 
+classification system that assigns color-coded health card types: Yellow for food 
+handlers (e.g., service crew, kitchen staff), Green for non-food industry workers (e.g., 
+security guards, receptionists, BPO staff), and Pink for occupations involving direct 
+skin contact (e.g., barbers, massage therapists, tattoo artists). Food handlers will be 
+required to attend a mandatory food safety orientation with a sanitary inspector and 
+they will receive a schedule appointment. Non-food and pink card applicants may 
+proceed directly with the process unless otherwise instructed. 
+To enhance transparency, the app provides real-time status updates and 
+notifications to inform applicants about their progress, missing requirements, or next 
+3 
+STI College Davao                    
+steps. If an applicant is disapproved—often due to incomplete documents or medical 
+findings—the system will display a personalized follow-up checklist, suggest nearby 
+health centers, and guide them through the additional tests needed before they can 
+reapply. 
+Once an application is approved, the app will notify the applicant that their 
+health card is ready for release. The health card can be accessed and downloaded 
+through the application, containing the user’s personal details, photo, classification 
+color, and expiration date. This digital release process eliminates the need for physical 
+claiming and ensures a more secure, efficient, and user-friendly distribution of health 
+cards. 
+Overall, the eMediCard mobile application is envisioned as a complete solution 
+to improve the efficiency, security, and accessibility of the health card renewal process 
+in Davao City. The system will be managed by both applicants and City Health Office 
+(CHO) administrators. Applicants can register, submit requirements, track their status, 
+and receive notifications. Administrators will be able to verify documents, manage 
+compliance, send updates, and generate reports for monitoring and future 
+improvements. 
+4 
+STI College Davao                    
+Objectives of the Study 
+The main objective of this study is to develop a mobile application that 
+modernizes the health card registration and renewal process in Davao City, making it 
+more efficient, accessible, and organized for both employees and health administrators. 
+Specifically, this project aims: 
+• To develop a user registration and profile management module 
+This will allow users to create and manage their accounts, input 
+personal details, and update information for health card renewal. 
+• To develop a classification module that determines the appropriate health 
+card type based on the applicant’s job category 
+The system will classify applicants into Yellow (food handlers), 
+Green (non-food workers), or Pink (skin-to-skin contact jobs), each with its 
+own set of requirements and procedures. 
+• To develop a document submission module that allows applicants to 
+upload and manage all required supporting materials 
+This module allows applicants to upload required documents such 
+as medical results, valid ID, photo, tax certificate, and payment receipt 
+based on their health card type to ensure a complete, verifiable submission. 
+• To implement food safety orientation features for Yellow card applicants, 
+including scheduling alerts and QR-based attendance tracking. 
+This feature notifies Yellow card applicants of their scheduled in
+person food safety orientation. The app displays their assigned date and 
+generates a QR code for attendance scanning at the venue. 
+5 
+STI College Davao                    
+• To develop a module for the admin that can execute various 
+administrative tasks 
+This module allows CHO administrators to manage the application 
+process, such as handling user accounts, validating documents, scheduling 
+orientations, tracking payments, and approving or rejecting applications. 
+• To develop a digital health card release feature that allows approved 
+applicants to securely access their health card through the application 
+This feature will generate a digital health card containing the 
+applicant’s personal details, classification color, photo, and expiration date. 
+• To develop a flexible payment module that supports various payment 
+methods for health card fees 
+Users can pay via the app such as GCash or upload proof of payment 
+from official centers. A ₱10 transaction fee is automatically added to reflect 
+the processing cost. 
+6 
+STI College Davao                    
+Scope and Limitation of the Study 
+The eMediCard mobile application is designed to enhance and digitize the 
+health card registration and renewal process for employees in Davao City.. It aims to 
+replace the traditional in-person process, which often leads to long queues, delays, and 
+administrative inefficiencies, with a convenient, mobile-based solution. The 
+application will allow users to complete the entire renewal process remotely, reducing 
+congestion at processing centers and minimizing disruptions to employees' work 
+schedules. 
+This project will be beneficial to the following: 
+• Employees  
+Workers required to renew their health cards, including 
+those in the food industry, non-food industry, and jobs involving 
+skin-to-skin contact. 
+• City Health Office (CHO) Administrators  
+Health officials responsible for processing applications 
+whether to approve or reject, verifying documents, send 
+notifications, managing health card issuance, and generate 
+reports for monitoring and evaluation. 
+• Business Owners  
+Organizations that require their employees to have valid 
+health cards for compliance with local health regulations. 
+The key functionalities of the mobile application include: 
+• User Accounts  
+7 
+STI College Davao                    
+Allow users to create accounts, input personal information, 
+and update details for health card renewal. 
+• Document Submission  
+Enables users to upload required documents such as medical 
+results, a 1x1 picture, and a Community Tax Certificate. 
+• Classification of Health Cards  
+The application includes the classification of health cards 
+into food (yellow), non-food (green), and pink (for jobs involving 
+skin-to-skin contact) categories, ensuring that each applicant 
+follows the correct process. 
+• Digital Health Card Releasing 
+Enables users to access their approved digital health card—
+ including personal details, classification color, photo, and expiration 
+date—directly within the app. 
+• Food Safety Orientation 
+Enables yellow-card applicants to schedule mandatory food 
+safety orientations, receive in-app reminders, and confirm their 
+attendance. 
+• Payment Processing  
+The application offers options for electronic payments or in
+person transactions at designated locations. All payment 
+transactions will include an additional ₱10 fee, which will be 
+reflected in the total amount shown during checkout. 
+STI College Davao                    
+8 
+This project is only a mobile-based application, meaning that its functionality is 
+limited to mobile platforms and does not extend to native desktop or web-based versions. 
+For now, the application is specifically developed for Android devices only, and does not 
+currently support iOS or other operating systems. The system is specifically tailored for 
+the health card renewal process in Davao City, designed to meet local administrative 
+practices and regulatory requirements, which may not be readily adaptable to other regions 
+without substantial modifications. Although the application incorporates advanced features 
+such as secure digital document uploads, real-time status updates, and mandatory food 
+safety orientation, it relies on users having a basic level of digital literacy and stable internet 
+access. Additionally, certain processes—such as the physical verification of documents—
+ may still require manual intervention, potentially causing delays in processing.
+ 9 
+STI College Davao                    
+REVIEW OF RELATED LITERATURE/STUDIES/SYSTEMS 
+Related Studies and/or Systems 
+Mobile Health Card Application System (Itransition, 2024) 
+The research conducted by Itransition (2024) was to design a mobile health card 
+application system through which the patients can retrieve their medical information, book 
+appointments, and converse with healthcare providers. The system is integrated with IoT 
+and wearables to remotely capture health information securely and make healthcare 
+services better. Based on Itransition (2024), the major issue in conventional healthcare 
+systems is the insufficient availability of effective medical record access. Patients find it 
+difficult to deal with paperwork and scheduling appointments manually, which causes 
+inefficiencies and delays in medical treatment. With the processes being digitized, the 
+mobile health card application provides a smooth flow of data access and management. 
+The system allows for quicker and more streamlined healthcare procedures, 
+enabling users to keep and retrieve their health records online. Patients can book 
+appointments with healthcare providers, get reminders about appointments, and monitor 
+their medical history in one platform. Furthermore, integration with wearable devices 
+provides real-time monitoring of health conditions, encouraging active healthcare 
+management. 
+The patient has access to the login and registration page, where he or she may 
+modify his or her medical history, view appointment schedules, and obtain personalized 
+health information. Health providers, on the other hand, can securely manage patient 
+information, monitor health trends, and streamline medical workflows. 
+10 
+STI College Davao                    
+mHealth Solutions for Digital Healthcare (OSP Labs, 2023) 
+In the research conducted by OSP Labs (2023), mHealth solutions were created to 
+make healthcare services easily accessible and convenient through online platforms. They 
+are comprised of mobile apps, wearables, and remote monitoring equipment that was 
+developed to help patients monitor their health, meet with medical professionals, and 
+implement wellness plans.  As per OSP Labs (2023), the main challenge in healthcare is 
+the accessibility gap, particularly among patients in rural regions. Integrating mHealth 
+solutions helps bridge this gap by providing telemedicine consultations, medication 
+reminders, and real-time health monitoring capabilities.  
+The mHealth platform increases efficiency through the digitization of scheduling 
+appointments, prescribing electronically, and virtual consultations. The app enables 
+patients to schedule appointments, access health alerts, and securely share medical reports 
+with healthcare professionals. The use of AI-powered analytics also helps to identify early 
+disease symptoms, and timely medical interventions are ensured.  
+Administrators and care providers can equally gain from the system as they can 
+monitor patient records, derive trends from health data, and enhance the provision of 
+healthcare by means of targeted treatment plans. The digitization of healthcare services via 
+mHealth applications aids better patient involvement as well as medical outcomes. 
+11 
+STI College Davao                    
+Mobile Health Regulations and Compliance (Federal Trade Commission, 2023) 
+The Federal Trade Commission (2023) performed a study on regulatory compliance 
+in mobile health apps. The study highlights that while online healthcare platforms are of 
+many benefits, they have to follow rigorous privacy, security, and data protection rules to 
+uphold patient trust and confidentiality.  As per the FTC (2023), most of the healthcare 
+apps are subject to legal and ethical issues surrounding data security. If there are no proper 
+compliance practices, there are chances of leaking sensitive health data, and that is highly 
+detrimental to both patients and healthcare professionals.  
+In response to these challenges, the FTC launched an interactive guide to assist 
+developers in complying with privacy legislation like HIPAA and GDPR. The guide assists 
+mobile health developers in ensuring their apps are up to standard security levels, securing 
+patient information from improper access. Through compliance regulations, healthcare 
+apps can strengthen data security, win the trust of patients, and legally conduct business in 
+the digital health market. Adhering to stringent cybersecurity protocols is essential for 
+long-term success and acceptance of mobile health technology. 
+12 
+STI College Davao                    
+Synthesis 
+The review of related studies and systems emphasize the transformative potential 
+of mobile health technologies in modernizing healthcare services, enhancing patient 
+accessibility, and ensuring regulatory compliance. The Mobile Health Card Application 
+System (Itransition, 2024) addresses inefficiencies in conventional healthcare systems by 
+digitizing medical record access, appointment scheduling, and real-time health monitoring 
+through IoT and wearable integration. Similarly, mHealth Solutions for Digital Healthcare 
+(OSP Labs, 2023) highlight the role of mobile applications in bridging healthcare 
+accessibility gaps, particularly in rural areas. By incorporating telemedicine, AI-powered 
+analytics, and remote health monitoring, these solutions enhance efficiency and patient 
+engagement while streamlining medical workflows. 
+However, with the growing reliance on digital health platforms, regulatory 
+compliance and data security remain critical challenges. The Federal Trade Commission 
+(2023) underscores the importance of adhering to privacy regulations such as HIPAA and 
+GDPR to protect sensitive patient information. The study highlights the risks associated 
+with improper compliance and the need for robust cybersecurity measures to prevent data 
+breaches. Ensuring that mobile health applications meet legal and ethical standards is 
+crucial for gaining patient trust and promoting widespread adoption of digital healthcare 
+solutions. 
+These findings align with the objectives of eMediCard: A Mobile-Based Health 
+Card Application System, which aims to facilitate health card applications, reduce 
+processing time, and minimize overcrowding in government offices. Inspired by 
+Itransition’s mobile health card system, eMediCard seeks to provide a secure and user
+friendly digital platform for health record access and appointment management. 
+Additionally, the concerns raised by the FTC study emphasize the need for strong data 
+security protocols, ensuring patient information is safeguarded against unauthorized 
+access. By addressing these challenges, eMediCard can contribute to the modernization of 
+healthcare services in the Philippines, making medical processes more efficient, secure, 
+and accessible for all citizen
+ 13 
+STI College Davao                    
+METHODOLOGY 
+Technical Background 
+Technologies to be Used  
+The eMediCard system will use a set of open-source technologies chosen 
+for their ease of use, speed of development, and reliable performance. Flutter, 
+Google’s UI toolkit, will provide a single codebase that compiles into native 
+machine code for Android. Flutter’s hot reload feature and wide range of widgets 
+will enable quick iteration on user interfaces, covering steps from registration and 
+document upload to payment and orientation scheduling while maintaining a 
+consistent look and feel across devices. 
+For writing and debugging our Flutter code, we rely mainly on Visual 
+Studio Code a lightweight, extensible editor that accelerates development with rich 
+plugin support—while using Android Studio when we need more advanced 
+profiling, emulator management, or deep integration with the Android SDK. This 
+hybrid IDE approach maximizes productivity, letting developers choose the right 
+tool for each task without sacrificing performance or debug visibility. 
+Database Methodology 
+The eMediCard backend will use Firebase Firestore, Google’s fully 
+managed NoSQL document database, for all persistent data. We will define 
+collections for user profiles, application records, document metadata, payment 
+transactions, and orientation schedules. Firestore’s real-time synchronization 
+ensures that status changes— such as an admin confirming a payment or approving 
+a document—propagate immediately to the Android client without polling. During 
+development and testing, we will employ the Firestore Emulator to simulate 
+database interactions locally, enabling offline-first testing and validation of security 
+rules and indexing exactly as they run in production. This setup combines the 
+14 
+STI College Davao                    
+scalability and low-maintenance advantages of a cloud database with thorough pre
+deployment testing. 
+Software Development Approach (Waterfall Model) 
+The development of the eMediCard mobile application follows the 
+Waterfall Model, a structured, phase-oriented methodology that progresses 
+sequentially through Requirements Gathering, System Design, Implementation, 
+Testing, Deployment, and Maintenance. Each phase is marked by well-defined 
+deliverables and validation checkpoints before advancing to the next, promoting 
+strong planning, documentation, and traceability. This method supports the secure 
+handling of sensitive health data and ensures alignment with the regulatory 
+standards of the City Health Office. Refer to Page 31, Figure 2. 
+In this development cycle, the team concentrated on the early stages of the 
+Waterfall process, specifically, the Requirements Analysis and Design Phases. 
+During requirements analysis, all key system functionalities were identified and 
+documented in accordance with the actual workflow of health card issuance. These 
+include user registration, classification-based document submission, payment 
+processing, and orientation scheduling. The requirements were validated through 
+field research and stakeholder interviews to ensure accuracy and relevance. 
+Following this, the Design Phase involved the formulation of system 
+architecture, database schema, and user interface prototypes. Tools such as Figma 
+were used to create interactive mockups that demonstrate how users will navigate 
+the application, from submitting applications to viewing their orientation schedules. 
+These visual artifacts serve as the technical foundation for the upcoming 
+Implementation Phase. 
+In the Implementation Phase the developers will convert the approved 
+design assets—Figma mockups, Firestore schemas, and API definitions—into 
+working Flutter code. This will set up the project in Visual Studio Code, integrate 
+Firebase services, and build each core feature (user registration, document uploads, 
+15 
+STI College Davao                    
+payments, notifications, and digital card generation) in parallel via Git feature 
+branches with peer reviews. UI components will follow the established design 
+system, and security rules for Firestore will be created and tested locally. Every 
+module will include unit tests (minimum 80 % coverage), and a continuous 
+integration pipeline will enforce linting, builds, and automated tests on each 
+commit. 
+During the Testing Phase, the developers and QA Testers will jointly verify 
+functionality, usability, performance, and security. Automated integration tests will 
+run through critical flows, including signup, document submission and approval, 
+orientation scheduling, and card release, using the Firestore emulator. Manual 
+testing on various Android devices will catch UI and edge-case issues (e.g., upload 
+interruptions, low bandwidth), while security checks will challenge authentication 
+and Firestore rules. Defects will be tracked, prioritized, and fixed in rapid sprints, 
+followed by an acceptance test with City Health Office stakeholders to ensure 
+compliance with real-world workflows and regulations. 
+In the Deployment Phase, the developers will assemble a signed, 
+release-mode Android App Bundle (AAB) for the Google Play Console, including 
+screenshots, metadata, release notes, and a privacy policy. An initial beta rollout to 
+CHO staff and selected users will surface any critical issues before full production 
+release. After successful beta feedback, the build moves to production. Post-release, 
+Firebase Crashlytics and Google Analytics will monitor app health and usage, and 
+a rollback plan will allow swift reversion to the previous stable version if necessary. 
+Finally, at the Maintenance Phase, developers and QA Testers will 
+continuously monitor the live application for bugs, performance hiccups, and user 
+feedback. They will review Firebase Crashlytics and Google Analytics daily to 
+identify crash trends or usability issues. Critical defects will be addressed 
+immediately via hotfix branches, while minor updates and new feature requests will 
+be grouped into the next sprint cycle. Security patches, such as updates to Firestore 
+rules or third-party SDKs, will be applied as soon as vulnerabilities are discovered. 
+16 
+STI College Davao                    
+Calendar of Activities 
+The Gantt chart presents the summary of activities. Listed are the activities 
+and opposite them are their duration or periods of execution. Below are the legends 
+of activity indication where BLUE indicates as starting or not finished and 
+YELLOW as on progress or finished. Refer to Page 30, Figure 1 
+The developers have brainstormed ideas to determine the possible capstone 
+projects. Then, these were presented to the panel in order to determine the most 
+feasible project title. After approval, the developers have planned to conduct an 
+interview with the City Health Office CHO and other related staff, so, a letter and 
+questions formulations were done.  
+After data gathering the, the information was analyzed and served as a basis 
+for writing the project context, purpose and description, and objectives. These were 
+then checked by the thesis adviser to determine its correctness. Then, the revisions 
+were done by the developers, including the statement of scope and limitations. 
+Relevant systems are research and included in the review of related/studies 
+next, a synthesis was made to compare and contrast the developers’ project with 
+the selected related systems. After that, the developers stated the technical 
+background of the project, requirements analysis and gathering, requirements 
+documentations, and diagrams as part of methodology. Finaly, resources and 
+appendices are made. 
+17 
+STI College Davao                    
+Resources 
+• Hardware 
+This section outlines the essential hardware and software 
+resources needed to develop, test, and deploy the eMediCard mobile 
+application. These resources ensure the smooth development and 
+implementation of the system based on the chosen technologies. 
+Refer to Page 30, Table 1. 
+• Software 
+The development of the eMediCard mobile application 
+requires several software tools and platforms to support the creation, 
+testing, deployment, and maintenance of the system. The software 
+resources included: Refer to Page 31, Table 2. 
+18 
+STI College Davao                    
+Requirements Gathering and Analysis 
+The requirements gathering for the eMediCard mobile application began with an 
+interview with a City Health Office (CHO) staff member who oversee health card 
+operations at the designated processing venue in Victoria Plaza. The interview provided 
+the team with valuable insights into the end-to-end workflow of health card registration 
+and renewal, along with common issues faced by both applicants and CHO personnel. 
+Their broad operational knowledge enabled the team to understand the administrative 
+routines, processing challenges, and compliance concerns that a digital system must 
+address. According to City Health Office (CHO) records, renewal numbers surged during 
+the first quarter of 2024, with 23,489 applicants in January, 29,185 in February, and 18,788 
+in March. These peak months accounted for over 71,000 health card renewals in just three 
+months. The high traffic volumes—particularly in January and February, where daily 
+applicants reached up to 1,400—highlighted the strain placed on the manual system and 
+reinforced the urgent need for a scalable, digital solution capable of managing bulk 
+renewals efficiently. This significant demand highlighted the urgent need for a digital 
+system capable of efficiently handling high traffic while minimizing delays and physical 
+congestion. 
+To contextualize these findings within the local framework, the team conducted 
+field interviews and informal consultations with CHO personnel, health card applicants, 
+and administrative staff involved in the current in-person process. These conversations 
+provided essential insights into how applications were evaluated, what documents were 
+typically submitted, and how orientations were scheduled and conducted—particularly for 
+food industry workers who require a mandatory seminar. 
+During the interview, the CHO staff member explained that when an applicant's 
+submission is disapproved due to medical findings—such as pulmonary tuberculosis (PTB) 
+or urinary tract infection (UTI)—they are required to undergo a follow-up consultation 
+with a physician. This additional check-up ensures applicants are medically cleared before 
+continuing the health card process, which the app must accommodate through personalized 
+feedback and follow-up guidance. This led the team to prioritize a user-friendly document 
+19 
+STI College Davao                    
+submission interface capable of handling various file types  while enabling administrators 
+to flag missing or questionable entries. This reinforced the need for real-time status 
+notifications and dynamic checklists within the app. 
+The team also engaged several employees from two local businesses—McDonald's 
+Buhangin Pagibig Branch and Three J Watch Service Center from Gaisano Grand 
+Illustre—who were frequent health card applicants. These users described the longest 
+queue times as one of their main concerns during the renewal process, but noted that they 
+clearly understood the difference between Yellow, Green, and Pink health card types. They 
+explained that this information is included in the official paper provided during initial 
+registration or renewal at the venue. However, they expressed frustration over the long 
+waiting times during renewal, sharing that queues often extended outside the mall 
+premises. Based on this, the team retained the classification system in the app but shifted 
+focus toward enhancing user guidance, improving progress transparency, and introducing 
+digital queuing features to reduce physical congestion. 
+Another significant output of the analysis was the integration of payment 
+functionality. Through feedback from both users and CHO finance staff, the team identified 
+the importance of a flexible payment module that supports both online methods (e.g., 
+GCash) and manual uploads of official receipts from physical payment centers. A fixed 
+₱10 transaction fee was included as a feature for processing and recordkeeping purposes. 
+At the end of the requirements analysis phase, the team compiled a comprehensive 
+list of system needs, which included: user registration and profile management, 
+classification-based document submission, digital orientation scheduling for Yellow card 
+holders, payment integration, digital health card issuance, admin dashboard features, and 
+real-time notification systems. These components were validated through both user-side 
+interviews and administrative consultations, ensuring the solution was practical, secure, 
+and aligned with the CHO’s workflow and compliance standards. 
+20 
+STI College Davao                    
+Requirements Documentation 
+This section outlines the mobile application's features and provides detailed 
+descriptions aligned with the developers' specified objectives. 
+Landing Screen 
+The eMediCard landing screen briefly displays the app logo and 
+name upon launch. It features a user-friendly interface with clear navigation 
+options for Sign- Up and Log-In. Refer to Page 33, Figure 3. 
+Sign-up and Log in screen 
+The eMediCard Sign-Up and Log-In screen is designed with a clean 
+and minimalist interface to ensure ease of use for both user applicants and 
+CHO admins. Users can enter their credentials through fields such as Name, 
+Password, Phone Number, Email, Date of Birth, and Gender. Refer to Page 
+33, Figure 4. 
+Log in and Signup Confirmation Screen 
+After submission, a confirmation screen is displayed to indicate 
+successful registration. The user is then redirected to the User or Admin 
+dashboard screen. Refer to Page 34, Figure 5. 
+Dashboard Screen (User) 
+The eMediCard Dashboard Screen (users) features a navigation bar 
+that allows users to access notifications and their profile. It also displays a 
+friendly prompt asking whether they would like to apply for a new health 
+card or renew an existing one. Refer to Page 34, Figure 6. 
+21 
+STI College Davao                    
+Application Form Screen 
+When the user selects “Apply for New Health Card,” the system 
+navigates to the Application Form screen. This form allows users to input 
+personal details, including their name and job classification (Yellow – Food 
+Handler, Green – Non-Food, Pink – Skin-to- Skin Contact). The name and 
+date of birth fields are auto-filled based on the user's profile. Users can 
+upload the required medical documents using the designated upload button. 
+Once all fields and documents are completed, the user may proceed by 
+submitting the application. Refer to Page 34, Figure 7. 
+Payment Submission Screen 
+Next is the Payment Submission screen, which allows users to 
+upload their payment receipt, either from GCash or an Official Receipt 
+(OR). This screen includes upload buttons for each payment method, 
+enabling users to provide proof of payment as part of their application 
+process. Refer to Page 35, Figure 8. 
+Schedule Orientation Screen (User) 
+The Schedule Orientation screen is intended for Yellow (Food 
+Handler) applicants. It allows users to select their preferred date for the 
+Food Safety Orientation. The system automatically fills in the scheduled 
+orientation time based on the availability set by the CHO administrator for 
+the selected date. Refer to Page 35, Figure 9. 
+Application Submitted Screen 
+Next after successfully submitting all requirements, the system 
+displays the Application Success screen. This screen presents a 
+confirmation message indicating that the application form has been 
+submitted. It also includes an informational message notifying users that 
+they will receive updates once their application status has been reviewed 
+22 
+STI College Davao                    
+and processed. Refer to Page 35, Figure 10. 
+Notifications Screen 
+Back on the user dashboard, the navigation bar features a 
+notification button that allows users to stay informed and receive updates 
+regarding the status of their application, document verification, orientation 
+reminders, and other important alerts. Refer to Page 35, Figure 11. 
+Health Card Advisory Screen 
+The Health Card Advisory screen appears when a user’s application 
+is disapproved by the CHO admin. It displays the reason for disapproval 
+and includes a user-friendly message encouraging the applicant to reapply. 
+This screen also features a “Re-upload” button, enabling users to update and 
+resubmit their application form. Refer to Page 36, Figure 12. 
+Orientation Attendance Screen 
+The Health Card Release screen is displayed once the CHO admin 
+approves the user’s application. The user receives a notification indicating 
+that their health card has been approved. This screen allows the user to view 
+and download their digital health card for personal reference, printing, or 
+verification purposes. Refer to Page 36, Figure 13. 
+Health Card Release Screen 
+The eMediCard landing screen briefly displays the app logo and 
+name upon launch. It features a user-friendly interface with clear navigation 
+options for Sign- Up and Log-In. Refer to Page 36, Figure 14. 
+Dashboard Screen (Admin) 
+After sign-up or log in, the CHO Admin is directed to the 
+Application Management screen, which serves as the main dashboard. It 
+23 
+STI College Davao                    
+includes a quick report, a status filter, and a summary showing the number 
+of pending, disapproved, and approved applications, including those 
+submitted on the current day. A list of applicants is also displayed, showing 
+their name, submission date, status, and available actions. Admins can click 
+“View” to review and validate submitted documents. Refer to Page 36, 
+Figure 15. 
+Document Verification Screen 
+The Document Verification screen allows admins to review and 
+validate user credentials, including name, date of birth, job type, and 
+uploaded documents. Admins can view each submitted file by clicking the 
+“View” button and individually mark each document as either approved or 
+rejected. Refer to Page 37, Figure 16. 
+Remarks Screen 
+If an anomaly is found in an uploaded document during review, 
+admins can select the reject option and provide remarks by clicking the edit 
+(pen) icon. This opens a list of predefined remark options that can be 
+selected using radio buttons to specify the reason for disapproval. Refer to 
+Page 37, Figure 17. 
+Payment Verification Screen 
+The Payment Verification screen allows admins to review the user's 
+name, date of submission, and selected payment type—either GCash or 
+Official Receipt (OR). Admins can view the uploaded payment receipt by 
+clicking the “View” button and then decide whether to approve or reject the 
+payment. Refer to Page 38, Figure 18. 
+Schedule Orientation Screen (Admin) 
+The Orientation Scheduler screen allows admins to assign Food 
+Safety Orientation schedules to Yellow Card (Food Handler) applicants. 
+24 
+STI College Davao                    
+Admins can select an applicant, set the orientation date, choose a time slot, 
+assign a Sanitary Inspector, and specify the orientation venue. Time slot 
+availability is color-coded: green for available, yellow for almost full, and 
+red for full. Once all fields are completed, admins can click the “Save 
+Schedule” button to notify the user of their assigned orientation schedule. 
+Refer to Page 38, Figure 19. 
+Orientation Attendance Tracker Screen 
+The Orientation Attendance Tracker screen allows admins to 
+finalize user attendance for a scheduled Food Safety Orientation. Admins 
+can select the orientation date, choose the assigned Sanitary Officer, and 
+specify the orientation venue. A list of applicants registered for that 
+schedule is displayed. Attendance status can be filtered and marked as 
+“Pending,” “Attended,” or “Missed.” A QR code scanner is also integrated, 
+allowing admins to verify attendance by scanning the applicant’s in-app QR 
+code at the venue. An edit (pen) icon is available for adding CHO remarks, 
+such as “Attended but arrived late.” Refer to Page 39, Figure 20. 
+Notification Management Screen 
+The Notification Management page enables admins to send 
+notifications to users about updates such as Food Orientation Reminders, 
+Health Card Approvals, or Incomplete Requirements. Admins can choose 
+from predefined notification cards and click the "Send" button to notify 
+users. A search bar is also available to find specific notifications, and if none 
+of the predefined options are suitable, admins can compose a custom 
+message by selecting the “Others” option. Refer to Page 39, Figure 21. 
+25 
+STI College Davao                    
+Design of Software, System, Product, and/or Processes 
+Following the requirements gathering and analysis phase, the design of the 
+eMediCard mobile application was thoughtfully structured to balance user accessibility 
+with administrative control, ensuring that the system effectively addresses the health card 
+processing needs of Davao City. The team prioritized creating a platform that is both 
+scalable and adaptable, allowing for future enhancements while meeting the immediate 
+requirements identified through stakeholder interviews. 
+To visualize the user interface (UI) and ensure usability for both applicants and 
+administrators, the team used Figma to design and prototype the app's layout. The mockups 
+included modules for registration, document uploads, status tracking, and digital card 
+issuance. These visual representations helped validate workflows early in the process. 
+As the system uses a NoSQL database (Firestore), a traditional Entity-Relationship 
+Diagram (ERD) was not used. Instead, the team developed a document-based schema 
+tailored for Firestore. This includes collections for users, applications, documents, 
+payments, and orientation schedules, each containing subdocuments and fields that mirror 
+the logical workflow of the health card process.  
+In addition to designing the user interface and backend schema, the team developed 
+a Data Flow Diagram (DFD) to gain a comprehensive understanding of how information 
+flows throughout the eMediCard system. The DFD provides a graphical representation of 
+the system’s processes, data inputs and outputs, and storage components. This visual tool 
+was essential in mapping out key operations such as user registration, document 
+submission, classification handling, orientation scheduling, payment processing, and 
+digital health card issuance. Refer to Page 44-46, Figure 28-32 
+The system’s main user interactions are also illustrated through a use case diagram, 
+which highlights the functional relationships between users (applicants and CHO admins) 
+and system processes. Refer to Page 44-46, Figure 28-32. 
+26 
+STI College Davao                    
+The system was structured around several core modules that serve both applicants 
+and CHO administrators. The first is the User Registration and Login module, which allows 
+applicants to create secure accounts and log in to access their application data. During 
+registration, users specify their job type, which the system uses to classify them under the 
+appropriate health card category—Yellow for food handlers, Green for non-food industry 
+workers, and Pink for occupations involving direct skin contact. Once registered, users 
+proceed to the Profile and Document Upload module, where they enter personal 
+information and submit required documents such as medical results, IDs, and proof of 
+payment. 
+To support classification, the Health Card Type Identification system automatically 
+determines the user’s card type based on occupation. For Yellow card applicants, the 
+Orientation Scheduling module displays available seminar slots and sends attendance 
+reminders. 
+The Payment module integrates with GCash and supports manual uploads of 
+payment receipts, providing flexibility for users to complete transactions. After approval, 
+the Digital Health Card Generation and Release module allows users to download their 
+digital health card directly from the app, containing all essential personal and classification 
+data. 
+To make seminar attendance more efficient, the system includes QR code-based 
+tracking for Yellow card holders, enabling real-time confirmation and reducing 
+administrative workload. Push notifications further assist users by reminding them of 
+pending actions such as missing documents or upcoming orientations. 
+Finally, the system features a comprehensive Admin Dashboard for CHO 
+personnel. This interface enables administrators to manage and review submissions, 
+approve or reject applications, assign orientation schedules, and generate reports to monitor 
+system activity. 
+27 
+STI College Davao                    
+REFERENCES 
+Akweongo, P., Aikins, M., Asenso-Boadi, F., Nonvignon, J., & Others. (2023). Ghana’s 
+National Health Insurance Scheme. BMJ Global Health. https://doi.org/10.1136/bmjgh
+2023-012345 
+Propel. (2023). Driving Medicaid renewals via mobile app. Propel, from 
+https://www.propel.app/insights/driving-medicaid-renewals-via-mobile-app/ 
+Philippine Information Agency. (n.d.). Growth in investment, tourism drive Davao’s 
+unemployment rate down—DOLE, from https://pia.gov.ph/growth-in-investment-tourism
+drive-davaos-unemployment-rate-down-dole/ 
+Federal Trade Commission. (n.d.). Mobile health apps interactive tool.from 
+https://www.ftc.gov/business-guidance/resources/mobile-health-apps-interactive-tool? 
+Itransition. (n.d.). Mobile healthcare solutions, from 
+https://www.itransition.com/healthcare/mobile 
+OSP Labs. (n.d.). mHealth: Mobile health solutions, from 
+https://www.osplabs.com/mhealth/? 
+28 
+STI College Davao                    
+APPENDICE 
+STI College Davao                    
+29 
+APPENDIX A 
+This section compiles all supplementary visuals and data tables referenced in the 
+document. 
+Table 1. Devices’ Specification 
+Device 1 
+Device 2 
+Processor 
+(CPU) 
+Intel® Core™     
+i5-1155G7 
+Device 3 
+Device 4 
+Intel® Core™ 
+i5-8300H 
+Operating 
+System 
+Windows 11 
+Home Single 
+Language 
+Windows 11 
+Pro 
+Intel® Core™ 
+i3-10100F 
+Intel® Core™ 
+i3-1005G1 
+Windows 10 
+Pro 
+Memory 
+24GB 
+20GB 
+Windows 10 
+Home Single 
+Language 
+16GB 
+Storage 
+512GB 
+512GB 
+8GB 
+512GB 
+Monitor/Display 
+15.6" FHD 
+(1920x1080) 
+15.6" FHD 
+(1920x1080) 
+1TB 
+21.5" 
+1920x1080 
+Network 
+Adapter 
+Intel(R) 
+Wireless-AC 
+9560 
+1366x768 
+Resolution 
+Intel(R) 
+Wireless-AC 
+9560 
+Realtek PCIe 
+GBE Family 
+Controller 
+802.11n Wi-Fi 
+4 
+30 
+STI College Davao                    
+Table 2. Software and Stable Release 
+SOFTWARE 
+STABLE 
+RELEASE 
+Flutter SDK 
+3.29.3 
+Dart 
+3.7.3 
+Visual Studio Code 
+1.100 
+Firebase (Authentication, Firestore, Storage) 
+Managed via Firebase 
+Console 
+Android Emulator (via Android Studio) 
+35.5.10 
+Figure 1. Gantt Chart 
+STI College Davao                    
+31 
+Figure 2. Waterfall Model (Iterative) 
+32 
+STI College Davao                    
+UI Design Mockups (Figures 3–14: User, Figures 15–21: Admin) 
+Figure 3. Landing Screen 
+Figure 4. Sign-up and Log in screen  
+33 
+STI College Davao                    
+Figure 5. Login/Signup Completion Screen    Figure 6. Dashboard Screen (User) 
+\ 
+Figure 7. Application Form 
+34 
+STI College Davao                    
+Figure 8. Payment Screen  
+Figure 10. Application Screen        
+Figure 9. Schedule Orientation Screen (User) 
+35 
+STI College Davao                    
+Figure 11. Notification Screen (User) 
+v 
+Figure 12. Advisory Screen       
+Figure 14. Health Card Release Screen    
+Figure 13. Attendance Screen 
+STI College Davao                    
+Figure 15. Dashboard Screen (Admin) 
+36 
+Figure 16. Document Verification Screen 
+Figure 17. Remark Screen  
+37 
+STI College Davao                    
+STI College Davao                    38 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Figure 18. Payment Verification Screen (Admin) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Figure 19. Schedule Orientation Screen (Admin)  
+STI College Davao                    39 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Figure 20. Orientation Tracker (Admin) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Figure 21. Notification Screen (Admin)  
+Data Flow Diagram (DFD) 
+Figure 22. User Registration and Profile Management 
+Figure 23. Health Card Classification 
+40 
+STI College Davao                    
+Figure 24. Document Submission 
+Figure 25. Payment  
+41 
+STI College Davao                    
+Figure 26. Schedule Orientation 
+42 
+STI College Davao                    
+Figure 27. Manage Account (Admin)  
+Figure 27. Validate Applications (Admin) 
+Figure 27. Reports (Admin)  
+43 
+STI College Davao                    
+Use Case 
+Figure 28. User Registration 
+Figure 29. Health Card Classification 
+44 
+STI College Davao                    
+Figure 30. Document Submission and Payment 
+Figure 31. Orientation Process 
+45 
+STI College Davao                    
+Figure 32. Admin Management 
+46 
+STI College Davao                    
+APPENDIX B 
+Resource Persons 
+Dominic R. Bantigue 
+Capstone Project Adviser 
+Jessiel Chris Hilot 
+Capstone Project Coordinator 
+47 
+STI College Davao                    
