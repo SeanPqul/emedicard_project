@@ -1,0 +1,29 @@
+{
+  "ignore_dirs": [
+    "node_modules/.pnpm",
+    "node_modules/.cache",
+    ".expo",
+    ".turbo",
+    "dist",
+    "build",
+    "web-build",
+    ".next",
+    "coverage",
+    ".git",
+    ".vscode",
+    ".claude",
+    "android/app/build",
+    "android/app/.cxx",
+    "android/.gradle",
+    "ios/Pods",
+    "ios/DerivedData",
+    "__pycache__",
+    ".pytest_cache",
+    "*.log"
+  ],
+  "ignore_vcs": [".git"],
+  "settle": 20,
+  "root_restrict_files": [
+    ".watchmanconfig"
+  ]
+}
