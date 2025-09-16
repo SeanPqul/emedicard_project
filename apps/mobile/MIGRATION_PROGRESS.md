@@ -79,33 +79,33 @@ When you extract a feature, include the following 3-step micro-task for every ro
 
 ## Phase 2: Extract Domain Entities ⏳
 
-- [ ] **Task 2.1**: Create User Entity
-  - [ ] Create src/entities/user/model.ts - user domain types and interfaces
-  - [ ] Create src/entities/user/api.ts - centralized user API calls from useUsers.ts
-  - [ ] Create src/entities/user/lib.ts - user utility functions from user-utils.ts
-  - [ ] Create src/entities/user/index.ts - public exports
-  - [ ] Test user entity functionality
+- [x] **Task 2.1**: Create User Entity
+  - [x] Create src/entities/user/model.ts - user domain types and interfaces
+  - [x] Create src/entities/user/api.ts - centralized user API calls from useUsers.ts
+  - [x] Create src/entities/user/lib.ts - user utility functions from user-utils.ts
+  - [x] Create src/entities/user/index.ts - public exports
+  - [x] Test user entity functionality
 
-- [ ] **Task 2.2**: Create Application Entity
-  - [ ] Create src/entities/application/model.ts - application domain types
-  - [ ] Create src/entities/application/api.ts - extract from useApplications.ts
-  - [ ] Create src/entities/application/lib.ts - application utilities
-  - [ ] Create src/entities/application/index.ts - public exports
-  - [ ] Test application entity functionality
+- [x] **Task 2.2**: Create Application Entity
+  - [x] Create src/entities/application/model.ts - application domain types
+  - [x] Create src/entities/application/api.ts - extract from useApplications.ts
+  - [x] Create src/entities/application/lib.ts - application utilities
+  - [x] Create src/entities/application/index.ts - public exports
+  - [x] Test application entity functionality
 
-- [ ] **Task 2.3**: Create Health Card Entity
-  - [ ] Create src/entities/healthCard/model.ts - health card types
-  - [ ] Create src/entities/healthCard/api.ts - extract from useHealthCards.ts
-  - [ ] Create src/entities/healthCard/lib.ts - health card utilities
-  - [ ] Create src/entities/healthCard/index.ts - public exports
-  - [ ] Test health card entity functionality
+- [x] **Task 2.3**: Create Health Card Entity
+  - [x] Create src/entities/healthCard/model.ts - health card types
+  - [x] Create src/entities/healthCard/api.ts - extract from useHealthCards.ts
+  - [x] Create src/entities/healthCard/lib.ts - health card utilities
+  - [x] Create src/entities/healthCard/index.ts - public exports
+  - [x] Test health card entity functionality
 
-- [ ] **Task 2.4**: Create Payment Entity
-  - [ ] Create src/entities/payment/model.ts - payment domain types
-  - [ ] Create src/entities/payment/api.ts - extract from usePayments.ts
-  - [ ] Create src/entities/payment/lib.ts - payment utilities
-  - [ ] Create src/entities/payment/index.ts - public exports
-  - [ ] Test payment entity functionality
+- [x] **Task 2.4**: Create Payment Entity
+  - [x] Create src/entities/payment/model.ts - payment domain types
+  - [x] Create src/entities/payment/api.ts - extract from usePayments.ts
+  - [x] Create src/entities/payment/lib.ts - payment utilities
+  - [x] Create src/entities/payment/index.ts - public exports
+  - [x] Test payment entity functionality
 
 ## Phase 3: Feature Migration ⏳
 
@@ -209,11 +209,11 @@ When you extract a feature, include the following 3-step micro-task for every ro
 
 ## Progress Tracking
 
-**Overall Progress**: 5/26 tasks completed (19%)
+**Overall Progress**: 9/26 tasks completed (35%)
 
 **Phase Status**:
 - ✅ Phase 1: Foundation & Shared Infrastructure (5/6 tasks)
-- ⏳ Phase 2: Extract Domain Entities (0/4 tasks)
+- ✅ Phase 2: Extract Domain Entities (4/4 tasks)
 - ⏳ Phase 3: Feature Migration (0/5 tasks)
 - ⏳ Phase 4: Component Refactoring (0/3 tasks)
 - ⏳ Phase 5: Cleanup & Optimization (0/5 tasks)
