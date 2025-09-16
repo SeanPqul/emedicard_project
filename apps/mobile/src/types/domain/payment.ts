@@ -13,7 +13,7 @@ export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
 // ===== PAYMENT ENTITY TYPES =====
 export interface Payment {
   _id: Id<"payments">;
-  formId: Id<"forms">;
+  applicationId: Id<"applications">;
   amount: number;
   serviceFee: number;
   netAmount: number;
@@ -61,7 +61,7 @@ export interface PaymentReceipt {
 
 // ===== PAYMENT OPERATION TYPES =====
 export interface CreatePaymentInput {
-  formId: Id<'forms'>;
+  applicationId: Id<'applications'>;
   amount: number;
   serviceFee: number;
   netAmount: number;

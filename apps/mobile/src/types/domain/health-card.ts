@@ -12,7 +12,7 @@ export type HealthCardStatus = 'Active' | 'Expired' | 'Suspended' | 'Revoked';
 // ===== HEALTH CARD ENTITY TYPES =====
 export interface HealthCard {
   _id: Id<"healthCards">;
-  formId: Id<"forms">;
+  applicationId: Id<"applications">;
   cardUrl: string;
   issuedAt: number;
   expiresAt: number;
@@ -27,8 +27,8 @@ export interface HealthCard {
 
 export interface HealthCardData {
   _id: Id<"healthCards">;
-  form: {
-    _id: Id<"forms">;
+  application: {
+    _id: Id<"applications">;
     applicationType: 'New' | 'Renew';
     position: string;
     organization: string;
@@ -74,7 +74,7 @@ export interface VerificationResult {
 
 // ===== HEALTH CARD OPERATION TYPES =====
 export interface IssueHealthCardInput {
-  formId: Id<'forms'>;
+  applicationId: Id<'applications'>;
   cardUrl: string;
   issuedAt: number;
   expiresAt: number;
@@ -136,7 +136,7 @@ export interface HealthCardTemplate {
 export interface HealthCardRenewal {
   id: string;
   originalCardId: Id<"healthCards">;
-  newApplicationId: Id<"forms">;
+  newApplicationId: Id<"applications">;
   renewalReason: 'expiration' | 'lost' | 'damaged' | 'update';
   requestedAt: number;
   processedAt?: number;

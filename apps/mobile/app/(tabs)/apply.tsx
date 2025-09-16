@@ -27,8 +27,8 @@ import { transformRequirements } from '../../src/utils/application/requirementsM
 import { STEP_TITLES } from '../../src/constants/application';
 
 // Import extracted components
-import { StepIndicator } from '../../src/screens/apply/components/StepIndicator';
-import { DocumentSourceModal } from '../../src/screens/apply/components/DocumentSourceModal';
+import { StepIndicator } from '../../src/features/apply/components/StepIndicator';
+import { DocumentSourceModal } from '../../src/features/apply/components/DocumentSourceModal';
 import { 
   ApplicationTypeStep,
   JobCategoryStep,

@@ -7,7 +7,7 @@
 
 
 // Components
-export * from './components';
+// Components are now feature-scoped and imported directly
 
 // Configuration
 export * from './config';

@@ -1,4 +1,5 @@
-import { convexUseQuery, convexUseMutation, apiEndpoints, ConvexId } from '../../shared/api';
+import { useQuery, useMutation } from 'convex/react';
+import { apiEndpoints, ConvexId } from '../../shared/api';
 import { 
   Application, 
   CreateApplicationInput, 
@@ -18,7 +19,7 @@ import {
  * Hook to get a specific application by ID
  */
 export const useApplicationById = (applicationId?: string) => {
-  const application = convexUseQuery(
+  const application = useQuery(
     apiEndpoints.applications.getById,
     applicationId ? { applicationId: applicationId as ConvexId<"applications"> } : "skip"
   );
@@ -34,7 +35,7 @@ export const useApplicationById = (applicationId?: string) => {
  * Hook to get all applications for the current user
  */
 export const useUserApplications = () => {
-  const userApplications = convexUseQuery(apiEndpoints.applications.getUserApplications, {});
+  const userApplications = useQuery(apiEndpoints.applications.getUserApplications, {});
 
   return {
     data: userApplications as Application[] | undefined,
@@ -70,7 +71,7 @@ export const useApplications = (applicationId?: string) => {
  * Hook for creating a new application
  */
 export const useCreateApplication = () => {
-  const createApplicationMutation = convexUseMutation(apiEndpoints.applications.create);
+  const createApplicationMutation = useMutation(apiEndpoints.applications.create);
 
   const createApplication = async (input: CreateApplicationInput): Promise<Application | null> => {
     try {
@@ -92,7 +93,7 @@ export const useCreateApplication = () => {
  * Hook for updating an application
  */
 export const useUpdateApplication = () => {
-  const updateApplicationMutation = convexUseMutation(apiEndpoints.applications.update);
+  const updateApplicationMutation = useMutation(apiEndpoints.applications.update);
 
   const updateApplication = async (
     applicationId: ConvexId<'applications'>, 
@@ -117,7 +118,7 @@ export const useUpdateApplication = () => {
  * Hook for submitting an application
  */
 export const useSubmitApplication = () => {
-  const submitApplicationMutation = convexUseMutation(apiEndpoints.applications.submit);
+  const submitApplicationMutation = useMutation(apiEndpoints.applications.submit);
 
   const submitApplicationForm = async (
     applicationId: ConvexId<'applications'>,

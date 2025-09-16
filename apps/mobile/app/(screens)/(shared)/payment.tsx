@@ -11,7 +11,8 @@ import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { usePayments, useApplications } from '../../../src/hooks/';
 import { getColor } from '../../../src/styles/theme';
 import { styles } from '../../../src/styles/screens/shared-payment';
-import { PAYMENT_METHODS, DIGITAL_PAYMENT_METHODS, MANUAL_PAYMENT_METHODS, type PaymentMethod, type UploadedReceipt } from '../../../src/constants';
+import { PAYMENT_METHODS, DIGITAL_PAYMENT_METHODS, MANUAL_PAYMENT_METHODS, type PaymentMethod as PaymentMethodConfig, type UploadedReceipt } from '../../../src/constants';
+import { PaymentMethod, useCreatePayment, useUpdatePaymentStatus } from '../../../src/entities/payment';
 
 
 export default function PaymentScreen() {
@@ -24,8 +25,16 @@ export default function PaymentScreen() {
   const { messages, showSuccess, showError, showWarning, dismissFeedback } = useFeedback();
   
   // Use our API hooks instead of direct Convex calls
-  const { existingPayment, createPayment, updatePaymentStatus, generateUploadUrl, isLoadingFormPayment } = usePayments(formId);
-  const { form, isLoadingForm } = useApplications(formId);
+  const paymentsHook = usePayments(formId);
+  const existingPayment = paymentsHook.data.existingPayment;
+  const { createPayment } = useCreatePayment();
+  const { updatePaymentStatus } = useUpdatePaymentStatus();
+  const generateUploadUrl = paymentsHook.mutations.generateUploadUrl;
+  const isLoadingFormPayment = paymentsHook.isLoadingApplicationPayment;
+  
+  const applicationsHook = useApplications(formId);
+  const form = applicationsHook.data.form;
+  const isLoadingForm = applicationsHook.isLoadingForm;
   
 
   const getSelectedMethodDetails = () => {
@@ -68,7 +77,7 @@ export default function PaymentScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: 'Images' as ImagePicker.MediaTypeOptions,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -87,7 +96,7 @@ export default function PaymentScreen() {
 
   const pickImageFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: 'Images' as ImagePicker.MediaTypeOptions,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -197,21 +206,21 @@ export default function PaymentScreen() {
 
       // Create payment record
       const paymentId = await createPayment({
-        formId: formId as Id<"forms">,
+        applicationId: formId as Id<"applications">,
         amount: method.fee,
         serviceFee: method.serviceFee || 0,
         netAmount: calculateTotal(),
-        method: method.id as any,
+        paymentMethod: method.id as PaymentMethod,
         referenceNumber: finalReferenceNumber,
         receiptId,
       });
 
       // For digital payments, mark as complete immediately
-      if (DIGITAL_PAYMENT_METHODS.includes(method.id as any)) {
-        await updatePaymentStatus({
-          paymentId,
-          status: 'Complete',
-        });
+      if (paymentId && DIGITAL_PAYMENT_METHODS.includes(method.id as any)) {
+        await updatePaymentStatus(
+          paymentId._id,
+          'Completed'
+        );
       }
 
       setIsSubmitting(false);
@@ -251,7 +260,7 @@ export default function PaymentScreen() {
             onPress={() => setSelectedPaymentMethod(method.id)}
           >
             <Ionicons 
-              name={method.icon} 
+              name={method.icon as any} 
               size={24} 
               color={selectedPaymentMethod === method.id ? getColor('success.main') : getColor('text.secondary')} 
             />
@@ -375,12 +384,12 @@ export default function PaymentScreen() {
             <Text style={styles.sectionTitle}>Existing Payment</Text>
             <View style={styles.paymentStatusCard}>
               <View style={styles.paymentStatusHeader}>
-                <Text style={styles.paymentStatusText}>Status: {existingPayment.status}</Text>
-                <View style={[
-                  styles.statusBadge,
-                  { backgroundColor: existingPayment.status === 'Complete' ? getColor('success.main') : getColor('warning.main') }
-                ]}>
-                  <Text style={styles.statusBadgeText}>{existingPayment.status}</Text>
+              <Text style={styles.paymentStatusText}>Status: {existingPayment.paymentStatus}</Text>
+              <View style={[
+                styles.statusBadge,
+                { backgroundColor: existingPayment.paymentStatus === 'Complete' ? getColor('success.main') : getColor('warning.main') }
+              ]}>
+                <Text style={styles.statusBadgeText}>{existingPayment.paymentStatus}</Text>
                 </View>
               </View>
               <Text style={styles.paymentReference}>Reference: {existingPayment.referenceNumber}</Text>

@@ -9,7 +9,7 @@ export { default as storageHelper, storage, encryptedStorage, createUserStorage,
   hasKey, getStorageSize, trimStorage, encryptStorage, removeEncryption,
   storageHelper as storageUtils } from './storage';
 
-export { default as userUtils, generateDisplayNameFromEmail, getUserDisplayName,
+export { generateDisplayNameFromEmail, getUserDisplayName,
   hasPlaceholderName } from './user-utils';
 
 export { cacheDocument, getCachedDocument, getCachedDocumentsByForm, updateCachedDocumentStatus,
@@ -18,15 +18,7 @@ export { cacheDocument, getCachedDocument, getCachedDocumentsByForm, updateCache
 
 export { getHealthCardTypeName, getPaymentMethods } from './health-card-utils';
 
-export { 
-  getCardColor, 
-  getCardStatus, 
-  getStatusColor, 
-  generateVerificationUrl, 
-  formatDate, 
-  generateCardHtml,
-  type HealthCardData 
-} from './health-card-display-utils';
+// Health card utilities moved to entities/healthCard
 
 export {
   formatDate as formatOrientationDate,

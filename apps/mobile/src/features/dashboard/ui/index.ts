@@ -7,4 +7,3 @@
 // ===== DASHBOARD COMPONENTS =====
 export * from './StatCard';
 export * from './ActivityItem';
-export * from './header';

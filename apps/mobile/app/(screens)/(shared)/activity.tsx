@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../../backend/convex/_generated/api';
-import { EmptyState } from '../../../src/components';
+import { EmptyState } from '../../../src/shared/ui/EmptyState';
 import { getColor } from '../../../src/styles/theme';
 import { styles } from '@/src/styles/screens/shared-activity';
 import {

@@ -1,4 +1,5 @@
-import { ConvexId, convexUseQuery, convexUseMutation, apiEndpoints } from '../../shared/api';
+import { useQuery, useMutation } from 'convex/react';
+import { ConvexId, apiEndpoints } from '../../shared/api';
 
 /**
  * Payment Entity - Complete Domain Model
@@ -58,7 +59,7 @@ export const isPaymentComplete = (payment: Payment): boolean => {
 
 // ===== API HOOKS =====
 export const usePaymentByApplication = (applicationId?: string) => {
-  const existingPayment = convexUseQuery(
+  const existingPayment = useQuery(
     apiEndpoints.payments.getByApplication || (() => null),
     applicationId ? { applicationId: applicationId as ConvexId<"applications"> } : "skip"
   );
@@ -71,7 +72,7 @@ export const usePaymentByApplication = (applicationId?: string) => {
 };
 
 export const useUserPayments = () => {
-  const userPayments = convexUseQuery(apiEndpoints.payments.getUserPayments || (() => null), {});
+  const userPayments = useQuery(apiEndpoints.payments.getUserPayments || (() => null), {});
   
   return {
     data: userPayments as Payment[] | undefined,
@@ -95,7 +96,7 @@ export const usePayments = (applicationId?: string) => {
 };
 
 export const useCreatePayment = () => {
-  const createPaymentMutation = convexUseMutation(apiEndpoints.payments.create || (() => Promise.resolve(null)));
+  const createPaymentMutation = useMutation(apiEndpoints.payments.create || (() => Promise.resolve(null)));
   
   const createPayment = async (input: CreatePaymentInput): Promise<Payment | null> => {
     try {
@@ -124,7 +125,7 @@ export const useCreatePayment = () => {
 };
 
 export const useUpdatePaymentStatus = () => {
-  const updatePaymentStatusMutation = convexUseMutation(apiEndpoints.payments.updateStatus || (() => Promise.resolve(null)));
+  const updatePaymentStatusMutation = useMutation(apiEndpoints.payments.updateStatus || (() => Promise.resolve(null)));
   
   const updatePaymentStatus = async (
     paymentId: ConvexId<'payments'>, 

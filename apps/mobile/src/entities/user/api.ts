@@ -1,4 +1,5 @@
-import { convexUseQuery, convexUseMutation, apiEndpoints, ConvexId } from '../../shared/api';
+import { useQuery, useMutation } from 'convex/react';
+import { apiEndpoints, ConvexId } from '../../shared/api';
 import { User, CreateUserInput, UpdateUserInput, UserRole, createUserPayload } from './model';
 
 /**
@@ -12,7 +13,7 @@ import { User, CreateUserInput, UpdateUserInput, UserRole, createUserPayload } f
  * Hook to get the current authenticated user
  */
 export const useCurrentUser = () => {
-  const currentUser = convexUseQuery(apiEndpoints.users.getCurrentUser, {});
+  const currentUser = useQuery(apiEndpoints.users.getCurrentUser, {});
   
   return {
     data: currentUser as User | undefined,
@@ -25,7 +26,7 @@ export const useCurrentUser = () => {
  * Hook to get users filtered by role
  */
 export const useUsersByRole = (role?: UserRole) => {
-  const usersByRole = convexUseQuery(
+  const usersByRole = useQuery(
     apiEndpoints.users.getUsersByRole,
     role ? { role } : "skip"
   );
@@ -60,7 +61,7 @@ export const useUsers = (role?: UserRole) => {
  * Hook for creating a new user
  */
 export const useCreateUser = () => {
-  const createUserMutation = convexUseMutation(apiEndpoints.users.createUser);
+  const createUserMutation = useMutation(apiEndpoints.users.createUser);
   
   const createUser = async (input: CreateUserInput): Promise<User | null> => {
     try {
@@ -83,7 +84,7 @@ export const useCreateUser = () => {
  * Hook for updating user profile
  */
 export const useUpdateUser = () => {
-  const updateUserMutation = convexUseMutation(apiEndpoints.users.updateUser);
+  const updateUserMutation = useMutation(apiEndpoints.users.updateUser);
   
   const updateUser = async (updates: UpdateUserInput): Promise<User | null> => {
     try {
@@ -105,7 +106,7 @@ export const useUpdateUser = () => {
  * Hook for updating user role (admin only)
  */
 export const useUpdateUserRole = () => {
-  const updateRoleMutation = convexUseMutation(apiEndpoints.users.updateRole);
+  const updateRoleMutation = useMutation(apiEndpoints.users.updateRole);
   
   const updateUserRole = async (
     userId: ConvexId<'users'>,

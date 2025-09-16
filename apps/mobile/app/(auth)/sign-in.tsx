@@ -8,11 +8,9 @@ import {
     heightPercentageToDP as hp,
     widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
-import {
-    CustomButton,
-    CustomTextInput,
-    Divider
-} from "../../src/components";
+import { CustomButton } from "../../src/shared/ui/Button";
+import { CustomTextInput } from "../../src/shared/ui/CustomTextInput";
+import { Divider } from "../../src/shared/ui/Divider";
 
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -102,7 +100,7 @@ export default function SignInScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
-          onChangeText={(text) => {
+          onChangeText={(text: string) => {
             setEmail(text);
             clearError();
           }}
@@ -116,7 +114,7 @@ export default function SignInScreen() {
           placeholder="Enter password"
           secureTextEntry={!showPassword}
           value={password}
-          onChangeText={(text) => {
+          onChangeText={(text: string) => {
             setPassword(text);
             clearError();
           }}

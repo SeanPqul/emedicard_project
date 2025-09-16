@@ -4,13 +4,13 @@
  */
 
 export interface HealthCardData {
-  _id: string;
-  formId: string;
+  _id?: string | any; // Can be string or Id<"healthCards">
+  applicationId?: string;
   cardUrl: string;
-  issuedAt: number;
-  expiresAt: number;
-  verificationToken: string;
-  form?: any;
+  issuedAt?: number;
+  expiresAt?: number;
+  verificationToken?: string;
+  application?: any;
   jobCategory?: any;
 }
 
@@ -34,6 +34,9 @@ export const getCardColor = (jobCategory: any): string => {
  * Determines the status of a health card based on expiry date
  */
 export const getCardStatus = (card: HealthCardData): 'active' | 'expired' => {
+  if (!card.expiresAt) {
+    return 'active'; // Default to active if no expiry date
+  }
   const now = Date.now();
   if (card.expiresAt < now) {
     return 'expired';
@@ -61,13 +64,16 @@ export const getStatusColor = (status: string): string => {
  * Generates a verification URL for a health card
  */
 export const generateVerificationUrl = (card: HealthCardData): string => {
-  return `https://yourdomain.com/verify/${card.verificationToken}`;
+  return `https://yourdomain.com/verify/${card.verificationToken || card._id}`;
 };
 
 /**
  * Formats a timestamp into a readable date string
  */
-export const formatDate = (timestamp: number): string => {
+export const formatDate = (timestamp?: number): string => {
+  if (!timestamp) {
+    return 'N/A';
+  }
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -120,7 +126,7 @@ export const generateCardHtml = (card: HealthCardData): string => {
         <div class="card">
           <div class="status">${status.toUpperCase()}</div>
           <div class="card-header">${card.jobCategory?.name || 'Health Card'}</div>
-          <div class="card-id">ID: ${card.verificationToken}</div>
+          <div class="card-id">ID: ${card.verificationToken || card._id}</div>
           <div class="card-dates">Issued: ${formatDate(card.issuedAt)}</div>
           <div class="card-dates">Expires: ${formatDate(card.expiresAt)}</div>
           <div class="verification-url">Verify: ${verificationUrl}</div>

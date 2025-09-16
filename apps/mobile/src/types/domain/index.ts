@@ -68,7 +68,7 @@ export type {
 export interface Notification {
   _id: Id<"notifications">;
   userId: Id<"users">;
-  formsId?: Id<"forms">;
+  applicationId?: Id<"applications">;
   type: NotificationType;
   message: string;
   read: boolean;
@@ -96,7 +96,7 @@ export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
 export interface Orientation {
   _id: Id<"orientations">;
   userId: Id<"users">;
-  jobCategoryId: Id<"jobCategory">;
+  jobCategoryId: Id<"jobCategories">;
   scheduledAt: number;
   location: string;
   instructor?: Id<"users">;

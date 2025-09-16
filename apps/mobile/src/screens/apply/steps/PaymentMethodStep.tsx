@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../../../styles/screens/tabs-apply-forms';
 import { getBorderRadius, getColor, getSpacing, getTypography, getShadow } from '../../../styles/theme';
-import { CustomTextInput } from '../../../components';
+import { CustomTextInput } from '../../../shared/ui/CustomTextInput';
 
 type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall' | '';
 

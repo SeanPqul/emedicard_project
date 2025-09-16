@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Share, Alert } from 'react-na
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { EmptyState } from '../../../src/components';
+import { EmptyState } from '../../../src/shared/ui/EmptyState';
 import QRCode from 'react-native-qrcode-svg';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -12,15 +12,15 @@ import { useHealthCards } from '../../../src/hooks/useHealthCards';
 import { Id } from '../../../../../backend/convex/_generated/dataModel';
 import { getColor } from '../../../src/styles/theme';
 import { styles } from '../../../src/styles/screens/shared-health-cards';
-import { 
-  getCardColor, 
-  getCardStatus, 
-  getStatusColor, 
-  generateVerificationUrl, 
-  formatDate, 
+import {
+  getCardColor,
+  getCardStatus,
+  getStatusColor,
+  generateVerificationUrl,
+  formatDate,
   generateCardHtml,
-  type HealthCardData 
-} from '../../../src/utils';
+  type HealthCardData
+} from '../../../src/entities/healthCard';
 
 
 export default function HealthCardsScreen() {
@@ -35,12 +35,12 @@ export default function HealthCardsScreen() {
 
   const handleShareCard = async (card: HealthCardData) => {
     try {
-      setSharingCard(card._id);
+      setSharingCard(card._id || null);
       const verificationUrl = generateVerificationUrl(card);
       const status = getCardStatus(card);
-      
+
       const result = await Share.share({
-        message: `Health Card Verification\n\nCard ID: ${card.verificationToken}\nStatus: ${status}\nExpiry: ${formatDate(card.expiresAt)}\n\nVerify at: ${verificationUrl}`,
+        message: `Health Card Verification\n\nCard ID: ${card.verificationToken}\nStatus: ${status}\nExpiry: ${card.expiresAt ? formatDate(card.expiresAt) : 'N/A'}\n\nVerify at: ${verificationUrl}`,
         url: verificationUrl,
       });
       
@@ -62,7 +62,7 @@ export default function HealthCardsScreen() {
 
   const handleDownloadCard = async (card: HealthCardData) => {
     try {
-      setDownloadingCard(card._id);
+      setDownloadingCard(card._id || null);
       const { status } = await MediaLibrary.requestPermissionsAsync();
       
       if (status !== 'granted') {
@@ -88,7 +88,7 @@ export default function HealthCardsScreen() {
 
   const handlePrintCard = async (card: HealthCardData) => {
     try {
-      setPrintingCard(card._id);
+      setPrintingCard(card._id || null);
       
       const cardHtml = generateCardHtml(card);
       
@@ -154,18 +154,18 @@ export default function HealthCardsScreen() {
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardId}>Card ID: {card.verificationToken}</Text>
                     <Text style={styles.cardDates}>
-                      Issued: {formatDate(card.issuedAt)}
+                      Issued: {card.issuedAt ? formatDate(card.issuedAt) : 'N/A'}
                     </Text>
                     <Text style={styles.cardDates}>
-                      Expires: {formatDate(card.expiresAt)}
+                      Expires: {card.expiresAt ? formatDate(card.expiresAt) : 'N/A'}
                     </Text>
                   </View>
 
                   <TouchableOpacity
                     style={styles.qrCodeContainer}
-                    onPress={() => setSelectedCard(selectedCard === card._id ? null : card._id)}
+                    onPress={() => setSelectedCard(selectedCard === (card._id || null) ? null : (card._id || null))}
                   >
-                    {selectedCard === card._id ? (
+                    {selectedCard === (card._id || null) ? (
                       <View style={styles.qrCodeWrapper}>
                         <QRCode
                           value={verificationUrl}

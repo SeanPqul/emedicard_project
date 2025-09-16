@@ -36,6 +36,7 @@
   ],
   "exclude": [
     "convex/**/*",
+    "docs/**/*",
     "node_modules",
     ".expo",
     "dist",

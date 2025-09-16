@@ -61,7 +61,7 @@ export default function UploadDocumentsScreen() {
     getUploadState,
     cacheFileForUpload,
     batchUploadCachedDocuments,
-  } = useDocumentUpload(formId as Id<'forms'>);
+  } = useDocumentUpload(formId as Id<'applications'>);
 
   useEffect(() => {
     if (applicationType === 'New' || applicationType === 'Renew') {
@@ -98,7 +98,7 @@ export default function UploadDocumentsScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: 'Images' as ImagePicker.MediaTypeOptions,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -123,7 +123,7 @@ export default function UploadDocumentsScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: 'Images' as ImagePicker.MediaTypeOptions,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,

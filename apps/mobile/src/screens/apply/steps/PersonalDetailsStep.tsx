@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '@clerk/clerk-expo';
 import { styles } from '../../../styles/screens/tabs-apply-forms';
-import { CustomTextInput } from '../../../components/';
+import { CustomTextInput } from '../../../shared/ui/CustomTextInput';
 import { getBorderRadius, getColor, getSpacing, getTypography } from '../../../styles/theme';
 import { JobCategory } from '../../../types/domain/application';
 

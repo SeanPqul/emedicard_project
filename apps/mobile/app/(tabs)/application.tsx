@@ -12,7 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { styles } from '../../src/styles/screens/tabs-application';
-import { EmptyState } from '../../src/components';
+import { EmptyState } from '../../src/shared/ui/EmptyState';
 import { useApplications } from '../../src/hooks/useApplications';
 import { Application } from '../../src/types/domain/application';
 
