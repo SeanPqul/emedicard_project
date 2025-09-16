@@ -3,7 +3,7 @@ import { View, Text, Alert, TouchableOpacity } from 'react-native';
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { QRCodeScanner } from '../../../src/components/QRCodeScanner';
+import { QRCodeScanner } from '../../../src/shared/ui/QRScanner';
 import { styles } from '../../../src/styles/screens/shared-qr-scanner';
 
 export default function QRScannerScreen() {

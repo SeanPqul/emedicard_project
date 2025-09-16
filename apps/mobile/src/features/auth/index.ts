@@ -30,13 +30,17 @@ export {
 
 // ===== API HOOKS =====
 export {
-  useRoleBasedNavigation,
   useAuthState,
   useAuthUser,
   handleAuthError,
   getPostAuthRoute,
   getAuthRoute,
 } from './api';
+
+// ===== NAVIGATION HOOKS =====
+export {
+  useRoleBasedNavigation,
+} from './model/useRoleBasedNavigation';
 
 export type {
   AuthMethods,
@@ -45,6 +49,8 @@ export type {
 // ===== UI COMPONENTS =====
 export * from './ui';
 
-// ===== BACKWARD COMPATIBILITY =====
-// Re-export the navigation hook for existing components
-export { useRoleBasedNavigation as useRoleBasedNavigationLegacy } from './api';
+// ===== TYPES RE-EXPORT =====
+export type {
+  RolePermissions,
+  TabConfig,
+} from './model/useRoleBasedNavigation';

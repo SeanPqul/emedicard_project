@@ -1,4 +1,4 @@
-import { ErrorBoundary } from "@/src/components/ErrorBoundary";
+import { ErrorBoundary } from "@/src/shared/ui/ErrorBoundary";
 import { ToastProvider } from "@/src/contexts/ToastContext";
 import ClerkAndConvexProvider from "@/src/provider/ClerkAndConvexProvider";
 import { StatusBar } from "react-native";

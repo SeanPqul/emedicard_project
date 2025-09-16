@@ -1,7 +1,7 @@
 import { useUsers } from '@/src/hooks/useUsers';
 import { Redirect } from 'expo-router';
-import RoleBasedTabLayout from '@/src/components/navigation/RoleBasedTabLayout';
-import { LoadingSpinner } from '@/src/components/LoadingSpinner';
+import RoleBasedTabLayout from '@/src/shared/ui/navigation/RoleBasedTabLayout';
+import { LoadingSpinner } from '@/src/shared/ui/LoadingSpinner';
 
 export default function TabLayout() {
   const { data: { currentUser }, isLoading } = useUsers();

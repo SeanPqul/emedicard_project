@@ -11,7 +11,7 @@ import {
   Dimensions
 } from 'react-native';
 import { hp } from '../../src/utils/responsive';
-import { FeedbackSystem, useFeedback } from '../../src/components/';
+import { FeedbackSystem, useFeedback } from '../../src/shared/ui/FeedbackSystem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { styles } from '../../src/styles/screens/tabs-apply-forms';

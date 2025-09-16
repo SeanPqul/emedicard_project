@@ -5,7 +5,7 @@ import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useSegments, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUsers } from '../../../src/hooks/useUsers';
-import { useRoleBasedNavigation } from '../../../src/hooks/useRoleBasedNavigation';
+import { useRoleBasedNavigation } from '../../../src/features/auth';
 import { theme } from '../../../src/styles/theme';
 
 export default function NavigationHealthCheck() {

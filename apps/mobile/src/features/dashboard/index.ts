@@ -226,8 +226,10 @@ export interface ActivityListProps {
   onActivityPress?: (activity: ActivityItem) => void;
 }
 
+// ===== UI COMPONENTS =====
+export * from './ui';
+
 // Placeholder components that would be extracted from existing dashboard components
-export const DashboardHeader = () => null; // TODO: Extract from existing component
 export const StatsCards = () => null; // TODO: Extract from existing component
 export const RecentActivityList = () => null; // TODO: Extract from existing component
 export const QuickActions = () => null; // TODO: Extract from existing component

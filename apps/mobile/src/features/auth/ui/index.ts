@@ -58,13 +58,17 @@ export interface RoleBasedTabLayoutProps {
   userRole?: string;
 }
 
+// ===== MOVED COMPONENTS =====
+export { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
+export { OtpInputUI } from './OtpInputUI';
+export { SignOutButton } from './SignOutButton';
+export { default as VerificationPage } from './VerificationPage';
+
 // ===== PLACEHOLDER COMPONENTS =====
 // These would be implemented when migrating the actual UI components
 
 export const SignInForm = () => null; // TODO: Extract from sign-in.tsx
 export const SignUpForm = () => null; // TODO: Extract from sign-up.tsx  
 export const ResetPasswordForm = () => null; // TODO: Extract from reset-password.tsx
-export const VerificationForm = () => null; // TODO: Extract from verification.tsx
-export const PasswordStrengthIndicator = () => null; // TODO: Extract from components
 export const AuthLayout = () => null; // TODO: Create common auth layout
 export const RoleBasedTabLayout = () => null; // TODO: Migrate from navigation components

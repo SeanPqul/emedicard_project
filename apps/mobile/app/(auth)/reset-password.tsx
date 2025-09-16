@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { OtpInputUI } from '../../src/components/OtpInputUI'; // Our reusable component
+import { OtpInputUI } from '../../src/features/auth/ui/OtpInputUI'; // Our reusable component
 // Make sure this style file contains styles for all steps
 import { styles } from '../../src/styles/screens/auth-reset-password';
 
