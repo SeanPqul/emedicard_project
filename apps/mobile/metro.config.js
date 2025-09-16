@@ -13,8 +13,8 @@ config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
 
 // Watch other workspaces (so imports from backend/packages work)
 config.watchFolders = [
-  path.resolve(monorepoRoot, 'backend'),
-  path.resolve(monorepoRoot, 'packages'),
+  path.resolve(monorepoRoot, 'packages'),  // Your shared packages
+  path.resolve(monorepoRoot, 'backend/convex'),  // Only Convex schemas, not entire backend
   monorepoRoot,
 ];
 
