@@ -1,25 +1,33 @@
 /**
- * Shared Utilities Index
+ * Shared Layer Index
  * 
- * Simple, practical utilities for common tasks
+ * Centralized exports for API, UI, and utility modules
  */
 
-// Basic validation utilities
+// ===== API LAYER =====
+export * from './api';
+
+// ===== SHARED UTILITIES =====
+export * from './lib';
+
+// ===== UI COMPONENTS =====
+export * from './ui';
+
+// ===== BACKWARD COMPATIBILITY =====
+// Keep existing exports for compatibility during migration
 export {
   validators,
   validateField,
   validateForm,
-} from './validation/form-validation';
+} from './lib/validation/form-validation';
 
-// Essential formatting utilities
 export {
   dateFormatters,
   currencyFormatters,
   stringFormatters,
   statusFormatters,
-} from './formatting/data-formatters';
+} from './lib/formatting/data-formatters';
 
-// Simple error handling
 export {
   errorHandlers,
 } from './api/error-handling';
