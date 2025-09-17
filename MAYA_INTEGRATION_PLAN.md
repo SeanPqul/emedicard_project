@@ -103,6 +103,38 @@ payments: defineTable({
 
 ### **Phase 1: Backend Infrastructure (Week 1)**
 
+#### Progress Tracking
+
+##### Environment & Setup
+- [x] Create Git branch for Maya payment integration
+- [x] Update integration plan with progress tracking
+- [x] Set up environment configuration files
+- [x] Configure Convex environment variables
+
+##### API Client Development  
+- [x] Create Maya API client structure
+- [x] Implement authentication headers
+- [x] Create HTTP client with error handling
+- [x] Add request/response logging
+
+##### Core Payment Functions
+- [ ] Create checkout session function
+- [ ] Implement payment status checking
+- [ ] Add payment confirmation handler
+- [ ] Create refund processing function
+
+##### Database Schema Updates
+- [ ] Add Maya-specific fields to payments table
+- [ ] Create payment_logs table for audit
+- [ ] Add indexes for Maya payment lookups
+- [ ] Update schema TypeScript definitions
+
+##### Testing Setup
+- [ ] Create test environment configuration
+- [ ] Set up Maya sandbox credentials
+- [ ] Create unit test structure
+- [ ] Add integration test helpers
+
 #### 1.1 Environment Configuration
 ```bash
 # .env.local (backend/convex)
