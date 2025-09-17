@@ -5,7 +5,7 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { api } from '../../../../../backend/convex/_generated/api';
 import { useRoleBasedNavigation } from '../../hooks/useRoleBasedNavigation';
-import { LoadingSpinner } from '../LoadingSpinner';
+import { LoadingSpinner } from '../common/LoadingSpinner';
 
 export default function RoleBasedTabLayout() {
   const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);

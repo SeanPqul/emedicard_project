@@ -41,10 +41,10 @@
 import { moderateScale, verticalScale } from '@/src/utils/responsive';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
+import { Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 import { theme } from '@/src/styles/theme';
 
-interface CustomTextInputProps extends TextInputProps {
+interface CustomTextInputProps extends Omit<TextInputProps, 'accessibilityDescribedBy'> {
   leftIcon?: keyof typeof Ionicons.glyphMap;
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightIconPress?: () => void;
@@ -53,12 +53,18 @@ interface CustomTextInputProps extends TextInputProps {
   iconColor?: string;
   iconSize?: number;
   label?: string;
-  error?: boolean;
+  error?: boolean | string; // Allow both boolean and string for error messages
   errorMessage?: string;
   rightIconAccessibilityLabel?: string;
   rightIconAccessibilityHint?: string;
   validationState?: 'valid' | 'invalid' | 'none';
   showRequiredIndicator?: boolean;
+  // Test compatibility props
+  icon?: keyof typeof Ionicons.glyphMap; // Alias for leftIcon
+  disabled?: boolean;
+  required?: boolean;
+  variant?: string; // For radio button variant
+  selected?: boolean; // For radio button variant
 }
 
 export const CustomTextInput: React.FC<CustomTextInputProps> = ({
@@ -77,10 +83,23 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({
   rightIconAccessibilityHint,
   validationState = 'none',
   showRequiredIndicator = false,
+  // Test compatibility props
+  icon,
+  disabled,
+  required,
+  variant,
+  selected,
   ...props
 }) => {
+  // Handle error prop as both boolean and string
+  const hasError = Boolean(error);
+  const errorText = typeof error === 'string' ? error : errorMessage;
+  
+  // Use icon prop as fallback for leftIcon (test compatibility)
+  const displayIcon = leftIcon || icon;
+  
   const getBorderColor = () => {
-    if (error || validationState === 'invalid') return theme.colors.semantic.error;
+    if (hasError || validationState === 'invalid') return theme.colors.semantic.error;
     if (validationState === 'valid') return theme.colors.semantic.success;
     return theme.colors.border.light;
   };
@@ -116,24 +135,25 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({
   
   return (
     <View style={[defaultStyles.container, containerStyle]}>
-      {leftIcon && (
+      {displayIcon && (
         <Ionicons
-          name={leftIcon}
+          name={displayIcon}
           size={iconSize}
           color={iconColor}
           style={defaultStyles.leftIcon}
+          testID="input-icon"
         />
       )}
       <TextInput
-        style={[defaultStyles.input, leftIcon && defaultStyles.inputWithLeftIcon, inputStyle]}
+        style={[defaultStyles.input, displayIcon && defaultStyles.inputWithLeftIcon, inputStyle]}
         placeholderTextColor={iconColor}
         accessibilityLabel={label || props.placeholder}
         accessibilityRole="text"
         accessibilityState={{
-          disabled: props.editable === false,
+          disabled: disabled || props.editable === false,
         }}
-        accessibilityHint={errorMessage || (showRequiredIndicator ? 'Required field' : undefined)}
-        accessibilityDescribedBy={errorMessage ? 'error-message' : undefined}
+        accessibilityHint={errorText || (showRequiredIndicator || required ? 'Required field' : undefined)}
+        editable={disabled ? false : props.editable}
         {...props}
       />
       {rightIcon && (
@@ -143,6 +163,7 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({
           accessibilityLabel={rightIconAccessibilityLabel || `${rightIcon} button`}
           accessibilityHint={rightIconAccessibilityHint}
           accessibilityRole="button"
+          testID="password-toggle"
         >
           <Ionicons
             name={rightIcon}
@@ -151,6 +172,16 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({
             accessibilityElementsHidden={true}
           />
         </TouchableOpacity>
+      )}
+      {errorText && (
+        <View style={{ position: 'absolute', bottom: -20, left: 0 }}>
+          <Text style={{ 
+            ...theme.typography.caption, 
+            color: theme.colors.semantic.error 
+          }}>
+            {errorText}
+          </Text>
+        </View>
       )}
     </View>
   );

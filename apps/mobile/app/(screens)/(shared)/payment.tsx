@@ -23,8 +23,8 @@ export default function PaymentScreen() {
   const { messages, showSuccess, showError, showWarning, dismissFeedback } = useFeedback();
   
   // Use our API hooks instead of direct Convex calls
-  const { existingPayment, createPayment, updatePaymentStatus, generateUploadUrl, isLoadingFormPayment } = usePayments(formId);
-  const { form, isLoadingForm } = useApplications(formId);
+  const { data: { existingPayment }, mutations: { createPayment, updatePaymentStatus, generateUploadUrl }, isLoadingApplicationPayment } = usePayments(formId);
+  const { data: { form }, isLoadingForm } = useApplications(formId);
   
 
   const getSelectedMethodDetails = () => {
@@ -67,7 +67,7 @@ export default function PaymentScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -86,7 +86,7 @@ export default function PaymentScreen() {
 
   const pickImageFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -196,21 +196,18 @@ export default function PaymentScreen() {
 
       // Create payment record
       const paymentId = await createPayment({
-        formId: formId as Id<"forms">,
+        applicationId: formId as Id<"applications">,
         amount: method.fee,
         serviceFee: method.serviceFee || 0,
         netAmount: calculateTotal(),
-        method: method.id as any,
+        paymentMethod: method.id as any,
         referenceNumber: finalReferenceNumber,
-        receiptId,
+        receiptStorageId: receiptId,
       });
 
       // For digital payments, mark as complete immediately
       if (DIGITAL_PAYMENT_METHODS.includes(method.id as any)) {
-        await updatePaymentStatus({
-          paymentId,
-          status: 'Complete',
-        });
+        await updatePaymentStatus(paymentId, 'Complete');
       }
 
       setIsSubmitting(false);
@@ -250,7 +247,7 @@ export default function PaymentScreen() {
             onPress={() => setSelectedPaymentMethod(method.id)}
           >
             <Ionicons 
-              name={method.icon} 
+              name={method.icon as any} 
               size={24} 
               color={selectedPaymentMethod === method.id ? getColor('success.main') : getColor('text.secondary')} 
             />
@@ -374,12 +371,12 @@ export default function PaymentScreen() {
             <Text style={styles.sectionTitle}>Existing Payment</Text>
             <View style={styles.paymentStatusCard}>
               <View style={styles.paymentStatusHeader}>
-                <Text style={styles.paymentStatusText}>Status: {existingPayment.status}</Text>
+                <Text style={styles.paymentStatusText}>Status: {existingPayment.paymentStatus}</Text>
                 <View style={[
                   styles.statusBadge,
-                  { backgroundColor: existingPayment.status === 'Complete' ? getColor('success.main') : getColor('warning.main') }
+                  { backgroundColor: existingPayment.paymentStatus === 'Complete' ? getColor('success.main') : getColor('warning.main') }
                 ]}>
-                  <Text style={styles.statusBadgeText}>{existingPayment.status}</Text>
+                  <Text style={styles.statusBadgeText}>{existingPayment.paymentStatus}</Text>
                 </View>
               </View>
               <Text style={styles.paymentReference}>Reference: {existingPayment.referenceNumber}</Text>

@@ -19,8 +19,8 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Button } from './ui/Button';
-import { Text } from './ui/Text';
+import { Button } from './Button';
+import { Text } from './Text';
 import { getColor, getSpacing, colorWithOpacity } from '@/src/styles';
 
 const { width } = Dimensions.get('window');
@@ -62,6 +62,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
   disabled,
   accessibilityLabel,
   accessibilityHint,
+  onPress,
   ...props
 }) => {
   // Custom style for enhanced CTA appearance
@@ -137,7 +138,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
       }}>
         <Text 
           variant={size === 'large' ? 'button' : 'bodySmall'}
-          weight="semibold"
+          weight="semiBold"
           color={getTextColor()}
           style={[{ 
             letterSpacing: 0.3,
@@ -145,7 +146,6 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
             lineHeight: size === 'large' ? 20 : 18
           }, textStyle]}
           numberOfLines={1}
-          adjustsFontSizeToFit
         >
           {title}
         </Text>
@@ -177,11 +177,11 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
       loading={loading}
       loadingText={loadingText}
       disabled={disabled}
-      onPress={props.onPress}
+      onPress={onPress ? () => onPress({} as any) : undefined}
       style={[ctaButtonStyle, buttonStyle]}
       accessibilityLabel={accessibilityLabel || title}
       accessibilityHint={accessibilityHint || `Tap to ${title.toLowerCase()}`}
-      {...props}
+      testID={props.testID}
     >
       {renderCustomContent()}
     </Button>

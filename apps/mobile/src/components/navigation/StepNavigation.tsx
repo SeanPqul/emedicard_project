@@ -3,8 +3,8 @@ import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { getBorderRadius, getColor, getSpacing, getTypography } from '../../styles/theme';
-import { ErrorState } from '../ErrorState';
-import { LoadingSpinner } from '../LoadingSpinner';
+import { ErrorState } from '../common/ErrorState';
+import { LoadingSpinner } from '../common/LoadingSpinner';
 
 interface StepNavigationProps {
   currentStep: number;

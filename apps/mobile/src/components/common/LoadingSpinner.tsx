@@ -11,13 +11,14 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getColor, getTypography, getSpacing } from '../styles/theme';
+import { getColor, getTypography, getSpacing } from '../../styles/theme';
 
 interface LoadingSpinnerProps {
   visible?: boolean;
   size?: 'small' | 'medium' | 'large';
   color?: string;
   message?: string;
+  text?: string; // Alias for message (compatibility)
   overlay?: boolean;
   type?: 'spinner' | 'dots' | 'pulse';
   style?: ViewStyle;
@@ -34,6 +35,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
   color = getColor('primary.500'),
   message,
+  text, // Alias for message
   overlay = false,
   type = 'spinner',
   style,
@@ -42,6 +44,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   progress,
   icon,
 }) => {
+  // Use text as fallback for message for compatibility
+  const displayMessage = message || text;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(0.5)).current;
@@ -258,7 +262,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       ]}
       accessible={true}
       accessibilityRole="progressbar"
-      accessibilityLabel={message || 'Loading content'}
+      accessibilityLabel={displayMessage || 'Loading content'}
       accessibilityLiveRegion="polite"
       accessibilityState={{
         busy: visible,
@@ -266,13 +270,13 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     >
       <View style={styles.loadingContent}>
         {renderLoading()}
-        {message && (
+        {displayMessage && (
           <Text 
             style={[styles.message, textStyle]}
             accessibilityRole="text"
             accessibilityLiveRegion="polite"
           >
-            {message}
+            {displayMessage}
           </Text>
         )}
         {renderProgress()}
@@ -298,6 +302,23 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   }
 
   return content;
+};
+
+// Skeleton Group component for grouping skeleton loaders
+export const SkeletonGroup: React.FC<{
+  count?: number;
+  children: React.ReactNode;
+  style?: ViewStyle;
+}> = ({ count = 1, children, style }) => {
+  return (
+    <View style={style}>
+      {Array.from({ length: count }).map((_, index) => (
+        <View key={index}>
+          {children}
+        </View>
+      ))}
+    </View>
+  );
 };
 
 // Skeleton loading component for lists
@@ -405,7 +426,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   message: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     textAlign: 'center',
     marginTop: getSpacing('md'),

@@ -1,87 +1,46 @@
-// Form Components
-import { CustomButton } from "./ui/Button";
-import { CTAButton } from "./CTAButton";
-import { CustomTextInput } from "./CustomTextInput";
-import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
+// Re-export from subdirectories
+// Authentication Components
+export * from './auth';
+
+// Common Components
+export * from './common';
 
 // UI Components
-import { Divider } from "./Divider";
-import { ErrorText } from "./ErrorText";
-import { LinkText } from "./LinkText";
-import { OtpInputUI } from "./OtpInputUI";
-import { SignOutButton } from "./SignOutButton";
-import VerificationPage from "./VerificationPage";
-import { DashboardHeader } from "./ui/DashboardHeader";
+export * from './ui';
 
 // Dashboard Components
-import { StatCard } from "./StatCard";
-import { ActionButton } from "./ActionButton";
-import { ActivityItem } from "./ActivityItem";
-import { ProfileLink } from "./ProfileLink";
-import { EmptyState } from "./EmptyState";
+export * from './dashboard';
 
-// Error & Feedback Components
-import { ErrorBoundary } from "./ErrorBoundary";
-import { Toast } from "./Toast";
-import type { ToastType, ToastProps } from "./Toast";
-import { LoadingSpinner } from "./LoadingSpinner";
-import { ErrorState, NetworkErrorState, ServerErrorState, UploadErrorState, PaymentErrorState } from "./ErrorState";
-import type { ErrorType } from "./ErrorState";
+// Application Components
+export * from './application';
 
-// Responsive Components
-import { ResponsiveLayout, ResponsiveRow, ResponsiveColumn, ResponsiveGrid } from "./ResponsiveLayout";
+// Navigation Components
+export * from './navigation';
 
-// Enhanced UI Components
-import { DragDropUpload } from "./DragDropUpload";
-import { QRCodeScanner } from "./QRCodeScanner";
-import { FeedbackSystem, useFeedback } from "./FeedbackSystem";
+// Payment Components
+export * from './payment';
 
-export {
-    // Form Components
-    CustomButton,
-    CTAButton,
-    CustomTextInput,
-    PasswordStrengthIndicator,
-    
-    // UI Components
-    Divider,
-    ErrorText,
-    LinkText,
-    OtpInputUI,
-    SignOutButton,
-    VerificationPage,
-    DashboardHeader,
-    
-    // Dashboard Components
-    StatCard,
-    ActionButton,
-    ActivityItem,
-    ProfileLink,
-    EmptyState,
-    
-    // Error & Feedback Components
-    ErrorBoundary,
-    Toast,
-    LoadingSpinner,
-    ErrorState,
-    NetworkErrorState,
-    ServerErrorState,
-    UploadErrorState,
-    PaymentErrorState,
-    
-    // Responsive Components
-    ResponsiveLayout,
-    ResponsiveRow,
-    ResponsiveColumn,
-    ResponsiveGrid,
-    
-    // Enhanced UI Components
-    DragDropUpload,
-    QRCodeScanner,
-    FeedbackSystem,
-    useFeedback
-};
+// Feedback Components
+export * from './feedback';
 
-// Export types
+// Upload Components
+export * from './upload';
+
+// Profile Components
+export * from './profile';
+
+// Scanner Components
+export * from './scanner';
+
+// Stats Components
+export * from './stats';
+
+// Activity Components
+export * from './activity';
+
+// Legacy types - maintain for backward compatibility
+import type { ToastType, ToastProps } from './feedback/Toast';
+import type { ErrorType } from './common/ErrorState';
+
 export type { ToastType, ToastProps, ErrorType };
 

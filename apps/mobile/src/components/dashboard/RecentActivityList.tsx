@@ -1,8 +1,8 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ActivityItem } from '../ActivityItem';
-import { EmptyState } from '../EmptyState';
+import { ActivityItem } from '../activity/ActivityItem';
+import { EmptyState } from '../common/EmptyState';
 import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../../styles/theme';
 import { RecentActivity } from '../../types';
 

@@ -9,8 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getColor, getTypography, getSpacing, getBorderRadius } from '../styles/theme';
-import { CustomButton } from './ui/Button';
+import { getColor, getTypography, getSpacing, getBorderRadius } from '../../styles/theme';
+import { CustomButton } from '../ui/Button';
 
 export type ErrorType = 
   | 'network' 
@@ -211,7 +211,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
             title={action.text}
             onPress={action.onPress}
             loading={action.loading}
-            variant={action.variant}
+            variant={action.variant as 'primary' | 'secondary'}
             size="small"
             style={[
               styles.actionButton,
@@ -261,7 +261,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   return (
     <View style={containerStyle}>
       <View style={styles.iconContainer}>
-        <Ionicons name={displayIcon} size={48} color={iconColor} />
+        <Ionicons name={displayIcon as any} size={48} color={iconColor} />
       </View>
       
       <Text style={[styles.title, titleStyle]}>
@@ -336,13 +336,13 @@ const styles = StyleSheet.create({
     marginBottom: getSpacing('lg'),
   },
   title: {
-    ...getTypography('headingMedium'),
+    ...getTypography('h3'),
     color: getColor('text.primary'),
     textAlign: 'center',
     marginBottom: getSpacing('md'),
   },
   message: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.secondary'),
     textAlign: 'center',
     marginBottom: getSpacing('xl'),

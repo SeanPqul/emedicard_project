@@ -10,10 +10,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 // Components
-import { CustomButton } from '../CustomButton';
-import { CustomTextInput } from '../CustomTextInput';
-import { ErrorState } from '../ErrorState';
-import { LoadingSpinner, SkeletonLoader } from '../LoadingSpinner';
+import { CustomButton } from '../ui/Button';
+import { CustomTextInput } from '../ui/CustomTextInput';
+import { ErrorState } from '../common/ErrorState';
+import { LoadingSpinner, SkeletonLoader, SkeletonGroup } from '../common/LoadingSpinner';
 
 // Payment flow and utilities
 import {
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     borderBottomColor: getColor('border.primary'),
   },
   headerTitle: {
-    ...getTypography('headingMedium'),
+    ...getTypography('h3'),
     color: getColor('text.primary'),
     flex: 1,
     textAlign: 'center',
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     borderColor: getColor('border.secondary'),
   },
   summaryTitle: {
-    ...getTypography('headingSmall'),
+    ...getTypography('h4'),
     color: getColor('text.primary'),
     marginBottom: getSpacing('md'),
   },
@@ -386,11 +386,11 @@ const styles = StyleSheet.create({
     paddingVertical: getSpacing('xs'),
   },
   summaryLabel: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.secondary'),
   },
   summaryValue: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '500',
   },
@@ -401,12 +401,12 @@ const styles = StyleSheet.create({
     paddingTop: getSpacing('sm'),
   },
   totalLabel: {
-    ...getTypography('bodyLarge'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '600',
   },
   totalValue: {
-    ...getTypography('bodyLarge'),
+    ...getTypography('body'),
     color: getColor('primary.500'),
     fontWeight: '700',
   },
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     margin: getSpacing('lg'),
   },
   sectionTitle: {
-    ...getTypography('headingSmall'),
+    ...getTypography('h4'),
     color: getColor('text.primary'),
     marginBottom: getSpacing('md'),
   },
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   methodName: {
-    ...getTypography('bodyLarge'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '500',
   },
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   loadingText: {
-    ...getTypography('bodyLarge'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     marginTop: getSpacing('md'),
     fontWeight: '500',

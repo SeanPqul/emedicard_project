@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { ActionButton } from '../ActionButton';
+import { ActionButton } from '../ui/ActionButton';
 import { getSpacing, getTypography, getColor } from '../../styles/theme';
 import { DashboardStats } from '../../types';
 

@@ -21,9 +21,9 @@ export function usePayments(applicationId?: string) {
     amount: number;
     serviceFee: number;
     netAmount: number;
-    method: PaymentMethod;
+    paymentMethod: PaymentMethod;
     referenceNumber: string;
-    receiptId?: ConvexId<'_storage'>;
+    receiptStorageId?: ConvexId<'_storage'>;
   }) => {
     return createPaymentMutation(input);
   };
@@ -32,7 +32,7 @@ export function usePayments(applicationId?: string) {
     paymentId: ConvexId<'payments'>, 
     status: 'Pending' | 'Complete' | 'Failed'
   ) => {
-    return updatePaymentStatusMutation({ paymentId, status });
+    return updatePaymentStatusMutation({ paymentId, paymentStatus: status });
   };
 
   const generateUploadUrl = async () => {

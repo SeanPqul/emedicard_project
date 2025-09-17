@@ -5,12 +5,12 @@
 
 export interface HealthCardData {
   _id: string;
-  formId: string;
+  applicationId?: string; // Changed from formId to applicationId, optional for backward compatibility
   cardUrl: string;
-  issuedAt: number;
-  expiresAt: number;
-  verificationToken: string;
-  form?: any;
+  issuedAt?: number; // Make optional for better type safety
+  expiresAt?: number; // Make optional for better type safety  
+  verificationToken?: string; // Make optional for better type safety
+  application?: any; // Changed from form to application
   jobCategory?: any;
 }
 
@@ -35,6 +35,9 @@ export const getCardColor = (jobCategory: any): string => {
  */
 export const getCardStatus = (card: HealthCardData): 'active' | 'expired' => {
   const now = Date.now();
+  if (!card.expiresAt) {
+    return 'active'; // Default to active if no expiry date
+  }
   if (card.expiresAt < now) {
     return 'expired';
   }
@@ -67,7 +70,10 @@ export const generateVerificationUrl = (card: HealthCardData): string => {
 /**
  * Formats a timestamp into a readable date string
  */
-export const formatDate = (timestamp: number): string => {
+export const formatDate = (timestamp?: number): string => {
+  if (!timestamp) {
+    return 'N/A';
+  }
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',

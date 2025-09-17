@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { StatCard } from '../StatCard';
+import { StatCard } from '../stats';
 import { getColor, getSpacing, getTypography } from '../../styles/theme';
 import { DashboardStats } from '../../types';
 

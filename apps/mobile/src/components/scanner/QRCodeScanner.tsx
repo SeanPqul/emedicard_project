@@ -11,8 +11,8 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme, getColor, getSpacing, getBorderRadius, getShadow, getTypography } from '../styles/theme';
-import { CustomButton } from './ui/Button';
+import { theme, getColor, getSpacing, getBorderRadius, getShadow, getTypography } from '@/src/styles/theme';
+import { CustomButton } from '../ui/Button';
 
 const { width, height } = Dimensions.get('window');
 

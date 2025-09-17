@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Id } from '../../../../../backend/convex/_generated/dataModel';
 import { CustomButton } from '../../../src/components';
-import { DragDropUpload } from '../../../src/components/DragDropUpload';
+import { DragDropUpload } from '../../../src/components/upload';
 import { getColor } from '../../../src/styles/theme';
 import { styles } from '../../../src/styles/screens/shared-upload-documents';
 import { useDocumentUpload } from '../../../src/hooks/useDocumentUpload';
@@ -61,7 +61,7 @@ export default function UploadDocumentsScreen() {
     getUploadState,
     cacheFileForUpload,
     batchUploadCachedDocuments,
-  } = useDocumentUpload(formId as Id<'forms'>);
+  } = useDocumentUpload(formId as Id<'applications'>);
 
   useEffect(() => {
     if (applicationType === 'New' || applicationType === 'Renew') {
@@ -98,7 +98,7 @@ export default function UploadDocumentsScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -123,7 +123,7 @@ export default function UploadDocumentsScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,

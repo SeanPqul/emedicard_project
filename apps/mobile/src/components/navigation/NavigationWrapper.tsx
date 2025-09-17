@@ -3,8 +3,8 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { getColor, getSpacing } from '../../styles/theme';
-import { LoadingSpinner } from '../LoadingSpinner';
-import { ErrorState } from '../ErrorState';
+import { LoadingSpinner } from '../common/LoadingSpinner';
+import { ErrorState } from '../common/ErrorState';
 
 interface NavigationWrapperProps {
   children: React.ReactNode;

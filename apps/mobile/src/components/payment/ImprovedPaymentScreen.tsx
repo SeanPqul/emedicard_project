@@ -10,9 +10,9 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Components
 import { CustomButton } from '../ui/Button';
-import { CustomTextInput } from '../CustomTextInput';
-import { ErrorState } from '../ErrorState';
-import { LoadingSpinner, SkeletonLoader } from '../LoadingSpinner';
+import { CustomTextInput } from '../ui/CustomTextInput';
+import { ErrorState } from '../common/ErrorState';
+import { LoadingSpinner, SkeletonLoader, SkeletonGroup } from '../common/LoadingSpinner';
 
 // Hooks
 import { 

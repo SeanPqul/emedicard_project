@@ -1,7 +1,7 @@
 import { useDashboard } from '@/src/hooks';
 import React from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
-import { FeedbackSystem, useFeedback } from '../../src/components/FeedbackSystem';
+import { FeedbackSystem, useFeedback } from '../../src/components/feedback/FeedbackSystem';
 import {
   OfflineBanner,
   DashboardHeader,

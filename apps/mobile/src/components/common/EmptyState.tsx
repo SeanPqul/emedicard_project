@@ -4,34 +4,46 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface EmptyStateProps {
-  icon: string;
+  icon?: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
+  message?: string; // Alternative to subtitle for compatibility
   actionText?: string;
+  onAction?: () => void; // Test compatibility alias
   onActionPress?: () => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  icon,
+  icon = 'information-circle-outline',
   title,
   subtitle,
+  message,
   actionText,
+  onAction,
   onActionPress,
 }) => {
+  // Use message as fallback for subtitle for compatibility
+  const displaySubtitle = subtitle || message;
+  // Use onAction as fallback for onActionPress for compatibility
+  const handleAction = onActionPress || onAction;
   return (
     <View 
       style={styles.container}
-      accessibilityLabel={`${title}: ${subtitle}`}
+      accessibilityLabel={`${title}: ${displaySubtitle}`}
     >
-      <View style={styles.iconContainer}>
-        <Ionicons name={icon as any} size={48} color={getColor('text.tertiary')} />
-      </View>
+      {icon && (
+        <View style={styles.iconContainer}>
+          <Ionicons name={icon as any} size={48} color={getColor('text.tertiary')} />
+        </View>
+      )}
       <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
-      {actionText && onActionPress && (
+      {displaySubtitle && (
+        <Text style={styles.subtitle}>{displaySubtitle}</Text>
+      )}
+      {actionText && handleAction && (
         <TouchableOpacity 
           style={styles.button} 
-          onPress={onActionPress}
+          onPress={handleAction}
           accessibilityLabel={actionText}
           accessibilityRole="button"
         >

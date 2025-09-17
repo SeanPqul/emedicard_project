@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { CustomTextInput } from '../CustomTextInput';
+import { CustomTextInput } from '../ui/CustomTextInput';
 import { getSpacing, getTypography, getColor } from '../../styles/theme';
 
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';

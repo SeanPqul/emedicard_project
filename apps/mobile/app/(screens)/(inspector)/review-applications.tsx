@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { LoadingSpinner } from '@/src/components/LoadingSpinner';
+import { LoadingSpinner } from '@/src/components/common';
 import { useRoleBasedNavigation } from '@/src/hooks/useRoleBasedNavigation';
 import { useRouter } from 'expo-router';
 import { User } from '@/src/types/domain/user';

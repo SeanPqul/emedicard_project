@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Animated, Text, TouchableOpacity, View } from "react-native";
-import { OtpInputUI } from "../../src/components/OtpInputUI"; // Import our new component
+import { OtpInputUI } from '../../src/components/auth';
 
 // This is the "Success Screen" component, extracted for clarity
 const SuccessScreen = ({ onContinue }: { onContinue: () => void }) => {

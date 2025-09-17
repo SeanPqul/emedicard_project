@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import CustomTextInput from '../CustomTextInput';
+import { CustomTextInput } from '../ui/CustomTextInput';
 
 describe('CustomTextInput', () => {
   test('renders correctly with placeholder', () => {
@@ -40,7 +40,7 @@ describe('CustomTextInput', () => {
       <CustomTextInput
         placeholder="Enter text"
         onChangeText={() => {}}
-        icon="email"
+        icon="mail"
       />
     );
     
