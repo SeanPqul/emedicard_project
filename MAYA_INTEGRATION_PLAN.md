@@ -411,22 +411,22 @@ export const updatePaymentSuccess = mutation({
 #### Progress Tracking
 
 ##### React Native Integration
-- [ ] Create usePaymentMaya hook
-- [ ] Implement WebBrowser integration
-- [ ] Add deep linking support
-- [ ] Handle payment callbacks
+- [x] Create usePaymentMaya hook (created in src/hooks/usePaymentMaya.ts)
+- [x] Implement WebBrowser integration (using expo-web-browser)
+- [x] Add deep linking support (Linking API integrated)
+- [x] Handle payment callbacks (success/failure/cancelled states)
 
 ##### UI Components
-- [ ] Create MayaPaymentButton component
-- [ ] Build PaymentStatus display component
+- [x] Create MayaPaymentButton component (integrated in EnhancedPaymentScreen)
+- [x] Build PaymentStatus display component (integrated in usePaymentMaya hook)
 - [ ] Create PaymentReceipt component
-- [ ] Add loading states and animations
+- [x] Add loading states and animations (LoadingSpinner in EnhancedPaymentScreen)
 
 ##### Payment Flow
-- [ ] Integrate with application submission flow
-- [ ] Handle payment retry logic
-- [ ] Add error recovery mechanisms
-- [ ] Implement timeout handling
+- [x] Integrate with application submission flow (EnhancedPaymentScreen)
+- [x] Handle payment retry logic (resetPayment function in hook)
+- [x] Add error recovery mechanisms (error states and retries)
+- [x] Implement timeout handling (in payment status sync)
 
 ##### Testing
 - [ ] Test in-app browser flow
