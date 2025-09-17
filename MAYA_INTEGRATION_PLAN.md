@@ -281,6 +281,26 @@ export const createMayaCheckout = mutation({
 
 ### **Phase 2: Webhook Integration (Week 1-2)**
 
+#### Progress Tracking
+
+##### Webhook Setup
+- [ ] Create HTTP action for webhook endpoint
+- [ ] Implement signature verification
+- [ ] Parse webhook payload
+- [ ] Handle different event types
+
+##### Status Handlers
+- [x] Implement payment success handler (already done in statusUpdates.ts)
+- [x] Implement payment failed handler (already done in statusUpdates.ts)
+- [x] Implement payment expired handler (already done in statusUpdates.ts)
+- [ ] Add idempotency checks
+
+##### Webhook Registration
+- [ ] Register webhook URL with Maya
+- [ ] Configure webhook events to listen for
+- [ ] Test webhook delivery in sandbox
+- [ ] Implement retry mechanism
+
 #### 2.1 Webhook Handler
 ```typescript
 // backend/convex/payments/maya/webhook.ts
@@ -387,6 +407,32 @@ export const updatePaymentSuccess = mutation({
 ```
 
 ### **Phase 3: Mobile App Integration (Week 2)**
+
+#### Progress Tracking
+
+##### React Native Integration
+- [ ] Create usePaymentMaya hook
+- [ ] Implement WebBrowser integration
+- [ ] Add deep linking support
+- [ ] Handle payment callbacks
+
+##### UI Components
+- [ ] Create MayaPaymentButton component
+- [ ] Build PaymentStatus display component
+- [ ] Create PaymentReceipt component
+- [ ] Add loading states and animations
+
+##### Payment Flow
+- [ ] Integrate with application submission flow
+- [ ] Handle payment retry logic
+- [ ] Add error recovery mechanisms
+- [ ] Implement timeout handling
+
+##### Testing
+- [ ] Test in-app browser flow
+- [ ] Test deep linking returns
+- [ ] Test error scenarios
+- [ ] Test on iOS and Android
 
 #### 3.1 Payment Hook
 ```typescript
@@ -545,6 +591,39 @@ export const MayaPaymentButton: React.FC<MayaPaymentButtonProps> = ({
 ```
 
 ### **Phase 4: Testing & Deployment (Week 3)**
+
+#### Progress Tracking
+
+##### Sandbox Testing
+- [ ] Create Maya sandbox account
+- [ ] Generate test API keys
+- [ ] Test checkout creation
+- [ ] Test payment success flow
+- [ ] Test payment failure scenarios
+- [ ] Test webhook delivery
+- [ ] Test refund process
+- [ ] Test error handling
+- [ ] Test network failures
+- [ ] Test timeout scenarios
+
+##### Integration Testing
+- [ ] End-to-end payment flow test
+- [ ] Test with different payment methods
+- [ ] Test concurrent payments
+- [ ] Test edge cases
+
+##### Production Preparation
+- [ ] Security review
+- [ ] Load testing
+- [ ] Documentation update
+- [ ] Create deployment guide
+
+##### Go-Live
+- [ ] Production API keys setup
+- [ ] Production webhook registration
+- [ ] Deploy backend changes
+- [ ] Deploy mobile app update
+- [ ] Monitor first transactions
 
 #### 4.1 Test Scenarios
 ```typescript
