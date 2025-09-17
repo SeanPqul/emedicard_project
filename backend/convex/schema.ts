@@ -96,13 +96,29 @@ export default defineSchema({
     receiptStorageId: v.optional(v.id("_storage")),
     paymentStatus: v.union(
       v.literal("Pending"),
+      v.literal("Processing"), // New status for Maya checkout
       v.literal("Complete"),
       v.literal("Failed"),
       v.literal("Refunded"),
-      v.literal("Cancelled")
+      v.literal("Cancelled"),
+      v.literal("Expired") // New status for expired checkouts
     ),
+    // Maya-specific fields
+    mayaPaymentId: v.optional(v.string()), // Maya's payment ID
+    mayaCheckoutId: v.optional(v.string()), // Maya checkout session ID
+    checkoutUrl: v.optional(v.string()), // Maya checkout URL
+    webhookPayload: v.optional(v.any()), // Store webhook data for debugging
+    paymentProvider: v.optional(v.union(
+      v.literal("maya_api"),
+      v.literal("manual"),
+      v.literal("cash")
+    )),
+    transactionFee: v.optional(v.float64()), // Maya transaction fees
+    settlementDate: v.optional(v.float64()), // When funds will be settled
+    failureReason: v.optional(v.string()), // Reason for failed payments
     updatedAt: v.optional(v.float64()),
-  }).index("by_application", ["applicationId"]),
+  }).index("by_application", ["applicationId"])
+    .index("by_maya_payment", ["mayaPaymentId"]), // New index for Maya lookups
 
   // Orientation scheduling for food handlers
   orientations: defineTable({
@@ -150,5 +166,33 @@ export default defineSchema({
       v.literal("Failed")
     ),
   }).index("by_health_card", ["healthCardId"]),
+
+  // Payment logs for audit trail
+  paymentLogs: defineTable({
+    paymentId: v.optional(v.id("payments")), // Reference to payment record
+    eventType: v.union(
+      v.literal("checkout_created"),
+      v.literal("payment_success"),
+      v.literal("payment_failed"),
+      v.literal("payment_expired"),
+      v.literal("payment_cancelled"),
+      v.literal("webhook_received"),
+      v.literal("refund_initiated"),
+      v.literal("refund_completed"),
+      v.literal("status_check")
+    ),
+    mayaPaymentId: v.optional(v.string()),
+    mayaCheckoutId: v.optional(v.string()),
+    amount: v.optional(v.float64()),
+    currency: v.optional(v.string()),
+    errorMessage: v.optional(v.string()),
+    metadata: v.optional(v.any()), // Additional event-specific data
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+    timestamp: v.float64(),
+  }).index("by_payment", ["paymentId"])
+    .index("by_maya_payment", ["mayaPaymentId"])
+    .index("by_event_type", ["eventType"])
+    .index("by_timestamp", ["timestamp"]),
 
 });

@@ -118,16 +118,16 @@ payments: defineTable({
 - [x] Add request/response logging
 
 ##### Core Payment Functions
-- [ ] Create checkout session function
-- [ ] Implement payment status checking
-- [ ] Add payment confirmation handler
+- [x] Create checkout session function
+- [x] Implement payment status checking
+- [x] Add payment confirmation handler
 - [ ] Create refund processing function
 
 ##### Database Schema Updates
-- [ ] Add Maya-specific fields to payments table
-- [ ] Create payment_logs table for audit
-- [ ] Add indexes for Maya payment lookups
-- [ ] Update schema TypeScript definitions
+- [x] Add Maya-specific fields to payments table
+- [x] Create payment_logs table for audit
+- [x] Add indexes for Maya payment lookups
+- [x] Update schema TypeScript definitions
 
 ##### Testing Setup
 - [ ] Create test environment configuration
