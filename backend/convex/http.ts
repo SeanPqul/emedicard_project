@@ -1,7 +1,8 @@
-﻿import { httpRouter } from "convex/server";
+import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { Webhook } from "svix";
 import { api } from "./_generated/api";
+import { handleMayaWebhook } from "./payments/maya/webhook";
 
 const http = httpRouter();
 
@@ -69,5 +70,12 @@ http.route({
         return new Response("Webhook processed successfully", {status: 200})
     })
 })
+
+// Maya Payment Webhook Route
+http.route({
+    path: "/maya-webhook",
+    method: "POST",
+    handler: handleMayaWebhook,
+});
 
 export default http;

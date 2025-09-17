@@ -284,16 +284,16 @@ export const createMayaCheckout = mutation({
 #### Progress Tracking
 
 ##### Webhook Setup
-- [ ] Create HTTP action for webhook endpoint
-- [ ] Implement signature verification
-- [ ] Parse webhook payload
-- [ ] Handle different event types
+- [x] Create HTTP action for webhook endpoint
+- [x] Implement signature verification
+- [x] Parse webhook payload
+- [x] Handle different event types
 
 ##### Status Handlers
 - [x] Implement payment success handler (already done in statusUpdates.ts)
 - [x] Implement payment failed handler (already done in statusUpdates.ts)
 - [x] Implement payment expired handler (already done in statusUpdates.ts)
-- [ ] Add idempotency checks
+- [x] Add idempotency checks
 
 ##### Webhook Registration
 - [ ] Register webhook URL with Maya
