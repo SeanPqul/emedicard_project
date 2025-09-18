@@ -27,8 +27,8 @@ export const handleMayaWebhook = httpAction(async (ctx, request: Request) => {
       return new Response("Missing signature", { status: 401 });
     }
     
-    const isValid = validateWebhookSignature(signature, body);
-    
+    const isValid = await validateWebhookSignature(signature, body);
+
     if (!isValid) {
       console.error("Maya webhook signature verification failed");
       return new Response("Invalid signature", { status: 401 });

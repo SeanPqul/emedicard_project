@@ -31,13 +31,13 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     fee: 50, 
     serviceFee: 5 
   },
-  { 
-    id: 'Maya', 
-    name: 'Maya', 
-    description: 'Pay with Maya (formerly PayMaya)', 
-    icon: 'card', 
-    fee: 50, 
-    serviceFee: 5 
+  {
+    id: 'Maya',
+    name: 'Maya',
+    description: 'Pay with Maya checkout (₱60 total)',
+    icon: 'card',
+    fee: 50,
+    serviceFee: 10
   },
   { 
     id: 'BaranggayHall', 

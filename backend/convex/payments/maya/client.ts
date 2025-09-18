@@ -206,10 +206,10 @@ export const getCheckoutSession = async (
  * @param payload - Raw webhook payload
  * @returns Boolean indicating if signature is valid
  */
-export const validateWebhookSignature = (
+export const validateWebhookSignature = async (
   signature: string,
   payload: string
-): boolean => {
+): Promise<boolean> => {
   const config = getMayaConfig();
 
   if (!config.webhookSecret) {
@@ -217,15 +217,57 @@ export const validateWebhookSignature = (
     return true; // In development, you might want to skip validation
   }
 
-  // For now, skip signature validation due to Convex crypto limitations
-  // TODO: Implement using Web Crypto API or Node.js runtime
-  console.log('Webhook signature validation (temporarily disabled):', {
-    received: signature,
-    payload: payload.substring(0, 100) + '...',
-    secret: config.webhookSecret ? 'configured' : 'missing'
-  });
+  // Implement proper HMAC-SHA256 signature validation for production security
+  try {
+    // Maya uses HMAC-SHA256 for webhook signature validation
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(config.webhookSecret);
+    const messageData = encoder.encode(payload);
 
-  return true;
+    // Import the secret key for HMAC
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    // Generate HMAC signature
+    const signatureBuffer = await crypto.subtle.sign('HMAC', key, messageData);
+    const signatureArray = Array.from(new Uint8Array(signatureBuffer));
+    const expectedSignature = signatureArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    // Maya typically sends signature in hex format
+    const receivedSignature = signature.toLowerCase().replace(/^sha256=/, '');
+    const isValid = expectedSignature === receivedSignature;
+
+    console.log('🔐 Webhook signature validation:', {
+      valid: isValid,
+      received: receivedSignature.substring(0, 16) + '...',
+      expected: expectedSignature.substring(0, 16) + '...'
+    });
+
+    if (!isValid) {
+      console.error('❌ Invalid webhook signature - potential security risk!');
+      return false;
+    }
+
+    console.log('✅ Webhook signature validated successfully');
+    return true;
+
+  } catch (error) {
+    console.error('❌ Error validating webhook signature:', error);
+
+    // In development, allow unsigned webhooks but log warning
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️ Allowing unsigned webhook in development mode');
+      return true;
+    }
+
+    // In production, reject invalid signatures
+    return false;
+  }
 };
 
 /**

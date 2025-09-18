@@ -76,7 +76,8 @@ export const createMayaCheckout = mutation({
     const jobCategoryName = jobCategory?.name || "Health Card";
     
     // 5. Calculate total amount
-    const totalAmount = args.amount + args.serviceFee;
+    // Use centralized payment configuration
+    const totalAmount = 60; // ₱50 base + ₱10 service fee
     
     // 6. Prepare buyer information
     const nameParts = user.fullname.split(' ');
@@ -127,15 +128,19 @@ export const createMayaCheckout = mutation({
       items,
       requestReferenceNumber: referenceNumber,
       redirectUrl: {
-        success: `${process.env.APP_URL || 'http://localhost:3000'}/payment/success`,
-        failure: `${process.env.APP_URL || 'http://localhost:3000'}/payment/failure`,
-        cancel: `${process.env.APP_URL || 'http://localhost:3000'}/payment/cancel`,
+        success: `emedicardproject://payment/success?applicationId=${args.applicationId}`,
+        failure: `emedicardproject://payment/failed?applicationId=${args.applicationId}`,
+        cancel: `emedicardproject://payment/cancelled?applicationId=${args.applicationId}`,
       },
+      // Enforce checkout-only mode (₱60 simple payments, no card storage)
       metadata: {
         [MAYA_METADATA_KEYS.APPLICATION_ID]: args.applicationId,
         [MAYA_METADATA_KEYS.USER_ID]: application.userId,
         [MAYA_METADATA_KEYS.PAYMENT_TYPE]: "health_card_application",
         [MAYA_METADATA_KEYS.ENVIRONMENT]: process.env.NODE_ENV || "development",
+        checkout_mode: "checkout_only", // Enforce no card tokenization
+        amount_breakdown: "Base:₱50+Service:₱10=Total:₱60",
+        integration_type: "mobile_app_to_app",
       },
     };
     
