@@ -14,5 +14,16 @@
   },
   "devDependencies": {
     "turbo": "latest"
+  },
+  "pnpm": {
+    "allowedScriptVersions": {
+      "@clerk/shared": "*",
+      "@tailwindcss/oxide": "*",
+      "browser-tabs-lock": "*",
+      "core-js": "*",
+      "esbuild": "*",
+      "sharp": "*",
+      "unrs-resolver": "*"
+    }
   }
 }

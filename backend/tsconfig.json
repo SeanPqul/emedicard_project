@@ -4,6 +4,6 @@
     "baseUrl": ".",
     "rootDir": "."
   },
-  "include": ["convex/**/*"],
+  "include": ["convex/**/*", "start-tunnel.js"],
   "exclude": ["convex/_generated"]
 }

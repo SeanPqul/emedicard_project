@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "echo \"No linter configured\"",
     "test": "echo \"No tests yet\"",
+    "tunnel": "node start-tunnel.js",
     "clean": "rm -rf .convex dist"
   },
   "dependencies": {
@@ -17,7 +18,9 @@
     "svix": "^1.76.1"
   },
   "devDependencies": {
+    "@ngrok/ngrok": "^1.5.2",
     "@types/node": "^20.19.13",
+    "dotenv": "^17.2.2",
     "typescript": "~5.8.3"
   },
   "private": true

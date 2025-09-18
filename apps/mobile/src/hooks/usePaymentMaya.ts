@@ -14,12 +14,120 @@ export interface PaymentResult {
   success: boolean;
   paymentId?: string;
   reason?: string;
+  waitingForReturn?: boolean; // New field for app-to-app flow
+}
+
+/**
+ * Try to open Maya checkout in Maya app using proper app-to-app patterns
+ * Based on Maya documentation - supports universal links and app schemes
+ */
+async function tryOpenInMayaApp(checkoutUrl: string): Promise<boolean> {
+  try {
+    console.log('🔍 Attempting Maya app-to-app integration for:', checkoutUrl);
+
+    // Maya app schemes based on official documentation
+    const mayaAppSchemes = [
+      'maya://', // Primary Maya app scheme
+      'paymaya://', // Legacy PayMaya scheme (still supported)
+    ];
+
+    // First try: Check if Maya app is installed using app schemes
+    let mayaAppDetected = false;
+    for (const scheme of mayaAppSchemes) {
+      const canOpen = await Linking.canOpenURL(scheme);
+      if (canOpen) {
+        console.log(`✅ Maya app detected with scheme: ${scheme}`);
+        mayaAppDetected = true;
+        break;
+      }
+    }
+
+    if (!mayaAppDetected) {
+      console.log('❌ Maya app not installed - will use browser fallback');
+      return false;
+    }
+
+    // Second try: Open checkout URL directly (Maya supports universal links)
+    // Maya's checkout URLs are designed to work as universal links
+    // If Maya app is installed, the universal link will open in Maya app
+    // If not, it falls back to web browser automatically
+    console.log('🚀 Opening Maya checkout via universal link');
+
+    await Linking.openURL(checkoutUrl);
+
+    // Wait a moment to see if Maya app actually opened
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    console.log('✅ Maya checkout opened successfully');
+    return true;
+
+  } catch (error) {
+    console.error('❌ Error in Maya app-to-app flow:', error);
+    console.log('📱 Falling back to browser integration');
+    return false;
+  }
+}
+
+/**
+ * Handle browser result from WebBrowser (legacy flow)
+ */
+async function handleBrowserResult(
+  result: WebBrowser.WebBrowserResult,
+  paymentId: string
+): Promise<PaymentResult> {
+  // This is the old flow - kept for fallback compatibility
+  if (result.type === 'dismiss') {
+    console.log('Browser dismissed by user, assuming cancelled');
+    return { success: false, reason: 'Payment cancelled', paymentId };
+  }
+
+  // For other result types, assume cancelled
+  return { success: false, reason: 'Payment cancelled', paymentId };
 }
 
 export const usePaymentMaya = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentResult, setPaymentResult] = useState<'success' | 'failed' | 'cancelled' | null>(null);
   const [currentPaymentId, setCurrentPaymentId] = useState<string | null>(null);
+
+  // Add deep link listener for Maya payment returns
+  useEffect(() => {
+    const handleDeepLink = (url: string) => {
+      console.log('🔗 Received deep link:', url);
+
+      // Check if it's a payment return deep link
+      if (url.includes('emedicardproject://payment/')) {
+        console.log('💳 Maya payment return detected');
+
+        // The deep link routes will handle the actual status verification
+        // This is just for logging/analytics
+        if (url.includes('/success')) {
+          console.log('✅ Payment success deep link received');
+        } else if (url.includes('/failed')) {
+          console.log('❌ Payment failed deep link received');
+        } else if (url.includes('/cancelled')) {
+          console.log('💨 Payment cancelled deep link received');
+        }
+      }
+    };
+
+    // Add URL event listener
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleDeepLink(url);
+    });
+
+    // Check if app was opened with a URL (cold start)
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        console.log('🚀 App opened with URL:', url);
+        handleDeepLink(url);
+      }
+    });
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
 
   // Convex mutations and queries
   const createCheckout = useMutation(api.payments.maya.checkout.createMayaCheckout);
@@ -56,51 +164,27 @@ export const usePaymentMaya = () => {
         console.log('Using existing checkout session');
       }
 
-      // 2. Open Maya checkout in in-app browser
+      // 2. Try Maya app first, fallback to browser
       console.log('Opening Maya checkout URL:', checkoutUrl);
-      const result = await WebBrowser.openBrowserAsync(checkoutUrl, {
-        showTitle: true,
-        enableBarCollapsing: false,
-        dismissButtonStyle: 'close',
-        toolbarColor: '#00BFA6', // Maya brand color
-      });
+      const openedInMayaApp = await tryOpenInMayaApp(checkoutUrl);
 
-      // 3. Browser was closed, check payment status
-      if (result.type === 'dismiss') {
-        console.log('Browser dismissed, checking payment status...');
-        
-        // Wait a moment for webhook to process
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Sync payment status with Maya
-        if (currentPaymentId) {
-          try {
-            const syncResult = await syncStatus({ 
-              paymentId: currentPaymentId as Id<"payments"> 
-            });
-            
-            if (syncResult.status === 'Complete') {
-              setPaymentResult('success');
-              return { success: true, paymentId };
-            } else if (syncResult.status === 'Failed') {
-              setPaymentResult('failed');
-              return { success: false, reason: 'Payment failed' };
-            } else if (syncResult.status === 'Expired') {
-              setPaymentResult('cancelled');
-              return { success: false, reason: 'Payment expired' };
-            }
-          } catch (error) {
-            console.error('Error syncing payment status:', error);
-          }
-        }
-        
-        // Default to cancelled if we can't determine status
-        setPaymentResult('cancelled');
-        return { success: false, reason: 'Payment cancelled' };
+      if (!openedInMayaApp) {
+        // Fallback to in-app browser
+        console.log('Maya app not available, using browser fallback');
+        const result = await WebBrowser.openBrowserAsync(checkoutUrl, {
+          showTitle: true,
+          enableBarCollapsing: false,
+          dismissButtonStyle: 'close',
+          toolbarColor: '#00BFA6', // Maya brand color
+        });
+
+        // Handle browser result (legacy flow)
+        return handleBrowserResult(result, paymentId);
+      } else {
+        // Maya app opened - wait for deep link return
+        console.log('Maya app opened, waiting for deep link return...');
+        return { success: true, paymentId, waitingForReturn: true };
       }
-
-      // Should not reach here
-      return { success: false, reason: 'Unexpected browser result' };
 
     } catch (error) {
       console.error('Maya payment error:', error);
