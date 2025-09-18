@@ -7,8 +7,8 @@ import { useState, useEffect } from 'react';
 import { Linking } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../backend/convex/_generated/api';
-import { Id } from '../../../backend/convex/_generated/dataModel';
+import { api } from '../../../../backend/convex/_generated/api';
+import { Id } from '../../../../backend/convex/_generated/dataModel';
 
 export interface PaymentResult {
   success: boolean;

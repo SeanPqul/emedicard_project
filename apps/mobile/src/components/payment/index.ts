@@ -1,4 +1,5 @@
 // Payment components barrel export
 export { ImprovedPaymentScreen } from './ImprovedPaymentScreen';
-export { PaymentStatusCard } from './PaymentStatusCard';
+export { PaymentMethodCard } from './PaymentMethodCard';
 export { PaymentSubmissionScreen } from './PaymentSubmissionScreen';
+export { EnhancedPaymentScreen } from './EnhancedPaymentScreen';

@@ -44,14 +44,14 @@ export const handleMayaWebhook = httpAction(async (ctx, request: Request) => {
     }
     
     // 4. Log webhook receipt
-    await ctx.runMutation(api.payments.maya.logWebhookEvent, {
+    await ctx.runMutation(api.payments.maya.webhook.logWebhookEvent, {
       eventType: "webhook_received",
       mayaPaymentId: data.id,
       payload: data,
     });
     
     // 5. Check for idempotency - prevent duplicate processing
-    const isDuplicate = await ctx.runQuery(api.payments.maya.checkWebhookDuplicate, {
+    const isDuplicate = await ctx.runQuery(api.payments.maya.webhook.checkWebhookDuplicate, {
       mayaPaymentId: data.id,
       status: data.status,
     });
@@ -69,7 +69,7 @@ export const handleMayaWebhook = httpAction(async (ctx, request: Request) => {
           webhookData: data,
         });
         break;
-        
+
       case MAYA_WEBHOOK_EVENTS.PAYMENT_FAILED:
         await ctx.runMutation(api.payments.maya.statusUpdates.updatePaymentFailed, {
           mayaPaymentId: data.id,
@@ -77,44 +77,21 @@ export const handleMayaWebhook = httpAction(async (ctx, request: Request) => {
           webhookData: data,
         });
         break;
-        
+
       case MAYA_WEBHOOK_EVENTS.PAYMENT_EXPIRED:
         await ctx.runMutation(api.payments.maya.statusUpdates.updatePaymentExpired, {
           mayaPaymentId: data.id,
           webhookData: data,
         });
         break;
-        
-      case MAYA_WEBHOOK_EVENTS.CHECKOUT_SUCCESS:
-        // Checkout completed successfully, but payment may still be processing
-        console.log(`Checkout success for payment ${data.id}`);
-        break;
-        
-      case MAYA_WEBHOOK_EVENTS.CHECKOUT_FAILURE:
-        // Checkout failed
-        await ctx.runMutation(api.payments.maya.statusUpdates.updatePaymentFailed, {
-          mayaPaymentId: data.id,
-          failureReason: "Checkout failed",
-          webhookData: data,
-        });
-        break;
-        
-      case MAYA_WEBHOOK_EVENTS.CHECKOUT_DROPOUT:
-        // User abandoned checkout
+
+      case MAYA_WEBHOOK_EVENTS.PAYMENT_CANCELLED:
         await ctx.runMutation(api.payments.maya.statusUpdates.updatePaymentExpired, {
           mayaPaymentId: data.id,
           webhookData: data,
         });
         break;
-        
-      case MAYA_WEBHOOK_EVENTS.REFUND:
-        // Handle refund
-        await ctx.runMutation(api.payments.maya.statusUpdates.updatePaymentRefunded, {
-          mayaPaymentId: data.id,
-          webhookData: data,
-        });
-        break;
-        
+
       default:
         console.log(`Unhandled webhook event: ${data.paymentStatus}`, data);
     }

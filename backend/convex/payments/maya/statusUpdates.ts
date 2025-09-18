@@ -5,6 +5,7 @@
 
 import { v } from "convex/values";
 import { mutation, query } from "../../_generated/server";
+import { api } from "../../_generated/api";
 import { getPaymentStatus as getMayaPaymentStatus } from "./client";
 import { PAYMENT_STATUS_MAP } from "./constants";
 
@@ -329,8 +330,8 @@ export const syncPaymentStatus = mutation({
         
         // Handle status-specific actions
         if (mappedStatus === "Complete" && mayaStatus.isPaid) {
-          await updatePaymentSuccess.handler(ctx, {
-            mayaPaymentId: payment.mayaPaymentId,
+          await ctx.runMutation(api.payments.maya.statusUpdates.updatePaymentSuccess, {
+            mayaPaymentId: payment.mayaPaymentId!,
             webhookData: mayaStatus,
           });
         }

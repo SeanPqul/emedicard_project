@@ -5,6 +5,7 @@
 
 import { v } from "convex/values";
 import { mutation } from "../../_generated/server";
+import { Id } from "../../_generated/dataModel";
 import { 
   createCheckoutSession, 
   logPaymentEvent 
@@ -176,7 +177,7 @@ export const createMayaCheckout = mutation({
       
       // 12. Log the payment event
       await ctx.db.insert("paymentLogs", {
-        paymentId,
+        paymentId: paymentId as Id<"payments">,
         eventType: "checkout_created",
         mayaPaymentId: mayaResponse.paymentId,
         mayaCheckoutId: mayaResponse.checkoutId,

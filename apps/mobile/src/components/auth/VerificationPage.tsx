@@ -256,7 +256,7 @@ export default function VerificationPage({
         {/* Email Verification Icon */}
         <View style={styles.iconContainer}>
           <Image
-            source={require("../../assets/images/email-envelope-icon.png")}
+            source={require("../../../assets/images/email-envelope-icon.png")}
             style={styles.emailIcon}
             resizeMode="contain"
           />

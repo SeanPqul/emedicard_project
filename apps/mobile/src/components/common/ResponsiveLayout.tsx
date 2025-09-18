@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ViewProps, StyleSheet } from 'react-native';
-import { dimensions } from '../utils/responsive';
-import { theme } from '../styles/theme';
+import { dimensions } from '../../utils/responsive';
+import { theme } from '../../styles/theme';
 
 interface ResponsiveLayoutProps extends ViewProps {
   children: React.ReactNode;

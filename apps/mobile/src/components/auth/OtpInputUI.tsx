@@ -76,7 +76,7 @@ export const OtpInputUI: React.FC<OtpInputUIProps> = ({
       <View style={styles.content}>
         <View style={styles.iconContainer}>
           <Image
-            source={require("../../assets/images/email-envelope-icon.png")}
+            source={require("../../../assets/images/email-envelope-icon.png")}
             style={styles.emailIcon}
             resizeMode="contain"
           />
