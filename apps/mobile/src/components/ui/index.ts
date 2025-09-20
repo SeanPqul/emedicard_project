@@ -5,7 +5,7 @@ export { Button, CustomButton } from './Button';
 export { Card } from './Card';
 export { CTAButton } from './CTAButton';
 export { CustomTextInput } from './CustomTextInput';
-export { DashboardHeader } from './DashboardHeader';
+export { UIHeader } from './UIHeader';
 export { Input } from './Input';
 export { LinkText } from './LinkText';
 export { ScreenHeader } from './ScreenHeader';

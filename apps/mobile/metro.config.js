@@ -1,7 +1,7 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
-const projectRoot = __dirname;  // apps/mobile/
+const projectRoot = __dirname; 
 const monorepoRoot = path.resolve(projectRoot, '../..');  // emedicard_project/
 
 const config = getDefaultConfig(projectRoot);
@@ -13,8 +13,9 @@ config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
 
 // Watch other workspaces (so imports from backend/packages work)
 config.watchFolders = [
-  path.resolve(monorepoRoot, 'packages'),  // Your shared packages
-  path.resolve(monorepoRoot, 'backend/convex'),  // Only Convex schemas, not entire backend
+  ...config.watchFolders,
+  path.resolve(monorepoRoot, 'packages'),
+  path.resolve(monorepoRoot, 'backend/convex'), 
   monorepoRoot,
 ];
 
@@ -29,8 +30,10 @@ config.resolver.extraNodeModules = {
   react: path.resolve(monorepoRoot, 'node_modules/react'),
   'react-native': path.resolve(monorepoRoot, 'node_modules/react-native'),
   'expo-router': path.resolve(monorepoRoot, 'node_modules/expo-router'),
+  'react-dom': path.resolve(monorepoRoot, 'node_modules/react-dom'),
+  '@babel/runtime': path.resolve(monorepoRoot, 'node_modules/@babel/runtime'),
 };
 
-config.resolver.platforms = ['ios', 'android', 'native'];
+config.resolver.platforms = ['ios', 'android', 'native', 'web'];
 
 module.exports = config;

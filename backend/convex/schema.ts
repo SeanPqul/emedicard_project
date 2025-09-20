@@ -60,7 +60,8 @@ export default defineSchema({
     position: v.string(),
     organization: v.string(),
     civilStatus: v.string(),
-    applicationStatus: v.string(), // "Draft", "Submitted", "Pending", "Approved", "Rejected"
+    applicationStatus: v.string(), // "Draft", "Pending Payment", "Submitted", "For Payment Validation", "Approved", "Rejected"
+    paymentDeadline: v.optional(v.float64()), // Timestamp for payment deadline
     approvedAt: v.optional(v.float64()),
     adminRemarks: v.optional(v.string()), // Admin notes
     updatedAt: v.optional(v.float64()),

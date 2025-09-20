@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Button } from '../../src/components/ui/Button';
-import { FeedbackSystem } from '../../src/components/feedback/FeedbackSystem';
+import { Button, FeedbackSystem } from '@/src/components';
 
 /**
  * Payment Cancelled Screen

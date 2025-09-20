@@ -1,5 +1,8 @@
 // Re-export from subdirectories
 // Authentication Components
+import type { ToastType, ToastProps } from './feedback/Toast';
+import type { ErrorType } from './common/ErrorState';
+
 export * from './auth';
 
 // Common Components
@@ -39,8 +42,5 @@ export * from './stats';
 export * from './activity';
 
 // Legacy types - maintain for backward compatibility
-import type { ToastType, ToastProps } from './feedback/Toast';
-import type { ErrorType } from './common/ErrorState';
-
 export type { ToastType, ToastProps, ErrorType };
 

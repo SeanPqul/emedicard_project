@@ -3,6 +3,10 @@ module.exports = function(api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
+      ['@babel/plugin-transform-runtime', {
+        helpers: true,
+        regenerator: true,
+      }],
       // React Native Reanimated plugin should be listed last
       'react-native-reanimated/plugin',
     ],
@@ -10,7 +14,6 @@ module.exports = function(api) {
       production: {
         plugins: [
           'transform-remove-console',
-          '@babel/plugin-transform-runtime',
         ],
       },
     },

@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { theme } from '../../styles/theme';
 import { Image } from 'expo-image';
 
-interface DashboardHeaderProps {
+interface UIHeaderProps {
   greeting: string;
   userName: string;
   userImage?: string;
@@ -59,7 +59,7 @@ const SECONDARY_ACTIONS: SecondaryAction[] = [
 ];
 
 /**
- * DashboardHeader Component - Unified header for dashboard screen
+ * UIHeader Component - Unified header for dashboard screen
  * 
  * FEATURES:
  * - User profile display with greeting and time
@@ -67,10 +67,10 @@ const SECONDARY_ACTIONS: SecondaryAction[] = [
  * - Notification button with unread count badge
  * - Dropdown menu for additional secondary actions
  * 
- * @param {DashboardHeaderProps} props - Component props
+ * @param {UIHeaderProps} props - Component props
  * @returns {React.ReactElement} Rendered header component
  */
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
+export const UIHeader: React.FC<UIHeaderProps> = ({
   greeting,
   userName,
   userImage,

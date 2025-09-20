@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from 'convex/react';
-import { api } from '../../../backend/convex/_generated/api';
-import { Id } from '../../../backend/convex/_generated/dataModel';
-import { Button } from '../../src/components/ui/Button';
-import { FeedbackSystem } from '../../src/components/feedback/FeedbackSystem';
+import { api } from '../../../../backend/convex/_generated/api';
+import { Id } from '../../../../backend/convex/_generated/dataModel';
+import { Button, FeedbackSystem } from '@/src/components';
 
 /**
  * Payment Success Screen
