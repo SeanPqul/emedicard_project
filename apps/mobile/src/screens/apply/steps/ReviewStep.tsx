@@ -176,7 +176,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         <View style={styles.reviewSection}>
           <Text style={styles.reviewSectionTitle}>Application Fee</Text>
           <Text style={styles.feeNote}>
-            Includes ₱10 processing fee for secure application handling and verification.
+            Payment will be required after submission. You'll have 7 days to complete the payment.
           </Text>
           <View style={styles.reviewItem}>
             <Text style={styles.reviewLabel}>Application Fee:</Text>

@@ -30,14 +30,14 @@ export function useApplications(applicationId?: string) {
 
   const submitApplicationForm = async (
     applicationId: ConvexId<'applications'>,
-    paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall',
-    paymentReferenceNumber: string,
+    paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall' | null,
+    paymentReferenceNumber: string | null,
     receiptStorageId?: ConvexId<'_storage'>
   ) => {
     return submitApplicationMutation({
       applicationId,
-      paymentMethod,
-      paymentReferenceNumber,
+      ...(paymentMethod !== null && { paymentMethod }),
+      ...(paymentReferenceNumber !== null && { paymentReferenceNumber }),
       ...(receiptStorageId !== undefined && { paymentReceiptId: receiptStorageId }),
     });
   };

@@ -1,7 +1,8 @@
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from 'convex/react';
 import { router } from 'expo-router';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   RefreshControl,
   ScrollView,
@@ -9,18 +10,22 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Alert,
 } from 'react-native';
 import { styles } from '../../src/styles/screens/tabs-application';
+import { api } from '../../../../backend/convex/_generated/api';
 import { EmptyState } from '../../src/components';
-import { useApplications } from '../../src/hooks/useApplications';
-import { Application } from '../../src/types/domain/application';
 
-type FilterStatus = 'All' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
+type FilterStatus = 'All' | 'Pending Payment' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
 type SortOption = 'Date' | 'Status' | 'Category';
 
-type ApplicationWithDetails = Application & {
+interface ApplicationWithDetails {
+  _id: string;
   _creationTime: number;
+  userId: string;
+  formId: string;
+  status: 'Pending Payment' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
+  approvedAt?: number;
+  remarks?: string;
   form?: {
     _id: string;
     applicationType: 'New' | 'Renew';
@@ -35,16 +40,17 @@ type ApplicationWithDetails = Application & {
     colorCode: string;
     requireOrientation: string;
   };
-};
+}
 
 const STATUS_COLORS = {
+  'Pending Payment': '#FFA500',
   Submitted: '#2E86AB',
   'Under Review': '#F18F01',
   Approved: '#28A745',
   Rejected: '#DC3545',
 };
 
-const FILTER_OPTIONS: FilterStatus[] = ['All', 'Submitted', 'Under Review', 'Approved', 'Rejected'];
+const FILTER_OPTIONS: FilterStatus[] = ['All', 'Pending Payment', 'Submitted', 'Under Review', 'Approved', 'Rejected'];
 const SORT_OPTIONS: SortOption[] = ['Date', 'Status', 'Category'];
 
 export default function Applications() {
@@ -54,34 +60,16 @@ export default function Applications() {
   const [selectedSort, setSelectedSort] = useState<SortOption>('Date');
   const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [applications, setApplications] = useState<ApplicationWithDetails[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // API hooks
-  const applicationHooks = useApplications();
-
-  // Load applications
-  useEffect(() => {
-    loadApplications();
-  }, []);
-
-  const loadApplications = async () => {
-    try {
-      setLoading(true);
-      // Use data from hooks
-      setApplications(applicationHooks.data.userApplications || []);
-    } catch (error) {
-      console.error('Error loading applications:', error);
-      Alert.alert('Error', 'Failed to load applications');
-    } finally {
-      setLoading(false);
-    }
-  };
+  
+  // Convex queries
+  const applications = useQuery(api.applications.getUserApplications.getUserApplicationsQuery) as ApplicationWithDetails[] | undefined;
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadApplications();
-    setRefreshing(false);
+    // The query will automatically refetch
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
   };
 
   const getFilteredAndSortedApplications = () => {
@@ -92,11 +80,10 @@ export default function Applications() {
     // Apply search filter
     if (searchQuery.trim()) {
       filtered = filtered.filter(app => 
-        app.form?.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.form?.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.jobCategory?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app._id.toLowerCase().includes(searchQuery.toLowerCase())  ||
-        app.form?.applicationType.toLowerCase().includes(searchQuery.toLowerCase())
+        app.form?.position?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.form?.organization?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.jobCategory?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app._id?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -124,6 +111,8 @@ export default function Applications() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'Pending Payment':
+        return 'time-outline';
       case 'Submitted':
         return 'document-text';
       case 'Under Review':
@@ -139,6 +128,8 @@ export default function Applications() {
 
   const getStatusDescription = (status: string) => {
     switch (status) {
+      case 'Pending Payment':
+        return 'Application submitted. Payment required to proceed';
       case 'Submitted':
         return 'Application submitted and awaiting review';
       case 'Under Review':
@@ -165,7 +156,7 @@ export default function Applications() {
             <Text style={styles.filterButtonText}>Filter</Text>
           </TouchableOpacity>
         </View>
-        
+       
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <Ionicons name="search" size={20} color="#6C757D" style={styles.searchIcon} />
@@ -254,7 +245,7 @@ export default function Applications() {
               { backgroundColor: application.jobCategory?.colorCode + '20' }
             ]}>
               <Ionicons 
-                name={application.jobCategory?.name.toLowerCase().includes('food') ? 'restaurant' : 'shield'}
+                name={application.jobCategory?.name?.toLowerCase().includes('food') ? 'restaurant' : 'shield'}
                 size={16} 
                 color={application.jobCategory?.colorCode}
               />
@@ -265,20 +256,19 @@ export default function Applications() {
             </View>
           </View>
           
-{application.status === 'Submitted' ? (
-            <View style={[
-              styles.statusBadge,
-              { backgroundColor: statusColor + '20' }
-            ]}>
-              <Text style={[styles.statusText, { color: statusColor }]}>
-                {application.status}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.lockIcon}>
-              <Ionicons name="lock-closed" size={16} color="#6C757D" />
-            </View>
-          )}
+          <View style={[
+            styles.statusBadge,
+            { backgroundColor: statusColor + '20' }
+          ]}>
+            <Ionicons 
+              name={getStatusIcon(application.status)} 
+              size={12} 
+              color={statusColor}
+            />
+            <Text style={[styles.statusText, { color: statusColor }]}>
+              {application.status}
+            </Text>
+          </View>
         </View>
         
         <View style={styles.cardContent}>
@@ -332,6 +322,7 @@ export default function Applications() {
 
   const getProgressPercentage = (status: string) => {
     switch (status) {
+      case 'Pending Payment': return 10;
       case 'Submitted': return 25;
       case 'Under Review': return 50;
       case 'Approved': return 100;
@@ -342,6 +333,7 @@ export default function Applications() {
 
   const getProgressText = (status: string) => {
     switch (status) {
+      case 'Pending Payment': return 'Awaiting payment';
       case 'Submitted': return 'Application received';
       case 'Under Review': return 'Being reviewed';
       case 'Approved': return 'Approved - Card ready';
@@ -366,14 +358,6 @@ export default function Applications() {
     );
   };
 
-  if (loading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text>Loading applications...</Text>
-      </View>
-    );
-  }
-
   const filteredApplications = getFilteredAndSortedApplications();
 
   return (
@@ -388,7 +372,7 @@ export default function Applications() {
         }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ 
-          paddingBottom: 50 // Add padding to account for FAB + tab bar
+          paddingBottom: 20 // Add padding to account for tab bar
         }}
       >
         {filteredApplications.length === 0 ? (
@@ -400,13 +384,6 @@ export default function Applications() {
         )}
       </ScrollView>
       
-      {/* Floating Action Button */}
-      <TouchableOpacity 
-        style={styles.fab}
-        onPress={() => router.push('/(tabs)/apply')}
-      >
-        <Ionicons name="add" size={24} color="#FFFFFF" />
-      </TouchableOpacity>
     </View>
   );
 }

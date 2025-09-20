@@ -34,7 +34,6 @@ import {
   JobCategoryStep,
   PersonalDetailsStep,
   UploadDocumentsStep,
-  PaymentMethodStep,
   ReviewStep
 } from '../../src/screens/apply/steps';
 
@@ -216,14 +215,6 @@ export default function ApplyScreen() {
           />
         );
       case 4:
-        return (
-          <PaymentMethodStep
-            formData={formData}
-            setFormData={setFormData}
-            errors={errors}
-          />
-        );
-      case 5:
         return (
           <ReviewStep
             formData={formData}

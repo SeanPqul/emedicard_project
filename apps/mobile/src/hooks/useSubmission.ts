@@ -90,19 +90,8 @@ export const useSubmission = ({
     
     setLoading(true);
     try {
-      // TEMPORARY: Auto-submit with test payment for testing purposes
-      const testReferenceNumber = `TEST-${Date.now()}`;
-      
-      Alert.alert(
-        'Test Payment Mode',
-        `Automatically processing payment for testing.\nReference: ${testReferenceNumber}`,
-        [
-          {
-            text: 'Continue',
-            onPress: () => submitApplicationWithPayment('BaranggayHall', testReferenceNumber),
-          },
-        ]
-      );
+      // NEW FLOW: Submit without payment
+      await submitApplicationWithoutPayment();
     } catch (error) {
       console.error('Error submitting application:', error);
       Alert.alert('Error', 'Failed to submit application. Please try again.');
@@ -423,6 +412,227 @@ export const useSubmission = ({
                 resetForm(); // Reset the form after successful submission
                 router.push('/(tabs)/application');
               },
+            },
+          ]
+        );
+      } else {
+        throw new Error('Submission failed');
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      
+      // Mark queue as failed
+      if (tempApp?.queueId) {
+        formStorage.updateQueueStatus(tempApp.queueId, 'failed');
+      }
+      
+      Alert.alert(
+        'Submission Error',
+        error instanceof Error ? error.message : 'Failed to submit application. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [formData, requirementsByJobCategory, jobCategoriesData, applications, requirements, showSuccess, resetForm]);
+
+  // NEW FLOW: Submit without payment - sets status to "Pending Payment"
+  const submitApplicationWithoutPayment = useCallback(async () => {
+    const tempApp = formStorage.getTempApplication();
+    if (!tempApp?.queueId) {
+      Alert.alert('Error', 'No application data found. Please try again.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Check if job categories are loaded
+      if (!jobCategoriesData || jobCategoriesData.length === 0) {
+        showError('Data Loading', 'Job categories are still loading. Please wait a moment and try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Check if form data has a selected job category
+      if (!formData.jobCategory) {
+        showError('Validation Error', 'Please select a job category before submitting.');
+        setLoading(false);
+        return;
+      }
+
+      // Mark queue as submitting
+      formStorage.updateQueueStatus(tempApp.queueId, 'submitting');
+
+      // Validate job category first
+      const selectedCategory = jobCategoriesData?.find(cat => cat._id === formData.jobCategory);
+      if (!selectedCategory) {
+        throw new Error(`Invalid job category selected. Selected: ${formData.jobCategory}, Available: ${jobCategoriesData?.length || 0} categories`);
+      }
+
+      // Step 1: Create or get draft application first
+      let applicationId: string;
+      const existingAppId = formStorage.getApplicationId();
+      
+      if (existingAppId) {
+        applicationId = existingAppId;
+        // Update application with latest form data in case user made changes
+        await applications.mutations.updateApplication(existingAppId as Id<'applications'>, {
+          applicationType: formData.applicationType,
+          jobCategoryId: formData.jobCategory as Id<'jobCategories'>,
+          position: formData.position,
+          organization: formData.organization,
+          civilStatus: formData.civilStatus,
+        });
+      } else {
+        // Create new draft application
+        applicationId = await applications.mutations.createApplication({
+          applicationType: formData.applicationType,
+          jobCategoryId: formData.jobCategory as Id<'jobCategories'>,
+          position: formData.position,
+          organization: formData.organization,
+          civilStatus: formData.civilStatus,
+        });
+        
+        // Save application ID to local storage for future resume capability
+        formStorage.setApplicationId(applicationId);
+      }
+
+      // Save current form progress to MMKV (local draft)
+      formStorage.saveApplicationProgress(formData, tempApp.selectedDocuments, tempApp.currentStep, applicationId);
+
+      // Step 2: Upload documents with application reference
+      const queue = formStorage.getDeferredQueue(tempApp.queueId);
+      if (!queue) {
+        throw new Error('Document queue not found');
+      }
+      
+      const operations = Object.values(queue.uploadOperations);
+      const uploadedDocuments: { [key: string]: { storageId: string; fileName: string; fileType: string; fileSize: number } } = {};
+      
+      if (operations.length > 0) {
+        let successCount = 0;
+        let failureCount = 0;
+        
+        for (const operation of operations) {
+          // Skip already completed operations
+          if (operation.status === 'completed' && operation.uploadResult) {
+            uploadedDocuments[operation.documentId] = operation.uploadResult;
+            successCount++;
+            continue;
+          }
+          
+          try {
+            // Upload file logic (same as before)
+            formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'uploading', 0);
+            
+            const response = await fetch(operation.file.uri, { method: 'HEAD' });
+            if (!response.ok) {
+              throw new Error(`File no longer accessible: ${response.status}`);
+            }
+            
+            const fileResponse = await fetch(operation.file.uri);
+            const fileBlob = await fileResponse.blob();
+            const fileSize = fileBlob.size;
+            
+            formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'uploading', 50);
+            
+            const uploadUrl = await requirements.mutations.generateUploadUrl();
+            
+            let contentType = operation.file.type || operation.file.mimeType || 'image/jpeg';
+            if (!contentType.includes('/')) {
+              const fileName = operation.file.name || operation.file.fileName || '';
+              if (fileName.toLowerCase().includes('.png')) {
+                contentType = 'image/png';
+              } else if (fileName.toLowerCase().includes('.pdf')) {
+                contentType = 'application/pdf';
+              } else {
+                contentType = 'image/jpeg';
+              }
+            }
+            
+            const uploadResponse = await fetch(uploadUrl, {
+              method: 'POST',
+              body: fileBlob,
+              headers: {
+                'Content-Type': contentType,
+              },
+            });
+            
+            if (!uploadResponse.ok) {
+              throw new Error(`File upload failed: ${uploadResponse.status}`);
+            }
+            
+            const { storageId } = await uploadResponse.json();
+            
+            const uploadData = {
+              storageId: storageId,
+              fileName: operation.file.fileName || operation.file.name || 'document',
+              fileType: contentType,
+              fileSize: fileSize,
+            };
+            uploadedDocuments[operation.documentId] = uploadData;
+            
+            formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'completed', 100, undefined, uploadData);
+            successCount++;
+            
+          } catch (error) {
+            failureCount++;
+            const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+            formStorage.updateOperationStatus(tempApp.queueId, operation.id, 'failed', 0, errorMessage);
+          }
+        }
+        
+        if (failureCount > 0) {
+          throw new Error(`Failed to upload ${failureCount} document(s). Please check your internet connection and try again.`);
+        }
+      }
+
+      // Step 3: Link uploaded documents to the application
+      for (const [documentId, uploadData] of Object.entries(uploadedDocuments)) {
+        await requirements.mutations.uploadDocument({
+          applicationId: applicationId,
+          fieldIdentifier: documentId,
+          storageId: uploadData.storageId,
+          fileName: uploadData.fileName,
+          fileType: uploadData.fileType,
+          fileSize: uploadData.fileSize,
+          reviewStatus: 'Pending',
+        });
+      }
+
+      // Step 4: Submit application WITHOUT payment - this will set status to "Pending Payment"
+      const result = await applications.mutations.submitApplicationForm(
+        applicationId,
+        null, // No payment method yet
+        null  // No reference number yet
+      );
+
+      if (result.success) {
+        // Mark queue as completed and clear data
+        formStorage.updateQueueStatus(tempApp.queueId, 'completed');
+        formStorage.clearTempApplication();
+        
+        // Show success notification
+        showSuccess('Application Submitted!', 'Your application has been submitted successfully. Please proceed to payment.');
+        
+        Alert.alert(
+          'Application Submitted!',
+          'Your application has been successfully submitted.\n\nYou have 7 days to complete the payment of ₱60.\n\nYou can pay now or later from your applications list.',
+          [
+            {
+              text: 'Pay Now',
+              onPress: () => {
+                resetForm();
+                // Navigate to application details with payment section
+                router.replace(`/application/${applicationId}`);
+              },
+            },
+            {
+              text: 'Pay Later',
+              onPress: () => {
+                resetForm();
+                router.replace('/(tabs)/application');
+              },
+              style: 'cancel',
             },
           ]
         );

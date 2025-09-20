@@ -4,13 +4,13 @@ import { v } from "convex/values";
 export const submitApplicationMutation = mutation({
   args: {
     applicationId: v.id("applications"),
-    paymentMethod: v.union(
+    paymentMethod: v.optional(v.union(
       v.literal("Gcash"),
       v.literal("Maya"),
       v.literal("BaranggayHall"),
       v.literal("CityHall")
-    ),
-    paymentReferenceNumber: v.string(),
+    )),
+    paymentReferenceNumber: v.optional(v.string()),
     paymentReceiptId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
@@ -90,13 +90,16 @@ export const submitApplicationMutation = mutation({
       }
     }
 
+    // NEW FLOW: Check if this is a submit-without-payment flow
+    const isPaymentDeferred = !args.paymentMethod && !args.paymentReferenceNumber;
+
     // Check if payment already exists
     const existingPayment = await ctx.db
       .query("payments")
       .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
       .unique();
 
-    if (existingPayment) {
+    if (existingPayment && !isPaymentDeferred) {
       throw new Error("Payment already submitted for this application");
     }
 
@@ -106,34 +109,62 @@ export const submitApplicationMutation = mutation({
     const totalAmount = baseAmount + serviceFee;
 
     try {
-      // Create payment record
-      const paymentId = await ctx.db.insert("payments", {
-        applicationId: args.applicationId,
-        amount: baseAmount,
-        serviceFee: serviceFee,
-        netAmount: totalAmount,
-        paymentMethod: args.paymentMethod,
-        referenceNumber: args.paymentReferenceNumber,
-        receiptStorageId: args.paymentReceiptId,
-        paymentStatus: "Pending",
-        updatedAt: Date.now(),
-      });
+      let paymentId = null;
+      
+      if (!isPaymentDeferred) {
+        // OLD FLOW: Create payment record when payment is provided
+        paymentId = await ctx.db.insert("payments", {
+          applicationId: args.applicationId,
+          amount: baseAmount,
+          serviceFee: serviceFee,
+          netAmount: totalAmount,
+          paymentMethod: args.paymentMethod!,
+          referenceNumber: args.paymentReferenceNumber!,
+          receiptStorageId: args.paymentReceiptId,
+          paymentStatus: "Pending",
+          updatedAt: Date.now(),
+        });
+      }
 
-      // Update application status to Submitted
-      await ctx.db.patch(args.applicationId, {
-        applicationStatus: "Submitted",
-        updatedAt: Date.now(),
-      });
+      // Update application status based on payment flow
+      if (isPaymentDeferred) {
+        // NEW FLOW: Set status to "Pending Payment" and set payment deadline
+        const paymentDeadline = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days from now
+        await ctx.db.patch(args.applicationId, {
+          applicationStatus: "Pending Payment",
+          paymentDeadline: paymentDeadline,
+          updatedAt: Date.now(),
+        });
+      } else {
+        // OLD FLOW: Set status to "Submitted" when payment is provided
+        await ctx.db.patch(args.applicationId, {
+          applicationStatus: "Submitted",
+          updatedAt: Date.now(),
+        });
+      }
 
       // Create notification for user
-      await ctx.db.insert("notifications", {
-        userId: user._id,
-        applicationId: args.applicationId,
-        title: "Application Submitted",
-        message: `Application submitted successfully! Payment of ₱${totalAmount} via ${args.paymentMethod} is being processed. Reference: ${args.paymentReferenceNumber}`,
-        notificationType: "PaymentReceived",
-        isRead: false,
-      });
+      if (isPaymentDeferred) {
+        // NEW FLOW: Notification for pending payment
+        await ctx.db.insert("notifications", {
+          userId: user._id,
+          applicationId: args.applicationId,
+          title: "Application Submitted - Payment Required",
+          message: `Your application has been submitted successfully! Please complete the payment of ₱${totalAmount} within 7 days to proceed with processing.`,
+          notificationType: "Payment",
+          isRead: false,
+        });
+      } else {
+        // OLD FLOW: Notification for submitted with payment
+        await ctx.db.insert("notifications", {
+          userId: user._id,
+          applicationId: args.applicationId,
+          title: "Application Submitted",
+          message: `Application submitted successfully! Payment of ₱${totalAmount} via ${args.paymentMethod} is being processed. Reference: ${args.paymentReferenceNumber}`,
+          notificationType: "PaymentReceived",
+          isRead: false,
+        });
+      }
 
       // If orientation is required, create orientation record
       if (jobCategory.requireOrientation) {
