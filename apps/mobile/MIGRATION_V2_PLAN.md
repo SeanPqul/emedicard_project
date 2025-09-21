@@ -113,16 +113,16 @@ src/features/
 - [x] Create dashboard-specific hooks
 
 #### 3.2 Migrate Dashboard Components
-- [ ] Move all components from `src/components/dashboard/` to feature
-  - [ ] ApplicationStatus → `features/dashboard/components/`
+- [x] Move all components from `src/components/dashboard/` to feature
+  - [x] ApplicationStatus → `features/dashboard/components/`
   - [x] DashboardHeader → `features/dashboard/components/`
-  - [ ] HealthCardStatus → `features/dashboard/components/`
+  - [x] HealthCardStatus → `features/dashboard/components/`
   - [x] OfflineBanner → `shared/components/` (used globally)
-  - [ ] PriorityAlerts → `features/dashboard/components/`
-  - [ ] QuickActionsGrid → `features/dashboard/components/`
-  - [ ] RecentActivityList → `features/dashboard/components/`
-  - [ ] StatsOverview → `features/dashboard/components/`
-  - [ ] WelcomeBanner → `features/dashboard/components/`
+  - [x] PriorityAlerts → `features/dashboard/components/`
+  - [x] QuickActionsGrid → `features/dashboard/components/`
+  - [x] RecentActivityList → `features/dashboard/components/`
+  - [x] StatsOverview → `features/dashboard/components/`
+  - [x] WelcomeBanner → `features/dashboard/components/`
 
 #### 3.3 Create Dashboard Services
 - [ ] Create `src/features/dashboard/services/dashboardService.ts`

@@ -1,17 +1,12 @@
 // Dashboard components barrel export
+export * from './ApplicationStatus';
 export * from './DashboardHeader';
-export * from './WelcomeBanner';
+export * from './HealthCardStatus';
 export * from './PriorityAlerts';
-
-// Re-export existing components temporarily
-// TODO: Migrate these to feature-based structure
-export { 
-  ApplicationStatus,
-  StatsOverview,
-  QuickActionsGrid,
-  RecentActivityList,
-  HealthCardStatus
-} from '@/src/components/dashboard';
+export * from './QuickActionsGrid';
+export * from './RecentActivityList';
+export * from './StatsOverview';
+export * from './WelcomeBanner';
 
 // OfflineBanner is now in shared
 export { OfflineBanner } from '@/shared/components';
