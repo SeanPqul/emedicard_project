@@ -43,3 +43,11 @@ export interface AuthState {
   isAuthenticated: boolean;
   error: AuthError | null;
 }
+
+export interface PasswordValidation {
+  minLength: boolean;
+  hasUppercase: boolean;
+  hasLowercase: boolean;
+  hasNumber: boolean;
+  isValid: boolean;
+}

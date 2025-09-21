@@ -73,13 +73,13 @@ src/features/
   - [x] Create `SignInScreen.styles.ts`
   - [ ] Create `SignInScreen.types.ts`
   - [x] Create `index.ts` barrel export
-- [ ] Create `src/features/auth/screens/SignUpScreen/`
-  - [ ] Move logic from `app/(auth)/sign-up.tsx`
-  - [ ] Follow same pattern as SignIn
-- [ ] Create `src/features/auth/screens/VerificationScreen/`
-  - [ ] Move logic from `app/(auth)/verification.tsx`
-- [ ] Create `src/features/auth/screens/ResetPasswordScreen/`
-  - [ ] Move logic from `app/(auth)/reset-password.tsx`
+- [x] Create `src/features/auth/screens/SignUpScreen/`
+  - [x] Move logic from `app/(auth)/sign-up.tsx`
+  - [x] Follow same pattern as SignIn
+- [x] Create `src/features/auth/screens/VerificationScreen/`
+  - [x] Move logic from `app/(auth)/verification.tsx`
+- [x] Create `src/features/auth/screens/ResetPasswordScreen/`
+  - [x] Move logic from `app/(auth)/reset-password.tsx`
 
 #### 2.2 Extract Auth Components
 - [x] Move `src/components/auth/OtpInputUI.tsx` to `src/features/auth/components/OtpInput/`
@@ -98,9 +98,9 @@ src/features/
 
 #### 2.4 Update Route Files
 - [x] Update `app/(auth)/sign-in.tsx` to thin route
-- [ ] Update `app/(auth)/sign-up.tsx` to thin route
-- [ ] Update `app/(auth)/verification.tsx` to thin route
-- [ ] Update `app/(auth)/reset-password.tsx` to thin route
+- [x] Update `app/(auth)/sign-up.tsx` to thin route
+- [x] Update `app/(auth)/verification.tsx` to thin route
+- [x] Update `app/(auth)/reset-password.tsx` to thin route
 - [ ] Test all auth flows still work
 
 ### Phase 3: Dashboard Feature Migration 
