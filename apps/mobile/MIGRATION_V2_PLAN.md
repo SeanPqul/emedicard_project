@@ -106,18 +106,18 @@ src/features/
 ### Phase 3: Dashboard Feature Migration 
 
 #### 3.1 Extract Dashboard Screen
-- [ ] Create `src/features/dashboard/screens/DashboardScreen/`
-  - [ ] Move logic from `app/(tabs)/index.tsx`
-  - [ ] Create proper screen structure
-- [ ] Extract dashboard data fetching logic
-- [ ] Create dashboard-specific hooks
+- [x] Create `src/features/dashboard/screens/DashboardScreen/`
+  - [x] Move logic from `app/(tabs)/index.tsx`
+  - [x] Create proper screen structure
+- [x] Extract dashboard data fetching logic
+- [x] Create dashboard-specific hooks
 
 #### 3.2 Migrate Dashboard Components
 - [ ] Move all components from `src/components/dashboard/` to feature
   - [ ] ApplicationStatus → `features/dashboard/components/`
-  - [ ] DashboardHeader → `features/dashboard/components/`
+  - [x] DashboardHeader → `features/dashboard/components/`
   - [ ] HealthCardStatus → `features/dashboard/components/`
-  - [ ] OfflineBanner → `shared/components/` (used globally)
+  - [x] OfflineBanner → `shared/components/` (used globally)
   - [ ] PriorityAlerts → `features/dashboard/components/`
   - [ ] QuickActionsGrid → `features/dashboard/components/`
   - [ ] RecentActivityList → `features/dashboard/components/`
