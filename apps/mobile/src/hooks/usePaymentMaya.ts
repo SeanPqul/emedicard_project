@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Linking } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery, useAction } from 'convex/react';
 import { api } from '../../../../backend/convex/_generated/api';
 import { Id } from '../../../../backend/convex/_generated/dataModel';
 
@@ -129,8 +129,8 @@ export const usePaymentMaya = () => {
     };
   }, []);
 
-  // Convex mutations and queries
-  const createCheckout = useMutation(api.payments.maya.checkout.createMayaCheckout);
+  // Convex actions, mutations and queries
+  const createCheckout = useAction(api.payments.maya.checkout.createMayaCheckout);
   const syncStatus = useMutation(api.payments.maya.statusUpdates.syncPaymentStatus);
   const checkStatus = useQuery(
     api.payments.maya.statusUpdates.checkPaymentStatus,

@@ -7,13 +7,14 @@
 export interface MayaAmount {
   value: number;
   currency?: string; // Default: PHP
+  details?: Record<string, any>; // Maya expects this field
 }
 
 // Buyer information
 export interface MayaBuyer {
   firstName: string;
   lastName: string;
-  email: string;
+  email?: string; // Made optional - Maya expects email in contact object for checkout
   phone?: string;
   birthday?: string;
   sex?: string;

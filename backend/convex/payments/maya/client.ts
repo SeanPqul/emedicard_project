@@ -17,8 +17,8 @@ import { MAYA_DEFAULTS, MAYA_ENDPOINTS, MAYA_HEADERS } from "./constants";
 // Maya configuration from environment variables
 const getMayaConfig = (): MayaConfig => ({
   apiUrl: process.env.MAYA_API_URL || 'https://pg-sandbox.paymaya.com',
-  publicKey: process.env.MAYA_PUBLIC_KEY || '',
-  secretKey: process.env.MAYA_SECRET_KEY || '',
+  publicKey: process.env.MAYA_PUBLIC_KEY || 'pk-Z0OSzLvIcOI2UIvDhdTGVVfRSSeiGStnceqwUE7n0Ah', // Sandbox default
+  secretKey: process.env.MAYA_SECRET_KEY || 'sk-X8qolYjy62kIzEbr0QRK1h4b4KDVHaNcwMYk39jInSl', // Sandbox default
   webhookSecret: process.env.MAYA_WEBHOOK_SECRET || '',
 });
 
@@ -36,7 +36,8 @@ export const createMayaHeaders = (useSecret = false): HeadersInit => {
   }
   
   // Maya uses Basic Auth with base64 encoded key
-  const encoded = Buffer.from(`${key}:`).toString('base64');
+  // Using btoa for base64 encoding (browser/Convex compatible)
+  const encoded = btoa(`${key}:`);
   
   return {
     [MAYA_HEADERS.AUTHORIZATION]: `Basic ${encoded}`,
@@ -61,6 +62,15 @@ export const mayaApiCall = async <T = any>(
 ): Promise<T> => {
   const config = getMayaConfig();
   const url = `${config.apiUrl}${endpoint}`;
+  
+  // Debug logging
+  console.log("Maya API Request:", {
+    url,
+    method,
+    useSecret,
+    hasPublicKey: !!config.publicKey,
+    hasSecretKey: !!config.secretKey,
+  });
   
   let lastError: Error | null = null;
   let attempt = 0;
@@ -162,7 +172,7 @@ export const createCheckoutSession = async (
     MAYA_ENDPOINTS.CHECKOUT_CREATE,
     'POST',
     checkoutData,
-    true // Use secret key for checkout creation
+    false // Use public key for checkout creation
   );
 };
 

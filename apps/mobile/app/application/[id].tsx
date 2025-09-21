@@ -15,9 +15,11 @@ import { router } from 'expo-router';
 import { api } from '../../../../backend/convex/_generated/api';
 import { Id } from '../../../../backend/convex/_generated/dataModel';
 import { usePaymentMaya } from '../../src/hooks/usePaymentMaya';
+import { useAbandonedPayment } from '../../src/hooks/useAbandonedPayment';
 import { CustomButton } from '../../src/components';
 import { styles } from '../../src/styles/screens/application-details';
 import { getColor } from '../../src/styles/theme';
+import { useFocusEffect } from '@react-navigation/native';
 
 type PaymentMethod = 'Maya' | 'Gcash' | 'BaranggayHall' | 'CityHall';
 
@@ -74,6 +76,36 @@ export default function ApplicationDetailsScreen() {
     api.applications.getApplicationById.getApplicationByIdQuery,
     id ? { applicationId: id as Id<"applications"> } : "skip"
   ) as ApplicationDetails | undefined;
+
+  // Handle abandoned payments
+  const {
+    isProcessing: isPaymentStatusProcessing,
+    paymentStatus,
+    cancelPayment,
+    checkAndHandleAbandoned,
+  } = useAbandonedPayment({
+    applicationId: id as Id<"applications"> | null,
+    autoCheck: true,
+  });
+
+  // Check for abandoned payments when screen gains focus
+  useFocusEffect(
+    React.useCallback(() => {
+      // Check if there's a processing payment when user returns to this screen
+      if (paymentStatus === 'Processing') {
+        console.log('Detected processing payment, checking if abandoned...');
+        checkAndHandleAbandoned().then(result => {
+          if (result.handled) {
+            Alert.alert(
+              'Payment Cancelled',
+              'Your previous payment was cancelled. You can try again.',
+              [{ text: 'OK' }]
+            );
+          }
+        });
+      }
+    }, [paymentStatus, checkAndHandleAbandoned])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -369,6 +401,36 @@ export default function ApplicationDetailsScreen() {
                 <ActivityIndicator size="small" color={getColor('primary.500')} />
                 <Text style={styles.processingText}>Processing payment...</Text>
               </View>
+            )}
+
+            {/* Show cancel button if payment is stuck in processing */}
+            {paymentStatus === 'Processing' && !isPaymentProcessing && (
+              <TouchableOpacity
+                style={styles.cancelPaymentButton}
+                onPress={() => {
+                  Alert.alert(
+                    'Cancel Payment',
+                    'Are you sure you want to cancel this payment?',
+                    [
+                      { text: 'No', style: 'cancel' },
+                      {
+                        text: 'Yes, Cancel',
+                        style: 'destructive',
+                        onPress: async () => {
+                          const result = await cancelPayment();
+                          if (result.success) {
+                            Alert.alert('Payment Cancelled', 'You can now retry the payment.');
+                          } else {
+                            Alert.alert('Error', result.error || 'Failed to cancel payment');
+                          }
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
+                <Text style={styles.cancelPaymentText}>Cancel Pending Payment</Text>
+              </TouchableOpacity>
             )}
           </View>
         )}

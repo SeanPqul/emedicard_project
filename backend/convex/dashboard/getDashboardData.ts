@@ -40,7 +40,7 @@ export const getDashboardDataQuery = query({
         const payment = await ctx.db
           .query("payments")
           .withIndex("by_application", (q) => q.eq("applicationId", application._id))
-          .unique();
+          .first();
         return payment;
       })
     ).then(results => results.filter(Boolean));

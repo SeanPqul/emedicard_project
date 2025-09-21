@@ -297,7 +297,15 @@ export const syncPaymentStatus = mutation({
     }
     
     if (!payment.mayaPaymentId) {
-      throw new Error("No Maya payment ID associated with this payment");
+      // Payment doesn't have mayaPaymentId - this can happen with redirect-only payments
+      // Just return the current status without syncing
+      console.log("Payment doesn't have mayaPaymentId, skipping sync:", args.paymentId);
+      return {
+        success: true,
+        status: payment.paymentStatus,
+        synced: false,
+        message: "Payment doesn't have Maya payment ID - possibly processed via redirect only",
+      };
     }
     
     try {
