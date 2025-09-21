@@ -125,9 +125,9 @@ src/features/
   - [x] WelcomeBanner → `features/dashboard/components/`
 
 #### 3.3 Create Dashboard Services
-- [ ] Create `src/features/dashboard/services/dashboardService.ts`
-- [ ] Move `useDashboard` hook to feature
-- [ ] Update all dashboard-related types
+- [x] Create `src/features/dashboard/services/dashboardService.ts`
+- [x] Move `useDashboard` hook to feature
+- [x] Update all dashboard-related types
 
 ### Phase 4: Application Feature Migration 
 
