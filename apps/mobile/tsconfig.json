@@ -21,7 +21,10 @@
       "@/*": ["./*"],
       "@/src/*": ["./src/*"],
       "@/app/*": ["./app/*"],
-      "@/assets/*": ["./assets/*"]
+      "@/assets/*": ["./assets/*"],
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@core/*": ["./src/core/*"]
     },
     "baseUrl": ".",
     "typeRoots": ["./node_modules/@types"]
