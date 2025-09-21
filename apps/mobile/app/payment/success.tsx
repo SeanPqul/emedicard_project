@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from 'convex/react';
 import { api } from '../../../../backend/convex/_generated/api';
 import { Id } from '../../../../backend/convex/_generated/dataModel';
-import { Button, FeedbackSystem } from '@/src/components';
+import { Button } from '@/src/shared/components';
+import { FeedbackSystem } from '@/src/shared/components/feedback/feedback';
 
 /**
  * Payment Success Screen

@@ -4,13 +4,14 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { FeedbackSystem, useFeedback, CustomButton } from '../../../src/components/';
+import { FeedbackSystem, useFeedback } from '@/src/shared/components/feedback/feedback';
+import { CustomButton } from '@/src/shared/components';
 import { Id } from '../../../../../backend/convex/_generated/dataModel';
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { usePayments, useApplications } from '../../../src/hooks/';
 import { getColor } from '../../../src/styles/theme';
 import { styles } from '../../../src/styles/screens/shared-payment';
-import { PAYMENT_METHODS, DIGITAL_PAYMENT_METHODS, MANUAL_PAYMENT_METHODS, type PaymentMethod, type UploadedReceipt } from '../../../src/constants';
+import { PAYMENT_METHODS, DIGITAL_PAYMENT_METHODS, MANUAL_PAYMENT_METHODS, type PaymentMethod, type UploadedReceipt } from '@/src/features/payment/constants';
 
 
 export default function PaymentScreen() {

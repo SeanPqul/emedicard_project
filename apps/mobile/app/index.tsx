@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { Redirect } from 'expo-router';
-import { LoadingSpinner } from '@/src/components';
+import { LoadingSpinner } from '@/src/shared/components';
 import { useUsers } from '../src/hooks/useUsers';
 
 export default function Index() {

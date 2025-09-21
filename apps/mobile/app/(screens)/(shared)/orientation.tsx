@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { Id } from '../../../../../backend/convex/_generated/dataModel';
-import { CustomButton, EmptyState } from '../../../src/components';
+import { CustomButton, EmptyState } from '@/src/shared/components';
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { styles } from '../../../src/styles/screens/shared-orientation';
 import { getColor } from '../../../src/styles/theme';

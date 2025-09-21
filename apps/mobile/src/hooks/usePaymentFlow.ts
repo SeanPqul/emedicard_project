@@ -8,10 +8,10 @@ import {
   PaymentMethod,
   PaymentSubmissionData,
   PaymentFlowResult,
-} from '../lib/payment/paymentFlow';
+} from '../shared/lib/payment/paymentFlow';
 
 // Error handling
-import { AppError, AppErrorType } from '../lib/errors';
+import { AppError, AppErrorType } from '../shared/lib/errors';
 
 // Types
 import { Id } from '../../../../backend/convex/_generated/dataModel';

@@ -9,7 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ProfileLink, SignOutButton } from '../../src/components';
+import { ProfileLink } from '@/src/features/profile/components';
+import { SignOutButton } from '@/src/features/auth/components';
 import { useUsers } from '../../src/hooks/useUsers';
 import { styles } from '../../src/styles/screens/tabs-profile';
 import { getUserDisplayName } from '../../src/utils/user-utils';

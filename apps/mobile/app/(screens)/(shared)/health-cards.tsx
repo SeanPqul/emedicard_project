@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Share, Alert } from 'react-na
 import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { EmptyState } from '../../../src/components';
+import { EmptyState } from '@/src/shared/components';
 import QRCode from 'react-native-qrcode-svg';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';

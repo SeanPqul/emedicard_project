@@ -6,14 +6,14 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Id } from '../../../../../backend/convex/_generated/dataModel';
-import { CustomButton } from '../../../src/components';
-import { DragDropUpload } from '../../../src/components/upload';
+import { CustomButton } from '@/src/shared/components';
+import { DragDropUpload } from '@/src/features/upload/components';
 import { getColor } from '../../../src/styles/theme';
 import { styles } from '../../../src/styles/screens/shared-upload-documents';
 import { useDocumentUpload } from '../../../src/hooks/useDocumentUpload';
 import { useApplications } from '../../../src/hooks/useApplications';
 import { useRequirements } from '../../../src/hooks/useRequirements';
-import { clearFormCache } from '../../../src/utils/documentCache';
+import { clearFormCache } from '../../../src/shared/services/storage/documentCache';
 
 interface DocumentRequirement {
   id: string;

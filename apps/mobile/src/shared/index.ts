@@ -1,8 +1,20 @@
 /**
- * Shared Utilities Index
+ * Shared Infrastructure Index
  * 
- * Simple, practical utilities for common tasks
+ * Comprehensive shared utilities, services, components, and hooks
  */
+
+// Services
+export * from './services';
+
+// Hooks  
+export * from './hooks';
+
+// Components
+export * from './components';
+
+// Utilities
+export * from './utils';
 
 // Basic validation utilities
 export {

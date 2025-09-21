@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { ActionButton } from '@/src/components/ui/ActionButton';
+import { ActionButton } from '@/src/shared/components/buttons';
 import { QuickActionsGridProps } from '../../types';
 import { styles } from './QuickActionsGrid.styles';
 

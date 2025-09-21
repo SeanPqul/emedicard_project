@@ -2,7 +2,7 @@
 import React from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { BaseScreen } from '@core/components';
-import { FeedbackSystem, useFeedback } from '@/src/components/feedback/FeedbackSystem';
+import { FeedbackSystem, useFeedback } from '@/src/shared/components/feedback/feedback';
 import { useNetwork } from '@/src/hooks/useNetwork';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { 
@@ -17,7 +17,7 @@ import {
   HealthCardStatus
 } from '../../components';
 import { styles } from './DashboardScreen.styles';
-import { LoadingView } from '@/shared/components';
+import { LoadingView } from '@/src/shared/components';
 
 export function DashboardScreen() {
   const {

@@ -71,7 +71,7 @@ src/features/
   - [x] Move logic from `app/(auth)/sign-in.tsx`
   - [x] Create `SignInScreen.tsx`
   - [x] Create `SignInScreen.styles.ts`
-  - [ ] Create `SignInScreen.types.ts`
+- [x] Create `SignInScreen.types.ts`
   - [x] Create `index.ts` barrel export
 - [x] Create `src/features/auth/screens/SignUpScreen/`
   - [x] Move logic from `app/(auth)/sign-up.tsx`
@@ -85,8 +85,8 @@ src/features/
 - [x] Move `src/components/auth/OtpInputUI.tsx` to `src/features/auth/components/OtpInput/`
 - [x] Move `src/components/auth/PasswordStrengthIndicator.tsx` to feature
 - [x] Move `src/components/auth/SignOutButton.tsx` to feature
-- [ ] Move `src/components/auth/VerificationPage.tsx` to feature
-- [ ] Update all imports in moved components
+- [x] Move `src/components/auth/VerificationPage.tsx` to feature
+- [x] Update all imports in moved components
 
 #### 2.3 Create Auth Services
 - [x] Create `src/features/auth/services/authService.ts`
@@ -101,7 +101,7 @@ src/features/
 - [x] Update `app/(auth)/sign-up.tsx` to thin route
 - [x] Update `app/(auth)/verification.tsx` to thin route
 - [x] Update `app/(auth)/reset-password.tsx` to thin route
-- [ ] Test all auth flows still work
+- [x] Test all auth flows still work
 
 ### Phase 3: Dashboard Feature Migration 
 
@@ -132,52 +132,69 @@ src/features/
 ### Phase 4: Application Feature Migration 
 
 #### 4.1 Extract Application Screens
-- [ ] Create `src/features/application/screens/ApplyScreen/`
-  - [ ] Move complex logic from `app/(tabs)/apply.tsx`
-  - [ ] Break down into smaller components
-- [ ] Create `src/features/application/screens/ApplicationListScreen/`
-  - [ ] Move from `app/(tabs)/application.tsx`
-- [ ] Create `src/features/application/screens/ApplicationDetailScreen/`
-  - [ ] Move from `app/application/[id].tsx`
+- [x] Create `src/features/application/screens/ApplyScreen/`
+  - [x] Move complex logic from `app/(tabs)/apply.tsx`
+  - [x] Break down into smaller components
+- [x] Create `src/features/application/screens/ApplicationListScreen/`
+  - [x] Move from `app/(tabs)/application.tsx`
+- [x] Create `src/features/application/screens/ApplicationDetailScreen/`
+  - [x] Move from `app/application/[id].tsx`
 
 #### 4.2 Organize Application Components
-- [ ] Move step components to feature
-  - [ ] `src/screens/apply/steps/*` → `features/application/components/steps/`
-- [ ] Move other application components
-  - [ ] StepIndicator
-  - [ ] DocumentSourceModal
+- [x] Move step components to feature
+  - [x] `src/screens/apply/steps/*` → `features/application/components/steps/` (NEW versions exist, OLD still in place)
+- [x] Move other application components
+  - [x] StepIndicator
+  - [x] DocumentSourceModal
   - [ ] All form-related components
 
 #### 4.3 Extract Application Logic
-- [ ] Move `useApplicationForm` hook
-- [ ] Move `useDocumentSelection` hook
-- [ ] Move `useSubmission` hook
-- [ ] Create application service layer
-- [ ] Update all imports
+- [x] Move `useApplicationForm` hook
+- [x] Move `useDocumentSelection` hook
+- [x] Move `useSubmission` hook
+- [x] Create application service layer
+- [x] Update all imports (fixed broken imports in hooks)
 
 ### Phase 5: Shared Components & Services 
 
 #### 5.1 Reorganize Shared Components
-- [ ] Move truly shared UI components to `src/shared/components/`
-  - [ ] Button variations
-  - [ ] Input components
-  - [ ] Card components
-  - [ ] Loading states
-  - [ ] Empty states
-  - [ ] Error components
-- [ ] Update component structure with proper patterns
+- [x] Move truly shared UI components to `src/shared/components/`
+  - [x] Button variations (Button, ActionButton, CTAButton)
+  - [x] Input components (Input, CustomTextInput)
+  - [x] Card components (Card)
+  - [x] Loading states (LoadingSpinner, SkeletonLoader, LoadingView)
+  - [x] Empty states (EmptyState)
+  - [x] Error components (ErrorState, ErrorBoundary)
+  - [x] Typography components (Text)
+  - [x] Display components (Badge)
+  - [x] Layout utilities (Divider)
+- [x] Update component structure with proper patterns
+- [x] Update barrel exports to maintain backward compatibility
+- [x] Evaluated remaining components:
+  - ScreenHeader, UIHeader → remain app-specific
+  - LinkText → limited use, stays in ui
+  - ErrorText → limited use, stays in common
+  - ResponsiveLayout → specific utility, stays in common
 
 #### 5.2 Extract Shared Services
-- [ ] Create `src/shared/services/api/client.ts`
-- [ ] Create `src/shared/services/storage/`
-- [ ] Move utility functions to `src/shared/utils/`
-- [ ] Create shared hooks in `src/shared/hooks/`
+- [x] Create `src/shared/services/api/client.ts` (API client already exists)
+- [x] Create `src/shared/services/storage/`
+  - [x] Moved storage.ts to shared/services/storage/
+  - [x] Moved documentCache.ts to shared/services/storage/
+  - [x] Moved formStorage.ts to shared/services/storage/
+  - [x] Created barrel export index.ts for storage services
+- [x] Move utility functions to `src/shared/utils/`
+  - [x] Moved fileUtils.ts to shared/utils/
+  - [x] Moved fileUploadUtils.ts to shared/utils/
+  - [x] Moved uploadRetry.ts to shared/utils/
+- [x] Create shared hooks in `src/shared/hooks/` (useNetworkStatus already exists)
+- [x] Updated all imports throughout the project to use new shared locations
 
 #### 5.3 Update Global Providers
-- [ ] Move providers to `src/core/providers/`
-- [ ] Update ClerkAndConvexProvider imports
-- [ ] Update ToastProvider location
-- [ ] Ensure all context providers work
+- [x] Move providers to `src/core/providers/`
+- [x] Update ClerkAndConvexProvider imports
+- [x] Update ToastProvider location
+- [x] Ensure all context providers work
 
 ### Phase 6: Import Updates & Testing 
 
@@ -204,7 +221,8 @@ src/features/
 ### Phase 7: Cleanup & Optimization 
 
 #### 7.1 Remove Old Code
-- [ ] Delete moved files from old locations
+- [x] Delete moved files from old locations
+  - [x] Removed `src/screens/apply/` (duplicates of migrated components)
 - [ ] Remove unused imports
 - [ ] Clean up temporary code
 - [ ] Update file references

@@ -9,10 +9,9 @@ import {
   updateCachedDocumentStatusReactive,
   removeCachedDocumentReactive,
   clearFormCache,
-  base64ToBlob,
   smartCacheCleanup,
   type CachedDocument,
-} from '../utils/documentCache';
+} from '@/src/shared/services/storage/documentCache';
 
 interface UploadState {
   uploading: boolean;
@@ -531,11 +530,12 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
     const toUpload = cachedDocs.filter(doc => doc.status === 'cached' || doc.status === 'failed');
     
     // Check memory limits before starting
-    const memoryCheck = require('../utils/documentCache').checkMemoryLimits();
+    const { checkMemoryLimits } = await import('@/src/shared/services/storage/documentCache');
+    const memoryCheck = checkMemoryLimits();
     if (memoryCheck.exceedsLimits) {
       console.warn('Memory limits exceeded before bulk upload:', memoryCheck.recommendations);
       // Perform cleanup
-      await require('../utils/documentCache').smartCacheCleanup();
+      await smartCacheCleanup();
     }
     
     const successful: DocumentUploadResult[] = [];
@@ -571,7 +571,7 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
     }
     
     // Final memory cleanup
-    const finalMemoryCleanup = await require('../utils/documentCache').smartCacheCleanup();
+    const finalMemoryCleanup = await smartCacheCleanup();
     
     return { 
       successful, 
@@ -651,9 +651,8 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
       addToUploadQueue, 
       getNextUploadBatch, 
       removeFromUploadQueue, 
-      checkMemoryLimits,
-      smartCacheCleanup 
-    } = require('../utils/documentCache');
+      checkMemoryLimits 
+    } = await import('@/src/shared/services/storage/documentCache');
     
     const cachedDocs = getCachedDocumentsByForm(applicationId);
     const toUpload = cachedDocs.filter(doc => doc.status === 'cached' || doc.status === 'failed');

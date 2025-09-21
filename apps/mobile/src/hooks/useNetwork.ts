@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { addNetworkListener, NetworkState, isOnline } from '../lib/network';
+import { addNetworkListener, NetworkState, isOnline } from '../shared/lib/network';
 
 /**
  * useNetwork Hook

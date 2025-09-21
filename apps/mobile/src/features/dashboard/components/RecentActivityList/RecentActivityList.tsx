@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
-import { ActivityItem } from '@/src/components/activity/ActivityItem';
-import { EmptyState } from '@/src/components/common/EmptyState';
+import { ActivityItem } from '../ActivityItem';
+import { EmptyState } from '@/src/shared/components/feedback';
 import { RecentActivityListProps } from '../../types';
 import { styles } from './RecentActivityList.styles';
 

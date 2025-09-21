@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../../backend/convex/_generated/api';
-import { EmptyState } from '../../../src/components';
+import { EmptyState } from '@/src/shared/components';
 import { getColor } from '../../../src/styles/theme';
 import { styles } from '@/src/styles/screens/shared-activity';
 import {
@@ -14,7 +14,7 @@ import {
   getActivityStatusColor,
   formatTimestamp
 } from '../../../src/utils/activity-utils';
-import { ACTIVITY_FILTERS } from '../../../src/constants/activity-filters';
+import { ACTIVITY_FILTERS } from '@/src/features/activity/constants';
 
 export default function ActivityScreen() {
   const [filter, setFilter] = useState<string>('all');
