@@ -1,22 +1,22 @@
 // Dashboard feature types
 import { Id } from 'convex/values';
 
+// Dashboard stats matching backend response
 export interface DashboardStats {
-  totalApplications: number;
-  pendingApplications: number;
-  approvedApplications: number;
+  activeApplications: number;
+  pendingPayments: number;
+  pendingAmount: number;
   validHealthCards: number;
-  expiredHealthCards: number;
-  documentsToReview: number;
+  unreadNotifications?: number;
 }
 
 export interface RecentActivity {
   id: string;
-  type: 'application' | 'payment' | 'document' | 'health_card';
+  type: 'application' | 'payment' | 'notification';
   title: string;
   description: string;
-  timestamp: number;
-  status: string;
+  timestamp: string;
+  status: 'success' | 'pending' | 'error';
   metadata?: Record<string, any>;
 }
 
@@ -52,9 +52,15 @@ export interface Application {
   applicationType: string;
   position?: string;
   organization?: string;
-  jobCategory?: any;
+  jobCategory?: {
+    _id: string;
+    name: string;
+    colorCode?: string;
+    requireOrientation?: boolean;
+  };
   documentCount?: number;
   hasPayment?: boolean;
+  orientationCompleted?: boolean;
   _creationTime?: number;
 }
 
@@ -80,7 +86,7 @@ export interface WelcomeBannerProps {
 }
 
 export interface PriorityAlertsProps {
-  dashboardStats: any;
+  dashboardStats: DashboardStats;
   currentApplication: Application | null;
 }
 
@@ -89,23 +95,23 @@ export interface ApplicationStatusProps {
 }
 
 export interface StatsOverviewProps {
-  dashboardStats: any;
+  dashboardStats: DashboardStats;
   currentApplication: Application | null;
   showForNewUser: boolean;
 }
 
 export interface QuickActionsGridProps {
   userApplications: Application[] | null;
-  dashboardStats: any;
+  dashboardStats: DashboardStats;
   currentApplication: Application | null;
 }
 
 export interface RecentActivityListProps {
-  recentActivities: any[];
+  recentActivities: RecentActivity[];
 }
 
 export interface HealthCardStatusProps {
-  dashboardStats: any;
+  dashboardStats: DashboardStats;
 }
 
 export interface OfflineBannerProps {

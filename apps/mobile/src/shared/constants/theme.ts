@@ -6,9 +6,9 @@ export const COLORS = {
     dark: '#2563EB',
   },
   secondary: {
-    main: '#8B5CF6',
-    light: '#A78BFA',
-    dark: '#7C3AED',
+    main: '#0891b2',
+    light: '#06b6d4',
+    dark: '#0e7490',
   },
   background: {
     primary: '#FFFFFF',

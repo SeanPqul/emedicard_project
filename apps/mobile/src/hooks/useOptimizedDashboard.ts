@@ -2,7 +2,7 @@ import { useUser } from '@clerk/clerk-expo';
 import { useQuery } from 'convex/react';
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../../../backend/convex/_generated/api';
-import { DashboardStats, RecentActivity } from '../types';
+import { DashboardStats, RecentActivity } from '@features/dashboard/types';
 import { mobileCacheManager, JobCategory } from '../lib/cache/mobileCacheManager';
 import { useNetwork } from './useNetwork';
 
@@ -87,18 +87,18 @@ export const useOptimizedDashboard = () => {
       return {
         activeApplications: 0,
         pendingPayments: 0,
-        upcomingOrientations: 0,
         validHealthCards: 0,
         pendingAmount: 0,
+        unreadNotifications: 0,
       };
     }
 
     return {
       activeApplications: dashboardData.stats.activeApplications,
       pendingPayments: dashboardData.stats.pendingPayments,
-      upcomingOrientations: 0, // TODO: Implement orientations
       validHealthCards: dashboardData.stats.validHealthCards,
       pendingAmount: dashboardData.stats.pendingAmount,
+      unreadNotifications: dashboardData.stats.unreadNotifications || 0,
     };
   }, [dashboardData?.stats]);
 

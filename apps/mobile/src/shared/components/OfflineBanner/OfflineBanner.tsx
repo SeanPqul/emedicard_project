@@ -12,7 +12,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({ isOnline }) => {
 
   return (
     <View style={styles.container}>
-      <Ionicons name="cloud-offline-outline" size={16} color={styles.icon.color} />
+      <Ionicons name="wifi" size={16} color={styles.icon.color} />
       <Text style={styles.text}>You're offline</Text>
     </View>
   );
