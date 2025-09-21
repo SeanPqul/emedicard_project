@@ -82,9 +82,9 @@ src/features/
   - [ ] Move logic from `app/(auth)/reset-password.tsx`
 
 #### 2.2 Extract Auth Components
-- [ ] Move `src/components/auth/OtpInputUI.tsx` to `src/features/auth/components/OtpInput/`
-- [ ] Move `src/components/auth/PasswordStrengthIndicator.tsx` to feature
-- [ ] Move `src/components/auth/SignOutButton.tsx` to feature
+- [x] Move `src/components/auth/OtpInputUI.tsx` to `src/features/auth/components/OtpInput/`
+- [x] Move `src/components/auth/PasswordStrengthIndicator.tsx` to feature
+- [x] Move `src/components/auth/SignOutButton.tsx` to feature
 - [ ] Move `src/components/auth/VerificationPage.tsx` to feature
 - [ ] Update all imports in moved components
 
