@@ -1,2 +1,2 @@
-// Auth hooks exports
-// TODO: Add auth-specific hooks here
+// Auth hooks barrel export
+export * from './useAuth';

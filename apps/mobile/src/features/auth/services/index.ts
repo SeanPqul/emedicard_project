@@ -1,2 +1,2 @@
-// Auth services exports
-// TODO: Add auth service implementations here
+// Auth services barrel export
+export * from './authService';

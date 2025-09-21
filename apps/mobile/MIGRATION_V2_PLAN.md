@@ -89,12 +89,12 @@ src/features/
 - [ ] Update all imports in moved components
 
 #### 2.3 Create Auth Services
-- [ ] Create `src/features/auth/services/authService.ts`
-  - [ ] Extract Clerk-related logic
-  - [ ] Create clean API interface
-- [ ] Create `src/features/auth/hooks/useAuth.ts`
-  - [ ] Consolidate auth state management
-- [ ] Update auth types in `src/features/auth/types.ts`
+- [x] Create `src/features/auth/services/authService.ts`
+  - [x] Extract Clerk-related logic
+  - [x] Create clean API interface
+- [x] Create `src/features/auth/hooks/useAuth.ts`
+  - [x] Consolidate auth state management
+- [x] Update auth types in `src/features/auth/types.ts`
 
 #### 2.4 Update Route Files
 - [x] Update `app/(auth)/sign-in.tsx` to thin route
