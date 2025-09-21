@@ -4,9 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useSegments, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useUsers } from '../../../src/hooks/useUsers';
-import { useRoleBasedNavigation } from '../../../src/hooks/useRoleBasedNavigation';
-import { theme } from '../../../src/styles/theme';
+import { useUsers } from '@shared/hooks/useUsers';
+import { useRoleBasedNavigation } from '@shared/hooks/useRoleBasedNavigation';
+import { theme } from '@shared/styles/theme';
 
 export default function NavigationHealthCheck() {
   const { isLoaded, isSignedIn } = useAuth();

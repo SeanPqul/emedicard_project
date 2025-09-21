@@ -2,9 +2,9 @@
 import React from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { BaseScreen } from '@core/components';
-import { FeedbackSystem, useFeedback } from '@/src/shared/components/feedback/feedback';
-import { useNetwork } from '@/src/hooks/useNetwork';
-import { useDashboardData } from '../../hooks/useDashboardData';
+import { FeedbackSystem, useFeedback } from '@shared/components/feedback/feedback';
+import { useNetwork } from '@shared/hooks/useNetwork';
+import { useDashboardData } from '@features/dashboard/hooks/useDashboardData';
 import { 
   DashboardHeader,
   OfflineBanner,
@@ -15,9 +15,9 @@ import {
   QuickActionsGrid,
   RecentActivityList,
   HealthCardStatus
-} from '../../components';
+} from '@features/dashboard/components';
 import { styles } from './DashboardScreen.styles';
-import { LoadingView } from '@/src/shared/components';
+import { LoadingView } from '@shared/components';
 
 export function DashboardScreen() {
   const {

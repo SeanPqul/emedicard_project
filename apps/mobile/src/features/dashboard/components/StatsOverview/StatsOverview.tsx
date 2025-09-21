@@ -1,10 +1,10 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { StatCard } from '../StatCard';
-import { StatsOverviewProps } from '../../types';
+import { StatCard } from '@features/dashboard/components/StatCard';
+import { StatsOverviewProps } from '@features/dashboard/types';
 import { styles } from './StatsOverview.styles';
-import { COLORS } from '@/src/shared/constants/theme';
+import { COLORS } from '@shared/constants/theme';
 
 export const StatsOverview: React.FC<StatsOverviewProps> = ({ 
   dashboardStats, 

@@ -1,5 +1,5 @@
-// Reset password route - Thin route file following clean architecture
-import { ResetPasswordScreen } from '@features/auth';
+// Reset password route - Thin route file following FSD architecture
+import { ResetPasswordScreen } from '@/src/screens/auth';
 
 export default function ResetPasswordRoute() {
   return <ResetPasswordScreen />;

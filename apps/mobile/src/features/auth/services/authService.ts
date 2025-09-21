@@ -2,8 +2,8 @@
 import { useSignIn, useSignUp, useAuth as useClerkAuth, useUser } from '@clerk/clerk-expo';
 import { router } from 'expo-router';
 import { Alert } from 'react-native';
-import { AUTH_ROUTES, AUTH_ERRORS } from '../constants';
-import { AuthUser, SignInFormData, SignUpFormData, AuthError } from '../types';
+import { AUTH_ROUTES, AUTH_ERRORS } from '@features/auth/constants';
+import { AuthUser, SignInFormData, SignUpFormData, AuthError } from '@features/auth/types';
 
 // Convert Clerk user to our AuthUser type
 const mapClerkUserToAuthUser = (clerkUser: any): AuthUser => {

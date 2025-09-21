@@ -4,9 +4,9 @@ import { Alert, Animated, Text, TouchableOpacity, View } from 'react-native';
 import { useSignUp } from '@clerk/clerk-expo';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { OtpInputUI } from '../../components';
+import { OtpInputUI } from '@features/auth/components';
 import { styles } from './VerificationScreen.styles';
-import { OTP_CONFIG } from '../../constants';
+import { OTP_CONFIG } from '@features/auth/constants';
 
 // Success Screen Component
 interface SuccessScreenProps {

@@ -5,8 +5,8 @@ import {
   getBorderRadius, 
   getTypography, 
   getShadow 
-} from '@/src/styles/theme';
-import { hp, wp } from '@/src/utils/responsive';
+} from '@shared/styles/theme';
+import { hp, wp } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {

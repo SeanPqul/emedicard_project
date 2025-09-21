@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { UploadDocumentsStepProps, Document } from './UploadDocumentsStep.types';
 import styles from './UploadDocumentsStep.styles';
-import { getColor } from '@/src/styles/theme';
+import { getColor } from '@shared/styles/theme';
 
 const DOCUMENT_LABELS: Record<Document['type'], string> = {
   id_front: 'Valid ID (Front)',

@@ -7,7 +7,7 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getColor, getSpacing } from '@/src/styles/theme';
+import { getColor, getSpacing } from '@shared/styles/theme';
 
 export interface LayoutProps {
   children: React.ReactNode;

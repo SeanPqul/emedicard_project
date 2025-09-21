@@ -38,11 +38,11 @@
  * - Proper icon spacing and accessibility
  */
 
-import { moderateScale, verticalScale } from '@/src/utils/responsive';
+import { moderateScale, verticalScale } from '@shared/utils/responsive';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
-import { theme } from '@/src/styles/theme';
+import { theme } from '@shared/styles/theme';
 
 interface CustomTextInputProps extends Omit<TextInputProps, 'accessibilityDescribedBy'> {
   leftIcon?: keyof typeof Ionicons.glyphMap;

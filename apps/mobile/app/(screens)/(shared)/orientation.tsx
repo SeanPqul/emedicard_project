@@ -5,9 +5,9 @@ import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 
 import QRCode from 'react-native-qrcode-svg';
 import { Id } from '../../../../../backend/convex/_generated/dataModel';
 import { CustomButton, EmptyState } from '@/src/shared/components';
-import { BaseScreenLayout } from '../../../src/layouts/BaseScreenLayout';
-import { styles } from '../../../src/styles/screens/shared-orientation';
-import { getColor } from '../../../src/styles/theme';
+import { BaseScreenLayout } from '@shared/components/layout/BaseScreenLayout';
+import { styles } from '@shared/styles/screens/shared-orientation';
+import { getColor } from '@shared/styles/theme';
 import {
   formatOrientationDate,
   formatTime,

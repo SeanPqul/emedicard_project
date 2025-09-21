@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { Text as RNText, TextStyle } from 'react-native';
-import { getTypography, getColor } from '../../styles/theme';
-import { DesignSystemTextProps, FontWeight } from '../../types/design-system';
+import { getTypography, getColor } from '@shared/styles/theme';
+import { DesignSystemTextProps, FontWeight } from '@shared/types/design-system';
 
 const fontWeightMap: Record<FontWeight, TextStyle['fontWeight']> = {
   thin: '100',

@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { validateApplicationStep } from '@/src/shared/validation/form-validation';
-import { formStorage } from '@/src/shared/services/storage/formStorage';
+import { validateApplicationStep } from '@shared/validation/form-validation';
+import { formStorage } from '@shared/services/storage/formStorage';
 import { SelectedDocuments } from '@/src/types';
-import { DocumentRequirement } from '@/src/types/domain/application';
+import { DocumentRequirement } from '@entities/application/model/types';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';

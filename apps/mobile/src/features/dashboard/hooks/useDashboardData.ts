@@ -1,7 +1,7 @@
 // useDashboardData hook - Dashboard-specific data management
 import { useMemo } from 'react';
-import { useOptimizedDashboard } from '@/src/hooks/useOptimizedDashboard';
-import { Application } from '../types';
+import { useOptimizedDashboard } from '@shared/hooks/useOptimizedDashboard';
+import { Application } from '@features/dashboard/types';
 
 export function useDashboardData() {
   const dashboardData = useOptimizedDashboard();

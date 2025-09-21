@@ -7,8 +7,8 @@
 import React from 'react';
 import { View, Text, ViewStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { badgeVariants, badgeTextVariants, getSpacing } from '../../styles';
-import { BadgeStyleProps, BaseComponentProps } from '../../types/design-system';
+import { badgeVariants, badgeTextVariants, getSpacing } from '@shared/styles';
+import { BadgeStyleProps, BaseComponentProps } from '@shared/types/design-system';
 
 interface BadgeProps extends BaseComponentProps, BadgeStyleProps {
   text: string;

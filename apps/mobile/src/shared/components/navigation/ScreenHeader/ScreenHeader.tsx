@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { theme } from '@/src/styles/theme';
+import { theme } from '@shared/styles/theme';
 
 interface ScreenHeaderProps {
   title: string;

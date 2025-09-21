@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ApplicationTypeStepProps, ApplicationType } from './ApplicationTypeStep.types';
 import styles from './ApplicationTypeStep.styles';
-import { getColor } from '@/src/styles/theme';
+import { getColor } from '@shared/styles/theme';
 
 export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = ({ value, onChange }) => {
   const renderOption = (type: ApplicationType, icon: string, title: string, description: string) => (

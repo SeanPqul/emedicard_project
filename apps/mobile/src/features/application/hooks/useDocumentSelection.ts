@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { DocumentFile, SelectedDocuments } from '@/src/types';
-import { formStorage } from '@/src/shared/services/storage/formStorage';
+import { formStorage } from '@shared/services/storage/formStorage';
 
 interface UseDocumentSelectionProps {
   selectedDocuments: SelectedDocuments;

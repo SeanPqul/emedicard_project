@@ -1,5 +1,5 @@
 import { RecentActivity } from '@/src/types';
-import { getBorderRadius, getColor, getSpacing, getTypography } from '@/src/styles/theme';
+import { getBorderRadius, getColor, getSpacing, getTypography } from '@shared/styles/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';

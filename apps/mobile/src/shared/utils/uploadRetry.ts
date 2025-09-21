@@ -1,4 +1,4 @@
-import { formStorage } from '@/src/shared/services/storage/formStorage';
+import { formStorage } from '@shared/services/storage/formStorage';
 
 interface RetryResult {
   success: boolean;

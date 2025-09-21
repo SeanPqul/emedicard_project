@@ -1,4 +1,4 @@
-import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@/src/styles/theme';
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@shared/styles/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

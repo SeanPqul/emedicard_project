@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { ActionButton } from '@/src/shared/components/buttons';
-import { QuickActionsGridProps } from '../../types';
+import { ActionButton } from '@shared/components/buttons';
+import { QuickActionsGridProps } from '@features/dashboard/types';
 import { styles } from './QuickActionsGrid.styles';
 
 export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({

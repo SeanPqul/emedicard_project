@@ -17,9 +17,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { BaseScreen } from '@/src/core/components';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
-import { usePaymentMaya } from '@/src/hooks/usePaymentMaya';
-import { useAbandonedPayment } from '@/src/hooks/useAbandonedPayment';
-import { CustomButton } from '@/src/shared/components';
+import { usePaymentMaya } from '@shared/hooks/usePaymentMaya';
+import { useAbandonedPayment } from '@shared/hooks/useAbandonedPayment';
+import { CustomButton } from '@shared/components';
 
 import {
   ApplicationDetailScreenProps,
@@ -28,7 +28,7 @@ import {
   STATUS_COLORS
 } from './ApplicationDetailScreen.types';
 import { styles } from './ApplicationDetailScreen.styles';
-import { COLORS } from '@/src/shared/constants/theme';
+import { COLORS } from '@shared/constants/theme';
 
 export function ApplicationDetailScreen({ navigation, route }: ApplicationDetailScreenProps) {
   const { id } = useLocalSearchParams<{ id: string }>();

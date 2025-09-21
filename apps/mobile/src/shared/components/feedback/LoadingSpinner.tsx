@@ -11,7 +11,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getColor, getTypography, getSpacing } from '../../styles/theme';
+import { getColor, getTypography, getSpacing } from '@shared/styles/theme';
 
 interface LoadingSpinnerProps {
   visible?: boolean;

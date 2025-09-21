@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/src/styles/theme';
+import { theme } from '@shared/styles/theme';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 

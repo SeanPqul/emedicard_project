@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { WelcomeBannerProps } from '../../types';
+import { WelcomeBannerProps } from '@features/dashboard/types';
 import { styles } from './WelcomeBanner.styles';
 
 export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ isNewUser }) => {

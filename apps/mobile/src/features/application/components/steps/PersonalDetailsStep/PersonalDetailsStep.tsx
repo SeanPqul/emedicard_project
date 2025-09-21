@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingVi
 import { Ionicons } from '@expo/vector-icons';
 import { PersonalDetailsStepProps } from './PersonalDetailsStep.types';
 import styles from './PersonalDetailsStep.styles';
-import { getColor } from '@/src/styles/theme';
+import { getColor } from '@shared/styles/theme';
 
 const CIVIL_STATUS_OPTIONS = [
   'Single',

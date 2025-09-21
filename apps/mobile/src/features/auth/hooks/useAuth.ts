@@ -1,7 +1,7 @@
 // useAuth hook - Simplified auth state management
 import { useState, useCallback, useEffect } from 'react';
-import { useAuthService } from '../services';
-import { AuthUser, SignInFormData, SignUpFormData, AuthError, AuthState } from '../types';
+import { useAuthService } from '@features/auth/services';
+import { AuthUser, SignInFormData, SignUpFormData, AuthError, AuthState } from '@features/auth/types';
 
 interface UseAuthReturn extends AuthState {
   // Auth methods

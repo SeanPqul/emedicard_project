@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { CustomTextInput } from '@/src/shared/components';
-import { getBorderRadius, getColor, getSpacing, getTypography, getShadow } from '@/src/styles/theme';
+import { CustomTextInput } from '@shared/components';
+import { getBorderRadius, getColor, getSpacing, getTypography, getShadow } from '@shared/styles/theme';
 
 import { PaymentMethodStepProps, PaymentMethodOption, PaymentMethod } from './PaymentMethodStep.types';
 import { styles } from './PaymentMethodStep.styles';

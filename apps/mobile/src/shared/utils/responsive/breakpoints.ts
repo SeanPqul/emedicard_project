@@ -6,7 +6,7 @@
  */
 
 import { Dimensions } from 'react-native';
-import { theme } from '../../styles/theme';
+import { theme } from '@shared/styles/theme';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 

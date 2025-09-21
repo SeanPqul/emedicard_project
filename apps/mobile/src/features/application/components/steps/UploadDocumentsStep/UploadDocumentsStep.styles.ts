@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { getColor } from '@/src/styles/theme';
-import { wp, hp, scaleFont as sp } from '@/src/utils/responsive';
+import { getColor } from '@shared/styles/theme';
+import { wp, hp, scaleFont as sp } from '@shared/utils/responsive';
 
 const styles = StyleSheet.create({
   container: {

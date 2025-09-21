@@ -11,4 +11,4 @@ export { StatCard } from './StatCard';
 export { ActivityItem } from './ActivityItem';
 
 // OfflineBanner is now in shared
-export { OfflineBanner } from '@/src/shared/components';
+export { OfflineBanner } from '@shared/components';

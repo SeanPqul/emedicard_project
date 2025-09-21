@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { getColor, getSpacing, getBorderRadius, getTypography } from '@/src/styles/theme';
+import { getColor, getSpacing, getBorderRadius, getTypography } from '@shared/styles/theme';
 
 import { ReviewStepProps, DocumentStatusInfo, ApplicationSummary } from './ReviewStep.types';
 import { styles } from './ReviewStep.styles';

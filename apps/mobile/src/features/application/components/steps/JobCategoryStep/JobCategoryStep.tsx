@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { JobCategoryStepProps } from './JobCategoryStep.types';
 import styles from './JobCategoryStep.styles';
-import { getColor } from '@/src/styles/theme';
+import { getColor } from '@shared/styles/theme';
 
 export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({ 
   value, 

@@ -1,4 +1,4 @@
-import { useUsers } from '@/src/hooks/useUsers';
+import { useUsers } from '@shared/hooks/useUsers';
 import { Redirect } from 'expo-router';
 import RoleBasedTabLayout from '@/src/core/navigation/components/RoleBasedTabLayout';
 import { LoadingSpinner } from '@/src/shared/components';

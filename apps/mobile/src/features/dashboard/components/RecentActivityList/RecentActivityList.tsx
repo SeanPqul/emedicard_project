@@ -1,9 +1,9 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
-import { ActivityItem } from '../ActivityItem';
-import { EmptyState } from '@/src/shared/components/feedback';
-import { RecentActivityListProps } from '../../types';
+import { ActivityItem } from '@features/dashboard/components/ActivityItem';
+import { EmptyState } from '@shared/components/feedback';
+import { RecentActivityListProps } from '@features/dashboard/types';
 import { styles } from './RecentActivityList.styles';
 
 export const RecentActivityList: React.FC<RecentActivityListProps> = ({ recentActivities }) => {

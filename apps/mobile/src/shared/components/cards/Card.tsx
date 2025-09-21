@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { TouchableOpacity, View, ViewStyle } from 'react-native';
-import { cardVariants, getSpacing } from '../../styles';
-import { DesignSystemCardProps } from '../../types/design-system';
+import { cardVariants, getSpacing } from '@shared/styles';
+import { DesignSystemCardProps } from '@shared/types/design-system';
 
 export const Card: React.FC<DesignSystemCardProps> = React.memo(({
   children,

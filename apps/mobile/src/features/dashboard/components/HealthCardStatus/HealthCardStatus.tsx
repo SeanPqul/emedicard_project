@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { HealthCardStatusProps } from '../../types';
+import { HealthCardStatusProps } from '@features/dashboard/types';
 import { styles } from './HealthCardStatus.styles';
 
 export const HealthCardStatus: React.FC<HealthCardStatusProps> = ({ dashboardStats }) => {

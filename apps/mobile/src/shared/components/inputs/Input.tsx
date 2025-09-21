@@ -6,8 +6,8 @@
 
 import React, { useState } from 'react';
 import { TextInput, TextInputProps, ViewStyle, TextStyle } from 'react-native';
-import { inputVariants, getTypography } from '../../styles';
-import { InputStyleProps, BaseComponentProps } from '../../types/design-system';
+import { inputVariants, getTypography } from '@shared/styles';
+import { InputStyleProps, BaseComponentProps } from '@shared/types/design-system';
 
 interface InputProps extends TextInputProps, BaseComponentProps, InputStyleProps {
   style?: ViewStyle | ViewStyle[];

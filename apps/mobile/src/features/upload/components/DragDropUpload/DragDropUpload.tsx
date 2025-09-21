@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@/src/styles/theme';
-import { CustomButton } from '../ui/Button';
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@shared/styles/theme';
+import { CustomButton } from '@features/upload/components/ui/Button';
 
 interface DragDropUploadProps {
   onFilesSelected: (files: any[]) => void;

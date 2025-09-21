@@ -13,9 +13,9 @@ import {
   buttonTextVariants, 
   buttonSizeVariants,
   getSpacing
-} from '../../styles';
-import { theme } from '../../styles/theme';
-import { DesignSystemButtonProps } from '../../types/design-system';
+} from '@shared/styles';
+import { theme } from '@shared/styles/theme';
+import { DesignSystemButtonProps } from '@shared/types/design-system';
 
 export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
   title,

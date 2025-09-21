@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { theme } from '@/src/styles/theme';
+import { theme } from '@shared/styles/theme';
 
 export default function InspectorLayout() {
   return (

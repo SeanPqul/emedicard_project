@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS, SHADOWS } from '@/src/shared/constants/theme';
-import { moderateScale, verticalScale, horizontalScale, wp, hp } from '@/src/shared/utils/responsive';
+import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS, SHADOWS } from '@shared/constants/theme';
+import { moderateScale, verticalScale, horizontalScale, wp, hp } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {

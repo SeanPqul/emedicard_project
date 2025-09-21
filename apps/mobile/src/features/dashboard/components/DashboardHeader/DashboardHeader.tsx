@@ -4,8 +4,8 @@ import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { getUserDisplayName } from '@/src/utils/user-utils';
-import { DashboardHeaderProps } from '../../types';
+import { getUserDisplayName } from '@shared/utils/user-utils';
+import { DashboardHeaderProps } from '@features/dashboard/types';
 import { styles } from './DashboardHeader.styles';
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
