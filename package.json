@@ -13,7 +13,8 @@
     "clean": "turbo run clean"
   },
   "devDependencies": {
-    "turbo": "latest"
+    "turbo": "latest",
+    "convex": "^1.12.0"
   },
   "pnpm": {
     "allowedScriptVersions": {

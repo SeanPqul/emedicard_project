@@ -2,130 +2,79 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  
-  // Users
-  users: defineTable({
-    username: v.string(),
-    fullname: v.string(),
-    email: v.string(),
-    image: v.string(),
-    gender: v.optional(v.string()),
-    birthDate: v.optional(v.string()),
-    phoneNumber: v.optional(v.string()),
-    role: v.optional(v.union(
-      v.literal("applicant"),
-      v.literal("inspector"),
-      v.literal("admin"),
-    )),
-    managedCategories: v.optional(
-      v.array(v.id("jobCategories"))
-    ),
-    clerkId: v.string(),
-    updatedAt: v.optional(v.float64()), // For tracking profile updates
-  }).index("by_clerk_id", ["clerkId"])
-    .index("by_role", ["role"]),
-
-  // Job categories (e.g., food handler, security guard, etc.)
-  jobCategories: defineTable({
-    name: v.string(),
-    colorCode: v.string(),
-    requireOrientation: v.optional(v.union(v.boolean(), v.string()))
-  }),
-
-  // Document types that can be uploaded (e.g., valid ID, x-ray)
-  documentTypes: defineTable({
-    name: v.string(),
-    description: v.string(),
-    icon: v.string(),
-    isRequired: v.boolean(),
-    fieldIdentifier: v.string() // "validId", "chestXrayId", etc.
-  }).index("by_field_identifier", ["fieldIdentifier"]),
-
-  // Links job categories to required document types
-  jobCategoryDocuments: defineTable({
-    jobCategoryId: v.id("jobCategories"),
-    documentTypeId: v.id("documentTypes"),
-    isRequired: v.boolean(),
-  }).index("by_job_category", ["jobCategoryId"])
-    .index("by_document_type", ["documentTypeId"]),
-
-  // Health card applications (renamed from 'forms' for clarity)
   applications: defineTable({
-    userId: v.id("users"),
+    adminRemarks: v.optional(v.string()),
+    applicationStatus: v.string(),
     applicationType: v.union(
-      v.literal("New"), 
+      v.literal("New"),
       v.literal("Renew")
     ),
-    jobCategoryId: v.id("jobCategories"),
-    position: v.string(),
-    organization: v.string(),
-    civilStatus: v.string(),
-    applicationStatus: v.string(), // "Draft", "Pending Payment", "Submitted", "For Payment Validation", "Approved", "Rejected"
-    paymentDeadline: v.optional(v.float64()), // Timestamp for payment deadline
     approvedAt: v.optional(v.float64()),
-    adminRemarks: v.optional(v.string()), // Admin notes
+    civilStatus: v.string(),
+    jobCategoryId: v.id("jobCategories"),
+    organization: v.string(),
+    paymentDeadline: v.optional(v.float64()),
+    position: v.string(),
     updatedAt: v.optional(v.float64()),
+    userId: v.id("users"),
   }).index("by_user", ["userId"]),
-
-  // Document uploads for applications
+  documentTypes: defineTable({
+    description: v.string(),
+    fieldIdentifier: v.string(),
+    icon: v.string(),
+    isRequired: v.boolean(),
+    name: v.string(),
+  }).index("by_field_identifier", ["fieldIdentifier"]),
   documentUploads: defineTable({
+    adminRemarks: v.optional(v.string()),
     applicationId: v.id("applications"),
     documentTypeId: v.id("documentTypes"),
     originalFileName: v.string(),
-    storageFileId: v.id("_storage"), // Convex storage reference
+    reviewStatus: v.string(),
+    reviewedAt: v.optional(v.float64()),
+    reviewedBy: v.optional(v.id("users")),
+    storageFileId: v.id("_storage"),
     uploadedAt: v.float64(),
-    reviewStatus: v.string(), // "Pending", "Approved", "Rejected"
-    adminRemarks: v.optional(v.string()), // Admin feedback on document
-    reviewedBy: v.optional(v.id("users")), // Who reviewed the document
-    reviewedAt: v.optional(v.float64()), // When document was reviewed
-  }).index("by_application", ["applicationId"])
-    .index("by_application_document", ["applicationId", "documentTypeId"]),
-
-  // Payments for applications
-  payments: defineTable({
+  })
+    .index("by_application", ["applicationId"])
+    .index("by_application_document", [
+      "applicationId",
+      "documentTypeId",
+    ]),
+  healthCards: defineTable({
     applicationId: v.id("applications"),
-    amount: v.float64(),
-    serviceFee: v.float64(),
-    netAmount: v.float64(),
-    paymentMethod: v.union(
-      v.literal("Gcash"),
-      v.literal("Maya"),
-      v.literal("BaranggayHall"),
-      v.literal("CityHall")
+    cardUrl: v.string(),
+    expiresAt: v.float64(),
+    issuedAt: v.float64(),
+    verificationToken: v.string(),
+  })
+    .index("by_application", ["applicationId"])
+    .index("by_verification_token", ["verificationToken"]),
+  jobCategories: defineTable({
+    colorCode: v.string(),
+    name: v.string(),
+    requireOrientation: v.optional(
+      v.union(v.boolean(), v.string())
     ),
-    referenceNumber: v.string(),
-    receiptStorageId: v.optional(v.id("_storage")),
-    paymentStatus: v.union(
-      v.literal("Pending"),
-      v.literal("Processing"), // New status for Maya checkout
-      v.literal("Complete"),
-      v.literal("Failed"),
-      v.literal("Refunded"),
-      v.literal("Cancelled"),
-      v.literal("Expired") // New status for expired checkouts
-    ),
-    // Maya-specific fields
-    mayaPaymentId: v.optional(v.string()), // Maya's payment ID
-    mayaCheckoutId: v.optional(v.string()), // Maya checkout session ID
-    checkoutUrl: v.optional(v.string()), // Maya checkout URL
-    webhookPayload: v.optional(v.any()), // Store webhook data for debugging
-    paymentProvider: v.optional(v.union(
-      v.literal("maya_api"),
-      v.literal("manual"),
-      v.literal("cash")
-    )),
-    transactionFee: v.optional(v.float64()), // Maya transaction fees
-    settlementDate: v.optional(v.float64()), // When funds will be settled
-    failureReason: v.optional(v.string()), // Reason for failed payments
-    updatedAt: v.optional(v.float64()),
-  }).index("by_application", ["applicationId"])
-    .index("by_maya_payment", ["mayaPaymentId"]), // New index for Maya lookups
-
-  // Orientation scheduling for food handlers
+  }),
+  jobCategoryDocuments: defineTable({
+    documentTypeId: v.id("documentTypes"),
+    isRequired: v.boolean(),
+    jobCategoryId: v.id("jobCategories"),
+  })
+    .index("by_document_type", ["documentTypeId"])
+    .index("by_job_category", ["jobCategoryId"]),
+  notifications: defineTable({
+    actionUrl: v.optional(v.string()),
+    applicationId: v.optional(v.id("applications")),
+    isRead: v.boolean(),
+    message: v.string(),
+    notificationType: v.string(),
+    title: v.optional(v.string()),
+    userId: v.id("users"),
+  }).index("by_user", ["userId"]),
   orientations: defineTable({
     applicationId: v.id("applications"),
-    scheduledAt: v.float64(),
-    qrCodeUrl: v.string(),
     checkInTime: v.optional(v.float64()),
     checkOutTime: v.optional(v.float64()),
     orientationStatus: v.union(
@@ -133,44 +82,13 @@ export default defineSchema({
       v.literal("Completed"),
       v.literal("Missed")
     ),
+    qrCodeUrl: v.string(),
+    scheduledAt: v.float64(),
   }).index("by_application", ["applicationId"]),
-
-  // Health card issuance
-  healthCards: defineTable({
-    applicationId: v.id("applications"),
-    cardUrl: v.string(),
-    issuedAt: v.float64(),
-    expiresAt: v.float64(),
-    verificationToken: v.string(),
-  }).index("by_application", ["applicationId"])
-    .index("by_verification_token", ["verificationToken"]),
-
-  // Notifications for users
-  notifications: defineTable({
-    userId: v.id("users"),
-    applicationId: v.optional(v.id("applications")),
-    title: v.optional(v.string()),
-    message: v.string(),
-    notificationType: v.string(), // "MissingDoc", "Payment", "Approval"
-    isRead: v.boolean(),
-    actionUrl: v.optional(v.string()),
-  }).index("by_user", ["userId"]),
-
-  // QR verification logs
-  verificationLogs: defineTable({
-    healthCardId: v.id("healthCards"),
-    scannedAt: v.float64(),
-    userAgent: v.optional(v.string()),
-    ipAddress: v.optional(v.string()),
-    verificationStatus: v.union(
-      v.literal("Success"),
-      v.literal("Failed")
-    ),
-  }).index("by_health_card", ["healthCardId"]),
-
-  // Payment logs for audit trail
   paymentLogs: defineTable({
-    paymentId: v.optional(v.id("payments")), // Reference to payment record
+    amount: v.optional(v.float64()),
+    currency: v.optional(v.string()),
+    errorMessage: v.optional(v.string()),
     eventType: v.union(
       v.literal("checkout_created"),
       v.literal("payment_success"),
@@ -182,18 +100,89 @@ export default defineSchema({
       v.literal("refund_completed"),
       v.literal("status_check")
     ),
-    mayaPaymentId: v.optional(v.string()),
-    mayaCheckoutId: v.optional(v.string()),
-    amount: v.optional(v.float64()),
-    currency: v.optional(v.string()),
-    errorMessage: v.optional(v.string()),
-    metadata: v.optional(v.any()), // Additional event-specific data
     ipAddress: v.optional(v.string()),
-    userAgent: v.optional(v.string()),
+    mayaCheckoutId: v.optional(v.string()),
+    mayaPaymentId: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    paymentId: v.optional(v.id("payments")),
     timestamp: v.float64(),
-  }).index("by_payment", ["paymentId"])
-    .index("by_maya_payment", ["mayaPaymentId"])
+    userAgent: v.optional(v.string()),
+  })
     .index("by_event_type", ["eventType"])
+    .index("by_maya_payment", ["mayaPaymentId"])
+    .index("by_payment", ["paymentId"])
     .index("by_timestamp", ["timestamp"]),
-
+  payments: defineTable({
+    amount: v.float64(),
+    applicationId: v.id("applications"),
+    checkoutUrl: v.optional(v.string()),
+    failureReason: v.optional(v.string()),
+    mayaCheckoutId: v.optional(v.string()),
+    mayaPaymentId: v.optional(v.string()),
+    netAmount: v.float64(),
+    paymentMethod: v.union(
+      v.literal("Gcash"),
+      v.literal("Maya"),
+      v.literal("BaranggayHall"),
+      v.literal("CityHall")
+    ),
+    paymentProvider: v.optional(
+      v.union(
+        v.literal("maya_api"),
+        v.literal("manual"),
+        v.literal("cash")
+      )
+    ),
+    paymentStatus: v.union(
+      v.literal("Pending"),
+      v.literal("Processing"),
+      v.literal("Complete"),
+      v.literal("Failed"),
+      v.literal("Refunded"),
+      v.literal("Cancelled"),
+      v.literal("Expired")
+    ),
+    receiptStorageId: v.optional(v.id("_storage")),
+    referenceNumber: v.string(),
+    serviceFee: v.float64(),
+    settlementDate: v.optional(v.float64()),
+    transactionFee: v.optional(v.float64()),
+    updatedAt: v.optional(v.float64()),
+    webhookPayload: v.optional(v.any()),
+  })
+    .index("by_application", ["applicationId"])
+    .index("by_maya_payment", ["mayaPaymentId"]),
+  users: defineTable({
+    birthDate: v.optional(v.string()),
+    clerkId: v.string(),
+    email: v.string(),
+    fullname: v.string(),
+    gender: v.optional(v.string()),
+    image: v.string(),
+    managedCategories: v.optional(
+      v.array(v.id("jobCategories"))
+    ),
+    phoneNumber: v.optional(v.string()),
+    role: v.optional(
+      v.union(
+        v.literal("applicant"),
+        v.literal("inspector"),
+        v.literal("admin")
+      )
+    ),
+    updatedAt: v.optional(v.float64()),
+    username: v.string(),
+  })
+    .index("by_clerk_id", ["clerkId"])
+    .index("by_role", ["role"]),
+  verificationLogs: defineTable({
+    healthCardId: v.id("healthCards"),
+    ipAddress: v.optional(v.string()),
+    scannedAt: v.float64(),
+    userAgent: v.optional(v.string()),
+    verificationStatus: v.union(
+      v.literal("Success"),
+      v.literal("Failed")
+    ),
+  }).index("by_health_card", ["healthCardId"]),
 });

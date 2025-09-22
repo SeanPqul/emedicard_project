@@ -1,6 +1,6 @@
 // Extended user management functions from webadmin
 import { v } from "convex/values";
-import { query, mutation, internalMutation } from "../_generated/server";
+import { internalMutation, mutation, query } from "../_generated/server";
 
 // =================================================================
 // == 1. FOR THE SECURE CLERK WEBHOOK (INTERNAL) ==
@@ -72,5 +72,59 @@ export const getCurrentUserAlternative = query({
       .unique();
 
     return user;
+  },
+});
+
+// =================================================================
+// == 4. FOR SUPER ADMIN ACTIONS (INTERNAL QUERY/MUTATIONS) ==
+// =================================================================
+
+// Query to get a user by Clerk ID (used by actions)
+export const getUserByClerkId = query({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .first();
+  },
+});
+
+// Mutation to patch user role and managed categories (used by actions)
+export const patchUserRoleAndCategories = mutation({
+  args: {
+    userId: v.id("users"),
+    role: v.union(v.literal("applicant"), v.literal("inspector"), v.literal("admin")), // Constrained role type
+    managedCategories: v.array(v.id("jobCategories")),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, {
+      role: args.role,
+      managedCategories: args.managedCategories,
+    });
+  },
+});
+
+// Mutation to insert a new user (used by actions)
+export const insertUser = mutation({
+  args: {
+    clerkId: v.string(),
+    email: v.string(),
+    fullname: v.string(),
+    image: v.string(),
+    role: v.union(v.literal("applicant"), v.literal("inspector"), v.literal("admin")), // Constrained role type
+    managedCategories: v.array(v.id("jobCategories")),
+    username: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("users", {
+      clerkId: args.clerkId,
+      email: args.email,
+      fullname: args.fullname,
+      image: args.image,
+      role: args.role,
+      managedCategories: args.managedCategories,
+      username: args.username,
+    });
   },
 });
