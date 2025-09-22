@@ -1,76 +1,28 @@
-// Dashboard feature types
-import { Id } from 'convex/values';
+// Dashboard feature types - Uses entities from entities layer (FSD pattern)
+import type { 
+  DashboardStats, 
+  Activity as RecentActivity,
+  Alert,
+  QuickAction 
+} from '@entities/dashboard';
+import type { Application } from '@entities/application';
+import type { User as UserProfile } from '@entities/user';
 
-// Dashboard stats matching backend response
-export interface DashboardStats {
-  activeApplications: number;
-  pendingPayments: number;
-  pendingAmount: number;
-  validHealthCards: number;
-  unreadNotifications?: number;
-}
+// Re-export entity types for backward compatibility
+export type { 
+  DashboardStats, 
+  RecentActivity, 
+  Alert, 
+  QuickAction,
+  Application,
+  UserProfile 
+};
 
-export interface RecentActivity {
-  id: string;
-  type: 'application' | 'payment' | 'notification';
-  title: string;
-  description: string;
-  timestamp: string;
-  status: 'success' | 'pending' | 'error';
-  metadata?: Record<string, any>;
-}
-
-export interface QuickAction {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: string;
-  route: string;
-  enabled: boolean;
-  badge?: number;
-}
-
+// Dashboard-specific feature types
 export interface DashboardData {
   stats: DashboardStats;
   recentActivities: RecentActivity[];
   alerts: Alert[];
-}
-
-export interface Alert {
-  id: string;
-  type: 'info' | 'warning' | 'error' | 'success';
-  title: string;
-  message: string;
-  actionLabel?: string;
-  actionRoute?: string;
-}
-
-// Additional types for dashboard feature
-export interface Application {
-  _id: string;
-  status: string;
-  applicationType: string;
-  position?: string;
-  organization?: string;
-  jobCategory?: {
-    _id: string;
-    name: string;
-    colorCode?: string;
-    requireOrientation?: boolean;
-  };
-  documentCount?: number;
-  hasPayment?: boolean;
-  orientationCompleted?: boolean;
-  _creationTime?: number;
-}
-
-export interface UserProfile {
-  _id: string;
-  email: string;
-  fullname?: string;
-  username?: string;
-  profilePicture?: string;
-  role?: string;
 }
 
 // Component Props interfaces

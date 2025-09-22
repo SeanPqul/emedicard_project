@@ -1,0 +1,420 @@
+﻿app/(screens)/(shared)/navigation-debug.tsx(50,69): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/(screens)/(shared)/orientation.tsx(17,8): error TS2307: Cannot find module '../../../src/utils' or its corresponding type declarations.
+app/(screens)/(shared)/orientation.tsx(27,9): error TS7034: Variable 'orientations' implicitly has type 'any[]' in some locations where its type cannot be determined.
+app/(screens)/(shared)/orientation.tsx(209,10): error TS7005: Variable 'orientations' implicitly has an 'any[]' type.
+app/(screens)/(shared)/orientation.tsx(212,14): error TS7005: Variable 'orientations' implicitly has an 'any[]' type.
+app/(tabs)/_layout.tsx(3,32): error TS2307: Cannot find module '@/src/core/navigation/components/RoleBasedTabLayout' or its corresponding type declarations.
+app/(tabs)/application.tsx(6,11): error TS2739: Type '{}' is missing the following properties from type 'ApplicationListScreenProps': navigation, route
+app/(tabs)/apply.tsx(6,11): error TS2739: Type '{}' is missing the following properties from type 'ApplyScreenProps': navigation, route
+app/application/[id].tsx(6,11): error TS2739: Type '{}' is missing the following properties from type 'ApplicationDetailScreenProps': navigation, route
+app/payment/cancelled.tsx(82,8): error TS2739: Type '{}' is missing the following properties from type 'FeedbackSystemProps': messages, onDismiss
+app/payment/failed.tsx(142,8): error TS2739: Type '{}' is missing the following properties from type 'FeedbackSystemProps': messages, onDismiss
+app/payment/success.tsx(117,10): error TS2739: Type '{}' is missing the following properties from type 'FeedbackSystemProps': messages, onDismiss
+app/payment/success.tsx(148,8): error TS2739: Type '{}' is missing the following properties from type 'FeedbackSystemProps': messages, onDismiss
+app/providers/ClerkAndConvexProvider.tsx(7,66): error TS2307: Cannot find module '@shared/utils/user-utils' or its corresponding type declarations.
+docs/types/index.ts(18,15): error TS2307: Cannot find module './user.types' or its corresponding type declarations.
+docs/types/index.ts(25,8): error TS2307: Cannot find module './user.types' or its corresponding type declarations.
+docs/types/index.ts(139,16): error TS2304: Cannot find name 'UserService'.
+docs/types/index.ts(140,23): error TS2304: Cannot find name 'ApplicationService'.
+docs/types/index.ts(141,19): error TS2304: Cannot find name 'PaymentService'.
+docs/types/index.ts(142,22): error TS2304: Cannot find name 'HealthCardService'.
+docs/types/index.ts(143,24): error TS2304: Cannot find name 'NotificationService'.
+docs/types/index.ts(144,23): error TS2304: Cannot find name 'OrientationService'.
+docs/types/index.ts(213,3): error TS2687: All declarations of 'code' must have identical modifiers.
+docs/types/index.ts(215,3): error TS2687: All declarations of 'details' must have identical modifiers.
+docs/types/index.ts(231,19): error TS2687: All declarations of 'code' must have identical modifiers.
+docs/types/index.ts(232,19): error TS2687: All declarations of 'details' must have identical modifiers.
+scripts/convex-naming-codemod.ts(124,13): error TS18048: 'declaration' is possibly 'undefined'.
+scripts/convex-naming-codemod.ts(125,11): error TS18048: 'declaration' is possibly 'undefined'.
+src/entities/application/index.ts(3,1): error TS2308: Module './model/types' has already exported a member named 'ApplicationType'. Consider explicitly re-exporting to resolve the ambiguity.
+src/entities/application/index.ts(3,1): error TS2308: Module './model/types' has already exported a member named 'CivilStatus'. Consider explicitly re-exporting to resolve the ambiguity.
+src/entities/application/lib/application/requirementsMapper.ts(1,37): error TS2307: Cannot find module '../../types/domain/application' or its corresponding type declarations.
+src/entities/application/lib/job-category-utils.ts(1,26): error TS2307: Cannot find module '../styles/theme' or its corresponding type declarations.
+src/entities/application/model/service.ts(7,20): error TS2307: Cannot find module '../../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/entities/application/model/types.ts(7,20): error TS2307: Cannot find module '../../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/entities/healthCard/lib/health-card-utils.ts(1,29): error TS2307: Cannot find module '../types/domain/application' or its corresponding type declarations.
+src/entities/healthCard/model/types.ts(7,20): error TS2307: Cannot find module '../../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/entities/index.ts(4,1): error TS2308: Module './application' has already exported a member named 'PaymentMethod'. Consider explicitly re-exporting to resolve the ambiguity.
+src/entities/notification/model/types.ts(7,16): error TS2344: Type '"forms"' does not satisfy the constraint 'TableNames | SystemTableNames'.
+src/entities/notification/model/types.ts(40,16): error TS2344: Type '"forms"' does not satisfy the constraint 'TableNames | SystemTableNames'.
+src/entities/payment/model/types.ts(7,20): error TS2307: Cannot find module '../../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/entities/user/model/types.ts(7,20): error TS2307: Cannot find module '../../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/features/application/components/index.ts(2,15): error TS2307: Cannot find module './StepIndicator' or its corresponding type declarations.
+src/features/application/components/index.ts(3,15): error TS2307: Cannot find module './DocumentSourceModal' or its corresponding type declarations.
+src/features/application/components/steps/ApplicationTypeStep/ApplicationTypeStep.styles.ts(3,18): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'scaleFont'.
+src/features/application/components/steps/index.ts(7,1): error TS2308: Module './ApplicationTypeStep' has already exported a member named 'ApplicationType'. Consider explicitly re-exporting to resolve the ambiguity.
+src/features/application/components/steps/index.ts(7,1): error TS2308: Module './PaymentMethodStep' has already exported a member named 'ApplicationFormData'. Consider explicitly re-exporting to resolve the ambiguity.
+src/features/application/components/steps/JobCategoryStep/JobCategoryStep.styles.ts(3,18): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'scaleFont'.
+src/features/application/components/steps/PaymentMethodStep/PaymentMethodStep.styles.ts(26,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/PaymentMethodStep/PaymentMethodStep.styles.ts(72,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/PaymentMethodStep/PaymentMethodStep.styles.ts(78,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/PaymentMethodStep/PaymentMethodStep.styles.ts(121,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/PaymentMethodStep/PaymentMethodStep.styles.ts(144,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/PaymentMethodStep/PaymentMethodStep.styles.ts(157,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/PersonalDetailsStep/PersonalDetailsStep.styles.ts(3,18): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'scaleFont'.
+src/features/application/components/steps/ReviewStep/ReviewStep.styles.ts(26,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/ReviewStep/ReviewStep.styles.ts(55,22): error TS2345: Argument of type '"bodyLarge"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/ReviewStep/ReviewStep.styles.ts(88,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/ReviewStep/ReviewStep.styles.ts(94,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/ReviewStep/ReviewStep.styles.ts(137,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/ReviewStep/ReviewStep.styles.ts(211,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/ReviewStep/ReviewStep.styles.ts(233,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/features/application/components/steps/UploadDocumentsStep/UploadDocumentsStep.styles.ts(3,18): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'scaleFont'.
+src/features/application/hooks/useSubmission.ts(4,20): error TS2307: Cannot find module '@backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/features/application/services/index.ts(2,15): error TS2307: Cannot find module './applicationService' or its corresponding type declarations.
+src/features/application/services/index.ts(3,47): error TS2307: Cannot find module './applicationService' or its corresponding type declarations.
+src/features/auth/components/PasswordStrengthIndicator/PasswordStrengthIndicator.tsx(1,72): error TS2307: Cannot find module '@/shared/utils/responsive' or its corresponding type declarations.
+src/features/auth/components/VerificationPage/index.ts(4,3): error TS2305: Module '"./VerificationPage.types"' has no exported member 'VerificationState'.
+src/features/auth/components/VerificationPage/index.ts(5,3): error TS2305: Module '"./VerificationPage.types"' has no exported member 'SuccessScreenProps'.
+src/features/auth/components/VerificationPage/VerificationPage.styles.ts(2,74): error TS2307: Cannot find module '@/shared/constants/theme' or its corresponding type declarations.
+src/features/auth/components/VerificationPage/VerificationPage.styles.ts(3,71): error TS2307: Cannot find module '@/shared/utils/responsive' or its corresponding type declarations.
+src/features/auth/components/VerificationPage/VerificationPage.tsx(49,13): error TS7030: Not all code paths return a value.
+src/features/auth/components/VerificationPage/VerificationPage.tsx(60,13): error TS7030: Not all code paths return a value.
+src/features/dashboard/components/ActivityItem/ActivityItem.tsx(1,10): error TS2305: Module '"@shared/types"' has no exported member 'RecentActivity'.
+src/features/dashboard/components/ApplicationStatus/ApplicationStatus.tsx(5,75): error TS2307: Cannot find module '@shared/utils/job-category-utils' or its corresponding type declarations.
+src/features/dashboard/components/ApplicationStatus/ApplicationStatus.tsx(26,7): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | null'.
+  Type 'undefined' is not assignable to type 'string | null'.
+src/features/dashboard/components/DashboardHeader/DashboardHeader.tsx(7,36): error TS2307: Cannot find module '@shared/utils/user-utils' or its corresponding type declarations.
+src/features/dashboard/components/DashboardHeader/DashboardHeader.tsx(33,59): error TS2339: Property 'profilePicture' does not exist on type 'User'.
+src/features/dashboard/components/PriorityAlerts/PriorityAlerts.tsx(17,82): error TS2339: Property 'orientationCompleted' does not exist on type 'Application'.
+src/features/dashboard/components/QuickActionsGrid/QuickActionsGrid.tsx(15,66): error TS2339: Property 'orientationCompleted' does not exist on type 'Application'.
+src/features/dashboard/components/StatCard/StatCard.tsx(8,8): error TS2307: Cannot find module '@/src/styles' or its corresponding type declarations.
+src/features/dashboard/components/StatsOverview/StatsOverview.tsx(20,29): error TS2339: Property 'orientationCompleted' does not exist on type 'Application'.
+src/features/dashboard/components/StatsOverview/StatsOverview.tsx(26,29): error TS2339: Property 'orientationCompleted' does not exist on type 'Application'.
+src/features/dashboard/components/StatsOverview/StatsOverview.tsx(32,29): error TS2339: Property 'orientationCompleted' does not exist on type 'Application'.
+src/features/dashboard/services/dashboardService.ts(1,21): error TS2307: Cannot find module '@backend/convex/_generated/api' or its corresponding type declarations.
+src/features/dashboard/services/dashboardService.ts(20,44): error TS2554: Expected 2 arguments, but got 1.
+src/features/dashboard/services/dashboardService.ts(71,9): error TS2322: Type '"notification"' is not assignable to type 'ActivityType'.
+src/features/dashboard/services/dashboardService.ts(74,9): error TS2322: Type 'string' is not assignable to type 'Date'.
+src/features/dashboard/services/dashboardService.ts(87,9): error TS2322: Type '"application"' is not assignable to type 'ActivityType'.
+src/features/dashboard/services/dashboardService.ts(90,9): error TS2322: Type 'string' is not assignable to type 'Date'.
+src/features/dashboard/services/dashboardService.ts(104,11): error TS2322: Type '"payment"' is not assignable to type 'ActivityType'.
+src/features/dashboard/services/dashboardService.ts(107,11): error TS2322: Type 'string' is not assignable to type 'Date'.
+src/features/dashboard/services/dashboardService.ts(174,11): error TS2322: Type '"application"' is not assignable to type 'ActivityType'.
+src/features/dashboard/services/dashboardService.ts(177,11): error TS2322: Type 'string' is not assignable to type 'Date'.
+src/features/dashboard/services/dashboardService.ts(182,11): error TS2322: Type '"payment"' is not assignable to type 'ActivityType'.
+src/features/dashboard/services/dashboardService.ts(185,11): error TS2322: Type 'string' is not assignable to type 'Date'.
+src/features/healthCards/HealthCardExample.tsx(8,38): error TS2307: Cannot find module './useHealthCard' or its corresponding type declarations.
+src/features/healthCards/HealthCardExample.tsx(9,28): error TS2307: Cannot find module '../../components/common' or its corresponding type declarations.
+src/features/healthCards/HealthCardExample.tsx(10,32): error TS2307: Cannot find module '../../components/common/LoadingSpinner' or its corresponding type declarations.
+src/features/healthCards/HealthCardExample.tsx(11,70): error TS2307: Cannot find module '../../styles/theme' or its corresponding type declarations.
+src/features/healthCards/HealthCardExample.tsx(39,18): error TS2304: Cannot find name 'SkeletonGroup'.
+src/features/healthCards/HealthCardExample.tsx(41,19): error TS2304: Cannot find name 'SkeletonGroup'.
+src/features/healthCards/index.ts(1,38): error TS2307: Cannot find module './useHealthCard' or its corresponding type declarations.
+src/features/scanner/components/QRCodeScanner/QRCodeScanner.tsx(15,30): error TS2307: Cannot find module '@features/scanner/components/ui/Button' or its corresponding type declarations.
+src/features/scanner/index.ts(3,15): error TS2307: Cannot find module './screens' or its corresponding type declarations.
+src/features/scanner/index.ts(4,15): error TS2307: Cannot find module './hooks' or its corresponding type declarations.
+src/features/scanner/index.ts(5,15): error TS2307: Cannot find module './services' or its corresponding type declarations.
+src/features/scanner/index.ts(6,15): error TS2307: Cannot find module './types' or its corresponding type declarations.
+src/features/scanner/index.ts(7,15): error TS2307: Cannot find module './constants' or its corresponding type declarations.
+src/features/upload/components/DragDropUpload/DragDropUpload.tsx(13,30): error TS2307: Cannot find module '@features/upload/components/ui/Button' or its corresponding type declarations.
+src/index.ts(13,15): error TS2307: Cannot find module './config' or its corresponding type declarations.
+src/index.ts(16,15): error TS2307: Cannot find module './contexts' or its corresponding type declarations.
+src/index.ts(19,15): error TS2307: Cannot find module './hooks' or its corresponding type declarations.
+src/index.ts(25,15): error TS2307: Cannot find module './utils' or its corresponding type declarations.
+src/index.ts(28,1): error TS2308: Module './types' has already exported a member named 'ApiResponse'. Consider explicitly re-exporting to resolve the ambiguity.
+src/index.ts(28,1): error TS2308: Module './types' has already exported a member named 'LayoutProps'. Consider explicitly re-exporting to resolve the ambiguity.
+src/index.ts(31,15): error TS2307: Cannot find module './styles' or its corresponding type declarations.
+src/index.ts(34,15): error TS2307: Cannot find module './layouts' or its corresponding type declarations.
+src/pages/application/ApplicationDetailScreen/ApplicationDetailScreen.tsx(17,28): error TS2307: Cannot find module '@/src/core/components' or its corresponding type declarations.
+src/pages/application/ApplicationDetailScreen/ApplicationDetailScreen.tsx(18,21): error TS2307: Cannot find module '@backend/convex/_generated/api' or its corresponding type declarations.
+src/pages/application/ApplicationDetailScreen/ApplicationDetailScreen.tsx(19,20): error TS2307: Cannot find module '@backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/pages/application/ApplicationDetailScreen/ApplicationDetailScreen.types.ts(2,36): error TS2307: Cannot find module '@/shared/types/navigation' or its corresponding type declarations.
+src/pages/application/ApplicationDetailScreen/ApplicationDetailScreen.types.ts(3,20): error TS2307: Cannot find module '@backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/pages/application/ApplicationListScreen/ApplicationListScreen.tsx(15,28): error TS2307: Cannot find module '@/src/core/components' or its corresponding type declarations.
+src/pages/application/ApplicationListScreen/ApplicationListScreen.tsx(16,21): error TS2307: Cannot find module '@backend/convex/_generated/api' or its corresponding type declarations.
+src/pages/application/ApplicationListScreen/ApplicationListScreen.tsx(328,9): error TS2322: Type '{ icon: string; title: string; subtitle: string; buttonText: string; onButtonPress: () => void; }' is not assignable to type 'IntrinsicAttributes & EmptyStateProps'.
+  Property 'buttonText' does not exist on type 'IntrinsicAttributes & EmptyStateProps'.
+src/pages/application/ApplicationListScreen/ApplicationListScreen.types.ts(2,36): error TS2307: Cannot find module '@/shared/types/navigation' or its corresponding type declarations.
+src/pages/application/ApplyScreen/ApplyScreen.tsx(15,28): error TS2307: Cannot find module '@/src/core/components' or its corresponding type declarations.
+src/pages/application/ApplyScreen/ApplyScreen.tsx(20,39): error TS2307: Cannot find module '@shared/utils/application/requirementsMapper' or its corresponding type declarations.
+src/pages/application/ApplyScreen/ApplyScreen.tsx(163,13): error TS2322: Type '{ formData: ApplicationFormData; setFormData: Dispatch<SetStateAction<ApplicationFormData>>; errors: Record<string, string>; }' is not assignable to type 'IntrinsicAttributes & ApplicationTypeStepProps'.
+  Property 'formData' does not exist on type 'IntrinsicAttributes & ApplicationTypeStepProps'.
+src/pages/application/ApplyScreen/ApplyScreen.tsx(171,13): error TS2322: Type '{ formData: ApplicationFormData; setFormData: Dispatch<SetStateAction<ApplicationFormData>>; errors: Record<string, string>; jobCategoriesData: JobCategory[]; }' is not assignable to type 'IntrinsicAttributes & JobCategoryStepProps'.
+  Property 'formData' does not exist on type 'IntrinsicAttributes & JobCategoryStepProps'.
+src/pages/application/ApplyScreen/ApplyScreen.tsx(180,13): error TS2322: Type '{ formData: ApplicationFormData; setFormData: Dispatch<SetStateAction<ApplicationFormData>>; errors: Record<string, string>; jobCategoriesData: JobCategory[]; }' is not assignable to type 'IntrinsicAttributes & PersonalDetailsStepProps'.
+  Property 'formData' does not exist on type 'IntrinsicAttributes & PersonalDetailsStepProps'.
+src/pages/application/ApplyScreen/ApplyScreen.tsx(189,13): error TS2322: Type '{ formData: ApplicationFormData; requirementsByJobCategory: DocumentRequirement[]; selectedDocuments: SelectedDocuments; ... 4 more ...; requirements: { ...; }; }' is not assignable to type 'IntrinsicAttributes & UploadDocumentsStepProps'.
+  Property 'formData' does not exist on type 'IntrinsicAttributes & UploadDocumentsStepProps'.
+src/pages/application/ApplyScreen/ApplyScreen.types.ts(2,36): error TS2307: Cannot find module '@/shared/types/navigation' or its corresponding type declarations.
+src/pages/auth/ResetPasswordScreen/ResetPasswordScreen.styles.ts(2,74): error TS2307: Cannot find module '@/shared/constants/theme' or its corresponding type declarations.
+src/pages/auth/ResetPasswordScreen/ResetPasswordScreen.styles.ts(3,63): error TS2307: Cannot find module '@/shared/utils/responsive' or its corresponding type declarations.
+src/pages/auth/ResetPasswordScreen/ResetPasswordScreen.tsx(7,28): error TS2307: Cannot find module '@core/components' or its corresponding type declarations.
+src/pages/auth/ResetPasswordScreen/ResetPasswordScreen.tsx(10,31): error TS2307: Cannot find module '@/shared/utils/responsive' or its corresponding type declarations.
+src/pages/auth/SignInScreen/SignInScreen.styles.ts(2,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/pages/auth/SignInScreen/SignInScreen.styles.ts(2,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/pages/auth/SignInScreen/SignInScreen.tsx(10,32): error TS2307: Cannot find module '@/assets/svgs/google-ctn-logo.svg' or its corresponding type declarations.
+src/pages/auth/SignInScreen/SignInScreen.tsx(12,28): error TS2307: Cannot find module '@core/components' or its corresponding type declarations.
+src/pages/auth/SignInScreen/SignInScreen.types.ts(2,36): error TS2307: Cannot find module '@/shared/types/navigation' or its corresponding type declarations.
+src/pages/auth/SignUpScreen/SignUpScreen.styles.ts(2,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/pages/auth/SignUpScreen/SignUpScreen.styles.ts(2,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/pages/auth/SignUpScreen/SignUpScreen.tsx(7,32): error TS2307: Cannot find module '@/assets/svgs/google-ctn-logo.svg' or its corresponding type declarations.
+src/pages/auth/SignUpScreen/SignUpScreen.tsx(8,28): error TS2307: Cannot find module '@core/components' or its corresponding type declarations.
+src/pages/auth/VerificationScreen/VerificationScreen.styles.ts(2,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/pages/auth/VerificationScreen/VerificationScreen.styles.ts(2,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/pages/dashboard/DashboardScreen.tsx(4,28): error TS2307: Cannot find module '@core/components' or its corresponding type declarations.
+src/pages/dashboard/DashboardScreen.tsx(8,33): error TS2307: Cannot find module '@widgets/dashboard' or its corresponding type declarations.
+src/pages/notification/NotificationScreen.tsx(16,30): error TS2307: Cannot find module '@types/domain' or its corresponding type declarations.
+src/pages/notification/NotificationScreen.tsx(16,30): error TS6137: Cannot import type declaration files. Consider importing 'domain' instead of '@types/domain'.
+src/pages/notification/NotificationScreen.tsx(17,20): error TS2307: Cannot find module '../../../../convex/_generated/dataModel' or its corresponding type declarations.
+src/pages/notification/NotificationScreen.tsx(139,36): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/pages/notification/NotificationScreen.tsx(142,36): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/pages/notification/NotificationScreen.tsx(147,36): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/pages/notification/NotificationScreen.tsx(150,36): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/pages/notification/NotificationScreen.tsx(157,27): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/pages/notification/NotificationScreen.tsx(157,30): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/pages/notification/NotificationScreen.tsx(164,22): error TS7006: Parameter 'notification' implicitly has an 'any' type.
+src/pages/notification/NotificationScreen.tsx(214,51): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/pages/notification/NotificationScreen.tsx(241,43): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/pages/notification/NotificationScreen.tsx(268,22): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ MissingDoc: string; PaymentReceived: string; FormApproved: string; OrientationScheduled: string; CardIssue: string; }'.
+src/pages/notification/NotificationScreen.tsx(269,19): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ MissingDoc: string; PaymentReceived: string; FormApproved: string; OrientationScheduled: string; CardIssue: string; }'.
+src/pages/notification/NotificationScreen.tsx(270,19): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ MissingDoc: string; PaymentReceived: string; FormApproved: string; OrientationScheduled: string; CardIssue: string; }'.
+src/pages/profile/ProfileScreen.tsx(16,36): error TS2307: Cannot find module '@shared/utils/user-utils' or its corresponding type declarations.
+src/pages/shared/ActivityScreen.tsx(3,34): error TS2307: Cannot find module '@/src/layouts/BaseScreenLayout' or its corresponding type declarations.
+src/pages/shared/ActivityScreen.tsx(7,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/pages/shared/DocumentRequirementsScreen.tsx(14,58): error TS2307: Cannot find module '@/src/utils' or its corresponding type declarations.
+src/pages/shared/DocumentRequirementsScreen.tsx(151,75): error TS7006: Parameter 'payment' implicitly has an 'any' type.
+src/pages/shared/DocumentRequirementsScreen.tsx(151,84): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/pages/shared/HealthCardsScreen.tsx(3,34): error TS2307: Cannot find module '@/src/layouts/BaseScreenLayout' or its corresponding type declarations.
+src/pages/shared/HealthCardsScreen.tsx(12,20): error TS2307: Cannot find module '../../../../convex/_generated/dataModel' or its corresponding type declarations.
+src/pages/shared/HealthCardsScreen.tsx(23,8): error TS2307: Cannot find module '@/src/utils' or its corresponding type declarations.
+src/pages/shared/HealthCardsScreen.tsx(135,32): error TS7006: Parameter 'card' implicitly has an 'any' type.
+src/pages/shared/PaymentScreen.tsx(9,20): error TS2307: Cannot find module '@/backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/pages/shared/PaymentScreen.tsx(10,34): error TS2307: Cannot find module '@/src/layouts/BaseScreenLayout' or its corresponding type declarations.
+src/pages/shared/QrScannerScreen.tsx(3,34): error TS2307: Cannot find module '@/src/layouts/BaseScreenLayout' or its corresponding type declarations.
+src/pages/shared/QrScannerScreen.tsx(12,23): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/pages/shared/UploadDocumentsScreen.tsx(3,34): error TS2307: Cannot find module '@/src/layouts/BaseScreenLayout' or its corresponding type declarations.
+src/pages/shared/UploadDocumentsScreen.tsx(8,20): error TS2307: Cannot find module '@/backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/pages/shared/UploadDocumentsScreen.tsx(203,54): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+src/pages/shared/UploadDocumentsScreen.tsx(204,54): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+src/pages/shared/UploadDocumentsScreen.tsx(211,55): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+src/pages/shared/UploadDocumentsScreen.tsx(217,51): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+src/processes/paymentFlow/lib/paymentFlow.ts(2,20): error TS2307: Cannot find module '../../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/processes/paymentFlow/model/hooks.ts(17,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/components/buttons/CTAButton.tsx(23,22): error TS2307: Cannot find module './Text' or its corresponding type declarations.
+src/shared/components/buttons/CTAButton.tsx(24,56): error TS2307: Cannot find module '@/src/styles' or its corresponding type declarations.
+src/shared/components/core/BaseScreen.tsx(68,7): error TS2322: Type 'ReactElement<typeof RefreshControl, string | JSXElementConstructor<any>> | undefined' is not assignable to type 'ReactElement<RefreshControlProps, string | JSXElementConstructor<any>> | undefined'.
+  Type 'ReactElement<typeof RefreshControl, string | JSXElementConstructor<any>>' is not assignable to type 'ReactElement<RefreshControlProps, string | JSXElementConstructor<any>>'.
+    Property 'refreshing' is missing in type 'typeof RefreshControl' but required in type 'RefreshControlProps'.
+src/shared/components/feedback/ErrorState.tsx(13,30): error TS2307: Cannot find module '@shared/components/ui/Button' or its corresponding type declarations.
+src/shared/components/feedback/ErrorText/ErrorText.tsx(1,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/shared/components/feedback/ErrorText/ErrorText.tsx(1,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/shared/components/feedback/feedback/FeedbackSystem.tsx(5,81): error TS2307: Cannot find module '@shared/components/styles/theme' or its corresponding type declarations.
+src/shared/components/feedback/feedback/Toast.tsx(39,13): error TS7030: Not all code paths return a value.
+src/shared/components/inputs/Input.tsx(12,11): error TS2320: Interface 'InputProps' cannot simultaneously extend types 'TextInputProps' and 'BaseComponentProps'.
+  Named property 'accessibilityRole' of types 'TextInputProps' and 'BaseComponentProps' are not identical.
+src/shared/components/inputs/Input.tsx(59,5): error TS7053: Element implicitly has an 'any' type because expression of type 'InputVariant' can't be used to index type '{ base: { color: any; backgroundColor: any; borderWidth: number; borderColor: any; minHeight: number; fontSize: 32; fontWeight: "700"; lineHeight: 40; borderRadius: 0 | 9999 | 4 | 8 | 12 | 16 | 24; paddingHorizontal: 4 | ... 5 more ... | 64; paddingVertical: 4 | ... 5 more ... | 64; } | ... 6 more ... | { ...; }; fo...'.
+  Property 'default' does not exist on type '{ base: { color: any; backgroundColor: any; borderWidth: number; borderColor: any; minHeight: number; fontSize: 32; fontWeight: "700"; lineHeight: 40; borderRadius: 0 | 9999 | 4 | 8 | 12 | 16 | 24; paddingHorizontal: 4 | ... 5 more ... | 64; paddingVertical: 4 | ... 5 more ... | 64; } | ... 6 more ... | { ...; }; fo...'.
+src/shared/components/inputs/Input.tsx(70,15): error TS2322: Type 'ViewStyle[]' is not assignable to type 'TextStyle | Falsy | RegisteredStyle<TextStyle> | RecursiveArray<TextStyle | Falsy | RegisteredStyle<TextStyle>> | readonly (TextStyle | ... 1 more ... | RegisteredStyle<...>)[]'.
+  Type 'ViewStyle[]' is not assignable to type 'RecursiveArray<TextStyle | Falsy | RegisteredStyle<TextStyle>>'.
+    The types returned by 'pop()' are incompatible between these types.
+      Type 'ViewStyle | undefined' is not assignable to type 'TextStyle | Falsy | RegisteredStyle<TextStyle> | RecursiveArray<TextStyle | Falsy | RegisteredStyle<TextStyle>> | readonly (TextStyle | ... 1 more ... | RegisteredStyle<...>)[]'.
+        Type 'ViewStyle' is not assignable to type 'TextStyle | Falsy | RegisteredStyle<TextStyle> | RecursiveArray<TextStyle | Falsy | RegisteredStyle<TextStyle>> | readonly (TextStyle | ... 1 more ... | RegisteredStyle<...>)[]'.
+          Type 'ViewStyle' is not assignable to type 'TextStyle'.
+            Types of property 'userSelect' are incompatible.
+              Type 'string | undefined' is not assignable to type '"text" | "none" | "auto" | "contain" | "all" | undefined'.
+                Type 'string' is not assignable to type '"text" | "none" | "auto" | "contain" | "all" | undefined'.
+src/shared/components/inputs/Input.tsx(70,27): error TS2322: Type 'ViewStyle | ViewStyle[] | undefined' is not assignable to type 'TextStyle | Falsy | RegisteredStyle<TextStyle> | RecursiveArray<TextStyle | Falsy | RegisteredStyle<TextStyle>> | readonly (TextStyle | ... 1 more ... | RegisteredStyle<...>)[]'.
+  Type 'ViewStyle' is not assignable to type 'TextStyle | Falsy | RegisteredStyle<TextStyle> | RecursiveArray<TextStyle | Falsy | RegisteredStyle<TextStyle>> | readonly (TextStyle | ... 1 more ... | RegisteredStyle<...>)[]'.
+    Type 'ViewStyle' is not assignable to type 'TextStyle'.
+      Types of property 'userSelect' are incompatible.
+        Type 'string | undefined' is not assignable to type '"text" | "none" | "auto" | "contain" | "all" | undefined'.
+          Type 'string' is not assignable to type '"text" | "none" | "auto" | "contain" | "all" | undefined'.
+src/shared/components/layout/BaseScreenLayout.tsx(3,23): error TS2307: Cannot find module '../styles/theme' or its corresponding type declarations.
+src/shared/components/layout/Divider.tsx(1,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/shared/components/layout/Divider.tsx(1,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/shared/components/layout/InitialLayout.tsx(3,32): error TS2307: Cannot find module '../components/LoadingSpinner' or its corresponding type declarations.
+src/shared/components/layout/ResponsiveLayout/ResponsiveLayout.tsx(3,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'dimensions'.
+src/shared/components/layout/ResponsiveLayout/ResponsiveLayout.tsx(90,11): error TS2322: Type '(false | "" | ViewStyle | RegisteredStyle<ViewStyle> | RecursiveArray<ViewStyle | Falsy | RegisteredStyle<ViewStyle>> | { ...; } | { ...; } | null | undefined)[]' is not assignable to type 'StyleProp<ViewStyle>'.
+  Type '(false | "" | ViewStyle | RegisteredStyle<ViewStyle> | RecursiveArray<ViewStyle | Falsy | RegisteredStyle<ViewStyle>> | { ...; } | { ...; } | null | undefined)[]' is not assignable to type 'RecursiveArray<ViewStyle | Falsy | RegisteredStyle<ViewStyle>>'.
+    The types returned by 'pop()' are incompatible between these types.
+      Type 'false | "" | ViewStyle | RegisteredStyle<ViewStyle> | RecursiveArray<ViewStyle | Falsy | RegisteredStyle<ViewStyle>> | { ...; } | { ...; } | null | undefined' is not assignable to type 'ViewStyle | Falsy | RegisteredStyle<ViewStyle> | RecursiveArray<ViewStyle | Falsy | RegisteredStyle<ViewStyle>> | readonly (ViewStyle | ... 1 more ... | RegisteredStyle<...>)[]'.
+        Type '{ maxWidth: any; paddingHorizontal: number; paddingVertical: 8 | 16 | 24 | 32; alignSelf: string; }' is not assignable to type 'ViewStyle | Falsy | RegisteredStyle<ViewStyle> | RecursiveArray<ViewStyle | Falsy | RegisteredStyle<ViewStyle>> | readonly (ViewStyle | ... 1 more ... | RegisteredStyle<...>)[]'.
+          Type '{ maxWidth: any; paddingHorizontal: number; paddingVertical: 8 | 16 | 24 | 32; alignSelf: string; }' is not assignable to type 'ViewStyle'.
+            Types of property 'alignSelf' are incompatible.
+              Type 'string' is not assignable to type '"auto" | FlexAlignType | undefined'.
+src/shared/components/layout/ResponsiveLayout/ResponsiveLayout.tsx(177,13): error TS2322: Type '{ flexBasis: string; marginRight: number; }' is not assignable to type 'ViewStyle | Falsy | RegisteredStyle<ViewStyle> | RecursiveArray<ViewStyle | Falsy | RegisteredStyle<ViewStyle>> | readonly (ViewStyle | ... 1 more ... | RegisteredStyle<...>)[]'.
+  Types of property 'flexBasis' are incompatible.
+    Type 'string' is not assignable to type 'DimensionValue | undefined'.
+src/shared/components/LoadingView/LoadingView.styles.ts(2,45): error TS2307: Cannot find module '@/shared/constants/theme' or its corresponding type declarations.
+src/shared/components/LoadingView/LoadingView.styles.ts(3,31): error TS2307: Cannot find module '@/shared/utils/responsive' or its corresponding type declarations.
+src/shared/components/LoadingView/LoadingView.tsx(4,24): error TS2307: Cannot find module '@/shared/constants/theme' or its corresponding type declarations.
+src/shared/components/OfflineBanner/OfflineBanner.styles.ts(2,59): error TS2307: Cannot find module '@/shared/constants/theme' or its corresponding type declarations.
+src/shared/components/OfflineBanner/OfflineBanner.styles.ts(3,48): error TS2307: Cannot find module '@/shared/utils/responsive' or its corresponding type declarations.
+src/shared/components/types/buttons.ts(8,36): error TS2307: Cannot find module '../design-system' or its corresponding type declarations.
+src/shared/components/types/dashboard.ts(8,36): error TS2307: Cannot find module '../design-system' or its corresponding type declarations.
+src/shared/components/types/feedback.ts(8,36): error TS2307: Cannot find module '../design-system' or its corresponding type declarations.
+src/shared/components/types/forms.ts(8,53): error TS2307: Cannot find module '../design-system' or its corresponding type declarations.
+src/shared/components/types/forms.ts(11,18): error TS2430: Interface 'InputProps' incorrectly extends interface 'TextInputProps'.
+  Types of property 'style' are incompatible.
+    Type 'ViewStyle | ViewStyle[] | undefined' is not assignable to type 'StyleProp<TextStyle>'.
+      Type 'ViewStyle' is not assignable to type 'StyleProp<TextStyle>'.
+        Type 'ViewStyle' is not assignable to type 'TextStyle'.
+          Types of property 'userSelect' are incompatible.
+            Type 'string | undefined' is not assignable to type '"text" | "none" | "auto" | "contain" | "all" | undefined'.
+              Type 'string' is not assignable to type '"text" | "none" | "auto" | "contain" | "all" | undefined'.
+src/shared/components/types/index.ts(60,8): error TS2307: Cannot find module '../design-system' or its corresponding type declarations.
+src/shared/components/typography/LinkText/LinkText.tsx(1,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/shared/components/typography/LinkText/LinkText.tsx(1,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/shared/formatting/data-formatters.ts(13,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/shared/formatting/data-formatters.ts(167,9): error TS18048: 'username' is possibly 'undefined'.
+src/shared/formatting/data-formatters.ts(169,28): error TS18048: 'username' is possibly 'undefined'.
+src/shared/formatting/data-formatters.ts(169,60): error TS18048: 'username' is possibly 'undefined'.
+src/shared/formatting/data-formatters.ts(169,83): error TS18048: 'username' is possibly 'undefined'.
+src/shared/formatting/data-formatters.ts(169,99): error TS18048: 'username' is possibly 'undefined'.
+src/shared/hooks/useAbandonedPayment.ts(3,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useAbandonedPayment.ts(4,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/useApplications.ts(2,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useApplications.ts(3,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/useDocumentUpload.ts(3,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useDocumentUpload.ts(4,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/useDocumentUpload.ts(561,24): error TS18048: 'doc' is possibly 'undefined'.
+src/shared/hooks/useDocumentUpload.ts(703,48): error TS18048: 'item' is possibly 'undefined'.
+src/shared/hooks/useDocumentUpload.ts(703,79): error TS18048: 'item' is possibly 'undefined'.
+src/shared/hooks/useDocumentUpload.ts(706,24): error TS18048: 'item' is possibly 'undefined'.
+src/shared/hooks/useDocumentUpload.ts(716,24): error TS18048: 'item' is possibly 'undefined'.
+src/shared/hooks/useHealthCards.ts(2,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useHealthCards.ts(3,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/useHealthCards.ts(4,44): error TS2307: Cannot find module '../types/domain/health-card' or its corresponding type declarations.
+src/shared/hooks/useHealthCards.ts(41,14): error TS2304: Cannot find name 'healthCardsService'.
+src/shared/hooks/useJobCategories.ts(2,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useJobCategories.ts(3,32): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/useNetworkStatus.ts(8,39): error TS2307: Cannot find module '@react-native-community/netinfo' or its corresponding type declarations.
+src/shared/hooks/useNotifications.ts(2,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useNotifications.ts(3,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/useOptimizedDashboard.ts(4,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useOptimizedDashboard.ts(112,42): error TS7006: Parameter 'notification' implicitly has an 'any' type.
+src/shared/hooks/useOptimizedDashboard.ts(115,9): error TS2322: Type '"notification"' is not assignable to type 'ActivityType'.
+src/shared/hooks/useOptimizedDashboard.ts(118,9): error TS2322: Type 'string' is not assignable to type 'Date'.
+src/shared/hooks/useOptimizedDashboard.ts(124,53): error TS7006: Parameter 'application' implicitly has an 'any' type.
+src/shared/hooks/useOptimizedDashboard.ts(127,9): error TS2322: Type '"application"' is not assignable to type 'ActivityType'.
+src/shared/hooks/useOptimizedDashboard.ts(130,9): error TS2322: Type 'string' is not assignable to type 'Date'.
+src/shared/hooks/useOptimizedDashboard.ts(135,37): error TS7006: Parameter 'payment' implicitly has an 'any' type.
+src/shared/hooks/useOptimizedDashboard.ts(139,11): error TS2322: Type '"payment"' is not assignable to type 'ActivityType'.
+src/shared/hooks/useOptimizedDashboard.ts(142,11): error TS2322: Type 'string' is not assignable to type 'Date'.
+src/shared/hooks/usePaymentMaya.ts(10,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/usePaymentMaya.ts(11,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/usePayments.ts(2,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/usePayments.ts(3,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/useRequirements.ts(2,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useRequirements.ts(3,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/useRoleBasedNavigation.ts(2,26): error TS2307: Cannot find module '../types/domain/user' or its corresponding type declarations.
+src/shared/hooks/useStorage.ts(2,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useUsers.ts(2,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useUsers.ts(3,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/hooks/useVerification.ts(2,21): error TS2307: Cannot find module '../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/hooks/useVerification.ts(3,20): error TS2307: Cannot find module '../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/lib/formatting/data-formatters.ts(13,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/shared/lib/formatting/data-formatters.ts(167,9): error TS18048: 'username' is possibly 'undefined'.
+src/shared/lib/formatting/data-formatters.ts(169,28): error TS18048: 'username' is possibly 'undefined'.
+src/shared/lib/formatting/data-formatters.ts(169,60): error TS18048: 'username' is possibly 'undefined'.
+src/shared/lib/formatting/data-formatters.ts(169,83): error TS18048: 'username' is possibly 'undefined'.
+src/shared/lib/formatting/data-formatters.ts(169,99): error TS18048: 'username' is possibly 'undefined'.
+src/shared/lib/formStorage.ts(2,37): error TS2307: Cannot find module '@shared/shared/validation/form-validation' or its corresponding type declarations.
+src/shared/lib/index.ts(4,1): error TS2308: Module './storage' has already exported a member named 'createUserStorage'. Consider explicitly re-exporting to resolve the ambiguity.
+src/shared/lib/index.ts(4,1): error TS2308: Module './storage' has already exported a member named 'storage'. Consider explicitly re-exporting to resolve the ambiguity.
+src/shared/lib/network.ts(95,24): error TS2345: Argument of type '"You are offline. Please check your connection."' is not assignable to parameter of type 'AppErrorType'.
+src/shared/lib/network.ts(99,54): error TS2345: Argument of type '"Request timed out"' is not assignable to parameter of type 'AppErrorType'.
+src/shared/lib/payment/paymentFlow.ts(8,20): error TS2307: Cannot find module '../../../../../backend/convex/_generated/dataModel' or its corresponding type declarations.
+src/shared/lib/payment/paymentFlow.ts(29,47): error TS2304: Cannot find name 'storageService'.
+src/shared/lib/payment/paymentFlow.ts(39,19): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'URL | RequestInfo'.
+src/shared/lib/payment/paymentFlow.ts(45,26): error TS2345: Argument of type '`Upload failed with status ${number}`' is not assignable to parameter of type 'AppErrorType'.
+src/shared/lib/payment/paymentFlow.ts(54,24): error TS2345: Argument of type '"Failed to upload receipt"' is not assignable to parameter of type 'AppErrorType'.
+src/shared/lib/payment/paymentFlow.ts(66,26): error TS2345: Argument of type '"Permission denied for media library access"' is not assignable to parameter of type 'AppErrorType'.
+src/shared/lib/payment/paymentFlow.ts(93,24): error TS2345: Argument of type '"Failed to handle receipt upload"' is not assignable to parameter of type 'AppErrorType'.
+src/shared/lib/payment/paymentFlow.ts(125,46): error TS2304: Cannot find name 'paymentsService'.
+src/shared/lib/payment/paymentFlow.ts(128,29): error TS2339: Property '_id' does not exist on type '{}'.
+src/shared/lib/payment/paymentFlow.ts(153,15): error TS2304: Cannot find name 'paymentsService'.
+src/shared/lib/payment/paymentFlow.ts(168,18): error TS18046: 'paymentId' is of type 'unknown'.
+src/shared/lib/payment/paymentFlow.ts(177,24): error TS2345: Argument of type '"Payment submission failed"' is not assignable to parameter of type 'AppErrorType'.
+src/shared/lib/payment/paymentFlow.ts(192,46): error TS2304: Cannot find name 'paymentsService'.
+src/shared/lib/payment/paymentFlow.ts(195,29): error TS2339: Property '_id' does not exist on type '{}'.
+src/shared/lib/payment/paymentFlow.ts(207,15): error TS2304: Cannot find name 'paymentsService'.
+src/shared/lib/payment/paymentFlow.ts(221,18): error TS18046: 'paymentId' is of type 'unknown'.
+src/shared/lib/payment/paymentFlow.ts(230,24): error TS2345: Argument of type '"Payment submission failed"' is not assignable to parameter of type 'AppErrorType'.
+src/shared/lib/validation/form-validation.ts(6,15): error TS2305: Module '"@shared/types"' has no exported member 'DocumentRequirement'.
+src/shared/navigation/components/RoleBasedTabLayout.tsx(6,21): error TS2307: Cannot find module '../../../../../backend/convex/_generated/api' or its corresponding type declarations.
+src/shared/navigation/components/RoleBasedTabLayout.tsx(8,32): error TS2307: Cannot find module '../common/LoadingSpinner' or its corresponding type declarations.
+src/shared/services/storageService.ts(9,26): error TS2307: Cannot find module '@react-native-async-storage/async-storage' or its corresponding type declarations.
+src/shared/styles/index.ts(24,3): error TS2305: Module '"../utils/responsive"' has no exported member 'scale'.
+src/shared/styles/index.ts(29,3): error TS2305: Module '"../utils/responsive"' has no exported member 'spacing'.
+src/shared/styles/index.ts(30,3): error TS2305: Module '"../utils/responsive"' has no exported member 'borderRadius'.
+src/shared/styles/index.ts(31,3): error TS2305: Module '"../utils/responsive"' has no exported member 'iconSizes'.
+src/shared/styles/index.ts(32,3): error TS2305: Module '"../utils/responsive"' has no exported member 'dimensions'.
+src/shared/styles/index.ts(33,3): error TS2305: Module '"../utils/responsive"' has no exported member 'responsiveValue'.
+src/shared/styles/index.ts(34,3): error TS2305: Module '"../utils/responsive"' has no exported member 'responsiveTypography'.
+src/shared/styles/index.ts(35,3): error TS2305: Module '"../utils/responsive"' has no exported member 'designSystem'.
+src/shared/styles/index.ts(36,3): error TS2305: Module '"../utils/responsive"' has no exported member 'getBreakpoint'.
+src/shared/styles/index.ts(37,3): error TS2305: Module '"../utils/responsive"' has no exported member 'isTablet'.
+src/shared/styles/index.ts(38,3): error TS2305: Module '"../utils/responsive"' has no exported member 'isMobile'.
+src/shared/styles/index.ts(39,3): error TS2305: Module '"../utils/responsive"' has no exported member 'when'.
+src/shared/styles/layouts/common-patterns.ts(60,35): error TS2345: Argument of type '"xs"' is not assignable to parameter of type '"none" | "md" | "sm" | "lg" | "xl" | "xxl" | "full"'.
+src/shared/styles/screens/auth-reset-password.ts(1,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/shared/styles/screens/auth-reset-password.ts(1,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/shared/styles/screens/auth-sign-in.ts(1,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/shared/styles/screens/auth-sign-in.ts(1,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/shared/styles/screens/auth-sign-up.ts(1,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/shared/styles/screens/auth-sign-up.ts(1,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/shared/styles/screens/auth-verification.ts(1,10): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_SIZES'.
+src/shared/styles/screens/auth-verification.ts(1,22): error TS2305: Module '"@shared/utils/responsive"' has no exported member 'FONT_WEIGHTS'.
+src/shared/styles/screens/shared-qr-code.ts(26,28): error TS2345: Argument of type '"xxxxl"' is not assignable to parameter of type '"md" | "sm" | "xs" | "lg" | "xl" | "xxl" | "xxxl"'.
+src/shared/styles/screens/shared-qr-scanner.ts(55,30): error TS2345: Argument of type '"xxxxl"' is not assignable to parameter of type '"md" | "sm" | "xs" | "lg" | "xl" | "xxl" | "xxxl"'.
+src/shared/styles/screens/shared-upload-documents.ts(137,35): error TS2345: Argument of type '"xs"' is not assignable to parameter of type '"none" | "md" | "sm" | "lg" | "xl" | "xxl" | "full"'.
+src/shared/styles/screens/shared-upload-documents.ts(143,35): error TS2345: Argument of type '"xs"' is not assignable to parameter of type '"none" | "md" | "sm" | "lg" | "xl" | "xxl" | "full"'.
+src/shared/styles/screens/shared-upload-documents.ts(252,35): error TS2345: Argument of type '"xs"' is not assignable to parameter of type '"none" | "md" | "sm" | "lg" | "xl" | "xxl" | "full"'.
+src/shared/styles/screens/tabs-apply-forms.ts(497,22): error TS2345: Argument of type '"bodyMedium"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/shared/styles/screens/tabs-apply-forms.ts(680,3): error TS1117: An object literal cannot have multiple properties with the same name.
+src/shared/styles/screens/tabs-apply-forms.ts(686,3): error TS1117: An object literal cannot have multiple properties with the same name.
+src/shared/styles/screens/tabs-apply-forms.ts(936,22): error TS2345: Argument of type '"headingSmall"' is not assignable to parameter of type '"body" | "button" | "caption" | "h1" | "h2" | "h3" | "h4" | "bodySmall"'.
+src/shared/styles/screens/tabs-apply-forms.ts(1066,3): error TS1117: An object literal cannot have multiple properties with the same name.
+src/shared/styles/screens/tabs-apply-forms.ts(1072,3): error TS1117: An object literal cannot have multiple properties with the same name.
+src/shared/types/design-system.ts(8,15): error TS6137: Cannot import type declaration files. Consider importing 'design-system' instead of '@types/design-system'.
+src/shared/types/navigation.ts(8,15): error TS6137: Cannot import type declaration files. Consider importing 'navigation' instead of '@types/navigation'.
+src/shared/types/utility.ts(8,15): error TS6137: Cannot import type declaration files. Consider importing 'utility' instead of '@types/utility'.
+src/shared/utils/__tests__/responsive.test.ts(5,3): error TS2305: Module '"../responsive"' has no exported member 'isTablet'.
+src/shared/utils/__tests__/responsive.test.ts(6,3): error TS2305: Module '"../responsive"' has no exported member 'getDeviceType'.
+src/shared/utils/__tests__/responsive.test.ts(7,3): error TS2305: Module '"../responsive"' has no exported member 'getOrientation'.
+src/shared/utils/__tests__/storage.test.ts(2,60): error TS2307: Cannot find module '../storage' or its corresponding type declarations.
+src/shared/utils/fileUtils.ts(9,15): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | PromiseLike<string>'.
+  Type 'undefined' is not assignable to type 'string | PromiseLike<string>'.
+src/shared/utils/index.ts(2,10): error TS2305: Module '"./responsive"' has no exported member 'designSystem'.
+src/shared/utils/index.ts(2,24): error TS2305: Module '"./responsive"' has no exported member 'scale'.
+src/shared/utils/index.ts(2,61): error TS2305: Module '"./responsive"' has no exported member 'moderateVerticalScale'.
+src/shared/utils/index.ts(2,84): error TS2305: Module '"./responsive"' has no exported member 'fontScale'.
+src/shared/utils/index.ts(3,4): error TS2305: Module '"./responsive"' has no exported member 'micro'.
+src/shared/utils/index.ts(3,11): error TS2305: Module '"./responsive"' has no exported member 'caption'.
+src/shared/utils/index.ts(3,20): error TS2305: Module '"./responsive"' has no exported member 'action'.
+src/shared/utils/index.ts(3,28): error TS2305: Module '"./responsive"' has no exported member 'body'.
+src/shared/utils/index.ts(3,34): error TS2305: Module '"./responsive"' has no exported member 'headline'.
+src/shared/utils/index.ts(3,44): error TS2305: Module '"./responsive"' has no exported member 'title'.
+src/shared/utils/index.ts(3,51): error TS2305: Module '"./responsive"' has no exported member 'largeTitle'.
+src/shared/utils/index.ts(9,29): error TS2307: Cannot find module './user-utils' or its corresponding type declarations.
+src/shared/utils/index.ts(12,58): error TS2307: Cannot find module './health-card-utils' or its corresponding type declarations.
+src/shared/utils/index.ts(22,8): error TS2307: Cannot find module './health-card-display-utils' or its corresponding type declarations.
+src/shared/utils/lazyLoad.tsx(26,8): error TS2322: Type 'T' is not assignable to type 'IntrinsicAttributes & (T | (PropsWithoutRef<T> & RefAttributes<Component<T, any, any>>))'.
+  Type 'T' is not assignable to type 'IntrinsicAttributes & PropsWithoutRef<T> & RefAttributes<Component<T, any, any>>'.
+    Type 'T' is not assignable to type 'IntrinsicAttributes'.
+src/shared/utils/lazyLoad.tsx(30,63): error TS2339: Property 'displayName' does not exist on type 'LazyComponent<T>'.
+src/shared/utils/lazyLoad.tsx(42,39): error TS2345: Argument of type '(() => Promise<{ default: ComponentType<any>; }>) | undefined' is not assignable to parameter of type '() => Promise<{ default: ComponentType<any>; }>'.
+  Type 'undefined' is not assignable to type '() => Promise<{ default: ComponentType<any>; }>'.
+src/shared/validation/form-validation.ts(6,15): error TS2305: Module '"../../types"' has no exported member 'DocumentRequirement'.
+src/shared/validation/form-validation.ts(6,36): error TS2305: Module '"../../types"' has no exported member 'SelectedDocuments'.
+../../backend/convex/admin/adminMain.ts(207,12): error TS7030: Not all code paths return a value.
+../../backend/convex/admin/seed.ts(101,70): error TS2345: Argument of type 'Id<"jobCategories"> | undefined' is not assignable to parameter of type 'Id<"jobCategories">'.
+  Type 'undefined' is not assignable to type 'Id<"jobCategories">'.
+    Type 'undefined' is not assignable to type 'string'.
+../../backend/convex/admin/seed.ts(107,13): error TS2322: Type 'Id<"jobCategories"> | undefined' is not assignable to type 'Id<"jobCategories">'.
+  Type 'undefined' is not assignable to type 'Id<"jobCategories">'.
+    Type 'undefined' is not assignable to type 'string'.
+../../backend/convex/admin/seed.ts(108,13): error TS2322: Type 'Id<"documentTypes"> | undefined' is not assignable to type 'Id<"documentTypes">'.
+  Type 'undefined' is not assignable to type 'Id<"documentTypes">'.
+    Type 'undefined' is not assignable to type 'string'.
+../../backend/convex/users/usersMain.ts(24,13): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+../../backend/convex/users/usersMain.ts(52,7): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.

@@ -8,8 +8,8 @@ import GoogleSignInButton from '@/assets/svgs/google-ctn-logo.svg';
 import { BaseScreen } from '@core/components';
 import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './SignUpScreen.styles';
-import { SignUpFormData, AuthError } from '@screens/types';
-import { PASSWORD_REQUIREMENTS } from '@screens/constants';
+import { SignUpFormData, AuthError } from '@features/auth/types';
+import { PASSWORD_REQUIREMENTS } from '@features/auth/constants';
 
 interface PasswordValidation {
   minLength: boolean;

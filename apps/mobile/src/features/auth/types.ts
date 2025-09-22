@@ -1,13 +1,8 @@
-// Auth feature types
+// Auth feature types - Uses entities from entities layer (FSD pattern)
+import type { AuthUser, AuthRole, AuthErrorCode } from '@entities/auth';
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  username: string;
-  fullname: string;
-  isVerified: boolean;
-  role?: 'applicant' | 'inspector' | 'admin';
-}
+// Re-export entity types for backward compatibility
+export type { AuthUser, AuthRole };
 
 export interface SignInFormData {
   email: string;

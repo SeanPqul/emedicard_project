@@ -5,11 +5,11 @@ import { useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { BaseScreen } from '@core/components';
-import { OtpInputUI, PasswordStrengthIndicator } from '@screens/components';
+import { OtpInputUI, PasswordStrengthIndicator } from '@features/auth/components';
 import { styles } from './ResetPasswordScreen.styles';
 import { moderateScale } from '@/shared/utils/responsive';
-import { PASSWORD_REQUIREMENTS } from '@screens/constants';
-import { AuthError, PasswordValidation } from '@screens/types';
+import { PASSWORD_REQUIREMENTS } from '@features/auth/constants';
+import { AuthError, PasswordValidation } from '@features/auth/types';
 
 // Define the steps for the password reset flow
 type ResetStep = 'enterEmail' | 'enterCode' | 'changePassword';

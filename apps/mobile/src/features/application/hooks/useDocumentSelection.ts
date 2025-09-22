@@ -2,7 +2,7 @@ import { useState, useCallback, Dispatch, SetStateAction } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import { DocumentFile, SelectedDocuments } from '@/src/types';
+import { DocumentFile, SelectedDocuments } from '@shared/types';
 import { formStorage } from '@shared/services/storage/formStorage';
 
 interface UseDocumentSelectionProps {

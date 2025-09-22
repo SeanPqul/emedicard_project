@@ -1,4 +1,4 @@
-import { InspectorDashboardScreen } from '@/src/screens/inspector';
+import { InspectorDashboardScreen } from '@/src/pages/inspector';
 
 export default function InspectorDashboard() {
   return <InspectorDashboardScreen />;

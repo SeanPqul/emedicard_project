@@ -1,4 +1,4 @@
-import { RecentActivity } from '@/src/types';
+import { RecentActivity } from '@shared/types';
 import { getBorderRadius, getColor, getSpacing, getTypography } from '@shared/styles/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';

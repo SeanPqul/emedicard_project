@@ -1,4 +1,22 @@
-// Application feature types
+// Application feature types - Uses entities from entities layer (FSD pattern)
+import type { 
+  Application,
+  ApplicationType,
+  ApplicationStatus,
+  JobCategory,
+  DocumentRequirement
+} from '@entities/application';
+
+// Re-export entity types for backward compatibility  
+export type { 
+  Application,
+  ApplicationType,
+  ApplicationStatus,
+  JobCategory,
+  DocumentRequirement
+};
+
+// Application-specific feature types
 export interface ApplicationFeatureState {
   // Application list state
   applications: Application[];
@@ -14,25 +32,6 @@ export interface ApplicationFeatureState {
   formData: ApplicationFormData | null;
   isSubmitting: boolean;
   submitError: string | null;
-}
-
-export interface Application {
-  id: string;
-  applicationType: 'New' | 'Renew';
-  status: string;
-  jobCategory: {
-    id: string;
-    name: string;
-    colorCode: string;
-    requireOrientation?: boolean;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-  position: string;
-  organization: string;
-  documents: ApplicationDocument[];
-  payment?: ApplicationPayment;
-  orientationCompleted?: boolean;
 }
 
 export interface ApplicationDocument {
@@ -77,5 +76,4 @@ export interface ApplicationFormData {
   startDate?: string;
 }
 
-// Re-export types used in screens
-export type { FormData, SelectedDocument, UploadState, FormErrors } from './screens/ApplyScreen';
+// Form-specific types are now defined in entities/application/model/types.ts

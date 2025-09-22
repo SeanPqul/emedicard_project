@@ -1,6 +1,6 @@
 import { cacheStorage, StorageKeys, storageUtils } from '@shared/lib/storage/mmkv';
 import { ApplicationFormData } from '@shared/validation/form-validation';
-import { SelectedDocuments } from '@/src/types';
+import { SelectedDocuments } from '@shared/types';
 
 interface TempApplicationData {
   formData: ApplicationFormData;

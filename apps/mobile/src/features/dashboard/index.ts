@@ -1,5 +1,4 @@
-// Dashboard feature barrel export
-export * from './screens';
+// Dashboard feature exports - Business logic only (FSD pattern)
 export * from './components';
 export * from './hooks';
 export * from './services';

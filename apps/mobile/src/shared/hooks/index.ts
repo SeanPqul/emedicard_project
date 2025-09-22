@@ -16,7 +16,7 @@ export { useStorage } from './useStorage';
 // Feature Hooks
 export { useOptimizedDashboard as useDashboard } from './useOptimizedDashboard';
 export { useDocumentUpload } from './useDocumentUpload';
-// Payment flow moved to processes
+// Payment flow hooks
 export { usePaymentFlow, usePaymentMethod, usePaymentManager } from '@processes/paymentFlow';
 
 // Utility Hooks

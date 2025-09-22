@@ -5,7 +5,7 @@
  */
 
 import { JobCategory, DocumentRequirement } from '@entities/application/model/types';
-import { SelectedDocuments } from '@/src/types';
+import { SelectedDocuments } from '@shared/types';
 
 export type ApplicationType = 'New' | 'Renew';
 

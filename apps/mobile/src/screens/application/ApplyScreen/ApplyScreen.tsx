@@ -25,7 +25,7 @@ import { useJobCategories } from '@shared/hooks/useJobCategories';
 import { useApplications } from '@shared/hooks/useApplications';
 import { useRequirements } from '@shared/hooks/useRequirements';
 import { useUsers } from '@shared/hooks/useUsers';
-import { useApplicationForm, useDocumentSelection, useSubmission } from '@screens/hooks';
+import { useApplicationForm, useDocumentSelection, useSubmission } from '@features/application/hooks';
 
 // Components
 import { StepIndicator } from '@entities/application/ui/StepIndicator';
@@ -36,7 +36,7 @@ import {
   PersonalDetailsStep,
   UploadDocumentsStep,
   ReviewStep
-} from '@screens/components/steps';
+} from '@features/application/components/steps';
 
 // Types
 import { ApplyScreenProps, FormData, SelectedDocument } from './ApplyScreen.types';

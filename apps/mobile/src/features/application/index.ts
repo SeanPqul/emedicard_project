@@ -1,5 +1,4 @@
-// Application feature barrel export
-export * from './screens';
+// Application feature exports - Business logic only (FSD pattern)
 export * from './components';
 export * from './hooks';
 export * from './services';

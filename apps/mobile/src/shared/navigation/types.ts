@@ -18,12 +18,12 @@ export type RootStackParamList = {
   '(tabs)/notification': undefined;
   
   // Application routes
-  'application/[id]': { id: string };
+  '(screens)/(application)/[id]': { id: string };
   
   // Payment routes
-  'payment/success': { applicationId: string };
-  'payment/failed': { applicationId: string; reason?: string };
-  'payment/cancelled': { applicationId: string };
+  '(screens)/(payment)/success': { applicationId: string };
+  '(screens)/(payment)/failed': { applicationId: string; reason?: string };
+  '(screens)/(payment)/cancelled': { applicationId: string };
   
   // Shared routes
   '(screens)/(shared)/health-cards': undefined;

@@ -10,7 +10,7 @@ import {
     TextInputKeyPressEventData,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles } from '@features/auth/screens/VerificationScreen/VerificationScreen.styles';
+import { styles } from '@/src/screens/auth/VerificationScreen/VerificationScreen.styles';
 
 interface OtpInputUIProps {
   title: string;

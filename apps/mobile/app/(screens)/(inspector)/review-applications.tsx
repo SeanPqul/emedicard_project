@@ -1,4 +1,4 @@
-import { ReviewApplicationsScreen } from '@/src/screens/inspector';
+import { ReviewApplicationsScreen } from '@/src/pages/inspector';
 
 export default function ReviewApplications() {
   return <ReviewApplicationsScreen />;

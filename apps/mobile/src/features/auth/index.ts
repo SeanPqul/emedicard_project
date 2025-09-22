@@ -1,5 +1,4 @@
-// Auth feature exports
-export * from './screens';
+// Auth feature exports - Business logic only (FSD pattern)
 export * from './components';
 export * from './hooks';
 export * from './services';

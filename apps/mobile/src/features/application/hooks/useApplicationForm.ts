@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { validateApplicationStep } from '@shared/validation/form-validation';
 import { formStorage } from '@shared/services/storage/formStorage';
-import { SelectedDocuments } from '@/src/types';
+import { SelectedDocuments } from '@shared/types';
 import { DocumentRequirement } from '@entities/application/model/types';
 
 type ApplicationType = 'New' | 'Renew';

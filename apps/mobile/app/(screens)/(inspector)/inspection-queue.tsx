@@ -1,4 +1,4 @@
-import { InspectionQueueScreen } from '@/src/screens/inspector';
+import { InspectionQueueScreen } from '@/src/pages/inspector';
 
 export default function InspectionQueue() {
   return <InspectionQueueScreen />;

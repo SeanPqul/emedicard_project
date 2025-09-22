@@ -4,7 +4,7 @@
  * Type definitions for health card entities and operations
  */
 
-import { Id } from '../../../../../backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 // ===== HEALTH CARD STATUS TYPES =====
 export type HealthCardStatus = 'Active' | 'Expired' | 'Suspended' | 'Revoked';
