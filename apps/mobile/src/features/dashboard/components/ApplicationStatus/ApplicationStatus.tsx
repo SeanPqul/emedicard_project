@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ApplicationStatusProps } from '@features/dashboard/types';
+import { ApplicationStatusProps, DashboardApplication } from '@features/dashboard/types';
 import { getJobCategoryColor, getJobCategoryIcon, getCardTypeLabel } from '@shared/utils/job-category-utils';
 import { styles } from './ApplicationStatus.styles';
 

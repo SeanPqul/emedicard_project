@@ -1,5 +1,5 @@
 ﻿import { useMemo } from 'react';
-import { UserRole } from '../types/domain/user';
+import { UserRole } from '@entities/user/model/types';
 
 export interface RolePermissions {
   canAccessApplicantTabs: boolean;

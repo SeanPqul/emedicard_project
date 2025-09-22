@@ -1,4 +1,4 @@
-﻿import { Id } from '../../../../../../../../../backend/convex/_generated/dataModel';
+import { Id } from 'backend/convex/_generated/dataModel';
 import { setObject, getObject, removeItem, getAllKeys } from './storage';
 
 export interface CachedDocument {
@@ -68,7 +68,7 @@ export const cacheDocument = async (
     // Update global state
     updateGlobalCacheState(applicationId, fieldName, cachedDoc);
 
-    console.log(`📦 Document cached: ${fieldName} for application ${applicationId} (file reference only)`);
+    console.log(`?? Document cached: ${fieldName} for application ${applicationId} (file reference only)`);
     return cachedDoc;
   } catch (error) {
     console.error('Failed to cache document:', error);
@@ -174,7 +174,7 @@ export const updateCachedDocumentStatus = (
       console.warn('Failed to update global cache state, but document was cached:', globalStateError);
     }
     
-    console.log(`📝 Updated cached document status: ${fieldName} -> ${updates.status}`);
+    console.log(`?? Updated cached document status: ${fieldName} -> ${updates.status}`);
     return true;
   } catch (error) {
     console.error(`Error updating cached document status for ${fieldName}:`, error);
@@ -202,7 +202,7 @@ export const removeCachedDocument = (formId: string, fieldName: string): void =>
     setObject(GLOBAL_CACHE_KEY, state);
   }
   
-  console.log(`🗑️ Removed cached document: ${fieldName} from form ${formId}`);
+  console.log(`??? Removed cached document: ${fieldName} from form ${formId}`);
 };
 
 /**
@@ -224,7 +224,7 @@ export const clearFormCache = (formId: string): void => {
   delete state[formId];
   setObject(GLOBAL_CACHE_KEY, state);
   
-  console.log(`🧹 Cleared all cached documents for form ${formId}`);
+  console.log(`?? Cleared all cached documents for form ${formId}`);
 };
 
 /**
@@ -274,7 +274,7 @@ export const cleanupOldCache = (): void => {
   });
   
   if (cleanedCount > 0) {
-    console.log(`🧹 Cleaned up ${cleanedCount} old cached documents`);
+    console.log(`?? Cleaned up ${cleanedCount} old cached documents`);
   }
 };
 

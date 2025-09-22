@@ -12,7 +12,8 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
 }) => {
   const isNewUser = (!userApplications || userApplications.length === 0) && dashboardStats.validHealthCards === 0;
   const isFoodHandler = currentApplication?.jobCategory?.name?.toLowerCase().includes('food');
-  const needsOrientation = isFoodHandler && !currentApplication?.orientationCompleted;
+  // TODO: Check orientation completion status from backend
+  const needsOrientation = false; // isFoodHandler && !currentApplication?.orientationCompleted;
 
   const getPrimaryAction = () => {
     if (isNewUser) {

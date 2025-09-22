@@ -10,7 +10,7 @@ import {
   View
 } from 'react-native';
 import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@shared/styles/theme';
-import { CustomButton } from '@features/upload/components/ui/Button';
+import { Button as CustomButton } from '@shared/components/buttons/Button';
 
 interface DragDropUploadProps {
   onFilesSelected: (files: any[]) => void;

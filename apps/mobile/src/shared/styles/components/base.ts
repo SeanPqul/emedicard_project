@@ -33,6 +33,15 @@ export const buttonVariants = StyleSheet.create({
     ...getShadow('medium'),
   },
   
+  // Tertiary variant
+  tertiary: {
+    backgroundColor: colorWithOpacity[10]('primary.500'),
+    borderWidth: 1,
+    borderColor: colorWithOpacity[20]('primary.500'),
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  
   // Outline variant
   outline: {
     backgroundColor: 'transparent',
@@ -84,6 +93,10 @@ export const buttonTextVariants = StyleSheet.create({
   secondary: {
     ...getTypography('button'),
     color: getColor('text.inverse'),
+  },
+  tertiary: {
+    ...getTypography('button'),
+    color: getColor('primary.700'),
   },
   outline: {
     ...getTypography('button'),

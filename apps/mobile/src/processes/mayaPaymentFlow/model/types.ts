@@ -3,7 +3,7 @@
  * Type definitions for Maya payment process
  */
 
-import { Id } from '@backend/convex/_generated/dataModel';
+import { Id } from 'backend/convex/_generated/dataModel';
 
 /**
  * Result of a Maya payment attempt

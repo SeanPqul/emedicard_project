@@ -9,9 +9,9 @@ import {
 } from 'react-native';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-document-requirements';
-import { JobCategory } from '@entities/(screens)/(shared)/(screens)/(shared)/application/model/types';
+import { JobCategory } from '@/src/entities/application/model/types';
 import { useJobCategories } from '@shared/hooks/useJobCategories';
-import { getHealthCardTypeName, getPaymentMethods } from '@/src/utils';
+import { getHealthCardTypeName, getPaymentMethods } from '@shared/utils';
 
 interface Requirement {
   name: string;
@@ -81,7 +81,7 @@ export function DocumentRequirementsScreen() {
                 <View style={[styles.colorIndicator, { backgroundColor: category.colorCode }]} />
                 <View style={styles.categoryDetails}>
                   <Text style={styles.categoryName}>{category.name}</Text>
-                  <Text style={styles.cardType}>{getHealthCardTypeName(category)}</Text>
+                  <Text style={styles.cardType}>{getHealthCardTypeName(category.name)}</Text>
                   {(category.requireOrientation === 'Yes' || category.requireOrientation === true) && (
                     <View style={styles.orientationBadge}>
                       <Ionicons name="school-outline" size={12} color={getColor('primary.main')} />

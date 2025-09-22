@@ -1,6 +1,6 @@
-import { useUsers } from '@shared/hooks/useUsers';
+import { useUsers } from '../../../src/shared/hooks/useUsers';
 import { Redirect, Stack } from 'expo-router';
-import { LoadingSpinner } from '@/src/shared/components';
+import { LoadingSpinner } from '../../../src/shared/components';
 
 export default function InspectorScreensLayout() {
   const { data: { currentUser }, isLoading } = useUsers();

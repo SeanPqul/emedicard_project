@@ -1,4 +1,4 @@
-import { api } from '@backend/convex/_generated/api';
+import { api } from 'backend/convex/_generated/api';
 import { ConvexClient } from 'convex/browser';
 import { DashboardData, DashboardStats, RecentActivity } from '@features/dashboard/types';
 
@@ -18,7 +18,8 @@ export class DashboardService {
   async getDashboardData(): Promise<DashboardData | null> {
     try {
       const data = await this.convexClient.query(
-        api.dashboard.getDashboardData.getDashboardDataQuery
+        api.dashboard.getDashboardData.getDashboardDataQuery,
+        {}
       );
       
       if (!data) return null;
@@ -68,10 +69,11 @@ export class DashboardService {
     notifications?.forEach(notification => {
       activities.push({
         id: notification._id,
-        type: 'notification',
+        userId: notification.userId || '',
+        type: 'notification_sent' as const,
         title: notification.message || notification.title || 'New Notification',
         description: this.getNotificationDescription(notification),
-        timestamp: new Date(notification._creationTime || 0).toISOString(),
+        timestamp: new Date(notification._creationTime || 0),
         status: notification.isRead ? 'success' : 'pending',
         metadata: {
           notificationType: notification.notificationType,
@@ -84,10 +86,11 @@ export class DashboardService {
     applications?.slice(0, 2).forEach(application => {
       activities.push({
         id: application._id,
-        type: 'application',
+        userId: application.userId || '',
+        type: 'application_submitted' as const,
         title: `Health Card Application ${application.status || 'Pending'}`,
         description: `Application for ${application.applicationType || 'health card'} is now ${application.status?.toLowerCase() || 'pending'}`,
-        timestamp: new Date(application._creationTime || 0).toISOString(),
+        timestamp: new Date(application._creationTime || 0),
         status: this.getApplicationActivityStatus(application.status || 'pending'),
         metadata: {
           applicationType: application.applicationType,
@@ -101,10 +104,11 @@ export class DashboardService {
       if (payment) {
         activities.push({
           id: payment._id,
-          type: 'payment',
+          userId: payment.userId || '',
+          type: 'payment_made' as const,
           title: `Payment ${payment.status}`,
           description: `₱${payment.netAmount.toFixed(2)} payment via ${payment.paymentMethod}`,
-          timestamp: new Date(payment.updatedAt || payment._creationTime || 0).toISOString(),
+          timestamp: new Date(payment.updatedAt || payment._creationTime || 0),
           status: payment.status === 'Complete' ? 'success' : payment.status === 'Failed' ? 'error' : 'pending',
           metadata: {
             amount: payment.netAmount,
@@ -171,18 +175,20 @@ export class DashboardService {
       recentActivities: [
         {
           id: '1',
-          type: 'application',
+          userId: 'mock-user-id',
+          type: 'application_submitted' as const,
           title: 'Health Card Application Approved',
           description: 'Your health card application has been approved',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           status: 'success',
         },
         {
           id: '2',
-          type: 'payment',
+          userId: 'mock-user-id',
+          type: 'payment_made' as const,
           title: 'Payment Complete',
           description: '₱60.00 payment via Gcash',
-          timestamp: new Date(Date.now() - 86400000).toISOString(),
+          timestamp: new Date(Date.now() - 86400000),
           status: 'success',
         },
       ],

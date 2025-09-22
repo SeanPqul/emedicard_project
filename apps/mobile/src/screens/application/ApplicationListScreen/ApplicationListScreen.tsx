@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   RefreshControl,
   ScrollView,
@@ -13,8 +13,8 @@ import { useQuery } from 'convex/react';
 import { router } from 'expo-router';
 
 import { BaseScreen } from '@/src/shared/components/core';
-import { api } from '@backend/convex/_generated/api';
-import { EmptyState } from '@shared/components';
+import { api } from 'backend/convex/_generated/api';
+import { EmptyState } from '@shared/components/feedback';
 import { styles } from './ApplicationListScreen.styles';
 import { 
   ApplicationListScreenProps,
@@ -26,7 +26,7 @@ import {
   SORT_OPTIONS
 } from './ApplicationListScreen.types';
 
-export function ApplicationListScreen({ navigation, route }: ApplicationListScreenProps) {
+export function ApplicationListScreen() {
   const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<FilterStatus>('All');

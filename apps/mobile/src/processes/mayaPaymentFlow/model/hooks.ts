@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useMutation, useQuery, useAction } from 'convex/react';
-import { api } from '@backend/convex/_generated/api';
-import { Id } from '@backend/convex/_generated/dataModel';
+import { api } from 'backend/convex/_generated/api';
+import { Id } from 'backend/convex/_generated/dataModel';
 
 import {
   PaymentResult,

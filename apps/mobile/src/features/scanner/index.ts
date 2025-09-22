@@ -1,7 +1,2 @@
-// Scanner feature barrel export
+// Scanner feature module
 export * from './components';
-export * from './screens';
-export * from './hooks';
-export * from './services';
-export * from './types';
-export * from './constants';

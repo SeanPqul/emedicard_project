@@ -31,7 +31,7 @@ export type ActivityType =
   | 'health_card_issued'
   | 'notification_sent';
 
-export type ActivityStatus = 'success' | 'pending' | 'error' | 'info';
+export type ActivityStatus = 'success' | 'pending' | 'error' | 'info' | 'warning';
 
 export type EntityType = 'application' | 'payment' | 'document' | 'health_card' | 'notification';
 

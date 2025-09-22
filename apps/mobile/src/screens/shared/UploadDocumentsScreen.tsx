@@ -1,11 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
 import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import { Id } from '@/backend/convex/_generated/dataModel';
+import { Id } from 'backend/convex/_generated/dataModel';
 import { CustomButton } from '@shared/components';
 import { DragDropUpload } from '@features/upload/components';
 import { getColor } from '@shared/styles/theme';
@@ -284,7 +284,7 @@ export default function UploadDocumentsScreen() {
               to ensure proper processing of your {applicationType?.toLowerCase()} application.
             </Text>
             <Text style={styles.instructionsNote}>
-              ⚠️ Note: Documents must be from accredited clinics and laboratories. 
+              ?? Note: Documents must be from accredited clinics and laboratories. 
               Accepted formats: JPG, PNG, PDF
             </Text>
           </View>

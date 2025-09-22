@@ -1,5 +1,5 @@
 {
-  "extends": "expo/tsconfig.base.json",
+  "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
@@ -12,7 +12,7 @@
     "noUncheckedIndexedAccess": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "jsx": "react-native",
+    "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "sourceMap": true,
@@ -28,10 +28,16 @@
       "@processes/*": ["./src/processes/*"],
       "@shared/*": ["./src/shared/*"],
       "@core/*": ["./src/core/*"],
-      "@types/*": ["./src/types/*"]
+      "@types/*": ["./src/types/*"],
+      "@backend/*": ["../../backend/*"],
+      "@emedicard/constants": ["../../packages/constants/src"],
+      "@emedicard/types": ["../../packages/types/src"],
+      "@emedicard/utils": ["../../packages/utils/src"],
+      "@emedicard/validation": ["../../packages/validation/src"]
     },
     "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "lib": ["ES2022"]
   },
   "include": [
     "**/*.ts",

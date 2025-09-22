@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Alert, Button, Text, TextInput, View } from 'react-native';
-import { styles } from '@shared/styles/screens/tabs-profile';
-import { profileEditStyles } from '@shared/styles/screens/shared-profile-edit';
-import { getColor } from '@shared/styles/theme';
+import { styles } from '../../../../src/shared/styles/screens/tabs-profile';
+import { profileEditStyles } from '../../../../src/shared/styles/screens/shared-profile-edit';
+import { getColor } from '../../../../src/shared/styles/theme';
 
 export default function EditProfile() {
   const [name, setName] = useState('');

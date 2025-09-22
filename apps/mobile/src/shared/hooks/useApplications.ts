@@ -1,6 +1,6 @@
 ﻿import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../../../backend/convex/_generated/api';
-import { Id } from '../../../../../../../backend/convex/_generated/dataModel';
+import { api } from 'backend/convex/_generated/api';
+import { Id } from 'backend/convex/_generated/dataModel';
 
 type ConvexId<T extends string> = Id<T>;
 

@@ -2,10 +2,10 @@
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from 'convex/react';
-import { api } from '../../../../../../../backend/convex/_generated/api';
-import { Id } from '../../../../../../../backend/convex/_generated/dataModel';
-import { Button } from '@/src/shared/components';
-import { FeedbackSystem } from '@/src/shared/components/feedback/feedback';
+import { api } from '@backend/convex/_generated/api';
+import { Id } from '@backend/convex/_generated/dataModel';
+import { Button } from '../../../../src/shared/components';
+import { FeedbackSystem } from '../../../../src/shared/components/feedback/feedback';
 
 /**
  * Payment Success Screen
@@ -114,7 +114,8 @@ export default function PaymentSuccessScreen() {
             style={styles.button}
           />
         </View>
-        <FeedbackSystem />
+        {/* TODO: Implement feedback system with proper props 
+        <FeedbackSystem messages={[]} onDismiss={() => {}} /> */}
       </View>
     );
   }
@@ -145,7 +146,8 @@ export default function PaymentSuccessScreen() {
           />
         </View>
       </View>
-      <FeedbackSystem />
+      {/* TODO: Implement feedback system with proper props 
+      <FeedbackSystem messages={[]} onDismiss={() => {}} /> */}
     </View>
   );
 }

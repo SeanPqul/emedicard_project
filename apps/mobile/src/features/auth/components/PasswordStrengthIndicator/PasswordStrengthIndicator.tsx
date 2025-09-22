@@ -1,4 +1,4 @@
-import { FONT_SIZES, FONT_WEIGHTS, moderateScale, verticalScale } from '@/shared/utils/responsive';
+import { FONT_SIZES, FONT_WEIGHTS, moderateScale, verticalScale } from '@/src/shared/utils/responsive';
 import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 

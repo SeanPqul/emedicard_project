@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, Animated, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getColor, getTypography, getSpacing, getBorderRadius, getShadow } from '@shared/components/styles/theme';
+import { getColor, getTypography, getSpacing, getBorderRadius, getShadow } from '@shared/styles/theme';
 
 export type FeedbackType = 'success' | 'error' | 'warning' | 'info';
 

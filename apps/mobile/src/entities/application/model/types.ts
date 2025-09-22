@@ -4,7 +4,7 @@
  * Type definitions for health card application entities and operations
  */
 
-import { Id } from '@backend/convex/_generated/dataModel';
+import { Id } from 'backend/convex/_generated/dataModel';
 
 // ===== APPLICATION STATUS TYPES =====
 export type ApplicationStatus = 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
@@ -13,7 +13,7 @@ export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separ
 
 // ===== APPLICATION ENTITY TYPES =====
 export interface Application {
-  _id: Id<"forms">;
+  _id: Id<"applications">;
   userId: Id<"users">;
   applicationType: ApplicationType;
   jobCategory: Id<"jobCategories">;
@@ -32,9 +32,9 @@ export interface Application {
 }
 
 export interface ApplicationForm {
-  _id: Id<"forms">;
+  _id: Id<"applications">;
   userId: Id<"users">;
-  formId: Id<"forms">;
+  formId: Id<"applications">;
   status: ApplicationStatus;
   approvedAt: number;
   remarks?: string;
@@ -54,8 +54,9 @@ export interface JobCategory {
 }
 
 // ===== DOCUMENT REQUIREMENT TYPES =====
+// This is a frontend composite type, not a direct backend table
 export interface DocumentRequirement {
-  _id: Id<"documentRequirements">;
+  _id: string; // Composite ID or documentTypeId
   jobCategoryId: Id<"jobCategories">;
   name: string;
   description: string;
@@ -85,7 +86,7 @@ export interface UpdateApplicationInput {
 }
 
 export interface SubmitApplicationInput {
-  formId: Id<'forms'>;
+  formId: Id<'applications'>;
   paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
   paymentReferenceNumber: string;
   paymentReceiptId?: Id<'_storage'>;
@@ -116,7 +117,7 @@ export interface ApplicationWorkflowStep {
 }
 
 export interface ApplicationWorkflow {
-  applicationId: Id<'forms'>;
+  applicationId: Id<'applications'>;
   currentStep: number;
   steps: ApplicationWorkflowStep[];
   progress: number;

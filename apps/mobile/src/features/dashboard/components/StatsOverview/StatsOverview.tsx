@@ -17,19 +17,22 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
   
   const getFoodSafetyStatus = () => {
     if (!isFoodHandler) return { value: "Not Required", subtitle: "Non-food worker" };
-    if (currentApplication?.orientationCompleted) return { value: "Completed", subtitle: "Requirements met" };
+    // TODO: Check orientation completion status from backend
+    // if (currentApplication?.orientationCompleted) return { value: "Completed", subtitle: "Requirements met" };
     return { value: "Required", subtitle: "Schedule required" };
   };
 
   const getFoodSafetyColor = () => {
     if (!isFoodHandler) return theme.colors.text.secondary;
-    if (currentApplication?.orientationCompleted) return theme.colors.status.success;
+    // TODO: Check orientation completion status from backend
+    // if (currentApplication?.orientationCompleted) return theme.colors.status.success;
     return theme.colors.status.error;
   };
 
   const getFoodSafetyIcon = () => {
     if (!isFoodHandler) return 'checkmark-circle-outline';
-    if (currentApplication?.orientationCompleted) return 'checkmark-circle';
+    // TODO: Check orientation completion status from backend
+    // if (currentApplication?.orientationCompleted) return 'checkmark-circle';
     return 'calendar-outline';
   };
 

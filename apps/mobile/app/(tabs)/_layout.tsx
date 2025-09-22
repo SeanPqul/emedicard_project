@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { Redirect } from 'expo-router';
-import RoleBasedTabLayout from '@/src/shared/navigation/components/RoleBasedTabLayout';
-import { LoadingSpinner } from '@/src/shared/components';
+import RoleBasedTabLayout from '../../src/shared/navigation/RoleBasedTabLayout';
+import { LoadingSpinner } from '../../src/shared/components';
 
 export default function TabLayout() {
   const { isLoaded, isSignedIn } = useAuth();

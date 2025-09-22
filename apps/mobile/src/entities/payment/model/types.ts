@@ -4,7 +4,7 @@
  * Type definitions for payment entities and operations
  */
 
-import { Id } from '@backend/convex/_generated/dataModel';
+import { Id } from 'backend/convex/_generated/dataModel';
 
 // ===== PAYMENT STATUS TYPES =====
 export type PaymentStatus = 'Pending' | 'Complete' | 'Failed';
@@ -13,7 +13,7 @@ export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
 // ===== PAYMENT ENTITY TYPES =====
 export interface Payment {
   _id: Id<"payments">;
-  formId: Id<"forms">;
+  formId: Id<"applications">;
   amount: number;
   serviceFee: number;
   netAmount: number;
@@ -61,7 +61,7 @@ export interface PaymentReceipt {
 
 // ===== PAYMENT OPERATION TYPES =====
 export interface CreatePaymentInput {
-  formId: Id<'forms'>;
+  formId: Id<'applications'>;
   amount: number;
   serviceFee: number;
   netAmount: number;

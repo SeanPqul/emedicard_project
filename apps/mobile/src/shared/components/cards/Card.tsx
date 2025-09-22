@@ -7,11 +7,18 @@
 import React from 'react';
 import { TouchableOpacity, View, ViewStyle } from 'react-native';
 import { cardVariants, getSpacing } from '@shared/styles';
-import { DesignSystemCardProps } from '@/src/shared/components/types';
+import { CardStyleProps, BaseComponentProps, CardVariant } from '@/src/types/design-system';
 
-export const Card: React.FC<DesignSystemCardProps> = React.memo(({
+export interface CardProps extends BaseComponentProps, CardStyleProps {
+  children: React.ReactNode;
+  onPress?: () => void;
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
+export const Card: React.FC<CardProps> = React.memo(({
   children,
-  variant = 'default',
+  variant = 'default' as CardVariant,
   padding = 'medium',
   margin = 'none',
   onPress,

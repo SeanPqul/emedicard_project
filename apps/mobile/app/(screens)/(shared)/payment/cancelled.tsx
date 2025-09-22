@@ -1,8 +1,8 @@
 ﻿import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Button } from '@/src/shared/components';
-import { FeedbackSystem } from '@/src/shared/components/feedback/feedback';
+import { Button } from '../../../../src/shared/components';
+import { FeedbackSystem } from '../../../../src/shared/components/feedback/feedback';
 
 /**
  * Payment Cancelled Screen
@@ -79,7 +79,7 @@ export default function PaymentCancelledScreen() {
           </Text>
         </View>
       </View>
-      <FeedbackSystem />
+      {/* FeedbackSystem removed - should be managed at app level */}
     </View>
   );
 }

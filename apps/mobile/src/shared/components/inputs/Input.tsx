@@ -7,15 +7,15 @@
 import React, { useState } from 'react';
 import { TextInput, TextInputProps, ViewStyle, TextStyle } from 'react-native';
 import { inputVariants, getTypography } from '@shared/styles';
-import { InputStyleProps, BaseComponentProps } from '@/src/shared/components/types';
+import { InputStyleProps, BaseComponentProps, InputVariant, InputState } from '@/src/types/design-system';
 
-interface InputProps extends TextInputProps, BaseComponentProps, InputStyleProps {
+interface InputProps extends Omit<TextInputProps, 'style' | keyof BaseComponentProps>, BaseComponentProps, InputStyleProps {
   style?: ViewStyle | ViewStyle[];
   textStyle?: TextStyle | TextStyle[];
 }
 
 export const Input: React.FC<InputProps> = React.memo(({
-  variant = 'default',
+  variant = 'default' as InputVariant,
   state: propState,
   hasError = false,
   multiline = false,

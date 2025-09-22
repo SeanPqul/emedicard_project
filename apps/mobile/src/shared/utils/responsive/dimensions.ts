@@ -12,21 +12,27 @@ const pixelRatio = PixelRatio.get();
 
 /**
  * Convert percentage to device pixels for width
- * @param percentage - Percentage of screen width (0-100)
+ * @param percentage - Percentage of screen width (0-100 as number or '0%'-'100%' as string)
  * @returns Width in pixels
  */
-export const wp = (percentage: number): number => {
-  const value = (percentage * screenWidth) / 100;
+export const wp = (percentage: number | string): number => {
+  const numericValue = typeof percentage === 'string' 
+    ? parseFloat(percentage.replace('%', '')) 
+    : percentage;
+  const value = (numericValue * screenWidth) / 100;
   return Math.round(value);
 };
 
 /**
  * Convert percentage to device pixels for height
- * @param percentage - Percentage of screen height (0-100)
+ * @param percentage - Percentage of screen height (0-100 as number or '0%'-'100%' as string)
  * @returns Height in pixels
  */
-export const hp = (percentage: number): number => {
-  const value = (percentage * screenHeight) / 100;
+export const hp = (percentage: number | string): number => {
+  const numericValue = typeof percentage === 'string' 
+    ? parseFloat(percentage.replace('%', '')) 
+    : percentage;
+  const value = (numericValue * screenHeight) / 100;
   return Math.round(value);
 };
 

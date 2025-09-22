@@ -2,6 +2,25 @@
 import { useMemo } from 'react';
 import { useOptimizedDashboard } from '@shared/hooks/useOptimizedDashboard';
 import { Application } from '@features/dashboard/types';
+import { Id } from 'backend/convex/_generated/dataModel';
+
+// Type for the aggregated application data from backend
+interface DashboardApplication {
+  _id: Id<"applications">;
+  _creationTime: number;
+  status: string;
+  applicationType: "New" | "Renew";
+  position: string;
+  organization: string;
+  jobCategory: {
+    _id: Id<"jobCategories">;
+    name: string;
+    colorCode: string;
+    requireOrientation: string | boolean | undefined;
+  } | undefined;
+  documentCount: number;
+  hasPayment: boolean;
+}
 
 export function useDashboardData() {
   const dashboardData = useOptimizedDashboard();
@@ -10,11 +29,14 @@ export function useDashboardData() {
   const currentApplication = useMemo(() => {
     if (!dashboardData.userApplications) return null;
     
-    return dashboardData.userApplications.find((app: Application) => 
+    // The backend returns aggregated applications with different structure
+    const app = dashboardData.userApplications.find((app: DashboardApplication) => 
       app.status === 'Submitted' || 
       app.status === 'Under Review' || 
       app.status === 'Approved'
-    ) || null;
+    );
+    
+    return app || null;
   }, [dashboardData.userApplications]);
 
   const isNewUser = useMemo(() => {

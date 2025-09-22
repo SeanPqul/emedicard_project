@@ -5,7 +5,7 @@
  */
 
 import { TextInputProps, ViewStyle, TextStyle } from 'react-native';
-import { BaseComponentProps, InputStyleProps } from '../design-system';
+import { BaseComponentProps, InputStyleProps } from '@types/design-system';
 
 // ===== INPUT TYPES =====
 export interface InputProps extends TextInputProps, BaseComponentProps, InputStyleProps {

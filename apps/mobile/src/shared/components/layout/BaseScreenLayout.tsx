@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { theme } from '../styles/theme';
+import { theme } from '@shared/styles/theme';
 
 interface BaseScreenLayoutProps {
   children: React.ReactNode;

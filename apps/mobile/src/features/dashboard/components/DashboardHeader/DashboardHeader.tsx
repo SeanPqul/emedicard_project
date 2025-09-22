@@ -30,7 +30,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       <View style={styles.headerLeft}>
         <View style={styles.profilePicture}>
           <Image
-            source={{ uri: user?.imageUrl || userProfile?.profilePicture }}
+            source={{ uri: user?.imageUrl || userProfile?.image }}
             style={styles.profileImage}
             placeholder="👤"
             contentFit="cover"

@@ -1,13 +1,13 @@
-ï»¿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Share, Alert } from 'react-native';
-import { BaseScreenLayout } from '@shared/components/layout/BaseScreenLayout';
+import { BaseScreenLayout } from '../../../src/shared/components/layout/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../../../../backend/convex/_generated/api';
+import { api } from 'backend/convex/_generated/api';
 import QRCode from 'react-native-qrcode-svg';
-import { getColor } from '@shared/styles/theme';
-import { styles } from '@shared/styles/screens/shared-qr-code';
+import { getColor } from '../../../src/shared/styles/theme';
+import { styles } from '../../../src/shared/styles/screens/shared-qr-code';
 
 export default function QRCodeScreen() {
   // TODO: Replace mock data with actual health card data from API
@@ -71,9 +71,9 @@ export default function QRCodeScreen() {
         <View style={styles.instructionsContainer}>
           <Text style={styles.instructionsTitle}>How to use this QR Code</Text>
           <Text style={styles.instructionsText}>
-            â€¢ Show this QR code to health inspectors for verification{'\n'}
-            â€¢ Keep your device screen bright for better scanning{'\n'}
-            â€¢ This QR code is valid until the expiry date shown above
+            • Show this QR code to health inspectors for verification{'\n'}
+            • Keep your device screen bright for better scanning{'\n'}
+            • This QR code is valid until the expiry date shown above
           </Text>
         </View>
 

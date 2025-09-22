@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme, getColor, getSpacing, getBorderRadius, getShadow, getTypography } from '@shared/styles/theme';
-import { CustomButton } from '@features/scanner/components/ui/Button';
+import { Button as CustomButton } from '@shared/components/buttons/Button';
 
 const { width, height } = Dimensions.get('window');
 

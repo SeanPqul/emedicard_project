@@ -5,7 +5,7 @@
  */
 
 import { ViewStyle, TextStyle } from 'react-native';
-import { BaseComponentProps } from '../design-system';
+import { BaseComponentProps } from '@types/design-system';
 
 // ===== LOADING SPINNER TYPES =====
 export interface LoadingSpinnerProps extends BaseComponentProps {

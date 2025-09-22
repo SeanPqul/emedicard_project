@@ -1,11 +1,11 @@
-﻿import { theme } from '@shared/styles/theme';
+import { theme } from '@shared/styles/theme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from 'convex/react';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { api } from '../../../../../../../../backend/convex/_generated/api';
-import { useRoleBasedNavigation } from '../../hooks/useRoleBasedNavigation';
-import { LoadingSpinner } from '../common/LoadingSpinner';
+import { api } from 'backend/convex/_generated/api';
+import { useRoleBasedNavigation } from '@shared/hooks/useRoleBasedNavigation';
+import { LoadingSpinner } from '@shared/components/feedback/LoadingSpinner';
 
 export default function RoleBasedTabLayout() {
   const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);

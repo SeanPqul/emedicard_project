@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { validateApplicationStep } from '@shared/validation/form-validation';
 import { formStorage } from '@shared/services/storage/formStorage';
 import { SelectedDocuments } from '@shared/types';
-import { DocumentRequirement } from '@entities/(screens)/(shared)/(screens)/(shared)/application/model/types';
+import { DocumentRequirement } from '@/src/entities/application/model/types';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';

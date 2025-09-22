@@ -57,7 +57,7 @@ export type {
   FlexDirection,
   JustifyContent,
   AlignItems,
-} from '../design-system';
+} from '@types/design-system';
 
 // Navigation component types
 export interface NavigationWrapperProps {

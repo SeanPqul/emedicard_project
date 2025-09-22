@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { BaseScreen } from '@/src/shared/components/core';
 import { OtpInputUI, PasswordStrengthIndicator } from '@features/auth/components';
 import { styles } from './ResetPasswordScreen.styles';
-import { moderateScale } from '@/shared/utils/responsive';
+import { moderateScale } from '@/src/shared/utils/responsive';
 import { PASSWORD_REQUIREMENTS } from '@features/auth/constants';
 import { AuthError, PasswordValidation } from '@features/auth/types';
 import { theme } from '@shared/styles/theme';

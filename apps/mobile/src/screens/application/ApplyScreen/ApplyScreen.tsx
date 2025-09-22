@@ -13,40 +13,40 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BaseScreen } from '@/src/shared/components/core';
-import { FeedbackSystem, useFeedback } from '@shared/components/feedback/feedback';
+import { FeedbackSystem, useFeedback } from '@shared/components/feedback';
 import { hp } from '@shared/utils/responsive';
 import { formStorage } from '@shared/services/storage/formStorage';
 import { getColor } from '@shared/styles/theme';
-import { transformRequirements } from '@shared/utils/(screens)/(shared)/(screens)/(shared)/application/requirementsMapper';
-import { STEP_TITLES } from '@features/(screens)/(shared)/(screens)/(shared)/application/constants';
+import { transformRequirements } from '@entities/application/lib/requirementsMapper';
+import { STEP_TITLES } from '@/src/features/application/constants';
 
 // Hooks
 import { useJobCategories } from '@shared/hooks/useJobCategories';
 import { useApplications } from '@shared/hooks/useApplications';
 import { useRequirements } from '@shared/hooks/useRequirements';
 import { useUsers } from '@shared/hooks/useUsers';
-import { useApplicationForm, useDocumentSelection, useSubmission } from '@features/(screens)/(shared)/(screens)/(shared)/application/hooks';
+import { useApplicationForm, useDocumentSelection, useSubmission } from '@/src/features/application/hooks';
 
 // Components
-import { StepIndicator } from '@entities/(screens)/(shared)/(screens)/(shared)/application/ui/StepIndicator';
-import { DocumentSourceModal } from '@entities/(screens)/(shared)/(screens)/(shared)/application/ui/DocumentSourceModal';
+import { StepIndicator } from '@/src/entities/application/ui/StepIndicator';
+import { DocumentSourceModal } from '@/src/entities/application/ui/DocumentSourceModal';
 import { 
   ApplicationTypeStep,
   JobCategoryStep,
   PersonalDetailsStep,
   UploadDocumentsStep,
   ReviewStep
-} from '@features/(screens)/(shared)/(screens)/(shared)/application/components/steps';
+} from '@/src/features/application/components/steps';
 
 // Types
 import { ApplyScreenProps, FormData, SelectedDocument } from './ApplyScreen.types';
-import { JobCategory, DocumentRequirement } from '@entities/(screens)/(shared)/(screens)/(shared)/application/model/types';
+import { JobCategory, DocumentRequirement } from '@/src/entities/application/model/types';
 import { User } from '@entities/user/model/types';
 
 // Styles
 import { styles } from './ApplyScreen.styles';
 
-export function ApplyScreen({ navigation, route }: ApplyScreenProps) {
+export function ApplyScreen() {
   const { user } = useUser();
   const insets = useSafeAreaInsets();
   const screenHeight = Dimensions.get('window').height;

@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { Redirect, Stack } from 'expo-router';
-import { LoadingSpinner } from '@/src/shared/components';
+import { LoadingSpinner } from '../../src/shared/components';
 
 export default function ScreensLayout() {
   const { isLoaded, isSignedIn } = useAuth();

@@ -24,3 +24,17 @@ export interface VerificationPageProps {
   autoRedirect?: boolean;
   redirectPath?: string;
 }
+
+export interface VerificationState {
+  code: string;
+  isVerifying: boolean;
+  isResending: boolean;
+  error: string | null;
+  showSuccess: boolean;
+}
+
+export interface SuccessScreenProps {
+  title?: string;
+  subtitle?: string;
+  onClose?: () => void;
+}

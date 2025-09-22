@@ -1,9 +1,9 @@
-﻿import { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { Id } from '@backend/convex/_generated/dataModel';
+import { Id } from 'backend/convex/_generated/dataModel';
 import { formStorage } from '@shared/services/storage/formStorage';
-import { DocumentRequirement, JobCategory } from '@entities/(screens)/(shared)/(screens)/(shared)/application/model/types';
+import { DocumentRequirement, JobCategory } from '@/src/entities/application/model/types';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
@@ -404,7 +404,7 @@ export const useSubmission = ({
         
         Alert.alert(
           'Application Submitted Successfully!',
-          `Your application has been submitted with payment reference: ${referenceNumber}\n\nTotal Amount: ₱${result.totalAmount}\nPayment Method: ${result.paymentMethod}\n\n${result.requiresOrientation ? '📚 Note: Food safety orientation is required for your health card category.' : ''}\n\nYou will receive notifications about your application status.`,
+          `Your application has been submitted with payment reference: ${referenceNumber}\n\nTotal Amount: ?${result.totalAmount}\nPayment Method: ${result.paymentMethod}\n\n${result.requiresOrientation ? '?? Note: Food safety orientation is required for your health card category.' : ''}\n\nYou will receive notifications about your application status.`,
           [
             {
               text: 'View Applications',
@@ -616,7 +616,7 @@ export const useSubmission = ({
         
         Alert.alert(
           'Application Submitted!',
-          'Your application has been successfully submitted.\n\nYou have 7 days to complete the payment of ₱60.\n\nYou can pay now or later from your applications list.',
+          'Your application has been successfully submitted.\n\nYou have 7 days to complete the payment of ?60.\n\nYou can pay now or later from your applications list.',
           [
             {
               text: 'Pay Now',

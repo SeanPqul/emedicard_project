@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { Stack } from "expo-router";
-import { LoadingSpinner } from "@/src/shared/components/LoadingSpinner";
+import { LoadingSpinner } from "@shared/components/feedback";
 
 export default function InitialLayout() {
   const { isLoaded } = useAuth();

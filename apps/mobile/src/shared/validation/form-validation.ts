@@ -3,7 +3,7 @@
  */
 
 import { Alert } from 'react-native';
-import type { DocumentRequirement, SelectedDocuments } from '../../types';
+import type { DocumentRequirement, SelectedDocuments } from '../types';
 
 // ===== BASIC VALIDATION RESULT =====
 

@@ -1,37 +1,30 @@
 /**
  * Main Src Index
  * 
- * Central export point for the entire src folder.
- * Provides clean imports for all major modules.
- * 
- * Note: Components and constants have been migrated to Feature-Sliced Design structure.
- * - Components are now in @shared/components or feature-specific folders
- * - Constants are now in @shared/constants or feature-specific folders
+ * Central export point for the entire src folder following Feature-Sliced Design.
+ * Provides clean imports for all major architectural layers.
  */
 
-// Configuration
-export * from './config';
+// App Layer - Global app configuration and providers
+export * from './app-layer';
 
-// Contexts
-export * from './contexts';
+// Entities Layer - Business entities
+export * from './entities';
 
-// Hooks
-export * from './hooks';
+// Features Layer - User scenarios and features  
+export * from './features';
 
-// Types
-export * from './types';
+// Widgets Layer - Complex UI blocks
+export * from './widgets';
 
-// Utilities
-export * from './utils';
+// Processes Layer - Complex business processes
+export * from './processes';
 
-// Shared utilities (new architectural layer)
+// Shared Layer - Reusable utilities, components, hooks
 export * from './shared';
 
-// Styles
-export * from './styles';
+// Types - Global type definitions
+export * from './types';
 
-// Layouts
-export * from './layouts';
-
-// Features (only healthCards is active)
-export * from './features/healthCards';
+// Screens - Page components (legacy, being migrated)
+export * from './screens';

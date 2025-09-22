@@ -4,7 +4,7 @@
  * Type definitions for the review and submit step component
  */
 
-import { JobCategory, DocumentRequirement } from '@entities/(screens)/(shared)/(screens)/(shared)/application/model/types';
+import { JobCategory, DocumentRequirement } from '@/src/entities/application/model/types';
 import { SelectedDocuments } from '@shared/types';
 
 export type ApplicationType = 'New' | 'Renew';

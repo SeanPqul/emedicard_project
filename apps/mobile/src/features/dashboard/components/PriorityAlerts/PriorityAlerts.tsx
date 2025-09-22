@@ -14,7 +14,8 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
   // Check if orientation is required based on job category
   const isFoodHandler = currentApplication?.jobCategory?.name?.toLowerCase().includes('food');
   const requiresOrientation = isFoodHandler && currentApplication?.jobCategory?.requireOrientation;
-  const hasNotCompletedOrientation = requiresOrientation && !currentApplication?.orientationCompleted;
+  // TODO: Check orientation completion status from backend
+  const hasNotCompletedOrientation = false; // requiresOrientation && !currentApplication?.orientationCompleted;
   
   const showAlerts = hasPendingPayments || hasNotCompletedOrientation;
 

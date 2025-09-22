@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 
 // Payment flow utilities
@@ -14,7 +14,7 @@ import {
 import { AppError, AppErrorType } from '../lib/errors';
 
 // Types
-import { Id } from '../../../../../../../backend/convex/_generated/dataModel';
+import { Id } from 'backend/convex/_generated/dataModel';
 
 export interface PaymentFlowState {
   isSubmitting: boolean;
@@ -269,7 +269,7 @@ export interface UsePaymentManagerReturn extends UsePaymentFlowReturn {
   serviceFee: number;
   totalAmount: number;
   resetForm: () => void;
-  submitCurrentPayment: (formId: Id<"forms">, withReceipt?: boolean) => Promise<PaymentFlowResult | null>;
+  submitCurrentPayment: (formId: Id<"applications">, withReceipt?: boolean) => Promise<PaymentFlowResult | null>;
 }
 
 export function usePaymentManager(
@@ -285,7 +285,7 @@ export function usePaymentManager(
   }, [paymentFlow, paymentMethod]);
 
   const submitCurrentPayment = useCallback(async (
-    formId: Id<"forms">,
+    formId: Id<"applications">,
     withReceipt: boolean = true
   ): Promise<PaymentFlowResult | null> => {
     if (!paymentMethod.selectedMethod || !paymentMethod.referenceNumber.trim()) {

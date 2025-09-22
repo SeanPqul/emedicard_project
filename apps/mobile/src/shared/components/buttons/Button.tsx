@@ -15,7 +15,30 @@ import {
   getSpacing
 } from '@shared/styles';
 import { theme } from '@shared/styles/theme';
-import { DesignSystemButtonProps } from '@/src/shared/components/types';
+// Using local type definition instead of importing from types
+interface DesignSystemButtonProps {
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'error' | 'success' | 'warning' | 'none';
+  size?: 'small' | 'medium' | 'large';
+  disabled?: boolean;
+  loading?: boolean;
+  loadingText?: string;
+  fullWidth?: boolean;
+  buttonStyle?: any;
+  textStyle?: any;
+  children?: React.ReactNode;
+  title?: string;
+  onPress?: () => void;
+  accessibilityLabel?: string;
+  accessibilityRole?: 'button' | 'link' | 'none';
+  accessibilityState?: any;
+  accessibilityHint?: string;
+  testID?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+  iconPosition?: 'left' | 'right';
+  style?: any;
+  minimumTouchTarget?: boolean;
+  loadingIndicatorColor?: string;
+}
 
 export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
   title,

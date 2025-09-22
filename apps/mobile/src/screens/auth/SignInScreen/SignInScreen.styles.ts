@@ -13,15 +13,15 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: getColor('background.primary'),
     justifyContent: "center",
-    paddingHorizontal: wp("5%"),
-    paddingBottom: hp("5%"),
+    paddingHorizontal: wp(5),
+    paddingBottom: hp(5),
   },
 
   orgLogosContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginVertical: hp("4%"),
-    marginBottom: hp("5%"),
+    marginVertical: hp(4),
+    marginBottom: hp(5),
   },
   orgLogo: {
     alignItems: "center",
@@ -54,7 +54,7 @@ export const styles = StyleSheet.create({
   },
 
   formContainer: {
-    width: wp("90%"),
+    width: wp(90),
     alignSelf: "center",
   },
 
@@ -110,10 +110,10 @@ export const styles = StyleSheet.create({
   signInButton: {
     backgroundColor: getColor('semanticUI.primaryButton'),
     borderRadius: getBorderRadius('lg'),
-    height: hp("6.5%"),
+    height: hp(6.5),
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: hp("3%"),
+    marginBottom: hp(3),
     ...getShadow('medium'),
   },
   buttonDisabled: {
@@ -131,8 +131,8 @@ export const styles = StyleSheet.create({
   },
 
   googleIcon: {
-    width: wp("50%"),
-    height: hp("6%"),
+    width: wp(50),
+    height: hp(6),
   },
 
   signUpContainer: {

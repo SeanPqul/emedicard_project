@@ -1,4 +1,4 @@
-﻿import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { FeedbackSystem, useFeedback } from '@shared/components/feedback/feedback';
 import { CustomButton } from '@shared/components';
-import { Id } from '@/backend/convex/_generated/dataModel';
+import { Id } from 'backend/convex/_generated/dataModel';
 import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
 import { usePayments, useApplications } from '@shared/hooks/';
 import { getColor } from '@shared/styles/theme';
@@ -255,7 +255,7 @@ export default function PaymentScreen() {
             <View style={styles.paymentDetails}>
               <Text style={styles.paymentName}>{method.name}</Text>
               <Text style={styles.paymentDescription}>{method.description}</Text>
-              <Text style={styles.paymentFee}>₱{method.fee}</Text>
+              <Text style={styles.paymentFee}>?{method.fee}</Text>
             </View>
             {selectedPaymentMethod === method.id && (
               <Ionicons name="checkmark" size={20} color={getColor('success.main')} />
@@ -271,17 +271,17 @@ export default function PaymentScreen() {
             <View style={styles.feeBreakdown}>
               <View style={styles.feeRow}>
                 <Text style={styles.feeLabel}>Base Fee:</Text>
-                <Text style={styles.feeValue}>₱{getSelectedMethodDetails()?.fee}</Text>
+                <Text style={styles.feeValue}>?{getSelectedMethodDetails()?.fee}</Text>
               </View>
               {getSelectedMethodDetails()?.serviceFee && (
                 <View style={styles.feeRow}>
                   <Text style={styles.feeLabel}>Service Fee:</Text>
-                  <Text style={styles.feeValue}>₱{getSelectedMethodDetails()?.serviceFee}</Text>
+                  <Text style={styles.feeValue}>?{getSelectedMethodDetails()?.serviceFee}</Text>
                 </View>
               )}
               <View style={[styles.feeRow, styles.totalRow]}>
                 <Text style={styles.totalLabel}>Total:</Text>
-                <Text style={styles.totalValue}>₱{calculateTotal()}</Text>
+                <Text style={styles.totalValue}>?{calculateTotal()}</Text>
               </View>
             </View>
             
@@ -337,28 +337,28 @@ export default function PaymentScreen() {
               {selectedPaymentMethod === 'Gcash' && (
                 <Text style={styles.instructionsText}>
                   1. Open your GCash app{"\n"}
-                  2. Send ₱{calculateTotal()} to 09123456789{"\n"}
+                  2. Send ?{calculateTotal()} to 09123456789{"\n"}
                   3. Enter the reference number above
                 </Text>
               )}
               {selectedPaymentMethod === 'Maya' && (
                 <Text style={styles.instructionsText}>
                   1. Open your Maya app{"\n"}
-                  2. Send ₱{calculateTotal()} to 09123456789{"\n"}
+                  2. Send ?{calculateTotal()} to 09123456789{"\n"}
                   3. Enter the reference number above
                 </Text>
               )}
               {selectedPaymentMethod === 'BaranggayHall' && (
                 <Text style={styles.instructionsText}>
                   1. Visit your Barangay Hall{"\n"}
-                  2. Pay ₱{calculateTotal()} for health card processing{"\n"}
+                  2. Pay ?{calculateTotal()} for health card processing{"\n"}
                   3. Upload the receipt using the button above
                 </Text>
               )}
               {selectedPaymentMethod === 'CityHall' && (
                 <Text style={styles.instructionsText}>
                   1. Visit the City Hall{"\n"}
-                  2. Pay ₱{calculateTotal()} for health card processing{"\n"}
+                  2. Pay ?{calculateTotal()} for health card processing{"\n"}
                   3. Upload the receipt using the button above
                 </Text>
               )}
@@ -381,7 +381,7 @@ export default function PaymentScreen() {
                 </View>
               </View>
               <Text style={styles.paymentReference}>Reference: {existingPayment.referenceNumber}</Text>
-              <Text style={styles.paymentAmount}>Amount: ₱{existingPayment.netAmount}</Text>
+              <Text style={styles.paymentAmount}>Amount: ?{existingPayment.netAmount}</Text>
             </View>
           </View>
         )}

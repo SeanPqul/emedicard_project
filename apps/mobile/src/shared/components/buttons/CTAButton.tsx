@@ -20,8 +20,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from './Button';
-import { Text } from './Text';
-import { getColor, getSpacing, colorWithOpacity } from '@/src/styles';
+import { Text } from '../typography/Text';
+import { getColor, getSpacing, colorWithOpacity } from '@shared/styles/theme';
 
 const { width } = Dimensions.get('window');
 

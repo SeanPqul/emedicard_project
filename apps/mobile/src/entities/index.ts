@@ -1,5 +1,22 @@
 // Re-export all entities
+// Export from application (includes PaymentMethod)
 export * from './application';
 export * from './user';
-export * from './payment';
+
+// Export from payment but exclude PaymentMethod to avoid conflict
+export type {
+  PaymentStatus,
+  Payment,
+  PaymentBreakdown,
+  PaymentReceipt,
+  CreatePaymentInput,
+  UpdatePaymentStatusInput,
+  ProcessPaymentInput,
+  PaymentValidationResult,
+  PaymentFlowStep,
+  PaymentFlow,
+  PaymentHistoryItem
+} from './payment';
+
 export * from './healthCard';
+export * from './notification';

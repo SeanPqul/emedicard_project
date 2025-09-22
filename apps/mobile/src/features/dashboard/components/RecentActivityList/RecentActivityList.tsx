@@ -2,7 +2,7 @@
 import { Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import { ActivityItem } from '@features/dashboard/components/ActivityItem';
-import { EmptyState } from '@shared/components/feedback';
+import { EmptyState } from '../../../../shared/components/feedback';
 import { RecentActivityListProps } from '@features/dashboard/types';
 import { styles } from './RecentActivityList.styles';
 

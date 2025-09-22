@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,40 +14,79 @@ import { EmptyState } from '@shared/components';
 import { styles } from '@shared/styles/screens/tabs-notification';
 import { useNotifications } from '@shared/hooks/useNotifications';
 import { Notification } from '@/src/entities';
-import { Id } from '../../../../../../../backend/convex/_generated/dataModel';
+import { Id } from 'backend/convex/_generated/dataModel';
 
 type NotificationCategory = 'All' | 'Unread' | 'Applications' | 'Payments' | 'Orientations';
 
-type NotificationItem = Notification & {
+// Map backend notification to frontend format
+type BackendNotification = {
+  _id: Id<'notifications'>;
   _creationTime: number;
+  applicationId?: Id<'applications'>;
+  title?: string;
+  actionUrl?: string;
+  userId: Id<'users'>;
+  message: string;
+  notificationType: string;
+  isRead: boolean;
+};
+
+type NotificationItem = {
+  _id: Id<'notifications'>;
+  _creationTime: number;
+  applicationId?: Id<'applications'>;
+  title?: string;
+  actionUrl?: string;
+  userId: Id<'users'>;
+  message: string;
+  type: string;
+  read: boolean;
 };
 
 const NOTIFICATION_CATEGORIES: NotificationCategory[] = [
   'All', 'Unread', 'Applications', 'Payments', 'Orientations'
 ];
 
-const NOTIFICATION_ICONS = {
+const NOTIFICATION_ICONS: Record<string, string> = {
   MissingDoc: 'document-text',
   PaymentReceived: 'card',
   FormApproved: 'checkmark-circle',
   OrientationScheduled: 'calendar',
   CardIssue: 'shield-checkmark',
+  ApplicationSubmitted: 'document',
+  ApplicationApproved: 'checkmark-circle',
+  status_update: 'information-circle',
 };
 
-const NOTIFICATION_COLORS = {
+const NOTIFICATION_COLORS: Record<string, string> = {
   MissingDoc: '#F18F01',
   PaymentReceived: '#2E86AB',
   FormApproved: '#28A745',
   OrientationScheduled: '#A23B72',
   CardIssue: '#6B46C1',
+  ApplicationSubmitted: '#3B82F6',
+  ApplicationApproved: '#28A745',
+  status_update: '#6B7280',
 };
 
-const NOTIFICATION_TITLES = {
+const NOTIFICATION_TITLES: Record<string, string> = {
   MissingDoc: 'Missing Document',
   PaymentReceived: 'Payment Received',
   FormApproved: 'Application Approved',
   OrientationScheduled: 'Orientation Scheduled',
   CardIssue: 'Health Card Issued',
+  ApplicationSubmitted: 'Application Submitted',
+  ApplicationApproved: 'Application Approved',
+  status_update: 'Status Update',
+};
+
+// Map backend notifications to frontend format
+const mapNotification = (backendNotif: BackendNotification): NotificationItem => {
+  return {
+    ...backendNotif,
+    type: backendNotif.notificationType,
+    read: backendNotif.isRead
+  };
 };
 
 export function NotificationScreen() {
@@ -56,7 +95,8 @@ export function NotificationScreen() {
   const [selectedCategory, setSelectedCategory] = useState<NotificationCategory>('All');
   const [refreshing, setRefreshing] = useState(false);
 
-  const notificationsData = notifications.data.notifications || [];
+  const rawNotifications = notifications.data.notifications || [];
+  const notificationsData = rawNotifications.map(mapNotification);
   const loading = notifications.isLoading;
 
   const onRefresh = async () => {
@@ -89,26 +129,26 @@ export function NotificationScreen() {
   const handleNotificationNavigation = (notification: NotificationItem) => {
     switch (notification.type) {
       case 'MissingDoc':
-        if (notification.formsId) {
+        if (notification.applicationId) {
           router.push({
             pathname: '/(screens)/(shared)/documents/upload',
-            params: { formId: notification.formsId }
+            params: { formId: notification.applicationId }
           });
         }
         break;
       case 'PaymentReceived':
-        if (notification.formsId) {
+        if (notification.applicationId) {
           router.push({
             pathname: '/(screens)/(shared)/payment',
-            params: { formId: notification.formsId }
+            params: { formId: notification.applicationId }
           });
         }
         break;
       case 'OrientationScheduled':
-        if (notification.formsId) {
+        if (notification.applicationId) {
           router.push({
             pathname: '/(screens)/(shared)/orientation',
-            params: { formId: notification.formsId }
+            params: { formId: notification.applicationId }
           });
         }
         break;
@@ -116,10 +156,10 @@ export function NotificationScreen() {
         router.push('/(screens)/(shared)/health-cards');
         break;
       case 'FormApproved':
-        if (notification.formsId) {
+        if (notification.applicationId) {
           router.push({
             pathname: '/(tabs)/application',
-            params: { highlightId: notification.formsId }
+            params: { highlightId: notification.applicationId }
           });
         }
         break;
@@ -265,9 +305,9 @@ export function NotificationScreen() {
   };
 
   const renderNotificationItem = (notification: NotificationItem) => {
-    const iconName = NOTIFICATION_ICONS[notification.type];
-    const color = NOTIFICATION_COLORS[notification.type] ;
-    const title = NOTIFICATION_TITLES[notification.type];
+    const iconName = NOTIFICATION_ICONS[notification.type] || 'information-circle';
+    const color = NOTIFICATION_COLORS[notification.type] || '#6B7280';
+    const title = NOTIFICATION_TITLES[notification.type] || notification.type;
     
     return (
       <TouchableOpacity 
@@ -303,7 +343,7 @@ export function NotificationScreen() {
             {notification.message}
           </Text>
           
-          {notification.formsId && (
+          {notification.applicationId && (
             <Text style={styles.notificationAction}>
               Tap to view details
             </Text>

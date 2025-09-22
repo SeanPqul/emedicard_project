@@ -1,26 +1,30 @@
 import { RecentActivity } from '@shared/types';
+import { Activity } from '@entities/dashboard/model/types';
 import { getBorderRadius, getColor, getSpacing, getTypography } from '@shared/styles/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface ActivityItemProps {
-  activity: RecentActivity;
+  activity: RecentActivity | Activity;
 }
 
 export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity }) => {
   const getActivityIcon = () => {
-    switch (activity.type) {
-      case 'application': return 'document-text-outline';
-      case 'payment': return 'card-outline';
-      case 'orientation': return 'calendar-outline';
-      case 'card_issued': return 'shield-checkmark-outline';
-      default: return 'information-circle-outline';
-    }
+    const type = activity.type;
+    if (type.includes('application')) return 'document-text-outline';
+    if (type.includes('payment')) return 'card-outline';
+    if (type.includes('notification')) return 'notifications-outline';
+    if (type.includes('verification')) return 'shield-checkmark-outline';
+    if (type.includes('document')) return 'document-attach-outline';
+    if (type.includes('health_card')) return 'card-outline';
+    return 'information-circle-outline';
   };
 
   const getStatusColor = () => {
-    switch (activity.status) {
+    // Handle both RecentActivity and Activity types - provide default if no status
+    const status = 'status' in activity ? activity.status : 'pending';
+    switch (status) {
       case 'success': return getColor('semantic.success');
       case 'error': return getColor('semantic.error');
       case 'warning': return getColor('semantic.warning');
@@ -28,8 +32,8 @@ export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity 
     }
   };
 
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
+  const formatTime = (timestamp: string | Date) => {
+    const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
     

@@ -5,11 +5,14 @@ export { designSystem, scale, verticalScale, moderateScale, moderateVerticalScal
 export { wp as widthPercentageToDP, hp as heightPercentageToDP } from './responsive';
 
 // User utilities
-export { default as userUtils, generateDisplayNameFromEmail, getUserDisplayName,
+export { generateDisplayNameFromEmail, getUserDisplayName,
   hasPlaceholderName } from './user-utils';
 
 // Health card utilities
 export { getHealthCardTypeName, getPaymentMethods } from './health-card-utils';
+
+// Job category utilities
+export { getJobCategoryColor, getJobCategoryIcon, getCardTypeLabel } from './job-category-utils';
 
 export { 
   getCardColor, 
@@ -18,7 +21,8 @@ export {
   generateVerificationUrl, 
   formatDate, 
   generateCardHtml,
-  type HealthCardData 
+  type HealthCardData,
+  type BackendHealthCard
 } from './health-card-display-utils';
 
 // Orientation utilities

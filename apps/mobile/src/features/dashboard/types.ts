@@ -7,6 +7,25 @@ import type {
 } from '@entities/dashboard';
 import type { Application } from '@entities/application';
 import type { User as UserProfile } from '@entities/user';
+import { Id } from 'backend/convex/_generated/dataModel';
+
+// Type for the aggregated application data from backend dashboard
+export interface DashboardApplication {
+  _id: Id<"applications">;
+  _creationTime: number;
+  status: string;
+  applicationType: "New" | "Renew";
+  position: string;
+  organization: string;
+  jobCategory: {
+    _id: Id<"jobCategories">;
+    name: string;
+    colorCode: string;
+    requireOrientation: string | boolean | undefined;
+  } | undefined;
+  documentCount: number;
+  hasPayment: boolean;
+}
 
 // Re-export entity types for backward compatibility
 export type { 
@@ -39,23 +58,23 @@ export interface WelcomeBannerProps {
 
 export interface PriorityAlertsProps {
   dashboardStats: DashboardStats;
-  currentApplication: Application | null;
+  currentApplication: DashboardApplication | null;
 }
 
 export interface ApplicationStatusProps {
-  currentApplication: Application | null;
+  currentApplication: DashboardApplication | null;
 }
 
 export interface StatsOverviewProps {
   dashboardStats: DashboardStats;
-  currentApplication: Application | null;
+  currentApplication: DashboardApplication | null;
   showForNewUser: boolean;
 }
 
 export interface QuickActionsGridProps {
-  userApplications: Application[] | null;
+  userApplications: DashboardApplication[] | null;
   dashboardStats: DashboardStats;
-  currentApplication: Application | null;
+  currentApplication: DashboardApplication | null;
 }
 
 export interface RecentActivityListProps {

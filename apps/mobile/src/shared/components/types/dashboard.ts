@@ -5,7 +5,7 @@
  */
 
 import { ViewStyle, TextStyle } from 'react-native';
-import { BaseComponentProps } from '../design-system';
+import { BaseComponentProps } from '@types/design-system';
 
 // ===== STAT CARD TYPES =====
 export interface StatCardProps {
@@ -31,11 +31,11 @@ export interface StatCardProps {
 // ===== ACTIVITY ITEM TYPES =====
 export interface RecentActivity {
   id: string;
-  type: 'application' | 'payment' | 'orientation' | 'card_issued' | 'notification';
+  type: 'application' | 'payment' | 'notification' | 'verification';
   title: string;
   description: string;
   timestamp: string;
-  status: 'success' | 'pending' | 'warning' | 'error';
+  status?: 'success' | 'pending' | 'warning' | 'error';
   metadata?: Record<string, any>;
 }
 

@@ -1,5 +1,5 @@
 import { MMKV } from 'react-native-mmkv';
-import { setItem, getItem, removeItem, clearStorage } from '../storage';
+import { setItem, getItem, removeItem, clearStorage } from '@shared/lib/storage';
 
 // Mock react-native-mmkv
 jest.mock('react-native-mmkv', () => ({

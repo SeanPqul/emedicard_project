@@ -4,7 +4,8 @@ import { Alert, Image, Text, View, TouchableOpacity, TextInput } from 'react-nat
 import { Link, useRouter } from 'expo-router';
 import { useSignUp, useSSO } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
-import GoogleSignInButton from '@/assets/svgs/google-ctn-logo.svg';
+// @ts-ignore - SVG import
+import GoogleSignInButton from '../../../../assets/svgs/google-ctn-logo.svg';
 import { BaseScreen } from '@/src/shared/components/core';
 import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './SignUpScreen.styles';

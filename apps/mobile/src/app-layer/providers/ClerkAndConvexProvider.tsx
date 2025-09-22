@@ -59,7 +59,7 @@ function UserSetupHandler() {
   
   // Fix placeholder names for existing users
   useEffect(() => {
-    if (isSignedIn && user && userProfile && hasPlaceholderName(userProfile)) {
+    if (isSignedIn && user && userProfile && hasPlaceholderName(userProfile.fullname)) {
       const email = user.emailAddresses[0]?.emailAddress || userProfile.email;
       if (email) {
         const betterName = user.fullName || generateDisplayNameFromEmail(email);

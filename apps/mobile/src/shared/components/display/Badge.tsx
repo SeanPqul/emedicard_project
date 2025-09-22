@@ -8,7 +8,7 @@ import React from 'react';
 import { View, Text, ViewStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { badgeVariants, badgeTextVariants, getSpacing } from '@shared/styles';
-import { BadgeStyleProps, BaseComponentProps } from '@/src/shared/components/types';
+import { BadgeStyleProps, BaseComponentProps, BadgeVariant, BadgeSize } from '@/src/types/design-system';
 
 interface BadgeProps extends BaseComponentProps, BadgeStyleProps {
   text: string;
@@ -19,8 +19,8 @@ interface BadgeProps extends BaseComponentProps, BadgeStyleProps {
 
 export const Badge: React.FC<BadgeProps> = React.memo(({
   text,
-  variant = 'neutral',
-  size = 'medium',
+  variant = 'neutral' as BadgeVariant,
+  size = 'medium' as BadgeSize,
   icon,
   iconPosition = 'left',
   style,

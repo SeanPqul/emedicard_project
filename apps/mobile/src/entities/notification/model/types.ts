@@ -1,5 +1,5 @@
 // Notification entity types
-import type { Id } from '@backend/convex/_generated/dataModel';
+import type { Id } from 'backend/convex/_generated/dataModel';
 
 export interface Notification {
   _id: Id<"notifications">;

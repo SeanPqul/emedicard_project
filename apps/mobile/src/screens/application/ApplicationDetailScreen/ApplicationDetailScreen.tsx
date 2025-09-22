@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,8 +15,8 @@ import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { BaseScreen } from '@/src/shared/components/core';
-import { api } from '@backend/convex/_generated/api';
-import { Id } from '@backend/convex/_generated/dataModel';
+import { api } from 'backend/convex/_generated/api';
+import { Id } from 'backend/convex/_generated/dataModel';
 import { useMayaPayment } from '@processes/mayaPaymentFlow';
 import { useAbandonedPayment } from '@processes/abandonedPaymentFlow';
 import { CustomButton } from '@shared/components';
@@ -257,8 +257,8 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
         {application.status === 'Pending Payment' && (
           <View style={styles.paymentCard}>
             <Text style={styles.sectionTitle}>Payment Required</Text>
-            <Text style={styles.paymentAmount}>₱60.00</Text>
-            <Text style={styles.paymentBreakdown}>Application Fee: ₱50.00 | Service Fee: ₱10.00</Text>
+            <Text style={styles.paymentAmount}>?60.00</Text>
+            <Text style={styles.paymentBreakdown}>Application Fee: ?50.00 | Service Fee: ?10.00</Text>
             
             <View style={styles.paymentMethods}>
               <TouchableOpacity 

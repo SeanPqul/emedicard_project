@@ -1,11 +1,11 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from 'convex/react';
-import { api } from '../../../../../../../backend/convex/_generated/api';
-import { Id } from '../../../../../../../backend/convex/_generated/dataModel';
-import { Button } from '@/src/shared/components';
-import { FeedbackSystem } from '@/src/shared/components/feedback/feedback';
+import { api } from 'backend/convex/_generated/api';
+import { Id } from 'backend/convex/_generated/dataModel';
+import { Button } from '../../../../src/shared/components';
+import { FeedbackSystem } from '../../../../src/shared/components/feedback/feedback';
 
 /**
  * Payment Failed Screen
@@ -35,7 +35,7 @@ export default function PaymentFailedScreen() {
       }
 
       try {
-        console.log('🔄 Checking final payment status for failed payment:', paymentId);
+        console.log('?? Checking final payment status for failed payment:', paymentId);
 
         // Even though Maya said it failed, double-check with backend
         const result = await syncPaymentStatus({
@@ -45,16 +45,16 @@ export default function PaymentFailedScreen() {
         setActualStatus(result.status);
 
         if (result.status === 'Complete') {
-          console.log('🎉 Payment actually succeeded despite failure redirect!');
+          console.log('?? Payment actually succeeded despite failure redirect!');
           // This can happen due to network issues - redirect to success
           router.replace(`/payment/success?paymentId=${paymentId}&applicationId=${applicationId}`);
           return;
         } else if (result.status === 'Failed') {
           setErrorDetails(reason || 'Payment processing failed');
-          console.log('❌ Payment confirmed as failed');
+          console.log('? Payment confirmed as failed');
         } else {
           setErrorDetails('Payment status is unclear. Please try again.');
-          console.log('⚠️ Payment status unclear:', result.status);
+          console.log('?? Payment status unclear:', result.status);
         }
       } catch (error) {
         console.error('Error checking payment status:', error);
@@ -106,10 +106,10 @@ export default function PaymentFailedScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.centerContent}>
-        <Text style={styles.failureIcon}>❌</Text>
+        <Text style={styles.failureIcon}>?</Text>
         <Text style={styles.title}>Payment Failed</Text>
         <Text style={styles.subtitle}>
-          Your ₱60 health card payment could not be processed
+          Your ?60 health card payment could not be processed
         </Text>
         <View style={styles.reasonContainer}>
           <Text style={styles.reasonLabel}>Reason:</Text>
@@ -135,11 +135,11 @@ export default function PaymentFailedScreen() {
         </View>
         <View style={styles.helpContainer}>
           <Text style={styles.helpText}>
-            💡 Make sure you have sufficient balance in your Maya account and try again
+            ?? Make sure you have sufficient balance in your Maya account and try again
           </Text>
         </View>
       </View>
-      <FeedbackSystem />
+      {/* FeedbackSystem removed - should be managed at app level */}
     </View>
   );
 }
