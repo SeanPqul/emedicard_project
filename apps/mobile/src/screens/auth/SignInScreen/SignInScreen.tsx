@@ -1,4 +1,4 @@
-// SignInScreen component - Clean architecture implementation
+﻿// SignInScreen component - Clean architecture implementation
 import React, { useState } from 'react';
 import { Alert, Image, Text, View } from 'react-native';
 import { Link, useRouter } from 'expo-router';
@@ -9,7 +9,7 @@ import {
 } from 'react-native-responsive-screen';
 import GoogleSignInButton from '@/assets/svgs/google-ctn-logo.svg';
 import { CustomButton, CustomTextInput, Divider } from '@shared/components';
-import { BaseScreen } from '@core/components';
+import { BaseScreen } from '@/src/shared/components/core';
 import { styles } from './SignInScreen.styles';
 import { SignInFormData, AuthError } from '@features/auth/types';
 

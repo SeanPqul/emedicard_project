@@ -1,17 +1,17 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS, SHADOWS } from '@shared/constants/theme';
-import { moderateScale, verticalScale, horizontalScale, wp, hp } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { moderateScale, verticalScale, scale, wp } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: horizontalScale(SPACING.lg),
-    paddingVertical: verticalScale(SPACING.md),
+    paddingHorizontal: scale(theme.spacing.lg),
+    paddingVertical: verticalScale(theme.spacing.md),
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: FONT_WEIGHTS.semibold,
-    color: COLORS.text.primary,
-    marginBottom: verticalScale(SPACING.sm),
+    fontSize: 18,
+    fontWeight: '600' as const,
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(theme.spacing.sm),
   },
   actionsGrid: {
     flexDirection: 'row',

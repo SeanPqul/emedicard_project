@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Card Component
  * 
  * Enhanced card component with comprehensive variant system and responsive design
@@ -7,7 +7,7 @@
 import React from 'react';
 import { TouchableOpacity, View, ViewStyle } from 'react-native';
 import { cardVariants, getSpacing } from '@shared/styles';
-import { DesignSystemCardProps } from '@shared/types/design-system';
+import { DesignSystemCardProps } from '@/src/shared/components/types';
 
 export const Card: React.FC<DesignSystemCardProps> = React.memo(({
   children,

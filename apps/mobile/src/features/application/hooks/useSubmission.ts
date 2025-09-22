@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react';
+﻿import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { formStorage } from '@shared/services/storage/formStorage';
-import { DocumentRequirement, JobCategory } from '@entities/application/model/types';
+import { DocumentRequirement, JobCategory } from '@entities/(screens)/(shared)/(screens)/(shared)/application/model/types';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
@@ -623,7 +623,7 @@ export const useSubmission = ({
               onPress: () => {
                 resetForm();
                 // Navigate to application details with payment section
-                router.replace(`/application/${applicationId}`);
+                router.replace(`/(screens)/(shared)/(screens)/(shared)/application/${applicationId}`);
               },
             },
             {

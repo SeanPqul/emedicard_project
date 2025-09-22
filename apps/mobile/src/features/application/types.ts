@@ -1,4 +1,4 @@
-// Application feature types - Uses entities from entities layer (FSD pattern)
+﻿// Application feature types - Uses entities from entities layer (FSD pattern)
 import type { 
   Application,
   ApplicationType,
@@ -76,4 +76,4 @@ export interface ApplicationFormData {
   startDate?: string;
 }
 
-// Form-specific types are now defined in entities/application/model/types.ts
+// Form-specific types are now defined in entities/(screens)/(shared)/(screens)/(shared)/application/model/types.ts

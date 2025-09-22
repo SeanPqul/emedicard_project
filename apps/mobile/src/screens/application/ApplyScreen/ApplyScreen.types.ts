@@ -1,6 +1,6 @@
-import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '@/shared/types/navigation';
-import { JobCategory, DocumentRequirement } from '@entities/application/model/types';
+﻿import { NavigationProp, RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '@/src/shared/navigation/types';
+import { JobCategory, DocumentRequirement } from '@entities/(screens)/(shared)/(screens)/(shared)/application/model/types';
 import { User } from '@entities/user/model/types';
 
 export interface ApplyScreenProps {

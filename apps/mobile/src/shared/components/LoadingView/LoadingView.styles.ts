@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, SPACING } from '@/shared/constants/theme';
+import { theme } from '@shared/styles/theme';
 import { verticalScale } from '@/shared/utils/responsive';
 
 export const styles = StyleSheet.create({
@@ -7,12 +7,12 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background.primary,
+    backgroundColor: theme.colors.background.primary,
   },
   message: {
-    marginTop: verticalScale(SPACING.md),
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.secondary,
+    marginTop: verticalScale(theme.spacing.md),
+    fontSize: theme.typography.body.fontSize,
+    color: theme.colors.text.secondary,
     textAlign: 'center',
   },
 });

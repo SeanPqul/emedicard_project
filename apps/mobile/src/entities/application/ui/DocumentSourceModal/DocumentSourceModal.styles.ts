@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS } from '@shared/constants/theme';
-import { moderateScale, verticalScale, horizontalScale, wp, hp } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { moderateScale, verticalScale, scale, wp, hp } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   modalOverlay: {
@@ -9,46 +9,46 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    backgroundColor: COLORS.background.primary,
-    borderTopLeftRadius: BORDER_RADIUS.xl,
-    borderTopRightRadius: BORDER_RADIUS.xl,
-    paddingHorizontal: horizontalScale(SPACING.lg),
-    paddingTop: verticalScale(SPACING.lg),
-    paddingBottom: verticalScale(SPACING.xl),
+    backgroundColor: theme.colors.background.primary,
+    borderTopLeftRadius: theme.borderRadius.xl,
+    borderTopRightRadius: theme.borderRadius.xl,
+    paddingHorizontal: scale(theme.spacing.lg),
+    paddingTop: verticalScale(theme.spacing.lg),
+    paddingBottom: verticalScale(theme.spacing.xl),
   },
   modalTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: FONT_WEIGHTS.semibold,
-    color: COLORS.text.primary,
+    fontSize: 18,
+    fontWeight: '600' as const,
+    color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: verticalScale(SPACING.lg),
+    marginBottom: verticalScale(theme.spacing.lg),
   },
   imagePickerOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: verticalScale(SPACING.md),
-    paddingHorizontal: horizontalScale(SPACING.lg),
-    marginBottom: verticalScale(SPACING.sm),
-    backgroundColor: COLORS.background.secondary,
-    borderRadius: BORDER_RADIUS.lg,
+    paddingVertical: verticalScale(theme.spacing.md),
+    paddingHorizontal: scale(theme.spacing.lg),
+    marginBottom: verticalScale(theme.spacing.sm),
+    backgroundColor: theme.colors.background.secondary,
+    borderRadius: theme.borderRadius.lg,
   },
   imagePickerOptionText: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.primary,
-    marginLeft: horizontalScale(SPACING.md),
+    fontSize: 16,
+    color: theme.colors.text.primary,
+    marginLeft: scale(theme.spacing.md),
     flex: 1,
   },
   modalCancelButton: {
-    marginTop: verticalScale(SPACING.md),
-    paddingVertical: verticalScale(SPACING.md),
+    marginTop: verticalScale(theme.spacing.md),
+    paddingVertical: verticalScale(theme.spacing.md),
     alignItems: 'center',
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: theme.borderRadius.lg,
     borderWidth: 1,
-    borderColor: COLORS.border.medium,
+    borderColor: theme.colors.border.medium,
   },
   modalCancelText: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.secondary,
-    fontWeight: FONT_WEIGHTS.medium,
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+    fontWeight: '500' as const,
   },
 });

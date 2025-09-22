@@ -1,4 +1,4 @@
-// VerificationScreen component - Clean architecture implementation
+﻿// VerificationScreen component - Clean architecture implementation
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Alert, Animated, Text, TouchableOpacity, View } from 'react-native';
 import { useSignUp } from '@clerk/clerk-expo';

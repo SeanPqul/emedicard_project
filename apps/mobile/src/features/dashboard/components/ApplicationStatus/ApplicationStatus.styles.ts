@@ -1,97 +1,97 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS, SHADOWS } from '@shared/constants/theme';
-import { moderateScale, verticalScale, horizontalScale, wp, hp } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { moderateScale, verticalScale, scale, wp, hp } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
-    marginHorizontal: horizontalScale(SPACING.lg),
-    marginVertical: verticalScale(SPACING.md),
-    backgroundColor: COLORS.background.primary,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: moderateScale(SPACING.md),
-    ...SHADOWS.md,
+    marginHorizontal: scale(theme.spacing.lg),
+    marginVertical: verticalScale(theme.spacing.md),
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: theme.borderRadius.lg,
+    padding: moderateScale(theme.spacing.md),
+    ...theme.shadows.medium,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: verticalScale(SPACING.md),
+    marginBottom: verticalScale(theme.spacing.md),
   },
   categoryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: horizontalScale(SPACING.sm),
-    paddingVertical: verticalScale(SPACING.xs),
-    borderRadius: BORDER_RADIUS.full,
+    paddingHorizontal: scale(theme.spacing.sm),
+    paddingVertical: verticalScale(theme.spacing.xs),
+    borderRadius: theme.borderRadius.full,
   },
   categoryIcon: {
-    color: COLORS.text.inverse,
+    color: theme.colors.text.inverse,
   },
   categoryText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.inverse,
-    fontWeight: FONT_WEIGHTS.semibold,
-    marginLeft: horizontalScale(SPACING.xs),
+    fontSize: 12,
+    color: theme.colors.text.inverse,
+    fontWeight: '600' as const,
+    marginLeft: scale(theme.spacing.xs),
   },
   applicationId: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.secondary,
+    fontSize: 12,
+    color: theme.colors.text.secondary,
   },
   progressContainer: {
-    marginTop: verticalScale(SPACING.sm),
+    marginTop: verticalScale(theme.spacing.sm),
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: verticalScale(SPACING.sm),
+    marginBottom: verticalScale(theme.spacing.sm),
   },
   progressTitle: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.primary,
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontSize: 14,
+    color: theme.colors.text.primary,
+    fontWeight: '600' as const,
   },
   statusBadge: {
-    paddingHorizontal: horizontalScale(SPACING.sm),
-    paddingVertical: verticalScale(SPACING.xs / 2),
-    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: scale(theme.spacing.sm),
+    paddingVertical: verticalScale(theme.spacing.xs / 2),
+    borderRadius: theme.borderRadius.md,
   },
   progressStatus: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: 12,
     textTransform: 'uppercase',
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontWeight: '600' as const,
   },
   progressBar: {
     height: 6,
-    backgroundColor: COLORS.background.secondary,
-    borderRadius: BORDER_RADIUS.full,
-    marginBottom: verticalScale(SPACING.xs),
+    backgroundColor: theme.colors.background.secondary,
+    borderRadius: theme.borderRadius.full,
+    marginBottom: verticalScale(theme.spacing.xs),
   },
   progressFill: {
     height: '100%',
-    borderRadius: BORDER_RADIUS.full,
+    borderRadius: theme.borderRadius.full,
   },
   progressText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.secondary,
+    fontSize: 12,
+    color: theme.colors.text.secondary,
   },
   // Status colors
   statusApproved: {
-    color: COLORS.status.success,
+    color: theme.colors.status.success,
   },
   statusApprovedBg: {
-    backgroundColor: COLORS.status.success + '20',
+    backgroundColor: theme.colors.status.success + '20',
   },
   statusReview: {
-    color: COLORS.status.warning,
+    color: theme.colors.status.warning,
   },
   statusReviewBg: {
-    backgroundColor: COLORS.status.warning + '20',
+    backgroundColor: theme.colors.status.warning + '20',
   },
   statusSubmitted: {
-    color: COLORS.secondary.main,
+    color: theme.colors.brand.secondary,
   },
   statusSubmittedBg: {
-    backgroundColor: COLORS.secondary.main + '20',
+    backgroundColor: theme.colors.brand.secondary + '20',
   },
 });

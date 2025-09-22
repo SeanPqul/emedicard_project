@@ -1,4 +1,4 @@
-// Dashboard feature constants
+﻿// Dashboard feature constants
 
 export const REFRESH_INTERVALS = {
   DASHBOARD_DATA: 30000, // 30 seconds

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '@shared/styles/theme';
@@ -70,7 +70,7 @@ export function InspectorDashboardScreen() {
             title="Queue"
             value="15"
             subtitle="Awaiting inspection"
-            color={theme.colors.secondary[500]}
+            color={theme.colors.blue[500]}
             onPress={() => router.push('/(screens)/(inspector)/inspection-queue')}
           />
           
@@ -88,7 +88,7 @@ export function InspectorDashboardScreen() {
             title="Scanner"
             value="Ready"
             subtitle="QR Code scanner"
-            color={theme.colors.primary[500]}
+            color={theme.colors.green[500]}
             onPress={() => router.push('/(screens)/(inspector)/scanner')}
           />
         </View>

@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { getBorderRadius, getColor, getSpacing, getTypography } from '../theme';
+import { getBorderRadius, getColor, getSpacing, getTypography } from '../theme/index';
 
 export const modalStyles = StyleSheet.create({
   // Modal Overlay

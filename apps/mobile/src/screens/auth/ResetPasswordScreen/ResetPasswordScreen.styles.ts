@@ -1,13 +1,13 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS } from '@/shared/constants/theme';
-import { moderateScale, verticalScale, horizontalScale } from '@/shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { moderateScale, verticalScale, scale } from '@/shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: horizontalScale(24),
+    paddingHorizontal: scale(24),
     paddingTop: verticalScale(24),
-    backgroundColor: COLORS.background.primary,
+    backgroundColor: theme.colors.background.primary,
   },
   iconContainer: {
     alignItems: 'center',
@@ -22,15 +22,15 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: FONT_SIZES.xxl,
-    fontWeight: FONT_WEIGHTS.bold as any,
-    color: COLORS.text.primary,
+    fontSize: theme.typography.h2.fontSize,
+    fontWeight: theme.typography.h2.fontWeight,
+    color: theme.colors.text.primary,
     textAlign: 'center',
     marginBottom: verticalScale(8),
   },
   subtitle: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.secondary,
+    fontSize: theme.typography.bodySmall.fontSize,
+    color: theme.colors.text.secondary,
     textAlign: 'center',
     marginBottom: verticalScale(32),
     lineHeight: moderateScale(20),
@@ -41,21 +41,21 @@ export const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.background.secondary,
-    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: theme.colors.background.secondary,
+    borderRadius: theme.borderRadius.md,
     borderWidth: 1,
-    borderColor: COLORS.border.light,
+    borderColor: theme.colors.border.light,
     marginBottom: verticalScale(16),
-    paddingHorizontal: horizontalScale(16),
+    paddingHorizontal: scale(16),
     height: verticalScale(56),
   },
   inputIcon: {
-    marginRight: horizontalScale(12),
+    marginRight: scale(12),
   },
   inputWithIcon: {
     flex: 1,
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.primary,
+    fontSize: theme.typography.body.fontSize,
+    color: theme.colors.text.primary,
   },
   eyeIcon: {
     padding: moderateScale(8),
@@ -65,16 +65,16 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(8),
   },
   errorText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.status.error,
+    fontSize: theme.typography.bodySmall.fontSize,
+    color: theme.colors.status.error,
     textAlign: 'center',
   },
   passwordRequirements: {
     marginBottom: verticalScale(24),
   },
   primaryButton: {
-    backgroundColor: COLORS.primary.main,
-    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: theme.colors.blue[500],
+    borderRadius: theme.borderRadius.md,
     paddingVertical: verticalScale(16),
     alignItems: 'center',
     justifyContent: 'center',
@@ -84,9 +84,9 @@ export const styles = StyleSheet.create({
     opacity: 0.6,
   },
   primaryButtonText: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.semibold as any,
-    color: COLORS.text.inverse,
+    fontSize: theme.typography.body.fontSize,
+    fontWeight: '600' as const,
+    color: theme.colors.text.inverse,
   },
   backButton: {
     flexDirection: 'row',
@@ -95,8 +95,8 @@ export const styles = StyleSheet.create({
     paddingVertical: verticalScale(12),
   },
   backButtonText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.secondary,
-    marginLeft: horizontalScale(8),
+    fontSize: theme.typography.bodySmall.fontSize,
+    color: theme.colors.text.secondary,
+    marginLeft: scale(8),
   },
 });

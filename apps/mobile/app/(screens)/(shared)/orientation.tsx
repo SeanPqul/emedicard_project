@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { Id } from '../../../../../backend/convex/_generated/dataModel';
+import { Id } from '../../../../../../../../backend/convex/_generated/dataModel';
 import { CustomButton, EmptyState } from '@/src/shared/components';
 import { BaseScreenLayout } from '@shared/components/layout/BaseScreenLayout';
 import { styles } from '@shared/styles/screens/shared-orientation';
@@ -251,5 +251,3 @@ export default function OrientationScreen() {
     </BaseScreenLayout>
   );
 }
-
-

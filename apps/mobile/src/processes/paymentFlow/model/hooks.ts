@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+﻿import { useState, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 
 // Payment flow utilities
@@ -14,7 +14,7 @@ import {
 import { AppError, AppErrorType } from '../lib/errors';
 
 // Types
-import { Id } from '../../../../backend/convex/_generated/dataModel';
+import { Id } from '../../../../../../../backend/convex/_generated/dataModel';
 
 export interface PaymentFlowState {
   isSubmitting: boolean;

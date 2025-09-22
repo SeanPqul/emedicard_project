@@ -1,29 +1,29 @@
-import { useUsers } from '@shared/hooks/useUsers';
+import { useAuth } from "@clerk/clerk-expo";
 import { Redirect } from 'expo-router';
-import RoleBasedTabLayout from '@/src/core/navigation/components/RoleBasedTabLayout';
+import RoleBasedTabLayout from '@/src/shared/navigation/components/RoleBasedTabLayout';
 import { LoadingSpinner } from '@/src/shared/components';
 
 export default function TabLayout() {
-  const { data: { currentUser }, isLoading } = useUsers();
+  const { isLoaded, isSignedIn } = useAuth();
   
-  // Wait for user data to load before making routing decisions
-  if (isLoading || !currentUser) {
+  // Check authentication
+  if (!isLoaded) {
     return (
       <LoadingSpinner 
         visible={true} 
-        message="Loading tabs..." 
+        message="Loading..." 
         fullScreen 
         type="pulse" 
-        icon="compass" 
+        icon="shield-checkmark"
       />
     );
   }
   
-  // Only applicants should access tab navigation
-  // Inspectors should be redirected to their Stack-based navigation
-  if (currentUser.role === 'inspector') {
-    return <Redirect href="/(screens)/(inspector)/inspector-dashboard" />;
+  // Redirect to auth if not signed in
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/sign-in" />;
   }
   
+  // Render tab navigation for authenticated users
   return <RoleBasedTabLayout />;
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Text, View, ViewStyle } from 'react-native';
 import { styles } from './LoadingView.styles';
-import { COLORS } from '@/shared/constants/theme';
+import { theme } from '@shared/styles/theme';
 
 interface LoadingViewProps {
   message?: string;
@@ -13,7 +13,7 @@ interface LoadingViewProps {
 export const LoadingView: React.FC<LoadingViewProps> = ({ 
   message, 
   size = 'large',
-  color = COLORS.primary.main,
+  color = theme.colors.brand.primary,
   style 
 }) => {
   return (

@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { getColor, getSpacing, getBorderRadius, getTypography } from '../theme';
+import { getColor, getSpacing, getBorderRadius, getTypography } from '../theme/index';
 
 // Common style patterns extracted from inline styles across the app
 export const commonPatterns = StyleSheet.create({

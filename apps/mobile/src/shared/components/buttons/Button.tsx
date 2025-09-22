@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Button Component
  * 
  * Enhanced button component with comprehensive variant system, accessibility, and responsive design
@@ -15,7 +15,7 @@ import {
   getSpacing
 } from '@shared/styles';
 import { theme } from '@shared/styles/theme';
-import { DesignSystemButtonProps } from '@shared/types/design-system';
+import { DesignSystemButtonProps } from '@/src/shared/components/types';
 
 export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
   title,

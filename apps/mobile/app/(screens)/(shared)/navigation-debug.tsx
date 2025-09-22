@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth, useUser } from "@clerk/clerk-expo";
@@ -96,7 +96,7 @@ export default function NavigationHealthCheck() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Ionicons name="bug" size={32} color={theme.colors.primary[500]} />
+          <Ionicons name="bug" size={32} color={theme.colors.brand.secondary} />
           <Text style={styles.title}>Navigation Health Check</Text>
           <Text style={styles.subtitle}>Debug & Troubleshooting Tool</Text>
         </View>
@@ -106,7 +106,7 @@ export default function NavigationHealthCheck() {
           <Ionicons name="refresh" size={16} color={theme.colors.text.secondary} />
           <Text style={styles.refreshText}>Auto-refresh #{refreshCount}</Text>
           <TouchableOpacity onPress={copyToClipboard} style={styles.copyButton}>
-            <Ionicons name="copy" size={16} color={theme.colors.primary[500]} />
+            <Ionicons name="copy" size={16} color={theme.colors.brand.secondary} />
             <Text style={styles.copyText}>Copy Debug Info</Text>
           </TouchableOpacity>
         </View>
@@ -166,7 +166,7 @@ export default function NavigationHealthCheck() {
             <Text style={styles.statusValue}>{String(healthData.convex.hasUser)}</Text>
           </View>
           <View style={styles.statusRow}>
-            <Ionicons name="shield" size={20} color={theme.colors.primary[500]} />
+            <Ionicons name="shield" size={20} color={theme.colors.brand.primary} />
             <Text style={styles.statusLabel}>Role:</Text>
             <Text style={[styles.statusValue, styles.roleHighlight]}>
               {healthData.convex.role || 'undefined'}
@@ -183,7 +183,7 @@ export default function NavigationHealthCheck() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🧭 Navigation State</Text>
           <View style={styles.statusRow}>
-            <Ionicons name="compass" size={20} color={theme.colors.primary[500]} />
+            <Ionicons name="compass" size={20} color={theme.colors.brand.secondary} />
             <Text style={styles.statusLabel}>Initial Route:</Text>
             <Text style={[styles.statusValue, styles.monospace]}>{healthData.navigation.initialRoute}</Text>
           </View>
@@ -222,7 +222,7 @@ export default function NavigationHealthCheck() {
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.navTestButton} 
-              onPress={() => testNavigation('/(screens)/(inspector)/inspector-dashboard')}
+              onPress={() => testNavigation('/(screens)/(inspector)/dashboard')}
             >
               <Text style={styles.navTestText}>Inspector Dashboard</Text>
             </TouchableOpacity>
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
   },
   copyText: {
     fontSize: 12,
-    color: theme.colors.primary[500],
+    color: theme.colors.brand.secondary,
     marginLeft: 4,
   },
   section: {
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   roleHighlight: {
     fontWeight: '600',
-    color: theme.colors.primary[500],
+    color: theme.colors.brand.primary,
   },
   navTestGrid: {
     flexDirection: 'row',
@@ -355,14 +355,14 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: '45%',
     padding: 12,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.blue[50],
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: theme.colors.primary[200],
+    borderColor: theme.colors.blue[200],
   },
   navTestText: {
     fontSize: 12,
-    color: theme.colors.primary[700],
+    color: theme.colors.blue[700],
     textAlign: 'center',
     fontWeight: '500',
   },

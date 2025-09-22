@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 import { router } from 'expo-router';
 import * as Linking from 'expo-linking';
 
@@ -26,7 +26,7 @@ export const useDeepLink = () => {
       // Handle different deep link patterns
       if (hostname === 'notification' || path?.startsWith('/notification/')) {
         handleNotificationDeepLink(queryParams ?? {});
-      } else if (hostname === 'application' || path?.startsWith('/application/')) {
+      } else if (hostname === 'application' || path?.startsWith('/(screens)/(shared)/(screens)/(shared)/application/')) {
         handleApplicationDeepLink(queryParams ?? {});
       } else if (hostname === 'health-card' || path?.startsWith('/health-card/')) {
         handleHealthCardDeepLink(queryParams ?? {});
@@ -63,7 +63,7 @@ export const useDeepLink = () => {
       case 'MissingDoc':
         if (formId) {
           router.push({
-            pathname: '/(screens)/(shared)/upload-documents',
+            pathname: '/(screens)/(shared)/documents/upload',
             params: { formId }
           });
         }
@@ -152,7 +152,7 @@ export const useDeepLink = () => {
     const { formId } = params;
     if (formId) {
       router.push({
-        pathname: '/(screens)/(shared)/upload-documents',
+        pathname: '/(screens)/(shared)/documents/upload',
         params: { formId }
       });
     } else {

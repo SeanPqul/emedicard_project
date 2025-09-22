@@ -3,7 +3,7 @@ import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DocumentSourceModalProps } from './DocumentSourceModal.types';
 import { styles } from './DocumentSourceModal.styles';
-import { COLORS } from '@shared/constants/theme';
+import { theme } from '@shared/styles/theme';
 
 export const DocumentSourceModal: React.FC<DocumentSourceModalProps> = ({
   visible,
@@ -24,17 +24,17 @@ export const DocumentSourceModal: React.FC<DocumentSourceModalProps> = ({
           <Text style={styles.modalTitle}>Select Document Source</Text>
           
           <TouchableOpacity style={styles.imagePickerOption} onPress={onPickCamera}>
-            <Ionicons name="camera" size={24} color={COLORS.primary.main} />
+            <Ionicons name="camera" size={24} color={theme.colors.brand.secondary} />
             <Text style={styles.imagePickerOptionText}>Take Photo</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.imagePickerOption} onPress={onPickGallery}>
-            <Ionicons name="images" size={24} color={COLORS.primary.main} />
+            <Ionicons name="images" size={24} color={theme.colors.brand.secondary} />
             <Text style={styles.imagePickerOptionText}>Choose from Gallery</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.imagePickerOption} onPress={onPickDocument}>
-            <Ionicons name="document" size={24} color={COLORS.primary.main} />
+            <Ionicons name="document" size={24} color={theme.colors.brand.secondary} />
             <Text style={styles.imagePickerOptionText}>Select File</Text>
           </TouchableOpacity>
           

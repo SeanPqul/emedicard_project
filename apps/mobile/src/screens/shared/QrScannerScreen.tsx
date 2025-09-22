@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { View, Text, Alert, TouchableOpacity } from 'react-native';
-import { BaseScreenLayout } from '@/src/layouts/BaseScreenLayout';
+import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { QRCodeScanner } from '@features/scanner/components';

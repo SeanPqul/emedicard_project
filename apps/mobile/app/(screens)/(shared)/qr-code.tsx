@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Share, Alert } from 'react-native';
 import { BaseScreenLayout } from '@shared/components/layout/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../backend/convex/_generated/api';
+import { api } from '../../../../../../../../backend/convex/_generated/api';
 import QRCode from 'react-native-qrcode-svg';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-qr-code';
@@ -93,4 +93,3 @@ export default function QRCodeScreen() {
     </BaseScreenLayout>
   );
 }
-

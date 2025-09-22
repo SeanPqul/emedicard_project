@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   RefreshControl,
   ScrollView,
@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
 import { router } from 'expo-router';
 
-import { BaseScreen } from '@/src/core/components';
+import { BaseScreen } from '@/src/shared/components/core';
 import { api } from '@backend/convex/_generated/api';
 import { EmptyState } from '@shared/components';
 import { styles } from './ApplicationListScreen.styles';
@@ -231,7 +231,7 @@ export function ApplicationListScreen({ navigation, route }: ApplicationListScre
       <TouchableOpacity 
         key={application._id} 
         style={styles.applicationCard}
-        onPress={() => router.push(`/application/${application._id}`)}
+        onPress={() => router.push(`/(screens)/(shared)/(screens)/(shared)/application/${application._id}`)}
       >
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>

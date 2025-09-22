@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Share, Alert } from 'react-native';
-import { BaseScreenLayout } from '@/src/layouts/BaseScreenLayout';
+import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { EmptyState } from '@shared/components';
@@ -9,7 +9,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { useHealthCards } from '@shared/hooks/useHealthCards';
-import { Id } from '../../../../convex/_generated/dataModel';
+import { Id } from '../../../../../../../backend/convex/_generated/dataModel';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-health-cards';
 import { 

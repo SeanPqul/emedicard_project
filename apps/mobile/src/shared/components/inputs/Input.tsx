@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Input Component
  * 
  * Enhanced input component with variant system and accessibility
@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { TextInput, TextInputProps, ViewStyle, TextStyle } from 'react-native';
 import { inputVariants, getTypography } from '@shared/styles';
-import { InputStyleProps, BaseComponentProps } from '@shared/types/design-system';
+import { InputStyleProps, BaseComponentProps } from '@/src/shared/components/types';
 
 interface InputProps extends TextInputProps, BaseComponentProps, InputStyleProps {
   style?: ViewStyle | ViewStyle[];

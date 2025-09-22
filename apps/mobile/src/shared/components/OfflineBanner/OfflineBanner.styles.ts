@@ -1,23 +1,23 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING } from '@/shared/constants/theme';
-import { verticalScale, horizontalScale } from '@/shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { verticalScale, scale } from '@/shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.status.warning,
+    backgroundColor: theme.colors.status.warning,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: verticalScale(SPACING.xs),
-    paddingHorizontal: horizontalScale(SPACING.sm),
-    gap: horizontalScale(SPACING.xs),
+    paddingVertical: verticalScale(theme.spacing.xs),
+    paddingHorizontal: scale(theme.spacing.sm),
+    gap: scale(theme.spacing.xs),
   },
   icon: {
-    color: COLORS.text.inverse,
+    color: theme.colors.text.inverse,
   },
   text: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.inverse,
-    fontWeight: FONT_WEIGHTS.medium,
+    fontSize: theme.typography.bodySmall.fontSize,
+    color: theme.colors.text.inverse,
+    fontWeight: '500' as const,
   },
 });

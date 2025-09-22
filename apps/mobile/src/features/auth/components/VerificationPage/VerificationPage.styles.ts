@@ -1,11 +1,11 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS } from '@/shared/constants/theme';
-import { moderateScale, verticalScale, horizontalScale, wp, hp } from '@/shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { moderateScale, verticalScale, scale, wp, hp } from '@/shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background.primary,
+    backgroundColor: theme.colors.background.primary,
     justifyContent: 'center',
     paddingHorizontal: wp(5),
     paddingBottom: hp(5),
@@ -30,24 +30,24 @@ export const styles = StyleSheet.create({
   
   // Title and Subtitle
   title: {
-    fontSize: FONT_SIZES.xxl,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text.primary,
+    fontSize: theme.typography.h2.fontSize,
+    fontWeight: theme.typography.h2.fontWeight,
+    color: theme.colors.text.primary,
     marginBottom: verticalScale(8),
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.secondary,
+    fontSize: theme.typography.body.fontSize,
+    color: theme.colors.text.secondary,
     textAlign: 'center',
     marginBottom: verticalScale(8),
     lineHeight: moderateScale(18),
     paddingHorizontal: wp(5),
   },
   emailText: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.tertiary,
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontSize: theme.typography.body.fontSize,
+    color: theme.colors.text.tertiary,
+    fontWeight: '600' as const,
     textAlign: 'center',
     marginBottom: hp(4),
   },
@@ -67,21 +67,21 @@ export const styles = StyleSheet.create({
   otpInput: {
     width: wp(12.5), 
     height: hp(7),
-    backgroundColor: COLORS.background.secondary,
+    backgroundColor: theme.colors.background.secondary,
     borderWidth: moderateScale(2),
-    borderColor: COLORS.border.light,
+    borderColor: theme.colors.border.light,
     borderRadius: moderateScale(10),
     textAlign: 'center',
     fontSize: moderateScale(20),
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text.primary,
+    fontWeight: '700' as const,
+    color: theme.colors.text.primary,
   },
   otpInputFilled: {
-    borderColor: COLORS.status.success,
+    borderColor: theme.colors.status.success,
     backgroundColor: '#E8F5E8',
   },
   otpInputError: {
-    borderColor: COLORS.status.error,
+    borderColor: theme.colors.status.error,
     backgroundColor: '#FEF2F2',
   },
 
@@ -93,33 +93,33 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(6),
   },
   errorText: {
-    color: COLORS.status.error,
-    fontSize: FONT_SIZES.xs,
+    color: theme.colors.status.error,
+    fontSize: theme.typography.caption.fontSize,
     textAlign: 'center',
-    fontWeight: FONT_WEIGHTS.medium,
+    fontWeight: '500' as const,
   },
 
   // Verify Button
   verifyButton: {
-    backgroundColor: COLORS.status.success,
+    backgroundColor: theme.colors.status.success,
     borderRadius: moderateScale(10),
     height: hp(6),
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: hp(3),
-    shadowColor: COLORS.status.success,
+    shadowColor: theme.colors.status.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(8),
     elevation: 8,
   },
   verifyButtonText: {
-    color: COLORS.text.inverse,
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.bold,
+    color: theme.colors.text.inverse,
+    fontSize: theme.typography.body.fontSize,
+    fontWeight: '700' as const,
   },
   buttonDisabled: {
-    backgroundColor: COLORS.text.tertiary,
+    backgroundColor: theme.colors.text.tertiary,
   },
 
   // Resend Section
@@ -129,8 +129,8 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resendText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.secondary,
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.colors.text.secondary,
     marginRight: moderateScale(4),
     textAlignVertical: 'center'
   },
@@ -138,14 +138,14 @@ export const styles = StyleSheet.create({
     // Button area for tap
   },
   resendButtonText: {
-    color: COLORS.status.success,
-    fontSize: FONT_SIZES.xs,
-    fontWeight: FONT_WEIGHTS.semibold,
+    color: theme.colors.status.success,
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: '600' as const,
     textAlign: 'center',
     textAlignVertical: 'center'
   },
   resendButtonDisabled: {
-    color: COLORS.text.tertiary,
+    color: theme.colors.text.tertiary,
   },
 
   // Back Button
@@ -163,21 +163,21 @@ export const styles = StyleSheet.create({
     paddingVertical: verticalScale(12),
   },
   backText: {
-    color: COLORS.text.secondary,
-    fontSize: FONT_SIZES.xs,
+    color: theme.colors.text.secondary,
+    fontSize: theme.typography.caption.fontSize,
     marginLeft: moderateScale(8),
   },
 
   // Success Screen
   successContainer: {
     flex: 1,
-    backgroundColor: COLORS.background.primary,
+    backgroundColor: theme.colors.background.primary,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: wp(5),
   },
   successContent: {
-    backgroundColor: COLORS.background.primary,
+    backgroundColor: theme.colors.background.primary,
     borderRadius: moderateScale(20),
     padding: wp(8),
     alignItems: 'center',
@@ -196,14 +196,14 @@ export const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: moderateScale(20),
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text.primary,
+    fontWeight: '700' as const,
+    color: theme.colors.text.primary,
     marginBottom: verticalScale(12),
     textAlign: 'center',
   },
   successSubtitle: {
     fontSize: moderateScale(14),
-    color: COLORS.text.secondary,
+    color: theme.colors.text.secondary,
     textAlign: 'center',
     marginBottom: hp(3),
     lineHeight: moderateScale(18),
@@ -216,26 +216,26 @@ export const styles = StyleSheet.create({
   },
   countdownText: {
     fontSize: moderateScale(14),
-    color: COLORS.text.secondary,
-    fontWeight: FONT_WEIGHTS.medium,
+    color: theme.colors.text.secondary,
+    fontWeight: '500' as const,
     marginBottom: verticalScale(16),
     textAlign: 'center',
   },
   continueButton: {
-    backgroundColor: COLORS.status.success,
+    backgroundColor: theme.colors.status.success,
     borderRadius: moderateScale(8),
     paddingVertical: verticalScale(12),
     paddingHorizontal: moderateScale(24),
-    shadowColor: COLORS.status.success,
+    shadowColor: theme.colors.status.success,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: moderateScale(4),
     elevation: 4,
   },
   continueButtonText: {
-    color: COLORS.text.inverse,
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.semibold,
+    color: theme.colors.text.inverse,
+    fontSize: theme.typography.body.fontSize,
+    fontWeight: '600' as const,
     textAlign: 'center',
   },
 });

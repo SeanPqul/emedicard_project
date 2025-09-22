@@ -1,37 +1,32 @@
-// Theme constants - Centralized design tokens
+/**
+ * @deprecated This file has been deprecated in favor of the consolidated theme system.
+ * Please use imports from '@shared/styles/theme' instead.
+ * 
+ * This file now re-exports from the new theme for backward compatibility.
+ * All new code should import directly from '@shared/styles/theme'.
+ */
+
+import { theme } from '@shared/styles/theme';
+
+// Re-export for backward compatibility - maps old structure to new theme
 export const COLORS = {
+  // Brand colors - mapped to new structure
   primary: {
-    main: '#3B82F6',
-    light: '#60A5FA',
-    dark: '#2563EB',
+    main: theme.colors.brand.secondary, // Blue (was primary, now secondary)
+    light: theme.colors.blue[400],
+    dark: theme.colors.blue[600],
   },
   secondary: {
-    main: '#0891b2',
+    main: '#0891b2', // Cyan - keeping old value for compatibility
     light: '#06b6d4',
     dark: '#0e7490',
   },
-  background: {
-    primary: '#FFFFFF',
-    secondary: '#F9FAFB',
-    tertiary: '#F3F4F6',
-  },
-  text: {
-    primary: '#111827',
-    secondary: '#6B7280',
-    tertiary: '#9CA3AF',
-    inverse: '#FFFFFF',
-  },
-  border: {
-    light: '#E5E7EB',
-    medium: '#D1D5DB',
-    dark: '#9CA3AF',
-  },
-  status: {
-    success: '#10B981',
-    error: '#EF4444',
-    warning: '#F59E0B',
-    info: '#3B82F6',
-  },
+  
+  // Direct mappings
+  background: theme.colors.background,
+  text: theme.colors.text,
+  border: theme.colors.border,
+  status: theme.colors.status,
 } as const;
 
 export const FONT_SIZES = {
@@ -46,53 +41,19 @@ export const FONT_SIZES = {
 } as const;
 
 export const FONT_WEIGHTS = {
-  light: '300',
-  regular: '400',
-  medium: '500',
-  semibold: '600',
-  bold: '700',
+  light: '300' as const,
+  regular: '400' as const,
+  medium: '500' as const,
+  semibold: '600' as const,
+  bold: '700' as const,
 } as const;
 
-export const SPACING = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
-  xxxl: 64,
-} as const;
+export const SPACING = theme.spacing;
+export const BORDER_RADIUS = theme.borderRadius;
 
-export const BORDER_RADIUS = {
-  none: 0,
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  xxl: 24,
-  full: 9999,
-} as const;
-
+// Map old shadow structure to new
 export const SHADOWS = {
-  sm: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  lg: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 5,
-  },
+  sm: theme.shadows.small,
+  md: theme.shadows.medium,
+  lg: theme.shadows.large,
 } as const;

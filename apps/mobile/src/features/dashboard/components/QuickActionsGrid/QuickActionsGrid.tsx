@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { ActionButton } from '@shared/components/buttons';
@@ -72,7 +72,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
           icon="document-text-outline"
           title="Requirements Guide"
           subtitle="What documents you need"
-          onPress={() => router.push('/(screens)/(shared)/document-requirements')}
+          onPress={() => router.push('/(screens)/(shared)/documents/requirements')}
         />
         
         {dashboardStats.activeApplications > 0 ? (
@@ -80,7 +80,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
             icon="cloud-upload-outline"
             title="Upload Documents"
             subtitle="Submit missing documents"
-            onPress={() => router.push('/(screens)/(shared)/upload-documents')}
+            onPress={() => router.push('/(screens)/(shared)/documents/upload')}
           />
         ) : (
           <ActionButton

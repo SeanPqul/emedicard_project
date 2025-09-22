@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-document-requirements';
-import { JobCategory } from '@entities/application/model/types';
+import { JobCategory } from '@entities/(screens)/(shared)/(screens)/(shared)/application/model/types';
 import { useJobCategories } from '@shared/hooks/useJobCategories';
 import { getHealthCardTypeName, getPaymentMethods } from '@/src/utils';
 

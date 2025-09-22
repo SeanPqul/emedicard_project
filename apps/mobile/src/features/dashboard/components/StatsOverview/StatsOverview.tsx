@@ -1,10 +1,10 @@
-import React from 'react';
+﻿import React from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { StatCard } from '@features/dashboard/components/StatCard';
 import { StatsOverviewProps } from '@features/dashboard/types';
 import { styles } from './StatsOverview.styles';
-import { COLORS } from '@shared/constants/theme';
+import { theme } from '@shared/styles/theme';
 
 export const StatsOverview: React.FC<StatsOverviewProps> = ({ 
   dashboardStats, 
@@ -22,9 +22,9 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
   };
 
   const getFoodSafetyColor = () => {
-    if (!isFoodHandler) return COLORS.text.secondary;
-    if (currentApplication?.orientationCompleted) return COLORS.status.success;
-    return COLORS.status.error;
+    if (!isFoodHandler) return theme.colors.text.secondary;
+    if (currentApplication?.orientationCompleted) return theme.colors.status.success;
+    return theme.colors.status.error;
   };
 
   const getFoodSafetyIcon = () => {
@@ -45,7 +45,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
           title="Applications"
           value={dashboardStats.activeApplications.toString()}
           subtitle={dashboardStats.activeApplications > 0 ? "In progress" : "Ready to apply"}
-          color={COLORS.secondary.main}
+          color={theme.colors.blue[500]}
           onPress={() => router.push('/(tabs)/application')}
         />
         
@@ -54,7 +54,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
           title="Payments"
           value={dashboardStats.pendingPayments > 0 ? `${dashboardStats.pendingPayments} Due` : "Clear"}
           subtitle={dashboardStats.pendingPayments > 0 ? `₱${dashboardStats.pendingAmount.toFixed(2)} due` : "All payments up to date"}
-          color={dashboardStats.pendingPayments > 0 ? COLORS.status.error : COLORS.status.success}
+          color={dashboardStats.pendingPayments > 0 ? theme.colors.status.error : theme.colors.status.success}
           onPress={() => router.push('/(screens)/(shared)/payment')}
         />
       </View>
@@ -74,7 +74,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
           title="Health Cards"
           value={dashboardStats.validHealthCards.toString()}
           subtitle={dashboardStats.validHealthCards > 0 ? "Active" : "None issued"}
-          color={COLORS.status.success}
+          color={theme.colors.status.success}
           onPress={() => router.push('/(screens)/(shared)/health-cards')}
         />
       </View>

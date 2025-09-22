@@ -1,6 +1,6 @@
 import { Dimensions, StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS, SHADOWS } from '@shared/constants/theme';
-import { moderateScale, verticalScale, horizontalScale, wp, hp } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { moderateScale, verticalScale, scale, wp, hp } from '@shared/utils/responsive';
 
 const { width } = Dimensions.get('window');
 
@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
   // Container and Layout
   container: {
     flex: 1,
-    backgroundColor: COLORS.background.primary,
+    backgroundColor: theme.colors.background.primary,
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -25,16 +25,16 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: horizontalScale(SPACING.lg),
-    paddingVertical: verticalScale(SPACING.md),
-    backgroundColor: COLORS.background.primary,
+    paddingHorizontal: scale(theme.spacing.lg),
+    paddingVertical: verticalScale(theme.spacing.md),
+    backgroundColor: theme.colors.background.primary,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border.light,
+    borderBottomColor: theme.colors.border.light,
   },
   headerTitle: {
-    fontSize: FONT_SIZES.lg,
-    color: COLORS.text.primary,
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontSize: 18,
+    color: theme.colors.text.primary,
+    fontWeight: '600' as const,
   },
   headerRight: {
     width: moderateScale(24), // Same as back button to center title
@@ -46,36 +46,36 @@ export const styles = StyleSheet.create({
   // Navigation Buttons
   navigationButtons: {
     flexDirection: 'row',
-    paddingHorizontal: horizontalScale(SPACING.lg),
-    paddingVertical: verticalScale(SPACING.md),
-    backgroundColor: COLORS.background.primary,
+    paddingHorizontal: scale(theme.spacing.lg),
+    paddingVertical: verticalScale(theme.spacing.md),
+    backgroundColor: theme.colors.background.primary,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border.light,
+    borderTopColor: theme.colors.border.light,
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     paddingBottom: hp(8), // Space for tab bar
-    gap: horizontalScale(SPACING.md),
+    gap: scale(theme.spacing.md),
   },
   previousButton: {
     flex: 1,
-    paddingVertical: verticalScale(SPACING.md),
-    borderRadius: BORDER_RADIUS.lg,
+    paddingVertical: verticalScale(theme.spacing.md),
+    borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border.medium,
+    borderColor: theme.colors.border.medium,
   },
   previousButtonText: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.secondary,
-    fontWeight: FONT_WEIGHTS.medium,
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+    fontWeight: '500' as const,
   },
   nextButton: {
     flex: 1,
-    paddingVertical: verticalScale(SPACING.md),
-    borderRadius: BORDER_RADIUS.lg,
+    paddingVertical: verticalScale(theme.spacing.md),
+    borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -83,9 +83,9 @@ export const styles = StyleSheet.create({
     flex: 2,
   },
   nextButtonText: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.inverse,
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontSize: 16,
+    color: theme.colors.text.inverse,
+    fontWeight: '600' as const,
   },
 
   // Loading state
@@ -93,11 +93,11 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background.primary,
+    backgroundColor: theme.colors.background.primary,
   },
   loadingText: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.secondary,
-    marginTop: verticalScale(SPACING.md),
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(theme.spacing.md),
   },
 });

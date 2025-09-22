@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
+﻿import { useState, useCallback, useEffect } from 'react';
 import { useMutation } from 'convex/react';
-import { api } from '../../../../backend/convex/_generated/api';
-import { Id } from '../../../../backend/convex/_generated/dataModel';
+import { api } from '../../../../../../../backend/convex/_generated/api';
+import { Id } from '../../../../../../../backend/convex/_generated/dataModel';
 import {
   cacheDocumentReactive,
   getCachedDocument,

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Badge Component
  * 
  * Enhanced badge component with comprehensive variant system and responsive design
@@ -8,7 +8,7 @@ import React from 'react';
 import { View, Text, ViewStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { badgeVariants, badgeTextVariants, getSpacing } from '@shared/styles';
-import { BadgeStyleProps, BaseComponentProps } from '@shared/types/design-system';
+import { BadgeStyleProps, BaseComponentProps } from '@/src/shared/components/types';
 
 interface BadgeProps extends BaseComponentProps, BadgeStyleProps {
   text: string;

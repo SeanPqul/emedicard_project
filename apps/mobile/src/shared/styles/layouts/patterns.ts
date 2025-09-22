@@ -5,7 +5,7 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { getSpacing } from '../theme';
+import { getSpacing } from '../theme/index';
 
 // ===== FLEXBOX LAYOUTS =====
 export const flexLayouts = StyleSheet.create({
@@ -96,6 +96,7 @@ export const flexLayouts = StyleSheet.create({
 });
 
 // ===== SPACING UTILITIES =====
+// Note: This 'spacing' is a StyleSheet of utility classes, not the theme spacing values
 export const spacing = StyleSheet.create({
   // Margin utilities
   m0: { margin: 0 },

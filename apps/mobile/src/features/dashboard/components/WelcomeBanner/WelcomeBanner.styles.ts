@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS } from '@shared/constants/theme';
-import { moderateScale, verticalScale, horizontalScale, wp, hp } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { moderateScale, verticalScale, scale, wp, hp } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
-    marginHorizontal: horizontalScale(SPACING.lg),
-    marginVertical: verticalScale(SPACING.md),
-    padding: moderateScale(SPACING.lg),
-    backgroundColor: COLORS.background.primary,
-    borderRadius: BORDER_RADIUS.lg,
+    marginHorizontal: scale(theme.spacing.lg),
+    marginVertical: verticalScale(theme.spacing.md),
+    padding: moderateScale(theme.spacing.lg),
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -19,45 +19,45 @@ export const styles = StyleSheet.create({
   iconContainer: {
     width: moderateScale(80),
     height: moderateScale(80),
-    borderRadius: BORDER_RADIUS.full,
-    backgroundColor: COLORS.secondary.light + '20',
+    borderRadius: theme.borderRadius.full,
+    backgroundColor: theme.colors.blue[300] + '20',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: verticalScale(SPACING.md),
+    marginBottom: verticalScale(theme.spacing.md),
   },
   icon: {
-    color: COLORS.secondary.main,
+    color: theme.colors.blue[500],
   },
   title: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text.primary,
-    marginBottom: verticalScale(SPACING.sm),
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(theme.spacing.sm),
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.secondary,
+    fontSize: 16,
+    color: theme.colors.text.secondary,
     textAlign: 'center',
-    marginBottom: verticalScale(SPACING.lg),
-    paddingHorizontal: horizontalScale(SPACING.md),
-    lineHeight: FONT_SIZES.md * 1.5,
+    marginBottom: verticalScale(theme.spacing.lg),
+    paddingHorizontal: scale(theme.spacing.md),
+    lineHeight: 16 * 1.5,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.secondary.main,
-    paddingHorizontal: horizontalScale(SPACING.lg),
-    paddingVertical: verticalScale(SPACING.sm),
-    borderRadius: BORDER_RADIUS.full,
-    gap: horizontalScale(SPACING.xs),
+    backgroundColor: theme.colors.blue[500],
+    paddingHorizontal: scale(theme.spacing.lg),
+    paddingVertical: verticalScale(theme.spacing.sm),
+    borderRadius: theme.borderRadius.full,
+    gap: scale(theme.spacing.xs),
   },
   buttonText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.inverse,
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontSize: 14,
+    color: theme.colors.text.inverse,
+    fontWeight: '600' as const,
   },
   buttonIcon: {
-    color: COLORS.text.inverse,
+    color: theme.colors.text.inverse,
   },
 });

@@ -5,7 +5,7 @@ import { theme } from '../styles/theme';
 // Loading fallback component
 const LoadingFallback = () => (
   <View style={styles.loadingContainer}>
-    <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+    <ActivityIndicator size="large" color={theme.colors.green[500]} />
   </View>
 );
 

@@ -1,6 +1,6 @@
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../backend/convex/_generated/api';
-import { Id, TableNames } from '../../../../backend/convex/_generated/dataModel';
+﻿import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../../../../../backend/convex/_generated/api';
+import { Id, TableNames } from '../../../../../../../backend/convex/_generated/dataModel';
 
 type ConvexId<T extends TableNames> = Id<T>;
 

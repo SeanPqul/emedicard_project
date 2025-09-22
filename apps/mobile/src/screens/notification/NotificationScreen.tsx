@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,8 +13,8 @@ import { router } from 'expo-router';
 import { EmptyState } from '@shared/components';
 import { styles } from '@shared/styles/screens/tabs-notification';
 import { useNotifications } from '@shared/hooks/useNotifications';
-import { Notification } from '@types/domain';
-import { Id } from '../../../../convex/_generated/dataModel';
+import { Notification } from '@/src/entities';
+import { Id } from '../../../../../../../backend/convex/_generated/dataModel';
 
 type NotificationCategory = 'All' | 'Unread' | 'Applications' | 'Payments' | 'Orientations';
 
@@ -91,7 +91,7 @@ export function NotificationScreen() {
       case 'MissingDoc':
         if (notification.formsId) {
           router.push({
-            pathname: '/(screens)/(shared)/upload-documents',
+            pathname: '/(screens)/(shared)/documents/upload',
             params: { formId: notification.formsId }
           });
         }

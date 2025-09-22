@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
   },
   button: {
-    backgroundColor: theme.colors.primary[500],
+    backgroundColor: theme.colors.green[500],
     paddingHorizontal: theme.spacing.xl,
     paddingVertical: theme.spacing.md,
     borderRadius: theme.borderRadius.lg,

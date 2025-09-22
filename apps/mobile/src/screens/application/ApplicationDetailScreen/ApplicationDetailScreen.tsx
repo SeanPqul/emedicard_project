@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,11 @@ import { useQuery } from 'convex/react';
 import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { BaseScreen } from '@/src/core/components';
+import { BaseScreen } from '@/src/shared/components/core';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
-import { usePaymentMaya } from '@shared/hooks/usePaymentMaya';
-import { useAbandonedPayment } from '@shared/hooks/useAbandonedPayment';
+import { useMayaPayment } from '@processes/mayaPaymentFlow';
+import { useAbandonedPayment } from '@processes/abandonedPaymentFlow';
 import { CustomButton } from '@shared/components';
 
 import {
@@ -28,7 +28,7 @@ import {
   STATUS_COLORS
 } from './ApplicationDetailScreen.types';
 import { styles } from './ApplicationDetailScreen.styles';
-import { COLORS } from '@shared/constants/theme';
+import { theme } from '@shared/styles/theme';
 
 export function ApplicationDetailScreen({ navigation, route }: ApplicationDetailScreenProps) {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -36,7 +36,7 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [paymentReference, setPaymentReference] = useState('');
 
-  const { initiatePayment, isProcessing: isPaymentProcessing } = usePaymentMaya();
+  const { initiatePayment, isProcessing: isPaymentProcessing } = useMayaPayment();
 
   // Query application details
   const application = useQuery(
@@ -104,10 +104,10 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
   };
 
   const getUrgencyColor = (daysLeft: number | null) => {
-    if (daysLeft === null) return COLORS.text.secondary;
-    if (daysLeft <= 1) return COLORS.status.error;
-    if (daysLeft <= 3) return COLORS.status.warning;
-    return COLORS.status.success;
+    if (daysLeft === null) return theme.colors.text.secondary;
+    if (daysLeft <= 1) return theme.colors.status.error;
+    if (daysLeft <= 3) return theme.colors.status.warning;
+    return theme.colors.status.success;
   };
 
   const handlePaymentMethodSelect = async (method: PaymentMethod) => {
@@ -160,7 +160,7 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
     return (
       <BaseScreen>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary.main} />
+          <ActivityIndicator size="large" color={theme.colors.brand.secondary} />
           <Text style={styles.loadingText}>Loading application details...</Text>
         </View>
       </BaseScreen>
@@ -182,7 +182,7 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
+            <Ionicons name="arrow-back" size={24} color={theme.colors.text.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Application Details</Text>
           <View style={styles.headerRight} />
@@ -305,7 +305,7 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
           
           <CustomButton
             title="View Documents"
-            onPress={() => router.push(`/application/${application._id}/documents`)}
+            onPress={() => router.push(`/(screens)/(shared)/(screens)/(shared)/application/${application._id}/documents`)}
             variant="secondary"
           />
         </View>

@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
   },
 
   description: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.secondary'),
     lineHeight: 20,
     marginBottom: getSpacing('lg'),
@@ -69,13 +69,13 @@ export const styles = StyleSheet.create({
   },
 
   feeTotalLabel: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '700',
   },
 
   feeTotalValue: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '700',
   },
@@ -118,7 +118,7 @@ export const styles = StyleSheet.create({
   },
 
   methodName: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '600',
     marginBottom: 2,
@@ -141,7 +141,7 @@ export const styles = StyleSheet.create({
   },
 
   referenceLabel: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '600',
     marginBottom: getSpacing('sm'),
@@ -154,7 +154,7 @@ export const styles = StyleSheet.create({
     borderRadius: getBorderRadius('md'),
     paddingHorizontal: getSpacing('md'),
     paddingVertical: getSpacing('sm'),
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     minHeight: hp(5.5),
   },

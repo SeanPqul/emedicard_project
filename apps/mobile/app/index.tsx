@@ -27,9 +27,9 @@ export default function Index() {
   
   // Role-based routing - ensure currentUser exists before checking role
   if (currentUser && currentUser.role === 'inspector') {
-    return <Redirect href="/(screens)/(inspector)/inspector-dashboard" />;
+    return <Redirect href="/(screens)/(inspector)/dashboard" />;
   }
   
-  // Default to applicant dashboard - redirect to tabs group, not specific index
+  // Default to tabs for applicants
   return <Redirect href="/(tabs)" />;
 }

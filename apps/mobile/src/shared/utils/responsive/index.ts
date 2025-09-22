@@ -5,6 +5,11 @@
  * Consolidates scaling, dimensions, breakpoints, typography, and design tokens.
  */
 
+// Import all modules for comprehensive design system object
+import * as scaleModule from './scale';
+import * as dimensionsModule from './dimensions';
+import * as breakpointsModule from './breakpoints';
+import * as typographyModule from './typography';
 // Re-export all scaling functions
 export {
   scale,
@@ -81,27 +86,10 @@ export {
   TYPOGRAPHY_CONSTANTS,
 } from './typography';
 
-// Re-export all design tokens
-export {
-  spacing,
-  borderRadius,
-  iconSizes,
-  responsiveSpacing,
-  responsiveBorderRadius,
-  responsiveIconSizes,
-  getSpacing,
-  getBorderRadius,
-  getIconSize,
-  getResponsiveSpacing,
-  DESIGN_TOKENS,
-} from './tokens';
+// Design tokens have been moved to @shared/styles/theme
+// Import from there for spacing, borderRadius, iconSizes, etc.
 
-// Import all modules for comprehensive design system object
-import * as scaleModule from './scale';
-import * as dimensionsModule from './dimensions';
-import * as breakpointsModule from './breakpoints';
-import * as typographyModule from './typography';
-import * as tokensModule from './tokens';
+
 
 /**
  * Comprehensive design system object for theme integration
@@ -114,9 +102,7 @@ export const designSystem = {
     lineHeights: typographyModule.LINE_HEIGHTS,
     families: typographyModule.FONT_FAMILIES,
   },
-  spacing: tokensModule.spacing,
-  borderRadius: tokensModule.borderRadius,
-  iconSizes: tokensModule.iconSizes,
+  // Note: spacing, borderRadius, and iconSizes have been moved to @shared/styles/theme
   dimensions: dimensionsModule.dimensions,
   scaling: {
     scale: scaleModule.scale,
@@ -141,8 +127,6 @@ export const designSystem = {
 export type ResponsiveDesignSystem = typeof designSystem;
 export type FontSizeKeys = keyof typeof typographyModule.FONT_SIZES;
 export type FontWeightKeys = keyof typeof typographyModule.FONT_WEIGHTS;
-export type SpacingKeys = keyof typeof tokensModule.spacing;
-export type BorderRadiusKeys = keyof typeof tokensModule.borderRadius;
-export type IconSizeKeys = keyof typeof tokensModule.iconSizes;
+// Token types are now available from @shared/styles/theme
 export type BreakpointKeys = 'sm' | 'md' | 'lg' | 'xl';
 export type TypographyVariants = keyof typeof typographyModule.responsiveTypography;

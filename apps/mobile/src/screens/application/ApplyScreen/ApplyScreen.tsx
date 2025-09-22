@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { 
   KeyboardAvoidingView,
   Platform,
@@ -12,35 +12,35 @@ import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BaseScreen } from '@/src/core/components';
+import { BaseScreen } from '@/src/shared/components/core';
 import { FeedbackSystem, useFeedback } from '@shared/components/feedback/feedback';
 import { hp } from '@shared/utils/responsive';
 import { formStorage } from '@shared/services/storage/formStorage';
 import { getColor } from '@shared/styles/theme';
-import { transformRequirements } from '@shared/utils/application/requirementsMapper';
-import { STEP_TITLES } from '@features/application/constants';
+import { transformRequirements } from '@shared/utils/(screens)/(shared)/(screens)/(shared)/application/requirementsMapper';
+import { STEP_TITLES } from '@features/(screens)/(shared)/(screens)/(shared)/application/constants';
 
 // Hooks
 import { useJobCategories } from '@shared/hooks/useJobCategories';
 import { useApplications } from '@shared/hooks/useApplications';
 import { useRequirements } from '@shared/hooks/useRequirements';
 import { useUsers } from '@shared/hooks/useUsers';
-import { useApplicationForm, useDocumentSelection, useSubmission } from '@features/application/hooks';
+import { useApplicationForm, useDocumentSelection, useSubmission } from '@features/(screens)/(shared)/(screens)/(shared)/application/hooks';
 
 // Components
-import { StepIndicator } from '@entities/application/ui/StepIndicator';
-import { DocumentSourceModal } from '@entities/application/ui/DocumentSourceModal';
+import { StepIndicator } from '@entities/(screens)/(shared)/(screens)/(shared)/application/ui/StepIndicator';
+import { DocumentSourceModal } from '@entities/(screens)/(shared)/(screens)/(shared)/application/ui/DocumentSourceModal';
 import { 
   ApplicationTypeStep,
   JobCategoryStep,
   PersonalDetailsStep,
   UploadDocumentsStep,
   ReviewStep
-} from '@features/application/components/steps';
+} from '@features/(screens)/(shared)/(screens)/(shared)/application/components/steps';
 
 // Types
 import { ApplyScreenProps, FormData, SelectedDocument } from './ApplyScreen.types';
-import { JobCategory, DocumentRequirement } from '@entities/application/model/types';
+import { JobCategory, DocumentRequirement } from '@entities/(screens)/(shared)/(screens)/(shared)/application/model/types';
 import { User } from '@entities/user/model/types';
 
 // Styles

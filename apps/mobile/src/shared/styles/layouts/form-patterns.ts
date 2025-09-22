@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { getColor, getSpacing, getBorderRadius, getTypography, getShadow } from '../theme';
+import { getColor, getSpacing, getBorderRadius, getTypography, getShadow } from '../theme/index';
 
 // Form-specific style patterns
 export const formPatterns = StyleSheet.create({

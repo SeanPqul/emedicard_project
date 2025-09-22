@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { UserRole } from '../types/domain/user';
 
 export interface RolePermissions {
@@ -31,7 +31,7 @@ export function useRoleBasedNavigation(userRole?: UserRole) {
           canManageUsers: false,
           canApproveApplications: true,
           canViewAnalytics: false,
-          defaultRoute: '/(screens)/(inspector)/inspector-dashboard',
+          defaultRoute: '/(screens)/(inspector)/dashboard',
         };
       
       case 'applicant':

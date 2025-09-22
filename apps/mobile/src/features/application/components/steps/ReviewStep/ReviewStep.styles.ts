@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
   },
 
   description: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.secondary'),
     lineHeight: 20,
     marginBottom: getSpacing('lg'),
@@ -52,7 +52,7 @@ export const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    ...getTypography('bodyLarge'),
+    ...getTypography('h4'),
     color: getColor('text.primary'),
     fontWeight: '700',
   },
@@ -85,13 +85,13 @@ export const styles = StyleSheet.create({
   },
 
   detailLabel: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.secondary'),
     flex: 1,
   },
 
   detailValue: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '500',
     textAlign: 'right',
@@ -134,7 +134,7 @@ export const styles = StyleSheet.create({
   },
 
   documentTitle: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '500',
     marginBottom: 2,
@@ -208,7 +208,7 @@ export const styles = StyleSheet.create({
   },
 
   validationTitle: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('semantic.error'),
     fontWeight: '700',
     marginLeft: getSpacing('sm'),
@@ -230,7 +230,7 @@ export const styles = StyleSheet.create({
   },
 
   termsTitle: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     color: getColor('text.primary'),
     fontWeight: '600',
     marginBottom: getSpacing('sm'),

@@ -1,7 +1,7 @@
-import { useUser } from '@clerk/clerk-expo';
+﻿import { useUser } from '@clerk/clerk-expo';
 import { useQuery } from 'convex/react';
 import { useEffect, useMemo, useState } from 'react';
-import { api } from '../../../../backend/convex/_generated/api';
+import { api } from '../../../../../../../backend/convex/_generated/api';
 import { DashboardStats, RecentActivity } from '@features/dashboard/types';
 import { mobileCacheManager, JobCategory } from '@shared/lib/cache/mobileCacheManager';
 import { useNetwork } from './useNetwork';

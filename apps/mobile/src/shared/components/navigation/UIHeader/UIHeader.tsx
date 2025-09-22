@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -28,7 +28,7 @@ const SECONDARY_ACTIONS: SecondaryAction[] = [
     id: 'requirements',
     label: 'View Requirements',
     icon: 'document-text-outline',
-    route: '/(screens)/(shared)/document-requirements',
+    route: '/(screens)/(shared)/documents/requirements',
     accessibilityLabel: 'View Requirements',
     accessibilityHint: 'View document requirements for health card applications',
   },

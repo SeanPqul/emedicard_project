@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Text Component
  * 
  * Enhanced text component with typography variants and design system integration
@@ -7,7 +7,7 @@
 import React from 'react';
 import { Text as RNText, TextStyle } from 'react-native';
 import { getTypography, getColor } from '@shared/styles/theme';
-import { DesignSystemTextProps, FontWeight } from '@shared/types/design-system';
+import { DesignSystemTextProps, FontWeight } from '@/src/shared/components/types';
 
 const fontWeightMap: Record<FontWeight, TextStyle['fontWeight']> = {
   thin: '100',

@@ -1,15 +1,16 @@
-// ResetPasswordScreen component - Clean architecture implementation
+﻿// ResetPasswordScreen component - Clean architecture implementation
 import React, { useEffect, useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { BaseScreen } from '@core/components';
+import { BaseScreen } from '@/src/shared/components/core';
 import { OtpInputUI, PasswordStrengthIndicator } from '@features/auth/components';
 import { styles } from './ResetPasswordScreen.styles';
 import { moderateScale } from '@/shared/utils/responsive';
 import { PASSWORD_REQUIREMENTS } from '@features/auth/constants';
 import { AuthError, PasswordValidation } from '@features/auth/types';
+import { theme } from '@shared/styles/theme';
 
 // Define the steps for the password reset flow
 type ResetStep = 'enterEmail' | 'enterCode' | 'changePassword';
@@ -190,7 +191,7 @@ export function ResetPasswordScreen() {
     <View style={styles.container}>
       <View style={styles.iconContainer}>
         <View style={styles.iconCircle}>
-          <Ionicons name="mail-outline" size={moderateScale(32)} color="#3B82F6" />
+          <Ionicons name="mail-outline" size={moderateScale(32)} color={theme.colors.blue[500]} />
         </View>
       </View>
 
@@ -204,13 +205,13 @@ export function ResetPasswordScreen() {
           <Ionicons 
             name="mail-outline" 
             size={moderateScale(20)} 
-            color="#9CA3AF" 
+            color={theme.colors.gray[400]}
             style={styles.inputIcon} 
           />
           <TextInput
             style={styles.inputWithIcon}
             placeholder="Enter your email"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={theme.colors.gray[400]}
             value={email}
             onChangeText={(text) => {
               setEmail(text);
@@ -239,7 +240,7 @@ export function ResetPasswordScreen() {
           style={styles.backButton} 
           onPress={() => router.replace('/(auth)/sign-in')}
         >
-          <Ionicons name="arrow-back" size={16} color="#6B7280" />
+          <Ionicons name="arrow-back" size={16} color={theme.colors.gray[500]} />
           <Text style={styles.backButtonText}>Back to Sign In</Text>
         </TouchableOpacity>
       </View>
@@ -250,7 +251,7 @@ export function ResetPasswordScreen() {
     <View style={styles.container}>
       <View style={styles.iconContainer}>
         <View style={styles.iconCircle}>
-          <Ionicons name="lock-closed-outline" size={moderateScale(32)} color="#3B82F6" />
+          <Ionicons name="lock-closed-outline" size={moderateScale(32)} color={theme.colors.blue[500]} />
         </View>
       </View>
 
@@ -264,13 +265,13 @@ export function ResetPasswordScreen() {
           <Ionicons 
             name="lock-closed-outline" 
             size={moderateScale(20)} 
-            color="#9CA3AF" 
+            color={theme.colors.gray[400]}
             style={styles.inputIcon} 
           />
           <TextInput
             style={styles.inputWithIcon}
             placeholder="New Password"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={theme.colors.gray[400]}
             value={password}
             onChangeText={(text) => {
               setPassword(text);
@@ -285,7 +286,7 @@ export function ResetPasswordScreen() {
             <Ionicons 
               name={showPassword ? "eye" : "eye-off"} 
               size={20} 
-              color="#9CA3AF" 
+              color={theme.colors.gray[400]}
             />
           </TouchableOpacity>
         </View>
@@ -294,13 +295,13 @@ export function ResetPasswordScreen() {
           <Ionicons 
             name="lock-closed-outline" 
             size={moderateScale(20)} 
-            color="#9CA3AF" 
+            color={theme.colors.gray[400]}
             style={styles.inputIcon} 
           />
           <TextInput
             style={styles.inputWithIcon}
             placeholder="Confirm New Password"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={theme.colors.gray[400]}
             value={confirmPassword}
             onChangeText={(text) => {
               setConfirmPassword(text);
@@ -315,7 +316,7 @@ export function ResetPasswordScreen() {
             <Ionicons 
               name={showConfirmPassword ? "eye" : "eye-off"} 
               size={20} 
-              color="#9CA3AF" 
+              color={theme.colors.gray[400]}
             />
           </TouchableOpacity>
         </View>
@@ -349,7 +350,7 @@ export function ResetPasswordScreen() {
             setStep('enterCode');
           }}
         >
-          <Ionicons name="arrow-back" size={16} color="#6B7280" />
+          <Ionicons name="arrow-back" size={16} color={theme.colors.gray[500]} />
           <Text style={styles.backButtonText}>Back to Code Entry</Text>
         </TouchableOpacity>
       </View>

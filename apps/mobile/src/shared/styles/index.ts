@@ -5,38 +5,86 @@
  * It provides a single source of truth for all styling-related imports.
  */
 
-// Core theme system
-export * from './theme';
+// Core theme system - single source of truth for all design tokens
+export {
+  // Theme object
+  theme,
+  // Color utilities
+  colors,
+  getColor,
+  getColorWithAlpha,
+  colorWithOpacity,
+  getCategoryColorWithOpacity,
+  hexWithOpacity,
+  // Typography
+  typography,
+  getTypography,
+  // Spacing (theme values, not styles)
+  spacing,
+  getSpacing,
+  // Border radius
+  borderRadius,
+  getBorderRadius,
+  // Shadows
+  shadows,
+  getShadow,
+  // Breakpoints
+  breakpoints,
+  // Layout patterns from spacing module
+  layoutPatterns,
+  // Responsive tokens
+  responsiveSpacing,
+  responsiveFontSizes,
+  responsiveBorderRadius,
+  responsiveIconSizes,
+  // Type exports
+  type Theme
+} from './theme/index';
 export * from './screenStyles';
 
 // Base component styles
 export * from './components/base';
 
-// Layout patterns and utilities
-export * from './layouts/patterns';
+// Layout patterns and utilities - exported individually to avoid conflicts
+export { flexLayouts } from './layouts/patterns';
+export { spacing as spacingStyles } from './layouts/patterns'; // Aliased to avoid conflict with theme spacing
+export { containers } from './layouts/patterns';
+export { gridPatterns } from './layouts/patterns';
+export { positioning } from './layouts/patterns';
+export { overflow } from './layouts/patterns';
 export * from './layouts/common-patterns';
 export * from './layouts/form-patterns';
 
-// Responsive design utilities - consolidated from new responsive structure
+// Responsive design utilities - consolidated from responsive directory
 export {
-  moderateScale,
-  verticalScale,
+  // Scaling functions
   scale,
+  verticalScale, 
+  moderateScale,
+  moderateVerticalScale,
+  fontScale,
+  scaleFont,
+  scaleSpacing,
+  // Dimension utilities
   wp,
   hp,
   widthPercentageToDP,
   heightPercentageToDP,
-  spacing,
-  borderRadius,
-  iconSizes,
   dimensions,
-  responsiveValue,
-  responsiveTypography,
-  designSystem,
+  deviceUtils,
+  // Breakpoint utilities
   getBreakpoint,
   isTablet,
   isMobile,
+  responsiveValue,
   when,
+  // Typography
+  responsiveTypography,
+  FONT_SIZES,
+  FONT_WEIGHTS,
+  // Note: Design tokens (spacing, borderRadius, iconSizes) are now in theme exports above
+  // Design system object
+  designSystem,
 } from '../utils/responsive';
 
 // Named style exports for easy importing

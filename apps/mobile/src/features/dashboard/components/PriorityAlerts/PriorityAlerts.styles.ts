@@ -1,44 +1,44 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING, BORDER_RADIUS } from '@shared/constants/theme';
-import { moderateScale, verticalScale, horizontalScale, wp, hp } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { moderateScale, verticalScale, scale, wp, hp } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
-    marginHorizontal: horizontalScale(SPACING.lg),
-    marginVertical: verticalScale(SPACING.sm),
-    padding: moderateScale(SPACING.md),
-    backgroundColor: COLORS.status.error + '10',
-    borderRadius: BORDER_RADIUS.lg,
+    marginHorizontal: scale(theme.spacing.lg),
+    marginVertical: verticalScale(theme.spacing.sm),
+    padding: moderateScale(theme.spacing.md),
+    backgroundColor: theme.colors.status.error + '10',
+    borderRadius: theme.borderRadius.lg,
     borderWidth: 1,
-    borderColor: COLORS.status.error + '30',
+    borderColor: theme.colors.status.error + '30',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: verticalScale(SPACING.sm),
-    gap: horizontalScale(SPACING.xs),
+    marginBottom: verticalScale(theme.spacing.sm),
+    gap: scale(theme.spacing.xs),
   },
   headerIcon: {
-    color: COLORS.status.error,
+    color: theme.colors.status.error,
   },
   title: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.status.error,
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontSize: 14,
+    color: theme.colors.status.error,
+    fontWeight: '600' as const,
   },
   alertItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: verticalScale(SPACING.xs),
+    paddingVertical: verticalScale(theme.spacing.xs),
   },
   alertText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.primary,
+    fontSize: 14,
+    color: theme.colors.text.primary,
     flex: 1,
-    marginRight: horizontalScale(SPACING.xs),
+    marginRight: scale(theme.spacing.xs),
   },
   chevronIcon: {
-    color: COLORS.status.error,
+    color: theme.colors.status.error,
   },
 });

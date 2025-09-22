@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet } from 'react-native';
-import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../theme';
+import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '../theme/index';
 import { hp } from '../../utils/responsive';
 
 const { width } = Dimensions.get('window');

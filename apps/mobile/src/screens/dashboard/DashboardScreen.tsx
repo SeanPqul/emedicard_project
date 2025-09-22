@@ -1,11 +1,11 @@
-// DashboardScreen - Page that uses DashboardWidget (FSD pattern)
+﻿// DashboardScreen - Page that uses DashboardWidget (FSD pattern)
 import React from 'react';
 import { View } from 'react-native';
-import { BaseScreen } from '@core/components';
+import { BaseScreen } from '@/src/shared/components/core';
 import { FeedbackSystem, useFeedback } from '@shared/components/feedback/feedback';
 import { useNetwork } from '@shared/hooks/useNetwork';
 import { useDashboardData } from '@features/dashboard/hooks';
-import { DashboardWidget } from '@widgets/dashboard';
+import { DashboardWidget } from '@/src/widgets/dashboard';
 import { LoadingView } from '@shared/components';
 import { styles } from './DashboardScreen.styles';
 

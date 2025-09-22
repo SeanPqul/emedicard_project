@@ -6,18 +6,25 @@
  */
 
 import { Dimensions } from 'react-native';
-import { theme } from '@shared/styles/theme';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+// Define breakpoints directly to avoid circular dependency
+const BREAKPOINT_VALUES = {
+  sm: 0,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+} as const;
 
 /**
  * Get current breakpoint based on screen width
  * @returns Current breakpoint string
  */
 export const getBreakpoint = (): 'sm' | 'md' | 'lg' | 'xl' => {
-  if (screenWidth >= theme.breakpoints.xl) return 'xl';
-  if (screenWidth >= theme.breakpoints.lg) return 'lg';
-  if (screenWidth >= theme.breakpoints.md) return 'md';
+  if (screenWidth >= BREAKPOINT_VALUES.xl) return 'xl';
+  if (screenWidth >= BREAKPOINT_VALUES.lg) return 'lg';
+  if (screenWidth >= BREAKPOINT_VALUES.md) return 'md';
   return 'sm';
 };
 
@@ -25,13 +32,13 @@ export const getBreakpoint = (): 'sm' | 'md' | 'lg' | 'xl' => {
  * Check if current screen is tablet size or larger
  * @returns True if tablet or larger
  */
-export const isTablet = (): boolean => screenWidth >= theme.breakpoints.md;
+export const isTablet = (): boolean => screenWidth >= BREAKPOINT_VALUES.md;
 
 /**
  * Check if current screen is mobile size
  * @returns True if mobile size
  */
-export const isMobile = (): boolean => screenWidth < theme.breakpoints.md;
+export const isMobile = (): boolean => screenWidth < BREAKPOINT_VALUES.md;
 
 /**
  * Responsive value utility - returns appropriate value based on current breakpoint
@@ -121,8 +128,8 @@ export const responsiveDimensions = {
 export const when = {
   mobile: <T>(value: T): T | undefined => isMobile() ? value : undefined,
   tablet: <T>(value: T): T | undefined => isTablet() ? value : undefined,
-  smallScreen: <T>(value: T): T | undefined => screenWidth < theme.breakpoints.md ? value : undefined,
-  largeScreen: <T>(value: T): T | undefined => screenWidth >= theme.breakpoints.lg ? value : undefined,
+  smallScreen: <T>(value: T): T | undefined => screenWidth < BREAKPOINT_VALUES.md ? value : undefined,
+  largeScreen: <T>(value: T): T | undefined => screenWidth >= BREAKPOINT_VALUES.lg ? value : undefined,
   sm: <T>(value: T): T | undefined => getBreakpoint() === 'sm' ? value : undefined,
   md: <T>(value: T): T | undefined => getBreakpoint() === 'md' ? value : undefined,
   lg: <T>(value: T): T | undefined => getBreakpoint() === 'lg' ? value : undefined,
@@ -163,7 +170,7 @@ export const getResponsiveBorderRadius = () => responsiveValue({
 /**
  * Breakpoint constants for external use
  */
-export const BREAKPOINTS = theme.breakpoints;
+export const BREAKPOINTS = BREAKPOINT_VALUES;
 
 /**
  * Current screen info
