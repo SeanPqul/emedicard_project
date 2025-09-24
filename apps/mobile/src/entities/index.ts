@@ -20,3 +20,5 @@ export type {
 
 export * from './healthCard';
 export * from './notification';
+export * from './activity';
+export * from './jobCategory';

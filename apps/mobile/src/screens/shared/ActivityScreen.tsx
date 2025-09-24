@@ -13,7 +13,7 @@ import {
   getActivityIcon,
   getActivityStatusColor,
   formatTimestamp
-} from '@shared/utils/activity-utils';
+} from '@entities/activity/lib';
 import { ACTIVITY_FILTERS } from '@features/activity/constants';
 
 export default function ActivityScreen() {

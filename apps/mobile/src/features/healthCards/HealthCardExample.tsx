@@ -6,8 +6,8 @@ import {
   ScrollView,
 } from 'react-native';
 // import { useHealthCardByToken } from './useHealthCard'; // TODO: Implement this hook
-import { ErrorState } from '../../shared/components/feedback';
-import { SkeletonLoader, SkeletonGroup } from '../../shared/components/feedback';
+import { ErrorState } from '@shared/components/feedback';
+import { SkeletonLoader, SkeletonGroup } from '@shared/components/feedback';
 import { getColor, getTypography, getSpacing, getBorderRadius } from '@shared/styles/theme';
 
 interface HealthCardExampleProps {

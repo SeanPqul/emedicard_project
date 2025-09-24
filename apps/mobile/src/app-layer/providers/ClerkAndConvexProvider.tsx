@@ -3,7 +3,7 @@ import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect } from "react";
-import { useUsers } from "@shared/hooks/useUsers";
+import { useUsers } from "@entities/user";
 import { generateDisplayNameFromEmail, hasPlaceholderName } from "@shared/utils/user-utils";
 import { useDeepLink } from "@shared/hooks/useDeepLink";
 

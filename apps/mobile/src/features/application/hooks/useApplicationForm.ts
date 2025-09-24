@@ -1,20 +1,13 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { validateApplicationStep } from '@shared/validation/form-validation';
-import { formStorage } from '@shared/services/storage/formStorage';
+import { validateApplicationStep, ApplicationFormData } from '../lib/validation';
+import { formStorage } from '../services/formStorage';
 import { SelectedDocuments } from '@shared/types';
 import { DocumentRequirement } from '@/src/entities/application/model/types';
 
-type ApplicationType = 'New' | 'Renew';
-type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
-
-interface ApplicationFormData {
-  applicationType: ApplicationType;
-  jobCategory: string;
-  position: string;
-  organization: string;
-  civilStatus: CivilStatus;
+// Extend the ApplicationFormData to include payment fields
+interface ExtendedApplicationFormData extends ApplicationFormData {
   paymentMethod?: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall' | '';
   paymentReference?: string;
 }

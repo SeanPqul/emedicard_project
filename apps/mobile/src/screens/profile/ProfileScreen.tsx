@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { ProfileLink } from '@features/profile/components';
 import { SignOutButton } from '@features/auth/components';
-import { useUsers } from '@shared/hooks/useUsers';
+import { useUsers } from '@entities/user';
 import { styles } from '@shared/styles/screens/tabs-profile';
 import { getUserDisplayName } from '@shared/utils/user-utils';
 

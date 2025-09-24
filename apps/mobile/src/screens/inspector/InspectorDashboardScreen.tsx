@@ -4,10 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '@shared/styles/theme';
 import { StatCard } from '@features/dashboard/components';
 import { LoadingSpinner } from '@shared/components';
-import { useRoleBasedNavigation } from '@shared/hooks/useRoleBasedNavigation';
+import { useRoleBasedNavigation } from '@features/navigation';
 import { useRouter } from 'expo-router';
 import { User } from '@entities/user/model/types';
-import { useUsers } from '@shared/hooks/useUsers';
+import { useUsers } from '@entities/user';
 import { styles } from '@shared/styles/screens/inspector-dashboard';
 
 export function InspectorDashboardScreen() {

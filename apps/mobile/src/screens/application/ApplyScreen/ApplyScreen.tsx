@@ -15,16 +15,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BaseScreen } from '@/src/shared/components/core';
 import { FeedbackSystem, useFeedback } from '@shared/components/feedback';
 import { hp } from '@shared/utils/responsive';
-import { formStorage } from '@shared/services/storage/formStorage';
+import { formStorage } from '@features/application/services/formStorage';
 import { getColor } from '@shared/styles/theme';
 import { transformRequirements } from '@entities/application/lib/requirementsMapper';
 import { STEP_TITLES } from '@/src/features/application/constants';
 
 // Hooks
-import { useJobCategories } from '@shared/hooks/useJobCategories';
-import { useApplications } from '@shared/hooks/useApplications';
-import { useRequirements } from '@shared/hooks/useRequirements';
-import { useUsers } from '@shared/hooks/useUsers';
+import { useJobCategories } from '@entities/jobCategory';
+import { useApplications } from '@features/application';
+import { useRequirements } from '@features/upload';
+import { useUsers } from '@entities/user';
 import { useApplicationForm, useDocumentSelection, useSubmission } from '@/src/features/application/hooks';
 
 // Components

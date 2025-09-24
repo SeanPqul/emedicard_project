@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ApplicationStatusProps, DashboardApplication } from '@features/dashboard/types';
-import { getJobCategoryColor, getJobCategoryIcon, getCardTypeLabel } from '@shared/utils/job-category-utils';
+import { getJobCategoryColor, getJobCategoryIcon, getCardTypeLabel } from '@entities/jobCategory/lib';
 import { styles } from './ApplicationStatus.styles';
 
 interface ApplicationProgress {

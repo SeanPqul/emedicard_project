@@ -1,25 +1,24 @@
 // =============================================================================
-// HOOKS INDEX - Central export point for all application hooks
+// SHARED HOOKS INDEX - Generic/Utility hooks only
 // =============================================================================
+// Note: All business logic hooks have been moved to their respective features/entities:
+// - useUsers -> @entities/user
+// - useJobCategories -> @entities/jobCategory
+// - useApplications -> @features/application
+// - usePayments -> @features/payment
+// - useHealthCards -> @features/healthCards
+// - useRequirements -> @features/upload
+// - useNotifications -> @features/notification
+// - useVerification -> @features/scanner
+// - useOptimizedDashboard -> @features/dashboard
+// - useRoleBasedNavigation -> @features/navigation
+// - useDocumentUpload -> @features/upload
 
-// API Integration Hooks (using new service architecture)
-export { useHealthCards } from './useHealthCards';
-export { useApplications } from './useApplications';
-export { useJobCategories } from './useJobCategories';
-export { usePayments } from './usePayments';
-export { useRequirements } from './useRequirements';
-export { useNotifications } from './useNotifications';
-export { useUsers } from './useUsers';
-export { useVerification } from './useVerification';
+// Generic Hooks (these remain in shared)
 export { useStorage } from './useStorage';
-
-// Feature Hooks
-export { useOptimizedDashboard as useDashboard } from './useOptimizedDashboard';
-export { useDocumentUpload } from './useDocumentUpload';
-// Payment flow hooks
-export { usePaymentFlow, usePaymentMethod, usePaymentManager } from '@processes/paymentFlow';
-
-// Utility Hooks
 export { useDeepLink } from './useDeepLink';
 export { useNetwork } from './useNetwork';
-export { useRoleBasedNavigation } from './useRoleBasedNavigation';
+export { useNetworkStatus } from './useNetworkStatus';
+
+// Payment flow hooks (from processes)
+export { usePaymentFlow, usePaymentMethod, usePaymentManager } from '@processes/paymentFlow';

@@ -10,7 +10,9 @@
     "format": "turbo run format",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "devDependencies": {
     "turbo": "latest"
@@ -25,5 +27,10 @@
       "sharp": "*",
       "unrs-resolver": "*"
     }
+  },
+  "dependencies": {
+    "expo": "~53.0.22",
+    "react": "19.0.0",
+    "react-native": "0.79.6"
   }
 }

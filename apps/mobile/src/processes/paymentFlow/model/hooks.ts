@@ -8,13 +8,18 @@ import {
   PaymentMethod,
   PaymentSubmissionData,
   PaymentFlowResult,
-} from '../lib/paymentFlow';
+  PaymentServices,
+} from '@features/payment/lib';
 
 // Error handling
-import { AppError, AppErrorType } from '../lib/errors';
+import { AppError, AppErrorType } from '@shared/lib/errors';
 
 // Types
 import { Id } from 'backend/convex/_generated/dataModel';
+
+// Hooks for payment services
+import { usePayments } from '@features/payment/hooks';
+import { useDocumentUpload } from '@features/upload';
 
 export interface PaymentFlowState {
   isSubmitting: boolean;
@@ -31,8 +36,8 @@ export interface UsePaymentFlowOptions {
 
 export interface UsePaymentFlowReturn {
   state: PaymentFlowState;
-  submitWithReceipt: (data: PaymentSubmissionData) => Promise<PaymentFlowResult | null>;
-  submitWithoutReceipt: (data: PaymentSubmissionData) => Promise<PaymentFlowResult | null>;
+  submitWithReceipt: (data: PaymentSubmissionData, services?: PaymentServices) => Promise<PaymentFlowResult | null>;
+  submitWithoutReceipt: (data: PaymentSubmissionData, services?: PaymentServices) => Promise<PaymentFlowResult | null>;
   clearError: () => void;
   reset: () => void;
   isLoading: boolean;
@@ -57,7 +62,7 @@ const initialState: PaymentFlowState = {
  * - Optional success/error callbacks
  * - Built-in alert dialogs for user feedback
  */
-export function usePaymentFlow(options: UsePaymentFlowOptions = {}): UsePaymentFlowReturn {
+export function usePaymentFlow(options: UsePaymentFlowOptions = {}, defaultServices?: PaymentServices): UsePaymentFlowReturn {
   const {
     onSuccess,
     onError,
@@ -101,29 +106,30 @@ export function usePaymentFlow(options: UsePaymentFlowOptions = {}): UsePaymentF
   const showErrorAlert = useCallback((error: AppError) => {
     if (!showAlerts) return;
 
-    const getErrorMessage = () => {
-      switch (error.code) {
-        case 'OFFLINE':
-          return 'You are offline. Please check your connection and try again.';
-        case 'NETWORK':
-          return 'Network error occurred. Please check your connection and try again.';
-        case 'TIMEOUT':
-          return 'Request timed out. Please try again.';
-        case 'VALIDATION':
-          return error.message;
-        case 'SERVER':
-          return 'Server error occurred. Please try again later.';
-        default:
-          return 'Payment submission failed. Please try again.';
-      }
-    };
+      const getErrorMessage = () => {
+        switch (error.type) {
+          case AppErrorType.NETWORK_OFFLINE:
+            return 'You are offline. Please check your connection and try again.';
+          case AppErrorType.NETWORK_ERROR:
+            return 'Network error occurred. Please check your connection and try again.';
+          case AppErrorType.NETWORK_TIMEOUT:
+            return 'Request timed out. Please try again.';
+          case AppErrorType.VALIDATION_FAILED:
+            return error.message;
+          case AppErrorType.SERVER_ERROR:
+            return 'Server error occurred. Please try again later.';
+          default:
+            return 'Payment submission failed. Please try again.';
+        }
+      };
 
     Alert.alert('Payment Error', getErrorMessage(), [{ text: 'OK' }]);
   }, [showAlerts]);
 
   const handleSubmission = useCallback(async (
-    submissionFn: (data: PaymentSubmissionData) => Promise<PaymentFlowResult>,
+    submissionFn: (data: PaymentSubmissionData, services: PaymentServices) => Promise<PaymentFlowResult>,
     data: PaymentSubmissionData,
+    services: PaymentServices,
     withReceipt: boolean
   ): Promise<PaymentFlowResult | null> => {
     // Prevent duplicate submissions
@@ -146,7 +152,7 @@ export function usePaymentFlow(options: UsePaymentFlowOptions = {}): UsePaymentF
       }
 
       updateState({ progress: 'creating' });
-      const result = await submissionFn(data);
+      const result = await submissionFn(data, services);
 
       updateState({ 
         isSubmitting: false,
@@ -186,16 +192,24 @@ export function usePaymentFlow(options: UsePaymentFlowOptions = {}): UsePaymentF
   }, [updateState, showSuccessAlert, showErrorAlert, onSuccess, onError]);
 
   const submitWithReceipt = useCallback(async (
-    data: PaymentSubmissionData
+    data: PaymentSubmissionData,
+    services?: PaymentServices
   ): Promise<PaymentFlowResult | null> => {
-    return handleSubmission(submitPayment, data, true);
-  }, [handleSubmission]);
+    if (!services && !defaultServices) {
+      throw new AppError(AppErrorType.VALIDATION_FAILED, 'Payment services not provided');
+    }
+    return handleSubmission(submitPayment, data, services || defaultServices!, true);
+  }, [handleSubmission, defaultServices]);
 
   const submitWithoutReceipt = useCallback(async (
-    data: PaymentSubmissionData
+    data: PaymentSubmissionData,
+    services?: PaymentServices
   ): Promise<PaymentFlowResult | null> => {
-    return handleSubmission(submitPaymentWithoutReceipt, data, false);
-  }, [handleSubmission]);
+    if (!services && !defaultServices) {
+      throw new AppError(AppErrorType.VALIDATION_FAILED, 'Payment services not provided');
+    }
+    return handleSubmission(submitPaymentWithoutReceipt, data, services || defaultServices!, false);
+  }, [handleSubmission, defaultServices]);
 
   const isLoading = state.isSubmitting;
   const canSubmit = !state.isSubmitting && !submissionRef.current;
@@ -295,7 +309,7 @@ export function usePaymentManager(
     }
 
     const data: PaymentSubmissionData = {
-      formId,
+      applicationId: formId,
       method: paymentMethod.selectedMethod,
       referenceNumber: paymentMethod.referenceNumber.trim(),
     };

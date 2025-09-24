@@ -1,2 +1,2 @@
-export { useHealthCardByToken } from './useHealthCard';
+export * from './hooks';
 export { HealthCardExample } from './HealthCardExample';

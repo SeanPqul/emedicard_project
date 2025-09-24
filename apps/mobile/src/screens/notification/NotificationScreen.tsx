@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { EmptyState } from '@shared/components';
 import { styles } from '@shared/styles/screens/tabs-notification';
-import { useNotifications } from '@shared/hooks/useNotifications';
+import { useNotifications } from '@features/notification';
 import { Notification } from '@/src/entities';
 import { Id } from 'backend/convex/_generated/dataModel';
 

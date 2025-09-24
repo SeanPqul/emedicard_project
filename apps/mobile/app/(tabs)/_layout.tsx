@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { Redirect } from 'expo-router';
-import RoleBasedTabLayout from '../../src/shared/navigation/RoleBasedTabLayout';
+import { RoleBasedTabLayout } from '@features/navigation';
 import { LoadingSpinner } from '../../src/shared/components';
 
 export default function TabLayout() {

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { Id } from 'backend/convex/_generated/dataModel';
-import { formStorage } from '@shared/services/storage/formStorage';
+import { formStorage } from '../services/formStorage';
 import { DocumentRequirement, JobCategory } from '@/src/entities/application/model/types';
 
 type ApplicationType = 'New' | 'Renew';

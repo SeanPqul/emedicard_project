@@ -1,6 +1,6 @@
 // useDashboardData hook - Dashboard-specific data management
 import { useMemo } from 'react';
-import { useOptimizedDashboard } from '@shared/hooks/useOptimizedDashboard';
+import { useOptimizedDashboard } from './useOptimizedDashboard';
 import { Application } from '@features/dashboard/types';
 import { Id } from 'backend/convex/_generated/dataModel';
 

@@ -8,7 +8,7 @@ import QRCode from 'react-native-qrcode-svg';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
-import { useHealthCards, BackendHealthCard } from '@shared/hooks/useHealthCards';
+import { useHealthCards, BackendHealthCard } from '@features/healthCards';
 import { Id } from 'backend/convex/_generated/dataModel';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-health-cards';
@@ -19,7 +19,7 @@ import {
   generateVerificationUrl, 
   formatDate, 
   generateCardHtml
-} from '@shared/utils';
+} from '@features/healthCards/lib';
 
 
 export function HealthCardsScreen() {

@@ -7,19 +7,16 @@
 import { Id } from 'backend/convex/_generated/dataModel';
 import { DocumentRequirement, JobCategory } from './types';
 import { SelectedDocuments, DocumentFile } from '@shared/types';
-import { formStorage } from '@shared/services/storage/formStorage';
-import { validateApplicationStep } from '@shared/validation/form-validation';
+import { formStorage } from '@features/application/services/formStorage';
+import { validateApplicationStep, ApplicationFormData as BaseApplicationFormData, ApplicationType, CivilStatus } from '@features/application/lib/validation';
 
-export type ApplicationType = 'New' | 'Renew';
-export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
 export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
 
-export interface ApplicationFormData {
-  applicationType: ApplicationType;
-  jobCategory: string;
-  position: string;
-  organization: string;
-  civilStatus: CivilStatus;
+// Re-export for convenience
+export { ApplicationType, CivilStatus } from '@features/application/lib/validation';
+
+// Extend the base form data to include payment fields
+export interface ApplicationFormData extends BaseApplicationFormData {
   paymentMethod?: PaymentMethod;
   paymentReference?: string;
 }

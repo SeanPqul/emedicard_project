@@ -1,4 +1,4 @@
-import { useUsers } from '../../../src/shared/hooks/useUsers';
+import { useUsers } from '@entities/user';
 import { Redirect, Stack } from 'expo-router';
 import { LoadingSpinner } from '../../../src/shared/components';
 

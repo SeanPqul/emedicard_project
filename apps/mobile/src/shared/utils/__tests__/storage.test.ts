@@ -1,5 +1,5 @@
 import { MMKV } from 'react-native-mmkv';
-import { setItem, getItem, removeItem, clearStorage } from '@shared/lib/storage';
+import { setItem, getItem, removeItem, clearAll } from '@shared/lib/storage';
 
 // Mock react-native-mmkv
 jest.mock('react-native-mmkv', () => ({
@@ -69,10 +69,10 @@ describe('Storage utilities', () => {
     });
   });
 
-  describe('clearStorage', () => {
+  describe('clearAll', () => {
     test('clears all storage', () => {
-      clearStorage();
-      
+      clearAll();
+
       expect(mockStorage.clearAll).toHaveBeenCalled();
     });
   });

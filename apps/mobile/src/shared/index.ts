@@ -16,20 +16,8 @@ export * from './components';
 // Utilities
 export * from './utils';
 
-// Basic validation utilities
-export {
-  validators,
-  validateField,
-  validateForm,
-} from './validation/form-validation';
-
-// Essential formatting utilities
-export {
-  dateFormatters,
-  currencyFormatters,
-  stringFormatters,
-  statusFormatters,
-} from './formatting/data-formatters';
+// Note: Validation utilities moved to @features/application/lib during FSD migration
+// Note: Formatting utilities moved to respective feature/entity lib folders during FSD migration
 
 // Simple error handling
 export {

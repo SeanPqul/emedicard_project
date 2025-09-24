@@ -1,11 +1,10 @@
 // Storage Services
 export * from './storage';
-export * from './documentCache';
-export * from './formStorage';
 
 // Default exports
 export { default as storageHelper } from './storage';
-export { formStorage } from './formStorage';
+
+// formStorage has been moved to @features/application/services/formStorage
 
 // Re-export commonly used functions for convenience
 export { 
@@ -24,22 +23,4 @@ export {
   stopAutomaticCleanup
 } from './storage';
 
-export {
-  cacheDocument,
-  getCachedDocument,
-  getCachedDocumentsByForm,
-  updateCachedDocumentStatus,
-  removeCachedDocument,
-  clearFormCache,
-  getAllCachedDocuments,
-  getFailedDocuments,
-  cleanupOldCache,
-  getCacheStats,
-  smartCacheCleanup,
-  checkMemoryLimits,
-  addToUploadQueue,
-  getNextUploadBatch,
-  removeFromUploadQueue,
-  clearUploadQueue,
-  getUploadQueueStats
-} from './documentCache';
+// Document cache has been moved to @features/upload/services/documentCache

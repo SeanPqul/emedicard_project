@@ -10,8 +10,8 @@ import {
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-document-requirements';
 import { JobCategory } from '@/src/entities/application/model/types';
-import { useJobCategories } from '@shared/hooks/useJobCategories';
-import { getHealthCardTypeName, getPaymentMethods } from '@shared/utils';
+import { useJobCategories } from '@entities/jobCategory';
+import { getHealthCardTypeName, getPaymentMethods } from '@features/healthCards/lib';
 
 interface Requirement {
   name: string;

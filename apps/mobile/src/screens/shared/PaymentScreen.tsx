@@ -8,7 +8,8 @@ import { FeedbackSystem, useFeedback } from '@shared/components/feedback/feedbac
 import { CustomButton } from '@shared/components';
 import { Id } from 'backend/convex/_generated/dataModel';
 import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
-import { usePayments, useApplications } from '@shared/hooks/';
+import { usePayments } from '@features/payment';
+import { useApplications } from '@features/application';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-payment';
 import { PAYMENT_METHODS, DIGITAL_PAYMENT_METHODS, MANUAL_PAYMENT_METHODS, type PaymentMethod, type UploadedReceipt } from '@features/payment/constants';

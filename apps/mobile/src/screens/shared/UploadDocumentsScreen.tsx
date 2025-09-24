@@ -10,10 +10,10 @@ import { CustomButton } from '@shared/components';
 import { DragDropUpload } from '@features/upload/components';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-upload-documents';
-import { useDocumentUpload } from '@shared/hooks/useDocumentUpload';
-import { useApplications } from '@shared/hooks/useApplications';
-import { useRequirements } from '@shared/hooks/useRequirements';
-import { clearFormCache } from '@shared/services/storage/documentCache';
+import { useDocumentUpload } from '@features/upload';
+import { useApplications } from '@features/application';
+import { useRequirements } from '@features/upload';
+import { clearFormCache } from '@features/upload/services/documentCache';
 
 interface DocumentRequirement {
   id: string;
