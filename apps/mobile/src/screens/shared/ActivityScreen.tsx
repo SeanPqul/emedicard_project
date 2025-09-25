@@ -8,8 +8,8 @@ import { api } from 'backend/convex/_generated/api';
 import { EmptyState } from '@shared/components';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-activity';
+import { Activity } from '@entities/activity';
 import {
-  Activity,
   getActivityIcon,
   getActivityStatusColor,
   formatTimestamp

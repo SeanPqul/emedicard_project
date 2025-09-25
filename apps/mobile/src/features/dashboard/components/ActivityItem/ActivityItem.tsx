@@ -4,6 +4,11 @@ import { getBorderRadius, getColor, getSpacing, getTypography } from '@shared/st
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { 
+  getActivityIcon as getIcon, 
+  getActivityStatusColor, 
+  formatTimestamp 
+} from '@entities/activity/lib';
 
 interface ActivityItemProps {
   activity: RecentActivity | Activity;
@@ -11,46 +16,38 @@ interface ActivityItemProps {
 
 export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity }) => {
   const getActivityIcon = () => {
-    const type = activity.type;
-    if (type.includes('application')) return 'document-text-outline';
-    if (type.includes('payment')) return 'card-outline';
-    if (type.includes('notification')) return 'notifications-outline';
-    if (type.includes('verification')) return 'shield-checkmark-outline';
-    if (type.includes('document')) return 'document-attach-outline';
-    if (type.includes('health_card')) return 'card-outline';
+    // Handle the different type formats between RecentActivity and Activity
+    if ('type' in activity) {
+      const type = activity.type;
+      // Check if it's one of the Activity types
+      if (['application', 'payment', 'orientation', 'card_issued', 'document_upload'].includes(type)) {
+        return getIcon(type as any);
+      }
+      // Handle additional types that might be in RecentActivity
+      if (type.includes('notification')) return 'notifications-outline';
+      if (type.includes('verification')) return 'shield-checkmark-outline';
+      if (type.includes('health_card')) return 'card-outline';
+    }
     return 'information-circle-outline';
   };
 
   const getStatusColor = () => {
     // Handle both RecentActivity and Activity types - provide default if no status
     const status = 'status' in activity ? activity.status : 'pending';
-    switch (status) {
-      case 'success': return getColor('semantic.success');
-      case 'error': return getColor('semantic.error');
-      case 'warning': return getColor('semantic.warning');
-      default: return getColor('text.secondary');
+    // Use shared utility for standard statuses
+    if (['success', 'error', 'warning', 'pending'].includes(status)) {
+      const color = getActivityStatusColor(status as any);
+      // Convert hex to theme color if needed
+      return color;
     }
-  };
-
-  const formatTime = (timestamp: string | Date) => {
-    const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
-    const now = new Date();
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-    
-    if (diffInHours < 1) {
-      return 'Just now';
-    } else if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)}h ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
+    return getColor('text.secondary');
   };
 
   return (
     <View 
       style={styles.container}
       accessibilityLabel={`${activity.title}: ${activity.description}`}
-      accessibilityHint={`Activity from ${formatTime(activity.timestamp)}`}
+      accessibilityHint={`Activity from ${formatTimestamp(activity.timestamp)}`}
     >
       <View style={[styles.icon, { backgroundColor: getStatusColor() + '20' }]}>
         <Ionicons name={getActivityIcon() as any} size={18} color={getStatusColor()} />
@@ -59,7 +56,7 @@ export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity 
         <Text style={styles.title}>{activity.title}</Text>
         <Text style={styles.description}>{activity.description}</Text>
         <Text style={styles.time}>
-          {formatTime(activity.timestamp)}
+          {formatTimestamp(activity.timestamp)}
         </Text>
       </View>
     </View>
