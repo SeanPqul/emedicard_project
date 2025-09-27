@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { addNetworkListener, NetworkState, isOnline } from '@shared/lib/network';
+import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 
 /**
  * useNetwork Hook
@@ -7,6 +7,12 @@ import { addNetworkListener, NetworkState, isOnline } from '@shared/lib/network'
  * React hook for monitoring network connectivity status.
  * Provides network state and utilities for network-aware components.
  */
+
+export interface NetworkState {
+  isConnected: boolean;
+  isInternetReachable: boolean;
+  type: string;
+}
 
 export interface UseNetworkReturn {
   networkState: NetworkState;
@@ -22,36 +28,40 @@ export const useNetwork = (): UseNetworkReturn => {
     type: 'unknown',
   });
 
+  const handleNetworkChange = useCallback((state: NetInfoState) => {
+    setNetworkState({
+      isConnected: state.isConnected ?? false,
+      isInternetReachable: state.isInternetReachable ?? false,
+      type: state.type || 'unknown',
+    });
+  }, []);
+
   const checkConnection = useCallback(async () => {
     try {
-      const online = await isOnline();
-      setNetworkState(prev => ({
-        ...prev,
-        isConnected: online,
-        isInternetReachable: online,
-      }));
+      const state = await NetInfo.fetch();
+      handleNetworkChange(state);
     } catch (error) {
       console.warn('Failed to check network connection:', error);
-      setNetworkState(prev => ({
-        ...prev,
+      setNetworkState({
         isConnected: false,
         isInternetReachable: false,
-      }));
+        type: 'unknown',
+      });
     }
-  }, []);
+  }, [handleNetworkChange]);
 
   useEffect(() => {
     // Initial network check
     checkConnection();
 
     // Set up network listener
-    const unsubscribe = addNetworkListener((state) => {
-      setNetworkState(state);
-    });
+    const unsubscribe = NetInfo.addEventListener(handleNetworkChange);
 
     // Clean up listener on unmount
-    return unsubscribe;
-  }, [checkConnection]);
+    return () => {
+      unsubscribe();
+    };
+  }, [checkConnection, handleNetworkChange]);
 
   return {
     networkState,

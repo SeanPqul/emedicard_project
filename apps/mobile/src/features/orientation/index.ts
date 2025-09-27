@@ -1,2 +1,2 @@
 // Orientation feature exports
-export * from './lib';
+export * from './model';

@@ -1,6 +1,43 @@
-import { cacheStorage, StorageKeys, storageUtils } from '@shared/lib/storage/mmkv';
+import { storage as cacheStorage, setObject, getObject, removeItem } from '@shared/services/storage/storage';
 import { ApplicationFormData } from '@entities/application/model/service';
 import { SelectedDocuments } from '@shared/types';
+
+// Storage keys constants
+export const StorageKeys = {
+  TEMP_FORM_DATA: 'temp_form_data',
+  TEMP_UPLOAD_QUEUE: 'temp_upload_queue',
+} as const;
+
+// Storage utilities wrapper
+export const storageUtils = {
+  safeSet: <T>(key: string, value: T, storage: any): boolean => {
+    try {
+      setObject(key, value);
+      return true;
+    } catch (error) {
+      console.error(`Failed to set storage key ${key}:`, error);
+      return false;
+    }
+  },
+  safeGet: <T>(key: string, defaultValue: T, storage: any): T => {
+    try {
+      const value = getObject<T>(key);
+      return value !== null ? value : defaultValue;
+    } catch (error) {
+      console.error(`Failed to get storage key ${key}:`, error);
+      return defaultValue;
+    }
+  },
+  removeKey: (key: string, storage: any): boolean => {
+    try {
+      removeItem(key);
+      return true;
+    } catch (error) {
+      console.error(`Failed to remove storage key ${key}:`, error);
+      return false;
+    }
+  },
+};
 
 interface TempApplicationData {
   formData: ApplicationFormData;

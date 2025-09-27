@@ -1,7 +1,7 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
-const projectRoot = __dirname; 
+const projectRoot = __dirname;
 const monorepoRoot = path.resolve(projectRoot, '../..');  // emedicard_project/
 
 const config = getDefaultConfig(projectRoot);
@@ -15,7 +15,7 @@ config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
 config.watchFolders = [
   ...config.watchFolders,
   path.resolve(monorepoRoot, 'packages'),
-  path.resolve(monorepoRoot, 'backend/convex'), 
+  path.resolve(monorepoRoot, 'backend/convex'),
   monorepoRoot,
 ];
 
