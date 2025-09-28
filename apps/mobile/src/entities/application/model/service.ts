@@ -4,7 +4,7 @@
  * Core business logic for application management
  */
 
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 import { DocumentRequirement, JobCategory } from './types';
 import { SelectedDocuments, DocumentFile } from '@shared/types';
 import { formStorage } from '@features/application/services/formStorage';

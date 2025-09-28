@@ -4,7 +4,7 @@
  * Type definitions for payment entities and operations
  */
 
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 // ===== PAYMENT STATUS TYPES =====
 export type PaymentStatus = 'Pending' | 'Complete' | 'Failed';

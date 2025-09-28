@@ -15,7 +15,7 @@ import {
 import { AppError, AppErrorType } from '@shared/lib/errors';
 
 // Types
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 // Hooks for payment services
 import { usePayments } from '@features/payment/hooks';

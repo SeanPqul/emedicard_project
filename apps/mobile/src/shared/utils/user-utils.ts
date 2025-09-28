@@ -12,10 +12,10 @@ export function generateDisplayNameFromEmail(email: string): string {
     return 'User';
   }
   
-  const username = email.split('@')[0];
+  const username = email.split('@')[0] ?? '';
   // Convert email username to a more readable format
   // e.g., john.doe -> John Doe, john_doe -> John Doe
-  return username
+  return (username || '')
     .split(/[._-]/)
     .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
     .join(' ');

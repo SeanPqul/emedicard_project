@@ -1,4 +1,4 @@
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 export interface JobCategory {
   _id: Id<'jobCategories'>;

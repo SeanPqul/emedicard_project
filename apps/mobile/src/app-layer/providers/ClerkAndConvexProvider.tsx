@@ -5,7 +5,6 @@ import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect } from "react";
 import { useUsers } from "@entities/user";
 import { generateDisplayNameFromEmail, hasPlaceholderName } from "@shared/utils/user-utils";
-import { useDeepLink } from "@shared/hooks/useDeepLink";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 const convex = new ConvexReactClient(
@@ -23,8 +22,6 @@ function UserSetupHandler() {
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   
-  // Initialize deep linking
-  useDeepLink();
   
   // Use custom hooks instead of direct Convex calls
   const { data: { currentUser: userProfile }, mutations: { createUser, updateUser } } = useUsers();

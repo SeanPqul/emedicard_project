@@ -1,5 +1,5 @@
 {
-  "extends": "@react-native/typescript-config",
+  "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
@@ -18,7 +18,6 @@
     "sourceMap": true,
     "removeComments": false,
     "paths": {
-      "@/*": ["./*"],
       "@/src/*": ["./src/*"],
       "@/app/*": ["./app/*"],
       "@/assets/*": ["./assets/*"],
@@ -29,15 +28,14 @@
       "@shared/*": ["./src/shared/*"],
       "@core/*": ["./src/core/*"],
       "@types/*": ["./src/types/*"],
-      "@backend/*": ["../../backend/*"],
+      "@backend/convex/*": ["../../backend/convex/*"],
       "@emedicard/constants": ["../../packages/constants/src"],
       "@emedicard/types": ["../../packages/types/src"],
       "@emedicard/utils": ["../../packages/utils/src"],
       "@emedicard/validation": ["../../packages/validation/src"]
     },
     "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types"],
-    "lib": ["ES2022"]
+    "typeRoots": ["./node_modules/@types"]
   },
   "include": [
     "**/*.ts",
@@ -48,10 +46,12 @@
     "app/**/*"
   ],
   "exclude": [
-    "convex/**/*",
     "node_modules",
     ".expo",
     "dist",
-    "build"
+    "build",
+    "convex",
+    "../../backend",
+    "../../packages"
   ]
 }

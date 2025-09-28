@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -22,7 +22,7 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
   if (!showAlerts) return null;
 
   const handlePaymentPress = () => {
-    router.push('/(screens)/(shared)/payment');
+    router.push('/(screens)/(shared)/payment/');
   };
 
   const handleOrientationPress = () => {
@@ -32,7 +32,7 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="alert-circle" size={20} color={styles.headerIcon.color} />
+        <Ionicons name="alert-circle" size={20} color="#DC3545" />
         <Text style={styles.title}>Action Required</Text>
       </View>
       
@@ -45,7 +45,7 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
           <Text style={styles.alertText}>
             Pay ₱{dashboardStats.pendingAmount.toFixed(2)} to proceed with your application
           </Text>
-          <Ionicons name="chevron-forward" size={16} color={styles.chevronIcon.color} />
+          <Ionicons name="chevron-forward" size={16} color="#DC3545" />
         </TouchableOpacity>
       )}
       
@@ -58,7 +58,7 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
           <Text style={styles.alertText}>
             Schedule your required food safety orientation
           </Text>
-          <Ionicons name="chevron-forward" size={16} color={styles.chevronIcon.color} />
+          <Ionicons name="chevron-forward" size={16} color="#DC3545" />
         </TouchableOpacity>
       )}
     </View>

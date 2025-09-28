@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react';
+import { useMemo } from 'react';
 import { UserRole } from '@entities/user/model/types';
 
 export interface RolePermissions {

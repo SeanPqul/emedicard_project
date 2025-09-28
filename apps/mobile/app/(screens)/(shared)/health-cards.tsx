@@ -1,5 +1,3 @@
-﻿import { HealthCardsScreen } from '../../../src/screens/shared';
+import { HealthCardsScreen } from '../../../src/screens/shared/HealthCardsScreen';
 
-export default function HealthCards() {
-  return <HealthCardsScreen />;
-}
+export default HealthCardsScreen;

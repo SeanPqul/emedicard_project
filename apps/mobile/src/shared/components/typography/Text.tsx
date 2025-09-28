@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Text Component
  * 
  * Enhanced text component with typography variants and design system integration

@@ -7,7 +7,7 @@ import type {
 } from '@entities/dashboard';
 import type { Application } from '@entities/application';
 import type { User as UserProfile } from '@entities/user';
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 // Type for the aggregated application data from backend dashboard
 export interface DashboardApplication {

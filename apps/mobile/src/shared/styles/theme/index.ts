@@ -11,12 +11,11 @@ import { typography } from './typography';
 import { spacing, borderRadius, breakpoints, layoutPatterns } from './spacing';
 import { shadows } from './shadows';
 
-// Import for internal use
-import { getColor } from './utilities';
-
 // Import utilities and responsive tokens separately for re-export
-export * from './utilities';
 export * from './responsive-tokens';
+
+// Export adapter utilities as the primary interface (these override utilities exports)
+export { getColor, getSpacing, getTypography, getBorderRadius, getShadow } from './adapter';
 
 
 // Compose the complete theme object

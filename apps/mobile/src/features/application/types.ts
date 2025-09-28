@@ -1,4 +1,4 @@
-﻿// Application feature types - Uses entities from entities layer (FSD pattern)
+// Application feature types - Uses entities from entities layer (FSD pattern)
 import type { 
   Application,
   ApplicationType,

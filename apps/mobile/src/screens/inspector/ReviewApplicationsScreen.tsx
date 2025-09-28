@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { View, Text } from 'react-native';
 import { LoadingSpinner } from '@shared/components';
 import { useRoleBasedNavigation } from '@features/navigation';

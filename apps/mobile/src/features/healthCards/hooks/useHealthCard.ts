@@ -1,5 +1,5 @@
 import { useQuery } from 'convex/react';
-import { api } from 'backend/convex/_generated/api';
+import { api } from '@backend/convex/_generated/api';
 
 export function useHealthCardByToken(token?: string) {
   // This is a placeholder implementation since the API doesn't have getByVerificationToken

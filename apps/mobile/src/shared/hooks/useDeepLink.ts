@@ -1,4 +1,4 @@
-﻿import { useEffect } from 'react';
+import { useEffect } from 'react';
 import { router } from 'expo-router';
 import * as Linking from 'expo-linking';
 

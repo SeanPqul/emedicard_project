@@ -6,7 +6,7 @@
  */
 
 import { ConvexReactClient } from 'convex/react';
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 export interface ApiResponse<T = any> {
   success: boolean;

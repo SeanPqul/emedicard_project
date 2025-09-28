@@ -1,4 +1,4 @@
-﻿// Auth Service - Centralized authentication logic
+// Auth Service - Centralized authentication logic
 import { useSignIn, useSignUp, useAuth as useClerkAuth, useUser } from '@clerk/clerk-expo';
 import { router } from 'expo-router';
 import { Alert } from 'react-native';

@@ -9,7 +9,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { useHealthCards, BackendHealthCard } from '@features/healthCards';
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-health-cards';
 import { 

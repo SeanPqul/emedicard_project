@@ -1,5 +1,5 @@
-﻿// Sign-up route - Thin route file following FSD architecture
-import { SignUpScreen } from '../../src/screens/auth';
+import React from 'react';
+import { SignUpScreen } from '@/src/screens/auth/SignUpScreen/SignUpScreen';
 
 export default function SignUpRoute() {
   return <SignUpScreen />;

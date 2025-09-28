@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { StatCard } from '@features/dashboard/components/StatCard';

@@ -6,7 +6,11 @@ export const blobToBase64 = (blob: Blob): Promise<string> => {
       const result = reader.result as string;
       // Remove the data:mime;base64, prefix to get just the base64 string
       const base64 = result.split(',')[1];
-      resolve(base64);
+      if (base64 !== undefined) {
+        resolve(base64);
+      } else {
+        reject(new Error('Failed to extract base64 string from blob.'));
+      }
     };
     reader.onerror = reject;
     reader.readAsDataURL(blob);

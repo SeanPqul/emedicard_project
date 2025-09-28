@@ -14,7 +14,7 @@ import { EmptyState } from '@shared/components';
 import { styles } from '@shared/styles/screens/tabs-notification';
 import { useNotifications } from '@features/notification';
 import { Notification } from '@/src/entities';
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 type NotificationCategory = 'All' | 'Unread' | 'Applications' | 'Payments' | 'Orientations';
 

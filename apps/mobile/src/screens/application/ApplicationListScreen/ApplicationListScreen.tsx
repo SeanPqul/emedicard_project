@@ -12,8 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
 import { router } from 'expo-router';
 
-import { BaseScreen } from '@/src/shared/components/core';
-import { api } from 'backend/convex/_generated/api';
+import { api } from '@backend/convex/_generated/api';
 import { EmptyState } from '@shared/components/feedback';
 import { styles } from './ApplicationListScreen.styles';
 import { 
@@ -231,7 +230,7 @@ export function ApplicationListScreen() {
       <TouchableOpacity 
         key={application._id} 
         style={styles.applicationCard}
-        onPress={() => router.push(`/(screens)/(shared)/(screens)/(shared)/application/${application._id}`)}
+        onPress={() => router.push(`/application/${application._id}`)}
       >
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
@@ -334,27 +333,29 @@ export function ApplicationListScreen() {
   const filteredApplications = getFilteredAndSortedApplications();
 
   return (
-    <BaseScreen safeArea={false}>
-      <View style={styles.container}>
-        {renderHeader()}
-        
-        <ScrollView
-          style={styles.content}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.contentContainer}
-        >
-          {filteredApplications.length === 0 ? (
-            renderEmptyState()
-          ) : (
-            <View style={styles.applicationsList}>
-              {filteredApplications.map(renderApplicationCard)}
-            </View>
-          )}
-        </ScrollView>
-      </View>
-    </BaseScreen>
+    <View style={styles.container}>
+
+      {renderHeader()}
+
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 20 // Add padding to account for tab bar
+        }}
+      >
+        {filteredApplications.length === 0 ? (
+          renderEmptyState()
+        ) : (
+          <View style={styles.applicationsList}>
+            {filteredApplications.map(renderApplicationCard)}
+          </View>
+        )}
+      </ScrollView>
+
+    </View>
   );
 }

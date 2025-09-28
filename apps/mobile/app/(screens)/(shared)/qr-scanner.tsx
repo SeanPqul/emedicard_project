@@ -1,5 +1,3 @@
-﻿import { QrScannerScreen } from '../../../src/screens/shared';
+import { QrScannerScreen } from '../../../src/screens/shared/QrScannerScreen';
 
-export default function QRScannerScreen() {
-  return <QrScannerScreen />;
-}
+export default QrScannerScreen;

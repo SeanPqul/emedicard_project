@@ -1,6 +1,3 @@
-﻿// Sign-in route - Thin route file following FSD architecture
-import { SignInScreen } from '../../src/screens/auth';
+import { SignInScreen } from '../../src/screens/auth/SignInScreen';
 
-export default function SignInRoute() {
-  return <SignInScreen />;
-}
+export default SignInScreen;

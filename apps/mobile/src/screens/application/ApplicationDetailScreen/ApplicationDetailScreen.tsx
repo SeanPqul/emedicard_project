@@ -15,8 +15,8 @@ import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { BaseScreen } from '@/src/shared/components/core';
-import { api } from 'backend/convex/_generated/api';
-import { Id } from 'backend/convex/_generated/dataModel';
+import { api } from '@backend/convex/_generated/api';
+import { Id } from '@backend/convex/_generated/dataModel';
 import { useMayaPayment } from '@processes/mayaPaymentFlow';
 import { useAbandonedPayment } from '@processes/abandonedPaymentFlow';
 import { CustomButton } from '@shared/components';

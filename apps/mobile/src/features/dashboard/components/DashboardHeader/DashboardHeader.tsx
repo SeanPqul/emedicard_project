@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
@@ -56,7 +56,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <Ionicons 
           name="notifications-outline" 
           size={24} 
-          color={styles.notificationIcon.color} 
+          color="#111827" 
         />
         {unreadNotificationsCount > 0 && (
           <View style={styles.notificationBadge}>

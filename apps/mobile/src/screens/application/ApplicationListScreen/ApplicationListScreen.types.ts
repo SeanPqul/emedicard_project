@@ -1,4 +1,4 @@
-﻿import { NavigationProp, RouteProp } from '@react-navigation/native';
+import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/src/shared/navigation/types';
 
 export interface ApplicationListScreenProps {

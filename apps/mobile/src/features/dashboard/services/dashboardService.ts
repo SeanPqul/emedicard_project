@@ -1,4 +1,4 @@
-import { api } from 'backend/convex/_generated/api';
+import { api } from '@backend/convex/_generated/api';
 import { ConvexClient } from 'convex/browser';
 import { DashboardData, DashboardStats, RecentActivity } from '@features/dashboard/types';
 

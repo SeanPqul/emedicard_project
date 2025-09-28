@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { ActionButton } from '@shared/components/buttons';

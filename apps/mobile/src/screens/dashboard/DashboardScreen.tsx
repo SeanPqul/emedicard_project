@@ -1,4 +1,4 @@
-﻿// DashboardScreen - Page that uses DashboardWidget (FSD pattern)
+// DashboardScreen - Page that uses DashboardWidget (FSD pattern)
 import React from 'react';
 import { View } from 'react-native';
 import { BaseScreen } from '@/src/shared/components/core';

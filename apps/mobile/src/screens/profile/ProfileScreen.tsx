@@ -1,4 +1,4 @@
-﻿import { useUser } from '@clerk/clerk-expo';
+import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';

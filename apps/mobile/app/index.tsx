@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { Redirect } from 'expo-router';
 import { LoadingSpinner } from '../src/shared/components';
-import { useUsers } from '@entities/user';
+import { useUsers } from '../src/entities/user';
 
 export default function Index() {
   console.log('[Index] Component starting to render');

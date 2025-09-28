@@ -1,4 +1,3 @@
-﻿// SignInScreen component - Clean architecture implementation
 import React, { useState } from 'react';
 import { Alert, Image, Text, View } from 'react-native';
 import { Link, useRouter } from 'expo-router';
@@ -10,7 +9,7 @@ import {
 // @ts-ignore - SVG import
 import GoogleSignInButton from '../../../../assets/svgs/google-ctn-logo.svg';
 import { CustomButton, CustomTextInput, Divider } from '@shared/components';
-import { BaseScreen } from '@/src/shared/components/core';
+import { BaseScreen } from '@shared/components/core';
 import { styles } from './SignInScreen.styles';
 import { SignInFormData, AuthError } from '@features/auth/types';
 
@@ -177,7 +176,7 @@ export function SignInScreen() {
           </CustomButton>
 
           <View style={styles.signUpContainer}>
-            <Text style={styles.signUpText}>Don't have an account? </Text>
+            <Text style={styles.signUpText}>Don&apos;t have an account? </Text>
             <Link href="/(auth)/sign-up" replace>
               <Text style={styles.signUpLinkText}>Sign up</Text>
             </Link>

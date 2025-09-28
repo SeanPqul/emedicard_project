@@ -1,6 +1,6 @@
-import { useUsers } from '@entities/user';
+import { useUsers } from '../../../src/entities/user';
 import { Redirect, Stack } from 'expo-router';
-import { LoadingSpinner } from '../../../src/shared/components';
+import { LoadingSpinner } from '../../../src/shared/components/feedback/LoadingSpinner';
 
 export default function InspectorScreensLayout() {
   const { data: { currentUser }, isLoading } = useUsers();

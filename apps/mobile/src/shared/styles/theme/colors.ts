@@ -9,9 +9,22 @@ export const colors = {
   // Brand colors - your main identity
   brand: {
     primary: '#10B981', // Green - Emedicard brand color
-    secondary: '#3B82F6', // Blue - secondary/accent color
+    secondary: '#2E86AB', // Blue - medical/healthcare theme (matches master)
   },
   
+  // Primary color palette (for backward compatibility)
+  primary: {
+    50: '#F0FDF4',
+    100: '#DCFCE7',
+    200: '#BBF7D0',
+    300: '#86EFAC',
+    400: '#4ADE80',
+    500: '#10B981', // Main brand green
+    600: '#059669',
+    700: '#047857',
+    800: '#065F46',
+    900: '#064E3B',
+  },
   // Extended color palettes
   green: {
     50: '#F0FDF4',

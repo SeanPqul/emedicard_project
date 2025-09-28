@@ -1,5 +1,5 @@
-﻿import { ProfileScreen } from '../../src/screens/profile';
+import { ProfileScreen } from '../../src/screens/profile';
 
-export default function Profile() {
+export default function ProfileRoute() {
   return <ProfileScreen />;
-}
+};

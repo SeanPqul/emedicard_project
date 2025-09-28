@@ -1,4 +1,4 @@
-﻿import { NavigationProp, RouteProp } from '@react-navigation/native';
+import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/src/shared/navigation/types';
 
 export interface SignInFormData {
@@ -7,8 +7,8 @@ export interface SignInFormData {
 }
 
 export interface SignInScreenProps {
-  navigation: NavigationProp<RootStackParamList, 'SignIn'>;
-  route: RouteProp<RootStackParamList, 'SignIn'>;
+  navigation: NavigationProp<RootStackParamList, '(auth)/sign-in'>;
+  route: RouteProp<RootStackParamList, '(auth)/sign-in'>;
 }
 
 export interface SignInScreenState {

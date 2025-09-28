@@ -1,6 +1,6 @@
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/src/shared/navigation/types';
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 export interface ApplicationDetailScreenProps {
   navigation: NavigationProp<RootStackParamList, 'ApplicationDetail'>;

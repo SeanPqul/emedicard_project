@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { FeedbackSystem, useFeedback } from '@shared/components/feedback/feedback';
 import { CustomButton } from '@shared/components';
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
 import { usePayments } from '@features/payment';
 import { useApplications } from '@features/application';

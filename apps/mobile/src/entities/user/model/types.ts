@@ -4,7 +4,7 @@
  * Type definitions for user-related entities and operations
  */
 
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 // ===== USER ROLE TYPES =====
 export type UserRole = 'applicant' | 'inspector' | 'admin';

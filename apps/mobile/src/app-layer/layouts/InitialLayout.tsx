@@ -5,9 +5,6 @@ import { LoadingSpinner } from "@shared/components/feedback";
 export default function InitialLayout() {
   const { isLoaded } = useAuth();
 
-  // Show loading only while Clerk is initializing
-  // Navigation logic is now handled in app/index.tsx
-  // User setup logic is now handled in ClerkAndConvexProvider
   if (!isLoaded) {
     return (
       <LoadingSpinner 

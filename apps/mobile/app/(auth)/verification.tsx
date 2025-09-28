@@ -1,5 +1,5 @@
-﻿// Verification route - Thin route file following FSD architecture
-import { VerificationScreen } from '../../src/screens/auth';
+import React from 'react';
+import { VerificationScreen } from '@/src/screens/auth/VerificationScreen/VerificationScreen';
 
 export default function VerificationRoute() {
   return <VerificationScreen />;

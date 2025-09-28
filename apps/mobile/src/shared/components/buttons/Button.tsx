@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Button Component
  * 
  * Enhanced button component with comprehensive variant system, accessibility, and responsive design

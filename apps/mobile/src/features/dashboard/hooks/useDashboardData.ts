@@ -2,7 +2,7 @@
 import { useMemo } from 'react';
 import { useOptimizedDashboard } from './useOptimizedDashboard';
 import { Application } from '@features/dashboard/types';
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 // Type for the aggregated application data from backend
 interface DashboardApplication {

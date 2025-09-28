@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Badge Component
  * 
  * Enhanced badge component with comprehensive variant system and responsive design

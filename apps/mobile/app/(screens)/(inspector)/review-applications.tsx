@@ -1,5 +1,3 @@
-﻿import { ReviewApplicationsScreen } from '../../../src/screens/inspector';
+import { ReviewApplicationsScreen } from '../../../src/screens/inspector/ReviewApplicationsScreen';
 
-export default function ReviewApplications() {
-  return <ReviewApplicationsScreen />;
-}
+export default ReviewApplicationsScreen;

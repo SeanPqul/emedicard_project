@@ -1,9 +1,9 @@
-import { theme } from '@shared/styles/theme';
+import { getColor } from '@shared/styles/theme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from 'convex/react';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { api } from 'backend/convex/_generated/api';
+import { api } from '@backend/convex/_generated/api';
 import { useRoleBasedNavigation } from '../hooks';
 import { LoadingSpinner } from '@shared/components/feedback/LoadingSpinner';
 
@@ -42,16 +42,16 @@ export default function RoleBasedTabLayout() {
       screenOptions={{
         tabBarShowLabel: false,
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.green[500],
-        tabBarInactiveTintColor: theme.colors.gray[400],
+        tabBarActiveTintColor: getColor('green.500') || '#10B981',
+        tabBarInactiveTintColor: getColor('gray.400') || '#9CA3AF',
         tabBarStyle: {
           height: 50,
           paddingTop: 6,
           paddingBottom: 0,
           paddingHorizontal: 0,
-          backgroundColor: theme.colors.ui.white,
+          backgroundColor: getColor('ui.white') || '#FFFFFF',
           borderTopWidth: 0.5,
-          borderTopColor: theme.colors.border.light,
+          borderTopColor: getColor('border.light') || '#E5E7EB',
           elevation: 0,
           shadowOpacity: 0,
           minHeight: 50,
@@ -68,7 +68,7 @@ export default function RoleBasedTabLayout() {
               <Ionicons 
                 name={tab.icon as any} 
                 size={size} 
-                color={tab.name === 'apply' ? theme.colors.green[500] : color}
+                color={tab.name === 'apply' ? (getColor('green.500') || '#10B981') : color} 
               />
             ),
             tabBarStyle: tab.visible ? undefined : { display: 'none' },

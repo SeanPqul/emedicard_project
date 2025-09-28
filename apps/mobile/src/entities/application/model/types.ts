@@ -4,7 +4,7 @@
  * Type definitions for health card application entities and operations
  */
 
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 
 // ===== APPLICATION STATUS TYPES =====
 export type ApplicationStatus = 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';

@@ -1,1 +1,1 @@
-export * from './DashboardScreen';
+export { DashboardScreen } from './DashboardScreen';

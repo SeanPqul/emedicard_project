@@ -4,7 +4,7 @@ import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayou
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useQuery } from 'convex/react';
-import { api } from 'backend/convex/_generated/api';
+import { api } from '@backend/convex/_generated/api';
 import { EmptyState } from '@shared/components';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-activity';

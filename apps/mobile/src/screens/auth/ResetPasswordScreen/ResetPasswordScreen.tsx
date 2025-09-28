@@ -1,13 +1,12 @@
-﻿// ResetPasswordScreen component - Clean architecture implementation
 import React, { useEffect, useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { BaseScreen } from '@/src/shared/components/core';
+import { BaseScreen } from '@shared/components/core';
 import { OtpInputUI, PasswordStrengthIndicator } from '@features/auth/components';
 import { styles } from './ResetPasswordScreen.styles';
-import { moderateScale } from '@/src/shared/utils/responsive';
+import { moderateScale } from '@shared/utils/responsive';
 import { PASSWORD_REQUIREMENTS } from '@features/auth/constants';
 import { AuthError, PasswordValidation } from '@features/auth/types';
 import { theme } from '@shared/styles/theme';

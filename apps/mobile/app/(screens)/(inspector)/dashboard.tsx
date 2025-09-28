@@ -1,5 +1,3 @@
-﻿import { InspectorDashboardScreen } from '../../../src/screens/inspector';
+import { InspectorDashboardScreen } from '../../../src/screens/inspector/InspectorDashboardScreen';
 
-export default function InspectorDashboard() {
-  return <InspectorDashboardScreen />;
-}
+export default InspectorDashboardScreen;

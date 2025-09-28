@@ -1,4 +1,4 @@
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 import { setObject, getObject, removeItem, getAllKeys } from '@shared/services/storage';
 
 export interface CachedDocument {

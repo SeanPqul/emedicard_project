@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Card Component
  * 
  * Enhanced card component with comprehensive variant system and responsive design

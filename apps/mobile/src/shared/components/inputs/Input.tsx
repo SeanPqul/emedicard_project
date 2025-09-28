@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Input Component
  * 
  * Enhanced input component with variant system and accessibility

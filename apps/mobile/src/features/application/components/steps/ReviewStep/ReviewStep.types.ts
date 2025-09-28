@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ReviewStep Types
  * 
  * Type definitions for the review and submit step component
