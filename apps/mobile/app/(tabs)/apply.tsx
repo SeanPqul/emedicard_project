@@ -1,3 +1,1 @@
-import { ApplyScreen } from '../../src/screens/application/ApplyScreen/ApplyScreen';
-
-export default ApplyScreen;
+export { ApplyScreen as default } from '../../src/screens/application/ApplyScreen/ApplyScreen';

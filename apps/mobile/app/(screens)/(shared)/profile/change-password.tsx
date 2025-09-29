@@ -1,6 +1,1 @@
-import React from 'react';
-import { ChangePasswordScreen } from '../../../../src/screens/shared/ChangePasswordScreen';
-
-export default function ChangePasswordRoute() {
-  return <ChangePasswordScreen />;
-}
+export { ChangePasswordScreen as default } from '../../../../src/screens/shared/ChangePasswordScreen';

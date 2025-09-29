@@ -1,3 +1,1 @@
-import { ApplicationListScreen } from '../../src/screens/application/ApplicationListScreen';
-
-export default ApplicationListScreen;
+export { ApplicationListScreen as default } from '../../src/screens/application/ApplicationListScreen';

@@ -32,7 +32,7 @@ interface UploadProgress {
   uploading: boolean;
 }
 
-export default function UploadDocumentsScreen() {
+export function UploadDocumentsScreen() {
   const [selectedDocuments, setSelectedDocuments] = useState<Record<string, any>>({});
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, Id<'_storage'>>>({});
   const [showImagePicker, setShowImagePicker] = useState(false);

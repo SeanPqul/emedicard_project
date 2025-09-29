@@ -1,5 +1,1 @@
-import { ProfileScreen } from '../../src/screens/profile';
-
-export default function ProfileRoute() {
-  return <ProfileScreen />;
-};
+export { ProfileScreen as default } from '../../src/screens/profile';

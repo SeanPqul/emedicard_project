@@ -1,3 +1,1 @@
-import { HealthCardsScreen } from '../../../src/screens/shared/HealthCardsScreen';
-
-export default HealthCardsScreen;
+export { HealthCardsScreen as default } from '../../../src/screens/shared/HealthCardsScreen';

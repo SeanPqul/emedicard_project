@@ -14,6 +14,7 @@ import {
   getTypography as getTypographyUtility,
   getBorderRadius as getBorderRadiusUtility,
   getShadow as getShadowUtility,
+  colorWithOpacity as colorWithOpacityUtility,
 } from './utilities';
 
 // Re-export utilities directly - no duplication, just clean interface
@@ -22,6 +23,7 @@ export const getSpacing = getSpacingUtility;
 export const getTypography = getTypographyUtility;
 export const getBorderRadius = getBorderRadiusUtility;
 export const getShadow = getShadowUtility;
+export const colorWithOpacity = colorWithOpacityUtility;
 
 // Compose theme directly to avoid circular dependency
 export const theme = {

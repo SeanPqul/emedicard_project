@@ -1,3 +1,1 @@
-import { InspectorDashboardScreen } from '../../../src/screens/inspector/InspectorDashboardScreen';
-
-export default InspectorDashboardScreen;
+export { InspectorDashboardScreen as default } from '../../../src/screens/inspector/InspectorDashboardScreen';

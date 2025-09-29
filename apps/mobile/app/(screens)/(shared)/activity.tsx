@@ -1,3 +1,1 @@
-import ActivityScreen from '../../../src/screens/shared/ActivityScreen';
-
-export default ActivityScreen;
+export { ActivityScreen as default } from '../../../src/screens/shared/ActivityScreen';

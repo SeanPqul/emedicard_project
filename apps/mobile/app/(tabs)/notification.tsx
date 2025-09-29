@@ -1,3 +1,1 @@
-import { NotificationScreen } from '../../src/screens/notification/NotificationScreen';
-
-export default NotificationScreen;
+export { NotificationScreen as default } from '../../src/screens/notification/NotificationScreen';

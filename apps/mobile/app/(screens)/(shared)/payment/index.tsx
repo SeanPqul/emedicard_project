@@ -1,3 +1,1 @@
-import PaymentScreen from '../../../../src/screens/shared/PaymentScreen';
-
-export default PaymentScreen;
+export { PaymentScreen as default } from '../../../../src/screens/shared/PaymentScreen';

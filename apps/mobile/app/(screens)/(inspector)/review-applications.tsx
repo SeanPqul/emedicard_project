@@ -1,3 +1,1 @@
-import { ReviewApplicationsScreen } from '../../../src/screens/inspector/ReviewApplicationsScreen';
-
-export default ReviewApplicationsScreen;
+export { ReviewApplicationsScreen as default } from '../../../src/screens/inspector/ReviewApplicationsScreen';
