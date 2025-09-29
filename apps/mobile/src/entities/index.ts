@@ -22,3 +22,6 @@ export * from './healthCard';
 export * from './notification';
 export * from './activity';
 export * from './jobCategory';
+export * from './orientation';
+export * from './scanner';
+export * from './upload';

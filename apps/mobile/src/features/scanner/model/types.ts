@@ -1,38 +1,18 @@
-// Scanner feature types
+// Scanner feature types - Re-exports from entity (FSD pattern)
+import type {
+  QRCodeData,
+  ScanResult,
+  VerificationResult
+} from '@entities/scanner';
 
-export interface QRCodeData {
-  type: 'health_card' | 'application' | 'verification';
-  id: string;
-  timestamp: number;
-  signature?: string;
-  metadata?: {
-    healthCardId?: string;
-    applicationId?: string;
-    userId?: string;
-    expirationDate?: string;
-  };
-}
+// Re-export entity types
+export type {
+  QRCodeData,
+  ScanResult,
+  VerificationResult
+};
 
-export interface ScanResult {
-  success: boolean;
-  data?: QRCodeData;
-  error?: string;
-  scannedAt: number;
-}
-
-export interface VerificationResult {
-  isValid: boolean;
-  healthCard?: {
-    id: string;
-    holderName: string;
-    status: 'Active' | 'Expired' | 'Suspended';
-    expirationDate: string;
-    category: string;
-  };
-  message: string;
-  verifiedAt: number;
-}
-
+// Feature-specific types (UI configuration)
 export interface ScannerConfig {
   enableFlash: boolean;
   enableAutoFocus: boolean;

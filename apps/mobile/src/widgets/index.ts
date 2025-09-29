@@ -2,3 +2,5 @@
 // Widgets compose features into complex UI blocks
 
 export * from './dashboard';
+export * from './apply';
+export * from './payment';

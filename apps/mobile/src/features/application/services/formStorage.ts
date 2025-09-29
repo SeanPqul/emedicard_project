@@ -1,6 +1,7 @@
 import { storage as cacheStorage, setObject, getObject, removeItem } from '@shared/services/storage/storage';
-import { ApplicationFormData } from '@entities/application/model/service';
+import { ApplicationFormData } from './applicationService';
 import { SelectedDocuments } from '@shared/types';
+import { UploadOperation, UploadFile } from '@entities/upload';
 
 // Storage keys constants
 export const StorageKeys = {
@@ -48,30 +49,8 @@ interface TempApplicationData {
   applicationId?: string; // Draft application ID for resume capability
 }
 
-interface DocumentFile {
-  uri: string;
-  name: string;
-  type: string;
-  size?: number;
-  mimeType?: string;
-  fileName?: string;
-}
-
-interface UploadOperation {
-  id: string;
-  documentId: string;
-  file: DocumentFile;
-  status: 'pending' | 'uploading' | 'completed' | 'failed';
-  progress: number;
-  error?: string;
-  timestamp: number;
-  uploadResult?: {
-    storageId: string;
-    fileName: string;
-    fileType: string;
-    fileSize: number;
-  };
-}
+// Use DocumentFile as an alias for UploadFile from entities
+type DocumentFile = UploadFile;
 
 interface DeferredOperationQueue {
   id: string;

@@ -49,10 +49,10 @@ export interface PaymentReceipt {
     name: string;
     email: string;
   };
-  items: Array<{
+  items: {
     description: string;
     amount: number;
-  }>;
+  }[];
   breakdown: PaymentBreakdown;
   method: PaymentMethod;
   referenceNumber: string;

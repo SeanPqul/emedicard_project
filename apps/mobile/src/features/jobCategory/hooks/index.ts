@@ -1,2 +1,2 @@
-// Job Category entity API exports
+// JobCategory hooks exports
 export { useJobCategories } from './useJobCategories';

@@ -32,7 +32,7 @@ interface UploadProgress {
   uploading: boolean;
 }
 
-export function UploadDocumentsScreen() {
+function UploadDocumentsScreen() {
   const [selectedDocuments, setSelectedDocuments] = useState<Record<string, any>>({});
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, Id<'_storage'>>>({});
   const [showImagePicker, setShowImagePicker] = useState(false);
@@ -399,3 +399,5 @@ export function UploadDocumentsScreen() {
     </BaseScreenLayout>
   );
 }
+
+export default UploadDocumentsScreen;

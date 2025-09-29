@@ -1,35 +1,47 @@
-// Notification feature types
+// Notification feature types - Extends entity types (FSD pattern)
+import type { 
+  Notification as BaseNotification,
+  NotificationType as BaseNotificationType,
+  NotificationPriority,
+  NotificationPreferences as BaseNotificationPreferences,
+  CreateNotificationInput,
+  UpdateNotificationInput
+} from '@entities/notification';
 
-export type NotificationType = 
+// Re-export base types
+export type { 
+  BaseNotification as Notification,
+  BaseNotificationType as NotificationType,
+  NotificationPriority,
+  CreateNotificationInput,
+  UpdateNotificationInput
+};
+
+// Feature-specific notification types (if needed for UI/components)
+export type NotificationStatus = 'read' | 'unread';
+
+// Feature-specific display categories
+export type NotificationCategory = 
   | 'application_update' 
   | 'payment_reminder' 
   | 'document_required' 
   | 'appointment' 
   | 'general';
 
-export type NotificationStatus = 'read' | 'unread';
-
-export interface Notification {
-  _id: string;
-  _creationTime: number;
-  userId: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  status: NotificationStatus;
-  read: boolean;
+// Extended notification for UI display
+export interface NotificationDisplay extends BaseNotification {
+  title?: string; // Add title for display
+  status?: NotificationStatus;
+  category?: NotificationCategory;
   relatedEntity?: {
     type: 'application' | 'payment' | 'health_card';
     id: string;
   };
-  metadata?: Record<string, any>;
 }
 
-export interface NotificationPreferences {
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  smsNotifications: boolean;
-  notificationTypes: {
+// Extended preferences for UI settings
+export interface NotificationPreferencesUI extends BaseNotificationPreferences {
+  notificationCategories?: {
     applicationUpdates: boolean;
     paymentReminders: boolean;
     documentRequests: boolean;

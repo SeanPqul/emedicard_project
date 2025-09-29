@@ -6,16 +6,19 @@ import { ActivityType, ActivityStatus } from '../model/types';
  */
 export const getActivityIcon = (type: ActivityType): string => {
   switch (type) {
-    case 'application':
+    case 'application_submitted':
+    case 'application_approved':
+    case 'application_rejected':
       return 'document-text-outline';
-    case 'payment':
+    case 'payment_made':
+    case 'payment_verified':
       return 'card-outline';
-    case 'orientation':
-      return 'calendar-outline';
-    case 'card_issued':
+    case 'health_card_issued':
       return 'card-outline';
-    case 'document_upload':
+    case 'document_uploaded':
       return 'document-attach-outline';
+    case 'notification_sent':
+      return 'notifications-outline';
     default:
       return 'information-circle-outline';
   }

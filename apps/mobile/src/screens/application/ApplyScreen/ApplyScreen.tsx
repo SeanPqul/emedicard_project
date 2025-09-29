@@ -28,8 +28,7 @@ import { useUsers } from '@entities/user';
 import { useApplicationForm, useDocumentSelection, useSubmission } from '@/src/features/application/hooks';
 
 // Components
-import { StepIndicator } from '@/src/entities/application/ui/StepIndicator';
-import { DocumentSourceModal } from '@/src/entities/application/ui/DocumentSourceModal';
+import { StepIndicator, DocumentSourceModal } from '@features/application/components';
 import { 
   ApplicationTypeStep,
   JobCategoryStep,

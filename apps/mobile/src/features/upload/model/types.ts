@@ -1,39 +1,20 @@
-// Upload feature types
+// Upload feature types - Re-exports from entity (FSD pattern)
+import type {
+  UploadStatus,
+  UploadFile,
+  UploadOperation,
+  UploadQueue
+} from '@entities/upload';
 
-export type UploadStatus = 'pending' | 'uploading' | 'completed' | 'failed';
+// Re-export entity types
+export type {
+  UploadStatus,
+  UploadFile,
+  UploadOperation,
+  UploadQueue
+};
 
-export interface UploadFile {
-  uri: string;
-  name: string;
-  type: string;
-  size: number;
-}
-
-export interface UploadOperation {
-  id: string;
-  documentId: string;
-  file: UploadFile;
-  status: UploadStatus;
-  progress: number;
-  error?: string;
-  timestamp: number;
-  uploadResult?: {
-    storageId: string;
-    fileName: string;
-    fileType: string;
-    fileSize: number;
-  };
-}
-
-export interface UploadQueue {
-  id: string;
-  applicationId: string;
-  operations: Record<string, UploadOperation>;
-  status: 'draft' | 'submitting' | 'completed' | 'failed';
-  timestamp: number;
-  expiresAt: number;
-}
-
+// Feature-specific types (UI/configuration related)
 export interface DocumentRequirement {
   id: string;
   name: string;

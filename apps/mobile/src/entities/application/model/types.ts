@@ -41,17 +41,8 @@ export interface ApplicationForm {
 }
 
 // ===== JOB CATEGORY TYPES =====
-export interface JobCategory {
-  _id: Id<"jobCategories">;
-  name: string;
-  colorCode: string;
-  requireOrientation?: boolean | string;
-  description?: string;
-  requirements?: string[];
-  isActive?: boolean;
-  createdAt?: number;
-  updatedAt?: number;
-}
+// JobCategory is defined in entities/jobCategory/model/types.ts
+// Import from there when needed
 
 // ===== DOCUMENT REQUIREMENT TYPES =====
 // This is a frontend composite type, not a direct backend table

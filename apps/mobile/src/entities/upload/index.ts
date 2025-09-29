@@ -1,2 +1,2 @@
-// User domain exports
+// Upload entity exports
 export * from './model/types';

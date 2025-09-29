@@ -1,8 +1,9 @@
 import { Id } from 'backend/convex/_generated/dataModel';
 import { AppError, AppErrorType } from '@shared/lib/errors';
+import { PaymentMethod } from '@entities/payment';
 
-// Re-export PaymentMethod from the existing types
-export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
+// Re-export PaymentMethod from entities
+export type { PaymentMethod };
 
 export interface PaymentSubmissionData {
   applicationId: Id<"applications">;

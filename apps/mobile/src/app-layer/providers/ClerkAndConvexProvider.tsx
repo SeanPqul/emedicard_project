@@ -3,7 +3,7 @@ import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect } from "react";
-import { useUsers } from "@entities/user";
+import { useUsers } from "@features/profile";
 import { generateDisplayNameFromEmail, hasPlaceholderName } from "@shared/utils/user-utils";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;

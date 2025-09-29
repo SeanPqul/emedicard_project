@@ -1,14 +1,15 @@
-// Activity entity types
+// Activity entity types - Re-exports from dashboard for backward compatibility
+// Note: Activity is primarily a dashboard concept in this app
+import type { 
+  Activity as DashboardActivity,
+  ActivityType as DashboardActivityType,
+  ActivityStatus as DashboardActivityStatus,
+  ActivityMetadata,
+  EntityType
+} from '@entities/dashboard';
 
-export interface Activity {
-  id: string;
-  type: 'application' | 'payment' | 'orientation' | 'card_issued' | 'document_upload';
-  title: string;
-  description: string;
-  timestamp: string;
-  status: 'success' | 'pending' | 'warning' | 'error';
-  metadata?: Record<string, any>;
-}
-
-export type ActivityType = Activity['type'];
-export type ActivityStatus = Activity['status'];
+// Re-export for backward compatibility
+export type Activity = DashboardActivity;
+export type ActivityType = DashboardActivityType;
+export type ActivityStatus = DashboardActivityStatus;
+export type { ActivityMetadata, EntityType };

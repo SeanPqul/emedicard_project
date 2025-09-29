@@ -15,7 +15,7 @@ import { styles } from '@shared/styles/screens/shared-payment';
 import { PAYMENT_METHODS, DIGITAL_PAYMENT_METHODS, MANUAL_PAYMENT_METHODS, type PaymentMethod, type UploadedReceipt } from '@features/payment/constants';
 
 
-export function PaymentScreen() {
+function PaymentScreen() {
   const { formId } = useLocalSearchParams<{ formId: string }>();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -401,3 +401,5 @@ export function PaymentScreen() {
     </BaseScreenLayout>
   );
 }
+
+export default PaymentScreen;

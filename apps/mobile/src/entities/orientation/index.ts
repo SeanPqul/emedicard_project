@@ -1,2 +1,2 @@
-// User domain exports
+// Orientation entity exports
 export * from './model/types';

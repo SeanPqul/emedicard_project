@@ -3,7 +3,6 @@
 export type {
   Application,
   ApplicationForm,
-  JobCategory,
   DocumentRequirement,
   CreateApplicationInput,
   UpdateApplicationInput,
@@ -14,19 +13,8 @@ export type {
   ApplicationStatus
 } from './model/types';
 
-// Export service types from model/service.ts
-export type {
-  ApplicationFormData,
-  ApplicationService,
-  UploadState,
-  ValidationResult,
-  SubmissionResult,
-  // Re-export these types from service.ts only
-  ApplicationType,
-  CivilStatus,
-  PaymentMethod
-} from './model/service';
+// Re-export JobCategory from its proper location
+export type { JobCategory } from '@entities/jobCategory';
 
-// Re-export UI components
-export { StepIndicator } from './ui/StepIndicator';
-export { DocumentSourceModal } from './ui/DocumentSourceModal';
+// Export lib utilities
+export * from './lib';

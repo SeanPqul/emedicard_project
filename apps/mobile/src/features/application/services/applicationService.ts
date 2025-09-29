@@ -5,15 +5,15 @@
  */
 
 import { Id } from '@backend/convex/_generated/dataModel';
-import { DocumentRequirement, JobCategory } from './types';
+import { DocumentRequirement, JobCategory } from '@entities/application';
 import { SelectedDocuments, DocumentFile } from '@shared/types';
-import { formStorage } from '@features/application/services/formStorage';
-import { validateApplicationStep, ApplicationFormData as BaseApplicationFormData, ApplicationType, CivilStatus } from '@features/application/lib/validation';
+import { formStorage } from './formStorage';
+import { validateApplicationStep, ApplicationFormData as BaseApplicationFormData, ApplicationType, CivilStatus } from '../lib/validation';
 
 export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
 
 // Re-export for convenience
-export { ApplicationType, CivilStatus } from '@features/application/lib/validation';
+export { ApplicationType, CivilStatus } from '../lib/validation';
 
 // Extend the base form data to include payment fields
 export interface ApplicationFormData extends BaseApplicationFormData {
@@ -229,7 +229,7 @@ export class ApplicationService {
   /**
    * Adds a document to the upload queue
    */
-  static addDocumentToQueue(documentId: string, documentFile: DocumentFile): boolean {
+  static addDocumentToQueue(documentId: string, documentFile: any): boolean {
     try {
       return formStorage.addDocumentToQueue(documentId, documentFile);
     } catch (error) {

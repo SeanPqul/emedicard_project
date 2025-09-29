@@ -1,2 +1,2 @@
-// User entity API exports
+// Profile hooks exports
 export { useUsers } from './useUsers';

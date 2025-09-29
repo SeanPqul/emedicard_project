@@ -1,54 +1,20 @@
-// Orientation feature types
+// Orientation feature types - Re-exports from entity (FSD pattern)
+import type {
+  OrientationStatus,
+  OrientationSession,
+  OrientationCertificate,
+  OrientationSchedule,
+  OrientationRequirement
+} from '@entities/orientation';
 
-export type OrientationStatus = 'pending' | 'scheduled' | 'completed' | 'expired';
+// Re-export entity types
+export type {
+  OrientationStatus,
+  OrientationSession,
+  OrientationCertificate,
+  OrientationSchedule,
+  OrientationRequirement
+};
 
-export interface OrientationSession {
-  _id: string;
-  userId: string;
-  applicationId: string;
-  scheduledDate: string;
-  completedDate?: string;
-  status: OrientationStatus;
-  venue: {
-    name: string;
-    address: string;
-    room?: string;
-  };
-  instructor?: {
-    name: string;
-    designation: string;
-  };
-  certificateId?: string;
-  notes?: string;
-}
-
-export interface OrientationCertificate {
-  _id: string;
-  sessionId: string;
-  userId: string;
-  issueDate: string;
-  expirationDate: string;
-  certificateNumber: string;
-  qrCode?: string;
-}
-
-export interface OrientationSchedule {
-  _id: string;
-  date: string;
-  time: string;
-  venue: {
-    name: string;
-    address: string;
-    capacity: number;
-  };
-  availableSlots: number;
-  totalSlots: number;
-  isAvailable: boolean;
-}
-
-export interface OrientationRequirement {
-  jobCategoryId: string;
-  isRequired: boolean;
-  validityPeriod: number; // months
-  description: string;
-}
+// Feature-specific types can be added here if needed
+// For example, UI-specific view models or form data types

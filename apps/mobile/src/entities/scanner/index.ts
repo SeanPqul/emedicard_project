@@ -1,2 +1,2 @@
-// User domain exports
+// Scanner entity exports
 export * from './model/types';

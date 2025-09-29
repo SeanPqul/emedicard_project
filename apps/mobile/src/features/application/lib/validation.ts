@@ -3,7 +3,8 @@
  * Validates application form data for each step of the multi-step form
  */
 
-import { DocumentRequirement, SelectedDocuments } from '@entities/application';
+import { DocumentRequirement } from '@entities/application';
+import { SelectedDocuments } from '@shared/types';
 
 export type ApplicationType = 'New' | 'Renew';
 export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';

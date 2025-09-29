@@ -16,7 +16,7 @@ import {
 } from '@entities/activity/lib';
 import { ACTIVITY_FILTERS } from '@features/activity/constants';
 
-export function ActivityScreen() {
+function ActivityScreen() {
   const [filter, setFilter] = useState<string>('all');
 
   // TODO: Replace with actual API hook to fetch user activities
@@ -110,3 +110,5 @@ export function ActivityScreen() {
     </BaseScreenLayout>
   );
 }
+
+export default ActivityScreen;
