@@ -3,6 +3,10 @@
 export type {
   Application,
   ApplicationForm,
+  ApplicationStatus,
+  ApplicationType,
+  CivilStatus,
+  PaymentMethod,
   DocumentRequirement,
   CreateApplicationInput,
   UpdateApplicationInput,
@@ -10,7 +14,12 @@ export type {
   ApplicationValidationResult,
   ApplicationWorkflowStep,
   ApplicationWorkflow,
-  ApplicationStatus
+  // Composite types for UI display
+  ApplicationWithDetails,
+  ApplicationDetails,
+  ApplicationFormDetails,
+  JobCategoryDetails,
+  PaymentDetails
 } from './model/types';
 
 // Re-export JobCategory from its proper location

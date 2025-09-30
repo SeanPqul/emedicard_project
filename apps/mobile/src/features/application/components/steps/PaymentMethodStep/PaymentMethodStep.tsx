@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { CustomTextInput } from '@shared/components';
-import { getBorderRadius, getColor, getSpacing, getTypography, getShadow } from '@shared/styles/theme';
+import { theme } from '@shared/styles/theme';
+import { moderateScale } from '@shared/utils/responsive';
 
 import { PaymentMethodStepProps, PaymentMethodOption, PaymentMethod } from './PaymentMethodStep.types';
 import { styles } from './PaymentMethodStep.styles';
@@ -20,8 +21,8 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
       icon: 'card-outline',
       description: 'Pay instantly with GCash',
       requiresReference: true,
-      bgColor: getColor('accent.primaryGreen') + '10',
-      iconColor: getColor('accent.primaryGreen'),
+      bgColor: theme.colors.semantic.success + '10',
+      iconColor: theme.colors.semantic.success,
     },
     {
       id: 'Maya' as const,
@@ -29,8 +30,8 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
       icon: 'card-outline', 
       description: 'Pay instantly with Maya',
       requiresReference: true,
-      bgColor: getColor('accent.medicalBlue') + '10',
-      iconColor: getColor('accent.medicalBlue'),
+      bgColor: theme.colors.brand.primary + '10',
+      iconColor: theme.colors.brand.primary,
     },
     {
       id: 'BaranggayHall' as const,
@@ -38,8 +39,8 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
       icon: 'business-outline',
       description: 'Pay in person at your local Barangay Hall',
       requiresReference: false,
-      bgColor: getColor('accent.warningOrange') + '10',
-      iconColor: getColor('accent.warningOrange'),
+      bgColor: theme.colors.semantic.warning + '10',
+      iconColor: theme.colors.semantic.warning,
     },
     {
       id: 'CityHall' as const,
@@ -47,8 +48,8 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
       icon: 'library-outline',
       description: 'Pay in person at Davao City Hall',
       requiresReference: false,
-      bgColor: getColor('accent.safetyGreen') + '10',
-      iconColor: getColor('accent.safetyGreen'),
+      bgColor: theme.colors.semantic.info + '10',
+      iconColor: theme.colors.semantic.info,
     },
   ];
 
@@ -80,7 +81,7 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
       >
         <View style={styles.methodCardContent}>
           <View style={[styles.methodIcon, { backgroundColor: method.iconColor + '20' }]}>
-            <Ionicons name={method.icon as any} size={24} color={method.iconColor} />
+            <Ionicons name={method.icon as any} size={moderateScale(24)} color={method.iconColor} />
           </View>
           
           <View style={styles.methodInfo}>
@@ -90,7 +91,7 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
 
           {isSelected && (
             <View style={[styles.selectedIndicator, { backgroundColor: method.iconColor }]}>
-              <Ionicons name="checkmark" size={16} color={getColor('text.inverse')} />
+              <Ionicons name="checkmark" size={moderateScale(16)} color={theme.colors.background.primary} />
             </View>
           )}
         </View>
@@ -148,7 +149,7 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
       {(formData.paymentMethod === 'BaranggayHall' || formData.paymentMethod === 'CityHall') && (
         <View style={styles.instructionsContainer}>
           <View style={styles.instructionsContent}>
-            <Ionicons name="information-circle" size={20} color={getColor('accent.warningOrange')} />
+            <Ionicons name="information-circle" size={moderateScale(20)} color={theme.colors.semantic.warning} />
             <View style={styles.instructionsText}>
               <Text style={styles.instructionsTitle}>Payment Instructions:</Text>
               <Text style={styles.instructionsBody}>
@@ -161,7 +162,7 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
 
       {errors.paymentMethod && (
         <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle" size={16} color={getColor('semantic.error')} />
+          <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
           <Text style={styles.errorText}>{errors.paymentMethod}</Text>
         </View>
       )}

@@ -182,10 +182,10 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
         fileName: uploadResult.fileName,
         fileType: uploadResult.fileType,
         fileSize: uploadResult.fileSize,
-        status: uploadResult.status,
-        reviewBy: uploadResult.reviewBy,
-        reviewAt: uploadResult.reviewAt,
-        remarks: uploadResult.remarks
+        status: uploadResult.reviewStatus,
+        reviewBy: uploadResult.reviewedBy,
+        reviewAt: uploadResult.reviewedAt,
+        remarks: uploadResult.adminRemarks
       };
 
       return result;
@@ -260,7 +260,7 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
       const { storageId } = await uploadResponse.json();
 
       // Update document field
-      const result = await updateDocumentField({
+      const updateResult = await updateDocumentField({
         applicationId,
         fieldName,
         storageId,
@@ -276,6 +276,21 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
         error: null,
         success: true
       });
+
+      // Map API response to DocumentUploadResult interface
+      const result: DocumentUploadResult = {
+        requirementId: updateResult.requirementId,
+        fieldName: fieldName,
+        fieldIdentifier: fieldName, // Use the fieldName we sent
+        storageId: updateResult.storageId,
+        fileName: updateResult.fileName,
+        fileType: updateResult.fileType,
+        fileSize: updateResult.fileSize,
+        status: updateResult.reviewStatus,
+        reviewBy: updateResult.reviewedBy,
+        reviewAt: updateResult.reviewedAt,
+        remarks: updateResult.remarks // Use remarks not adminRemarks
+      };
 
       return result;
     } catch (error) {
@@ -491,10 +506,10 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
         fileName: uploadResult.fileName,
         fileType: uploadResult.fileType,
         fileSize: uploadResult.fileSize,
-        status: uploadResult.status,
-        reviewBy: uploadResult.reviewBy,
-        reviewAt: uploadResult.reviewAt,
-        remarks: uploadResult.remarks
+        status: uploadResult.reviewStatus,
+        reviewBy: uploadResult.reviewedBy,
+        reviewAt: uploadResult.reviewedAt,
+        remarks: uploadResult.adminRemarks
       };
       
     } catch (error) {
@@ -554,6 +569,8 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
       // Process results
       chunkResults.forEach((result, index) => {
         const doc = chunk[index];
+        if (!doc) return; // Skip if doc is undefined
+        
         if (result.status === 'fulfilled') {
           successful.push(result.value);
         } else {
@@ -696,6 +713,8 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
       
       batchResults.forEach((result, index) => {
         const item = batch[index];
+        if (!item) return; // Skip if item is undefined
+        
         totalProcessed++;
         
         if (result.status === 'fulfilled') {

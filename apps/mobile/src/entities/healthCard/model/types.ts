@@ -115,7 +115,7 @@ export interface HealthCardTemplate {
     height: number;
     dpi: number;
   };
-  fields: Array<{
+  fields: {
     name: string;
     type: 'text' | 'image' | 'qr' | 'barcode';
     position: {
@@ -125,7 +125,7 @@ export interface HealthCardTemplate {
       height: number;
     };
     style?: Record<string, any>;
-  }>;
+  }[];
   styles: Record<string, any>;
   isActive: boolean;
   createdAt: number;
@@ -153,12 +153,12 @@ export interface HealthCardAnalytics {
   verificationCount: number;
   averageValidityPeriod: number;
   renewalRate: number;
-  issuesByMonth: Array<{
+  issuesByMonth: {
     month: string;
     count: number;
-  }>;
-  verificationsByLocation: Array<{
+  }[];
+  verificationsByLocation: {
     location: string;
     count: number;
-  }>;
+  }[];
 }

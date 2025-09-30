@@ -2,6 +2,8 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { moderateScale } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
 import { PriorityAlertsProps } from '@features/dashboard/types';
 import { styles } from './PriorityAlerts.styles';
 
@@ -32,7 +34,7 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="alert-circle" size={20} color="#DC3545" />
+        <Ionicons name="alert-circle" size={moderateScale(20)} color={theme.colors.semantic.error} />
         <Text style={styles.title}>Action Required</Text>
       </View>
       
@@ -45,7 +47,7 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
           <Text style={styles.alertText}>
             Pay ₱{dashboardStats.pendingAmount.toFixed(2)} to proceed with your application
           </Text>
-          <Ionicons name="chevron-forward" size={16} color="#DC3545" />
+          <Ionicons name="chevron-forward" size={moderateScale(16)} color={theme.colors.semantic.error} />
         </TouchableOpacity>
       )}
       
@@ -58,7 +60,7 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
           <Text style={styles.alertText}>
             Schedule your required food safety orientation
           </Text>
-          <Ionicons name="chevron-forward" size={16} color="#DC3545" />
+          <Ionicons name="chevron-forward" size={moderateScale(16)} color={theme.colors.semantic.error} />
         </TouchableOpacity>
       )}
     </View>

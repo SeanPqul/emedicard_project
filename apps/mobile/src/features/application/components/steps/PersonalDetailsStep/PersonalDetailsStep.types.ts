@@ -1,11 +1,9 @@
-export interface PersonalDetails {
-  position: string;
-  organization: string;
-  civilStatus: string;
-}
+import { ApplicationFormData } from '../ApplicationTypeStep';
+import { JobCategory } from '@/src/entities/application';
 
 export interface PersonalDetailsStepProps {
-  value: PersonalDetails;
-  onChange: (details: PersonalDetails) => void;
-  errors?: Partial<PersonalDetails>;
+  formData: ApplicationFormData;
+  setFormData: (data: ApplicationFormData) => void;
+  errors: Record<string, string>;
+  jobCategoriesData?: JobCategory[];
 }

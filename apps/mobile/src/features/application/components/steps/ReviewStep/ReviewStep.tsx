@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { getColor, getSpacing, getBorderRadius, getTypography } from '@shared/styles/theme';
+import { theme } from '@shared/styles/theme';
+import { moderateScale } from '@shared/utils/responsive';
 
 import { ReviewStepProps, DocumentStatusInfo, ApplicationSummary } from './ReviewStep.types';
 import { styles } from './ReviewStep.styles';
@@ -80,19 +81,19 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
     
     if (isUploading) {
       statusIcon = "hourglass";
-      statusColor = getColor('semantic.warning');
+      statusColor = theme.colors.semantic.warning;
       statusText = "Uploading...";
     } else if (hasError) {
       statusIcon = "alert-circle";
-      statusColor = getColor('semantic.error');
+      statusColor = theme.colors.semantic.error;
       statusText = "Error";
     } else if (isUploaded) {
       statusIcon = "checkmark-circle";
-      statusColor = getColor('semantic.success');
+      statusColor = theme.colors.semantic.success;
       statusText = "Ready";
     } else {
       statusIcon = "close-circle";
-      statusColor = getColor('semantic.error');
+      statusColor = theme.colors.semantic.error;
       statusText = "Missing";
     }
     
@@ -113,7 +114,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         </View>
         
         <View style={styles.documentStatus}>
-          <Ionicons name={statusIcon as any} size={20} color={statusColor} />
+          <Ionicons name={statusIcon as any} size={moderateScale(20)} color={statusColor} />
           <Text style={[styles.documentStatusText, { color: statusColor }]}>
             {statusText}
           </Text>
@@ -163,11 +164,12 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   );
 
   const renderOrientationNotice = () => {
-    if (selectedCategory?.requireOrientation !== 'yes') return null;
+    const requiresOrientation = selectedCategory?.requireOrientation === true || selectedCategory?.requireOrientation === 'yes';
+    if (!requiresOrientation) return null;
     
     return (
       <View style={styles.orientationNotice}>
-        <Ionicons name="information-circle" size={20} color="#F18F01" />
+        <Ionicons name="information-circle" size={moderateScale(20)} color={theme.colors.semantic.warning} />
         <Text style={styles.orientationText}>
           🟡 Yellow Card Requirement: Food handlers must attend mandatory food safety orientation 
           with a sanitary inspector as per eMediCard system requirements.
@@ -183,7 +185,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
     return (
       <View style={styles.validationWarning}>
         <View style={styles.validationHeader}>
-          <Ionicons name="warning" size={20} color={getColor('semantic.error')} />
+          <Ionicons name="warning" size={moderateScale(20)} color={theme.colors.semantic.error} />
           <Text style={styles.validationTitle}>Application Incomplete</Text>
         </View>
         

@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    ...getTypography('bodyMedium'),
+    ...getTypography('body'),
     fontWeight: '600',
     color: getColor('text.primary'),
     marginBottom: getSpacing('xs'),

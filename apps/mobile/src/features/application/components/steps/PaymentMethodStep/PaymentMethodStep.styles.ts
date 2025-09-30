@@ -1,101 +1,102 @@
 import { StyleSheet } from 'react-native';
-import { 
-  getColor, 
-  getSpacing, 
-  getBorderRadius, 
-  getTypography, 
-  getShadow 
-} from '@shared/styles/theme';
-import { hp, wp } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: getSpacing('md'),
-    paddingTop: getSpacing('sm'),
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingTop: verticalScale(theme.spacing.sm),
   },
 
   heading: {
-    ...getTypography('h3'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.h3.fontSize),
     fontWeight: '700',
-    marginBottom: getSpacing('sm'),
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(theme.spacing.sm),
   },
 
   description: {
-    ...getTypography('body'),
-    color: getColor('text.secondary'),
-    lineHeight: 20,
-    marginBottom: getSpacing('lg'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(20),
+    marginBottom: verticalScale(theme.spacing.lg),
   },
 
   // Fee Breakdown Styles
   feeBreakdownContainer: {
-    backgroundColor: getColor('background.secondary'),
-    padding: getSpacing('md'),
-    borderRadius: getBorderRadius('md'),
-    marginBottom: getSpacing('lg'),
+    backgroundColor: theme.colors.background.secondary,
+    padding: scale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    marginBottom: verticalScale(theme.spacing.lg),
   },
 
   feeBreakdownTitle: {
-    ...getTypography('bodySmall'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '600',
-    marginBottom: getSpacing('sm'),
+    marginBottom: verticalScale(theme.spacing.sm),
   },
 
   feeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: verticalScale(4),
   },
 
   feeLabel: {
-    ...getTypography('bodySmall'),
-    color: getColor('text.secondary'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.text.secondary,
   },
 
   feeValue: {
-    ...getTypography('bodySmall'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.text.primary,
   },
 
   feeRowTotal: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: getSpacing('xs'),
-    borderTopWidth: 1,
-    borderTopColor: getColor('border.light'),
+    paddingTop: verticalScale(theme.spacing.xs),
+    borderTopWidth: moderateScale(1),
+    borderTopColor: theme.colors.border.light,
   },
 
   feeTotalLabel: {
-    ...getTypography('body'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '700',
   },
 
   feeTotalValue: {
-    ...getTypography('body'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '700',
   },
 
   // Payment Method Styles
   methodsContainer: {
-    gap: getSpacing('md'),
+    gap: verticalScale(theme.spacing.md),
   },
 
   methodCard: {
-    backgroundColor: getColor('background.primary'),
-    borderWidth: 1,
-    borderColor: getColor('border.light'),
-    borderRadius: getBorderRadius('lg'),
-    padding: getSpacing('md'),
-    ...getShadow('small'),
+    backgroundColor: theme.colors.background.primary,
+    borderWidth: moderateScale(1),
+    borderColor: theme.colors.border.light,
+    borderRadius: theme.borderRadius.lg,
+    padding: scale(theme.spacing.md),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: moderateScale(2),
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: moderateScale(4),
+    elevation: 2,
   },
 
   selectedCard: {
-    borderWidth: 3,
+    borderWidth: moderateScale(3),
     transform: [{ scale: 1.02 }],
   },
 
@@ -105,12 +106,12 @@ export const styles = StyleSheet.create({
   },
 
   methodIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: getBorderRadius('full'),
+    width: moderateScale(48),
+    height: moderateScale(48),
+    borderRadius: theme.borderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: getSpacing('md'),
+    marginRight: scale(theme.spacing.md),
   },
 
   methodInfo: {
@@ -118,62 +119,62 @@ export const styles = StyleSheet.create({
   },
 
   methodName: {
-    ...getTypography('body'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '600',
-    marginBottom: 2,
+    marginBottom: verticalScale(2),
   },
 
   methodDescription: {
-    ...getTypography('bodySmall'),
-    color: getColor('text.secondary'),
-    lineHeight: 16,
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(16),
   },
 
   selectedIndicator: {
-    borderRadius: getBorderRadius('full'),
-    padding: 4,
+    borderRadius: theme.borderRadius.full,
+    padding: moderateScale(4),
   },
 
   // Reference Input Styles
   referenceContainer: {
-    marginTop: getSpacing('lg'),
+    marginTop: verticalScale(theme.spacing.lg),
   },
 
   referenceLabel: {
-    ...getTypography('body'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '600',
-    marginBottom: getSpacing('sm'),
+    marginBottom: verticalScale(theme.spacing.sm),
   },
 
   referenceInput: {
-    backgroundColor: getColor('background.primary'),
-    borderWidth: 1,
-    borderColor: getColor('border.medium'),
-    borderRadius: getBorderRadius('md'),
-    paddingHorizontal: getSpacing('md'),
-    paddingVertical: getSpacing('sm'),
-    ...getTypography('body'),
-    color: getColor('text.primary'),
-    minHeight: hp(5.5),
+    backgroundColor: theme.colors.background.primary,
+    borderWidth: moderateScale(1),
+    borderColor: theme.colors.border.medium,
+    borderRadius: theme.borderRadius.md,
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingVertical: verticalScale(theme.spacing.sm),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.primary,
+    minHeight: verticalScale(44),
   },
 
   referenceNote: {
-    ...getTypography('caption'),
-    color: getColor('text.secondary'),
-    marginTop: getSpacing('xs'),
-    lineHeight: 16,
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(theme.spacing.xs),
+    lineHeight: moderateScale(16),
   },
 
   // Instructions Styles
   instructionsContainer: {
-    backgroundColor: getColor('accent.warningOrange') + '10',
-    padding: getSpacing('md'),
-    borderRadius: getBorderRadius('md'),
-    borderLeftWidth: 4,
-    borderLeftColor: getColor('accent.warningOrange'),
-    marginTop: getSpacing('lg'),
+    backgroundColor: theme.colors.semantic.warning + '10',
+    padding: scale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    borderLeftWidth: moderateScale(4),
+    borderLeftColor: theme.colors.semantic.warning,
+    marginTop: verticalScale(theme.spacing.lg),
   },
 
   instructionsContent: {
@@ -183,33 +184,33 @@ export const styles = StyleSheet.create({
 
   instructionsText: {
     flex: 1,
-    marginLeft: getSpacing('sm'),
+    marginLeft: scale(theme.spacing.sm),
   },
 
   instructionsTitle: {
-    ...getTypography('bodySmall'),
-    color: getColor('accent.warningOrange'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.semantic.warning,
     fontWeight: '600',
-    marginBottom: getSpacing('xs'),
+    marginBottom: verticalScale(theme.spacing.xs),
   },
 
   instructionsBody: {
-    ...getTypography('bodySmall'),
-    color: getColor('accent.warningOrange'),
-    lineHeight: 18,
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.semantic.warning,
+    lineHeight: moderateScale(18),
   },
 
   // Error Styles
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: getSpacing('md'),
+    marginTop: verticalScale(theme.spacing.md),
   },
 
   errorText: {
-    ...getTypography('bodySmall'),
-    color: getColor('semantic.error'),
-    marginLeft: getSpacing('xs'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.semantic.error,
+    marginLeft: scale(theme.spacing.xs),
     flex: 1,
   },
 });

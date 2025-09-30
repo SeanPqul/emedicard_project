@@ -107,6 +107,3 @@ export { profileEditStyles } from './screens/shared-profile-edit';
 
 // Layout styles
 export { layoutStyles } from './layouts/root-layout';
-
-// Form styles
-export { styles as applyFormStyles } from './screens/tabs-apply-forms';

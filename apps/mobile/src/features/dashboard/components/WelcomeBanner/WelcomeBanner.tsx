@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { moderateScale } from '@shared/utils/responsive';
 import { WelcomeBannerProps } from '@features/dashboard/types';
 import { styles } from './WelcomeBanner.styles';
 
@@ -17,7 +18,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ isNewUser }) => {
       <View style={styles.iconContainer}>
         <Ionicons 
           name="medical-outline" 
-          size={48} 
+          size={moderateScale(48)} 
           color={styles.icon.color} 
         />
       </View>
@@ -33,7 +34,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ isNewUser }) => {
         <Text style={styles.buttonText}>Get Started</Text>
         <Ionicons 
           name="arrow-forward" 
-          size={16} 
+          size={moderateScale(16)} 
           color={styles.buttonIcon.color} 
         />
       </TouchableOpacity>

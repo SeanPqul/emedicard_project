@@ -1,14 +1,12 @@
-import { useQuery, useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
-
-type ConvexId<T extends string> = Id<T>;
 type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
 
 export function usePayments(applicationId?: string) {
   const existingPayment = useQuery(
     api.payments.getPaymentByFormId.getPaymentByApplicationIdQuery, 
-    applicationId ? { applicationId: applicationId as ConvexId<"applications"> } : "skip"
+    applicationId ? { applicationId: applicationId as Id<"applications"> } : "skip"
   );
   const userPayments = useQuery(api.payments.getUserPayments.getUserPaymentsQuery);
 
@@ -17,19 +15,19 @@ export function usePayments(applicationId?: string) {
   const generateUploadUrlMutation = useMutation(api.storage.generateUploadUrl.generateUploadUrlMutation);
 
   const createPayment = async (input: {
-    applicationId: ConvexId<'applications'>;
+    applicationId: Id<'applications'>;
     amount: number;
     serviceFee: number;
     netAmount: number;
     paymentMethod: PaymentMethod;
     referenceNumber: string;
-    receiptStorageId?: ConvexId<'_storage'>;
+    receiptStorageId?: Id<'_storage'>;
   }) => {
     return createPaymentMutation(input);
   };
 
   const updatePaymentStatus = async (
-    paymentId: ConvexId<'payments'>, 
+    paymentId: Id<'payments'>, 
     status: 'Pending' | 'Complete' | 'Failed'
   ) => {
     return updatePaymentStatusMutation({ paymentId, paymentStatus: status });

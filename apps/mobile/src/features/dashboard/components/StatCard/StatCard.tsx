@@ -1,11 +1,9 @@
 import { 
-  getBorderRadius, 
-  getColor, 
-  getSpacing, 
-  getTypography,
   cardVariants,
   colorWithOpacity
 } from '@shared/styles';
+import { theme } from '@shared/styles/theme';
+import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -58,7 +56,7 @@ export const StatCard: React.FC<StatCardProps> = React.memo(({
       activeOpacity={0.7}
     >
       <View style={[styles.icon, { backgroundColor: getBackgroundColor(color) }]}>
-        <Ionicons name={icon as any} size={24} color={color} />
+        <Ionicons name={icon as any} size={moderateScale(24)} color={color} />
       </View>
       <Text style={styles.value}>{value}</Text>
       <Text style={styles.title}>{title}</Text>
@@ -72,35 +70,37 @@ StatCard.displayName = 'StatCard';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: getSpacing('xs'),
-    minHeight: 140,
+    marginHorizontal: scale(theme.spacing.xs),
+    minHeight: moderateScale(140),
     justifyContent: 'center',
     // Enhanced touch target
-    minWidth: 150,
+    minWidth: moderateScale(150),
   },
   icon: {
-    width: 48,
-    height: 48,
-    borderRadius: getBorderRadius('full'),
+    width: moderateScale(48),
+    height: moderateScale(48),
+    borderRadius: theme.borderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: getSpacing('sm'),
+    marginBottom: verticalScale(theme.spacing.sm),
   },
   value: {
-    ...getTypography('h2'),
-    color: getColor('text.primary'),
-    marginBottom: getSpacing('xs'),
+    fontSize: moderateScale(theme.typography.h2.fontSize),
     fontWeight: '700',
+    lineHeight: moderateScale(theme.typography.h2.lineHeight),
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(theme.spacing.xs),
   },
   title: {
-    ...getTypography('bodySmall'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
     fontWeight: '600',
-    color: getColor('text.primary'),
-    marginBottom: getSpacing('xs') / 2,
+    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(theme.spacing.xs / 2),
   },
   subtitle: {
-    ...getTypography('caption'),
-    color: getColor('text.secondary'),
-    lineHeight: 16,
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.secondary,
   },
 });

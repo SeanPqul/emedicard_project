@@ -52,7 +52,7 @@ export const styles = StyleSheet.create({
     color: getColor('text.secondary'),
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: getSpacing('xxxxl'),
+    marginBottom: getSpacing('xxxl') + 16,
   },
   buttonContainer: {
     width: '100%',

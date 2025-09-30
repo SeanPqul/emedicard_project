@@ -1,135 +1,117 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PersonalDetailsStepProps } from './PersonalDetailsStep.types';
 import styles from './PersonalDetailsStep.styles';
-import { getColor } from '@shared/styles/theme';
+import { theme } from '@shared/styles/theme';
+import { moderateScale } from '@shared/utils/responsive';
+import { useUser } from '@clerk/clerk-expo';
 
-const CIVIL_STATUS_OPTIONS = [
-  'Single',
-  'Married',
-  'Widowed',
-  'Separated',
-  'Annulled'
-];
+type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
 
-export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({ 
-  value, 
-  onChange,
-  errors = {}
+const CIVIL_STATUS_OPTIONS: CivilStatus[] = ['Single', 'Married', 'Divorced', 'Widowed', 'Separated'];
+
+export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
+  formData,
+  setFormData,
+  errors,
+  jobCategoriesData = [],
 }) => {
-  const handleFieldChange = (field: keyof typeof value, text: string) => {
-    onChange({
-      ...value,
-      [field]: text
-    });
-  };
-
-  const renderInput = (
-    label: string,
-    field: keyof typeof value,
-    placeholder: string,
-    icon: string,
-    multiline = false
-  ) => (
-    <View style={styles.inputGroup}>
-      <Text style={styles.inputLabel}>{label}</Text>
-      <View style={[
-        styles.inputContainer,
-        errors[field] && styles.inputContainerError,
-        multiline && styles.inputContainerMultiline
-      ]}>
-        <Ionicons 
-          name={icon as any} 
-          size={20} 
-          color={errors[field] ? getColor('semantic.error') : getColor('text.secondary')} 
-          style={styles.inputIcon}
-        />
-        <TextInput
-          style={[styles.input, multiline && styles.inputMultiline]}
-          value={value[field]}
-          onChangeText={(text) => handleFieldChange(field, text)}
-          placeholder={placeholder}
-          placeholderTextColor={getColor('text.placeholder')}
-          multiline={multiline}
-          numberOfLines={multiline ? 3 : 1}
-        />
-      </View>
-      {errors[field] && (
-        <Text style={styles.errorText}>{errors[field]}</Text>
-      )}
-    </View>
-  );
+  const { user } = useUser();
+  const selectedCategory = jobCategoriesData?.find(cat => cat._id === formData.jobCategory);
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Text style={styles.title}>Personal Details</Text>
-        <Text style={styles.subtitle}>
-          Please provide your employment and personal information
-        </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Personal Details</Text>
+      <Text style={styles.subtitle}>
+        Complete your {selectedCategory?.name || 'job'} application details.
+      </Text>
 
-        {renderInput(
-          'Position/Job Title',
-          'position',
-          'e.g. Software Developer, Teacher, Nurse',
-          'briefcase-outline'
-        )}
-
-        {renderInput(
-          'Organization/Company',
-          'organization',
-          'e.g. ABC Corporation, XYZ Hospital',
-          'business-outline',
-          true
-        )}
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Civil Status</Text>
-          <View style={styles.civilStatusContainer}>
-            {CIVIL_STATUS_OPTIONS.map((status) => (
-              <TouchableOpacity
-                key={status}
-                style={[
-                  styles.civilStatusOption,
-                  value.civilStatus === status && styles.civilStatusOptionSelected
-                ]}
-                onPress={() => handleFieldChange('civilStatus', status)}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.civilStatusText,
-                  value.civilStatus === status && styles.civilStatusTextSelected
-                ]}>
-                  {status}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          {errors.civilStatus && (
-            <Text style={styles.errorText}>{errors.civilStatus}</Text>
-          )}
-        </View>
-
+      {/* Auto-fill from profile notice */}
+      {user && (
         <View style={styles.infoBox}>
-          <Ionicons 
-            name="information-circle" 
-            size={20} 
-            color={getColor('primary.500')} 
-          />
+          <Ionicons name="person-circle-outline" size={moderateScale(20)} color={theme.colors.brand.secondary} />
           <Text style={styles.infoText}>
-            This information is required for your health card application and will be kept confidential.
+            Using profile info for {user?.firstName} {user?.lastName}
           </Text>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      )}
+      
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Position/Job Title</Text>
+        <View style={[
+          styles.inputContainer,
+          errors.position && styles.inputContainerError
+        ]}>
+          <Ionicons 
+            name="briefcase-outline" 
+            size={moderateScale(20)} 
+            color={errors.position ? theme.colors.semantic.error : theme.colors.text.secondary} 
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.input}
+            value={formData.position}
+            onChangeText={(text) => setFormData({ ...formData, position: text })}
+            placeholder="e.g., Your job position"
+            placeholderTextColor={theme.colors.text.tertiary}
+            autoCapitalize="words"
+          />
+        </View>
+        {errors.position && (
+          <Text style={styles.errorText}>{errors.position}</Text>
+        )}
+      </View>
+      
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Organization/Company</Text>
+        <View style={[
+          styles.inputContainer,
+          errors.organization && styles.inputContainerError
+        ]}>
+          <Ionicons 
+            name="business-outline" 
+            size={moderateScale(20)} 
+            color={errors.organization ? theme.colors.semantic.error : theme.colors.text.secondary} 
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.input}
+            value={formData.organization}
+            onChangeText={(text) => setFormData({ ...formData, organization: text })}
+            placeholder="e.g., Your company name"
+            placeholderTextColor={theme.colors.text.tertiary}
+            autoCapitalize="words"
+          />
+        </View>
+        {errors.organization && (
+          <Text style={styles.errorText}>{errors.organization}</Text>
+        )}
+      </View>
+      
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Civil Status</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.civilStatusContainer}>
+          {CIVIL_STATUS_OPTIONS.map((status) => (
+            <TouchableOpacity
+              key={status}
+              style={[
+                styles.civilStatusOption,
+                formData.civilStatus === status && styles.civilStatusOptionSelected
+              ]}
+              onPress={() => setFormData({ ...formData, civilStatus: status })}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.civilStatusText,
+                formData.civilStatus === status && styles.civilStatusTextSelected
+              ]}>
+                {status}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </View>
   );
 };

@@ -1,184 +1,126 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { UploadDocumentsStepProps, Document } from './UploadDocumentsStep.types';
+import { UploadDocumentsStepProps } from './UploadDocumentsStep.types';
 import styles from './UploadDocumentsStep.styles';
-import { getColor } from '@shared/styles/theme';
+import { theme } from '@shared/styles/theme';
+import { moderateScale } from '@shared/utils/responsive';
 
-const DOCUMENT_LABELS: Record<Document['type'], string> = {
-  id_front: 'Valid ID (Front)',
-  id_back: 'Valid ID (Back)',
-  photo_with_id: 'Photo with ID',
-  cedula: 'Cedula',
-  proof_of_residency: 'Proof of Residency'
-};
-
-const DOCUMENT_DESCRIPTIONS: Record<Document['type'], string> = {
-  id_front: 'Clear photo of the front of your valid ID',
-  id_back: 'Clear photo of the back of your valid ID',
-  photo_with_id: 'Selfie holding your valid ID',
-  cedula: 'Community tax certificate (if applicable)',
-  proof_of_residency: 'Recent utility bill or barangay certificate'
-};
-
-const DOCUMENT_ICONS: Record<Document['type'], string> = {
-  id_front: 'card-outline',
-  id_back: 'card-outline',
-  photo_with_id: 'person-circle-outline',
-  cedula: 'document-text-outline',
-  proof_of_residency: 'home-outline'
-};
-
-export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({ 
-  documents,
-  onDocumentSelect,
-  onDocumentRemove,
-  onSelectDocument
+export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
+  formData,
+  requirementsByJobCategory,
+  selectedDocuments,
+  isLoading,
+  getUploadState,
+  onDocumentPicker,
+  onRemoveDocument,
+  requirements,
 }) => {
-  const getDocument = (type: Document['type']) => {
-    return documents.find(doc => doc.type === type);
-  };
-
-  const renderDocumentCard = (type: Document['type'], isOptional = false) => {
-    const document = getDocument(type);
-    const hasDocument = document?.uri;
-
+  // Show loading if requirements are being fetched
+  if (isLoading) {
     return (
-      <TouchableOpacity
-        key={type}
-        style={[
-          styles.documentCard,
-          hasDocument && styles.documentCardUploaded
-        ]}
-        onPress={() => onSelectDocument(type)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.documentHeader}>
-          <View style={[
-            styles.documentIconContainer,
-            hasDocument && styles.documentIconContainerUploaded
-          ]}>
-            <Ionicons 
-              name={DOCUMENT_ICONS[type] as any} 
-              size={24} 
-              color={hasDocument ? getColor('white') : getColor('primary.500')} 
-            />
-          </View>
-          <View style={styles.documentInfo}>
-            <View style={styles.documentTitleRow}>
-              <Text style={styles.documentTitle}>{DOCUMENT_LABELS[type]}</Text>
-              {isOptional && (
-                <Text style={styles.optionalBadge}>Optional</Text>
-              )}
-            </View>
-            <Text style={styles.documentDescription}>{DOCUMENT_DESCRIPTIONS[type]}</Text>
-          </View>
-        </View>
-
-        {hasDocument ? (
-          <View style={styles.uploadedContainer}>
-            <View style={styles.uploadedInfo}>
-              <Ionicons 
-                name="checkmark-circle" 
-                size={20} 
-                color={getColor('accent.safetyGreen')} 
-              />
-              <Text style={styles.uploadedText} numberOfLines={1}>
-                {document.name || 'Document uploaded'}
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={styles.removeButton}
-              onPress={(e) => {
-                e.stopPropagation();
-                onDocumentRemove(type);
-              }}
-            >
-              <Ionicons 
-                name="close-circle" 
-                size={20} 
-                color={getColor('semantic.error')} 
-              />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={styles.uploadButton}
-            onPress={() => onSelectDocument(type)}
-          >
-            <Ionicons 
-              name="cloud-upload-outline" 
-              size={20} 
-              color={getColor('primary.500')} 
-            />
-            <Text style={styles.uploadButtonText}>Upload</Text>
-          </TouchableOpacity>
-        )}
-      </TouchableOpacity>
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Text style={styles.title}>Loading Document Requirements...</Text>
+        <Text style={styles.subtitle}>Please wait while we fetch the required documents for your job category.</Text>
+      </View>
     );
-  };
-
-  const requiredCount = documents.filter(doc => 
-    ['id_front', 'id_back', 'photo_with_id'].includes(doc.type) && doc.uri
-  ).length;
-
-  const optionalCount = documents.filter(doc => 
-    ['cedula', 'proof_of_residency'].includes(doc.type) && doc.uri
-  ).length;
-
+  }
+  
+  // Show message if no requirements found
+  if (!isLoading && requirementsByJobCategory.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Upload Documents</Text>
+        <Text style={styles.subtitle}>No document requirements found for the selected job category. Please contact support.</Text>
+      </View>
+    );
+  }
+  
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.container}>
       <Text style={styles.title}>Upload Documents</Text>
       <Text style={styles.subtitle}>
-        Please upload clear photos of the required documents
+        Please upload clear and readable copies of all required medical documents
+        to ensure proper processing of your {formData.applicationType?.toLowerCase() || 'health card'} application.
       </Text>
+      
+      {/* Document List */}
+      <View style={styles.documentsContainer}>
+        {requirementsByJobCategory.map((document, index) => (
+          <View key={document.fieldName || `doc-${index}`} style={styles.documentCard}>
+            <View style={styles.documentHeader}>
+              <View style={styles.documentInfo}>
+                <Text style={styles.documentTitle}>
+                  {document.name}
+                  {document.required && <Text style={styles.requiredAsterisk}> *</Text>}
+                </Text>
+                <Text style={styles.documentDescription}>{document.description}</Text>
+              </View>
+              <View style={styles.documentStatus}>
+                {selectedDocuments[document.fieldName] ? (
+                  <Ionicons name="checkmark-circle" size={moderateScale(24)} color={theme.colors.semantic.success} />
+                ) : (
+                  <Ionicons name="add-circle-outline" size={moderateScale(24)} color={theme.colors.text.secondary} />
+                )}
+              </View>
+            </View>
 
-      <View style={styles.progressContainer}>
-        <View style={styles.progressRow}>
-          <Text style={styles.progressLabel}>Required Documents</Text>
-          <Text style={styles.progressValue}>{requiredCount} of 3</Text>
-        </View>
-        <View style={styles.progressBar}>
-          <View 
-            style={[
-              styles.progressFill, 
-              { width: `${(requiredCount / 3) * 100}%` }
-            ]} 
-          />
-        </View>
-      </View>
+            {/* Upload Progress */}
+            {getUploadState(document.fieldName)?.uploading && (
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBar}>
+                  <View style={[
+                    styles.progressFill,
+                    { width: `${getUploadState(document.fieldName).progress}%` }
+                  ]} />
+                </View>
+                <Text style={styles.progressText}>
+                  {getUploadState(document.fieldName).progress}%
+                </Text>
+              </View>
+            )}
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Required Documents</Text>
-        {renderDocumentCard('id_front')}
-        {renderDocumentCard('id_back')}
-        {renderDocumentCard('photo_with_id')}
-      </View>
+            {/* Error State */}
+            {getUploadState(document.fieldName)?.error && (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+                <Text style={styles.errorMessage}>
+                  {getUploadState(document.fieldName).error}
+                </Text>
+              </View>
+            )}
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Optional Documents</Text>
-        {renderDocumentCard('cedula', true)}
-        {renderDocumentCard('proof_of_residency', true)}
-      </View>
+            {/* Document Preview */}
+            {selectedDocuments[document.fieldName] && !getUploadState(document.fieldName)?.uploading && (
+              <View style={styles.documentPreview}>
+                <Image
+                  source={{ uri: selectedDocuments[document.fieldName]?.uri }}
+                  style={styles.documentImage}
+                  resizeMode="cover"
+                />
+                <TouchableOpacity 
+                  style={styles.removeDocumentButton}
+                  onPress={() => onRemoveDocument(document.fieldName)}
+                >
+                  <Ionicons name="close-circle" size={moderateScale(20)} color={theme.colors.semantic.error} />
+                </TouchableOpacity>
+              </View>
+            )}
 
-      <View style={styles.tipBox}>
-        <Ionicons 
-          name="bulb-outline" 
-          size={20} 
-          color={getColor('accent.warningOrange')} 
-        />
-        <View style={styles.tipContent}>
-          <Text style={styles.tipTitle}>Tips for better photos:</Text>
-          <Text style={styles.tipText}>• Ensure good lighting</Text>
-          <Text style={styles.tipText}>• Avoid blurry images</Text>
-          <Text style={styles.tipText}>• Make sure all text is readable</Text>
-          <Text style={styles.tipText}>• Keep file size under 5MB</Text>
-        </View>
+            {/* Upload Button */}
+            {!selectedDocuments[document.fieldName] && (
+              <TouchableOpacity
+                style={styles.uploadButton}
+                onPress={() => onDocumentPicker(document.fieldName)}
+                disabled={getUploadState(document.fieldName)?.uploading}
+              >
+                <Ionicons name="cloud-upload-outline" size={moderateScale(20)} color={theme.colors.brand.secondary} />
+                <Text style={styles.uploadButtonText}>Choose File</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ))}
       </View>
-    </ScrollView>
+    </View>
   );
 };

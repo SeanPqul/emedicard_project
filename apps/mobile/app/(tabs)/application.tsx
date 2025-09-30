@@ -1,1 +1,1 @@
-export { ApplicationListScreen as default } from '../../src/screens/application/ApplicationListScreen';
+export { ApplicationListScreen as default } from '../../src/screens/tabs/ApplicationListScreen';

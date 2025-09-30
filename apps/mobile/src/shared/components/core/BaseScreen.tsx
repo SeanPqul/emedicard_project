@@ -18,7 +18,7 @@ interface BaseScreenProps {
   scrollable?: boolean;
   keyboardAvoiding?: boolean;
   safeArea?: boolean;
-  edges?: Array<'top' | 'bottom' | 'left' | 'right'>;
+  edges?: ('top' | 'bottom' | 'left' | 'right')[];
   
   // Styling
   backgroundColor?: string;
@@ -28,7 +28,7 @@ interface BaseScreenProps {
   
   // ScrollView props (when scrollable is true)
   showsVerticalScrollIndicator?: boolean;
-  refreshControl?: React.ReactElement<typeof RefreshControl>;
+  refreshControl?: React.ReactElement<React.ComponentProps<typeof RefreshControl>>;
   onScroll?: (event: any) => void;
   
   // Status bar

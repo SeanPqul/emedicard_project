@@ -1,97 +1,141 @@
-import React from 'react';
-import { View, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { 
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  Dimensions
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useUser } from '@clerk/clerk-expo';
+import { hp } from '@/src/shared/utils/responsive';
+import { formStorage } from '@/src/features/application/services/formStorage';
+import { getColor } from '@/src/shared/styles/theme';
+import { STEP_TITLES } from '@/src/features/application/constants';
+import { FeedbackSystem, useFeedback } from '@/src/shared/components/feedback';
 
-// Features
-import { StepIndicator } from '@features/application/components';
-import {
+// Components
+import { StepIndicator, DocumentSourceModal } from '@/src/features/application/components';
+import { 
   ApplicationTypeStep,
   JobCategoryStep,
   PersonalDetailsStep,
   UploadDocumentsStep,
   ReviewStep
-} from '@features/application/components/steps';
+} from '@/src/features/application/components/steps';
 
 // Types
-import { ApplicationFormData } from '@features/application/services/applicationService';
-import { SelectedDocuments } from '@shared/types';
-import { DocumentRequirement, JobCategory } from '@entities/application/model/types';
+import type { ApplicationFormData } from '@/src/features/application/lib/validation';
+import type { JobCategory, DocumentRequirement } from '@/src/entities/application';
+import type { SelectedDocuments } from '@shared/types';
 
-// Styles
 import { styles } from './ApplyWidget.styles';
 
+// Define UploadState interface
+interface UploadState {
+  uploading: boolean;
+  progress: number;
+  error: string | null;
+  success: boolean;
+  queued: boolean;
+}
+
 interface ApplyWidgetProps {
+  // State
   currentStep: number;
   formData: ApplicationFormData;
-  setFormData: (data: ApplicationFormData) => void;
   errors: Record<string, string>;
   selectedDocuments: SelectedDocuments;
   jobCategoriesData: JobCategory[];
   requirementsByJobCategory: DocumentRequirement[];
-  isLoading: boolean;
-  onDocumentPicker: (documentId: string) => void;
-  onRemoveDocument: (documentId: string) => void;
-  onSubmit: () => void;
-  onNext: () => void;
-  onPrevious: () => void;
-  getUploadState: (documentId: string) => any;
-  requirements: any;
   isSubmitting: boolean;
-  stepTitles: string[];
+  showImagePicker: boolean;
+  
+  // State setters
+  setCurrentStep: (step: number) => void;
+  setFormData: (data: ApplicationFormData) => void;
+  setShowImagePicker: (show: boolean) => void;
+  
+  // Handlers
+  handleNextStep: () => Promise<void>;
+  handlePrevious: () => void;
+  handleBackPress: () => void;
+  handleCancelApplication: () => void;
+  getUploadState: (documentId: string) => UploadState;
+  
+  // Document handlers
+  handleDocumentPicker: (requirementId: string) => void;
+  handleRemoveDocument: (requirementId: string) => void;
+  pickFromCamera: () => void;
+  pickFromGallery: () => void;
+  pickDocFile: () => void;
+  
+  // Requirements
+  requirementsLoading: boolean;
+  
+  // Feedback
+  messages: any[];
+  dismissFeedback: (id: string) => void;
 }
 
 export function ApplyWidget({
   currentStep,
   formData,
-  setFormData,
   errors,
   selectedDocuments,
   jobCategoriesData,
   requirementsByJobCategory,
-  isLoading,
-  onDocumentPicker,
-  onRemoveDocument,
-  onSubmit,
-  onNext,
-  onPrevious,
-  getUploadState,
-  requirements,
   isSubmitting,
-  stepTitles,
+  showImagePicker,
+  setCurrentStep,
+  setFormData,
+  setShowImagePicker,
+  handleNextStep,
+  handlePrevious,
+  handleBackPress,
+  handleCancelApplication,
+  getUploadState,
+  handleDocumentPicker,
+  handleRemoveDocument,
+  pickFromCamera,
+  pickFromGallery,
+  pickDocFile,
+  requirementsLoading,
+  messages,
+  dismissFeedback,
 }: ApplyWidgetProps) {
   const insets = useSafeAreaInsets();
+  const screenHeight = Dimensions.get('window').height;
 
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 0:
         return (
           <ApplicationTypeStep
-            applicationType={formData.applicationType}
-            onSelect={(type) => setFormData({ ...formData, applicationType: type })}
-            error={errors.applicationType}
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
           />
         );
       case 1:
         return (
           <JobCategoryStep
-            jobCategories={jobCategoriesData}
-            selectedCategory={formData.jobCategory}
-            onSelect={(category) => setFormData({ ...formData, jobCategory: category })}
-            error={errors.jobCategory}
-            isLoading={false}
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
+            jobCategoriesData={jobCategoriesData}
           />
         );
       case 2:
         return (
           <PersonalDetailsStep
-            position={formData.position}
-            organization={formData.organization}
-            civilStatus={formData.civilStatus}
-            onPositionChange={(position) => setFormData({ ...formData, position })}
-            onOrganizationChange={(org) => setFormData({ ...formData, organization: org })}
-            onCivilStatusChange={(status) => setFormData({ ...formData, civilStatus: status })}
+            formData={formData}
+            setFormData={setFormData}
             errors={errors}
-            jobCategories={jobCategoriesData}
+            jobCategoriesData={jobCategoriesData}
           />
         );
       case 3:
@@ -100,11 +144,11 @@ export function ApplyWidget({
             formData={formData}
             requirementsByJobCategory={requirementsByJobCategory}
             selectedDocuments={selectedDocuments}
-            isLoading={requirements.isLoading}
+            isLoading={requirementsLoading}
             getUploadState={getUploadState}
-            onDocumentPicker={onDocumentPicker}
-            onRemoveDocument={onRemoveDocument}
-            requirements={requirements}
+            onDocumentPicker={handleDocumentPicker}
+            onRemoveDocument={handleRemoveDocument}
+            requirements={{ isLoading: requirementsLoading }}
           />
         );
       case 4:
@@ -115,9 +159,7 @@ export function ApplyWidget({
             requirementsByJobCategory={requirementsByJobCategory}
             selectedDocuments={selectedDocuments}
             getUploadState={getUploadState}
-            onEdit={(step: number) => {/* Handle edit */}}
-            onSubmit={onSubmit}
-            isSubmitting={isSubmitting}
+            onEditStep={setCurrentStep}
           />
         );
       default:
@@ -127,26 +169,84 @@ export function ApplyWidget({
 
   return (
     <View style={styles.container}>
-      <StepIndicator
-        currentStep={currentStep}
-        totalSteps={stepTitles.length}
-        stepTitles={stepTitles}
-        onNext={onNext}
-        onPrevious={onPrevious}
-        isValid={!Object.keys(errors).length}
-        showSubmit={currentStep === stepTitles.length - 1}
-      />
-      
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={[
-          styles.contentContainer,
-          { paddingBottom: insets.bottom + 20 }
-        ]}
-        showsVerticalScrollIndicator={false}
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleBackPress}>
+          <Ionicons name="arrow-back" size={24} color="#212529" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>New Application</Text>
+        <View style={styles.headerRight}>
+          {formStorage.hasTempApplication() && (
+            <TouchableOpacity onPress={handleCancelApplication} style={styles.cancelButton}>
+              <Ionicons name="close-circle-outline" size={24} color="#dc3545" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* Step Indicator */}
+      <StepIndicator currentStep={currentStep} stepTitles={STEP_TITLES} />
+
+      {/* Content with Keyboard Avoiding */}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        {renderCurrentStep()}
-      </ScrollView>
+        <ScrollView 
+          style={styles.content} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ 
+            paddingBottom: hp(10),
+            flexGrow: 1
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.contentWrapper}>
+            {renderCurrentStep()}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Navigation Buttons */}
+      <View style={styles.navigationButtons}>
+        {currentStep > 0 && (
+          <TouchableOpacity 
+            style={styles.previousButton} 
+            onPress={handlePrevious}
+          >
+            <Text style={styles.previousButtonText}>Previous</Text>
+          </TouchableOpacity>
+        )}
+        
+        <TouchableOpacity
+          style={[
+            styles.nextButton,
+            currentStep === 0 && styles.nextButtonFull,
+            { 
+              backgroundColor: isSubmitting ? getColor('border.medium') : getColor('accent.medicalBlue'),
+              opacity: isSubmitting ? 0.6 : 1,
+            }
+          ]}
+          onPress={handleNextStep}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.nextButtonText}>
+            {isSubmitting ? 'Loading...' : (currentStep === STEP_TITLES.length - 1 ? 'Submit Application' : 'Next')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      
+      {/* Document Source Modal */}
+      <DocumentSourceModal
+        visible={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onPickCamera={pickFromCamera}
+        onPickGallery={pickFromGallery}
+        onPickDocument={pickDocFile}
+      />
+
+      <FeedbackSystem messages={messages} onDismiss={dismissFeedback} position="below-header" />
     </View>
   );
 }

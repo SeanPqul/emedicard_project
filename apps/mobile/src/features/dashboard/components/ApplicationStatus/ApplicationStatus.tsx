@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { moderateScale } from '@shared/utils/responsive';
 import { ApplicationStatusProps, DashboardApplication } from '@features/dashboard/types';
 import { styles } from './ApplicationStatus.styles';
 import { getJobCategoryColor, getJobCategoryIcon, getCardTypeLabel } from '@entities/jobCategory';
@@ -23,7 +24,7 @@ export const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ currentApp
       currentStep: currentStep + 1,
       totalSteps: steps.length,
       status: currentApplication.status,
-      nextStep: currentStep < steps.length - 1 ? steps[currentStep + 1] : null
+      nextStep: currentStep < steps.length - 1 ? (steps[currentStep + 1] ?? null) : null
     };
   };
 
@@ -50,7 +51,7 @@ export const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ currentApp
         <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
           <Ionicons 
             name={categoryIcon} 
-            size={16} 
+            size={moderateScale(16)} 
             color={styles.categoryIcon.color} 
           />
           <Text style={styles.categoryText}>{cardLabel}</Text>

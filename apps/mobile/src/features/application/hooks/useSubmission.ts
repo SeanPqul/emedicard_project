@@ -3,7 +3,8 @@ import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { formStorage } from '../services/formStorage';
-import { DocumentRequirement, JobCategory } from '@/src/entities/application/model/types';
+import { DocumentRequirement } from '@/src/entities/application/model/types';
+import { JobCategory } from '@/src/entities/jobCategory/model/types';
 
 type ApplicationType = 'New' | 'Renew';
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';

@@ -12,9 +12,9 @@ import {
   buttonVariants, 
   buttonTextVariants, 
   buttonSizeVariants,
-  getSpacing
 } from '@shared/styles';
 import { theme } from '@shared/styles/theme';
+import { moderateScale, scale } from '@shared/utils/responsive';
 // Using local type definition instead of importing from types
 interface DesignSystemButtonProps {
   variant?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'error' | 'success' | 'warning' | 'none';
@@ -111,7 +111,7 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
       ? buttonTextVariants.disabled.color 
       : buttonTextVariants[variant === 'none' ? 'ghost' : variant].color;
     
-    const iconSize = size === 'small' ? 16 : size === 'large' ? 24 : 20;
+    const iconSize = moderateScale(size === 'small' ? 16 : size === 'large' ? 24 : 20);
     
     return (
       <Ionicons 
@@ -119,8 +119,8 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
         size={iconSize} 
         color={iconColor}
         style={{ 
-          marginLeft: position === 'right' ? getSpacing('xs') : 0,
-          marginRight: position === 'left' ? getSpacing('xs') : 0,
+          marginLeft: position === 'right' ? scale(theme.spacing.xs) : 0,
+          marginRight: position === 'left' ? scale(theme.spacing.xs) : 0,
         }}
       />
     );
@@ -129,7 +129,7 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
   const renderContent = () => {
     if (loading) {
       return (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: getSpacing('xs') }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: scale(theme.spacing.xs) }}>
           <ActivityIndicator 
             size="small" 
             color={loadingIndicatorColor || buttonTextVariants[variant === 'none' ? 'ghost' : variant].color}
@@ -156,7 +156,7 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
     }
 
     return (
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: getSpacing('xs') }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: scale(theme.spacing.xs) }}>
         {renderIcon('left')}
         {title && (
           <Text style={[finalTextStyle, textStyle]}>

@@ -7,6 +7,9 @@ export interface UploadFile {
   name: string;
   type: string;
   size: number;
+  // Optional properties for compatibility with DocumentFile
+  mimeType?: string;
+  fileName?: string;
 }
 
 export interface UploadOperation {

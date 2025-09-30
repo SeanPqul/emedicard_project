@@ -1,8 +1,6 @@
-import { useQuery, useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
-
-type ConvexId<T extends string> = Id<T>;
 
 // Backend health card data structure
 export interface BackendHealthCard {
@@ -39,8 +37,8 @@ export function useHealthCards() {
   const updateHealthCardMutation = useMutation(api.healthCards.updateHealthCard.updateHealthCardMutation);
 
   const createVerificationLog = async (input: {
-    healthCardId: ConvexId<'healthCards'>;
-    scannedBy?: ConvexId<'users'>;
+    healthCardId: Id<'healthCards'>;
+    scannedBy?: Id<'users'>;
     location?: string;
     notes?: string;
   }) => {
@@ -48,7 +46,7 @@ export function useHealthCards() {
   };
 
   const issueHealthCard = async (input: {
-    applicationId: ConvexId<'applications'>;
+    applicationId: Id<'applications'>;
     cardUrl: string;
     issuedAt: number;
     expiresAt: number;
@@ -57,7 +55,7 @@ export function useHealthCards() {
     return issueHealthCardMutation(input);
   };
 
-  const updateHealthCardStatus = async (cardId: ConvexId<'healthCards'>) => {
+  const updateHealthCardStatus = async (cardId: Id<'healthCards'>) => {
     return updateHealthCardMutation({ healthCardId: cardId });
   };
 

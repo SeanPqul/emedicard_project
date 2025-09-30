@@ -7,9 +7,10 @@
 import { Id } from '@backend/convex/_generated/dataModel';
 
 // ===== APPLICATION STATUS TYPES =====
-export type ApplicationStatus = 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
+export type ApplicationStatus = 'Pending Payment' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
 export type ApplicationType = 'New' | 'Renew';
 export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
+export type PaymentMethod = 'Maya' | 'Gcash' | 'BaranggayHall' | 'CityHall';
 
 // ===== APPLICATION ENTITY TYPES =====
 export interface Application {
@@ -113,4 +114,52 @@ export interface ApplicationWorkflow {
   steps: ApplicationWorkflowStep[];
   progress: number;
   canSubmit: boolean;
+}
+
+// ===== COMPOSITE APPLICATION TYPES =====
+// These types combine application with related entities for UI display
+
+export interface ApplicationFormDetails {
+  _id: string;
+  applicationType: ApplicationType;
+  position: string;
+  organization: string;
+  civilStatus: string;
+  jobCategory: string;
+}
+
+// This reuses the JobCategory type from jobCategory entity for consistency
+export interface JobCategoryDetails {
+  _id: string;
+  name: string;
+  colorCode: string;
+  requireOrientation: string | boolean | undefined;  // Allow for multiple formats during migration
+}
+
+export interface PaymentDetails {
+  _id: string;
+  amount: number;
+  method: string;
+  status: string;
+  referenceNumber?: string;
+}
+
+// This type represents an application with all its related data
+// Used in list views and detail views
+export interface ApplicationWithDetails {
+  _id: string;
+  _creationTime: number;
+  userId: string;
+  formId: string;
+  status: ApplicationStatus;
+  approvedAt?: number;
+  remarks?: string;
+  form?: ApplicationFormDetails;
+  jobCategory?: JobCategoryDetails;
+}
+
+// Extended version with payment details for detail views
+export interface ApplicationDetails extends ApplicationWithDetails {
+  paymentDeadline?: number;
+  payment?: PaymentDetails;
 }

@@ -4,6 +4,8 @@ import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { moderateScale } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
 import { getUserDisplayName } from '@shared/utils/user-utils';
 import { DashboardHeaderProps } from '@features/dashboard/types';
 import { styles } from './DashboardHeader.styles';
@@ -55,8 +57,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       >
         <Ionicons 
           name="notifications-outline" 
-          size={24} 
-          color="#111827" 
+          size={moderateScale(24)} 
+          color={theme.colors.text.primary} 
         />
         {unreadNotificationsCount > 0 && (
           <View style={styles.notificationBadge}>

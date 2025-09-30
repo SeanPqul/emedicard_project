@@ -1,13 +1,10 @@
 /**
  * Screens Index
  * 
- * Export all screen modules
+ * Export all screen modules - reorganized structure
  */
 
-export * from './application';
 export * from './auth';
-export * from './dashboard';
+export * from './tabs';
 export * from './inspector';
-export * from './notification';
-export * from './profile';
 export * from './shared';

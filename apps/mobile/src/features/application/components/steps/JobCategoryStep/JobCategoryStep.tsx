@@ -1,25 +1,17 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { JobCategoryStepProps } from './JobCategoryStep.types';
 import styles from './JobCategoryStep.styles';
-import { getColor } from '@shared/styles/theme';
+import { theme } from '@shared/styles/theme';
+import { moderateScale } from '@shared/utils/responsive';
 
-export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({ 
-  value, 
-  onChange, 
-  categories = [],
-  isLoading = false
+export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({
+  formData,
+  setFormData,
+  errors,
+  jobCategoriesData,
 }) => {
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={getColor('primary.500')} />
-        <Text style={styles.loadingText}>Loading job categories...</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select Job Category</Text>
@@ -33,14 +25,14 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.categoriesGrid}>
-          {categories.map((category) => (
+          {jobCategoriesData.map((category) => (
             <TouchableOpacity
               key={category._id}
               style={[
                 styles.categoryCard,
-                value === category._id && styles.categoryCardSelected
+                formData.jobCategory === category._id && styles.categoryCardSelected
               ]}
-              onPress={() => onChange(category._id)}
+              onPress={() => setFormData({ ...formData, jobCategory: category._id })}
               activeOpacity={0.7}
             >
               <View style={[
@@ -50,17 +42,17 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({
               
               <Text style={[
                 styles.categoryName,
-                value === category._id && styles.categoryNameSelected
+                formData.jobCategory === category._id && styles.categoryNameSelected
               ]}>
                 {category.name}
               </Text>
 
-              {category.requireOrientation === 'Yes' && (
+              {(category.requireOrientation === true || category.requireOrientation === 'yes') && (
                 <View style={styles.orientationBadge}>
                   <Ionicons 
                     name="school-outline" 
-                    size={12} 
-                    color={getColor('accent.warningOrange')} 
+                    size={moderateScale(12)} 
+                    color={theme.colors.semantic.warning} 
                   />
                   <Text style={styles.orientationText}>Orientation</Text>
                 </View>
@@ -68,13 +60,13 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({
 
               <View style={[
                 styles.checkmark,
-                value === category._id && styles.checkmarkSelected
+                formData.jobCategory === category._id && styles.checkmarkSelected
               ]}>
-                {value === category._id && (
+                {formData.jobCategory === category._id && (
                   <Ionicons 
                     name="checkmark" 
-                    size={16} 
-                    color={getColor('white')} 
+                    size={moderateScale(16)} 
+                    color={theme.colors.background.primary} 
                   />
                 )}
               </View>
@@ -82,17 +74,26 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({
           ))}
         </View>
 
-        {categories.length === 0 && (
+        {jobCategoriesData.length === 0 && (
           <View style={styles.emptyContainer}>
             <Ionicons 
               name="briefcase-outline" 
-              size={48} 
-              color={getColor('text.secondary')} 
+              size={moderateScale(48)} 
+              color={theme.colors.text.secondary} 
             />
             <Text style={styles.emptyText}>No job categories available</Text>
           </View>
         )}
       </ScrollView>
+      
+      {errors.jobCategory && (
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+          <Text style={styles.errorText}>
+            {errors.jobCategory}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };

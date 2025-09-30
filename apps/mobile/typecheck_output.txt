@@ -1,0 +1,61 @@
+
+> mobile@1.0.0 typecheck
+> tsc --noEmit
+
+scripts/convex-naming-codemod.ts(124,13): error TS18048: 'declaration' is possibly 'undefined'.
+scripts/convex-naming-codemod.ts(125,11): error TS18048: 'declaration' is possibly 'undefined'.
+src/screens.backup/application/ApplicationDetailScreen/ApplicationDetailScreen.types.ts(6,50): error TS2344: Type '"ApplicationDetail"' does not satisfy the constraint 'keyof RootStackParamList'.
+src/screens.backup/application/ApplicationDetailScreen/ApplicationDetailScreen.types.ts(7,40): error TS2344: Type '"ApplicationDetail"' does not satisfy the constraint 'keyof RootStackParamList'.
+src/screens.backup/application/ApplicationListScreen/ApplicationListScreen.tsx(327,9): error TS2322: Type '{ icon: string; title: string; subtitle: string; buttonText: string; onButtonPress: () => void; }' is not assignable to type 'IntrinsicAttributes & EmptyStateProps'.
+  Property 'buttonText' does not exist on type 'IntrinsicAttributes & EmptyStateProps'.
+src/screens.backup/application/ApplicationListScreen/ApplicationListScreen.types.ts(5,50): error TS2344: Type '"ApplicationList"' does not satisfy the constraint 'keyof RootStackParamList'.
+src/screens.backup/application/ApplicationListScreen/ApplicationListScreen.types.ts(6,40): error TS2344: Type '"ApplicationList"' does not satisfy the constraint 'keyof RootStackParamList'.
+src/screens.backup/application/ApplyScreen/ApplyScreen.tsx(24,10): error TS2305: Module '"@entities/jobCategory"' has no exported member 'useJobCategories'.
+src/screens.backup/application/ApplyScreen/ApplyScreen.tsx(27,10): error TS2305: Module '"@entities/user"' has no exported member 'useUsers'.
+src/screens.backup/application/ApplyScreen/ApplyScreen.tsx(42,10): error TS2305: Module '"@/src/entities/application/model/types"' has no exported member 'JobCategory'.
+src/screens.backup/application/ApplyScreen/ApplyScreen.types.ts(3,10): error TS2305: Module '"@/src/entities/application/model/types"' has no exported member 'JobCategory'.
+src/screens.backup/application/ApplyScreen/ApplyScreen.types.ts(7,50): error TS2344: Type '"Apply"' does not satisfy the constraint 'keyof RootStackParamList'.
+src/screens.backup/application/ApplyScreen/ApplyScreen.types.ts(8,40): error TS2344: Type '"Apply"' does not satisfy the constraint 'keyof RootStackParamList'.
+src/screens.backup/dashboard/DashboardScreen.tsx(30,11): error TS2322: Type '{ currentApplication: { _id: Id<"applications">; _creationTime: number; status: string; applicationType: "New" | "Renew"; position: string; organization: string; jobCategory: { _id: Id<...>; name: string; colorCode: string; requireOrientation: string | ... 1 more ... | undefined; } | undefined; documentCount: number...' is not assignable to type '{ user: any; userProfile: any; userApplications: any; dashboardStats: any; recentActivities: any; currentTime: Date; unreadNotificationsCount: number; isLoading: boolean; refreshing: boolean; currentApplication: any; isNewUser: boolean; }'.
+  Types of property 'isLoading' are incompatible.
+    Type 'boolean | null | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/screens.backup/inspector/InspectorDashboardScreen.tsx(10,10): error TS2305: Module '"@entities/user"' has no exported member 'useUsers'.
+src/screens.backup/inspector/ReviewApplicationsScreen.tsx(7,10): error TS2305: Module '"@entities/user"' has no exported member 'useUsers'.
+src/screens.backup/profile/ProfileScreen.tsx(14,10): error TS2305: Module '"@entities/user"' has no exported member 'useUsers'.
+src/screens.backup/shared/DocumentRequirementsScreen.tsx(12,10): error TS2305: Module '"@/src/entities/application/model/types"' has no exported member 'JobCategory'.
+src/screens.backup/shared/DocumentRequirementsScreen.tsx(13,10): error TS2305: Module '"@entities/jobCategory"' has no exported member 'useJobCategories'.
+src/screens.backup/shared/UploadDocumentsScreen.tsx(203,47): error TS2339: Property 'filter' does not exist on type 'never[] | { application: { _id: Id<"applications">; _creationTime: number; updatedAt?: number | undefined; paymentDeadline?: number | undefined; approvedAt?: number | undefined; ... 7 more ...; applicationStatus: string; }; ... 4 more ...; totalUploaded: number; }'.
+  Property 'filter' does not exist on type '{ application: { _id: Id<"applications">; _creationTime: number; updatedAt?: number | undefined; paymentDeadline?: number | undefined; approvedAt?: number | undefined; adminRemarks?: string | undefined; ... 6 more ...; applicationStatus: string; }; ... 4 more ...; totalUploaded: number; }'.
+src/screens.backup/shared/UploadDocumentsScreen.tsx(203,54): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+src/screens.backup/shared/UploadDocumentsScreen.tsx(204,54): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+src/screens.backup/shared/UploadDocumentsScreen.tsx(211,48): error TS2339: Property 'filter' does not exist on type 'never[] | { application: { _id: Id<"applications">; _creationTime: number; updatedAt?: number | undefined; paymentDeadline?: number | undefined; approvedAt?: number | undefined; ... 7 more ...; applicationStatus: string; }; ... 4 more ...; totalUploaded: number; }'.
+  Property 'filter' does not exist on type '{ application: { _id: Id<"applications">; _creationTime: number; updatedAt?: number | undefined; paymentDeadline?: number | undefined; approvedAt?: number | undefined; adminRemarks?: string | undefined; ... 6 more ...; applicationStatus: string; }; ... 4 more ...; totalUploaded: number; }'.
+src/screens.backup/shared/UploadDocumentsScreen.tsx(211,55): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+src/screens.backup/shared/UploadDocumentsScreen.tsx(217,44): error TS2339: Property 'filter' does not exist on type 'never[] | { application: { _id: Id<"applications">; _creationTime: number; updatedAt?: number | undefined; paymentDeadline?: number | undefined; approvedAt?: number | undefined; ... 7 more ...; applicationStatus: string; }; ... 4 more ...; totalUploaded: number; }'.
+  Property 'filter' does not exist on type '{ application: { _id: Id<"applications">; _creationTime: number; updatedAt?: number | undefined; paymentDeadline?: number | undefined; approvedAt?: number | undefined; adminRemarks?: string | undefined; ... 6 more ...; applicationStatus: string; }; ... 4 more ...; totalUploaded: number; }'.
+src/screens.backup/shared/UploadDocumentsScreen.tsx(217,51): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+src/screens.backup/shared/UploadDocumentsScreen.tsx(307,33): error TS2339: Property 'map' does not exist on type 'never[] | { application: { _id: Id<"applications">; _creationTime: number; updatedAt?: number | undefined; paymentDeadline?: number | undefined; approvedAt?: number | undefined; ... 7 more ...; applicationStatus: string; }; ... 4 more ...; totalUploaded: number; }'.
+  Property 'map' does not exist on type '{ application: { _id: Id<"applications">; _creationTime: number; updatedAt?: number | undefined; paymentDeadline?: number | undefined; approvedAt?: number | undefined; adminRemarks?: string | undefined; ... 6 more ...; applicationStatus: string; }; ... 4 more ...; totalUploaded: number; }'.
+src/shared/components/types/forms.ts(11,18): error TS2430: Interface 'InputProps' incorrectly extends interface 'Omit<TextInputProps, "accessibilityRole">'.
+  Types of property 'style' are incompatible.
+    Type 'ViewStyle | ViewStyle[] | undefined' is not assignable to type 'StyleProp<TextStyle>'.
+      Type 'ViewStyle' is not assignable to type 'StyleProp<TextStyle>'.
+        Type 'ViewStyle' is not assignable to type 'TextStyle'.
+          Types of property 'userSelect' are incompatible.
+            Type 'string | undefined' is not assignable to type '"text" | "none" | "auto" | "contain" | "all" | undefined'.
+              Type 'string' is not assignable to type '"text" | "none" | "auto" | "contain" | "all" | undefined'.
+../../backend/convex/admin/adminMain.ts(207,12): error TS7030: Not all code paths return a value.
+../../backend/convex/admin/seed.ts(101,70): error TS2345: Argument of type 'Id<"jobCategories"> | undefined' is not assignable to parameter of type 'Id<"jobCategories">'.
+  Type 'undefined' is not assignable to type 'Id<"jobCategories">'.
+    Type 'undefined' is not assignable to type 'string'.
+../../backend/convex/admin/seed.ts(107,13): error TS2322: Type 'Id<"jobCategories"> | undefined' is not assignable to type 'Id<"jobCategories">'.
+  Type 'undefined' is not assignable to type 'Id<"jobCategories">'.
+    Type 'undefined' is not assignable to type 'string'.
+../../backend/convex/admin/seed.ts(108,13): error TS2322: Type 'Id<"documentTypes"> | undefined' is not assignable to type 'Id<"documentTypes">'.
+  Type 'undefined' is not assignable to type 'Id<"documentTypes">'.
+    Type 'undefined' is not assignable to type 'string'.
+../../backend/convex/users/usersMain.ts(24,13): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+../../backend/convex/users/usersMain.ts(52,7): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.

@@ -1,16 +1,23 @@
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
-import { Id, TableNames } from '@backend/convex/_generated/dataModel';
-
-type ConvexId<T extends TableNames> = Id<T>;
+import { Id } from '@backend/convex/_generated/dataModel';
+import { JobCategory } from '@/src/entities/jobCategory/model/types';
 
 export function useJobCategories(selectedCategoryId?: string) {
-  const allJobCategories = useQuery(api.jobCategories.getAllJobCategories.getAllJobCategoriesQuery);
+  const rawJobCategories = useQuery(api.jobCategories.getAllJobCategories.getAllJobCategoriesQuery);
+  
+  // Transform the data to ensure requireOrientation is always a boolean
+  const allJobCategories = rawJobCategories?.map(category => ({
+    ...category,
+    requireOrientation: typeof category.requireOrientation === 'string' 
+      ? category.requireOrientation === 'yes' 
+      : !!category.requireOrientation
+  })) as JobCategory[] | undefined;
   
   
   const requirementsByCategory = useQuery(
     api.requirements.getRequirementsByJobCategory.getRequirementsByJobCategoryQuery,
-    selectedCategoryId ? { jobCategoryId: selectedCategoryId as ConvexId<'jobCategories'> } : 'skip'
+    selectedCategoryId ? { jobCategoryId: selectedCategoryId as Id<'jobCategories'> } : 'skip'
   );
 
   const createJobCategoryMutation = useMutation(api.jobCategories.createJobCategory.createJobCategoryMutation);
@@ -27,7 +34,7 @@ export function useJobCategories(selectedCategoryId?: string) {
     return createJobCategoryMutation(input);
   };
 
-  const updateJobCategory = async (jobCategoryId: ConvexId<'jobCategories'>, updates: {
+  const updateJobCategory = async (jobCategoryId: Id<'jobCategories'>, updates: {
     name?: string;
     description?: string;
     requirements?: string[];
@@ -35,7 +42,7 @@ export function useJobCategories(selectedCategoryId?: string) {
     return updateJobCategoryMutation({ categoryId: jobCategoryId, ...updates });
   };
 
-  const deleteJobCategory = async (jobCategoryId: ConvexId<'jobCategories'>) => {
+  const deleteJobCategory = async (jobCategoryId: Id<'jobCategories'>) => {
     return deleteJobCategoryMutation({ categoryId: jobCategoryId });
   };
 

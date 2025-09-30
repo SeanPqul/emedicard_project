@@ -134,13 +134,13 @@ export const styles = StyleSheet.create({
     flex: 1,
     height: 4,
     backgroundColor: getColor('border.light'),
-    borderRadius: getBorderRadius('xs'),
+    borderRadius: getBorderRadius('sm'),
     marginRight: getSpacing('sm'),
   },
   progressFill: {
     height: '100%',
     backgroundColor: getColor('primary.main'),
-    borderRadius: getBorderRadius('xs'),
+    borderRadius: getBorderRadius('sm'),
   },
   progressText: {
     ...getTypography('bodySmall'),
@@ -249,7 +249,7 @@ export const styles = StyleSheet.create({
   retryButton: {
     paddingHorizontal: getSpacing('sm'),
     paddingVertical: getSpacing('xs'),
-    borderRadius: getBorderRadius('xs'),
+    borderRadius: getBorderRadius('sm'),
     backgroundColor: getColor('error.main'),
     marginLeft: getSpacing('sm'),
   },

@@ -139,7 +139,7 @@ export const useDocumentSelection = ({
         uri: file.uri,
         name: fileName,
         type: fileType,
-        size: fileSize,
+        size: fileSize || 0, // Ensure size is always a number
       };
 
       // Add to deferred operation queue (NOT uploaded immediately)

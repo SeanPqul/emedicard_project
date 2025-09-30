@@ -1,23 +1,23 @@
-import { useQuery, useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
-
-type ConvexId<T extends string> = Id<T>;
 
 export function useVerification(healthCardId?: string) {
   const verificationLogs = useQuery(
     api.verification.getVerificationLogsByHealthCard.getVerificationLogsByHealthCardQuery,
-    healthCardId ? { healthCardId: healthCardId as ConvexId<'healthCards'> } : "skip"
+    healthCardId ? { healthCardId: healthCardId as Id<'healthCards'> } : "skip"
   );
   const userVerificationLogs = useQuery(api.verification.getVerificationLogsByUser.getVerificationLogsByUserQuery, {});
-  const verificationStats = useQuery(api.verification.getVerificationStats.getVerificationStatsQuery, {});
+  const verificationStats = useQuery(api.verification.getVerificationStats.getVerificationStatsQuery, 
+    healthCardId ? { healthCardId: healthCardId as Id<'healthCards'> } : "skip"
+  );
 
   const createVerificationLogMutation = useMutation(api.verification.createVerificationLog.createVerificationLogMutation);
   const logQRScanMutation = useMutation(api.verification.logQRScan.logQRScanMutation);
   const logVerificationAttemptMutation = useMutation(api.verification.logVerificationAttempt.logVerificationAttemptMutation);
 
   const createVerificationLog = async (input: {
-    healthCardId: ConvexId<'healthCards'>;
+    healthCardId: Id<'healthCards'>;
     location?: string;
     metadata?: Record<string, any>;
   }) => {
@@ -25,16 +25,28 @@ export function useVerification(healthCardId?: string) {
   };
 
   const logQRScan = async (input: {
-    healthCardId: ConvexId<'healthCards'>;
-    location?: string;
-    scanResult: string;
+    verificationToken: string;
+    userAgent?: string;
+    ipAddress?: string;
+    scanLocation?: {
+      latitude: number;
+      longitude: number;
+      address?: string;
+    };
+    deviceInfo?: {
+      platform: string;
+      deviceId: string;
+      appVersion: string;
+    };
   }) => {
     return logQRScanMutation(input);
   };
 
   const logVerificationAttempt = async (input: {
-    healthCardId: ConvexId<'healthCards'>;
+    verificationToken: string;
     success: boolean;
+    userAgent?: string;
+    ipAddress?: string;
     errorMessage?: string;
   }) => {
     return logVerificationAttemptMutation(input);

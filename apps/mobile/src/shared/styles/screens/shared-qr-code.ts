@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: getSpacing('lg'),
-    paddingTop: getSpacing('xxxxl'),
+    paddingTop: getSpacing('xxxl') + 16,
     alignItems: 'center',
   },
   qrContainer: {

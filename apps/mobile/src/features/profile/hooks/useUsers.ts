@@ -1,8 +1,6 @@
-import { useQuery, useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
-
-type ConvexId<T extends string> = Id<T>;
 
 export function useUsers(role?: "applicant" | "inspector" | "admin") {
   const currentUser = useQuery(api.users.getCurrentUser.getCurrentUserQuery, {});
@@ -65,7 +63,7 @@ export function useUsers(role?: "applicant" | "inspector" | "admin") {
   };
 
   const updateUserRole = async (
-    userId: ConvexId<'users'>,
+    userId: Id<'users'>,
     role: "admin" | "applicant" | "inspector"
   ) => {
     return updateRoleMutation({ userId, role });

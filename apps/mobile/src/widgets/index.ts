@@ -4,3 +4,5 @@
 export * from './dashboard';
 export * from './apply';
 export * from './payment';
+export * from './application-detail';
+export * from './notification';

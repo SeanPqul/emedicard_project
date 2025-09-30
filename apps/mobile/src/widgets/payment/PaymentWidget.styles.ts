@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { theme } from '@shared/styles/theme';
-import { hp, wp } from '@shared/utils/responsive';
+import { hp, wp, moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
@@ -29,8 +29,8 @@ export const styles = StyleSheet.create({
     borderColor: theme.colors.border.light,
   },
   paymentOptionSelected: {
-    borderColor: theme.colors.primary.main,
-    backgroundColor: theme.colors.primary.light + '10',
+    borderColor: theme.colors.primary[500],
+    backgroundColor: theme.colors.primary[100] + '10',
   },
   paymentDetails: {
     flex: 1,
@@ -44,12 +44,12 @@ export const styles = StyleSheet.create({
   paymentDescription: {
     ...theme.typography.caption,
     color: theme.colors.text.secondary,
-    marginTop: theme.spacing.xxs,
+    marginTop: verticalScale(2),
   },
   paymentFee: {
     ...theme.typography.h4,
-    color: theme.colors.primary.main,
-    marginTop: theme.spacing.xs,
+    color: theme.colors.primary[500],
+    marginTop: verticalScale(4),
   },
   paymentDetailsContainer: {
     marginTop: theme.spacing.lg,
@@ -85,7 +85,7 @@ export const styles = StyleSheet.create({
   },
   totalValue: {
     ...theme.typography.h4,
-    color: theme.colors.primary.main,
+    color: theme.colors.primary[500],
   },
   inputContainer: {
     marginHorizontal: theme.spacing.md,
@@ -98,32 +98,32 @@ export const styles = StyleSheet.create({
   },
   textInput: {
     backgroundColor: theme.colors.background.secondary,
-    borderRadius: theme.borderRadius.md,
-    borderWidth: 1,
+    borderRadius: moderateScale(theme.borderRadius.md),
+    borderWidth: scale(1),
     borderColor: theme.colors.border.light,
-    padding: theme.spacing.md,
-    fontSize: theme.fontSize.md,
+    padding: moderateScale(theme.spacing.md),
+    fontSize: moderateScale(16),
     color: theme.colors.text.primary,
   },
   instructionsContainer: {
-    backgroundColor: theme.colors.info.light + '10',
-    marginHorizontal: theme.spacing.md,
-    marginTop: theme.spacing.lg,
-    padding: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.info.light,
+    backgroundColor: theme.colors.blue[100] + '10',
+    marginHorizontal: scale(theme.spacing.md),
+    marginTop: verticalScale(theme.spacing.lg),
+    padding: moderateScale(theme.spacing.md),
+    borderRadius: moderateScale(theme.borderRadius.md),
+    borderWidth: scale(1),
+    borderColor: theme.colors.blue[200],
   },
   instructionsTitle: {
     ...theme.typography.body,
-    color: theme.colors.info.main,
+    color: theme.colors.blue[600],
     fontWeight: '600',
-    marginBottom: theme.spacing.sm,
+    marginBottom: verticalScale(theme.spacing.sm),
   },
   instructionsText: {
     ...theme.typography.caption,
     color: theme.colors.text.secondary,
-    lineHeight: 20,
+    lineHeight: verticalScale(20),
   },
   existingPaymentContainer: {
     marginTop: theme.spacing.xl,
@@ -145,13 +145,13 @@ export const styles = StyleSheet.create({
     color: theme.colors.text.primary,
   },
   statusBadge: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xxs,
-    borderRadius: theme.borderRadius.sm,
+    paddingHorizontal: scale(theme.spacing.sm),
+    paddingVertical: verticalScale(2),
+    borderRadius: moderateScale(theme.borderRadius.sm),
   },
   statusBadgeText: {
     ...theme.typography.caption,
-    color: theme.colors.white,
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   paymentReference: {
@@ -170,6 +170,6 @@ export const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   paymentButton: {
-    backgroundColor: theme.colors.primary.main,
+    backgroundColor: theme.colors.primary[500],
   },
 });

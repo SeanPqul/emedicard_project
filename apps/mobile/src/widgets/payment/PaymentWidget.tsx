@@ -18,7 +18,7 @@ import {
   PAYMENT_METHODS,
   DIGITAL_PAYMENT_METHODS,
   MANUAL_PAYMENT_METHODS,
-  type PaymentMethod,
+  type PaymentMethodId,
   type UploadedReceipt,
 } from '@features/payment/constants';
 import { CustomButton } from '@shared/components';

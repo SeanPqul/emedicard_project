@@ -54,6 +54,7 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
       );
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [resendCooldown]);
 
   // Success animation and redirect
@@ -67,6 +68,7 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
       if (onSuccess) {
         // Custom success handler
         onSuccess(sessionId ?? undefined);
+        return undefined;
       } else if (autoRedirect) {
         // Default auto-redirect behavior
         const countdownTimer = setInterval(() => {
@@ -91,6 +93,7 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
         };
       }
     }
+    return undefined;
   }, [isVerified, scaleAnim, sessionId, onSuccess, autoRedirect, redirectPath, router]);
 
   const handleCodeChange = (text: string, index: number) => {

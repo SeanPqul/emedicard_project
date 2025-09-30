@@ -1,2 +1,2 @@
 export { JobCategoryStep } from './JobCategoryStep';
-export type { JobCategoryStepProps, JobCategory } from './JobCategoryStep.types';
+export type { JobCategoryStepProps } from './JobCategoryStep.types';

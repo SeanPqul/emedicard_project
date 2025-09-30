@@ -30,7 +30,7 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.border.medium,
   },
   stepNumber: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     fontWeight: '600' as const,
   },
   stepNumberActive: {
@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
   },
   stepTitle: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     textAlign: 'center',
     marginBottom: verticalScale(theme.spacing.sm),
   },
@@ -56,7 +56,7 @@ export const styles = StyleSheet.create({
     top: moderateScale(16),
     left: '60%',
     width: '80%',
-    height: 2,
+    height: moderateScale(2),
     zIndex: 1,
   },
   stepLineActive: {

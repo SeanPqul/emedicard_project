@@ -164,7 +164,7 @@ export function useOtpTimer(initialTime: number = 60) {
   const [isActive, setIsActive] = useState(false);
   
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
     
     if (isActive && timeLeft > 0) {
       interval = setInterval(() => {
@@ -174,7 +174,11 @@ export function useOtpTimer(initialTime: number = 60) {
       setIsActive(false);
     }
     
-    return () => clearInterval(interval);
+    return () => {
+      if (interval !== undefined) {
+        clearInterval(interval);
+      }
+    };
   }, [isActive, timeLeft]);
   
   const startTimer = useCallback(() => {

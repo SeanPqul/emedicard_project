@@ -1,1 +1,1 @@
-export { ApplyScreen as default } from '../../src/screens/application/ApplyScreen/ApplyScreen';
+export { ApplyScreen as default } from '../../src/screens/tabs/ApplyScreen';

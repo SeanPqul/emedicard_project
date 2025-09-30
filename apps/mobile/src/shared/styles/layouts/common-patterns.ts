@@ -57,7 +57,7 @@ export const commonPatterns = StyleSheet.create({
     backgroundColor: getColor('semantic.success') + '20', // 20% opacity
     paddingHorizontal: getSpacing('xs'),
     paddingVertical: getSpacing('xs'),
-    borderRadius: getBorderRadius('xs'),
+    borderRadius: getBorderRadius('sm'),
   },
   
   orientationBadge: {

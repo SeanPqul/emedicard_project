@@ -1,12 +1,22 @@
-export interface Document {
-  type: 'id_front' | 'id_back' | 'photo_with_id' | 'cedula' | 'proof_of_residency';
-  uri?: string;
-  name?: string;
+import { ApplicationFormData } from '../ApplicationTypeStep';
+import { DocumentRequirement } from '@/src/entities/application';
+import { SelectedDocuments } from '@shared/types';
+
+export interface UploadState {
+  uploading: boolean;
+  progress: number;
+  error: string | null;
+  success: boolean;
+  queued: boolean;
 }
 
 export interface UploadDocumentsStepProps {
-  documents: Document[];
-  onDocumentSelect: (type: Document['type'], uri: string, name: string) => void;
-  onDocumentRemove: (type: Document['type']) => void;
-  onSelectDocument: (type: Document['type']) => void;
+  formData: ApplicationFormData;
+  requirementsByJobCategory: DocumentRequirement[];
+  selectedDocuments: SelectedDocuments;
+  isLoading: boolean;
+  getUploadState: (documentId: string) => UploadState;
+  onDocumentPicker: (documentId: string) => void;
+  onRemoveDocument: (documentId: string) => void;
+  requirements?: any;
 }

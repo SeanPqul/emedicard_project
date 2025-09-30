@@ -59,6 +59,7 @@ export const Toast: React.FC<ToastProps> = ({
 
       return () => clearTimeout(hideTimer);
     }
+    return undefined;
   }, [visible]);
 
   const hide = () => {

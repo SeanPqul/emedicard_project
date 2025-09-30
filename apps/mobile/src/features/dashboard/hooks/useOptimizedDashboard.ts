@@ -3,7 +3,8 @@ import { useQuery } from 'convex/react';
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '@backend/convex/_generated/api';
 import { DashboardStats, RecentActivity } from '@features/dashboard/types';
-import { mobileCacheManager, JobCategory } from '@shared/lib/cache/mobileCacheManager';
+import { mobileCacheManager } from '@shared/lib/cache/mobileCacheManager';
+import { JobCategory } from '@entities/jobCategory';
 import { useNetwork } from '@shared/hooks';
 
 /**
@@ -45,8 +46,10 @@ export const useOptimizedDashboard = () => {
   // Cache job categories when fresh data arrives
   useEffect(() => {
     if (jobCategoriesQuery && Array.isArray(jobCategoriesQuery)) {
-      mobileCacheManager.cacheJobCategories(jobCategoriesQuery);
-      setCachedJobCategories(jobCategoriesQuery);
+      // Filter out categories with undefined requireOrientation before caching
+      const validCategories = jobCategoriesQuery.filter(cat => cat.requireOrientation !== undefined);
+      mobileCacheManager.cacheJobCategories(validCategories as JobCategory[]);
+      setCachedJobCategories(validCategories as JobCategory[]);
     }
   }, [jobCategoriesQuery]);
 
@@ -112,11 +115,12 @@ export const useOptimizedDashboard = () => {
     dashboardData.notifications?.forEach(notification => {
       activities.push({
         id: notification._id,
-        type: 'notification',
+        userId: user?.id || '', // userId is not part of notification object, use current user's id
+        type: 'notification_sent',
         title: notification.message || notification.title || 'New Notification',
         description: getNotificationDescription(notification),
-        timestamp: new Date(notification._creationTime || 0).toISOString(),
-        status: notification.read ? 'success' : 'pending'
+        timestamp: new Date(notification._creationTime || 0),
+        status: notification.isRead ? 'success' : 'pending'
       });
     });
 
@@ -124,10 +128,11 @@ export const useOptimizedDashboard = () => {
     dashboardData.applications?.slice(0, 2).forEach(application => {
       activities.push({
         id: application._id,
-        type: 'application',
+        userId: user?.id || '',
+        type: 'application_submitted',
         title: `Health Card Application ${application.status || 'Pending'}`,
         description: `Application for ${application.applicationType || 'health card'} is now ${application.status?.toLowerCase() || 'pending'}`,
-        timestamp: new Date(application._creationTime || 0).toISOString(),
+        timestamp: new Date(application._creationTime || 0),
         status: getApplicationActivityStatus(application.status || 'pending')
       });
     });
@@ -136,10 +141,11 @@ export const useOptimizedDashboard = () => {
       if (payment) {
         activities.push({
           id: payment._id,
-          type: 'payment',
+          userId: user?.id || '',
+          type: 'payment_made',
           title: `Payment ${payment.status}`,
-          description: `?${payment.netAmount.toFixed(2)} payment via ${payment.method}`,
-          timestamp: new Date(payment.updatedAt || payment._creationTime || 0).toISOString(),
+          description: `?${payment.netAmount.toFixed(2)} payment via ${payment.paymentMethod}`,
+          timestamp: new Date(payment.updatedAt || payment._creationTime || 0),
           status: payment.status === 'Complete' ? 'success' : payment.status === 'Failed' ? 'error' : 'pending'
         });
       }
@@ -187,7 +193,7 @@ export const useOptimizedDashboard = () => {
 
   // Helper to get job category by ID (optimized with memoization)
   const getJobCategoryById = useMemo(() => (id: string) => {
-    return jobCategories.find((cat: JobCategory) => cat._id === id);
+    return jobCategories.find((cat: any) => cat._id === id) as JobCategory | undefined;
   }, [jobCategories]);
 
   return {

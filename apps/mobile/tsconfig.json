@@ -26,6 +26,7 @@
       "@entities/*": ["./src/entities/*"],
       "@processes/*": ["./src/processes/*"],
       "@shared/*": ["./src/shared/*"],
+      "@widgets/*": ["./src/widgets/*"],
       "@core/*": ["./src/core/*"],
       "@types/*": ["./src/types/*"],
       "@backend/convex/*": ["../../backend/convex/*"],

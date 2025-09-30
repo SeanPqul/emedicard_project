@@ -153,14 +153,16 @@ export function useMayaPayment(): UseMayaPaymentReturn {
         logPaymentEvent('Using existing checkout session', { paymentId });
       }
 
-      // Open Maya checkout
-      const result = await openMayaCheckout(checkoutUrl, paymentId);
+      // Open Maya checkout - paymentId is already string from backend response
+      const result = await openMayaCheckout(checkoutUrl, paymentId as Id<"payments">);
       
       if (result.waitingForReturn) {
         // Payment is being processed in Maya app
         updateState({ paymentResult: 'processing' });
+        // Ensure result has success property for consistency
+        return { ...result, success: true };
       }
-
+      
       return result;
 
     } catch (error) {

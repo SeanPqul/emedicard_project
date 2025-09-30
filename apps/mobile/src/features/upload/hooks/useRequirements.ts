@@ -1,18 +1,16 @@
-import { useQuery, useMutation, useAction } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
-
-type ConvexId<T extends string> = Id<T>;
 
 export function useRequirements(jobCategoryId?: string, formId?: string) {
   const jobCategoryRequirements = useQuery(
     api.requirements.getJobCategoryRequirements.getJobCategoryRequirementsQuery,
-    jobCategoryId ? { jobCategoryId: jobCategoryId as ConvexId<'jobCategories'> } : "skip"
+    jobCategoryId ? { jobCategoryId: jobCategoryId as Id<'jobCategories'> } : "skip"
   );
   
   const formDocuments = useQuery(
     api.requirements.getFormDocumentsRequirements.getApplicationDocumentsRequirementsQuery,
-    formId ? { applicationId: formId as ConvexId<'applications'> } : "skip"
+    formId ? { applicationId: formId as Id<'applications'> } : "skip"
   );
 
   const uploadDocumentMutation = useMutation(api.requirements.uploadDocuments.uploadDocumentsMutation);
@@ -21,39 +19,41 @@ export function useRequirements(jobCategoryId?: string, formId?: string) {
   const generateUploadUrlMutation = useMutation(api.storage.generateUploadUrl.generateUploadUrlMutation);
 
   const uploadDocument = async (input: {
-    applicationId: ConvexId<'applications'>;
-    fieldIdentifier: string; // Changed from fieldName to fieldIdentifier to match backend
-    storageId: ConvexId<'_storage'>;
+    applicationId: Id<'applications'>;
+    fieldName: string;
+    fieldIdentifier: string;
+    storageId: Id<'_storage'>;
     fileName: string;
     fileType: string;
     fileSize: number;
-    adminRemarks?: string;
     reviewStatus?: 'Pending' | 'Approved' | 'Rejected';
-    reviewedBy?: ConvexId<'users'>;
+    reviewedBy?: Id<'users'>;
     reviewedAt?: number;
+    remarks?: string;
   }) => {
     return uploadDocumentMutation(input);
   };
 
   const updateDocumentField = async (input: {
-    applicationId: ConvexId<'applications'>;
-    fieldIdentifier: string; // Changed from fieldName to fieldIdentifier to match backend
-    storageId: ConvexId<'_storage'>;
+    applicationId: Id<'applications'>;
+    fieldName: string;
+    fieldIdentifier: string;
+    storageId: Id<'_storage'>;
     fileName: string;
     fileType: string;
     fileSize: number;
-    adminRemarks?: string;
     reviewStatus?: 'Pending' | 'Approved' | 'Rejected';
-    reviewedBy?: ConvexId<'users'>;
+    reviewedBy?: Id<'users'>;
     reviewedAt?: number;
+    remarks?: string;
   }) => {
     return updateDocumentFieldMutation(input);
   };
 
   const deleteDocument = async (input: {
-    applicationId: ConvexId<'applications'>;
+    applicationId: Id<'applications'>;
     fieldName: string;
-    storageId: ConvexId<'_storage'>;
+    storageId: Id<'_storage'>;
   }) => {
     return deleteDocumentMutation(input);
   };

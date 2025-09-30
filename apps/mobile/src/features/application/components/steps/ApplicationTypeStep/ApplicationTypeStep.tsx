@@ -3,40 +3,45 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ApplicationTypeStepProps, ApplicationType } from './ApplicationTypeStep.types';
 import styles from './ApplicationTypeStep.styles';
-import { getColor } from '@shared/styles/theme';
+import { theme } from '@shared/styles/theme';
+import { moderateScale } from '@shared/utils/responsive';
 
-export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = ({ value, onChange }) => {
+export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = ({
+  formData,
+  setFormData,
+  errors,
+}) => {
   const renderOption = (type: ApplicationType, icon: string, title: string, description: string) => (
     <TouchableOpacity
       style={[
         styles.optionCard,
-        value === type && styles.optionCardSelected
+        formData.applicationType === type && styles.optionCardSelected
       ]}
-      onPress={() => onChange(type)}
+      onPress={() => setFormData({ ...formData, applicationType: type })}
       activeOpacity={0.7}
     >
       <View style={[
         styles.iconContainer,
-        value === type && styles.iconContainerSelected
+        formData.applicationType === type && styles.iconContainerSelected
       ]}>
         <Ionicons 
           name={icon as any} 
-          size={32} 
-          color={value === type ? getColor('white') : getColor('primary.500')} 
+          size={moderateScale(32)} 
+          color={formData.applicationType === type ? theme.colors.background.primary : theme.colors.brand.secondary} 
         />
       </View>
       <View style={styles.optionContent}>
         <Text style={[
           styles.optionTitle,
-          value === type && styles.optionTitleSelected
+          formData.applicationType === type && styles.optionTitleSelected
         ]}>{title}</Text>
         <Text style={styles.optionDescription}>{description}</Text>
       </View>
       <View style={[
         styles.radioButton,
-        value === type && styles.radioButtonSelected
+        formData.applicationType === type && styles.radioButtonSelected
       ]}>
-        {value === type && (
+        {formData.applicationType === type && (
           <View style={styles.radioButtonInner} />
         )}
       </View>
@@ -65,6 +70,15 @@ export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = ({ value,
           'Renew your existing eHealth Card'
         )}
       </View>
+      
+      {errors.applicationType && (
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+          <Text style={styles.errorText}>
+            {errors.applicationType}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };

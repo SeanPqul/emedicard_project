@@ -3,7 +3,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 
-interface UseAbandonedPaymentOptions {
+export interface UseAbandonedPaymentOptions {
   applicationId: Id<"applications"> | null;
   autoCheck?: boolean;
   checkInterval?: number; // milliseconds

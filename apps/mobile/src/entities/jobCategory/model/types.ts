@@ -6,12 +6,13 @@ export interface JobCategory {
   name: string;
   description?: string;
   colorCode: string;
-  requireOrientation: boolean;
+  requireOrientation: boolean | string; // Can be boolean or string ('yes'/'no') depending on backend
   requirements?: string[];
+  isActive?: boolean; // Optional for compatibility with cache manager
 }
 
 export interface JobCategoryRequirement {
-  _id: Id<'requirements'>;
+  _id: string; // Changed from Id<'requirements'> as 'requirements' is not a valid table
   _creationTime: number;
   jobCategoryId: Id<'jobCategories'>;
   fieldName: string;

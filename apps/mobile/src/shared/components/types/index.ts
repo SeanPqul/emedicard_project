@@ -57,7 +57,15 @@ export type {
   FlexDirection,
   JustifyContent,
   AlignItems,
-} from '@types/design-system';
+} from '@/src/types/design-system';
+
+// Typography component types (re-export from design-system for consistency)
+export type {
+  DesignSystemTextProps,
+  FontWeight,
+  TypographyVariant,
+  TypographyProps,
+} from '@/src/types/design-system';
 
 // Navigation component types
 export interface NavigationWrapperProps {
@@ -80,12 +88,4 @@ export interface StepNavigationProps {
   completedStepStyle?: any;
 }
 
-// Responsive component types
-export interface ResponsiveLayoutProps {
-  children: React.ReactNode;
-  breakpoint?: 'sm' | 'md' | 'lg' | 'xl';
-  columns?: number;
-  spacing?: number;
-  containerStyle?: any;
-}
 

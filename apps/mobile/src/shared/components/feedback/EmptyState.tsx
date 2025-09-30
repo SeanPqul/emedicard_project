@@ -1,4 +1,5 @@
-import { getBorderRadius, getColor, getSpacing, getTypography } from '@shared/styles/theme';
+import { theme } from '@shared/styles/theme';
+import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -33,7 +34,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     >
       {icon && (
         <View style={styles.iconContainer}>
-          <Ionicons name={icon as any} size={48} color={getColor('text.tertiary')} />
+          <Ionicons name={icon as any} size={moderateScale(48)} color={theme.colors.text.tertiary} />
         </View>
       )}
       <Text style={styles.title}>{title}</Text>
@@ -59,45 +60,48 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: getSpacing('xl'),
-    paddingVertical: getSpacing('xxl'),
-    backgroundColor: getColor('background.primary'),
-    borderRadius: getBorderRadius('lg'),
+    paddingHorizontal: scale(theme.spacing.xl),
+    paddingVertical: verticalScale(theme.spacing.xxl),
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: theme.borderRadius.lg,
   },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: getBorderRadius('full'),
-    backgroundColor: getColor('background.secondary'),
+    width: moderateScale(80),
+    height: moderateScale(80),
+    borderRadius: theme.borderRadius.full,
+    backgroundColor: theme.colors.background.secondary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: getSpacing('md'),
+    marginBottom: verticalScale(theme.spacing.md),
   },
   title: {
-    ...getTypography('h4'),
-    color: getColor('text.primary'),
-    marginBottom: getSpacing('sm'),
+    fontSize: moderateScale(theme.typography.h4.fontSize),
+    fontWeight: theme.typography.h4.fontWeight,
+    lineHeight: moderateScale(theme.typography.h4.lineHeight),
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(theme.spacing.sm),
     textAlign: 'center',
   },
   subtitle: {
-    ...getTypography('body'),
-    color: getColor('text.secondary'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    lineHeight: moderateScale(24),
+    color: theme.colors.text.secondary,
     textAlign: 'center',
-    marginBottom: getSpacing('lg'),
-    lineHeight: 24,
+    marginBottom: verticalScale(theme.spacing.lg),
   },
   button: {
-    backgroundColor: getColor('accent.medicalBlue'),
-    paddingHorizontal: getSpacing('lg'),
-    paddingVertical: getSpacing('md'),
-    borderRadius: getBorderRadius('md'),
-    minHeight: 44,
+    backgroundColor: theme.colors.accent.medicalBlue,
+    paddingHorizontal: scale(theme.spacing.lg),
+    paddingVertical: verticalScale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    minHeight: moderateScale(44),
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonText: {
-    ...getTypography('button'),
-    color: getColor('text.inverse'),
-    fontWeight: '600',
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.text.inverse,
   },
 });

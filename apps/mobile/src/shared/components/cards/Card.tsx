@@ -7,7 +7,7 @@
 import React from 'react';
 import { TouchableOpacity, View, ViewStyle } from 'react-native';
 import { cardVariants, getSpacing } from '@shared/styles';
-import { CardStyleProps, BaseComponentProps, CardVariant } from '@/src/types/design-system';
+import type { CardStyleProps, BaseComponentProps, CardVariant } from '@/src/types/design-system';
 
 export interface CardProps extends BaseComponentProps, CardStyleProps {
   children: React.ReactNode;

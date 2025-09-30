@@ -1,13 +1,9 @@
-export interface JobCategory {
-  _id: string;
-  name: string;
-  colorCode: string;
-  requireOrientation: string;
-}
+import { ApplicationFormData } from '../ApplicationTypeStep';
+import { JobCategory } from '@/src/entities/application';
 
 export interface JobCategoryStepProps {
-  value: string | null;
-  onChange: (categoryId: string) => void;
-  categories?: JobCategory[];
-  isLoading?: boolean;
+  formData: ApplicationFormData;
+  setFormData: (data: ApplicationFormData) => void;
+  errors: Record<string, string>;
+  jobCategoriesData: JobCategory[];
 }

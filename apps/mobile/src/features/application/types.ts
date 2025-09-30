@@ -51,29 +51,11 @@ export interface ApplicationPayment {
   paidAt?: Date;
 }
 
-export interface ApplicationFormData {
-  applicationType: 'New' | 'Renew' | '';
-  jobCategory: string;
-  // Personal details
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  position: string;
-  organization: string;
-  address: string;
-  city: string;
-  province: string;
-  zipCode: string;
-  dateOfBirth: string;
-  gender: string;
-  civilStatus: string;
-  nationality: string;
-  // Job details
-  jobSalary?: string;
-  employmentStatus?: string;
-  workLocation?: string;
-  startDate?: string;
-}
+// ApplicationFormData is now defined and exported from ./services/applicationService
+// Re-export it here for backward compatibility
+export type { ApplicationFormData } from './services/applicationService';
 
-// Form-specific types are now defined in entities/(screens)/(shared)/(screens)/(shared)/application/model/types.ts
+// Import for local use
+import type { ApplicationFormData } from './services/applicationService';
+
+// Form-specific types are now defined in entities/application/model/types.ts

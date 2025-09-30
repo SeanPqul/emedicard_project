@@ -12,8 +12,8 @@ import { validateApplicationStep, ApplicationFormData as BaseApplicationFormData
 
 export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
 
-// Re-export for convenience
-export { ApplicationType, CivilStatus } from '../lib/validation';
+// Note: ApplicationType and CivilStatus are re-exported from types.ts
+// Don't re-export here to avoid duplicate export errors
 
 // Extend the base form data to include payment fields
 export interface ApplicationFormData extends BaseApplicationFormData {

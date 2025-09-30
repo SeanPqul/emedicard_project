@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
     paddingBottom: verticalScale(theme.spacing.xl),
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600' as const,
     color: theme.colors.text.primary,
     textAlign: 'center',
@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.lg,
   },
   imagePickerOptionText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: theme.colors.text.primary,
     marginLeft: scale(theme.spacing.md),
     flex: 1,
@@ -43,11 +43,11 @@ export const styles = StyleSheet.create({
     paddingVertical: verticalScale(theme.spacing.md),
     alignItems: 'center',
     borderRadius: theme.borderRadius.lg,
-    borderWidth: 1,
+    borderWidth: moderateScale(1),
     borderColor: theme.colors.border.medium,
   },
   modalCancelText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: theme.colors.text.secondary,
     fontWeight: '500' as const,
   },

@@ -6,37 +6,47 @@
  */
 
 import { StyleSheet } from 'react-native';
-import { theme, getColor, getSpacing, getBorderRadius, getShadow, getTypography, colorWithOpacity } from '../theme';
+import { theme, getShadow, colorWithOpacity } from '../theme';
+import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
+
+// ===== TYPE EXPORTS =====
+// Derive types from the actual StyleSheet objects for type safety
+export type ButtonVariant = keyof typeof buttonVariants;
+export type ButtonSize = keyof typeof buttonSizeVariants;
+export type CardVariant = keyof typeof cardVariants;
+export type BadgeVariant = keyof typeof badgeVariants;
+export type InputVariant = keyof typeof inputVariants;
+export type InputState = 'base' | 'focused' | 'error' | 'success' | 'disabled';
 
 // ===== BUTTON VARIANTS =====
 export const buttonVariants = StyleSheet.create({
   base: {
-    borderRadius: getBorderRadius('lg'),
+    borderRadius: theme.borderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-    minHeight: 44, // Accessibility minimum touch target
-    minWidth: 44,
-    paddingHorizontal: getSpacing('lg'),
-    paddingVertical: getSpacing('md'),
+    minHeight: moderateScale(44), // Accessibility minimum touch target
+    minWidth: moderateScale(44),
+    paddingHorizontal: scale(theme.spacing.lg),
+    paddingVertical: verticalScale(theme.spacing.md),
   },
   
   // Primary variant
   primary: {
-    backgroundColor: getColor('primary.500'),
+    backgroundColor: theme.colors.primary[500],
     ...getShadow('medium'),
   },
   
   // Secondary variant
   secondary: {
-    backgroundColor: getColor('gray.500'),
+    backgroundColor: theme.colors.gray[500],
     ...getShadow('medium'),
   },
   
   // Tertiary variant
   tertiary: {
     backgroundColor: colorWithOpacity[10]('primary.500'),
-    borderWidth: 1,
+    borderWidth: moderateScale(1),
     borderColor: colorWithOpacity[20]('primary.500'),
     shadowOpacity: 0,
     elevation: 0,
@@ -45,8 +55,8 @@ export const buttonVariants = StyleSheet.create({
   // Outline variant
   outline: {
     backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: getColor('primary.500'),
+    borderWidth: moderateScale(1),
+    borderColor: theme.colors.primary[500],
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -60,25 +70,25 @@ export const buttonVariants = StyleSheet.create({
   
   // Success variant
   success: {
-    backgroundColor: getColor('semantic.success'),
+    backgroundColor: theme.colors.semantic.success,
     ...getShadow('medium'),
   },
   
   // Warning variant
   warning: {
-    backgroundColor: getColor('semantic.warning'),
+    backgroundColor: theme.colors.semantic.warning,
     ...getShadow('medium'),
   },
   
   // Error variant
   error: {
-    backgroundColor: getColor('semantic.error'),
+    backgroundColor: theme.colors.semantic.error,
     ...getShadow('medium'),
   },
   
   // Disabled state
   disabled: {
-    backgroundColor: getColor('gray.400'),
+    backgroundColor: theme.colors.gray[400],
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -87,68 +97,86 @@ export const buttonVariants = StyleSheet.create({
 // Button text styles
 export const buttonTextVariants = StyleSheet.create({
   primary: {
-    ...getTypography('button'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.text.inverse,
   },
   secondary: {
-    ...getTypography('button'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.text.inverse,
   },
   tertiary: {
-    ...getTypography('button'),
-    color: getColor('primary.700'),
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.primary[700],
   },
   outline: {
-    ...getTypography('button'),
-    color: getColor('primary.500'),
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.primary[500],
   },
   ghost: {
-    ...getTypography('button'),
-    color: getColor('primary.500'),
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.primary[500],
   },
   success: {
-    ...getTypography('button'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.text.inverse,
   },
   warning: {
-    ...getTypography('button'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.text.inverse,
   },
   error: {
-    ...getTypography('button'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.text.inverse,
   },
   disabled: {
-    ...getTypography('button'),
-    color: getColor('text.tertiary'),
+    fontSize: moderateScale(theme.typography.button.fontSize),
+    fontWeight: theme.typography.button.fontWeight,
+    lineHeight: moderateScale(theme.typography.button.lineHeight),
+    color: theme.colors.text.tertiary,
   },
 });
 
 // Button size variants
 export const buttonSizeVariants = StyleSheet.create({
   small: {
-    height: 36,
-    paddingHorizontal: getSpacing('md'),
-    paddingVertical: getSpacing('sm'),
+    height: moderateScale(36),
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingVertical: verticalScale(theme.spacing.sm),
   },
   medium: {
-    height: 44,
-    paddingHorizontal: getSpacing('lg'),
-    paddingVertical: getSpacing('md'),
+    height: moderateScale(44),
+    paddingHorizontal: scale(theme.spacing.lg),
+    paddingVertical: verticalScale(theme.spacing.md),
   },
   large: {
-    height: 52,
-    paddingHorizontal: getSpacing('xl'),
-    paddingVertical: getSpacing('lg'),
+    height: moderateScale(52),
+    paddingHorizontal: scale(theme.spacing.xl),
+    paddingVertical: verticalScale(theme.spacing.lg),
   },
 });
 
 // ===== CARD VARIANTS =====
 export const cardVariants = StyleSheet.create({
   base: {
-    backgroundColor: getColor('background.primary'),
-    borderRadius: getBorderRadius('lg'),
-    padding: getSpacing('lg'),
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: theme.borderRadius.lg,
+    padding: scale(theme.spacing.lg),
   },
   
   // Default card with shadow
@@ -159,7 +187,7 @@ export const cardVariants = StyleSheet.create({
   // Flat card without shadow
   flat: {
     borderWidth: 1,
-    borderColor: getColor('border.light'),
+    borderColor: theme.colors.border.light,
   },
   
   // Elevated card with larger shadow
@@ -201,9 +229,9 @@ export const cardVariants = StyleSheet.create({
 // ===== BADGE VARIANTS =====
 export const badgeVariants = StyleSheet.create({
   base: {
-    paddingHorizontal: getSpacing('sm'),
-    paddingVertical: getSpacing('xs'),
-    borderRadius: getBorderRadius('full'),
+    paddingHorizontal: scale(theme.spacing.sm),
+    paddingVertical: verticalScale(theme.spacing.xs),
+    borderRadius: theme.borderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
@@ -211,96 +239,105 @@ export const badgeVariants = StyleSheet.create({
   
   // Status badges
   success: {
-    backgroundColor: getColor('semantic.success'),
+    backgroundColor: theme.colors.semantic.success,
   },
   
   warning: {
-    backgroundColor: getColor('semantic.warning'),
+    backgroundColor: theme.colors.semantic.warning,
   },
   
   error: {
-    backgroundColor: getColor('semantic.error'),
+    backgroundColor: theme.colors.semantic.error,
   },
   
   info: {
-    backgroundColor: getColor('semantic.info'),
+    backgroundColor: theme.colors.semantic.info,
   },
   
   neutral: {
-    backgroundColor: getColor('gray.500'),
+    backgroundColor: theme.colors.gray[500],
   },
   
   // Outline badges
   successOutline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: getColor('semantic.success'),
+    borderColor: theme.colors.semantic.success,
   },
   
   warningOutline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: getColor('semantic.warning'),
+    borderColor: theme.colors.semantic.warning,
   },
   
   errorOutline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: getColor('semantic.error'),
+    borderColor: theme.colors.semantic.error,
   },
   
   infoOutline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: getColor('semantic.info'),
+    borderColor: theme.colors.semantic.info,
   },
 });
 
 // Badge text styles
 export const badgeTextVariants = StyleSheet.create({
   success: {
-    ...getTypography('caption'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.text.inverse,
     fontWeight: '600',
   },
   warning: {
-    ...getTypography('caption'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.text.inverse,
     fontWeight: '600',
   },
   error: {
-    ...getTypography('caption'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.text.inverse,
     fontWeight: '600',
   },
   info: {
-    ...getTypography('caption'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.text.inverse,
     fontWeight: '600',
   },
   neutral: {
-    ...getTypography('caption'),
-    color: getColor('text.inverse'),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.text.inverse,
     fontWeight: '600',
   },
   successOutline: {
-    ...getTypography('caption'),
-    color: getColor('semantic.success'),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.semantic.success,
     fontWeight: '600',
   },
   warningOutline: {
-    ...getTypography('caption'),
-    color: getColor('semantic.warning'),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.semantic.warning,
     fontWeight: '600',
   },
   errorOutline: {
-    ...getTypography('caption'),
-    color: getColor('semantic.error'),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.semantic.error,
     fontWeight: '600',
   },
   infoOutline: {
-    ...getTypography('caption'),
-    color: getColor('semantic.info'),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.semantic.info,
     fontWeight: '600',
   },
 });
@@ -308,35 +345,36 @@ export const badgeTextVariants = StyleSheet.create({
 // ===== INPUT VARIANTS =====
 export const inputVariants = StyleSheet.create({
   base: {
-    borderRadius: getBorderRadius('md'),
-    paddingHorizontal: getSpacing('md'),
-    paddingVertical: getSpacing('md'),
-    ...getTypography('body'),
-    color: getColor('text.primary'),
-    backgroundColor: getColor('background.primary'),
+    borderRadius: theme.borderRadius.md,
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingVertical: verticalScale(theme.spacing.md),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    lineHeight: moderateScale(theme.typography.body.lineHeight),
+    color: theme.colors.text.primary,
+    backgroundColor: theme.colors.background.primary,
     borderWidth: 1,
-    borderColor: getColor('border.light'),
+    borderColor: theme.colors.border.light,
     minHeight: 48, // Accessibility minimum touch target
   },
   
   focused: {
-    borderColor: getColor('primary.500'),
+    borderColor: theme.colors.primary[500],
     borderWidth: 2,
   },
   
   error: {
-    borderColor: getColor('semantic.error'),
+    borderColor: theme.colors.semantic.error,
     borderWidth: 1,
   },
   
   success: {
-    borderColor: getColor('semantic.success'),
+    borderColor: theme.colors.semantic.success,
     borderWidth: 1,
   },
   
   disabled: {
-    backgroundColor: getColor('gray.100'),
-    color: getColor('text.tertiary'),
+    backgroundColor: theme.colors.gray[100],
+    color: theme.colors.text.tertiary,
   },
 });
 
@@ -345,17 +383,17 @@ export const iconButtonVariants = StyleSheet.create({
   base: {
     width: 44,
     height: 44,
-    borderRadius: getBorderRadius('full'),
+    borderRadius: theme.borderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
   },
   
   primary: {
-    backgroundColor: getColor('primary.500'),
+    backgroundColor: theme.colors.primary[500],
   },
   
   secondary: {
-    backgroundColor: getColor('gray.500'),
+    backgroundColor: theme.colors.gray[500],
   },
   
   ghost: {
@@ -365,6 +403,6 @@ export const iconButtonVariants = StyleSheet.create({
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: getColor('border.medium'),
+    borderColor: theme.colors.border.medium,
   },
 });

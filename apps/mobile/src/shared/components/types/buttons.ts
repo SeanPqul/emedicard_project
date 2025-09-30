@@ -5,7 +5,7 @@
  */
 
 import { TouchableOpacityProps, ViewStyle, TextStyle } from 'react-native';
-import { BaseComponentProps } from '@types/design-system';
+import { BaseComponentProps } from '@/src/types/design-system';
 
 // ===== CTA BUTTON TYPES =====
 export interface CTAButtonProps extends TouchableOpacityProps {

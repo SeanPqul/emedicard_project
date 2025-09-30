@@ -1,72 +1,73 @@
 import { StyleSheet } from 'react-native';
-import { 
-  getColor, 
-  getSpacing, 
-  getBorderRadius, 
-  getTypography, 
-  getShadow 
-} from '@shared/styles/theme';
-import { hp, wp } from '@shared/utils/responsive';
+import { theme } from '@shared/styles/theme';
+import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: getSpacing('md'),
-    paddingTop: getSpacing('sm'),
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingTop: verticalScale(theme.spacing.sm),
   },
 
   heading: {
-    ...getTypography('h3'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.h3.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '700',
-    marginBottom: getSpacing('sm'),
+    marginBottom: verticalScale(theme.spacing.sm),
   },
 
   description: {
-    ...getTypography('body'),
-    color: getColor('text.secondary'),
-    lineHeight: 20,
-    marginBottom: getSpacing('lg'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(20),
+    marginBottom: verticalScale(theme.spacing.lg),
   },
 
   // Review Card Styles
   reviewCard: {
-    backgroundColor: getColor('background.primary'),
-    borderRadius: getBorderRadius('lg'),
-    ...getShadow('medium'),
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: theme.borderRadius.lg,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: moderateScale(4),
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: moderateScale(8),
+    elevation: 4,
     overflow: 'hidden',
-    marginBottom: getSpacing('lg'),
+    marginBottom: verticalScale(theme.spacing.lg),
   },
 
   reviewSection: {
-    padding: getSpacing('md'),
-    borderBottomWidth: 1,
-    borderBottomColor: getColor('border.light'),
+    padding: scale(theme.spacing.md),
+    borderBottomWidth: moderateScale(1),
+    borderBottomColor: theme.colors.border.light,
   },
 
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: getSpacing('md'),
+    marginBottom: verticalScale(theme.spacing.md),
   },
 
   sectionTitle: {
-    ...getTypography('h4'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.h4.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '700',
   },
 
   editButton: {
-    backgroundColor: getColor('accent.medicalBlue') + '10',
-    paddingHorizontal: getSpacing('sm'),
-    paddingVertical: getSpacing('xs'),
-    borderRadius: getBorderRadius('sm'),
+    backgroundColor: theme.colors.brand.primary + '10',
+    paddingHorizontal: scale(theme.spacing.sm),
+    paddingVertical: verticalScale(theme.spacing.xs),
+    borderRadius: theme.borderRadius.sm,
   },
 
   editButtonText: {
-    ...getTypography('bodySmall'),
-    color: getColor('accent.medicalBlue'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.brand.primary,
     fontWeight: '600',
   },
 
@@ -75,9 +76,9 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: getSpacing('sm'),
-    borderBottomWidth: 1,
-    borderBottomColor: getColor('border.light'),
+    paddingVertical: verticalScale(theme.spacing.sm),
+    borderBottomWidth: moderateScale(1),
+    borderBottomColor: theme.colors.border.light,
   },
 
   lastItem: {
@@ -85,14 +86,14 @@ export const styles = StyleSheet.create({
   },
 
   detailLabel: {
-    ...getTypography('body'),
-    color: getColor('text.secondary'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.secondary,
     flex: 1,
   },
 
   detailValue: {
-    ...getTypography('body'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '500',
     textAlign: 'right',
     flex: 2,
@@ -100,7 +101,7 @@ export const styles = StyleSheet.create({
 
   totalAmount: {
     fontWeight: '700',
-    color: getColor('accent.medicalBlue'),
+    color: theme.colors.brand.primary,
   },
 
   // Job Category Styles
@@ -112,10 +113,10 @@ export const styles = StyleSheet.create({
   },
 
   colorIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: getSpacing('sm'),
+    width: moderateScale(12),
+    height: moderateScale(12),
+    borderRadius: moderateScale(6),
+    marginRight: scale(theme.spacing.sm),
   },
 
   // Document Status Styles
@@ -123,122 +124,122 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingVertical: getSpacing('sm'),
-    borderBottomWidth: 1,
-    borderBottomColor: getColor('border.light'),
+    paddingVertical: verticalScale(theme.spacing.sm),
+    borderBottomWidth: moderateScale(1),
+    borderBottomColor: theme.colors.border.light,
   },
 
   documentContent: {
     flex: 1,
-    marginRight: getSpacing('md'),
+    marginRight: scale(theme.spacing.md),
   },
 
   documentTitle: {
-    ...getTypography('body'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '500',
-    marginBottom: 2,
+    marginBottom: verticalScale(2),
   },
 
   requiredAsterisk: {
-    color: getColor('semantic.error'),
+    color: theme.colors.semantic.error,
     fontWeight: '700',
   },
 
   documentFileName: {
-    ...getTypography('bodySmall'),
-    color: getColor('text.secondary'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.text.secondary,
     fontStyle: 'italic',
   },
 
   documentStatus: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: getSpacing('xs'),
+    gap: scale(theme.spacing.xs),
   },
 
   documentStatusText: {
-    ...getTypography('bodySmall'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
     fontWeight: '500',
   },
 
   // Fee Note Styles
   feeNote: {
-    ...getTypography('bodySmall'),
-    color: getColor('text.secondary'),
-    lineHeight: 18,
-    marginBottom: getSpacing('md'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(18),
+    marginBottom: verticalScale(theme.spacing.md),
     fontStyle: 'italic',
   },
 
   // Orientation Notice Styles
   orientationNotice: {
-    backgroundColor: '#F18F01' + '10',
-    padding: getSpacing('md'),
-    borderRadius: getBorderRadius('md'),
-    borderLeftWidth: 4,
-    borderLeftColor: '#F18F01',
+    backgroundColor: theme.colors.semantic.warning + '10',
+    padding: scale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    borderLeftWidth: moderateScale(4),
+    borderLeftColor: theme.colors.semantic.warning,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    margin: getSpacing('md'),
+    margin: scale(theme.spacing.md),
   },
 
   orientationText: {
-    ...getTypography('bodySmall'),
-    color: '#F18F01',
-    lineHeight: 18,
-    marginLeft: getSpacing('sm'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.semantic.warning,
+    lineHeight: moderateScale(18),
+    marginLeft: scale(theme.spacing.sm),
     flex: 1,
   },
 
   // Validation Warning Styles
   validationWarning: {
-    backgroundColor: getColor('semantic.error') + '10',
-    padding: getSpacing('md'),
-    borderRadius: getBorderRadius('md'),
-    borderLeftWidth: 4,
-    borderLeftColor: getColor('semantic.error'),
-    margin: getSpacing('md'),
+    backgroundColor: theme.colors.semantic.error + '10',
+    padding: scale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    borderLeftWidth: moderateScale(4),
+    borderLeftColor: theme.colors.semantic.error,
+    margin: scale(theme.spacing.md),
   },
 
   validationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: getSpacing('sm'),
+    marginBottom: verticalScale(theme.spacing.sm),
   },
 
   validationTitle: {
-    ...getTypography('body'),
-    color: getColor('semantic.error'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.semantic.error,
     fontWeight: '700',
-    marginLeft: getSpacing('sm'),
+    marginLeft: scale(theme.spacing.sm),
   },
 
   validationMessage: {
-    ...getTypography('bodySmall'),
-    color: getColor('semantic.error'),
-    lineHeight: 18,
-    marginTop: getSpacing('xs'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.semantic.error,
+    lineHeight: moderateScale(18),
+    marginTop: verticalScale(theme.spacing.xs),
   },
 
   // Terms and Conditions Styles
   termsContainer: {
-    backgroundColor: getColor('background.secondary'),
-    padding: getSpacing('md'),
-    borderRadius: getBorderRadius('md'),
-    marginBottom: getSpacing('xl'),
+    backgroundColor: theme.colors.background.secondary,
+    padding: scale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    marginBottom: verticalScale(theme.spacing.xl),
   },
 
   termsTitle: {
-    ...getTypography('body'),
-    color: getColor('text.primary'),
+    fontSize: moderateScale(theme.typography.body.fontSize),
+    color: theme.colors.text.primary,
     fontWeight: '600',
-    marginBottom: getSpacing('sm'),
+    marginBottom: verticalScale(theme.spacing.sm),
   },
 
   termsText: {
-    ...getTypography('bodySmall'),
-    color: getColor('text.secondary'),
-    lineHeight: 18,
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(18),
   },
 });

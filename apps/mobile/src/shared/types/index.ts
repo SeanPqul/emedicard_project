@@ -7,7 +7,7 @@ export interface DocumentFile {
   uri: string;
   name: string;
   type: string;
-  size?: number;
+  size: number; // Required to match UploadFile type
   mimeType?: string;
   fileName?: string;
 }

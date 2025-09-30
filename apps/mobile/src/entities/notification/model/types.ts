@@ -48,3 +48,19 @@ export interface CreateNotificationInput {
 export interface UpdateNotificationInput {
   read?: boolean;
 }
+
+// Frontend-specific notification types
+export type NotificationCategory = 'All' | 'Unread' | 'Applications' | 'Payments' | 'Orientations';
+
+// Mapped notification type for frontend consumption
+export interface NotificationItem {
+  _id: Id<'notifications'>;
+  _creationTime: number;
+  applicationId?: Id<'applications'>;
+  title?: string;
+  actionUrl?: string;
+  userId: Id<'users'>;
+  message: string;
+  type: string;
+  read: boolean;
+}

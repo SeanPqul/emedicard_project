@@ -15,7 +15,7 @@ LoadingFallback.displayName = 'LoadingFallback';
 type LazyComponent<T = {}> = React.LazyExoticComponent<ComponentType<T>>;
 
 // Enhanced lazy loading function with error boundary support
-export function lazyLoadScreen<T = {}>(
+export function lazyLoadScreen<T extends Record<string, any> = {}>(
   importFunc: () => Promise<{ default: ComponentType<T> }>,
   fallback?: React.ReactNode
 ): ComponentType<T> {
@@ -23,11 +23,15 @@ export function lazyLoadScreen<T = {}>(
   
   const LazyScreenWrapper = (props: T) => (
     <Suspense fallback={fallback || <LoadingFallback />}>
-      <LazyComponent {...props} />
+      <LazyComponent {...(props as any)} />
     </Suspense>
   );
   
-  LazyScreenWrapper.displayName = `LazyScreen(${LazyComponent.displayName || 'Component'})`;
+  // Safely access displayName
+  const componentName = (LazyComponent as any).displayName || 
+                        (LazyComponent as any).name || 
+                        'Component';
+  LazyScreenWrapper.displayName = `LazyScreen(${componentName})`;
   
   return LazyScreenWrapper;
 }
@@ -39,7 +43,10 @@ export function lazyLoadScreens<T extends Record<string, () => Promise<{ default
   const lazyScreens: any = {};
   
   Object.keys(screens).forEach((key) => {
-    lazyScreens[key] = lazyLoadScreen(screens[key]);
+    const importFunc = screens[key];
+    if (importFunc) {
+      lazyScreens[key] = lazyLoadScreen(importFunc);
+    }
   });
   
   return lazyScreens;

@@ -9,7 +9,7 @@ import { Id } from '@backend/convex/_generated/dataModel';
  * Result of a Maya payment attempt
  */
 export interface PaymentResult {
-  success: boolean;
+  success?: boolean; // Optional because waitingForReturn can be set without success
   paymentId?: string;
   reason?: string;
   waitingForReturn?: boolean; // True when payment is handled by Maya app

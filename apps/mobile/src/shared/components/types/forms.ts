@@ -4,12 +4,12 @@
  * Centralized type definitions for all form-related components
  */
 
-import { TextInputProps, ViewStyle, TextStyle } from 'react-native';
-import { BaseComponentProps, InputStyleProps } from '@types/design-system';
+import { TextInputProps, ViewStyle, TextStyle, StyleProp } from 'react-native';
+import { BaseComponentProps, InputStyleProps } from '@/src/types/design-system';
 
 // ===== INPUT TYPES =====
-export interface InputProps extends TextInputProps, BaseComponentProps, InputStyleProps {
-  style?: ViewStyle | ViewStyle[];
+export interface InputProps extends Omit<TextInputProps, 'accessibilityRole' | 'style'>, Omit<BaseComponentProps, 'accessibilityRole'>, InputStyleProps {
+  style?: StyleProp<TextStyle>;
   textStyle?: TextStyle | TextStyle[];
   label?: string;
   errorText?: string;
@@ -18,6 +18,7 @@ export interface InputProps extends TextInputProps, BaseComponentProps, InputSty
   rightIcon?: string;
   onRightIconPress?: () => void;
   containerStyle?: ViewStyle;
+  accessibilityRole?: 'text' | 'button' | 'link' | 'image' | 'header' | 'none' | 'search' | 'tab' | 'tablist' | 'menu' | 'menuitem';
 }
 
 // ===== CUSTOM TEXT INPUT TYPES =====

@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { TextInput, TextInputProps, ViewStyle, TextStyle } from 'react-native';
 import { inputVariants, getTypography } from '@shared/styles';
-import { InputStyleProps, BaseComponentProps, InputVariant, InputState } from '@/src/types/design-system';
+import type { InputStyleProps, BaseComponentProps, InputVariant, InputState } from '@/src/types/design-system';
 
 interface InputProps extends Omit<TextInputProps, 'style' | keyof BaseComponentProps>, BaseComponentProps, InputStyleProps {
   style?: ViewStyle | ViewStyle[];
@@ -15,7 +15,7 @@ interface InputProps extends Omit<TextInputProps, 'style' | keyof BaseComponentP
 }
 
 export const Input: React.FC<InputProps> = React.memo(({
-  variant = 'default' as InputVariant,
+  variant,
   state: propState,
   hasError = false,
   multiline = false,
@@ -39,26 +39,29 @@ export const Input: React.FC<InputProps> = React.memo(({
     onBlur?.(e);
   };
 
-  const getInputState = () => {
-    if (propState) return propState;
+  const getInputState = (): 'base' | 'disabled' | 'success' | 'error' | 'focused' => {
+    if (propState === 'disabled') return 'disabled';
+    if (propState === 'focused') return 'focused';
     if (!editable) return 'disabled';
     if (isFocused) return 'focused';
-    return 'default';
+    return 'base';
   };
 
-  const getInputVariant = () => {
+  const getInputVariant = (): 'base' | 'disabled' | 'success' | 'error' | 'focused' => {
     if (hasError) return 'error';
-    return variant;
+    if (variant === 'success') return 'success';
+    if (variant === 'error') return 'error';
+    return 'base';
   };
 
   const inputState = getInputState();
   const inputVariant = getInputVariant();
 
-  const inputStyle: ViewStyle[] = [
+  const inputStyle: any[] = [
     inputVariants.base,
-    inputVariants[inputVariant],
-    ...(inputState !== 'default' ? [inputVariants[inputState]] : []),
-    ...(multiline ? [{ minHeight: 80, textAlignVertical: 'top' }] : []),
+    inputVariant !== 'base' ? inputVariants[inputVariant] : {},
+    inputState !== 'base' ? inputVariants[inputState] : {},
+    multiline ? { minHeight: 80, textAlignVertical: 'top' as const } : {},
   ];
 
   const inputTextStyle: TextStyle[] = [
@@ -67,7 +70,7 @@ export const Input: React.FC<InputProps> = React.memo(({
 
   return (
     <TextInput
-      style={[inputStyle, style, inputTextStyle, textStyle]}
+      style={[inputStyle, inputTextStyle, style, textStyle] as any}
       onFocus={handleFocus}
       onBlur={handleBlur}
       editable={editable}

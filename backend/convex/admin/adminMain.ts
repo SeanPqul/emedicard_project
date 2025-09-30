@@ -230,4 +230,9 @@ export const getApplicantsByManagedCategories = query({
           )
         )
       )
-      .order("desc")},})
+      .order("desc")
+      .collect();
+
+    return applications;
+  },
+});

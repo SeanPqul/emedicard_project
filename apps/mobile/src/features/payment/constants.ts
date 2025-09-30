@@ -3,7 +3,7 @@
  * Defines available payment methods for health card processing
  */
 
-export interface PaymentMethod {
+export interface PaymentMethodConfig {
   id: string;
   name: string;
   description: string;
@@ -22,7 +22,7 @@ export interface UploadedReceipt {
 /**
  * Available payment methods with fees and configurations
  */
-export const PAYMENT_METHODS: PaymentMethod[] = [
+export const PAYMENT_METHODS: PaymentMethodConfig[] = [
   { 
     id: 'Gcash', 
     name: 'GCash', 

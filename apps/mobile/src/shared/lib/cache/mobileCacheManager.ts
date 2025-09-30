@@ -1,13 +1,7 @@
 import { cacheUtils, setObject, getObject, removeItem, getAllKeys } from '@shared/services/storage/storage';
+import { JobCategory } from '@entities/jobCategory';
 
-export interface JobCategory {
-  _id: string;
-  name: string;
-  description?: string;
-  requirements: string[];
-  isActive: boolean;
-  _creationTime: number;
-}
+// JobCategory is now imported from entities to maintain type consistency
 
 interface CacheItem<T> {
   data: T;

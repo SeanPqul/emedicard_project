@@ -1,1 +1,1 @@
-export { ProfileScreen as default } from '../../src/screens/profile';
+export { ProfileScreen as default } from '../../src/screens/tabs/ProfileScreen';

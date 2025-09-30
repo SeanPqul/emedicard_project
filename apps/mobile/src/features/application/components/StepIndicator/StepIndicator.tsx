@@ -3,6 +3,8 @@ import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StepIndicatorProps } from './StepIndicator.types';
 import { styles } from './StepIndicator.styles';
+import { theme } from '@shared/styles/theme';
+import { moderateScale } from '@shared/utils/responsive';
 
 export const StepIndicator: React.FC<StepIndicatorProps> = ({ 
   currentStep, 
@@ -17,7 +19,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
             index <= currentStep ? styles.stepCircleActive : styles.stepCircleInactive
           ]}>
             {index < currentStep ? (
-              <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+              <Ionicons name="checkmark" size={moderateScale(16)} color={theme.colors.background.primary} />
             ) : (
               <Text style={[
                 styles.stepNumber,

@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { moderateScale } from '@shared/utils/responsive';
 import { HealthCardStatusProps } from '@features/dashboard/types';
 import { styles } from './HealthCardStatus.styles';
 
@@ -29,7 +30,7 @@ export const HealthCardStatus: React.FC<HealthCardStatusProps> = ({ dashboardSta
         <View style={styles.cardIcon}>
           <Ionicons 
             name="shield-checkmark" 
-            size={32} 
+            size={moderateScale(32)} 
             color={styles.icon.color} 
           />
         </View>
@@ -44,7 +45,7 @@ export const HealthCardStatus: React.FC<HealthCardStatusProps> = ({ dashboardSta
         <View style={styles.chevron}>
           <Ionicons 
             name="chevron-forward" 
-            size={20} 
+            size={moderateScale(20)} 
             color={styles.chevronIcon.color} 
           />
         </View>

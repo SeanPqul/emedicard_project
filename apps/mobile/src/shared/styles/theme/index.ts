@@ -14,8 +14,18 @@ import { shadows } from './shadows';
 // Import utilities and responsive tokens separately for re-export
 export * from './responsive-tokens';
 
-// Export adapter utilities as the primary interface (these override utilities exports)
-export { getColor, getSpacing, getTypography, getBorderRadius, getShadow, colorWithOpacity } from './adapter';
+// Export utilities directly
+export { 
+  getColor, 
+  getSpacing, 
+  getTypography, 
+  getBorderRadius, 
+  getShadow, 
+  colorWithOpacity,
+  getColorWithAlpha,
+  getCategoryColorWithOpacity,
+  hexWithOpacity
+} from './utilities';
 
 
 // Compose the complete theme object

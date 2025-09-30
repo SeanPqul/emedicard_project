@@ -5,7 +5,7 @@
  */
 
 import { ViewStyle, TextStyle } from 'react-native';
-import { BaseComponentProps } from '@types/design-system';
+import { BaseComponentProps } from '@/src/types/design-system';
 
 // ===== STAT CARD TYPES =====
 export interface StatCardProps {

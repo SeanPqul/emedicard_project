@@ -202,7 +202,7 @@ export class StorageService {
           return this.mmkv.getAllKeys();
 
         case 'async':
-          return await AsyncStorage.getAllKeys();
+          return (await AsyncStorage.getAllKeys()) as string[];
 
         case 'secure':
           // SecureStore doesn't have a get all keys method

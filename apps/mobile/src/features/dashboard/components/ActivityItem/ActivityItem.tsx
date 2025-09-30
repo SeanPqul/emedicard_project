@@ -1,6 +1,7 @@
 import { RecentActivity } from '@shared/types';
 import { Activity } from '@entities/dashboard/model/types';
-import { getBorderRadius, getColor, getSpacing, getTypography } from '@shared/styles/theme';
+import { theme } from '@shared/styles/theme';
+import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -40,7 +41,7 @@ export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity 
       // Convert hex to theme color if needed
       return color;
     }
-    return getColor('text.secondary');
+    return theme.colors.text.secondary;
   };
 
   return (
@@ -50,7 +51,7 @@ export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity 
       accessibilityHint={`Activity from ${formatTimestamp(activity.timestamp)}`}
     >
       <View style={[styles.icon, { backgroundColor: getStatusColor() + '20' }]}>
-        <Ionicons name={getActivityIcon() as any} size={18} color={getStatusColor()} />
+        <Ionicons name={getActivityIcon() as any} size={moderateScale(18)} color={getStatusColor()} />
       </View>
       <View style={styles.content}>
         <Text style={styles.title}>{activity.title}</Text>
@@ -69,37 +70,38 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: getSpacing('md'),
-    paddingVertical: getSpacing('sm'),
-    borderBottomWidth: 1,
-    borderBottomColor: getColor('border.light'),
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingVertical: verticalScale(theme.spacing.sm),
+    borderBottomWidth: moderateScale(1),
+    borderBottomColor: theme.colors.border.light,
   },
   icon: {
-    width: 36,
-    height: 36,
-    borderRadius: getBorderRadius('full'),
+    width: moderateScale(36),
+    height: moderateScale(36),
+    borderRadius: theme.borderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: getSpacing('md'),
+    marginRight: scale(theme.spacing.md),
   },
   content: {
     flex: 1,
   },
   title: {
-    ...getTypography('bodySmall'),
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
     fontWeight: '600',
-    color: getColor('text.primary'),
-    marginBottom: getSpacing('xs') / 2,
+    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(theme.spacing.xs / 2),
   },
   description: {
-    ...getTypography('caption'),
-    color: getColor('text.secondary'),
-    marginBottom: getSpacing('xs') / 2,
-    lineHeight: 16,
+    fontSize: moderateScale(theme.typography.caption.fontSize),
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.secondary,
+    marginBottom: verticalScale(theme.spacing.xs / 2),
   },
   time: {
-    ...getTypography('caption'),
-    color: getColor('text.tertiary'),
-    fontSize: 11,
+    fontSize: moderateScale(11),
+    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    color: theme.colors.text.tertiary,
   },
 });

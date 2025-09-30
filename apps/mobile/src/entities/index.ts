@@ -23,5 +23,9 @@ export * from './notification';
 export * from './activity';
 export * from './jobCategory';
 export * from './orientation';
-export * from './scanner';
+// Export scanner types but exclude VerificationResult to avoid conflict with healthCard
+export type {
+  ScanResult,
+  QRCodeData
+} from './scanner';
 export * from './upload';
