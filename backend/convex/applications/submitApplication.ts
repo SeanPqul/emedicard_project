@@ -166,28 +166,7 @@ export const submitApplicationMutation = mutation({
         });
       }
 
-      // If orientation is required, create orientation record
-      if (jobCategory.requireOrientation) {
-        const orientationSchedule = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days from now
-        const qrCode = `emedicard-orientation-${args.applicationId}-${Date.now()}`;
-        
-        await ctx.db.insert("orientations", {
-          applicationId: args.applicationId,
-          scheduledAt: orientationSchedule,
-          qrCodeUrl: qrCode,
-          orientationStatus: "Scheduled",
-        });
 
-        // Add orientation notification
-        await ctx.db.insert("notifications", {
-          userId: user._id,
-          applicationId: args.applicationId,
-          title: "Orientation Scheduled",
-          message: `Food safety orientation scheduled for ${new Date(orientationSchedule).toLocaleDateString()}. You will receive more details soon.`,
-          notificationType: "OrientationScheduled",
-          isRead: false,
-        });
-      }
 
       return {
         success: true,

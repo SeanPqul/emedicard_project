@@ -71,12 +71,12 @@ export default function DashboardActivityLog() {
             {recentActivities && recentActivities.map((activity: AdminActivityLog) => (
               <div key={activity._id} className="px-4 py-3 hover:bg-gray-50">
                 <p className="text-sm font-medium text-gray-800">
-                  <span className="font-bold">{activity.adminUsername}</span>
-                  <span className="text-gray-500 ml-1">({activity.adminEmail})</span>
-                  <span className="ml-1">{activity.action.toLowerCase()}</span>.
+                  <span className="font-bold">{activity.adminUsername}</span> ({activity.adminEmail}) {activity.action.toLowerCase()}
+                  {activity.applicantName && ` for `}
+                  {activity.applicantName && <span className="font-bold">{activity.applicantName}</span>}.
                 </p>
-                {activity.comment && (
-                    <p className="text-xs text-gray-500 mt-1 italic">"{activity.comment}"</p>
+                {activity.applicationId && (
+                  <p className="text-xs text-gray-500 mt-1">Application ID: {activity.applicationId}</p>
                 )}
                 <p className="text-xs text-gray-400 mt-1">{timeAgo(activity.timestamp || 0)}</p>
               </div>

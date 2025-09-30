@@ -10,7 +10,7 @@ export const getApplicationByIdQuery = query({
       return null;
     }
 
-    // Get the job category
+    const user = await ctx.db.get(application.userId);
     const jobCategory = application.jobCategoryId
       ? await ctx.db.get(application.jobCategoryId)
       : null;
@@ -22,9 +22,10 @@ export const getApplicationByIdQuery = query({
       .first();
 
     // Return enriched application data
-    // Since form data is stored directly on the application, we create a form object from it
     return {
       ...application,
+      userName: user?.fullname ?? "Unknown User",
+      jobCategoryName: jobCategory?.name ?? "Unknown Category",
       // Map applicationStatus to status for frontend compatibility
       status: application.applicationStatus,
       form: {

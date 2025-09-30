@@ -1,6 +1,6 @@
 // convex/payments/getForApplication.ts
-import { query } from "../_generated/server";
 import { v } from "convex/values";
+import { query } from "../_generated/server";
 
 export const get = query({
   args: { applicationId: v.id("applications") },
@@ -35,6 +35,9 @@ export const get = query({
       paymentMethod: payment.paymentMethod,
       paymentStatus: payment.paymentStatus,
       receiptUrl: receiptUrl,
+      checkoutUrl: payment.checkoutUrl,
+      mayaCheckoutId: payment.mayaCheckoutId,
+      referenceNumber: payment.referenceNumber, // Add referenceNumber
     };
   },
 });

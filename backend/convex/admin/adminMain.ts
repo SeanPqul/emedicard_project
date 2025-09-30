@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation } from "../_generated/server";
+import { mutation, query } from "../_generated/server";
 import { AdminRole } from "../users/roles";
 
 // =================================================================
@@ -20,6 +20,48 @@ export const getAllApplicants = query({
     return await ctx.db.query("users")
       .withIndex("by_role", (q) => q.eq("role", "applicant"))
       .collect();
+  },
+});
+
+// =================================================================
+// == 2. GET APPLICANT DETAILS (FOR ORIENTATION SCHEDULER) ==
+// =================================================================
+export const getApplicantDetails = query({
+  args: { applicationId: v.id("applications") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Authentication failed.");
+
+    // Ensure the user has admin privileges
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isAdmin) {
+      throw new Error("You do not have permission to view applicant details.");
+    }
+
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) {
+      throw new Error("Application not found.");
+    }
+
+    const applicant = await ctx.db.get(application.userId);
+    if (!applicant) {
+      throw new Error("Applicant user not found.");
+    }
+
+    const jobCategory = await ctx.db.get(application.jobCategoryId);
+    if (!jobCategory) {
+      throw new Error("Job category not found.");
+    }
+
+    return {
+      ...applicant,
+      applicationStatus: application.applicationStatus,
+      jobCategory: {
+        _id: jobCategory._id,
+        name: jobCategory.name,
+        colorCode: jobCategory.colorCode,
+      },
+    };
   },
 });
 
@@ -56,7 +98,30 @@ export const updateApplicantStatus = mutation({
       throw new Error("Applicant application not found.");
     }
 
-    await ctx.db.patch(existingForm._id, { applicationStatus: status, adminRemarks: remarks });
+    const adminUser = await ctx.db.query("users").withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject)).unique();
+    if (!adminUser) throw new Error("Admin user not found.");
+
+    const applicant = await ctx.db.get(userId);
+    if (!applicant) throw new Error("Applicant not found.");
+
+    await ctx.db.patch(existingForm._id, {
+      applicationStatus: status,
+      adminRemarks: remarks,
+      updatedAt: Date.now(), // Update the timestamp
+      lastUpdatedBy: adminUser._id, // Record the admin who made the update
+    });
+
+    // Log admin activity for application status update
+    await ctx.db.insert("adminActivityLogs", {
+      adminId: adminUser._id,
+      adminUsername: adminUser.username,
+      adminEmail: adminUser.email,
+      action: `updated application for ${applicant.fullname} to ${status}`,
+      comment: remarks,
+      timestamp: Date.now(),
+      applicationId: existingForm._id,
+      jobCategoryId: existingForm.jobCategoryId, // Ensure jobCategoryId is always included
+    });
 
     // Optionally, create a notification for the applicant
     await ctx.db.insert("notifications", {
@@ -89,37 +154,34 @@ export const verifyDocument = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Authentication failed.");
 
-    const user = await ctx.db.query("users").withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject)).unique();
-    if (!user) throw new Error("User not found.");
+    const adminUser = await ctx.db.query("users").withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject)).unique();
+    if (!adminUser) throw new Error("Admin user not found.");
 
-    await ctx.db.patch(documentUploadId, { reviewStatus: status, adminRemarks: remarks, reviewedAt: Date.now(), reviewedBy: user._id });
-    return { success: true };
-  },
-});
+    const documentUpload = await ctx.db.get(documentUploadId);
+    if (!documentUpload) throw new Error("Document upload not found.");
 
-// =================================================================
-// == 4. SCHEDULE AN ORIENTATION (FOR ADMIN ACTIONS) ==
-// =================================================================
-export const scheduleOrientation = mutation({
-  args: {
-    applicationId: v.id("applications"),
-    scheduleAt: v.float64(),
-    venue: v.string(),
-    inspectorId: v.id("users"),
-  },
-  handler: async (ctx, { applicationId, scheduleAt, venue, inspectorId }) => {
-    const adminCheck = await AdminRole(ctx);
-    if (!adminCheck.isAdmin) {
-      throw new Error("You do not have permission to schedule orientations.");
-    }
+    const application = await ctx.db.get(documentUpload.applicationId);
+    if (!application) throw new Error("Application not found.");
 
-    await ctx.db.insert("orientations", {
-      applicationId,
-      scheduledAt: scheduleAt,
-      //venue,
-      //inspectorId,
-      orientationStatus: "Scheduled",
-      qrCodeUrl: "temp-qr-code", // Replace with actual QR code generation logic
+    const applicant = await ctx.db.get(application.userId);
+    if (!applicant) throw new Error("Applicant not found.");
+
+    const documentType = await ctx.db.get(documentUpload.documentTypeId);
+    const docName = documentType?.name || "a document";
+
+    await ctx.db.patch(documentUploadId, { reviewStatus: status, adminRemarks: remarks, reviewedAt: Date.now(), reviewedBy: adminUser._id });
+
+    // Log admin activity
+    await ctx.db.insert("adminActivityLogs", {
+      adminId: adminUser._id,
+      adminUsername: adminUser.username,
+      adminEmail: adminUser.email,
+      action: `${status.toLowerCase()} document '${docName}' for ${applicant.fullname}`,
+      comment: remarks,
+      timestamp: Date.now(),
+      documentUploadId: documentUploadId,
+      applicationId: application._id, // Ensure applicationId is always included
+      jobCategoryId: application.jobCategoryId, // Ensure jobCategoryId is always included
     });
 
     return { success: true };
@@ -127,7 +189,7 @@ export const scheduleOrientation = mutation({
 });
 
 // =================================================================
-// == 5. TRACK ORIENTATION ATTENDANCE (FOR ADMIN ACTIONS) ==
+// == 4. TRACK ORIENTATION ATTENDANCE (FOR ADMIN ACTIONS) ==
 // =================================================================
 export const trackOrientationAttendance = mutation({
   args: {

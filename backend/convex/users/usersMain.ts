@@ -1,5 +1,6 @@
 // Extended user management functions from webadmin
 import { v } from "convex/values";
+import type { Doc } from "../_generated/dataModel";
 import { internalMutation, mutation, query } from "../_generated/server";
 
 // =================================================================
@@ -106,7 +107,7 @@ export const patchUserRoleAndCategories = mutation({
 });
 
 // Mutation to insert a new user (used by actions)
-export const insertUser = mutation({
+export const systemCreateUser = mutation({
   args: {
     clerkId: v.string(),
     email: v.string(),
@@ -116,8 +117,8 @@ export const insertUser = mutation({
     managedCategories: v.array(v.id("jobCategories")),
     username: v.string(),
   },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("users", {
+  handler: async (ctx, args): Promise<Doc<"users">["_id"]> => {
+    return await ctx.db.insert("users", {
       clerkId: args.clerkId,
       email: args.email,
       fullname: args.fullname,

@@ -1,23 +1,14 @@
 // src/components/ApplicantActivityLog.tsx
 
-import React, { useState } from 'react';
-import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api'; // Use consolidated backend
-import { Id } from '@/convex/_generated/dataModel';
-// DO NOT import directly from the convex folder here.
+import { Doc, Id } from '@/convex/_generated/dataModel'; // Added Doc import
+import { useQuery } from 'convex/react';
+import React, { useState } from 'react';
 
-// Define the shape of the data we expect from our query
-interface DocumentActivityLog {
-  _id: Id<"documentUploads">;
-  uploadedAt: number;
-  reviewStatus: string;
-  adminRemarks?: string;
-  reviewerEmail: string | null;
-  healthCardColor: string | null;
-  documentType: {
-    name: string;
-  } | null;
-}
+// Define the type for an activity log entry with applicant name
+type AdminActivityLogWithApplicantName = Doc<"adminActivityLogs"> & {
+  applicantName?: string;
+};
 
 interface ApplicantActivityLogProps {
   applicationId: Id<"applications">;
@@ -27,11 +18,9 @@ interface ApplicantActivityLogProps {
 const ApplicantActivityLog: React.FC<ApplicantActivityLogProps> = ({ applicationId, applicantName }) => {
   const [showLog, setShowLog] = useState(false);
 
-  // =================================================================
-  // == THIS IS THE FIX: We now point to the correct, clean API path ==
-  // =================================================================
-  const activityLogs = useQuery(
-    api.documentUploads.getReviewedDocumentsWithDetails.get, 
+  // Use the new query to fetch application-specific admin activities
+  const activityLogs: AdminActivityLogWithApplicantName[] | undefined = useQuery(
+    api.admin.activityLogs.getApplicationActivityLogs,
     { applicationId }
   );
 
@@ -54,19 +43,18 @@ const ApplicantActivityLog: React.FC<ApplicantActivityLogProps> = ({ application
             {activityLogs?.length === 0 && (
               <p className="text-gray-500">No activity logs found.</p>
             )}
-            {activityLogs?.map((log: DocumentActivityLog) => (
-              <div key={log._id} className="mb-3 pb-3 border-b border-gray-100 last:border-b-0">
+            {activityLogs?.map((activity: AdminActivityLogWithApplicantName) => (
+              <div key={activity._id} className="mb-3 pb-3 border-b border-gray-100 last:border-b-0">
                 <p className="text-sm text-gray-800 font-medium">
-                  Document <span className="font-bold">{log.documentType?.name}</span>: {log.reviewStatus}
+                  <span className="font-bold">{activity.adminUsername}</span> {activity.action.toLowerCase()}
+                  {activity.applicantName && ` for `}
+                  {activity.applicantName && <span className="font-bold">{activity.applicantName}</span>}.
                 </p>
-                {log.adminRemarks && (
-                  <p className="text-xs text-gray-700 bg-gray-50 p-1 rounded">Remarks: {log.adminRemarks}</p>
-                )}
-                {log.reviewerEmail && (
-                  <p className="text-xs text-gray-700">Reviewed by: {log.reviewerEmail}</p>
+                {activity.comment && (
+                  <p className="text-xs text-gray-700 bg-gray-50 p-1 rounded">Remarks: {activity.comment}</p>
                 )}
                 <p className="text-xs text-gray-500 mt-1">
-                  {new Date(log.uploadedAt).toLocaleString()}
+                  {new Date(activity.timestamp).toLocaleString()}
                 </p>
               </div>
             ))}

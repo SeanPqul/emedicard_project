@@ -17,6 +17,7 @@ export default defineSchema({
     position: v.string(),
     updatedAt: v.optional(v.float64()),
     userId: v.id("users"),
+    lastUpdatedBy: v.optional(v.id("users")), // New field to track which admin last updated the application
   }).index("by_user", ["userId"]),
   documentTypes: defineTable({
     description: v.string(),
@@ -77,6 +78,10 @@ export default defineSchema({
     applicationId: v.id("applications"),
     checkInTime: v.optional(v.float64()),
     checkOutTime: v.optional(v.float64()),
+    orientationDate: v.optional(v.float64()), // Timestamp for the orientation date
+    timeSlot: v.optional(v.string()), // e.g., "9:00 AM - 11:00 AM"
+    assignedInspectorId: v.optional(v.id("users")), // Reference to the assigned inspector
+    orientationVenue: v.optional(v.string()), // e.g., "Gaisano Ilustre"
     orientationStatus: v.union(
       v.literal("Scheduled"),
       v.literal("Completed"),
@@ -84,7 +89,8 @@ export default defineSchema({
     ),
     qrCodeUrl: v.string(),
     scheduledAt: v.float64(),
-  }).index("by_application", ["applicationId"]),
+  }).index("by_application", ["applicationId"])
+    .index("by_date_timeslot_venue", ["orientationDate", "timeSlot", "orientationVenue"]),
   paymentLogs: defineTable({
     amount: v.optional(v.float64()),
     currency: v.optional(v.string()),
@@ -174,7 +180,8 @@ export default defineSchema({
     username: v.string(),
   })
     .index("by_clerk_id", ["clerkId"])
-    .index("by_role", ["role"]),
+    .index("by_role", ["role"])
+    .index("by_email", ["email"]),
   verificationLogs: defineTable({
     healthCardId: v.id("healthCards"),
     ipAddress: v.optional(v.string()),
@@ -185,4 +192,20 @@ export default defineSchema({
       v.literal("Failed")
     ),
   }).index("by_health_card", ["healthCardId"]),
+
+  adminActivityLogs: defineTable({
+    adminId: v.id("users"),
+    adminUsername: v.string(),
+    adminEmail: v.string(),
+    action: v.string(), // e.g., "approved document", "rejected document", "approved application"
+    comment: v.optional(v.string()),
+    timestamp: v.float64(),
+    applicationId: v.optional(v.id("applications")),
+    documentUploadId: v.optional(v.id("documentUploads")),
+    jobCategoryId: v.optional(v.id("jobCategories")), // Added for HealthCard type filtering
+  })
+    .index("by_admin_timestamp", ["adminId", "timestamp"])
+    .index("by_jobCategoryId", ["jobCategoryId", "timestamp"])
+    .index("by_applicationId", ["applicationId", "timestamp"])
+    .index("by_timestamp", ["timestamp"]),
 });

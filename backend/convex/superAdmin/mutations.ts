@@ -49,6 +49,14 @@ export const createAdmin = action({ // Changed to action
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
+
+      // Customize specific Clerk error messages for user-friendliness
+      if (errorMessage.includes("Password has been found in an online data breach.")) {
+        errorMessage = "Password too simple. Please create a stronger password with special characters, numbers, and mixed cases.";
+      } else if (errorMessage.includes("Password is too weak")) { // Add another common password error
+        errorMessage = "Password is too weak. Please create a stronger password with special characters, numbers, and mixed cases.";
+      }
+      
       return { success: false, errorMessage }; // Return error message
     }
 
@@ -69,7 +77,7 @@ export const createAdmin = action({ // Changed to action
       });
     } else {
       // Create new user in Convex
-      await ctx.runMutation(api.users.usersMain.insertUser, {
+      await ctx.runMutation(api.users.usersMain.systemCreateUser, {
         clerkId: clerkUser.id,
         email: args.email,
         fullname: clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : args.email,
