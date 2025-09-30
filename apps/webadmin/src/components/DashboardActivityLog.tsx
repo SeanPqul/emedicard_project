@@ -1,8 +1,14 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { Doc } from '@/convex/_generated/dataModel';
+import { useQuery } from 'convex/react';
+import { useEffect, useRef, useState } from 'react';
+
+// Define the type for an activity log entry
+type AdminActivityLog = Doc<"adminActivityLogs"> & {
+  applicantName?: string; // To be populated on the frontend or extended in the backend query
+};
 
 // Helper to format time nicely (e.g., "1 hour ago")
 const timeAgo = (date: number): string => {
@@ -23,7 +29,8 @@ const timeAgo = (date: number): string => {
 export default function DashboardActivityLog() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const recentActivities = useQuery(api.dashboard.getActivityLog.get);
+  // Use the new query to fetch recent admin activities
+  const recentActivities = useQuery(api.admin.activityLogs.getRecentAdminActivities);
 
   // Logic to close dropdown when clicking outside
   useEffect(() => {
@@ -61,17 +68,22 @@ export default function DashboardActivityLog() {
           <div className="py-2 max-h-96 overflow-y-auto">
             {recentActivities === undefined && <div className="p-4 text-sm text-gray-500">Loading...</div>}
             {recentActivities && recentActivities.length === 0 && <div className="p-4 text-sm text-gray-500">No recent activity.</div>}
-            {recentActivities && recentActivities.filter(Boolean).map(activity => (
-              <div key={activity!.id} className="px-4 py-3 hover:bg-gray-50">
+            {recentActivities && recentActivities.map((activity: AdminActivityLog) => (
+              <div key={activity._id} className="px-4 py-3 hover:bg-gray-50">
                 <p className="text-sm font-medium text-gray-800">
-                  <span className="font-bold">{activity!.adminName}</span> {activity!.action.toLowerCase()} for <span className="font-bold">{activity!.applicantName}</span>.
+                  <span className="font-bold">{activity.adminUsername}</span>
+                  <span className="text-gray-500 ml-1">({activity.adminEmail})</span>
+                  <span className="ml-1">{activity.action.toLowerCase()}</span>.
                 </p>
-                <p className="text-xs text-gray-400 mt-1">{timeAgo(activity!.timestamp || 0)}</p>
+                {activity.comment && (
+                    <p className="text-xs text-gray-500 mt-1 italic">"{activity.comment}"</p>
+                )}
+                <p className="text-xs text-gray-400 mt-1">{timeAgo(activity.timestamp || 0)}</p>
               </div>
             ))}
           </div>
           <div className="p-2 bg-gray-50 rounded-b-xl">
-            <a href="#" className="block text-center text-sm text-emerald-600 font-semibold hover:underline">
+            <a href="/super-admin" className="block text-center text-sm text-emerald-600 font-semibold hover:underline">
               View all activity
             </a>
           </div>
