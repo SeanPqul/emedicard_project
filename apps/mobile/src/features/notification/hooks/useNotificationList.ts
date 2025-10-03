@@ -76,10 +76,8 @@ export function useNotificationList() {
         break;
       case 'PaymentReceived':
         if (notification.applicationId) {
-          router.push({
-            pathname: '/(screens)/(shared)/payment',
-            params: { formId: notification.applicationId }
-          });
+          // Navigate to application details to view payment info
+          router.push(`/(screens)/(application)/${notification.applicationId}`);
         }
         break;
       case 'OrientationScheduled':
