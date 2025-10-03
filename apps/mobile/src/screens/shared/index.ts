@@ -3,6 +3,7 @@ export * from './ActivityScreen';
 export * from './ChangePasswordScreen';
 export * from './DocumentRequirementsScreen';
 export * from './HealthCardsScreen';
+export * from './NotificationDetailScreen';
 export * from './PaymentScreen';
 export * from './ProfileEditScreen';
 export * from './QRCodeScreen';

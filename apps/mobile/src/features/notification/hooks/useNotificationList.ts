@@ -65,44 +65,8 @@ export function useNotificationList() {
   };
 
   const handleNotificationNavigation = (notification: NotificationItem) => {
-    switch (notification.type) {
-      case 'MissingDoc':
-        if (notification.applicationId) {
-          router.push({
-            pathname: '/(screens)/(shared)/documents/upload',
-            params: { formId: notification.applicationId }
-          });
-        }
-        break;
-      case 'PaymentReceived':
-        if (notification.applicationId) {
-          // Navigate to application details to view payment info
-          router.push(`/(screens)/(application)/${notification.applicationId}`);
-        }
-        break;
-      case 'OrientationScheduled':
-        if (notification.applicationId) {
-          router.push({
-            pathname: '/(screens)/(shared)/orientation',
-            params: { formId: notification.applicationId }
-          });
-        }
-        break;
-      case 'CardIssue':
-        router.push('/(screens)/(shared)/health-cards');
-        break;
-      case 'FormApproved':
-        if (notification.applicationId) {
-          router.push({
-            pathname: '/(tabs)/application',
-            params: { highlightId: notification.applicationId }
-          });
-        }
-        break;
-      default:
-        // Fallback to application screen
-        router.push('/(tabs)/application');
-    }
+    // Navigate to the notification detail screen
+    router.push(`/(screens)/(shared)/notification/${notification._id}`);
   };
 
   // Utility functions
