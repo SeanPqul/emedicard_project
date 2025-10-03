@@ -17,39 +17,39 @@ export const styles = StyleSheet.create({
   stepCircle: {
     width: moderateScale(32),
     height: moderateScale(32),
-    borderRadius: theme.borderRadius.full,
+    borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: verticalScale(theme.spacing.sm),
     zIndex: 2,
   },
   stepCircleActive: {
-    backgroundColor: theme.colors.brand.secondary,
+    backgroundColor: '#2E86AB',
   },
   stepCircleInactive: {
-    backgroundColor: theme.colors.border.medium,
+    backgroundColor: '#D1D5DB',
   },
   stepNumber: {
     fontSize: moderateScale(14),
     fontWeight: '600' as const,
   },
   stepNumberActive: {
-    color: theme.colors.background.primary,
+    color: '#FFFFFF',
   },
   stepNumberInactive: {
-    color: theme.colors.text.secondary,
+    color: '#6B7280',
   },
   stepTitle: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(10),
     textAlign: 'center',
-    marginBottom: verticalScale(theme.spacing.sm),
+    marginTop: verticalScale(2),
   },
   stepTitleActive: {
-    color: theme.colors.brand.secondary,
+    color: '#2E86AB',
     fontWeight: '600' as const,
   },
   stepTitleInactive: {
-    color: theme.colors.text.secondary,
+    color: '#6B7280',
   },
   stepLine: {
     position: 'absolute',
@@ -60,9 +60,9 @@ export const styles = StyleSheet.create({
     zIndex: 1,
   },
   stepLineActive: {
-    backgroundColor: theme.colors.brand.secondary,
+    backgroundColor: '#2E86AB',
   },
   stepLineInactive: {
-    backgroundColor: theme.colors.border.light,
+    backgroundColor: '#E5E7EB',
   },
 });

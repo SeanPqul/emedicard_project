@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { theme } from '@shared/styles/theme';
-import { moderateScale } from '@shared/utils/responsive';
+import { moderateScale, verticalScale } from '@shared/utils/responsive';
+import { formatFileSize } from '@shared/utils/documentStatus';
 
 import { ReviewStepProps, DocumentStatusInfo, ApplicationSummary } from './ReviewStep.types';
 import { styles } from './ReviewStep.styles';
@@ -104,11 +105,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             {document.name}
             {document.required && <Text style={styles.requiredAsterisk}> *</Text>}
           </Text>
-          {isUploaded && (
+          {isUploaded && selectedDocuments[document.fieldName]?.size && (
             <Text style={styles.documentFileName}>
-              File: {selectedDocuments[document.fieldName]?.name || 
-                     selectedDocuments[document.fieldName]?.fileName || 
-                     'selected'}
+              {formatFileSize(selectedDocuments[document.fieldName]?.size)} • Ready
             </Text>
           )}
         </View>
@@ -178,6 +177,36 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
     );
   };
 
+  const renderUploadProgressWarning = () => {
+    const uploadingDocuments = documentRequirements.filter(doc => {
+      const uploadState = getUploadState(doc.fieldName);
+      return uploadState?.uploading;
+    });
+    
+    if (uploadingDocuments.length === 0) return null;
+    
+    return (
+      <View style={[styles.validationWarning, { backgroundColor: theme.colors.semantic.info + '10', borderLeftColor: theme.colors.semantic.info }]}>
+        <View style={styles.validationHeader}>
+          <Ionicons name="hourglass" size={moderateScale(20)} color={theme.colors.semantic.info} />
+          <Text style={[styles.validationTitle, { color: theme.colors.semantic.info }]}>Uploads In Progress</Text>
+        </View>
+        
+        <Text style={[styles.validationMessage, { color: theme.colors.semantic.info }]}>
+          {uploadingDocuments.length} document(s) are still being uploaded. Please wait for all uploads to complete before submitting.
+        </Text>
+        
+        <View style={{ marginTop: verticalScale(8) }}>
+          {uploadingDocuments.map((doc) => (
+            <Text key={doc.fieldName} style={[styles.validationMessage, { color: theme.colors.semantic.info }]}>
+              • {doc.name}: {getUploadState(doc.fieldName)?.progress || 0}%
+            </Text>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
   const renderValidationWarnings = () => {
     const hasIssues = missingDocuments.length > 0 || documentsWithErrors.length > 0;
     if (!hasIssues) return null;
@@ -227,6 +256,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         {renderDocumentSummary()}
         {renderApplicationFee()}
         {renderOrientationNotice()}
+        {renderUploadProgressWarning()}
         {renderValidationWarnings()}
       </View>
       

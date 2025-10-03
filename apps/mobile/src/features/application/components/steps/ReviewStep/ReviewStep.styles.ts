@@ -101,7 +101,7 @@ export const styles = StyleSheet.create({
 
   totalAmount: {
     fontWeight: '700',
-    color: theme.colors.brand.primary,
+    color: theme.colors.text.primary,
   },
 
   // Job Category Styles

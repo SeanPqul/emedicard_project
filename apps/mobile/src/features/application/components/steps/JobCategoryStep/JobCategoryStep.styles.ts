@@ -1,118 +1,169 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { theme } from '@shared/styles/theme';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
+
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: scale(theme.spacing.lg),
     paddingTop: verticalScale(theme.spacing.lg),
   },
   title: {
-    fontSize: moderateScale(theme.typography.h3.fontSize),
+    fontSize: moderateScale(24),
     fontWeight: '600',
-    color: theme.colors.text.primary,
-    marginBottom: verticalScale(theme.spacing.xs),
+    color: '#111827',
+    marginBottom: verticalScale(theme.spacing.sm),
   },
   subtitle: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    color: theme.colors.text.secondary,
+    fontSize: moderateScale(14),
+    color: '#6B7280',
+    marginBottom: verticalScale(theme.spacing.md),
+    lineHeight: moderateScale(20),
+  },
+  // Color Guide
+  colorGuide: {
+    backgroundColor: '#F8F9FA',
+    padding: scale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
     marginBottom: verticalScale(theme.spacing.lg),
-    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
   },
-  scrollView: {
-    flex: 1,
+  colorGuideTitle: {
+    fontSize: moderateScale(12),
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: verticalScale(theme.spacing.xs),
   },
-  scrollContent: {
-    paddingBottom: verticalScale(theme.spacing.md),
+  colorGuideRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: scale(theme.spacing.sm),
   },
-  categoriesGrid: {
-    gap: verticalScale(theme.spacing.sm),
-  },
-  categoryCard: {
+  colorGuideItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.background.primary,
-    borderRadius: theme.borderRadius.md,
+  },
+  colorDot: {
+    width: moderateScale(12),
+    height: moderateScale(12),
+    borderRadius: moderateScale(6),
+    marginRight: scale(6),
+  },
+  colorGuideText: {
+    fontSize: moderateScale(11),
+    color: '#6B7280',
+  },
+  // Category Grid - 2 columns
+  categoriesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: verticalScale(theme.spacing.xl),
+  },
+  categoryCard: {
+    width: (width - scale(52)) / 2,
+    minHeight: verticalScale(150),
+    backgroundColor: '#FFFFFF',
+    borderRadius: theme.borderRadius.lg,
     padding: scale(theme.spacing.md),
-    borderWidth: moderateScale(1.5),
-    borderColor: theme.colors.border.light,
+    marginBottom: verticalScale(theme.spacing.sm),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: moderateScale(2),
+    borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: moderateScale(1),
+      height: moderateScale(2),
     },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.1,
     shadowRadius: moderateScale(4),
-    elevation: 1,
+    elevation: 2,
+    position: 'relative',
   },
   categoryCardSelected: {
-    borderColor: theme.colors.brand.secondary,
-    backgroundColor: theme.colors.background.tertiary,
+    borderWidth: moderateScale(3),
+    transform: [{ scale: 1.02 }],
   },
-  colorIndicator: {
-    width: moderateScale(40),
-    height: moderateScale(40),
+  categoryCardCentered: {
+    alignSelf: 'center',
+    width: (width - scale(52)) / 2,
+  },
+  // Color Badge on card
+  colorBadge: {
+    position: 'absolute',
+    top: scale(theme.spacing.sm),
+    right: scale(theme.spacing.sm),
+    paddingHorizontal: scale(theme.spacing.xs),
+    paddingVertical: verticalScale(2),
     borderRadius: theme.borderRadius.sm,
-    marginRight: scale(theme.spacing.sm),
   },
+  colorBadgeText: {
+    fontSize: moderateScale(10),
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  // Icon Container
+  categoryIcon: {
+    width: moderateScale(48),
+    height: moderateScale(48),
+    borderRadius: moderateScale(24),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: verticalScale(theme.spacing.sm),
+  },
+  // Category Name
   categoryName: {
-    flex: 1,
-    fontSize: moderateScale(theme.typography.body.fontSize),
-    fontWeight: '500',
-    color: theme.colors.text.primary,
-  },
-  categoryNameSelected: {
-    color: theme.colors.brand.secondary,
+    fontSize: moderateScale(14),
     fontWeight: '600',
+    color: '#111827',
+    textAlign: 'center',
+    marginBottom: verticalScale(theme.spacing.xs),
   },
+  // Job Examples Text
+  jobExamples: {
+    fontSize: moderateScale(11),
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: verticalScale(theme.spacing.xs),
+    lineHeight: moderateScale(14),
+  },
+  // Orientation Badge
   orientationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.semantic.warning + '15',
+    backgroundColor: '#F18F0120',
     paddingHorizontal: scale(theme.spacing.xs),
     paddingVertical: verticalScale(2),
-    borderRadius: theme.borderRadius.md,
-    marginRight: scale(theme.spacing.xs),
+    borderRadius: theme.borderRadius.sm,
+    marginTop: verticalScale(theme.spacing.sm),
   },
   orientationText: {
-    fontSize: moderateScale(11),
-    color: theme.colors.semantic.warning,
-    marginLeft: scale(2),
-    fontWeight: '500',
+    fontSize: moderateScale(10),
+    color: '#F18F01',
+    marginLeft: scale(4),
+    fontWeight: '600',
   },
-  checkmark: {
-    width: moderateScale(24),
-    height: moderateScale(24),
-    borderRadius: moderateScale(12),
-    borderWidth: moderateScale(1.5),
-    borderColor: theme.colors.border.light,
-    justifyContent: 'center',
-    alignItems: 'center',
+  // Selected Checkmark
+  selectedCheckmark: {
+    position: 'absolute',
+    top: moderateScale(-2),
+    right: moderateScale(-2),
+    borderRadius: theme.borderRadius.full,
+    padding: moderateScale(4),
   },
-  checkmarkSelected: {
-    borderColor: theme.colors.brand.secondary,
-    backgroundColor: theme.colors.brand.secondary,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: verticalScale(80),
-  },
-  loadingText: {
-    marginTop: verticalScale(theme.spacing.md),
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    color: theme.colors.text.secondary,
-  },
+  // Empty State
   emptyContainer: {
     alignItems: 'center',
     paddingVertical: verticalScale(64),
   },
   emptyText: {
     marginTop: verticalScale(theme.spacing.md),
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    color: theme.colors.text.secondary,
+    fontSize: moderateScale(14),
+    color: '#6B7280',
   },
+  // Error
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -121,7 +172,21 @@ const styles = StyleSheet.create({
   errorText: {
     marginLeft: scale(theme.spacing.xs),
     color: theme.colors.semantic.error,
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    fontSize: moderateScale(14),
+  },
+  // Help Text Container
+  helpTextContainer: {
+    backgroundColor: '#2E86AB10',
+    padding: scale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    borderLeftWidth: moderateScale(4),
+    borderLeftColor: '#2E86AB',
+    marginTop: verticalScale(theme.spacing.sm),
+  },
+  helpText: {
+    fontSize: moderateScale(13),
+    color: '#2E86AB',
+    fontWeight: '600',
   },
 });
 

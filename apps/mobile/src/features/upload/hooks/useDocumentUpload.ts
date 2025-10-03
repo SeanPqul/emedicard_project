@@ -370,10 +370,21 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
   ): Promise<CachedDocument> => {
     try {
       validateFile(file, fieldName);
+
+      // Extract the best available filename, avoiding generated UUIDs and numeric IDs
+      const isGeneratedFileName = file.fileName && (
+        /^\d{8,12}\.(jpg|jpeg|png|pdf)$/i.test(file.fileName) ||  // Numeric IDs
+        /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.(jpg|jpeg|png|pdf)$/i.test(file.fileName)  // UUIDs
+      );
+
+      const fileName = (!isGeneratedFileName && file.fileName) ||
+                      file.name ||
+                      file.uri?.split('/').pop() ||
+                      `document_${fieldName}.${file.type?.split('/')[1] || 'jpg'}`;
       
       const cachedDoc = await cacheDocumentReactive(applicationId, fieldName, {
         uri: file.uri,
-        name: file.name || `document_${fieldName}.${file.type?.split('/')[1] || 'jpg'}`,
+        name: fileName,
         type: file.type || 'image/jpeg',
         size: file.size,
       });

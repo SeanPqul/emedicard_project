@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useUser } from '@clerk/clerk-expo';
 import { useJobCategories } from '@/src/features/jobCategory/hooks/useJobCategories';
 import { useApplications } from './useApplications';
@@ -77,8 +77,10 @@ export function useApplyForm() {
   // Track if initialization has happened
   const hasInitialized = useRef(false);
 
-  // Use jobCategories directly from hook
-  const activeJobCategories = jobCategories.jobCategories || [];
+  // Use jobCategories directly from hook - memoize to prevent infinite loops
+  const activeJobCategories = useMemo(() => jobCategories.jobCategories || [], [jobCategories.jobCategories]);
+  const currentUser = useMemo(() => users.data.currentUser || null, [users.data.currentUser]);
+  const currentRequirements = useMemo(() => requirements.data.jobCategoryRequirements || [], [requirements.data.jobCategoryRequirements]);
 
   // Submission hook
   const submission = useSubmission({
@@ -103,18 +105,16 @@ export function useApplyForm() {
     // Only initialize once
     if (hasInitialized.current) {
       // Just update the data without re-initializing
-      const categories = jobCategories.jobCategories || [];
-      setJobCategoriesData(categories);
-      setUserProfile(users.data.currentUser || null);
+      setJobCategoriesData(activeJobCategories);
+      setUserProfile(currentUser);
       setLoadingData(false);
       return;
     }
     
     try {
-      const categories = jobCategories.jobCategories || [];
-      setJobCategoriesData(categories);
-      setUserProfile(users.data.currentUser || null);
-      initializeForm(categories, users.data.currentUser);
+      setJobCategoriesData(activeJobCategories);
+      setUserProfile(currentUser);
+      initializeForm(activeJobCategories, currentUser);
       hasInitialized.current = true;
       setLoadingData(false);
     } catch (error) {
@@ -122,14 +122,14 @@ export function useApplyForm() {
       showError('Failed to load application data');
       setLoadingData(false);
     }
-  }, [jobCategories.jobCategories, jobCategories.isLoading, users.data.currentUser, initializeForm, showError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCategories.isLoading, activeJobCategories.length, currentUser]);
 
   // Load requirements when job category changes
   useEffect(() => {
-    if (formData.jobCategory && requirements.data.jobCategoryRequirements) {
+    if (formData.jobCategory && currentRequirements.length > 0) {
       try {
-        const reqs = requirements.data.jobCategoryRequirements || [];
-        const transformedReqs = transformRequirements(reqs, formData.jobCategory);
+        const transformedReqs = transformRequirements(currentRequirements, formData.jobCategory);
         setRequirementsByJobCategory(transformedReqs);
       } catch (error) {
         console.error('Error loading requirements:', error);
@@ -138,7 +138,8 @@ export function useApplyForm() {
     } else {
       setRequirementsByJobCategory([]);
     }
-  }, [formData.jobCategory, requirements.data.jobCategoryRequirements, showError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.jobCategory, currentRequirements.length]);
 
   const handleNextStep = async () => {
     const success = await handleNext(requirementsByJobCategory, STEP_TITLES);

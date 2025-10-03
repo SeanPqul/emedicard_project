@@ -5,6 +5,7 @@ import { UploadDocumentsStepProps } from './UploadDocumentsStep.types';
 import styles from './UploadDocumentsStep.styles';
 import { theme } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
+import { getDocumentStatusInfo, formatFileSize } from '@shared/utils/documentStatus';
 
 export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
   formData,
@@ -44,6 +45,15 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
         to ensure proper processing of your {formData.applicationType?.toLowerCase() || 'health card'} application.
       </Text>
       
+      {/* Info Card */}
+      <View style={styles.infoCard}>
+        <Ionicons name="information-circle-outline" size={moderateScale(24)} color="#2E86AB" />
+        <View style={styles.infoContent}>
+          <Text style={styles.infoTitle}>Document Requirements</Text>
+          <Text style={styles.infoText}>⚠️ Note: Documents must be from accredited clinics and laboratories. Accepted formats: JPG, PNG, PDF</Text>
+        </View>
+      </View>
+      
       {/* Document List */}
       <View style={styles.documentsContainer}>
         {requirementsByJobCategory.map((document, index) => (
@@ -55,6 +65,9 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
                   {document.required && <Text style={styles.requiredAsterisk}> *</Text>}
                 </Text>
                 <Text style={styles.documentDescription}>{document.description}</Text>
+                <Text style={styles.documentFormats}>
+                  Formats: {(document as any).formats ? (document as any).formats.join(', ').toUpperCase() : 'JPG, PNG, PDF'}
+                </Text>
               </View>
               <View style={styles.documentStatus}>
                 {selectedDocuments[document.fieldName] ? (
@@ -93,31 +106,75 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
             {/* Document Preview */}
             {selectedDocuments[document.fieldName] && !getUploadState(document.fieldName)?.uploading && (
               <View style={styles.documentPreview}>
-                <Image
-                  source={{ uri: selectedDocuments[document.fieldName]?.uri }}
-                  style={styles.documentImage}
-                  resizeMode="cover"
-                />
-                <TouchableOpacity 
-                  style={styles.removeDocumentButton}
-                  onPress={() => onRemoveDocument(document.fieldName)}
-                >
-                  <Ionicons name="close-circle" size={moderateScale(20)} color={theme.colors.semantic.error} />
-                </TouchableOpacity>
+                <View style={styles.documentPreviewContent}>
+                  <Image
+                    source={{ uri: selectedDocuments[document.fieldName]?.uri }}
+                    style={styles.documentImage}
+                    resizeMode="cover"
+                  />
+                  <TouchableOpacity
+                    style={styles.removeDocumentButton}
+                    onPress={() => onRemoveDocument(document.fieldName)}
+                  >
+                    <Ionicons name="close-circle" size={moderateScale(20)} color={theme.colors.semantic.error} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Status Information */}
+                <View style={styles.statusContainer}>
+                  {(() => {
+                    const statusInfo = getDocumentStatusInfo(
+                      getUploadState(document.fieldName),
+                      new Date() // selectedAt timestamp - using current time as fallback
+                    );
+
+                    const docSize = selectedDocuments[document.fieldName]?.size;
+                    console.log('📊 Display check:', {
+                      fieldName: document.fieldName,
+                      hasDoc: !!selectedDocuments[document.fieldName],
+                      size: docSize,
+                      fullDoc: selectedDocuments[document.fieldName]
+                    });
+
+                    return (
+                      <>
+                        <View style={styles.statusRow}>
+                          <Ionicons
+                            name={statusInfo.icon as any}
+                            size={moderateScale(16)}
+                            color={statusInfo.color}
+                          />
+                          <Text style={[styles.statusLabel, { color: statusInfo.color }]}>
+                            {statusInfo.label}
+                          </Text>
+                        </View>
+                        {docSize && (
+                          <Text style={styles.fileSize}>
+                            {formatFileSize(docSize)}
+                          </Text>
+                        )}
+                      </>
+                    );
+                  })()}
+                </View>
               </View>
             )}
 
             {/* Upload Button */}
-            {!selectedDocuments[document.fieldName] && (
-              <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={() => onDocumentPicker(document.fieldName)}
-                disabled={getUploadState(document.fieldName)?.uploading}
-              >
-                <Ionicons name="cloud-upload-outline" size={moderateScale(20)} color={theme.colors.brand.secondary} />
-                <Text style={styles.uploadButtonText}>Choose File</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              style={styles.uploadButton}
+              onPress={() => onDocumentPicker(document.fieldName)}
+              disabled={getUploadState(document.fieldName)?.uploading}
+            >
+              <Ionicons 
+                name={selectedDocuments[document.fieldName] ? "refresh" : "cloud-upload-outline"} 
+                size={moderateScale(20)} 
+                color="#2E86AB" 
+              />
+              <Text style={styles.uploadButtonText}>
+                {selectedDocuments[document.fieldName] ? 'Replace' : 'Upload'}
+              </Text>
+            </TouchableOpacity>
           </View>
         ))}
       </View>

@@ -19,7 +19,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
             index <= currentStep ? styles.stepCircleActive : styles.stepCircleInactive
           ]}>
             {index < currentStep ? (
-              <Ionicons name="checkmark" size={moderateScale(16)} color={theme.colors.background.primary} />
+              <Ionicons name="checkmark" size={moderateScale(16)} color="#FFFFFF" />
             ) : (
               <Text style={[
                 styles.stepNumber,

@@ -5,90 +5,69 @@ import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: scale(theme.spacing.lg),
     paddingTop: verticalScale(theme.spacing.lg),
   },
   title: {
-    fontSize: moderateScale(theme.typography.h3.fontSize),
+    fontSize: moderateScale(24),
     fontWeight: '600',
-    color: theme.colors.text.primary,
-    marginBottom: verticalScale(theme.spacing.xs),
+    color: '#111827',
+    marginBottom: verticalScale(theme.spacing.sm),
   },
   subtitle: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    color: theme.colors.text.secondary,
+    fontSize: moderateScale(14),
+    color: '#6B7280',
     marginBottom: verticalScale(theme.spacing.xl),
-    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
+    lineHeight: moderateScale(20),
   },
   optionsContainer: {
     gap: verticalScale(theme.spacing.md),
   },
-  optionCard: {
+  radioOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.background.primary,
+    paddingVertical: verticalScale(theme.spacing.md),
+    paddingHorizontal: scale(theme.spacing.lg),
     borderRadius: theme.borderRadius.lg,
-    padding: scale(theme.spacing.md),
     borderWidth: moderateScale(2),
-    borderColor: theme.colors.border.light,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: moderateScale(2),
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: moderateScale(8),
-    elevation: 2,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
   },
-  optionCardSelected: {
-    borderColor: theme.colors.brand.secondary,
-    backgroundColor: theme.colors.background.tertiary,
+  radioOptionSelected: {
+    borderColor: '#2E86AB',
+    backgroundColor: '#F0F9FF',
   },
-  iconContainer: {
-    width: moderateScale(56),
-    height: moderateScale(56),
-    borderRadius: moderateScale(28),
-    backgroundColor: theme.colors.background.tertiary,
-    justifyContent: 'center',
+  radioCircle: {
+    width: moderateScale(20),
+    height: moderateScale(20),
+    borderRadius: moderateScale(10),
+    borderWidth: moderateScale(2),
+    borderColor: '#D1D5DB',
+    marginRight: scale(theme.spacing.md),
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  iconContainerSelected: {
-    backgroundColor: theme.colors.brand.secondary,
+  radioCircleSelected: {
+    borderColor: '#2E86AB',
   },
-  optionContent: {
+  radioInner: {
+    width: moderateScale(10),
+    height: moderateScale(10),
+    borderRadius: moderateScale(5),
+    backgroundColor: '#2E86AB',
+  },
+  radioContent: {
     flex: 1,
-    marginLeft: scale(theme.spacing.md),
-    marginRight: scale(theme.spacing.sm),
   },
-  optionTitle: {
-    fontSize: moderateScale(theme.typography.body.fontSize),
+  radioTitle: {
+    fontSize: moderateScale(16),
     fontWeight: '600',
-    color: theme.colors.text.primary,
+    color: '#111827',
     marginBottom: verticalScale(2),
   },
-  optionTitleSelected: {
-    color: theme.colors.brand.secondary,
-  },
-  optionDescription: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    color: theme.colors.text.secondary,
-  },
-  radioButton: {
-    width: moderateScale(24),
-    height: moderateScale(24),
-    borderRadius: moderateScale(12),
-    borderWidth: moderateScale(2),
-    borderColor: theme.colors.border.light,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioButtonSelected: {
-    borderColor: theme.colors.brand.secondary,
-  },
-  radioButtonInner: {
-    width: moderateScale(12),
-    height: moderateScale(12),
-    borderRadius: moderateScale(6),
-    backgroundColor: theme.colors.brand.secondary,
+  radioSubtitle: {
+    fontSize: moderateScale(14),
+    color: '#6B7280',
   },
   errorContainer: {
     flexDirection: 'row',

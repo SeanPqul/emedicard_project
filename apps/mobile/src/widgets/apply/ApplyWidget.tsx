@@ -1,21 +1,16 @@
-import React, { useEffect, useState } from 'react';
 import { 
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
-  Dimensions
+  View
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useUser } from '@clerk/clerk-expo';
 import { hp } from '@/src/shared/utils/responsive';
 import { formStorage } from '@/src/features/application/services/formStorage';
-import { getColor } from '@/src/shared/styles/theme';
 import { STEP_TITLES } from '@/src/features/application/constants';
-import { FeedbackSystem, useFeedback } from '@/src/shared/components/feedback';
+import { FeedbackSystem } from '@/src/shared/components/feedback';
 
 // Components
 import { StepIndicator, DocumentSourceModal } from '@/src/features/application/components';
@@ -107,8 +102,6 @@ export function ApplyWidget({
   messages,
   dismissFeedback,
 }: ApplyWidgetProps) {
-  const insets = useSafeAreaInsets();
-  const screenHeight = Dimensions.get('window').height;
 
   const renderCurrentStep = () => {
     switch (currentStep) {
@@ -224,7 +217,7 @@ export function ApplyWidget({
             styles.nextButton,
             currentStep === 0 && styles.nextButtonFull,
             { 
-              backgroundColor: isSubmitting ? getColor('border.medium') : getColor('accent.medicalBlue'),
+              backgroundColor: isSubmitting ? '#D1D5DB' : '#2E86AB',
               opacity: isSubmitting ? 0.6 : 1,
             }
           ]}

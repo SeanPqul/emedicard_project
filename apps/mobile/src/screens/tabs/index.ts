@@ -1,7 +1,8 @@
 // Tab navigation screens
-export { DashboardScreen } from './DashboardScreen';
-export { ApplicationListScreen } from './ApplicationListScreen';
+export { ApplyScreen } from '../../../docs/ApplyScreen';
 export { ApplicationDetailScreen } from './ApplicationDetailScreen';
-export { ApplyScreen } from './ApplyScreen';
+export { ApplicationListScreen } from './ApplicationListScreen';
+export { DashboardScreen } from './DashboardScreen';
 export { NotificationScreen } from './NotificationScreen';
 export { ProfileScreen } from './ProfileScreen';
+

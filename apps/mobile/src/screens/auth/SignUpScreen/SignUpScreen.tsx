@@ -280,7 +280,7 @@ export function SignUpScreen() {
 
           {/* Sign Up Button */}
           <TouchableOpacity
-            style={[styles.signUpButton, loading && styles.buttonDisabled]}
+            style={[styles.signUpButton, (loading || !isFormValid) && styles.buttonDisabled]}
             onPress={handleSignUp}
             disabled={loading || !isFormValid}
           >

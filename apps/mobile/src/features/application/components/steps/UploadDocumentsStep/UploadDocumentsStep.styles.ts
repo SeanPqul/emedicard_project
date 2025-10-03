@@ -5,26 +5,46 @@ import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: scale(theme.spacing.lg),
+    paddingTop: verticalScale(theme.spacing.lg),
   },
   loadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  scrollContent: {
-    paddingTop: verticalScale(theme.spacing.lg),
-    paddingBottom: verticalScale(theme.spacing.xl),
-  },
   title: {
-    fontSize: moderateScale(theme.typography.h3.fontSize),
+    fontSize: moderateScale(24),
     fontWeight: '600',
-    color: theme.colors.text.primary,
-    marginBottom: verticalScale(theme.spacing.xs),
+    color: '#111827',
+    marginBottom: verticalScale(theme.spacing.sm),
   },
   subtitle: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    color: theme.colors.text.secondary,
+    fontSize: moderateScale(14),
+    color: '#6B7280',
     marginBottom: verticalScale(theme.spacing.lg),
-    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
+    lineHeight: moderateScale(20),
+  },
+  infoCard: {
+    flexDirection: 'row',
+    backgroundColor: '#2E86AB10',
+    borderRadius: theme.borderRadius.md,
+    padding: scale(theme.spacing.md),
+    marginBottom: verticalScale(theme.spacing.lg),
+  },
+  infoContent: {
+    flex: 1,
+    marginLeft: scale(theme.spacing.sm),
+  },
+  infoTitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '600',
+    color: '#2E86AB',
+    marginBottom: verticalScale(2),
+  },
+  infoText: {
+    fontSize: moderateScale(12),
+    color: '#6B7280',
+    lineHeight: moderateScale(16),
   },
   documentsContainer: {
     flex: 1,
@@ -49,6 +69,8 @@ const styles = StyleSheet.create({
   },
   documentPreview: {
     marginTop: verticalScale(theme.spacing.sm),
+  },
+  documentPreviewContent: {
     position: 'relative',
   },
   documentImage: {
@@ -62,6 +84,28 @@ const styles = StyleSheet.create({
     right: scale(theme.spacing.xs),
     backgroundColor: theme.colors.background.primary,
     borderRadius: theme.borderRadius.full,
+  },
+  // Status-aware display styles (replaces filename display)
+  statusContainer: {
+    marginTop: verticalScale(theme.spacing.sm),
+    paddingHorizontal: scale(theme.spacing.xs),
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: verticalScale(2),
+  },
+  statusLabel: {
+    fontSize: moderateScale(13),
+    fontWeight: '600',
+    marginLeft: scale(theme.spacing.xs),
+  },
+  fileSize: {
+    fontSize: moderateScale(11),
+    color: theme.colors.text.tertiary,
+    marginLeft: scale(theme.spacing.lg),
+    fontStyle: 'italic',
+    marginTop: verticalScale(2),
   },
   progressContainer: {
     marginTop: verticalScale(theme.spacing.sm),
@@ -101,20 +145,20 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(theme.spacing.md),
   },
   documentCard: {
-    backgroundColor: theme.colors.background.primary,
+    backgroundColor: '#FFFFFF',
     borderRadius: theme.borderRadius.md,
     padding: scale(theme.spacing.md),
-    marginBottom: verticalScale(theme.spacing.sm),
-    borderWidth: moderateScale(1.5),
-    borderColor: theme.colors.border.light,
+    marginBottom: verticalScale(theme.spacing.md),
+    borderWidth: moderateScale(1),
+    borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: moderateScale(1),
+      height: moderateScale(2),
     },
-    shadowOpacity: 0.03,
-    shadowRadius: moderateScale(4),
-    elevation: 1,
+    shadowOpacity: 0.05,
+    shadowRadius: moderateScale(8),
+    elevation: 2,
   },
   documentCardUploaded: {
     borderColor: theme.colors.semantic.success,
@@ -151,9 +195,9 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(2),
   },
   documentTitle: {
-    fontSize: moderateScale(theme.typography.body.fontSize),
+    fontSize: moderateScale(15),
     fontWeight: '600',
-    color: theme.colors.text.primary,
+    color: '#111827',
   },
   optionalBadge: {
     fontSize: moderateScale(11),
@@ -165,9 +209,16 @@ const styles = StyleSheet.create({
     marginLeft: scale(theme.spacing.xs),
   },
   documentDescription: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    color: theme.colors.text.secondary,
+    fontSize: moderateScale(13),
+    color: '#6B7280',
     lineHeight: moderateScale(18),
+    marginTop: verticalScale(2),
+  },
+  documentFormats: {
+    fontSize: moderateScale(11),
+    color: '#9CA3AF',
+    fontStyle: 'italic',
+    marginTop: verticalScale(2),
   },
   uploadedContainer: {
     flexDirection: 'row',
@@ -192,18 +243,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.background.tertiary,
-    paddingHorizontal: scale(theme.spacing.md),
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: scale(theme.spacing.lg),
     paddingVertical: verticalScale(theme.spacing.sm),
-    borderRadius: moderateScale(20),
-    alignSelf: 'flex-start',
+    borderRadius: theme.borderRadius.md,
+    borderWidth: moderateScale(1),
+    borderColor: '#2E86AB',
     marginTop: verticalScale(theme.spacing.sm),
   },
   uploadButtonText: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    color: theme.colors.brand.secondary,
-    fontWeight: '500',
-    marginLeft: scale(theme.spacing.xs),
+    fontSize: moderateScale(14),
+    color: '#2E86AB',
+    fontWeight: '600',
+    marginLeft: scale(theme.spacing.sm),
   },
   tipBox: {
     flexDirection: 'row',

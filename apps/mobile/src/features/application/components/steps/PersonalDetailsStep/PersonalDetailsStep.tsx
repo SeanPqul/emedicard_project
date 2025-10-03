@@ -38,7 +38,10 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
       )}
       
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Position/Job Title</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>Position/Job Title</Text>
+          <Text style={{ color: theme.colors.semantic.error, marginLeft: moderateScale(4) }}>*</Text>
+        </View>
         <View style={[
           styles.inputContainer,
           errors.position && styles.inputContainerError
@@ -46,25 +49,31 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           <Ionicons 
             name="briefcase-outline" 
             size={moderateScale(20)} 
-            color={errors.position ? theme.colors.semantic.error : theme.colors.text.secondary} 
+            color={errors.position ? theme.colors.semantic.error : '#6B7280'} 
             style={styles.inputIcon}
           />
           <TextInput
             style={styles.input}
             value={formData.position}
             onChangeText={(text) => setFormData({ ...formData, position: text })}
-            placeholder="e.g., Your job position"
-            placeholderTextColor={theme.colors.text.tertiary}
+            placeholder="e.g., Food Handler, Security Guard"
+            placeholderTextColor="#9CA3AF"
             autoCapitalize="words"
           />
         </View>
         {errors.position && (
-          <Text style={styles.errorText}>{errors.position}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+            <Text style={styles.errorText}>{errors.position}</Text>
+          </View>
         )}
       </View>
       
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Organization/Company</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>Organization/Company</Text>
+          <Text style={{ color: theme.colors.semantic.error, marginLeft: moderateScale(4) }}>*</Text>
+        </View>
         <View style={[
           styles.inputContainer,
           errors.organization && styles.inputContainerError
@@ -72,20 +81,23 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           <Ionicons 
             name="business-outline" 
             size={moderateScale(20)} 
-            color={errors.organization ? theme.colors.semantic.error : theme.colors.text.secondary} 
+            color={errors.organization ? theme.colors.semantic.error : '#6B7280'} 
             style={styles.inputIcon}
           />
           <TextInput
             style={styles.input}
             value={formData.organization}
             onChangeText={(text) => setFormData({ ...formData, organization: text })}
-            placeholder="e.g., Your company name"
-            placeholderTextColor={theme.colors.text.tertiary}
+            placeholder="e.g., ABC Restaurant, XYZ Mall"
+            placeholderTextColor="#9CA3AF"
             autoCapitalize="words"
           />
         </View>
         {errors.organization && (
-          <Text style={styles.errorText}>{errors.organization}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+            <Text style={styles.errorText}>{errors.organization}</Text>
+          </View>
         )}
       </View>
       

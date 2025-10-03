@@ -68,7 +68,37 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
 
   const handleNext = useCallback(async (requirementsByJobCategory: DocumentRequirement[], stepTitles: string[]) => {
     // Validate current step with enhanced queue checking
-    if (!validateCurrentStep(requirementsByJobCategory)) {
+    const validation = validateApplicationStep(
+      formData, 
+      currentStep, 
+      requirementsByJobCategory || [], 
+      selectedDocuments, 
+      getUploadState
+    );
+    
+    setErrors(validation.errors);
+    
+    if (!validation.isValid) {
+      // Show specific error messages based on the current step
+      if (currentStep === 1 && validation.errors.jobCategory) {
+        showError('Job Category Required', 'Please select a job category to continue with your application.');
+        return;
+      }
+      
+      if (currentStep === 2) {
+        const missingFields = [];
+        if (validation.errors.position) missingFields.push('• Position/Job Title');
+        if (validation.errors.organization) missingFields.push('• Organization/Company');
+        
+        if (missingFields.length > 0) {
+          showError(
+            'Required Information Missing',
+            `Please provide the following information:\n\n${missingFields.join('\n')}`
+          );
+          return;
+        }
+      }
+      
       return;
     }
     

@@ -73,10 +73,19 @@ export function UploadDocumentsScreen() {
 
   const cacheDocumentBeforeUpload = async (file: any, documentId: string) => {
     try {
-      await cacheFileForUpload(file, documentId);
+      // Create a copy of file with properly extracted fileName
+      const fileWithName = {
+        ...file,
+        // Ensure we preserve the actual fileName from ImagePicker
+        fileName: file.fileName || file.name || file.uri?.split('/').pop() || `document_${documentId}.jpg`
+      };
+      
+      console.log('Caching document with fileName:', fileWithName.fileName);
+      
+      await cacheFileForUpload(fileWithName, documentId);
       setSelectedDocuments(prev => ({
         ...prev,
-        [documentId]: file,
+        [documentId]: fileWithName,
       }));
       Alert.alert('Success', 'Document cached successfully!');
     } catch (error) {
@@ -341,7 +350,12 @@ export function UploadDocumentsScreen() {
               {/* Show selected document preview */}
               {selectedDocuments[doc.fieldName] && (
                 <View style={styles.documentPreview}>
-                  <Text style={styles.documentName}>Selected: {selectedDocuments[doc.fieldName].name}</Text>
+                  <Text style={styles.documentName}>Selected: {
+                    selectedDocuments[doc.fieldName].fileName || 
+                    selectedDocuments[doc.fieldName].name || 
+                    selectedDocuments[doc.fieldName].uri?.split('/').pop() || 
+                    'Document'
+                  }</Text>
                   <TouchableOpacity 
                     style={styles.removeButton}
                     onPress={() => handleRemoveDocument(doc.fieldName)}

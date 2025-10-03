@@ -126,8 +126,15 @@ export const styles = StyleSheet.create({
   },
 
   googleButton: {
+    backgroundColor: getColor('background.primary'),
+    borderRadius: getBorderRadius('lg'),
+    borderWidth: 1,
+    borderColor: getColor('border.light'),
+    height: hp(6.5),
+    justifyContent: "center",
     alignItems: "center",
     marginBottom: verticalScale(13.2),
+    ...getShadow('small'),
   },
 
   googleIcon: {

@@ -1,6 +1,6 @@
 import {  StyleSheet } from 'react-native';
 import { theme } from '@shared/styles/theme';
-import { moderateScale, verticalScale, scale, wp, hp } from '@shared/utils/responsive';
+import { moderateScale, verticalScale, scale } from '@shared/utils/responsive';
 
 
 export const styles = StyleSheet.create({
@@ -31,12 +31,13 @@ export const styles = StyleSheet.create({
     borderBottomColor: theme.colors.border.light,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     color: theme.colors.text.primary,
     fontWeight: '600' as const,
   },
   headerRight: {
-    width: moderateScale(24), // Same as back button to center title
+    width: moderateScale(40),
+    alignItems: 'flex-end',
   },
   cancelButton: {
     padding: moderateScale(4),
@@ -49,41 +50,43 @@ export const styles = StyleSheet.create({
     paddingVertical: verticalScale(theme.spacing.md),
     backgroundColor: theme.colors.background.primary,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border.light,
+    borderTopColor: '#E5E7EB',
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: hp(8), // Space for tab bar
+    paddingBottom: verticalScale(10),
     gap: scale(theme.spacing.md),
   },
   previousButton: {
     flex: 1,
-    paddingVertical: verticalScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.lg,
+    height: moderateScale(48),
+    borderRadius: moderateScale(8),
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.border.medium,
+    borderWidth: moderateScale(1),
+    borderColor: '#D1D5DB',
+    backgroundColor: '#FFFFFF',
   },
   previousButtonText: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
+    fontSize: moderateScale(16),
+    color: '#6B7280',
     fontWeight: '500' as const,
   },
   nextButton: {
     flex: 1,
-    paddingVertical: verticalScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.lg,
+    height: moderateScale(48),
+    borderRadius: moderateScale(8),
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#2E86AB',
   },
   nextButtonFull: {
-    flex: 2,
+    flex: 1,
   },
   nextButtonText: {
-    fontSize: 16,
-    color: theme.colors.text.inverse,
+    fontSize: moderateScale(16),
+    color: '#FFFFFF',
     fontWeight: '600' as const,
   },
 
@@ -95,7 +98,7 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.primary,
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: theme.colors.text.secondary,
     marginTop: verticalScale(theme.spacing.md),
   },

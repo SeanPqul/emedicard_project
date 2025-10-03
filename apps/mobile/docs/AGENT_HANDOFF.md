@@ -138,6 +138,37 @@ The Maya payment flow has been successfully refactored following Feature-Sliced 
 - All imports have been updated to use the new structure
 - No duplication - the implementations are architecturally different
 
+## Completed Responsive Layout Refactoring (FSD Architecture)
+The Layout component and navigation structure have been successfully refactored with responsive design improvements:
+
+### Updated files:
+- C:\Em\apps\mobile\src\app\layout.tsx
+  - Added responsive design with useWindowDimensions hook
+  - Implemented dynamic sidebar visibility (auto-hide on mobile)
+  - Added collapsible sidebar with toggle button
+  - Enhanced responsive breakpoints (mobile: <768px, tablet: 768-1024px, desktop: >1024px)
+  - Improved safe area handling and scroll behavior
+  - Added smooth transitions and animations
+  - Implemented responsive padding and spacing
+  - Fixed navigation structure with proper segment handling
+  - Added authentication state management integration
+
+### Key improvements:
+- **Responsive Breakpoints**: Proper mobile/tablet/desktop handling
+- **Mobile Optimization**: Auto-hide sidebar, full-width content, hamburger menu
+- **Tablet Support**: Collapsible sidebar, optimized spacing
+- **Desktop Enhancement**: Wide sidebar, better content distribution
+- **Navigation Fix**: Proper root segment detection and active state handling
+- **Performance**: Memoized handlers, optimized re-renders
+- **Accessibility**: Touch targets, focus states, ARIA labels
+
+### Architecture notes:
+- Follows FSD app layer conventions
+- Uses existing shared hooks (useWindowDimensions, useAuth)
+- Maintains backward compatibility with existing navigation structure
+- Implements responsive design patterns consistently
+- Proper TypeScript typing throughout
+
 Other potential import fixes after maya utils (based on earlier typecheck snapshot):
 - @shared/lib/cache/mobileCacheManager — check existence; if missing, either remove usage or create minimal cache wrapper in shared/lib/cache with actual implementation based on shared/services/storage
 - @shared/lib/errors — create shared error types/utils if referenced, or temporarily replace with lightweight types in the call sites

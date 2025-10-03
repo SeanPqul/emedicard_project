@@ -67,5 +67,5 @@ export interface NavigationHelpers {
     screen: T,
     params?: RootStackParamList[T]
   ) => void;
-  reset: (routes: Array<{ name: keyof RootStackParamList; params?: any }>) => void;
+  reset: (routes: { name: keyof RootStackParamList; params?: any }[]) => void;
 }

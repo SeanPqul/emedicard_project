@@ -11,3 +11,13 @@ export { wp as widthPercentageToDP, hp as heightPercentageToDP } from './respons
 // User utilities (generic formatting only)
 export { generateDisplayNameFromEmail, getUserDisplayName,
   hasPlaceholderName } from './user-utils';
+
+// Document status utilities
+export {
+  getDocumentStatusInfo,
+  formatRelativeTime,
+  formatFileSize,
+  getDocumentTypeLabel
+} from './documentStatus';
+
+export type { DocumentStatusInfo, DocumentUploadStatus, UploadState } from './documentStatus';
