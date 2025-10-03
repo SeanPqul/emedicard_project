@@ -67,7 +67,7 @@ export function ApplicationDetailWidget({
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.replace('/(tabs)/application')} style={styles.backButton}>
             <Ionicons name="arrow-back" size={moderateScale(24)} color={theme.colors.text.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Application Details</Text>
