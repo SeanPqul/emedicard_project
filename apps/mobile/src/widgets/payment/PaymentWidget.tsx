@@ -150,7 +150,11 @@ export function PaymentWidget({
         onPaymentSuccess();
       }
       
-      setTimeout(() => router.back(), 2000);
+      // Navigate to application details instead of using back()
+      // This prevents navigation errors when there's no previous screen
+      setTimeout(() => {
+        router.replace(`/(screens)/(application)/${formId}`);
+      }, 2000);
     } catch (error) {
       setIsSubmitting(false);
       console.error('Payment error:', error);
