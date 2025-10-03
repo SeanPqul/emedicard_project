@@ -156,7 +156,7 @@ export function ApplicationListWidget({
       <TouchableOpacity 
         key={application._id} 
         style={styles.applicationCard}
-        onPress={() => router.push(`/application/${application._id}`)}
+        onPress={() => router.push(`/(screens)/(application)/${application._id}`)}
       >
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>

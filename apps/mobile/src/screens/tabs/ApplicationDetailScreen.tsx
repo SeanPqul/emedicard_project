@@ -67,7 +67,7 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
 
   // Delegate rendering to widget
   return (
-    <BaseScreen>
+    <BaseScreen safeArea={false}>
       <ApplicationDetailWidget
         application={application}
         refreshing={refreshing}

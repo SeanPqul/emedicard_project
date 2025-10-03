@@ -22,19 +22,19 @@ export default function PaymentCancelledScreen() {
   const handleTryAgain = () => {
     if (applicationId) {
       // Return to application details to retry payment
-      router.push(`/(screens)/(shared)/application-details?applicationId=${applicationId}`);
+      router.replace(`/(screens)/(application)/${applicationId}`);
     } else {
       // Return to applications list
-      router.push('/(tabs)/applications');
+      router.replace('/(tabs)/application');
     }
   };
 
   const handleGoToApplications = () => {
-    router.push('/(tabs)/applications');
+    router.replace('/(tabs)/application');
   };
 
   const handleGoToDashboard = () => {
-    router.push('/(tabs)/');
+    router.replace('/(tabs)/');
   };
 
   return (

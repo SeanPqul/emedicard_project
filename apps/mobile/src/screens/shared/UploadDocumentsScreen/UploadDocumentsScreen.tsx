@@ -45,6 +45,8 @@ export function UploadDocumentsScreen() {
   const jobCategory = params.jobCategory as string;
   const position = params.position as string;
   const organization = params.organization as string;
+  const rejectedOnly = params.rejectedOnly === 'true';
+  const rejectedFields = params.rejectedFields as string | undefined;
 
   // Use our API hooks instead of direct Convex calls
   const applications = useApplications(formId);
@@ -69,7 +71,23 @@ export function UploadDocumentsScreen() {
     }
   }, [applicationType]);
 
-  const documentRequirements = requirements.data.formDocuments || [];
+  // Filter document requirements based on rejected fields if applicable
+  const allDocumentRequirements = Array.isArray(requirements.data.formDocuments) 
+    ? requirements.data.formDocuments 
+    : [];
+  const documentRequirements = React.useMemo(() => {
+    if (!rejectedOnly || !rejectedFields) {
+      return allDocumentRequirements;
+    }
+    
+    // Parse the comma-separated rejected field identifiers
+    const rejectedFieldList = rejectedFields.split(',');
+    
+    // Filter to only show rejected documents
+    return allDocumentRequirements.filter((doc: DocumentRequirement) => 
+      rejectedFieldList.includes(doc.fieldName)
+    );
+  }, [allDocumentRequirements, rejectedOnly, rejectedFields]);
 
   const cacheDocumentBeforeUpload = async (file: any, documentId: string) => {
     try {

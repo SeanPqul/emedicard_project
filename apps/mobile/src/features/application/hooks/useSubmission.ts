@@ -624,7 +624,7 @@ export const useSubmission = ({
               onPress: () => {
                 resetForm();
                 // Navigate to application details with payment section
-                router.replace(`/(screens)/(shared)/(screens)/(shared)/application/${applicationId}`);
+                router.replace(`/(screens)/(application)/${applicationId}`);
               },
             },
             {

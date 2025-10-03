@@ -7,6 +7,12 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    paddingBottom: verticalScale(theme.spacing.xl * 1),
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -55,27 +61,50 @@ export const styles = StyleSheet.create({
   statusHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: verticalScale(theme.spacing.md),
   },
-  statusIconContainer: {
-    width: moderateScale(48),
-    height: moderateScale(48),
-    borderRadius: theme.borderRadius.full,
-    justifyContent: 'center',
+  statusBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: scale(theme.spacing.md),
+    paddingVertical: verticalScale(theme.spacing.xs),
+    paddingHorizontal: scale(theme.spacing.sm),
+    borderRadius: theme.borderRadius.full,
+    gap: scale(theme.spacing.xs),
   },
   statusInfo: {
-    flex: 1,
+    marginTop: verticalScale(theme.spacing.sm),
+  },
+  statusLabel: {
+    fontSize: moderateScale(12),
+    color: theme.colors.text.secondary,
+    marginBottom: verticalScale(theme.spacing.xs),
+  },
+  statusValue: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.primary,
+    fontWeight: '500' as const,
   },
   statusText: {
-    fontSize: moderateScale(18),
-    fontWeight: '700' as const,
+    fontSize: moderateScale(14),
+    fontWeight: '600' as const,
   },
   applicationId: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(12),
     color: theme.colors.text.secondary,
-    marginTop: verticalScale(theme.spacing.xs),
+  },
+  deadlineContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: verticalScale(theme.spacing.md),
+    padding: moderateScale(theme.spacing.sm),
+    backgroundColor: theme.colors.background.tertiary,
+    borderRadius: theme.borderRadius.md,
+    gap: scale(theme.spacing.xs),
+  },
+  deadlineText: {
+    fontSize: moderateScale(13),
+    fontWeight: '500' as const,
   },
   urgencyBanner: {
     padding: moderateScale(theme.spacing.sm),
@@ -104,14 +133,60 @@ export const styles = StyleSheet.create({
     lineHeight: moderateScale(14 * 1.5),
   },
 
-  // Info Card
-  infoCard: {
+  // Details Card
+  detailsCard: {
     backgroundColor: theme.colors.background.primary,
     marginHorizontal: scale(theme.spacing.md),
     marginBottom: verticalScale(theme.spacing.md),
     padding: moderateScale(theme.spacing.lg),
     borderRadius: theme.borderRadius.lg,
     ...theme.shadows.medium,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: verticalScale(theme.spacing.sm),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light + '30',
+  },
+  detailLabel: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+    flex: 1,
+  },
+  detailValue: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.primary,
+    fontWeight: '500' as const,
+    flex: 2,
+    textAlign: 'right',
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    flex: 2,
+    gap: scale(theme.spacing.xs),
+  },
+  categoryIndicator: {
+    width: moderateScale(12),
+    height: moderateScale(12),
+    borderRadius: theme.borderRadius.full,
+  },
+  orientationNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: verticalScale(theme.spacing.md),
+    padding: moderateScale(theme.spacing.sm),
+    backgroundColor: theme.colors.accent.warningOrange + '20',
+    borderRadius: theme.borderRadius.md,
+    gap: scale(theme.spacing.xs),
+  },
+  orientationText: {
+    fontSize: moderateScale(12),
+    color: theme.colors.accent.warningOrange,
+    flex: 1,
   },
   sectionTitle: {
     fontSize: moderateScale(16),
@@ -161,36 +236,149 @@ export const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.lg,
     ...theme.shadows.medium,
   },
-  paymentAmount: {
-    fontSize: moderateScale(32),
-    fontWeight: '700' as const,
-    color: theme.colors.brand.secondary,
-    textAlign: 'center',
-    marginVertical: verticalScale(theme.spacing.md),
-  },
-  paymentBreakdown: {
-    fontSize: moderateScale(12),
+  paymentDescription: {
+    fontSize: moderateScale(14),
     color: theme.colors.text.secondary,
-    textAlign: 'center',
+    marginBottom: verticalScale(theme.spacing.md),
+  },
+  feeBreakdown: {
+    backgroundColor: theme.colors.background.tertiary,
+    padding: moderateScale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
     marginBottom: verticalScale(theme.spacing.lg),
   },
-  paymentMethods: {
-    gap: verticalScale(theme.spacing.sm),
+  feeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: verticalScale(theme.spacing.xs),
   },
-  paymentMethodButton: {
-    backgroundColor: theme.colors.brand.secondary,
-    paddingVertical: verticalScale(theme.spacing.md),
-    paddingHorizontal: scale(theme.spacing.lg),
+  feeLabel: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+  },
+  feeValue: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.primary,
+    fontWeight: '500' as const,
+  },
+  totalRow: {
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border.light,
+    marginTop: verticalScale(theme.spacing.xs),
+    paddingTop: verticalScale(theme.spacing.sm),
+  },
+  totalLabel: {
+    fontSize: moderateScale(16),
+    color: theme.colors.text.primary,
+    fontWeight: '600' as const,
+  },
+  totalValue: {
+    fontSize: moderateScale(16),
+    color: theme.colors.text.primary,
+    fontWeight: '700' as const,
+  },
+  paymentMethodsTitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '600' as const,
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(theme.spacing.md),
+  },
+  paymentMethods: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: moderateScale(theme.spacing.sm),
+  },
+  paymentMethodCard: {
+    flex: 1,
+    minWidth: '47%',
+    backgroundColor: theme.colors.background.tertiary,
+    padding: moderateScale(theme.spacing.md),
     borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
-  manualPaymentButton: {
-    backgroundColor: theme.colors.blue[500],
-  },
-  paymentMethodText: {
-    fontSize: moderateScale(16),
-    color: theme.colors.text.inverse,
+  paymentMethodName: {
+    fontSize: moderateScale(14),
     fontWeight: '600' as const,
+    color: theme.colors.text.primary,
+    marginTop: verticalScale(theme.spacing.xs),
+  },
+  paymentMethodDesc: {
+    fontSize: moderateScale(12),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(theme.spacing.xs),
+  },
+  processingContainer: {
+    marginTop: verticalScale(theme.spacing.md),
+    paddingVertical: verticalScale(theme.spacing.sm),
+    alignItems: 'center',
+  },
+  processingText: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+  },
+  
+  // Payment History Card
+  paymentHistoryCard: {
+    backgroundColor: theme.colors.background.primary,
+    marginHorizontal: scale(theme.spacing.md),
+    marginBottom: verticalScale(theme.spacing.md),
+    padding: moderateScale(theme.spacing.lg),
+    borderRadius: theme.borderRadius.lg,
+    ...theme.shadows.medium,
+  },
+  
+  // Remarks Card
+  remarksCard: {
+    backgroundColor: theme.colors.background.primary,
+    marginHorizontal: scale(theme.spacing.md),
+    marginBottom: verticalScale(theme.spacing.md),
+    padding: moderateScale(theme.spacing.lg),
+    borderRadius: theme.borderRadius.lg,
+    ...theme.shadows.medium,
+  },
+
+  // Documents Card
+  documentsCard: {
+    backgroundColor: theme.colors.background.primary,
+    marginHorizontal: scale(theme.spacing.md),
+    marginBottom: verticalScale(theme.spacing.xl),
+    padding: moderateScale(theme.spacing.lg),
+    borderRadius: theme.borderRadius.lg,
+    ...theme.shadows.medium,
+  },
+  documentsStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background.tertiary,
+    padding: moderateScale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    marginBottom: verticalScale(theme.spacing.md),
+    gap: scale(theme.spacing.sm),
+  },
+  documentsStatusText: {
+    flex: 1,
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(14 * 1.5),
+  },
+  viewDocumentsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.primary[500] + '10',
+    padding: moderateScale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.primary[500] + '30',
+  },
+  viewDocumentsText: {
+    flex: 1,
+    fontSize: moderateScale(15),
+    fontWeight: '600' as const,
+    color: theme.colors.primary[500],
+    marginLeft: scale(theme.spacing.sm),
   },
 
   // Action Buttons

@@ -70,15 +70,15 @@ export default function PaymentFailedScreen() {
   const handleRetryPayment = () => {
     if (applicationId) {
       // Go back to application to retry payment
-      router.push(`/(screens)/(shared)/application-details?applicationId=${applicationId}`);
+      router.replace(`/(screens)/(application)/${applicationId}`);
     } else {
       // Go to applications list
-      router.push('/(tabs)/applications');
+      router.replace('/(tabs)/application');
     }
   };
 
   const handleGoToApplications = () => {
-    router.push('/(tabs)/applications');
+    router.replace('/(tabs)/application');
   };
 
   const getFailureReason = () => {

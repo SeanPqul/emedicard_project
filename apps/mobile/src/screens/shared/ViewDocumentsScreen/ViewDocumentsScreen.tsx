@@ -1,0 +1,374 @@
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Image, Linking, Alert } from 'react-native';
+import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import { Id } from '@backend/convex/_generated/dataModel';
+import { useQuery } from 'convex/react';
+import { api } from '@backend/convex/_generated/api';
+import { getColor } from '@shared/styles/theme';
+import { moderateScale } from '@shared/utils/responsive';
+import { styles } from './ViewDocumentsScreen.styles';
+
+interface DocumentWithRequirement {
+  _id: Id<'documentUploads'>;
+  applicationId: Id<'applications'>;
+  documentTypeId: Id<'documentTypes'>;
+  originalFileName: string;
+  storageFileId: Id<'_storage'>;
+  uploadedAt: number;
+  reviewStatus: string;
+  adminRemarks?: string;
+  reviewedBy?: Id<'users'>;
+  reviewedAt?: number;
+  fileUrl?: string | null;
+  requirement: {
+    _id: Id<'documentTypes'>;
+    name: string;
+    description: string;
+    icon: string;
+    isRequired: boolean;
+    fieldIdentifier: string;
+  } | null;
+}
+
+export function ViewDocumentsScreen() {
+  const params = useLocalSearchParams();
+  const formId = params.formId as Id<'applications'>;
+  const [viewingDocument, setViewingDocument] = useState<DocumentWithRequirement | null>(null);
+  
+  // Fetch documents with requirements
+  const documentsData = useQuery(
+    api.requirements.getFormDocumentsRequirements.getApplicationDocumentsRequirementsQuery,
+    formId ? { applicationId: formId } : 'skip'
+  );
+  
+  const isLoading = documentsData === undefined;
+  const uploadedDocuments = documentsData?.uploadedDocuments || [];
+  const requiredDocuments = documentsData?.requiredDocuments || [];
+  const application = documentsData?.application;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Approved':
+        return getColor('accent.safetyGreen');
+      case 'Rejected':
+        return getColor('semantic.error');
+      case 'Pending':
+      default:
+        return getColor('accent.warningOrange');
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'Approved':
+        return 'checkmark-circle';
+      case 'Rejected':
+        return 'close-circle';
+      case 'Pending':
+      default:
+        return 'time-outline';
+    }
+  };
+
+  const handleViewDocument = (doc: DocumentWithRequirement) => {
+    if (doc.fileUrl) {
+      setViewingDocument(doc);
+    } else {
+      Alert.alert('Error', 'Document URL not available. Please try refreshing.');
+    }
+  };
+
+  const handleOpenInBrowser = async () => {
+    if (viewingDocument?.fileUrl) {
+      try {
+        await Linking.openURL(viewingDocument.fileUrl);
+      } catch (error) {
+        Alert.alert('Error', 'Unable to open document in browser');
+      }
+    }
+  };
+
+  const handleAddMissingDocument = () => {
+    router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}`);
+  };
+
+  const handleReuploadRejected = () => {
+    // Get the field identifiers of rejected documents
+    const rejectedFieldIds = rejectedDocuments
+      .map(doc => doc.requirement?.fieldIdentifier)
+      .filter(Boolean)
+      .join(',');
+    
+    router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}&rejectedOnly=true&rejectedFields=${rejectedFieldIds}`);
+  };
+
+  // Find missing required documents
+  const missingDocuments = requiredDocuments.filter((req: any) => 
+    req.required && !uploadedDocuments.some((upload: DocumentWithRequirement) => 
+      upload.documentTypeId === req._id
+    )
+  );
+
+  // Find rejected documents
+  const rejectedDocuments = uploadedDocuments.filter(
+    (doc: DocumentWithRequirement) => doc.reviewStatus === 'Rejected'
+  );
+
+  if (isLoading) {
+    return (
+      <BaseScreenLayout>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Uploaded Documents</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={getColor('primary.500')} />
+          <Text style={styles.loadingText}>Loading documents...</Text>
+        </View>
+      </BaseScreenLayout>
+    );
+  }
+
+  return (
+    <BaseScreenLayout>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Uploaded Documents</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Summary Card */}
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryRow}>
+            <View style={styles.summaryItem}>
+              <Ionicons name="document-text" size={moderateScale(28)} color={getColor('primary.500')} />
+              <Text style={styles.summaryValue}>{uploadedDocuments.length}</Text>
+              <Text style={styles.summaryLabel}>Uploaded</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Ionicons name="checkmark-circle" size={moderateScale(28)} color={getColor('accent.safetyGreen')} />
+              <Text style={styles.summaryValue}>
+                {uploadedDocuments.filter((d: DocumentWithRequirement) => d.reviewStatus === 'Approved').length}
+              </Text>
+              <Text style={styles.summaryLabel}>Approved</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Ionicons name="time-outline" size={moderateScale(28)} color={getColor('accent.warningOrange')} />
+              <Text style={styles.summaryValue}>
+                {uploadedDocuments.filter((d: DocumentWithRequirement) => d.reviewStatus === 'Pending').length}
+              </Text>
+              <Text style={styles.summaryLabel}>Pending</Text>
+            </View>
+            {uploadedDocuments.filter((d: DocumentWithRequirement) => d.reviewStatus === 'Rejected').length > 0 && (
+              <View style={styles.summaryItem}>
+                <Ionicons name="close-circle" size={moderateScale(28)} color={getColor('semantic.error')} />
+                <Text style={styles.summaryValue}>
+                  {uploadedDocuments.filter((d: DocumentWithRequirement) => d.reviewStatus === 'Rejected').length}
+                </Text>
+                <Text style={styles.summaryLabel}>Rejected</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Application Status Info */}
+        {application && (
+          <View style={styles.infoCard}>
+            <Ionicons name="information-circle-outline" size={moderateScale(20)} color={getColor('primary.500')} />
+            <Text style={styles.infoText}>
+              {application.applicationStatus === 'Pending Payment'
+                ? 'Documents will be verified after payment is confirmed.'
+                : application.applicationStatus === 'Submitted'
+                ? 'Your documents are waiting for verification by our team.'
+                : application.applicationStatus === 'Under Review'
+                ? 'Your documents are currently being verified.'
+                : 'You can view all your uploaded documents below.'}
+            </Text>
+          </View>
+        )}
+
+        {/* Missing Documents Warning */}
+        {missingDocuments.length > 0 && (
+          <View style={styles.warningCard}>
+            <View style={styles.warningHeader}>
+              <Ionicons name="alert-circle" size={moderateScale(24)} color={getColor('semantic.error')} />
+              <Text style={styles.warningTitle}>Missing Required Documents</Text>
+            </View>
+            <Text style={styles.warningText}>
+              You have {missingDocuments.length} required document{missingDocuments.length > 1 ? 's' : ''} that need to be uploaded:
+            </Text>
+            {missingDocuments.map((doc: any) => (
+              <Text key={doc._id} style={styles.warningItem}>
+                • {doc.name}
+              </Text>
+            ))}
+            <TouchableOpacity style={styles.uploadMissingButton} onPress={handleAddMissingDocument}>
+              <Ionicons name="cloud-upload-outline" size={moderateScale(20)} color={getColor('background.primary')} />
+              <Text style={styles.uploadMissingText}>Upload Missing Documents</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Documents List */}
+        <View style={styles.documentsContainer}>
+          <Text style={styles.sectionTitle}>Your Documents</Text>
+          
+          {uploadedDocuments.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="document-outline" size={moderateScale(64)} color={getColor('text.tertiary')} />
+              <Text style={styles.emptyStateTitle}>No Documents Uploaded</Text>
+              <Text style={styles.emptyStateText}>
+                You haven&apos;t uploaded any documents yet. Start by uploading the required documents for your application.
+              </Text>
+              <TouchableOpacity style={styles.uploadButton} onPress={handleAddMissingDocument}>
+                <Ionicons name="cloud-upload-outline" size={moderateScale(20)} color={getColor('background.primary')} />
+                <Text style={styles.uploadButtonText}>Upload Documents</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            uploadedDocuments.map((doc: DocumentWithRequirement) => (
+              <View key={doc._id} style={styles.documentCard}>
+                <View style={styles.documentHeader}>
+                  <View style={styles.documentIconContainer}>
+                    <Ionicons 
+                      name={doc.requirement?.icon as any || 'document-text'} 
+                      size={moderateScale(24)} 
+                      color={getColor('primary.500')} 
+                    />
+                  </View>
+                  <View style={styles.documentInfo}>
+                    <Text style={styles.documentName}>{doc.requirement?.name || 'Document'}</Text>
+                    <Text style={styles.documentFileName}>{doc.originalFileName}</Text>
+                    <Text style={styles.documentDate}>
+                      Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(doc.reviewStatus) + '20' }]}>
+                  <Ionicons 
+                    name={getStatusIcon(doc.reviewStatus) as any} 
+                    size={moderateScale(16)} 
+                    color={getStatusColor(doc.reviewStatus)} 
+                  />
+                  <Text style={[styles.statusText, { color: getStatusColor(doc.reviewStatus) }]}>
+                    {doc.reviewStatus}
+                  </Text>
+                </View>
+
+                {doc.adminRemarks && (
+                  <View style={styles.remarksContainer}>
+                    <Text style={styles.remarksLabel}>Admin Remarks:</Text>
+                    <Text style={styles.remarksText}>{doc.adminRemarks}</Text>
+                  </View>
+                )}
+
+                <View style={styles.documentActions}>
+                  <TouchableOpacity 
+                    style={styles.viewButton}
+                    onPress={() => handleViewDocument(doc)}
+                  >
+                    <Ionicons name="eye-outline" size={moderateScale(18)} color={getColor('primary.500')} />
+                    <Text style={styles.viewButtonText}>View Document</Text>
+                  </TouchableOpacity>
+                  
+                  {doc.reviewStatus === 'Rejected' && (
+                    <TouchableOpacity 
+                      style={styles.replaceButton}
+                      onPress={() => {
+                        const fieldId = doc.requirement?.fieldIdentifier;
+                        if (fieldId) {
+                          router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}&rejectedOnly=true&rejectedFields=${fieldId}`);
+                        }
+                      }}
+                    >
+                      <Ionicons name="refresh-outline" size={moderateScale(18)} color={getColor('semantic.error')} />
+                      <Text style={styles.replaceButtonText}>Replace</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+
+        {/* Add More Documents Button - Only show if documents are rejected */}
+        {rejectedDocuments.length > 0 && (
+          <View style={styles.addMoreContainer}>
+            <View style={styles.rejectedNotice}>
+              <Ionicons name="alert-circle" size={moderateScale(20)} color={getColor('semantic.error')} />
+              <Text style={styles.rejectedNoticeText}>
+                {rejectedDocuments.length} document{rejectedDocuments.length > 1 ? 's were' : ' was'} rejected. Please upload clear replacements.
+              </Text>
+            </View>
+            <TouchableOpacity style={styles.addMoreButton} onPress={handleReuploadRejected}>
+              <Ionicons name="cloud-upload-outline" size={moderateScale(24)} color={getColor('semantic.error')} />
+              <Text style={styles.addMoreText}>Re-upload Rejected Documents</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Document Viewer Modal */}
+      <Modal
+        visible={!!viewingDocument}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setViewingDocument(null)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setViewingDocument(null)}>
+              <Ionicons name="close" size={moderateScale(28)} color={getColor('text.primary')} />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle} numberOfLines={1}>
+              {viewingDocument?.requirement?.name || viewingDocument?.originalFileName}
+            </Text>
+            <TouchableOpacity onPress={handleOpenInBrowser}>
+              <Ionicons name="open-outline" size={moderateScale(24)} color={getColor('primary.500')} />
+            </TouchableOpacity>
+          </View>
+          
+          {viewingDocument && (
+            <View style={styles.documentViewerContent}>
+              {viewingDocument.originalFileName.toLowerCase().endsWith('.pdf') ? (
+                <View style={styles.pdfContainer}>
+                  <Ionicons name="document-text" size={moderateScale(80)} color={getColor('text.secondary')} />
+                  <Text style={styles.pdfText}>PDF Document</Text>
+                  <Text style={styles.pdfFileName}>{viewingDocument.originalFileName}</Text>
+                  <TouchableOpacity style={styles.openExternalButton} onPress={handleOpenInBrowser}>
+                    <Ionicons name="open-outline" size={moderateScale(20)} color={getColor('background.primary')} />
+                    <Text style={styles.openExternalButtonText}>Open in Browser</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <ScrollView 
+                  contentContainerStyle={styles.imageScrollContainer}
+                  maximumZoomScale={3}
+                  minimumZoomScale={0.5}
+                  pinchGestureEnabled
+                >
+                  <Image 
+                    source={{ uri: viewingDocument.fileUrl || '' }}
+                    style={styles.documentImage}
+                    resizeMode="contain"
+                  />
+                </ScrollView>
+              )}
+            </View>
+          )}
+        </View>
+      </Modal>
+    </BaseScreenLayout>
+  );
+}
+

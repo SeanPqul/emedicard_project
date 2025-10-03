@@ -70,16 +70,16 @@ export default function PaymentSuccessScreen() {
   const handleContinue = () => {
     if (applicationId) {
       // Return to application details screen
-      router.push(`/(screens)/(shared)/application-details?applicationId=${applicationId}`);
+      router.replace(`/(screens)/(application)/${applicationId}`);
     } else {
       // Return to applications list
-      router.push('/(tabs)/applications');
+      router.replace('/(tabs)/application');
     }
   };
 
   const handleRetry = () => {
     // Go back to applications to retry payment
-    router.push('/(tabs)/applications');
+    router.replace('/(tabs)/application');
   };
 
   if (isVerifying) {
