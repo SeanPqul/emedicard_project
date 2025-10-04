@@ -60,7 +60,20 @@ export default defineSchema({
     position: v.string(),
     organization: v.string(),
     civilStatus: v.string(),
-    applicationStatus: v.string(), // "Draft", "Pending Payment", "Submitted", "For Payment Validation", "Approved", "Rejected"
+    applicationStatus: v.union(
+      v.literal("Draft"),
+      v.literal("Pending Payment"),
+      v.literal("Submitted"),
+      v.literal("Documents Need Revision"),
+      v.literal("Under Review"),
+      v.literal("For Payment Validation"),
+      v.literal("For Document Verification"),
+      v.literal("For Orientation"),
+      v.literal("Pending"),
+      v.literal("Cancelled"),
+      v.literal("Approved"),
+      v.literal("Rejected")
+    ),
     paymentDeadline: v.optional(v.float64()), // Timestamp for payment deadline
     approvedAt: v.optional(v.float64()),
     adminRemarks: v.optional(v.string()), // Admin notes
@@ -195,5 +208,50 @@ export default defineSchema({
     .index("by_maya_payment", ["mayaPaymentId"])
     .index("by_event_type", ["eventType"])
     .index("by_timestamp", ["timestamp"]),
+
+  // Document Rejection History
+  documentRejectionHistory: defineTable({
+    // Core References
+    applicationId: v.id("applications"),
+    documentTypeId: v.id("documentTypes"),
+    documentUploadId: v.id("documentUploads"), // Original upload
+    
+    // Preserved File Data
+    rejectedFileId: v.id("_storage"), // Never delete this
+    originalFileName: v.string(),
+    fileSize: v.float64(),
+    fileType: v.string(),
+    
+    // Rejection Information
+    rejectionCategory: v.union(
+      v.literal("quality_issue"),      // Blurry, dark, unreadable
+      v.literal("wrong_document"),     // Incorrect document type
+      v.literal("expired_document"),   // Document past validity
+      v.literal("incomplete_document"), // Missing pages/information
+      v.literal("invalid_document"),   // Fake or tampered
+      v.literal("format_issue"),       // Wrong format/size
+      v.literal("other")               // Other reasons
+    ),
+    rejectionReason: v.string(), // Detailed explanation
+    specificIssues: v.array(v.string()), // Bullet points
+    
+    // Tracking
+    rejectedBy: v.id("users"), // Admin who rejected
+    rejectedAt: v.float64(),
+    
+    // Resubmission Tracking
+    wasReplaced: v.boolean(),
+    replacementUploadId: v.optional(v.id("documentUploads")),
+    replacedAt: v.optional(v.float64()),
+    attemptNumber: v.float64(), // 1st, 2nd, 3rd attempt
+    
+    // Audit Fields
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+  }).index("by_application", ["applicationId"])
+    .index("by_document_type", ["applicationId", "documentTypeId"])
+    .index("by_rejected_at", ["rejectedAt"])
+    .index("by_admin", ["rejectedBy"])
+    .index("by_replacement", ["wasReplaced"]),
 
 });

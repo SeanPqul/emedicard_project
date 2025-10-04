@@ -94,7 +94,7 @@ export const handleAbandonedPayment = mutation({
     const application = await ctx.db.get(payment.applicationId);
     if (application) {
       // Determine the correct status to revert to
-      let newStatus = "Submitted";
+      let newStatus: "Submitted" | "Pending Payment" = "Submitted";
       
       // If there's a payment deadline, it should go back to "Pending Payment"
       if (application.paymentDeadline) {
