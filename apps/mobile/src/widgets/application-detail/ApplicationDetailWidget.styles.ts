@@ -348,6 +348,26 @@ export const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.lg,
     ...theme.shadows.medium,
   },
+  documentsSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: verticalScale(theme.spacing.md),
+  },
+  rejectionBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.semantic.error + '20',
+    paddingHorizontal: scale(theme.spacing.sm),
+    paddingVertical: verticalScale(theme.spacing.xs),
+    borderRadius: theme.borderRadius.full,
+    gap: scale(theme.spacing.xs),
+  },
+  rejectionBadgeText: {
+    fontSize: moderateScale(12),
+    fontWeight: '600' as const,
+    color: theme.colors.semantic.error,
+  },
   documentsStatusContainer: {
     flexDirection: 'row',
     alignItems: 'center',

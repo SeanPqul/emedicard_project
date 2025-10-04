@@ -43,10 +43,20 @@ export function ViewDocumentsScreen() {
     formId ? { applicationId: formId } : 'skip'
   );
   
-  const isLoading = documentsData === undefined;
+  // Fetch rejection history
+  const rejectionHistory = useQuery(
+    api.documents.rejectionQueries.getRejectionHistory,
+    formId ? { applicationId: formId } : 'skip'
+  );
+  
+  const isLoading = documentsData === undefined || rejectionHistory === undefined;
   const uploadedDocuments = documentsData?.uploadedDocuments || [];
   const requiredDocuments = documentsData?.requiredDocuments || [];
   const application = documentsData?.application;
+  const rejections = rejectionHistory || [];
+  
+  // Get active rejections (not replaced)
+  const activeRejections = rejections.filter(r => !r.wasReplaced);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -191,6 +201,8 @@ export function ViewDocumentsScreen() {
                 ? 'Your documents are waiting for verification by our team.'
                 : application.applicationStatus === 'Under Review'
                 ? 'Your documents are currently being verified.'
+                : application.applicationStatus === 'Documents Need Revision'
+                ? `${activeRejections.length} document${activeRejections.length > 1 ? 's need' : ' needs'} to be revised and resubmitted.`
                 : 'You can view all your uploaded documents below.'}
             </Text>
           </View>
@@ -220,7 +232,18 @@ export function ViewDocumentsScreen() {
 
         {/* Documents List */}
         <View style={styles.documentsContainer}>
-          <Text style={styles.sectionTitle}>Your Documents</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Text style={styles.sectionTitle}>Your Documents</Text>
+            {rejections.length > 0 && (
+              <TouchableOpacity
+                onPress={() => router.push(`/(screens)/(shared)/documents/rejection-history?formId=${formId}`)}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+              >
+                <Ionicons name="time-outline" size={moderateScale(16)} color={getColor('primary.500')} />
+                <Text style={{ color: getColor('primary.500'), fontSize: moderateScale(14) }}>View History</Text>
+              </TouchableOpacity>
+            )}
+          </View>
           
           {uploadedDocuments.length === 0 ? (
             <View style={styles.emptyState}>
@@ -265,7 +288,28 @@ export function ViewDocumentsScreen() {
                   </Text>
                 </View>
 
-                {doc.adminRemarks && (
+                {doc.reviewStatus === 'Rejected' && (
+                  <View style={styles.rejectionBanner}>
+                    <View style={styles.rejectionHeader}>
+                      <Ionicons 
+                        name="alert-circle" 
+                        size={moderateScale(20)} 
+                        color={getColor('semantic.error')} 
+                      />
+                      <Text style={styles.rejectionTitle}>Rejection Reason</Text>
+                    </View>
+                    <Text style={styles.rejectionText}>
+                      {doc.adminRemarks || 'Document rejected. Please upload a new version.'}
+                    </Text>
+                    {rejections.find(r => r.documentTypeId === doc.documentTypeId && !r.wasReplaced) && (
+                      <Text style={styles.attemptText}>
+                        Attempt #{rejections.find(r => r.documentTypeId === doc.documentTypeId && !r.wasReplaced)?.attemptNumber || 1}
+                      </Text>
+                    )}
+                  </View>
+                )}
+                
+                {doc.adminRemarks && doc.reviewStatus !== 'Rejected' && (
                   <View style={styles.remarksContainer}>
                     <Text style={styles.remarksLabel}>Admin Remarks:</Text>
                     <Text style={styles.remarksText}>{doc.adminRemarks}</Text>

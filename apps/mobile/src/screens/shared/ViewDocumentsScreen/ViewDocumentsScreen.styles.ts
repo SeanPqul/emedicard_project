@@ -331,6 +331,38 @@ export const styles = StyleSheet.create({
     color: theme.colors.semantic.error,
   },
 
+  // Rejection Banner (inside document card)
+  rejectionBanner: {
+    backgroundColor: theme.colors.semantic.error + '10',
+    borderRadius: theme.borderRadius.md,
+    padding: moderateScale(theme.spacing.md),
+    marginTop: verticalScale(theme.spacing.md),
+    borderWidth: 1,
+    borderColor: theme.colors.semantic.error + '20',
+  },
+  rejectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(theme.spacing.xs),
+    marginBottom: verticalScale(theme.spacing.sm),
+  },
+  rejectionTitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '600' as const,
+    color: theme.colors.semantic.error,
+  },
+  rejectionText: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(20),
+  },
+  attemptText: {
+    fontSize: moderateScale(12),
+    color: theme.colors.semantic.error,
+    fontWeight: '500' as const,
+    marginTop: verticalScale(theme.spacing.xs),
+  },
+
   // Rejected Notice
   rejectedNotice: {
     flexDirection: 'row',

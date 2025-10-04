@@ -32,6 +32,7 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
     isLoading,
     isPaymentProcessing,
     isPaymentStatusProcessing,
+    rejectedDocumentsCount,
     onRefresh,
     handlePaymentMethodSelect,
     getStatusIcon,
@@ -77,6 +78,7 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
         isPaymentStatusProcessing={isPaymentStatusProcessing}
         getStatusIcon={getStatusIcon}
         getUrgencyColor={getUrgencyColor}
+        rejectedDocumentsCount={rejectedDocumentsCount}
       />
     </BaseScreen>
   );

@@ -20,6 +20,7 @@ const STATUS_COLORS = {
   'Under Review': '#F18F01',
   'Approved': '#28A745',
   'Rejected': '#DC3545',
+  'Documents Need Revision': '#F18F01',
 } as const;
 
 interface ApplicationDetailWidgetProps {
@@ -31,6 +32,7 @@ interface ApplicationDetailWidgetProps {
   isPaymentStatusProcessing: boolean;
   getStatusIcon: (status: string) => string;
   getUrgencyColor: (daysLeft: number | null) => string;
+  rejectedDocumentsCount?: number;
 }
 
 export function ApplicationDetailWidget({
@@ -42,6 +44,7 @@ export function ApplicationDetailWidget({
   isPaymentStatusProcessing,
   getStatusIcon,
   getUrgencyColor,
+  rejectedDocumentsCount = 0,
 }: ApplicationDetailWidgetProps) {
   const statusColor = STATUS_COLORS[application.status as keyof typeof STATUS_COLORS];
   
@@ -160,7 +163,15 @@ export function ApplicationDetailWidget({
 
       {/* Documents Section */}
       <View style={styles.documentsCard}>
-        <Text style={styles.sectionTitle}>Submitted Documents</Text>
+        <View style={styles.documentsSectionHeader}>
+          <Text style={styles.sectionTitle}>Submitted Documents</Text>
+          {rejectedDocumentsCount > 0 && (
+            <View style={styles.rejectionBadge}>
+              <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+              <Text style={styles.rejectionBadgeText}>{rejectedDocumentsCount}</Text>
+            </View>
+          )}
+        </View>
         
         {application.status === 'Pending Payment' ? (
           <View style={styles.documentsStatusContainer}>
@@ -181,6 +192,13 @@ export function ApplicationDetailWidget({
             <Ionicons name="eye-outline" size={moderateScale(24)} color={theme.colors.accent.medicalBlue} />
             <Text style={styles.documentsStatusText}>
               Your documents are currently being verified
+            </Text>
+          </View>
+        ) : (application.status as string) === 'Documents Need Revision' ? (
+          <View style={styles.documentsStatusContainer}>
+            <Ionicons name="alert-circle" size={moderateScale(24)} color={theme.colors.accent.warningOrange} />
+            <Text style={[styles.documentsStatusText, { color: theme.colors.accent.warningOrange }]}>
+              {rejectedDocumentsCount} document{rejectedDocumentsCount !== 1 ? 's' : ''} need{rejectedDocumentsCount === 1 ? 's' : ''} to be revised and resubmitted
             </Text>
           </View>
         ) : application.status === 'Approved' ? (
@@ -207,6 +225,17 @@ export function ApplicationDetailWidget({
           <Text style={styles.viewDocumentsText}>View Uploaded Documents</Text>
           <Ionicons name="chevron-forward" size={moderateScale(20)} color={theme.colors.primary[500]} />
         </TouchableOpacity>
+        
+        {rejectedDocumentsCount > 0 && (
+          <TouchableOpacity 
+            style={[styles.viewDocumentsButton, { marginTop: 12, backgroundColor: theme.colors.semantic.error + '10' }]}
+            onPress={() => router.push(`/(screens)/(shared)/documents/view-document?formId=${application._id}&showRejected=true`)}
+          >
+            <Ionicons name="alert-circle-outline" size={moderateScale(20)} color={theme.colors.semantic.error} />
+            <Text style={[styles.viewDocumentsText, { color: theme.colors.semantic.error }]}>View Rejected Documents</Text>
+            <Ionicons name="chevron-forward" size={moderateScale(20)} color={theme.colors.semantic.error} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Payment Section - Only show if pending payment */}

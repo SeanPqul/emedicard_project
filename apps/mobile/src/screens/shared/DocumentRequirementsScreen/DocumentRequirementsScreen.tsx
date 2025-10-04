@@ -171,7 +171,7 @@ export function DocumentRequirementsScreen() {
               <View style={styles.paymentNote}>
                 <Ionicons name="information-circle-outline" size={16} color={getColor('text.secondary')} />
                 <Text style={styles.paymentNoteText}>
-                  For Barangay Hall or City Hall payments, you'll need to upload your Official Receipt (OR) during the application process.
+                  For Barangay Hall or City Hall payments, you&apos;ll need to upload your Official Receipt (OR) during the application process.
                 </Text>
               </View>
             </View>
