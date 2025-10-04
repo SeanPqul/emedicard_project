@@ -36,6 +36,8 @@ export const getRejectionHistory = query({
 
         return {
           _id: rejection._id,
+          applicationId: rejection.applicationId,
+          documentTypeId: rejection.documentTypeId,
           documentTypeName: documentType?.name || "Unknown Document",
           documentTypeIcon: documentType?.icon,
           rejectionCategory: rejection.rejectionCategory,

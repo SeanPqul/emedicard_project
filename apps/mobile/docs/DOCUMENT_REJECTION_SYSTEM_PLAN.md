@@ -46,7 +46,7 @@ git push -u origin document-rejection-history
 
 ## Progress Tracker
 
-### 📊 Overall Progress: 25/95 Tasks Completed
+### 📊 Overall Progress: 73/99 Tasks Completed
 
 ### Phase 1: Database & Backend Setup (25/25) ✅
 
@@ -84,93 +84,97 @@ git push -u origin document-rejection-history
 - [x] Test all queries in Convex dashboard
 - [x] Run typecheck to fix any issue/errors
 
-### Phase 2: Frontend Types & Entities (0/12)
+### Phase 2: Frontend Types & Entities (13/13) ✅
 
 #### Entity Updates
-- [ ] Create `src/entities/document/model/rejection-types.ts`
-- [ ] Define `RejectionHistory` interface
-- [ ] Define `RejectionCategory` enum
-- [ ] Define `DocumentStatus` enum
-- [ ] Update existing `Document` type to include rejection status
-- [ ] Create rejection-related constants
-- [ ] Export all new types from entity index
-- [ ] Run typecheck to fix any issue/errors
+- [x] Create `src/entities/document/model/rejection-types.ts`
+- [x] Define `RejectionHistory` interface
+- [x] Define `RejectionCategory` enum
+- [x] Define `DocumentStatus` enum
+- [x] Update existing `Document` type to include rejection status
+- [x] Create rejection-related constants
+- [x] Export all new types from entity index
+- [x] Run typecheck to fix any issue/errors
 
 #### API Integration
-- [ ] Create `src/entities/document/api/rejection.ts`
-- [ ] Implement rejection API calls wrapper
-- [ ] Add type-safe API functions
-- [ ] Create error handling for rejection APIs
-- [ ] Test API integration with backend
-- [ ] Run typecheck to fix any issue/errors
+- [x] Create rejection hooks in `src/features/document-rejection/hooks/`
+- [x] Implement rejection API calls wrapper
+- [x] Add type-safe API functions
+- [x] Create error handling for rejection APIs
+- [x] Reorganize to match project patterns (entities for types, features for hooks)
+- [x] Run typecheck to fix any issue/errors
 
-### Phase 3: Frontend Features (0/20)
+### Phase 3: Frontend Features (20/20) ✅
 
 #### Document Rejection Feature
-- [ ] Create `src/features/document-rejection/` directory
-- [ ] Create `ui/RejectionBanner.tsx` component
-- [ ] Create `ui/RejectionBanner.styles.ts`
-- [ ] Create `ui/RejectionDetails.tsx` component
-- [ ] Create `ui/RejectionDetails.styles.ts`
-- [ ] Create `hooks/useRejectionHistory.ts`
-- [ ] Implement rejection history fetching logic
-- [ ] Create feature index.ts with exports
-- [ ] Add loading and error states
-- [ ] Test rejection display components
-- [ ] Run typecheck to fix any issue/errors
+- [x] Create `src/features/document-rejection/` directory
+- [x] Create `components/RejectionBanner/RejectionBanner.tsx` component
+- [x] Create `components/RejectionBanner/RejectionBanner.styles.ts`
+- [x] Create `components/RejectionDetails/RejectionDetails.tsx` component
+- [x] Create `components/RejectionDetails/RejectionDetails.styles.ts`
+- [x] Create `hooks/useRejectionHistory.ts`
+- [x] Implement rejection history fetching logic
+- [x] Create feature index.ts with exports
+- [x] Add loading and error states
+- [x] Test rejection display components
+- [x] Run typecheck to fix any issue/errors
 
 #### Document Resubmit Feature
-- [ ] Create `src/features/document-resubmit/` directory
-- [ ] Create `ui/ResubmitModal.tsx` component
-- [ ] Create `ui/ResubmitModal.styles.ts`
-- [ ] Create `hooks/useDocumentResubmit.ts`
-- [ ] Implement file upload logic for resubmission
-- [ ] Add progress tracking for upload
-- [ ] Create success/error feedback
-- [ ] Link resubmission to rejection history
-- [ ] Test resubmission flow
-- [ ] Create feature index.ts with exports
-- [ ] Run typecheck to fix any issue/errors
+- [x] Create `src/features/document-resubmit/` directory
+- [x] Create `components/ResubmitModal/ResubmitModal.tsx` component
+- [x] Create `components/ResubmitModal/ResubmitModal.styles.ts`
+- [x] Create `hooks/useResubmitDocument.ts`
+- [x] Implement file upload logic for resubmission
+- [x] Add progress tracking for upload
+- [x] Create success/error feedback
+- [x] Link resubmission to rejection history
+- [x] Test resubmission flow
+- [x] Create feature index.ts with exports
+- [x] Run typecheck to fix any issue/errors
 
-### Phase 4: Widgets & Screens (0/15)
+### Phase 4: Widgets & Screens (15/15) ✅
 
 #### Rejection Widget
-- [ ] Create `src/widgets/document-rejection-widget/` directory
-- [ ] Create `DocumentRejectionWidget.tsx`
-- [ ] Create `DocumentRejectionWidget.styles.ts`
-- [ ] Implement rejection reason display
-- [ ] Add specific issues list rendering
-- [ ] Implement action buttons (resubmit, details)
-- [ ] Add attempt number display
-- [ ] Create widget index.ts
-- [ ] Test widget with mock data
-- [ ] Run typecheck to fix any issue/errors
+- [x] Create `src/widgets/document-rejection-widget/` directory
+- [x] Create `DocumentRejectionWidget.tsx`
+- [x] Create `DocumentRejectionWidget.styles.ts`
+- [x] Implement rejection reason display
+- [x] Add specific issues list rendering
+- [x] Implement action buttons (resubmit, details)
+- [x] Add attempt number display
+- [x] Create widget index.ts
+- [x] Test widget with mock data
+- [x] Run typecheck to fix any issue/errors
 
 #### Rejection History Screen
-- [ ] Create `src/screens/shared/DocumentRejectionHistoryScreen/` directory
-- [ ] Create `DocumentRejectionHistoryScreen.tsx`
-- [ ] Create `DocumentRejectionHistoryScreen.styles.ts`
-- [ ] Implement timeline view
-- [ ] Add filtering by category/date
-- [ ] Create screen index.ts
+- [x] Create `src/screens/shared/DocumentRejectionHistoryScreen/` directory
+- [x] Create `DocumentRejectionHistoryScreen.tsx`
+- [x] Create `DocumentRejectionHistoryScreen.styles.ts`
+- [x] Implement timeline view
+- [x] Add filtering by category/date
+- [x] Create screen index.ts
+- [x] Run typecheck to fix any issue/errors
+
+### Phase 5: Integration with Existing Screens (0/14)
+
+#### Update ViewDocumentsScreen
+- [ ] Integrate `DocumentRejectionWidget` for rejected documents
+- [ ] Add rejection details display using `RejectionDetails` component
+- [ ] Add link to rejection history screen
+- [ ] Show attempt numbers for rejected documents
+- [ ] Enhance rejected documents section with detailed feedback
+- [ ] Add quick action to view full rejection history
+- [ ] Test rejection display and resubmission flow
 - [ ] Run typecheck to fix any issue/errors
 
-### Phase 5: Integration with Existing Screens (0/10)
-
-#### Update Document Upload Step
-- [ ] Modify `UploadDocumentsStep.tsx`
-- [ ] Add rejection status indicators
-- [ ] Update styles for rejected documents
-- [ ] Add tap handler for rejected documents
-- [ ] Show rejection count in header
-- [ ] Run typecheck to fix any issue/errors
-
-#### Update Application Details
-- [ ] Add rejection history section
-- [ ] Show documents needing revision
-- [ ] Add quick resubmit actions
-- [ ] Update status display for "Documents Need Revision"
-- [ ] Test integration with existing flow
+#### Update ApplicationDetailWidget
+- [ ] Add rejection summary section (total rejected docs)
+- [ ] Show "Documents Need Revision" status prominently
+- [ ] Add quick action button to navigate to rejected documents
+- [ ] Display rejection count badge on documents section
+- [ ] Update document status display to handle rejections
+- [ ] Link to ViewDocumentsScreen with rejection filter
+- [ ] Test rejection indicators in application overview
 - [ ] Run typecheck to fix any issue/errors
 
 ### Phase 6: Notifications (0/8)

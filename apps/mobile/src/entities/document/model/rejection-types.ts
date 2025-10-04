@@ -88,6 +88,32 @@ export const RejectionCategoryDescriptions: Record<RejectionCategory, string> = 
 };
 
 /**
+ * Enriched rejection data with additional information
+ * This is the rejection history with document and user details included
+ */
+export interface EnrichedRejection {
+  _id: Id<"documentRejectionHistory">;
+  documentTypeName: string;
+  documentTypeIcon?: string;
+  rejectionCategory: RejectionCategory;
+  rejectionReason: string;
+  specificIssues: string[];
+  rejectedAt: number;
+  rejectedByName: string;
+  attemptNumber: number;
+  wasReplaced: boolean;
+  replacedAt?: number;
+  replacementInfo: {
+    uploadId: Id<"documentUploads">;
+    fileName: string;
+    uploadedAt: number;
+    reviewStatus: string;
+  } | null;
+  documentTypeId: Id<"documentTypes">;
+  applicationId: Id<"applications">;
+}
+
+/**
  * Rejection details with enriched data
  */
 export interface EnrichedRejectionHistory extends RejectionHistory {
