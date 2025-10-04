@@ -28,6 +28,12 @@ export const handleRedirectSuccess = mutation({
       };
     }
     
+    // Allow processing from Cancelled status (payment retry scenario)
+    const allowedStatuses = ["Processing", "Pending", "Cancelled", "Failed"];
+    if (!allowedStatuses.includes(payment.paymentStatus)) {
+      console.warn(`Unexpected payment status for success redirect: ${payment.paymentStatus}`);
+    }
+    
     // Update payment status to complete
     await ctx.db.patch(args.paymentId, {
       paymentStatus: "Complete",

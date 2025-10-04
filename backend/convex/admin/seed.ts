@@ -92,8 +92,17 @@ export const seedJobCategoriesAndRequirements = mutation({
 
     for (const [categoryName, reqList] of Object.entries(categoryRequirementMap)) {
       const jobCategoryId = jobCategoryIds[categoryName];
+      if (!jobCategoryId) {
+        console.warn(`⚠️ Skipping category ${categoryName} - ID not found`);
+        continue;
+      }
+      
       for (const req of reqList) {
         const documentTypeId = documentIds[req.name];
+        if (!documentTypeId) {
+          console.warn(`⚠️ Skipping document ${req.name} - ID not found`);
+          continue;
+        }
 
         // Check if link already exists
         const existing = await ctx.db

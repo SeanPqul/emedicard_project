@@ -1,0 +1,1 @@
+export { InspectorScannerScreen } from './InspectorScannerScreen';

@@ -1,0 +1,70 @@
+{
+  "analysis_date": "2025-09-21T13:16:00Z",
+  "current_structure": {
+    "top_level_folders": ["entities", "features", "screens", "shared", "widgets"],
+    "missing_folders": ["processes", "types"]
+  },
+  "payment_flow_analysis": {
+    "current_location": "src/features/payment/hooks/usePaymentFlow.ts",
+    "export_location": "src/shared/hooks/index.ts",
+    "usage_count": 3,
+    "usage_files": [
+      "features/payment/hooks/usePaymentFlow.ts",
+      "features/payment/hooks/index.ts", 
+      "shared/hooks/index.ts"
+    ],
+    "recommendation": "MOVE_TO_PROCESSES",
+    "reason": "Cross-feature workflow used across multiple features"
+  },
+  "types_analysis": {
+    "shared_types_files": [
+      {
+        "name": "utility.ts",
+        "category": "GENERIC",
+        "target": "src/types/utility.ts"
+      },
+      {
+        "name": "navigation.ts", 
+        "category": "GENERIC",
+        "target": "src/types/navigation.ts"
+      },
+      {
+        "name": "design-system.ts",
+        "category": "GENERIC", 
+        "target": "src/types/design-system.ts"
+      }
+    ],
+    "domain_types_location": "src/entities/*/model/types.ts",
+    "recommendation": "SEPARATE_GENERIC_FROM_DOMAIN"
+  },
+  "migration_decisions": {
+    "create_processes": true,
+    "create_types": true,
+    "files_to_move": {
+      "to_processes": [
+        {
+          "from": "src/features/payment/hooks/usePaymentFlow.ts",
+          "to": "src/processes/paymentFlow/model/hooks.ts"
+        },
+        {
+          "from": "src/features/payment/hooks/index.ts",
+          "to": "src/processes/paymentFlow/model/index.ts"
+        }
+      ],
+      "to_types": [
+        {
+          "from": "src/shared/types/utility.ts",
+          "to": "src/types/utility.ts"
+        },
+        {
+          "from": "src/shared/types/navigation.ts",
+          "to": "src/types/navigation.ts"
+        },
+        {
+          "from": "src/shared/types/design-system.ts",
+          "to": "src/types/design-system.ts"
+        }
+      ]
+    }
+  }
+}

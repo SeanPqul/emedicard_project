@@ -5,9 +5,30 @@ import { v } from "convex/values";
 export const getApplicationDocumentsRequirementsQuery = query({
   args: { applicationId: v.id("applications") },
   handler: async (ctx, args) => {
+    // Get current user identity
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get current user
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    
+    if (!user) {
+      throw new Error("User not found");
+    }
+
     const application = await ctx.db.get(args.applicationId);
     if (!application) {
       throw new Error("Application not found");
+    }
+
+    // Ensure the application belongs to the current user
+    if (application.userId !== user._id) {
+      throw new Error("Unauthorized: You can only view your own documents");
     }
 
     const jobCategory = await ctx.db.get(application.jobCategoryId);
@@ -42,13 +63,16 @@ export const getApplicationDocumentsRequirementsQuery = query({
       })
     );
 
-    // Map uploaded documents with their requirements
+    // Map uploaded documents with their requirements and storage URLs
     const documentsWithRequirements = await Promise.all(
       uploadedDocuments.map(async (doc) => {
         const requirement = await ctx.db.get(doc.documentTypeId);
+        // Get the storage URL for the document
+        const fileUrl = await ctx.storage.getUrl(doc.storageFileId);
         return {
           ...doc,
           requirement,
+          fileUrl, // Include the URL for viewing
         };
       })
     );

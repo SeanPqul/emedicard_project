@@ -1,9 +1,10 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { Redirect } from 'expo-router';
-import { LoadingSpinner } from '@/src/components';
-import { useUsers } from '../src/hooks/useUsers';
+import { LoadingSpinner } from '../src/shared/components';
+import { useUsers } from '../src/features/profile';
 
 export default function Index() {
+  console.log('[Index] Component starting to render');
   const { isLoaded, isSignedIn } = useAuth();
   const { data: { currentUser }, isLoading } = useUsers();
   
@@ -27,9 +28,9 @@ export default function Index() {
   
   // Role-based routing - ensure currentUser exists before checking role
   if (currentUser && currentUser.role === 'inspector') {
-    return <Redirect href="/(screens)/(inspector)/inspector-dashboard" />;
+    return <Redirect href="/(screens)/(inspector)/dashboard" />;
   }
   
-  // Default to applicant dashboard - redirect to tabs group, not specific index
+  // Default to tabs for applicants
   return <Redirect href="/(tabs)" />;
 }

@@ -22,7 +22,7 @@ export const internalCreateOrUpdateUser = internalMutation({
         }
 
         await ctx.db.insert("users", {
-            username: args.email.split('@')[0],
+            username: args.email.split('@')[0] || "user",
             fullname: args.fullname,
             email: args.email,
             image: args.image,
@@ -50,7 +50,7 @@ export const getOrCreateUser = mutation({
       email: identity.email!,
       fullname: identity.name!,
       image: identity.pictureUrl!,
-      username: identity.email!.split("@")[0],
+      username: identity.email!.split("@")[0] || "user",
       role: "applicant", // New users always start as applicants
     });
   },

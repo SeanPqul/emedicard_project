@@ -1,40 +1,38 @@
 /**
  * Main Src Index
- * 
- * Central export point for the entire src folder.
- * Provides clean imports for all major modules.
+ *
+ * Central export point for the entire src folder following Feature-Sliced Design.
+ * Provides clean imports for all major architectural layers.
  */
 
+// App Layer - Global app configuration and providers
+export * from './app-layer';
 
-// Components
-export * from './components';
+// Entities Layer - Business entities
+export type {
+  PaymentStatus,
+  Application,
+  ApplicationStatus,
+  PaymentMethod,
+  UserProfile,
+  HealthCardStatus,
+  HealthCardData,
+} from './entities';
 
-// Configuration
-export * from './config';
+// Features Layer - User scenarios and features
+// export * from './features'; // Removed due to duplicate exports
 
-// Constants
-export * from './constants';
+// Widgets Layer - Complex UI blocks
+// export * from './widgets'; // Removed due to duplicate exports
 
-// Contexts
-export * from './contexts';
+// Processes Layer - Complex business processes
+// export * from './processes'; // Removed due to duplicate exports
 
-// Hooks
-export * from './hooks';
+// Shared Layer - Reusable utilities, components, hooks
+// export * from './shared'; // Removed due to duplicate exports
 
-// Types
-export * from './types';
+// Types - Global type definitions
+// export * from './types'; // Removed due to duplicate exports
 
-// Utilities
-export * from './utils';
-
-// Shared utilities (new architectural layer)
-export * from './shared';
-
-// Styles
-export * from './styles';
-
-// Layouts
-export * from './layouts';
-
-// Features (only healthCards is active)
-export * from './features/healthCards';
+// Screens - Page components (legacy, being migrated)
+// export * from './screens'; // Removed due to duplicate exports

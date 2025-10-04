@@ -1,71 +1,34 @@
-import { Stack } from 'expo-router'
+import { useAuth } from "@clerk/clerk-expo";
+import { Redirect, Stack } from 'expo-router';
+import { LoadingSpinner } from '../../src/shared/components';
 
 export default function ScreensLayout() {
+  const { isLoaded, isSignedIn } = useAuth();
+  
+  // Wait for auth state to load
+  if (!isLoaded) {
+    return (
+      <LoadingSpinner 
+        visible={true} 
+        message="Loading..." 
+        fullScreen 
+        type="pulse" 
+        icon="shield-checkmark"
+      />
+    );
+  }
+  
+  // Redirect to auth if not signed in
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
+  
+  // Render screens with stack navigation
   return (
-    <Stack 
+    <Stack
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_right',
-        gestureEnabled: true,
-        gestureDirection: 'horizontal'
       }}
-    >
-      <Stack.Screen 
-        name="(shared)/upload-documents" 
-        options={{
-          title: 'Upload Documents',
-          presentation: 'card'
-        }}
-      />
-      <Stack.Screen 
-        name="(shared)/payment" 
-        options={{
-          title: 'Payment',
-          presentation: 'card'
-        }}
-      />
-      <Stack.Screen 
-        name="(shared)/orientation" 
-        options={{
-          title: 'Orientation',
-          presentation: 'card'
-        }}
-      />
-      <Stack.Screen 
-        name="(shared)/health-cards" 
-        options={{
-          title: 'Health Cards',
-          presentation: 'card'
-        }}
-      />
-      <Stack.Screen 
-        name="(shared)/document-requirements" 
-        options={{
-          title: 'Document Requirements',
-          presentation: 'card'
-        }}
-      />
-      <Stack.Screen 
-        name="(shared)/activity" 
-        options={{
-          title: 'Activity',
-          presentation: 'card'
-        }}
-      />
-      <Stack.Screen 
-        name="(shared)/qr-code" 
-        options={{
-          title: 'QR Code',
-          presentation: 'card'
-        }}
-      />
-      <Stack.Screen 
-        name="(shared)/qr-scanner" 
-        options={{
-          title: 'QR Scanner',
-          presentation: 'card'
-        }}
-      />
-    </Stack>
-  )
+    />
+  );
 }

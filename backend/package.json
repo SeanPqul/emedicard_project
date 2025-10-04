@@ -23,5 +23,11 @@
     "dotenv": "^17.2.2",
     "typescript": "~5.8.3"
   },
+  "exports": {
+    "./convex/_generated/api": "./convex/_generated/api.js",
+    "./convex/_generated/dataModel": "./convex/_generated/dataModel.js",
+    "./convex/_generated/server": "./convex/_generated/server.js",
+    "./convex/_generated/react": "./convex/_generated/react.js"
+  },
   "private": true
 }

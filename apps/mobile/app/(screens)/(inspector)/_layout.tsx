@@ -1,49 +1,35 @@
-import { Stack } from 'expo-router';
-import { theme } from '@/src/styles/theme';
+import { useUsers } from '../../../src/features/profile';
+import { Redirect, Stack } from 'expo-router';
+import { LoadingSpinner } from '../../../src/shared/components/feedback/LoadingSpinner';
 
-export default function InspectorLayout() {
+export default function InspectorScreensLayout() {
+  const { data: { currentUser }, isLoading } = useUsers();
+  
+  // Wait for user data to load
+  if (isLoading || !currentUser) {
+    return (
+      <LoadingSpinner 
+        visible={true} 
+        message="Loading inspector area..." 
+        fullScreen 
+        type="pulse" 
+        icon="shield"
+      />
+    );
+  }
+  
+  // Check if user has inspector role
+  if (currentUser.role !== 'inspector') {
+    // Redirect non-inspectors to tabs
+    return <Redirect href="/(tabs)" />;
+  }
+  
+  // Render inspector screens
   return (
     <Stack
       screenOptions={{
-        headerStyle: {
-          backgroundColor: theme.colors.background.primary,
-        },
-        headerTintColor: theme.colors.text.primary,
-        headerTitleStyle: {
-          fontWeight: '600',
-          fontSize: 18,
-        },
-        headerShadowVisible: true,
+        headerShown: false,
       }}
-    >
-      <Stack.Screen 
-        name="inspector-dashboard" 
-        options={{ 
-          title: 'Inspector Dashboard',
-          headerShown: true,
-        }} 
-      />
-      <Stack.Screen 
-        name="review-applications" 
-        options={{ 
-          title: 'Review Applications',
-          headerShown: true,
-        }} 
-      />
-      <Stack.Screen 
-        name="inspection-queue" 
-        options={{ 
-          title: 'Inspection Queue',
-          headerShown: true,
-        }} 
-      />
-      <Stack.Screen 
-        name="scanner" 
-        options={{ 
-          title: 'QR Scanner',
-          headerShown: true,
-        }} 
-      />
-    </Stack>
+    />
   );
 }
