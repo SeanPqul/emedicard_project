@@ -1,15 +1,16 @@
 // src/app/dashboard/[id]/doc_verif/page.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
+import ApplicantActivityLog from '@/components/ApplicantActivityLog';
+import CustomUserButton from '@/components/CustomUserButton';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
+import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
-import CustomUserButton from '@/components/CustomUserButton';
-import ApplicantActivityLog from '@/components/ApplicantActivityLog';
+import React, { useState } from 'react';
 // NEW: Import your beautiful new ErrorMessage component
 import ErrorMessage from '@/components/ErrorMessage';
+import SuccessMessage from '@/components/SuccessMessage'; // Import SuccessMessage
 
 // --- Data Structures ---
 interface AppError { title: string; message: string; }
@@ -39,6 +40,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [viewModalDocUrl, setViewModalDocUrl] = useState<string | null>(null);
   // NEW: State for error messages, connected to your component
   const [error, setError] = useState<AppError | null>(null); // Use AppError type
+  const [successMessage, setSuccessMessage] = useState<string | null>(null); // State for success messages
   const [openRemarkIndex, setOpenRemarkIndex] = useState<number | null>(null);
   const [selectedRemark, setSelectedRemark] = useState<string>('');
   const router = useRouter();
@@ -73,12 +75,17 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
       }
 
 await finalizeApplication({ applicationId: params.id, newStatus });
-  alert(`Application has been successfully ${newStatus.toLowerCase()}.`);
-  if (newStatus === 'Approved') {
-    router.push(`/dashboard/${params.id}/payment_validation`);
-  } else {
-    router.push('/dashboard');
-  }
+  setSuccessMessage(`Application has been successfully ${newStatus.toLowerCase()}.`); // Set success message
+
+  // Redirect after a short delay to allow the success message to be seen
+  setTimeout(() => {
+    if (newStatus === 'Approved') {
+      router.push(`/dashboard/${params.id}/payment_validation`);
+    } else {
+      router.push('/dashboard');
+    }
+  }, 2000); // Show message for 2 seconds before redirecting
+
 } catch (e: any) {
       // This is where we "turn on the warning light"
       setError({ title: "Validation Failed", message: e.message });
@@ -138,6 +145,11 @@ await finalizeApplication({ applicationId: params.id, newStatus });
               {error && (
                 <div className="mb-4">
                   <ErrorMessage title={error.title} message={error.message} onCloseAction={() => setError(null)} />
+                </div>
+              )}
+              {successMessage && (
+                <div className="mb-4">
+                  <SuccessMessage message={successMessage} />
                 </div>
               )}
               <div className="flex flex-col gap-3">

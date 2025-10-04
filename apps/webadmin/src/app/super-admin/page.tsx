@@ -1,13 +1,13 @@
 "use client";
 
 import CustomUserButton from '@/components/CustomUserButton';
-import DashboardActivityLog from '@/components/DashboardActivityLog';
 import DateRangeFilterDropdown from '@/components/DateRangeFilterDropdown';
 import ErrorMessage from "@/components/ErrorMessage";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { Doc, Id } from "@/convex/_generated/dataModel";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
-import { useAction, useQuery } from "convex/react"; // Changed useMutation to useAction
+import { useAction, useQuery } from "convex/react";
+import { formatDistanceToNow } from "date-fns";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -24,21 +24,26 @@ import {
   YAxis,
 } from "recharts";
 
-// Placeholder for the new Admin Creation Modal
+// Define the type for an activity log entry with applicant name
+type AdminActivityLogWithApplicantName = Doc<"adminActivityLogs"> & {
+  applicantName?: string;
+};
+
+// Admin Creation Modal
 const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolean; onClose: () => void; jobCategories: { _id: Id<"jobCategories">; name: string }[] | undefined }) => {
   const [adminEmail, setAdminEmail] = useState("");
-  const [adminPassword, setAdminPassword] = useState(""); // New state for password
-  const [selectedCategory, setSelectedCategory] = useState<Id<"jobCategories"> | undefined>(undefined); // Changed to single select
+  const [adminPassword, setAdminPassword] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<Id<"jobCategories"> | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const createAdminAction = useAction(api.superAdmin.mutations.createAdmin); // Changed to useAction and renamed
+  const createAdminAction = useAction(api.superAdmin.mutations.createAdmin);
 
   if (!isOpen) return null;
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCategory(e.target.value as Id<"jobCategories"> || undefined); // Handle single select
+    setSelectedCategory(e.target.value as Id<"jobCategories"> || undefined);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,7 +53,7 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
     setSuccessMessage(null);
 
     try {
-      const result = await createAdminAction({ // Renamed to createAdminAction and captured result
+      const result = await createAdminAction({
         email: adminEmail,
         password: adminPassword,
         managedCategoryIds: selectedCategory ? [selectedCategory] : [],
@@ -59,8 +64,6 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
         setAdminEmail("");
         setAdminPassword("");
         setSelectedCategory(undefined);
-        // Optionally close modal after a short delay or on user action
-        // setTimeout(onClose, 2000);
       } else {
         setError(result.errorMessage || "Failed to create admin. Please try again.");
       }
@@ -73,8 +76,8 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-100 bg-opacity-75 overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4"> {/* Lighter overlay */}
-      <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full border border-gray-200"> {/* Added border for professionalism */}
+    <div className="fixed inset-0 bg-gray-100 bg-opacity-75 overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4">
+      <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full border border-gray-200">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">Create New Admin</h2>
         <p className="text-gray-600 mb-6">Fill in the details to create a new admin account and assign their privileges.</p>
         
@@ -83,14 +86,13 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
             <span className="block sm:inline">{successMessage}</span>
           </div>
         )}
-        {/* Display general error at the top if it's not a field-specific error */}
-        {error && !error.includes("Password") && ( // Only show general error if not password related
+        {error && !error.includes("Password") && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
             <span className="block sm:inline">{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4"> {/* Added space-y for better spacing */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="adminEmail" className="block text-sm font-medium text-gray-700">Admin Email</label>
             <input
@@ -104,7 +106,7 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
               disabled={isLoading}
             />
           </div>
-          <div> {/* New div for password field */}
+          <div>
             <label htmlFor="adminPassword" className="block text-sm font-medium text-gray-700">Password</label>
             <input
               type="password"
@@ -116,28 +118,27 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
               required
               disabled={isLoading}
             />
-            {/* Display password-specific error below password field */}
             {error && error.includes("Password") && (
               <p className="mt-1 text-sm text-red-600">{error}</p>
             )}
           </div>
           <div>
-            <label htmlFor="managedCategories" className="block text-sm font-medium text-gray-700">Managed Category</label> {/* Changed label */}
+            <label htmlFor="managedCategories" className="block text-sm font-medium text-gray-700">Managed Category</label>
             <select
               id="managedCategories"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-600 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              value={selectedCategory || ""} // Bind to single selectedCategory
+              value={selectedCategory || ""}
               onChange={handleCategoryChange}
               disabled={isLoading}
-              required // Make category selection required
+              required
             >
-              <option value="" disabled>Select a category</option> {/* Placeholder option */}
+              <option value="" disabled>Select a category</option>
               {jobCategories?.map((category) => (
                 <option key={category._id} value={category._id}>{category.name}</option>
               ))}
             </select>
           </div>
-          <div className="flex justify-end space-x-3 pt-4"> {/* Added pt-4 for spacing */}
+          <div className="flex justify-end space-x-3 pt-4">
             <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors" disabled={isLoading}>
               Cancel
             </button>
@@ -176,6 +177,7 @@ export default function SuperAdminPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showQuickMetricsDetails, setShowQuickMetricsDetails] =
     useState(false);
+
   const router = useRouter();
 
   const { isLoaded: isClerkLoaded, user } = useUser();
@@ -208,6 +210,10 @@ export default function SuperAdminPage() {
   const mostActiveAdmins =
     useQuery(api.superAdmin.queries.getMostActiveAdmins, user ? { startDate, endDate, limit: 5 } : "skip") || [];
 
+  // Use the new query for all admin activities
+  const allAdminActivities: AdminActivityLogWithApplicantName[] =
+    useQuery(api.admin.activityLogs.getAllAdminActivities, user ? {} : "skip") || [];
+
   const handleClearFilter = () => {
     setStartDate(undefined);
     setEndDate(undefined);
@@ -231,18 +237,15 @@ export default function SuperAdminPage() {
     value: admins.length,
   }));
 
-  const barChartData = Object.entries(applicantsOverTime)
-    .map(([monthIndex, count]) => {
-      const monthName = new Date(currentYear, parseInt(monthIndex)).toLocaleString(
-        "default",
-        { month: "short" },
-      );
-      return { name: monthName, value: count as number };
-    })
-    .sort((a, b) => {
-      const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      return monthOrder.indexOf(a.name) - monthOrder.indexOf(b.name);
-    });
+  const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const initialBarChartData = monthOrder.map((monthName, index) => ({
+    name: monthName,
+    value: (applicantsOverTime[index.toString()] as number) || 0,
+  }));
+
+  const barChartData = initialBarChartData.sort((a, b) => {
+    return monthOrder.indexOf(a.name) - monthOrder.indexOf(b.name);
+  });
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -345,7 +348,6 @@ export default function SuperAdminPage() {
                 />
               </svg>
             </Link>
-            <DashboardActivityLog />
             <CustomUserButton />
           </div>
         </div>
@@ -483,27 +485,33 @@ export default function SuperAdminPage() {
             }
             colorClass="bg-purple-500"
           />
-          {Object.entries(applicationsByStatus).map(([status, count]) => {
-            const { icon, colorClass } = statusIconAndColorClasses[status] || {
-              icon: (
-                <StatIcon d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              ),
-              colorClass: "bg-gray-500",
-            };
-            return (
-              <StatCard
-                key={status}
-                title={status}
-                value={count}
-                icon={icon}
-                colorClass={colorClass}
-              />
-            );
-          })}
+          {Object.keys(statusIconAndColorClasses)
+            .filter(
+              (status) =>
+                status !== "Total Applications" && status !== "Registered Admins",
+            )
+            .map((status) => {
+              const count = applicationsByStatus[status] || 0;
+              const { icon, colorClass } = statusIconAndColorClasses[status] || {
+                icon: (
+                  <StatIcon d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                ),
+                colorClass: "bg-gray-500",
+              };
+              return (
+                <StatCard
+                  key={status}
+                  title={status}
+                  value={count}
+                  icon={icon}
+                  colorClass={colorClass}
+                />
+              );
+            })}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Bar Chart - always visible */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Left column: Graph */}
           <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Applicants Submitted ({currentYear})
@@ -515,9 +523,16 @@ export default function SuperAdminPage() {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="value">
+                  <Bar dataKey="value" name="Applicants">
                     {barChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={
+                          entry.name === applicationTrends.mostSubmittedMonth
+                            ? "#8884d8"
+                            : COLORS[index % COLORS.length]
+                        }
+                      />
                     ))}
                   </Bar>
                 </BarChart>
@@ -525,86 +540,170 @@ export default function SuperAdminPage() {
             </div>
           </div>
 
-          {/* Conditionally rendered Quick Metrics */}
-          {showQuickMetricsDetails && (
-            <div className="lg:col-span-1 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Additional Quick Metrics
-              </h2>
-              <div className="flex flex-col gap-8">
-                {/* Pie Chart: Admins per Health Card Type */}
-                <div>
-                  <h3 className="font-medium text-gray-700 mb-4">Admins per Health Card Type</h3>
-                  <div style={{ height: 250 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={pieChartData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value">
-                          {pieChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+          {/* Right column: Recent Admin Activity */}
+          <div className="lg:col-span-1 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Recent Admin Activity
+            </h2>
+            <div className="max-h-[320px] overflow-y-auto space-y-4 pr-2">
+              {allAdminActivities.length > 0 ? (
+                allAdminActivities.map((activity: AdminActivityLogWithApplicantName) => {
+                  if (!activity) return null;
+                  return (
+                    <div
+                      key={activity._id}
+                      className="flex items-start space-x-3 bg-gray-50 p-3 rounded-lg shadow-sm"
+                    >
+                      <div className="flex-shrink-0">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6 text-emerald-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-800">
+                          <span className="font-bold">
+                            {activity.adminUsername}
+                          </span>{" "}
+                          ({activity.adminEmail}) {activity.action.toLowerCase()}
+                          {activity.applicantName && ` for `}
+                          {activity.applicantName && <span className="font-bold">{activity.applicantName}</span>}.
+                        </p>
+                        {activity.comment && (
+                          <p className="text-xs text-gray-700 bg-gray-50 p-1 rounded mt-1">Comment: {activity.comment}</p>
+                        )}
+                        {activity.applicationId && (
+                          <p className="text-xs text-gray-500 mt-1">Application ID: {activity.applicationId}</p>
+                        )}
+                        <p className="text-xs text-gray-400 mt-1">
+                          {activity.timestamp
+                            ? formatDistanceToNow(new Date(activity.timestamp), {
+                                addSuffix: true,
+                              })
+                            : "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 mt-4 text-center">
+                  No recent admin activity found.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
 
-                {/* Pie Chart: Applicants per Health Card Type */}
-                <div>
-                  <h3 className="font-medium text-gray-700 mb-4">Applicants per Health Card Type</h3>
-                  <div style={{ height: 250 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={Object.entries(applicantsByHealthCardType).map(([name, value]) => ({ name, value }))} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value">
-                          {Object.entries(applicantsByHealthCardType).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
+        {showQuickMetricsDetails && (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Application Performance & Trends */}
+              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  Application Performance & Trends
+                </h2>
+                <div className="space-y-2">
+                  <p className="text-gray-600">
+                    <strong>Average Approval Time:</strong>{" "}
+                    {formatDuration(averageApprovalTime)}
+                  </p>
+                  <p className="text-gray-600">
+                    <strong>Most Submitted Month ({currentYear}):</strong>{" "}
+                    {applicationTrends.mostSubmittedMonth}
+                  </p>
+                  <p className="text-gray-600">
+                    <strong>Most Submitted Day ({currentYear}):</strong>{" "}
+                    {applicationTrends.mostSubmittedDay}
+                  </p>
+                  <p className="text-gray-600 mt-3">
+                    <strong>Most Active Admins:</strong>
+                  </p>
+                  <ul className="list-disc list-inside text-gray-600 ml-4">
+                    {mostActiveAdmins.map((admin, index) => (
+                      <li key={index}>
+                        {admin.adminName} ({admin.activityCount} activities)
+                      </li>
+                    ))}
+                    {mostActiveAdmins.length === 0 && (
+                      <li>No data available.</li>
+                    )}
+                  </ul>
                 </div>
+              </div>
 
-                {/* Performance & Trends Text Metrics */}
-                <div className="bg-gray-50 p-4 rounded-lg shadow-inner mt-4">
-                  <h3 className="font-medium text-gray-700 mb-2">
-                    Application Performance & Trends:
-                  </h3>
-                  <div className="space-y-2">
-                    <p className="text-gray-600">
-                      <strong>Average Approval Time:</strong>{" "}
-                      {formatDuration(averageApprovalTime)}
-                    </p>
-                    <p className="text-gray-600">
-                      <strong>Most Submitted Month ({currentYear}):</strong>{" "}
-                      {applicationTrends.mostSubmittedMonth}
-                    </p>
-                    <p className="text-gray-600">
-                      <strong>Most Submitted Day ({currentYear}):</strong>{" "}
-                      {applicationTrends.mostSubmittedDay}
-                    </p>
-                    <p className="text-gray-600 mt-3">
-                      <strong>Most Active Admins:</strong>
-                    </p>
-                    <ul className="list-disc list-inside text-gray-600 ml-4">
-                      {mostActiveAdmins.map((admin, index) => (
-                        <li key={index}>
-                          {admin.adminName} ({admin.activityCount} activities)
-                        </li>
-                      ))}
-                      {mostActiveAdmins.length === 0 && (
-                        <li>No data available.</li>
-                      )}
-                    </ul>
-                  </div>
+              {/* Detailed Admin Assignments */}
+              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Detailed Admin Assignments</h2>
+                <div className="space-y-4">
+                  {Object.entries(adminsByHealthCardType).map(([categoryName, admins]) => (
+                    <div key={categoryName}>
+                      <h3 className="font-medium text-gray-700 mb-2">{categoryName} ({admins.length} admins)</h3>
+                      <ul className="list-disc list-inside text-gray-600 ml-4">
+                        {admins.map((adminName, index) => (
+                          <li key={index}>{adminName}</li>
+                        ))}
+                        {admins.length === 0 && <li>No admins assigned.</li>}
+                      </ul>
+                    </div>
+                  ))}
+                  {Object.keys(adminsByHealthCardType).length === 0 && (
+                    <p className="text-gray-600">No admin data available.</p>
+                  )}
                 </div>
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Pie charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+              {/* Admins per Health Card Type - back to Pie Chart */}
+              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Admins per Health Card Type</h2>
+                <div style={{ height: 250 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={pieChartData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value">
+                        {pieChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Applicants per Health Card Type - remains a pie chart */}
+              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Applicants per Health Card Type</h2>
+                <div style={{ height: 250 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={Object.entries(applicantsByHealthCardType).map(([name, value]) => ({ name, value }))} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value">
+                        {Object.entries(applicantsByHealthCardType).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </main>
 
       <AdminCreationModal

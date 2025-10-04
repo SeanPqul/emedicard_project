@@ -75,6 +75,9 @@ export default function DashboardActivityLog() {
                   {activity.applicantName && ` for `}
                   {activity.applicantName && <span className="font-bold">{activity.applicantName}</span>}.
                 </p>
+                {activity.comment && (
+                  <p className="text-xs text-gray-700 bg-gray-50 p-1 rounded mt-1">Comment: {activity.comment}</p>
+                )}
                 {activity.applicationId && (
                   <p className="text-xs text-gray-500 mt-1">Application ID: {activity.applicationId}</p>
                 )}

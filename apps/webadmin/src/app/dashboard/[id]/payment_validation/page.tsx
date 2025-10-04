@@ -1,16 +1,16 @@
 // src/app/dashboard/[id]/payment_validation/page.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
-import { useQuery, useMutation } from 'convex/react';
+import ApplicantActivityLog from '@/components/ApplicantActivityLog';
+import CustomUserButton from '@/components/CustomUserButton';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import Link from 'next/link';
+import { useUser } from '@clerk/nextjs';
+import { useMutation, useQuery } from 'convex/react';
 import Image from 'next/image';
-import CustomUserButton from '@/components/CustomUserButton';
-import ApplicantActivityLog from '@/components/ApplicantActivityLog';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 type ActivityLog = {
   timestamp: Date;
@@ -158,6 +158,10 @@ export default function PaymentValidationPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">Payment Method</label>
                   <p className="text-lg font-semibold text-gray-800">{data.paymentMethod}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Reference Number</label>
+                  <p className="text-lg font-semibold text-gray-800">{data.referenceNumber}</p>
                 </div>
               </div>
 
