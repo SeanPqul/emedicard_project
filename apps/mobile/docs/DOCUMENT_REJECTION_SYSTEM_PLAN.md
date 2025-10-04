@@ -46,43 +46,43 @@ git push -u origin document-rejection-history
 
 ## Progress Tracker
 
-### 📊 Overall Progress: 0/95 Tasks Completed
+### 📊 Overall Progress: 25/95 Tasks Completed
 
-### Phase 1: Database & Backend Setup (0/25)
+### Phase 1: Database & Backend Setup (25/25) ✅
 
 #### Schema Updates
-- [ ] Create backup of current schema.ts
-- [ ] Add `documentRejectionHistory` table definition
-- [ ] Add all required fields to rejection history table
-- [ ] Add indexes for rejection history table
-- [ ] Update `applicationStatus` enum with "Documents Need Revision"
-- [ ] Run schema validation locally
-- [ ] Deploy schema changes to development environment
-- [ ] Verify schema deployment in Convex dashboard
-- [ ] Run typecheck to fix any issue/errors
+- [x] Create backup of current schema.ts
+- [x] Add `documentRejectionHistory` table definition
+- [x] Add all required fields to rejection history table
+- [x] Add indexes for rejection history table
+- [x] Update `applicationStatus` enum with "Documents Need Revision"
+- [x] Run schema validation locally
+- [x] Deploy schema changes to development environment
+- [x] Verify schema deployment in Convex dashboard
+- [x] Run typecheck to fix any issue/errors
 
 #### Backend Mutations
-- [ ] Create `backend/convex/admin/documents/` directory
-- [ ] Implement `rejectDocument.ts` mutation
-- [ ] Add admin permission checks in rejection mutation
-- [ ] Implement rejection history creation logic
-- [ ] Add notification trigger in rejection mutation
-- [ ] Create `backend/convex/requirements/resubmitDocument.ts`
-- [ ] Implement document resubmission logic
-- [ ] Add user ownership verification in resubmission
-- [ ] Implement rejection history update on resubmission
-- [ ] Add application status update logic
-- [ ] Run typecheck to fix any issue/errors
+- [x] Create `backend/convex/admin/documents/` directory
+- [x] Implement `rejectDocument.ts` mutation
+- [x] Add admin permission checks in rejection mutation
+- [x] Implement rejection history creation logic
+- [x] Add notification trigger in rejection mutation
+- [x] Create `backend/convex/requirements/resubmitDocument.ts`
+- [x] Implement document resubmission logic
+- [x] Add user ownership verification in resubmission
+- [x] Implement rejection history update on resubmission
+- [x] Add application status update logic
+- [x] Run typecheck to fix any issue/errors
 
 #### Backend Queries
-- [ ] Create `backend/convex/documents/rejectionQueries.ts`
-- [ ] Implement `getRejectionHistory` query
-- [ ] Implement `getRejectedDocumentsCount` query
-- [ ] Implement `getDocumentRejectionDetails` query
-- [ ] Implement `getResubmissionQueue` admin query
-- [ ] Add proper authorization to all queries
-- [ ] Test all queries in Convex dashboard
-- [ ] Run typecheck to fix any issue/errors
+- [x] Create `backend/convex/documents/rejectionQueries.ts`
+- [x] Implement `getRejectionHistory` query
+- [x] Implement `getRejectedDocumentsCount` query
+- [x] Implement `getDocumentRejectionDetails` query
+- [x] Implement `getResubmissionQueue` admin query
+- [x] Add proper authorization to all queries
+- [x] Test all queries in Convex dashboard
+- [x] Run typecheck to fix any issue/errors
 
 ### Phase 2: Frontend Types & Entities (0/12)
 
