@@ -14,8 +14,11 @@ import { useDocumentUpload } from '@features/upload';
 import { useApplications } from '@features/application';
 import { useRequirements } from '@features/upload';
 import { clearFormCache } from '@features/upload/services/documentCache';
+import { ResubmitModal } from '@features/document-resubmit';
+import { useResubmitDocument } from '@features/document-resubmit';
 
 interface DocumentRequirement {
+  _id: string;
   id: string;
   name: string;
   description: string;
@@ -24,6 +27,7 @@ interface DocumentRequirement {
   uploaded?: boolean;
   fileUrl?: string;
   fieldName: string;
+  fieldIdentifier: string;
 }
 
 interface UploadProgress {
@@ -38,6 +42,9 @@ export function UploadDocumentsScreen() {
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [canSkip, setCanSkip] = useState(false);
+  const [showResubmitModal, setShowResubmitModal] = useState(false);
+  const [resubmitDocumentTypeId, setResubmitDocumentTypeId] = useState<Id<'documentTypes'> | null>(null);
+  const [resubmitFieldIdentifier, setResubmitFieldIdentifier] = useState<string>('');
 
   const params = useLocalSearchParams();
   const formId = params.formId as string;
@@ -64,6 +71,8 @@ export function UploadDocumentsScreen() {
     cacheFileForUpload,
     batchUploadCachedDocuments,
   } = useDocumentUpload(formId as Id<'applications'>);
+  
+  const { resubmitDocument } = useResubmitDocument();
 
   useEffect(() => {
     if (applicationType === 'New' || applicationType === 'Renew') {
@@ -113,6 +122,18 @@ export function UploadDocumentsScreen() {
   };
 
   const handleDocumentPicker = async (documentId: string) => {
+    // Check if this is a rejected document resubmission
+    if (rejectedOnly && documentRequirements.length > 0) {
+      const docRequirement = documentRequirements.find((doc: DocumentRequirement) => doc.fieldName === documentId);
+      if (docRequirement) {
+        setResubmitDocumentTypeId((docRequirement._id || docRequirement.id) as Id<'documentTypes'>);
+        setResubmitFieldIdentifier(docRequirement.fieldIdentifier || docRequirement.fieldName);
+        setSelectedDocumentId(documentId); // Store for document name lookup
+        setShowResubmitModal(true);
+        return;
+      }
+    }
+    
     setSelectedDocumentId(documentId);
     setShowImagePicker(true);
   };
@@ -386,10 +407,10 @@ export function UploadDocumentsScreen() {
           ))}
         </View>
 
-        {/* Submit Button */}
+      {/* Submit Button */}
         <View style={styles.submitContainer}>
           <CustomButton
-            title="Submit Documents"
+            title={rejectedOnly ? "Re-upload Rejected Documents" : "Submit Documents"}
             onPress={() => batchUploadCachedDocuments().then(handleSubmitDocuments).catch(error => {
               console.error('Batch upload error:', error);
               Alert.alert('Error', 'Batch upload failed. Please try again.');
@@ -434,6 +455,27 @@ export function UploadDocumentsScreen() {
           </View>
         </View>
       </Modal>
+      
+      {/* Resubmit Modal for rejected documents */}
+      <ResubmitModal
+        visible={showResubmitModal}
+        onClose={() => {
+          setShowResubmitModal(false);
+          setResubmitDocumentTypeId(null);
+          setResubmitFieldIdentifier('');
+          setSelectedDocumentId(null);
+        }}
+        onSuccess={() => {
+          setShowResubmitModal(false);
+          Alert.alert('Success', 'Document resubmitted successfully!', [
+            { text: 'OK', onPress: () => router.back() }
+          ]);
+        }}
+        applicationId={formId as Id<'applications'>}
+        documentTypeId={resubmitDocumentTypeId!}
+        fieldIdentifier={resubmitFieldIdentifier}
+        documentName={documentRequirements.find((doc: DocumentRequirement) => doc.fieldName === selectedDocumentId)?.name || 'Document'}
+      />
     </BaseScreenLayout>
   );
 }

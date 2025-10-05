@@ -75,32 +75,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     lineHeight: moderateScale(20),
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    paddingHorizontal: scale(theme.spacing.md),
-    paddingVertical: verticalScale(theme.spacing.sm),
-    borderRadius: theme.borderRadius.full,
-    marginTop: verticalScale(theme.spacing.md),
-  },
-  statusBadgeReplaced: {
-    backgroundColor: theme.colors.status.success + '20',
-  },
-  statusBadgeActive: {
-    backgroundColor: theme.colors.status.error + '20',
-  },
-  statusText: {
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: '500' as const,
-    marginLeft: scale(theme.spacing.xs),
-  },
-  statusTextReplaced: {
-    color: theme.colors.status.success,
-  },
-  statusTextActive: {
-    color: theme.colors.status.error,
-  },
   footer: {
     marginTop: verticalScale(theme.spacing.xl),
     paddingTop: verticalScale(theme.spacing.lg),
@@ -120,16 +94,5 @@ export const styles = StyleSheet.create({
     fontSize: theme.typography.body.fontSize,
     fontWeight: '600' as const,
     color: theme.colors.text.inverse,
-  },
-  replacementInfo: {
-    backgroundColor: theme.colors.status.success + '10',
-    padding: moderateScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.md,
-    marginTop: verticalScale(theme.spacing.md),
-  },
-  replacementText: {
-    fontSize: theme.typography.body.fontSize,
-    color: theme.colors.status.success,
-    fontWeight: '500' as const,
   },
 });

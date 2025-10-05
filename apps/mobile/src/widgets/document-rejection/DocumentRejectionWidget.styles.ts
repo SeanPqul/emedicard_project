@@ -159,6 +159,31 @@ export const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: theme.colors.text.primary,
   },
+  // Replacement Status Section
+  replacementStatus: {
+    backgroundColor: theme.colors.status.success + '08',
+    borderRadius: theme.borderRadius.md,
+    padding: moderateScale(14),
+    marginTop: verticalScale(16),
+    borderWidth: 1,
+    borderColor: theme.colors.status.success + '20',
+  },
+  replacementStatusHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: verticalScale(6),
+  },
+  replacementStatusTitle: {
+    fontSize: moderateScale(15),
+    fontWeight: '600' as const,
+    color: theme.colors.status.success,
+    marginLeft: scale(8),
+  },
+  replacementStatusText: {
+    fontSize: moderateScale(13),
+    color: theme.colors.text.secondary,
+    marginLeft: scale(28), // Align with title (icon width + margin)
+  },
   
   // Loading State
   loadingContainer: {

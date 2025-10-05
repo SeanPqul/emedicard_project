@@ -20,6 +20,7 @@ export const ResubmitModal: React.FC<ResubmitModalProps> = ({
   onClose,
   applicationId,
   documentTypeId,
+  fieldIdentifier,
   documentName,
   onSuccess,
 }) => {
@@ -60,10 +61,21 @@ export const ResubmitModal: React.FC<ResubmitModalProps> = ({
     setUploadProgress(0);
 
     try {
+      // Convert expo-document-picker file format to match uploadFile expectations
+      // Ensure we have a proper mime type for both images and PDFs
+      const mimeType = selectedFile.mimeType || 
+        (selectedFile.name?.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
+      
+      const fileToUpload = {
+        ...selectedFile,
+        type: mimeType, // Map mimeType to type for validation
+        uri: selectedFile.uri,
+      };
+      
       // Upload file to storage
       const uploadResult = await uploadFile(
-        selectedFile,
-        documentTypeId // Use documentTypeId as the fieldName
+        fileToUpload,
+        fieldIdentifier // Use fieldIdentifier as the fieldName for backend lookup
       );
       const { storageId } = uploadResult;
 
@@ -73,7 +85,7 @@ export const ResubmitModal: React.FC<ResubmitModalProps> = ({
         documentTypeId,
         storageId,
         fileName: selectedFile.name || 'document',
-        fileType: selectedFile.mimeType || 'application/pdf',
+        fileType: mimeType,
         fileSize: selectedFile.size || 0,
       });
 

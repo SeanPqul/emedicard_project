@@ -120,21 +120,40 @@ export function DocumentRejectionWidget({
         </Text>
       </View>
 
+      {/* Replacement Status - Show above actions if document was replaced */}
+      {rejection.wasReplaced && rejection.replacedAt && (
+        <View style={styles.replacementStatus}>
+          <View style={styles.replacementStatusHeader}>
+            <Ionicons 
+              name="checkmark-circle" 
+              size={moderateScale(20)} 
+              color="#10B981"
+            />
+            <Text style={styles.replacementStatusTitle}>Document Resubmitted</Text>
+          </View>
+          <Text style={styles.replacementStatusText}>
+            New document submitted on {formatDate(rejection.replacedAt)}
+          </Text>
+        </View>
+      )}
+
       {/* Action Buttons */}
       {showActions && (
         <View style={styles.actionSection}>
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.primaryButton]}
-            onPress={onResubmit}
-            activeOpacity={0.8}
-          >
-            <Ionicons 
-              name="cloud-upload-outline" 
-              size={moderateScale(18)} 
-              color="white"
-            />
-            <Text style={styles.primaryButtonText}>Resubmit</Text>
-          </TouchableOpacity>
+          {!rejection.wasReplaced && (
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.primaryButton]}
+              onPress={onResubmit}
+              activeOpacity={0.8}
+            >
+              <Ionicons 
+                name="cloud-upload-outline" 
+                size={moderateScale(18)} 
+                color="white"
+              />
+              <Text style={styles.primaryButtonText}>Resubmit</Text>
+            </TouchableOpacity>
+          )}
           
           <TouchableOpacity 
             style={[styles.actionButton, styles.secondaryButton]}
@@ -142,11 +161,11 @@ export function DocumentRejectionWidget({
             activeOpacity={0.8}
           >
             <Ionicons 
-              name="eye-outline" 
+              name="information-circle-outline" 
               size={moderateScale(18)} 
               color="#1F2937"
             />
-            <Text style={styles.secondaryButtonText}>Details</Text>
+            <Text style={styles.secondaryButtonText}>More Info</Text>
           </TouchableOpacity>
         </View>
       )}

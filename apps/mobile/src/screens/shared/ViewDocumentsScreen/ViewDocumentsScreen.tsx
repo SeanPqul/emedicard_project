@@ -9,6 +9,7 @@ import { api } from '@backend/convex/_generated/api';
 import { getColor } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './ViewDocumentsScreen.styles';
+import { ResubmitModal } from '@features/document-resubmit';
 
 interface DocumentWithRequirement {
   _id: Id<'documentUploads'>;
@@ -36,6 +37,10 @@ export function ViewDocumentsScreen() {
   const params = useLocalSearchParams();
   const formId = params.formId as Id<'applications'>;
   const [viewingDocument, setViewingDocument] = useState<DocumentWithRequirement | null>(null);
+  const [showResubmitModal, setShowResubmitModal] = useState(false);
+  const [resubmitDocumentTypeId, setResubmitDocumentTypeId] = useState<Id<'documentTypes'> | null>(null);
+  const [resubmitFieldIdentifier, setResubmitFieldIdentifier] = useState<string>('');
+  const [resubmitDocumentName, setResubmitDocumentName] = useState<string>('');
   
   // Fetch documents with requirements
   const documentsData = useQuery(
@@ -105,13 +110,12 @@ export function ViewDocumentsScreen() {
   };
 
   const handleReuploadRejected = () => {
-    // Get the field identifiers of rejected documents
-    const rejectedFieldIds = rejectedDocuments
-      .map(doc => doc.requirement?.fieldIdentifier)
-      .filter(Boolean)
-      .join(',');
-    
-    router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}&rejectedOnly=true&rejectedFields=${rejectedFieldIds}`);
+    // For bulk reupload, we'll just show an alert for now
+    // In the future, this could open a multi-document resubmit modal
+    Alert.alert(
+      'Re-upload Documents',
+      'Please use the "Replace" button on each rejected document to resubmit them individually.'
+    );
   };
 
   // Find missing required documents
@@ -329,9 +333,11 @@ export function ViewDocumentsScreen() {
                     <TouchableOpacity 
                       style={styles.replaceButton}
                       onPress={() => {
-                        const fieldId = doc.requirement?.fieldIdentifier;
-                        if (fieldId) {
-                          router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}&rejectedOnly=true&rejectedFields=${fieldId}`);
+                        if (doc.documentTypeId && doc.requirement?.name && doc.requirement?.fieldIdentifier) {
+                          setResubmitDocumentTypeId(doc.documentTypeId);
+                          setResubmitFieldIdentifier(doc.requirement.fieldIdentifier);
+                          setResubmitDocumentName(doc.requirement.name);
+                          setShowResubmitModal(true);
                         }
                       }}
                     >
@@ -412,6 +418,26 @@ export function ViewDocumentsScreen() {
           )}
         </View>
       </Modal>
+      
+      {/* Resubmit Modal */}
+      <ResubmitModal
+        visible={showResubmitModal}
+        onClose={() => {
+          setShowResubmitModal(false);
+          setResubmitDocumentTypeId(null);
+          setResubmitFieldIdentifier('');
+          setResubmitDocumentName('');
+        }}
+        onSuccess={() => {
+          setShowResubmitModal(false);
+          Alert.alert('Success', 'Document resubmitted successfully!');
+          // Refresh will happen automatically through Convex reactivity
+        }}
+        applicationId={formId}
+        documentTypeId={resubmitDocumentTypeId!}
+        fieldIdentifier={resubmitFieldIdentifier}
+        documentName={resubmitDocumentName}
+      />
     </BaseScreenLayout>
   );
 }

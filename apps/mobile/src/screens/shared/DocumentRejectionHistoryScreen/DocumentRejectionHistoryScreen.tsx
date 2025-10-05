@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Modal, StyleSheet } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { View, Modal, StyleSheet, ScrollView } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { useRejectionHistory } from '@features/document-rejection/hooks';
 import { useDocumentTypes } from '@shared/hooks/useDocumentTypes';
 import { DocumentRejectionHistoryWidget } from '@widgets/document-rejection-history';
@@ -10,15 +10,15 @@ import { theme } from '@shared/styles/theme';
 import { scale } from '@shared/utils/responsive';
 import { 
   EnrichedRejection, 
-  RejectionCategory, 
-  EnrichedRejectionHistory, 
+  RejectionCategory,  
   RejectionCategoryLabels 
 } from '@entities/document/model/rejection-types';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { BaseScreenLayout } from '@shared/components/layout/BaseScreenLayout';
 
 export function DocumentRejectionHistoryScreen() {
-  const { applicationId } = useLocalSearchParams<{ applicationId: string }>();
+  const { formId } = useLocalSearchParams<{ formId: string }>();
+  const applicationId = formId; // Use formId as applicationId for compatibility
   const [selectedFilter, setSelectedFilter] = React.useState<RejectionCategory | 'all'>('all');
   const [selectedRejection, setSelectedRejection] = React.useState<EnrichedRejection | null>(null);
   const [showResubmitModal, setShowResubmitModal] = React.useState(false);
@@ -32,6 +32,12 @@ export function DocumentRejectionHistoryScreen() {
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const { documentTypes } = useDocumentTypes();
+  
+  // Helper to get field identifier from document type
+  const getFieldIdentifier = (documentTypeId: Id<"documentTypes">): string => {
+    const docType = documentTypes?.find((type: any) => type._id === documentTypeId);
+    return docType?.fieldIdentifier || documentTypeId; // Fallback to ID if not found
+  };
 
   const handleResubmit = (rejection: EnrichedRejection) => {
     setSelectedRejection(rejection);
@@ -90,6 +96,7 @@ export function DocumentRejectionHistoryScreen() {
           }}
           applicationId={applicationId as Id<"applications">}
           documentTypeId={selectedRejection.documentTypeId}
+          fieldIdentifier={getFieldIdentifier(selectedRejection.documentTypeId)}
           documentName={selectedRejection.documentTypeName || 'Unknown Document'}
           onSuccess={handleResubmitSuccess}
         />
@@ -107,10 +114,9 @@ export function DocumentRejectionHistoryScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {selectedRejection && (
-              <RejectionDetails
-                rejection={{
-                  // Map from backend format to EnrichedRejectionHistory
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {selectedRejection && (() => {
+                const rejectionObj = {
                   _id: selectedRejection._id,
                   applicationId: selectedRejection.applicationId,
                   documentTypeId: selectedRejection.documentTypeId,
@@ -128,10 +134,9 @@ export function DocumentRejectionHistoryScreen() {
                   replacementUploadId: selectedRejection.replacementInfo?.uploadId,
                   replacedAt: selectedRejection.replacedAt,
                   attemptNumber: selectedRejection.attemptNumber,
-                  // Enriched fields
                   documentTypeName: selectedRejection.documentTypeName,
                   rejectedByName: selectedRejection.rejectedByName,
-                  rejectedByRole: 'Admin', // Backend doesn't provide this
+                  rejectedByRole: 'Admin',
                   rejectionCategoryLabel: RejectionCategoryLabels[selectedRejection.rejectionCategory],
                   formattedRejectedAt: new Date(selectedRejection.rejectedAt).toLocaleDateString('en-US', {
                     month: 'short',
@@ -145,17 +150,22 @@ export function DocumentRejectionHistoryScreen() {
                         year: 'numeric',
                       })
                     : undefined,
-                }}
-                onClose={() => {
-                  setShowDetailsModal(false);
-                  setSelectedRejection(null);
-                }}
-                onResubmit={() => {
-                  setShowDetailsModal(false);
-                  setShowResubmitModal(true);
-                }}
-              />
-            )}
+                };
+                return (
+                  <RejectionDetails
+                    rejection={rejectionObj}
+                  onClose={() => {
+                    setShowDetailsModal(false);
+                    setSelectedRejection(null);
+                  }}
+                  onResubmit={() => {
+                    setShowDetailsModal(false);
+                    setShowResubmitModal(true);
+                  }}
+                  />
+                );
+              })()}
+            </ScrollView>
           </View>
         </View>
       </Modal>

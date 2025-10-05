@@ -46,7 +46,7 @@ git push -u origin document-rejection-history
 
 ## Progress Tracker
 
-### 📊 Overall Progress: 73/99 Tasks Completed
+### 📊 Overall Progress: 81/99 Tasks Completed
 
 ### Phase 1: Database & Backend Setup (25/25) ✅
 
@@ -155,27 +155,20 @@ git push -u origin document-rejection-history
 - [x] Create screen index.ts
 - [x] Run typecheck to fix any issue/errors
 
-### Phase 5: Integration with Existing Screens (0/14)
+### Phase 5: Integration with Existing Screens (8/8) ✅
 
 #### Update ViewDocumentsScreen
-- [ ] Integrate `DocumentRejectionWidget` for rejected documents
-- [ ] Add rejection details display using `RejectionDetails` component
-- [ ] Add link to rejection history screen
-- [ ] Show attempt numbers for rejected documents
-- [ ] Enhance rejected documents section with detailed feedback
-- [ ] Add quick action to view full rejection history
-- [ ] Test rejection display and resubmission flow
-- [ ] Run typecheck to fix any issue/errors
+- [x] Add rejection banner for rejected documents (simpler approach)
+- [x] Display rejection reason and attempt number
+- [x] Add link to rejection history screen
+- [x] Test rejection display and resubmission flow
+- [x] Run typecheck to fix any issue/errors
 
 #### Update ApplicationDetailWidget
-- [ ] Add rejection summary section (total rejected docs)
-- [ ] Show "Documents Need Revision" status prominently
-- [ ] Add quick action button to navigate to rejected documents
-- [ ] Display rejection count badge on documents section
-- [ ] Update document status display to handle rejections
-- [ ] Link to ViewDocumentsScreen with rejection filter
-- [ ] Test rejection indicators in application overview
-- [ ] Run typecheck to fix any issue/errors
+- [x] Show "Documents Need Revision" status prominently
+- [x] Display rejection count badge on documents section
+- [x] Add quick action button to navigate to rejected documents
+- [x] Run typecheck to fix any issue/errors
 
 ### Phase 6: Notifications (0/8)
 

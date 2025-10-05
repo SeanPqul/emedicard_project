@@ -5,6 +5,7 @@ export interface ResubmitModalProps {
   onClose: () => void;
   applicationId: Id<"applications">;
   documentTypeId: Id<"documentTypes">;
+  fieldIdentifier: string;
   documentName: string;
   onSuccess?: () => void;
 }
