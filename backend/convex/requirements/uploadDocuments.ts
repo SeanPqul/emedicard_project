@@ -53,6 +53,25 @@ export const uploadDocumentsMutation = mutation({
       .unique();
 
     if (existingDoc) {
+      // Check if document was rejected - if so, user must use resubmit flow
+      if (existingDoc.reviewStatus === "Rejected") {
+        // Check if there's a rejection history (proper rejection)
+        const rejectionHistory = await ctx.db
+          .query("documentRejectionHistory")
+          .withIndex("by_document_type", (q) => 
+            q.eq("applicationId", args.applicationId)
+             .eq("documentTypeId", documentType._id)
+          )
+          .filter(q => q.eq(q.field("wasReplaced"), false))
+          .first();
+          
+        if (rejectionHistory) {
+          throw new Error("This document was rejected. Please use the resubmit option to upload a new version.");
+        }
+        // If no rejection history (manual rejection), still prevent upload
+        throw new Error("This document was rejected. Please contact support if you need to resubmit.");
+      }
+      
       // Update existing document
       await ctx.db.patch(existingDoc._id, {
         documentTypeId: documentType._id,
