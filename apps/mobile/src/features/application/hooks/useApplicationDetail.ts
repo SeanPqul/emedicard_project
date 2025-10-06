@@ -21,6 +21,14 @@ export function useApplicationDetail(applicationId: string | undefined) {
     api.applications.getApplicationById.getApplicationByIdQuery,
     applicationId ? { applicationId: applicationId as Id<"applications"> } : "skip"
   ) as ApplicationDetails | undefined;
+  
+  // Query rejected documents count
+  const rejectionHistory = useQuery(
+    api.documents.rejectionQueries.getRejectionHistory,
+    applicationId ? { applicationId: applicationId as Id<"applications"> } : "skip"
+  );
+  
+  const rejectedDocumentsCount = rejectionHistory?.filter(r => !r.wasReplaced).length || 0;
 
   // Handle abandoned payments
   const {
@@ -64,6 +72,8 @@ export function useApplicationDetail(applicationId: string | undefined) {
         return 'document-text';
       case 'Under Review':
         return 'eye';
+      case 'Documents Need Revision':
+        return 'alert-circle';
       case 'Approved':
         return 'checkmark-circle';
       case 'Rejected':
@@ -132,6 +142,7 @@ export function useApplicationDetail(applicationId: string | undefined) {
     refreshing,
     selectedPaymentMethod,
     paymentReference,
+    rejectedDocumentsCount,
     
     // Loading states
     isLoading: !application && applicationId !== undefined,

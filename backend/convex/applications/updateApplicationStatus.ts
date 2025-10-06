@@ -4,7 +4,20 @@ import { v } from "convex/values";
 export const updateStatus = mutation({
   args: {
     applicationId: v.id("applications"),
-    newStatus: v.string(), // Add newStatus argument
+    newStatus: v.union(
+      v.literal("Draft"),
+      v.literal("Pending Payment"),
+      v.literal("Submitted"),
+      v.literal("Documents Need Revision"),
+      v.literal("Under Review"),
+      v.literal("For Payment Validation"),
+      v.literal("For Document Verification"),
+      v.literal("For Orientation"),
+      v.literal("Pending"),
+      v.literal("Cancelled"),
+      v.literal("Approved"),
+      v.literal("Rejected")
+    ),
   },
   handler: async (ctx, args) => {
     const application = await ctx.db.get(args.applicationId);

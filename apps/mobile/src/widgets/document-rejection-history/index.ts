@@ -1,0 +1,1 @@
+export { DocumentRejectionHistoryWidget } from './DocumentRejectionHistoryWidget';

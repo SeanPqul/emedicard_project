@@ -2,6 +2,31 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  users: defineTable({
+    username: v.string(),
+    fullname: v.string(),
+    email: v.string(),
+    image: v.string(),
+    gender: v.optional(v.string()),
+    birthDate: v.optional(v.string()),
+    phoneNumber: v.optional(v.string()),
+    clerkId: v.string(),
+    managedCategories: v.optional(
+      v.array(v.id("jobCategories"))
+    ),
+    role: v.optional(
+      v.union(
+        v.literal("applicant"),
+        v.literal("inspector"),
+        v.literal("admin")
+      )
+    ),
+    updatedAt: v.optional(v.float64()),
+  })
+    .index("by_clerk_id", ["clerkId"])
+    .index("by_role", ["role"])
+    .index("by_email", ["email"]),
+
   applications: defineTable({
     adminRemarks: v.optional(v.string()),
     applicationStatus: v.string(),
@@ -19,6 +44,7 @@ export default defineSchema({
     userId: v.id("users"),
     lastUpdatedBy: v.optional(v.id("users")), // New field to track which admin last updated the application
   }).index("by_user", ["userId"]),
+  
   documentTypes: defineTable({
     description: v.string(),
     fieldIdentifier: v.string(),
@@ -26,6 +52,7 @@ export default defineSchema({
     isRequired: v.boolean(),
     name: v.string(),
   }).index("by_field_identifier", ["fieldIdentifier"]),
+
   documentUploads: defineTable({
     adminRemarks: v.optional(v.string()),
     applicationId: v.id("applications"),
@@ -158,30 +185,7 @@ export default defineSchema({
   })
     .index("by_application", ["applicationId"])
     .index("by_maya_payment", ["mayaPaymentId"]),
-  users: defineTable({
-    birthDate: v.optional(v.string()),
-    clerkId: v.string(),
-    email: v.string(),
-    fullname: v.string(),
-    gender: v.optional(v.string()),
-    image: v.string(),
-    managedCategories: v.optional(
-      v.array(v.id("jobCategories"))
-    ),
-    phoneNumber: v.optional(v.string()),
-    role: v.optional(
-      v.union(
-        v.literal("applicant"),
-        v.literal("inspector"),
-        v.literal("admin")
-      )
-    ),
-    updatedAt: v.optional(v.float64()),
-    username: v.string(),
-  })
-    .index("by_clerk_id", ["clerkId"])
-    .index("by_role", ["role"])
-    .index("by_email", ["email"]),
+
   verificationLogs: defineTable({
     healthCardId: v.id("healthCards"),
     ipAddress: v.optional(v.string()),
@@ -208,4 +212,50 @@ export default defineSchema({
     .index("by_jobCategoryId", ["jobCategoryId", "timestamp"])
     .index("by_applicationId", ["applicationId", "timestamp"])
     .index("by_timestamp", ["timestamp"]),
+
+  // Document Rejection History
+  documentRejectionHistory: defineTable({
+    // Core References
+    applicationId: v.id("applications"),
+    documentTypeId: v.id("documentTypes"),
+    documentUploadId: v.id("documentUploads"), // Original upload
+    
+    // Preserved File Data
+    rejectedFileId: v.id("_storage"), // Never delete this
+    originalFileName: v.string(),
+    fileSize: v.float64(),
+    fileType: v.string(),
+    
+    // Rejection Information
+    rejectionCategory: v.union(
+      v.literal("quality_issue"),      // Blurry, dark, unreadable
+      v.literal("wrong_document"),     // Incorrect document type
+      v.literal("expired_document"),   // Document past validity
+      v.literal("incomplete_document"), // Missing pages/information
+      v.literal("invalid_document"),   // Fake or tampered
+      v.literal("format_issue"),       // Wrong format/size
+      v.literal("other")               // Other reasons
+    ),
+    rejectionReason: v.string(), // Detailed explanation
+    specificIssues: v.array(v.string()), // Bullet points
+    
+    // Tracking
+    rejectedBy: v.id("users"), // Admin who rejected
+    rejectedAt: v.float64(),
+    
+    // Resubmission Tracking
+    wasReplaced: v.boolean(),
+    replacementUploadId: v.optional(v.id("documentUploads")),
+    replacedAt: v.optional(v.float64()),
+    attemptNumber: v.float64(), // 1st, 2nd, 3rd attempt
+    
+    // Audit Fields
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+  }).index("by_application", ["applicationId"])
+    .index("by_document_type", ["applicationId", "documentTypeId"])
+    .index("by_rejected_at", ["rejectedAt"])
+    .index("by_admin", ["rejectedBy"])
+    .index("by_replacement", ["wasReplaced"]),
+
 });

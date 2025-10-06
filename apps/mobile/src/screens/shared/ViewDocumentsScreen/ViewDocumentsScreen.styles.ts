@@ -308,46 +308,39 @@ export const styles = StyleSheet.create({
     color: theme.colors.semantic.error,
   },
 
-  // Add More Container
-  addMoreContainer: {
-    paddingHorizontal: scale(theme.spacing.md),
-    paddingBottom: verticalScale(theme.spacing.xl * 1),
+
+  // Rejection Banner (inside document card)
+  rejectionBanner: {
+    backgroundColor: theme.colors.semantic.error + '10',
+    borderRadius: theme.borderRadius.md,
+    padding: moderateScale(theme.spacing.md),
+    marginTop: verticalScale(theme.spacing.md),
+    borderWidth: 1,
+    borderColor: theme.colors.semantic.error + '20',
   },
-  addMoreButton: {
+  rejectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colors.semantic.error + '10',
-    paddingVertical: verticalScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.md,
-    borderWidth: 2,
-    borderColor: theme.colors.semantic.error,
-    gap: scale(theme.spacing.sm),
-    marginTop: verticalScale(theme.spacing.md),
+    gap: scale(theme.spacing.xs),
+    marginBottom: verticalScale(theme.spacing.sm),
   },
-  addMoreText: {
-    fontSize: moderateScale(15),
+  rejectionTitle: {
+    fontSize: moderateScale(14),
     fontWeight: '600' as const,
     color: theme.colors.semantic.error,
   },
+  rejectionText: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(20),
+  },
+  attemptText: {
+    fontSize: moderateScale(12),
+    color: theme.colors.semantic.error,
+    fontWeight: '500' as const,
+    marginTop: verticalScale(theme.spacing.xs),
+  },
 
-  // Rejected Notice
-  rejectedNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.semantic.error + '10',
-    padding: moderateScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.md,
-    borderLeftWidth: 3,
-    borderLeftColor: theme.colors.semantic.error,
-    gap: scale(theme.spacing.sm),
-  },
-  rejectedNoticeText: {
-    flex: 1,
-    fontSize: moderateScale(13),
-    color: theme.colors.text.primary,
-    lineHeight: moderateScale(13 * 1.4),
-  },
 
   // Modal Styles
   modalContainer: {

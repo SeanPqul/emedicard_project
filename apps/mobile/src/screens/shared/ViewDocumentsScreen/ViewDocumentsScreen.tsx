@@ -9,6 +9,7 @@ import { api } from '@backend/convex/_generated/api';
 import { getColor } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './ViewDocumentsScreen.styles';
+import { ResubmitModal } from '@features/document-resubmit';
 
 interface DocumentWithRequirement {
   _id: Id<'documentUploads'>;
@@ -36,6 +37,10 @@ export function ViewDocumentsScreen() {
   const params = useLocalSearchParams();
   const formId = params.formId as Id<'applications'>;
   const [viewingDocument, setViewingDocument] = useState<DocumentWithRequirement | null>(null);
+  const [showResubmitModal, setShowResubmitModal] = useState(false);
+  const [resubmitDocumentTypeId, setResubmitDocumentTypeId] = useState<Id<'documentTypes'> | null>(null);
+  const [resubmitFieldIdentifier, setResubmitFieldIdentifier] = useState<string>('');
+  const [resubmitDocumentName, setResubmitDocumentName] = useState<string>('');
   
   // Fetch documents with requirements
   const documentsData = useQuery(
@@ -43,10 +48,20 @@ export function ViewDocumentsScreen() {
     formId ? { applicationId: formId } : 'skip'
   );
   
-  const isLoading = documentsData === undefined;
+  // Fetch rejection history
+  const rejectionHistory = useQuery(
+    api.documents.rejectionQueries.getRejectionHistory,
+    formId ? { applicationId: formId } : 'skip'
+  );
+  
+  const isLoading = documentsData === undefined || rejectionHistory === undefined;
   const uploadedDocuments = documentsData?.uploadedDocuments || [];
   const requiredDocuments = documentsData?.requiredDocuments || [];
   const application = documentsData?.application;
+  const rejections = rejectionHistory || [];
+  
+  // Get active rejections (not replaced)
+  const activeRejections = rejections.filter(r => !r.wasReplaced);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -94,15 +109,6 @@ export function ViewDocumentsScreen() {
     router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}`);
   };
 
-  const handleReuploadRejected = () => {
-    // Get the field identifiers of rejected documents
-    const rejectedFieldIds = rejectedDocuments
-      .map(doc => doc.requirement?.fieldIdentifier)
-      .filter(Boolean)
-      .join(',');
-    
-    router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}&rejectedOnly=true&rejectedFields=${rejectedFieldIds}`);
-  };
 
   // Find missing required documents
   const missingDocuments = requiredDocuments.filter((req: any) => 
@@ -191,6 +197,8 @@ export function ViewDocumentsScreen() {
                 ? 'Your documents are waiting for verification by our team.'
                 : application.applicationStatus === 'Under Review'
                 ? 'Your documents are currently being verified.'
+                : application.applicationStatus === 'Documents Need Revision'
+                ? `${activeRejections.length} document${activeRejections.length > 1 ? 's need' : ' needs'} to be revised and resubmitted.`
                 : 'You can view all your uploaded documents below.'}
             </Text>
           </View>
@@ -220,7 +228,18 @@ export function ViewDocumentsScreen() {
 
         {/* Documents List */}
         <View style={styles.documentsContainer}>
-          <Text style={styles.sectionTitle}>Your Documents</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Text style={styles.sectionTitle}>Your Documents</Text>
+            {rejections.length > 0 && (
+              <TouchableOpacity
+                onPress={() => router.push(`/(screens)/(shared)/documents/rejection-history?formId=${formId}`)}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+              >
+                <Ionicons name="time-outline" size={moderateScale(16)} color={getColor('primary.500')} />
+                <Text style={{ color: getColor('primary.500'), fontSize: moderateScale(14) }}>View History</Text>
+              </TouchableOpacity>
+            )}
+          </View>
           
           {uploadedDocuments.length === 0 ? (
             <View style={styles.emptyState}>
@@ -265,7 +284,28 @@ export function ViewDocumentsScreen() {
                   </Text>
                 </View>
 
-                {doc.adminRemarks && (
+                {doc.reviewStatus === 'Rejected' && (
+                  <View style={styles.rejectionBanner}>
+                    <View style={styles.rejectionHeader}>
+                      <Ionicons 
+                        name="alert-circle" 
+                        size={moderateScale(20)} 
+                        color={getColor('semantic.error')} 
+                      />
+                      <Text style={styles.rejectionTitle}>Rejection Reason</Text>
+                    </View>
+                    <Text style={styles.rejectionText}>
+                      {doc.adminRemarks || 'Document rejected. Please upload a new version.'}
+                    </Text>
+                    {rejections.find(r => r.documentTypeId === doc.documentTypeId && !r.wasReplaced) && (
+                      <Text style={styles.attemptText}>
+                        Attempt #{rejections.find(r => r.documentTypeId === doc.documentTypeId && !r.wasReplaced)?.attemptNumber || 1}
+                      </Text>
+                    )}
+                  </View>
+                )}
+                
+                {doc.adminRemarks && doc.reviewStatus !== 'Rejected' && (
                   <View style={styles.remarksContainer}>
                     <Text style={styles.remarksLabel}>Admin Remarks:</Text>
                     <Text style={styles.remarksText}>{doc.adminRemarks}</Text>
@@ -285,9 +325,11 @@ export function ViewDocumentsScreen() {
                     <TouchableOpacity 
                       style={styles.replaceButton}
                       onPress={() => {
-                        const fieldId = doc.requirement?.fieldIdentifier;
-                        if (fieldId) {
-                          router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}&rejectedOnly=true&rejectedFields=${fieldId}`);
+                        if (doc.documentTypeId && doc.requirement?.name && doc.requirement?.fieldIdentifier) {
+                          setResubmitDocumentTypeId(doc.documentTypeId);
+                          setResubmitFieldIdentifier(doc.requirement.fieldIdentifier);
+                          setResubmitDocumentName(doc.requirement.name);
+                          setShowResubmitModal(true);
                         }
                       }}
                     >
@@ -301,21 +343,6 @@ export function ViewDocumentsScreen() {
           )}
         </View>
 
-        {/* Add More Documents Button - Only show if documents are rejected */}
-        {rejectedDocuments.length > 0 && (
-          <View style={styles.addMoreContainer}>
-            <View style={styles.rejectedNotice}>
-              <Ionicons name="alert-circle" size={moderateScale(20)} color={getColor('semantic.error')} />
-              <Text style={styles.rejectedNoticeText}>
-                {rejectedDocuments.length} document{rejectedDocuments.length > 1 ? 's were' : ' was'} rejected. Please upload clear replacements.
-              </Text>
-            </View>
-            <TouchableOpacity style={styles.addMoreButton} onPress={handleReuploadRejected}>
-              <Ionicons name="cloud-upload-outline" size={moderateScale(24)} color={getColor('semantic.error')} />
-              <Text style={styles.addMoreText}>Re-upload Rejected Documents</Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </ScrollView>
 
       {/* Document Viewer Modal */}
@@ -368,6 +395,26 @@ export function ViewDocumentsScreen() {
           )}
         </View>
       </Modal>
+      
+      {/* Resubmit Modal */}
+      <ResubmitModal
+        visible={showResubmitModal}
+        onClose={() => {
+          setShowResubmitModal(false);
+          setResubmitDocumentTypeId(null);
+          setResubmitFieldIdentifier('');
+          setResubmitDocumentName('');
+        }}
+        onSuccess={() => {
+          setShowResubmitModal(false);
+          Alert.alert('Success', 'Document resubmitted successfully!');
+          // Refresh will happen automatically through Convex reactivity
+        }}
+        applicationId={formId}
+        documentTypeId={resubmitDocumentTypeId!}
+        fieldIdentifier={resubmitFieldIdentifier}
+        documentName={resubmitDocumentName}
+      />
     </BaseScreenLayout>
   );
 }
