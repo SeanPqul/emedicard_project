@@ -308,28 +308,6 @@ export const styles = StyleSheet.create({
     color: theme.colors.semantic.error,
   },
 
-  // Add More Container
-  addMoreContainer: {
-    paddingHorizontal: scale(theme.spacing.md),
-    paddingBottom: verticalScale(theme.spacing.xl * 1),
-  },
-  addMoreButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colors.semantic.error + '10',
-    paddingVertical: verticalScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.md,
-    borderWidth: 2,
-    borderColor: theme.colors.semantic.error,
-    gap: scale(theme.spacing.sm),
-    marginTop: verticalScale(theme.spacing.md),
-  },
-  addMoreText: {
-    fontSize: moderateScale(15),
-    fontWeight: '600' as const,
-    color: theme.colors.semantic.error,
-  },
 
   // Rejection Banner (inside document card)
   rejectionBanner: {
@@ -363,23 +341,6 @@ export const styles = StyleSheet.create({
     marginTop: verticalScale(theme.spacing.xs),
   },
 
-  // Rejected Notice
-  rejectedNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.semantic.error + '10',
-    padding: moderateScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.md,
-    borderLeftWidth: 3,
-    borderLeftColor: theme.colors.semantic.error,
-    gap: scale(theme.spacing.sm),
-  },
-  rejectedNoticeText: {
-    flex: 1,
-    fontSize: moderateScale(13),
-    color: theme.colors.text.primary,
-    lineHeight: moderateScale(13 * 1.4),
-  },
 
   // Modal Styles
   modalContainer: {

@@ -109,14 +109,6 @@ export function ViewDocumentsScreen() {
     router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}`);
   };
 
-  const handleReuploadRejected = () => {
-    // For bulk reupload, we'll just show an alert for now
-    // In the future, this could open a multi-document resubmit modal
-    Alert.alert(
-      'Re-upload Documents',
-      'Please use the "Replace" button on each rejected document to resubmit them individually.'
-    );
-  };
 
   // Find missing required documents
   const missingDocuments = requiredDocuments.filter((req: any) => 
@@ -351,21 +343,6 @@ export function ViewDocumentsScreen() {
           )}
         </View>
 
-        {/* Add More Documents Button - Only show if documents are rejected */}
-        {rejectedDocuments.length > 0 && (
-          <View style={styles.addMoreContainer}>
-            <View style={styles.rejectedNotice}>
-              <Ionicons name="alert-circle" size={moderateScale(20)} color={getColor('semantic.error')} />
-              <Text style={styles.rejectedNoticeText}>
-                {rejectedDocuments.length} document{rejectedDocuments.length > 1 ? 's were' : ' was'} rejected. Please upload clear replacements.
-              </Text>
-            </View>
-            <TouchableOpacity style={styles.addMoreButton} onPress={handleReuploadRejected}>
-              <Ionicons name="cloud-upload-outline" size={moderateScale(24)} color={getColor('semantic.error')} />
-              <Text style={styles.addMoreText}>Re-upload Rejected Documents</Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </ScrollView>
 
       {/* Document Viewer Modal */}
