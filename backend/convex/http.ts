@@ -380,21 +380,24 @@ http.route({
 
       // Set secure headers with appropriate CSP for different file types
       let csp = "default-src 'none'; ";
+      let disposition = "inline";
       
       if (contentType.startsWith("image/")) {
         // For images: allow them to be displayed
         csp = "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'";
       } else if (contentType === "application/pdf") {
-        // For PDFs: allow PDF rendering
-        csp = "default-src 'self'; object-src 'self'; plugin-types application/pdf";
+        // For PDFs: allow PDF rendering with more permissive CSP
+        csp = "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; object-src 'self' blob: data:; frame-src 'self' blob: data:; worker-src 'self' blob:";
+        // Ensure PDFs are displayed inline
+        disposition = "inline";
       }
       
       const headers = new Headers({
         "Content-Type": contentType,
-        "Content-Disposition": `inline; filename="${document.originalFileName}"`,
+        "Content-Disposition": `${disposition}; filename="${document.originalFileName}"`,
         "Cache-Control": "private, no-cache, no-store, must-revalidate",
         "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "SAMEORIGIN", // Changed from DENY to allow PDF viewing
+        "X-Frame-Options": "SAMEORIGIN", // Allow embedding in same origin
         "Content-Security-Policy": csp,
       });
 

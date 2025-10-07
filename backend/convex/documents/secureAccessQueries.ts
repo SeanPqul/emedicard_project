@@ -194,7 +194,6 @@ export const getSecureDocumentUrl = mutation({
       // Use existing valid token
       tokenString = existingToken.token;
       expiresAt = existingToken.expiresAt;
-      console.log("Reusing existing token for document:", args.documentId);
     } else {
       // Generate a new secure random token
       tokenString = generateSecureToken();
@@ -209,7 +208,6 @@ export const getSecureDocumentUrl = mutation({
         expiresAt: expiresAt,
         used: false,
       });
-      console.log("Created new token for document:", args.documentId);
     }
     
     // Get the base URL from environment or use default

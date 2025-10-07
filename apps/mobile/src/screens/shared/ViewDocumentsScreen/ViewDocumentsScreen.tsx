@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Image, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Image, Alert, Platform, Linking } from 'react-native';
 import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -10,6 +10,9 @@ import { getColor } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './ViewDocumentsScreen.styles';
 import { ResubmitModal } from '@features/document-resubmit';
+import { WebView } from 'react-native-webview';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 interface DocumentWithRequirement {
   _id: Id<'documentUploads'>;
@@ -39,6 +42,7 @@ export function ViewDocumentsScreen() {
   const [viewingDocument, setViewingDocument] = useState<DocumentWithRequirement | null>(null);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(false);
+  const [downloadingDocument, setDownloadingDocument] = useState(false);
   const [showResubmitModal, setShowResubmitModal] = useState(false);
   const [resubmitDocumentTypeId, setResubmitDocumentTypeId] = useState<Id<'documentTypes'> | null>(null);
   const [resubmitFieldIdentifier, setResubmitFieldIdentifier] = useState<string>('');
@@ -93,10 +97,6 @@ export function ViewDocumentsScreen() {
   };
 
   const handleViewDocument = async (doc: DocumentWithRequirement) => {
-    console.log('Viewing document:', doc);
-    console.log('Has file?', doc.hasFile);
-    console.log('Storage file ID:', doc.storageFileId);
-    
     // Check if document has a file - works with both old and new backend
     const hasDocument = doc.hasFile || !!doc.storageFileId || !!(doc as any).fileUrl;
     
@@ -128,15 +128,87 @@ export function ViewDocumentsScreen() {
     setLoadingDocument(true);
     try {
       // Generate a new secure URL
-      console.log('Refreshing document URL for:', viewingDocument._id);
       const secureUrlData = await getSecureUrl({ documentId: viewingDocument._id });
       setDocumentUrl(secureUrlData.url);
-      console.log('New secure URL generated');
     } catch (error) {
       console.error('Error refreshing document URL:', error);
       Alert.alert('Error', 'Unable to refresh document. Please try again.');
     } finally {
       setLoadingDocument(false);
+    }
+  };
+
+  // Function to download document
+  const handleDownloadDocument = async () => {
+    if (!documentUrl || !viewingDocument) return;
+    
+    setDownloadingDocument(true);
+    
+    try {
+      if (Platform.OS === 'web') {
+        // For web, create a download link
+        const link = document.createElement('a');
+        link.href = documentUrl;
+        link.download = viewingDocument.originalFileName;
+        link.click();
+        Alert.alert('Success', 'Document download started!');
+      } else {
+        // For mobile, check if sharing is available
+        const sharingAvailable = await Sharing.isAvailableAsync();
+        
+        if (!sharingAvailable) {
+          Alert.alert('Error', 'Sharing is not available on this device.');
+          return;
+        }
+        
+        // Create a filename for the download
+        const fileName = viewingDocument.originalFileName;
+        const fileUri = FileSystem.documentDirectory + fileName;
+        
+        // Download the file
+        const downloadResult = await FileSystem.downloadAsync(
+          documentUrl,
+          fileUri
+        );
+        
+        if (downloadResult.status !== 200) {
+          throw new Error('Failed to download document');
+        }
+        
+        // Open the share dialog for users to choose where to save
+        await Sharing.shareAsync(downloadResult.uri, {
+          mimeType: viewingDocument.originalFileName.toLowerCase().endsWith('.pdf') 
+            ? 'application/pdf' 
+            : viewingDocument.originalFileName.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp)$/i)
+            ? 'image/*'
+            : 'application/octet-stream',
+          dialogTitle: `Save ${viewingDocument.requirement?.name || viewingDocument.originalFileName}`,
+          UTI: viewingDocument.originalFileName.toLowerCase().endsWith('.pdf')
+            ? 'com.adobe.pdf'
+            : viewingDocument.originalFileName.toLowerCase().match(/\.(jpg|jpeg)$/i)
+            ? 'public.jpeg'
+            : viewingDocument.originalFileName.toLowerCase().endsWith('.png')
+            ? 'public.png'
+            : undefined,
+        });
+        
+        // Note: We can't detect if the user actually saved or cancelled the share dialog,
+        // but this gives them full control over where to save the file
+        
+        // Clean up the temporary file after a delay to ensure sharing completes
+        setTimeout(async () => {
+          try {
+            await FileSystem.deleteAsync(fileUri, { idempotent: true });
+          } catch (cleanupError) {
+            console.log('Cleanup error (non-critical):', cleanupError);
+          }
+        }, 5000); // Wait 5 seconds before cleanup
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      Alert.alert('Error', 'Unable to download document. Please try again.');
+    } finally {
+      setDownloadingDocument(false);
     }
   };
 
@@ -153,10 +225,6 @@ export function ViewDocumentsScreen() {
     )
   );
 
-  // Find rejected documents
-  const rejectedDocuments = uploadedDocuments.filter(
-    (doc: DocumentWithRequirement) => doc.reviewStatus === 'Rejected'
-  );
 
   if (isLoading) {
     return (
@@ -335,23 +403,86 @@ export function ViewDocumentsScreen() {
             <Text style={styles.modalTitle} numberOfLines={1}>
               {viewingDocument?.requirement?.name || viewingDocument?.originalFileName}
             </Text>
-            <View style={{ width: moderateScale(24) }} />
+            {documentUrl && (
+              <TouchableOpacity 
+                onPress={handleDownloadDocument}
+                disabled={downloadingDocument}
+              >
+                {downloadingDocument ? (
+                  <ActivityIndicator size="small" color={getColor('primary.500')} />
+                ) : (
+                  <Ionicons name="download-outline" size={moderateScale(24)} color={getColor('primary.500')} />
+                )}
+              </TouchableOpacity>
+            )}
           </View>
           
           {loadingDocument ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={getColor('primary.500')} />
-              <Text style={styles.loadingText}>Loading secure document...</Text>
+              <Text style={styles.loadingText}>Loading document...</Text>
             </View>
           ) : viewingDocument && documentUrl ? (
             <View style={styles.documentViewerContent}>
               {viewingDocument.originalFileName.toLowerCase().endsWith('.pdf') ? (
-                <View style={styles.pdfContainer}>
-                  <Ionicons name="document-text" size={moderateScale(80)} color={getColor('text.secondary')} />
-                  <Text style={styles.pdfText}>PDF Document</Text>
-                  <Text style={styles.pdfFileName}>{viewingDocument.originalFileName}</Text>
-                  <Text style={styles.securityNote}>Secure document view only</Text>
-                </View>
+                Platform.OS === 'web' ? (
+                  // For web, show the PDF icon with message
+                  <View style={styles.pdfContainer}>
+                    <Ionicons name="document-text" size={moderateScale(80)} color={getColor('text.secondary')} />
+                    <Text style={styles.pdfText}>PDF Document</Text>
+                    <Text style={styles.pdfFileName}>{viewingDocument.originalFileName}</Text>
+                    <TouchableOpacity 
+                      style={styles.downloadButton}
+                      onPress={handleDownloadDocument}
+                      disabled={downloadingDocument}
+                    >
+                      {downloadingDocument ? (
+                        <ActivityIndicator size="small" color={getColor('background.primary')} />
+                      ) : (
+                        <>
+                          <Ionicons name="download-outline" size={moderateScale(20)} color={getColor('background.primary')} />
+                          <Text style={styles.downloadButtonText}>Download PDF</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  // For mobile, use Google Docs Viewer to display PDF
+                  <WebView
+                    source={{ 
+                      uri: `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(documentUrl)}` 
+                    }}
+                    style={styles.pdfViewer}
+                    startInLoadingState={true}
+                    renderLoading={() => (
+                      <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color={getColor('primary.500')} />
+                        <Text style={styles.loadingText}>Loading PDF...</Text>
+                      </View>
+                    )}
+                    onError={(syntheticEvent) => {
+                      const { nativeEvent } = syntheticEvent;
+                      console.warn('WebView error: ', nativeEvent);
+                      Alert.alert(
+                        'Unable to Display PDF',
+                        'The PDF viewer encountered an error. Try downloading the document instead.',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          { 
+                            text: 'Download', 
+                            onPress: handleDownloadDocument
+                          }
+                        ]
+                      );
+                    }}
+                    // Enable PDF viewing
+                    allowsInlineMediaPlayback={true}
+                    javaScriptEnabled={true}
+                    domStorageEnabled={true}
+                    originWhitelist={['*']}
+                    mixedContentMode="always"
+                  />
+                )
               ) : (
                 <ScrollView 
                   contentContainerStyle={styles.imageScrollContainer}
@@ -363,8 +494,7 @@ export function ViewDocumentsScreen() {
                     source={{ uri: documentUrl }}
                     style={styles.documentImage}
                     resizeMode="contain"
-                    onError={(error) => {
-                      console.log('Image load error, refreshing token:', error);
+                    onError={() => {
                       // Silently refresh the URL if it fails to load (likely due to expired token)
                       refreshDocumentUrl();
                     }}
