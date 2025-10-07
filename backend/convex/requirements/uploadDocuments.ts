@@ -1,5 +1,6 @@
-import { mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { Id } from "../_generated/dataModel";
+import { mutation } from "../_generated/server";
 
 // Upload a single document using the new documentUploads schema
 export const uploadDocumentsMutation = mutation({
@@ -14,6 +15,8 @@ export const uploadDocumentsMutation = mutation({
     reviewedBy: v.optional(v.id("users")),
     reviewedAt: v.optional(v.number()),
     adminRemarks: v.optional(v.string()),
+    // NEW: Optional argument for resubmission
+    rejectedDocumentUploadId: v.optional(v.id("documentUploads")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -46,82 +49,103 @@ export const uploadDocumentsMutation = mutation({
       throw new Error(`Document type not found for field: ${args.fieldIdentifier}`);
     }
 
-    // Check if document already exists for this application and documentTypeId
-    const existingDoc = await ctx.db
-      .query("documentUploads")
-      .withIndex("by_application_document", (q) => q.eq("applicationId", args.applicationId).eq("documentTypeId", documentType._id))
-      .unique();
+    let newDocumentUploadId: Id<"documentUploads">;
 
-    if (existingDoc) {
-      // Check if document was rejected - if so, user must use resubmit flow
-      if (existingDoc.reviewStatus === "Rejected") {
-        // Check if there's a rejection history (proper rejection)
-        const rejectionHistory = await ctx.db
-          .query("documentRejectionHistory")
-          .withIndex("by_document_type", (q) => 
-            q.eq("applicationId", args.applicationId)
-             .eq("documentTypeId", documentType._id)
-          )
-          .filter(q => q.eq(q.field("wasReplaced"), false))
-          .first();
-          
-        if (rejectionHistory) {
-          throw new Error("This document was rejected. Please use the resubmit option to upload a new version.");
-        }
-        // If no rejection history (manual rejection), still prevent upload
-        throw new Error("This document was rejected. Please contact support if you need to resubmit.");
-      }
-      
-      // Update existing document
-      await ctx.db.patch(existingDoc._id, {
-        documentTypeId: documentType._id,
-        originalFileName: args.fileName,
-        storageFileId: args.storageId,
-        uploadedAt: Date.now(),
-        reviewStatus: args.reviewStatus || "Pending",
-        adminRemarks: args.adminRemarks,
-        reviewedBy: args.reviewedBy,
-        reviewedAt: args.reviewedAt,
-      });
-      
-      return {
-        requirementId: documentType._id,
-        fieldIdentifier: args.fieldIdentifier,
-        storageId: args.storageId,
-        fileName: args.fileName,
-        fileType: args.fileType,
-        fileSize: args.fileSize,
-        reviewStatus: args.reviewStatus || "Pending",
-        reviewedBy: args.reviewedBy,
-        reviewedAt: args.reviewedAt,
-        adminRemarks: args.adminRemarks,
-      };
-    } else {
-      // Create new document record
-      await ctx.db.insert("documentUploads", {
+    if (args.rejectedDocumentUploadId) {
+      // This is a resubmission of a previously rejected document
+      // Create a new documentUploads entry for the resubmitted document
+      newDocumentUploadId = await ctx.db.insert("documentUploads", {
         applicationId: args.applicationId,
         documentTypeId: documentType._id,
         originalFileName: args.fileName,
         storageFileId: args.storageId,
         uploadedAt: Date.now(),
-        reviewStatus: args.reviewStatus || "Pending",
-        adminRemarks: args.adminRemarks,
-        reviewedBy: args.reviewedBy,
-        reviewedAt: args.reviewedAt,
+        reviewStatus: "Pending", // Resubmitted documents start as pending
+        adminRemarks: undefined,
+        reviewedBy: undefined,
+        reviewedAt: undefined,
       });
-      
-      return {
-        requirementId: documentType._id,
-        fieldIdentifier: args.fieldIdentifier,
-        storageId: args.storageId,
-        fileName: args.fileName,
-        fileType: args.fileType,
-        fileSize: args.fileSize,
-        reviewStatus: args.reviewStatus || "Pending",
-        reviewedBy: args.reviewedBy,
-        reviewedAt: args.reviewedAt,
-        adminRemarks: args.adminRemarks,
-      };
+
+      // Find the most recent rejection history entry for this document type and original upload
+      const rejectionHistoryEntry = await ctx.db
+        .query("documentRejectionHistory")
+        .withIndex("by_document_type", (q) =>
+          q.eq("applicationId", args.applicationId)
+           .eq("documentTypeId", documentType._id)
+        )
+        .filter((q) => q.eq(q.field("documentUploadId"), args.rejectedDocumentUploadId))
+        .order("desc") // Get the most recent one if multiple rejections for the same upload exist (unlikely but safe)
+        .first();
+
+      if (rejectionHistoryEntry) {
+        await ctx.db.patch(rejectionHistoryEntry._id, {
+          wasReplaced: true,
+          replacementUploadId: newDocumentUploadId,
+          replacedAt: Date.now(),
+        });
+      }
+
+      // Notify admin about the resubmission
+      const admins = await ctx.db.query("users").withIndex("by_role", (q) => q.eq("role", "admin")).collect();
+      for (const admin of admins) {
+        await ctx.db.insert("notifications", {
+          userId: admin._id,
+          title: "Document Resubmitted",
+          message: `Applicant ${user.fullname} has resubmitted '${documentType.name}' for application ${application._id}.`,
+          notificationType: "document_resubmission",
+          isRead: false,
+          applicationId: application._id,
+        });
+      }
+
+    } else {
+      // This is an initial upload or an update to an existing non-rejected document
+      const existingDoc = await ctx.db
+        .query("documentUploads")
+        .withIndex("by_application_document", (q) => q.eq("applicationId", args.applicationId).eq("documentTypeId", documentType._id))
+        .unique();
+
+      if (existingDoc) {
+        // Update existing document
+        await ctx.db.patch(existingDoc._id, {
+          documentTypeId: documentType._id,
+          originalFileName: args.fileName,
+          storageFileId: args.storageId,
+          uploadedAt: Date.now(),
+          reviewStatus: args.reviewStatus || "Pending",
+          adminRemarks: args.adminRemarks,
+          reviewedBy: args.reviewedBy,
+          reviewedAt: args.reviewedAt,
+        });
+        newDocumentUploadId = existingDoc._id;
+      } else {
+        // Create new document record
+        newDocumentUploadId = await ctx.db.insert("documentUploads", {
+          applicationId: args.applicationId,
+          documentTypeId: documentType._id,
+          originalFileName: args.fileName,
+          storageFileId: args.storageId,
+          uploadedAt: Date.now(),
+          reviewStatus: args.reviewStatus || "Pending",
+          adminRemarks: args.adminRemarks,
+          reviewedBy: args.reviewedBy,
+          reviewedAt: args.reviewedAt,
+        });
+      }
     }
+    
+    return {
+      requirementId: documentType._id,
+      fieldIdentifier: args.fieldIdentifier,
+      storageId: args.storageId,
+      fileName: args.fileName,
+      fileType: args.fileType,
+      fileSize: args.fileSize,
+      reviewStatus: args.reviewStatus || "Pending", // This might need adjustment based on actual status after upload
+      reviewedBy: args.reviewedBy,
+      reviewedAt: args.reviewedAt,
+      adminRemarks: args.adminRemarks,
+      _id: newDocumentUploadId, // Return the ID of the new/updated document upload
+    };
   },
 });
