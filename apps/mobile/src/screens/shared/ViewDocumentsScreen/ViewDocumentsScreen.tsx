@@ -163,7 +163,7 @@ export function ViewDocumentsScreen() {
                 ? 'Your documents are waiting for verification by our team.'
                 : application.applicationStatus === 'Under Review'
                 ? 'Your documents are currently being verified.'
-                : application.applicationStatus === 'Documents Need Revision'
+                : application.applicationStatus === 'Rejected' && activeRejections.length > 0
                 ? `${activeRejections.length} document${activeRejections.length > 1 ? 's need' : ' needs'} to be revised and resubmitted.`
                 : 'You can view all your uploaded documents below.'}
             </Text>
@@ -222,88 +222,55 @@ export function ViewDocumentsScreen() {
           ) : (
             uploadedDocuments.map((doc: DocumentWithRequirement) => (
               <View key={doc._id} style={styles.documentCard}>
-                <View style={styles.documentHeader}>
+                <TouchableOpacity 
+                  style={styles.documentHeader}
+                  onPress={() => handleViewDocument(doc)}
+                >
                   <View style={styles.documentIconContainer}>
                     <Ionicons 
                       name={doc.requirement?.icon as any || 'document-text'} 
-                      size={moderateScale(24)} 
-                      color={getColor('primary.500')} 
+                      size={moderateScale(20)} 
+                      color="#666" 
                     />
                   </View>
                   <View style={styles.documentInfo}>
                     <Text style={styles.documentName}>{doc.requirement?.name || 'Document'}</Text>
-                    <Text style={styles.documentFileName}>{doc.originalFileName}</Text>
-                    <Text style={styles.documentDate}>
-                      Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
-                    </Text>
+                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(doc.reviewStatus) + '20' }]}>
+                      <Ionicons 
+                        name={getStatusIcon(doc.reviewStatus) as any} 
+                        size={moderateScale(14)} 
+                        color={getStatusColor(doc.reviewStatus)} 
+                      />
+                      <Text style={[styles.statusText, { color: getStatusColor(doc.reviewStatus) }]}>
+                        {doc.reviewStatus}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(doc.reviewStatus) + '20' }]}>
-                  <Ionicons 
-                    name={getStatusIcon(doc.reviewStatus) as any} 
-                    size={moderateScale(16)} 
-                    color={getStatusColor(doc.reviewStatus)} 
-                  />
-                  <Text style={[styles.statusText, { color: getStatusColor(doc.reviewStatus) }]}>
-                    {doc.reviewStatus}
-                  </Text>
-                </View>
+                  <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
+                </TouchableOpacity>
 
                 {doc.reviewStatus === 'Rejected' && (
-                  <View style={styles.rejectionBanner}>
-                    <View style={styles.rejectionHeader}>
-                      <Ionicons 
-                        name="alert-circle" 
-                        size={moderateScale(20)} 
-                        color={getColor('semantic.error')} 
-                      />
-                      <Text style={styles.rejectionTitle}>Rejection Reason</Text>
-                    </View>
-                    <Text style={styles.rejectionText}>
-                      {doc.adminRemarks || 'Document rejected. Please upload a new version.'}
-                    </Text>
-                    {rejections.find(r => r.documentTypeId === doc.documentTypeId && !r.wasReplaced) && (
-                      <Text style={styles.attemptText}>
-                        Attempt #{rejections.find(r => r.documentTypeId === doc.documentTypeId && !r.wasReplaced)?.attemptNumber || 1}
-                      </Text>
-                    )}
-                  </View>
-                )}
-                
-                {doc.adminRemarks && doc.reviewStatus !== 'Rejected' && (
-                  <View style={styles.remarksContainer}>
-                    <Text style={styles.remarksLabel}>Admin Remarks:</Text>
-                    <Text style={styles.remarksText}>{doc.adminRemarks}</Text>
-                  </View>
-                )}
-
-                <View style={styles.documentActions}>
                   <TouchableOpacity 
-                    style={styles.viewButton}
-                    onPress={() => handleViewDocument(doc)}
+                    style={[styles.documentHeader, styles.documentSubItem]}
+                    onPress={() => {
+                      if (doc.documentTypeId && doc.requirement?.name && doc.requirement?.fieldIdentifier) {
+                        setResubmitDocumentTypeId(doc.documentTypeId);
+                        setResubmitFieldIdentifier(doc.requirement.fieldIdentifier);
+                        setResubmitDocumentName(doc.requirement.name);
+                        setShowResubmitModal(true);
+                      }
+                    }}
                   >
-                    <Ionicons name="eye-outline" size={moderateScale(18)} color={getColor('primary.500')} />
-                    <Text style={styles.viewButtonText}>View Document</Text>
+                    <View style={styles.documentIconContainer}>
+                      <Ionicons name="refresh-outline" size={moderateScale(20)} color={getColor('semantic.error')} />
+                    </View>
+                    <View style={styles.documentInfo}>
+                      <Text style={styles.documentSubItemText}>Replace rejected document</Text>
+                      <Text style={styles.rejectionReason}>{doc.adminRemarks || 'Document needs revision'}</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
                   </TouchableOpacity>
-                  
-                  {doc.reviewStatus === 'Rejected' && (
-                    <TouchableOpacity 
-                      style={styles.replaceButton}
-                      onPress={() => {
-                        if (doc.documentTypeId && doc.requirement?.name && doc.requirement?.fieldIdentifier) {
-                          setResubmitDocumentTypeId(doc.documentTypeId);
-                          setResubmitFieldIdentifier(doc.requirement.fieldIdentifier);
-                          setResubmitDocumentName(doc.requirement.name);
-                          setShowResubmitModal(true);
-                        }
-                      }}
-                    >
-                      <Ionicons name="refresh-outline" size={moderateScale(18)} color={getColor('semantic.error')} />
-                      <Text style={styles.replaceButtonText}>Replace</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
+                )}
               </View>
             ))
           )}

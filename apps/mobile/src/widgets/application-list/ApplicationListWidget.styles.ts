@@ -6,15 +6,18 @@ import { scale, verticalScale, moderateScale } from "@shared/utils/responsive";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background.secondary,
+    backgroundColor: '#F5F5F5', // Light gray background matching UI/UX handoff
   },
   header: {
     backgroundColor: theme.colors.background.primary,
-    borderBottomWidth: moderateScale(1),
-    borderBottomColor: theme.colors.border.light,
-    paddingHorizontal: scale(theme.spacing.lg),
-    paddingTop: verticalScale(theme.spacing.md),
-    paddingBottom: verticalScale(theme.spacing.sm),
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingTop: verticalScale(theme.spacing.lg),
+    paddingBottom: verticalScale(theme.spacing.md),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   headerTop: {
     flexDirection: 'row',
@@ -23,9 +26,9 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(theme.spacing.md),
   },
   headerTitle: {
-    fontSize: moderateScale(theme.typography.h2.fontSize),
-    fontWeight: theme.typography.h2.fontWeight,
-    lineHeight: moderateScale(theme.typography.h2.lineHeight),
+    fontSize: moderateScale(24),
+    fontWeight: '700',
+    lineHeight: moderateScale(32),
     color: theme.colors.text.primary,
   },
   filterButton: {
@@ -104,52 +107,52 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   applicationsList: {
-    padding: scale(theme.spacing.md),
+    paddingTop: verticalScale(theme.spacing.md),
+    paddingBottom: verticalScale(theme.spacing.md),
   },
   applicationCard: {
     backgroundColor: theme.colors.background.primary,
-    borderRadius: theme.borderRadius.lg,
-    padding: scale(theme.spacing.lg),
-    marginBottom: verticalScale(theme.spacing.lg),
-    ...getShadow('medium'),
-    borderWidth: moderateScale(1),
-    borderColor: 'transparent',
+    borderRadius: moderateScale(theme.borderRadius.lg), // 12px
+    padding: moderateScale(16), // Reduce padding for more content space
+    marginBottom: verticalScale(theme.spacing.md), // 16px
+    marginHorizontal: scale(theme.spacing.md), // 16px
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: verticalScale(theme.spacing.lg),
-    paddingBottom: verticalScale(theme.spacing.sm),
-    borderBottomWidth: moderateScale(1),
-    borderBottomColor: theme.colors.border.light + '30',
+    marginBottom: verticalScale(theme.spacing.md),
   },
   cardHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     flex: 1,
+    maxWidth: '65%', // Prevent overflow when header right takes space
   },
   categoryIndicator: {
-    width: moderateScale(32),
-    height: moderateScale(32),
+    width: moderateScale(42),
+    height: moderateScale(42),
     borderRadius: theme.borderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: scale(theme.spacing.sm),
+    flexShrink: 0, // Prevent shrinking
   },
   cardHeaderInfo: {
     flex: 1,
     marginLeft: scale(theme.spacing.xs),
+    minWidth: 0, // Allow text truncation to work properly
   },
   applicationId: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
-    fontWeight: '700',
-    color: theme.colors.text.primary,
-    marginBottom: verticalScale(theme.spacing.xs),
-  },
-  applicationDate: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(theme.typography.caption.fontSize),
     lineHeight: moderateScale(theme.typography.caption.lineHeight),
     color: theme.colors.text.secondary,
   },
@@ -167,33 +170,27 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: scale(theme.spacing.xs),
   },
-  lockIcon: {
-    padding: scale(theme.spacing.xs),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardContent: {
-    marginBottom: verticalScale(theme.spacing.md),
-  },
   jobCategory: {
-    fontSize: moderateScale(theme.typography.h4.fontSize),
+    fontSize: moderateScale(11),
     fontWeight: '700',
-    lineHeight: moderateScale(theme.typography.h4.lineHeight),
-    color: theme.colors.text.primary,
-    marginBottom: verticalScale(theme.spacing.sm),
+    lineHeight: moderateScale(14),
+    color: theme.colors.text.secondary,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: verticalScale(2),
   },
   position: {
-    fontSize: moderateScale(theme.typography.body.fontSize),
-    lineHeight: moderateScale(theme.typography.body.lineHeight),
-    fontWeight: '600',
+    fontSize: moderateScale(16),
+    lineHeight: moderateScale(20),
+    fontWeight: '700',
     color: theme.colors.text.primary,
-    marginBottom: verticalScale(theme.spacing.xs),
+    marginBottom: verticalScale(2),
   },
   organization: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
+    fontSize: moderateScale(13),
+    lineHeight: moderateScale(16),
     color: theme.colors.text.secondary,
-    marginBottom: verticalScale(theme.spacing.md),
+    marginBottom: verticalScale(theme.spacing.sm),
   },
   applicationDetails: {
     backgroundColor: theme.colors.background.tertiary,
@@ -223,11 +220,13 @@ export const styles = StyleSheet.create({
     maxWidth: '60%',
   },
   remarksContainer: {
+    flexDirection: 'row',
     backgroundColor: theme.colors.status.warning + '10',
     borderRadius: theme.borderRadius.md,
     padding: scale(theme.spacing.sm),
     borderWidth: moderateScale(1),
     borderColor: theme.colors.status.warning + '30',
+    marginTop: verticalScale(theme.spacing.sm),
   },
   remarksLabel: {
     fontSize: moderateScale(theme.typography.bodySmall.fontSize),
@@ -237,9 +236,14 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(theme.spacing.xs),
   },
   remarksText: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
-    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
     color: theme.colors.text.primary,
+    flex: 1,
+    marginLeft: scale(theme.spacing.xs),
+  },
+  remarksIcon: {
+    flexShrink: 0,
   },
   cardFooter: {
     flexDirection: 'row',
@@ -280,6 +284,49 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     marginRight: scale(theme.spacing.xs),
   },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  statusInfo: {
+    flex: 1,
+  },
+  statusLabel: {
+    fontSize: moderateScale(12),
+    fontWeight: '700',
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.secondary,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: verticalScale(theme.spacing.xs),
+  },
+  statusValue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusDot: {
+    width: moderateScale(8),
+    height: moderateScale(8),
+    borderRadius: moderateScale(4),
+    marginRight: scale(theme.spacing.sm),
+  },
+  dateInfo: {
+    alignItems: 'flex-end',
+  },
+  dateLabel: {
+    fontSize: moderateScale(12),
+    fontWeight: '700',
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.secondary,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: verticalScale(theme.spacing.xs),
+  },
+  dateValue: {
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
+    color: theme.colors.text.primary,
+  },
   fab: {
     position: 'absolute',
     bottom: verticalScale(theme.spacing.xxxl),
@@ -292,5 +339,225 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     ...getShadow('large'),
     zIndex: 1,
+  },
+  // New styles for enhanced card design
+  cardHeaderRight: {
+    alignItems: 'flex-end',
+    marginLeft: scale(theme.spacing.sm),
+    flexShrink: 0, // Prevent shrinking
+  },
+  daysAgo: {
+    fontSize: moderateScale(11),
+    lineHeight: moderateScale(14),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(2),
+  },
+  progressContainer: {
+    marginBottom: verticalScale(theme.spacing.md),
+  },
+  statusSection: {
+    marginBottom: verticalScale(theme.spacing.md),
+  },
+  statusHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: verticalScale(theme.spacing.xs),
+  },
+  statusLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  statusDescription: {
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.secondary,
+  },
+  paymentBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFA500' + '15',
+    paddingHorizontal: scale(theme.spacing.sm),
+    paddingVertical: verticalScale(4),
+    borderRadius: theme.borderRadius.md,
+  },
+  paymentBadgeText: {
+    fontSize: moderateScale(11),
+    lineHeight: moderateScale(14),
+    color: '#FFA500',
+    fontWeight: '600',
+    marginLeft: scale(4),
+  },
+  infoGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: verticalScale(theme.spacing.md),
+    paddingTop: verticalScale(theme.spacing.md),
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border.light,
+  },
+  infoItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: moderateScale(11),
+    lineHeight: moderateScale(14),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(4),
+    marginBottom: verticalScale(2),
+  },
+  infoValue: {
+    fontSize: moderateScale(14),
+    lineHeight: moderateScale(18),
+    color: theme.colors.text.primary,
+    fontWeight: '600',
+  },
+  nextActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.background.tertiary,
+    paddingVertical: verticalScale(theme.spacing.sm),
+    paddingHorizontal: scale(theme.spacing.md),
+    borderRadius: theme.borderRadius.md,
+    marginBottom: verticalScale(theme.spacing.sm),
+  },
+  nextActionText: {
+    fontSize: moderateScale(14),
+    lineHeight: moderateScale(18),
+    fontWeight: '600',
+    marginHorizontal: scale(theme.spacing.sm),
+  },
+  // New styles for improved information display
+  stepsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: verticalScale(theme.spacing.sm),
+  },
+  stepsLabel: {
+    fontSize: moderateScale(11),
+    fontWeight: '700',
+    lineHeight: moderateScale(14),
+    color: theme.colors.text.secondary,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  stepsCount: {
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.secondary,
+    fontWeight: '600',
+  },
+  stepsIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: verticalScale(theme.spacing.xs),
+  },
+  stepDot: {
+    width: moderateScale(8),
+    height: moderateScale(8),
+    borderRadius: moderateScale(4),
+    backgroundColor: theme.colors.border.light,
+    marginRight: scale(6),
+  },
+  currentStep: {
+    width: moderateScale(10),
+    height: moderateScale(10),
+    borderRadius: moderateScale(5),
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  nextStepText: {
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.secondary,
+    fontStyle: 'italic',
+  },
+  timeInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: verticalScale(theme.spacing.xs),
+  },
+  timeLabel: {
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.secondary,
+    marginRight: scale(theme.spacing.xs),
+  },
+  timeValue: {
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.primary,
+    fontWeight: '600',
+  },
+  infoItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  actionTextContainer: {
+    marginLeft: scale(theme.spacing.sm),
+    flex: 1,
+  },
+  actionSubtext: {
+    fontSize: moderateScale(11),
+    lineHeight: moderateScale(14),
+    marginTop: verticalScale(2),
+  },
+  // New styles for simplified card design
+  dateApplied: {
+    fontSize: moderateScale(11),
+    lineHeight: moderateScale(14),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(2),
+  },
+  statusTextContainer: {
+    marginLeft: scale(theme.spacing.md), // Icon-to-text spacing per handoff
+    flex: 1,
+  },
+  statusMainText: {
+    fontSize: moderateScale(15),
+    fontWeight: '600',
+    lineHeight: moderateScale(19),
+    marginBottom: verticalScale(2),
+  },
+  statusSubText: {
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
+    color: theme.colors.text.secondary,
+  },
+  paymentRequiredBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFA500' + '15',
+    paddingHorizontal: scale(theme.spacing.sm),
+    paddingVertical: verticalScale(theme.spacing.xs),
+    borderRadius: theme.borderRadius.md,
+    marginTop: verticalScale(theme.spacing.sm),
+    alignSelf: 'flex-start',
+  },
+  primaryActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingVertical: verticalScale(theme.spacing.sm),
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1.5,
+    marginTop: verticalScale(theme.spacing.md),
+    backgroundColor: theme.colors.background.primary,
+  },
+  primaryActionText: {
+    fontSize: moderateScale(14),
+    fontWeight: '600',
+    marginLeft: scale(theme.spacing.sm),
   },
 });

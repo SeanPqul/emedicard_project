@@ -72,8 +72,6 @@ export function useApplicationDetail(applicationId: string | undefined) {
         return 'document-text';
       case 'Under Review':
         return 'eye';
-      case 'Documents Need Revision':
-        return 'alert-circle';
       case 'Approved':
         return 'checkmark-circle';
       case 'Rejected':

@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -12,6 +13,8 @@ import { ApplicationDetails, PaymentMethod } from '@entities/application';
 import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './ApplicationDetailWidget.styles';
 import { theme } from '@shared/styles/theme';
+import MayaLogo from '@/assets/svgs/maya-logo-brandlogos.net_gpvn1r359.svg';
+import GCashLogo from '@/assets/svgs/gcash-logo-brandlogos.net_arv9ck6s2.svg';
 
 // UI constants for status colors
 const STATUS_COLORS = {
@@ -20,7 +23,6 @@ const STATUS_COLORS = {
   'Under Review': '#F18F01',
   'Approved': '#28A745',
   'Rejected': '#DC3545',
-  'Documents Need Revision': '#F18F01',
 } as const;
 
 interface ApplicationDetailWidgetProps {
@@ -163,85 +165,44 @@ export function ApplicationDetailWidget({
 
       {/* Documents Section */}
       <View style={styles.documentsCard}>
-        <View style={styles.documentsSectionHeader}>
-          <Text style={styles.sectionTitle}>Submitted Documents</Text>
-          {rejectedDocumentsCount > 0 && (
-            <View style={styles.rejectionBadge}>
-              <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
-              <Text style={styles.rejectionBadgeText}>{rejectedDocumentsCount}</Text>
-            </View>
-          )}
-        </View>
+        <Text style={styles.sectionTitle}>Submitted Documents</Text>
         
-        {application.status === 'Pending Payment' ? (
-          <View style={styles.documentsStatusContainer}>
-            <Ionicons name="alert-circle-outline" size={moderateScale(24)} color={theme.colors.accent.warningOrange} />
-            <Text style={styles.documentsStatusText}>
-              Documents will be verified after payment is confirmed
-            </Text>
-          </View>
-        ) : application.status === 'Submitted' ? (
-          <View style={styles.documentsStatusContainer}>
-            <Ionicons name="time-outline" size={moderateScale(24)} color={theme.colors.primary[500]} />
-            <Text style={styles.documentsStatusText}>
-              Your documents are waiting for verification
-            </Text>
-          </View>
-        ) : application.status === 'Under Review' ? (
-          <View style={styles.documentsStatusContainer}>
-            <Ionicons name="eye-outline" size={moderateScale(24)} color={theme.colors.accent.medicalBlue} />
-            <Text style={styles.documentsStatusText}>
-              Your documents are currently being verified
-            </Text>
-          </View>
-        ) : (application.status as string) === 'Documents Need Revision' ? (
-          <View style={styles.documentsStatusContainer}>
-            <Ionicons name="alert-circle" size={moderateScale(24)} color={theme.colors.accent.warningOrange} />
-            <Text style={[styles.documentsStatusText, { color: theme.colors.accent.warningOrange }]}>
-              {rejectedDocumentsCount} document{rejectedDocumentsCount !== 1 ? 's' : ''} need{rejectedDocumentsCount === 1 ? 's' : ''} to be revised and resubmitted
-            </Text>
-          </View>
-        ) : application.status === 'Approved' ? (
-          <View style={styles.documentsStatusContainer}>
-            <Ionicons name="checkmark-circle" size={moderateScale(24)} color={theme.colors.accent.safetyGreen} />
-            <Text style={[styles.documentsStatusText, { color: theme.colors.accent.safetyGreen }]}>
-              All documents have been verified and approved
-            </Text>
-          </View>
-        ) : application.status === 'Rejected' ? (
-          <View style={styles.documentsStatusContainer}>
-            <Ionicons name="close-circle" size={moderateScale(24)} color={theme.colors.semantic.error} />
-            <Text style={[styles.documentsStatusText, { color: theme.colors.semantic.error }]}>
-              Document verification failed. Please check remarks for details.
-            </Text>
-          </View>
-        ) : null}
-
         <TouchableOpacity 
           style={styles.viewDocumentsButton}
           onPress={() => router.push(`/(screens)/(shared)/documents/view-document?formId=${application._id}`)}
         >
-          <Ionicons name="document-text-outline" size={moderateScale(20)} color={theme.colors.primary[500]} />
-          <Text style={styles.viewDocumentsText}>View Uploaded Documents</Text>
-          <Ionicons name="chevron-forward" size={moderateScale(20)} color={theme.colors.primary[500]} />
+          <View style={styles.documentsIconContainer}>
+            <Ionicons name="document-text-outline" size={moderateScale(20)} color="#666" />
+          </View>
+          <View style={styles.documentsInfo}>
+            <Text style={styles.viewDocumentsText}>View Uploaded Documents</Text>
+            {application.status === 'Pending Payment' && (
+              <Text style={styles.documentsStatusText}>Will be verified after payment</Text>
+            )}
+            {application.status === 'Submitted' && (
+              <Text style={styles.documentsStatusText}>Waiting for verification</Text>
+            )}
+            {application.status === 'Under Review' && (
+              <Text style={[styles.documentsStatusText, { color: theme.colors.primary[500] }]}>Currently being verified</Text>
+            )}
+            {application.status === 'Approved' && (
+              <Text style={[styles.documentsStatusText, { color: theme.colors.accent.safetyGreen }]}>All documents approved</Text>
+            )}
+            {rejectedDocumentsCount > 0 && (
+              <Text style={[styles.documentsStatusText, { color: theme.colors.semantic.error }]}>
+                {rejectedDocumentsCount} document{rejectedDocumentsCount !== 1 ? 's' : ''} need revision
+              </Text>
+            )}
+          </View>
+          <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
         </TouchableOpacity>
-        
-        {rejectedDocumentsCount > 0 && (
-          <TouchableOpacity 
-            style={[styles.viewDocumentsButton, { marginTop: 12, backgroundColor: theme.colors.semantic.error + '10' }]}
-            onPress={() => router.push(`/(screens)/(shared)/documents/view-document?formId=${application._id}&showRejected=true`)}
-          >
-            <Ionicons name="alert-circle-outline" size={moderateScale(20)} color={theme.colors.semantic.error} />
-            <Text style={[styles.viewDocumentsText, { color: theme.colors.semantic.error }]}>View Rejected Documents</Text>
-            <Ionicons name="chevron-forward" size={moderateScale(20)} color={theme.colors.semantic.error} />
-          </TouchableOpacity>
-        )}
       </View>
 
       {/* Payment Section - Only show if pending payment */}
       {application.status === 'Pending Payment' && (
         <View style={styles.paymentCard}>
           <Text style={styles.sectionTitle}>Payment Required</Text>
+          
           <Text style={styles.paymentDescription}>
             Complete your payment to proceed with your health card application
           </Text>
@@ -264,54 +225,74 @@ export function ApplicationDetailWidget({
 
           {/* Payment Methods */}
           <Text style={styles.paymentMethodsTitle}>Select Payment Method</Text>
+          <Text style={styles.paymentMethodsSubtitle}>Choose how you want to pay</Text>
           
           <View style={styles.paymentMethods}>
             <TouchableOpacity
-              style={styles.paymentMethodCard}
+              style={[styles.paymentMethodCard, isPaymentProcessing && styles.paymentMethodCardDisabled]}
               onPress={() => onPaymentMethodSelect('Maya')}
               disabled={isPaymentProcessing}
+              activeOpacity={0.7}
             >
-              <Ionicons name="card-outline" size={moderateScale(24)} color={theme.colors.primary[500]} />
+              <View style={styles.paymentMethodBadge}>
+                <Text style={styles.paymentMethodBadgeText}>RECOMMENDED</Text>
+              </View>
+              <MayaLogo width={moderateScale(50)} height={moderateScale(38)} />
               <Text style={styles.paymentMethodName}>Maya</Text>
-              <Text style={styles.paymentMethodDesc}>Pay instantly</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.paymentMethodCard}
+              style={[styles.paymentMethodCard, styles.paymentMethodCardDisabled]}
               onPress={() => onPaymentMethodSelect('Gcash')}
-              disabled={isPaymentProcessing}
+              disabled={true}
+              activeOpacity={0.7}
             >
-              <Ionicons name="phone-portrait-outline" size={moderateScale(24)} color={theme.colors.accent.primaryGreen} />
+              <View style={styles.comingSoonBadge}>
+                <Text style={styles.comingSoonText}>SOON</Text>
+              </View>
+              <GCashLogo width={moderateScale(50)} height={moderateScale(38)} />
               <Text style={styles.paymentMethodName}>GCash</Text>
-              <Text style={styles.paymentMethodDesc}>Coming soon</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.paymentMethodCard}
+              style={[styles.paymentMethodCard, isPaymentProcessing && styles.paymentMethodCardDisabled]}
               onPress={() => onPaymentMethodSelect('BaranggayHall')}
               disabled={isPaymentProcessing}
+              activeOpacity={0.7}
             >
-              <Ionicons name="business-outline" size={moderateScale(24)} color={theme.colors.accent.warningOrange} />
-              <Text style={styles.paymentMethodName}>Barangay Hall</Text>
-              <Text style={styles.paymentMethodDesc}>Pay in person</Text>
+              <View style={styles.paymentMethodIconContainer}>
+                <Ionicons name="business-outline" size={moderateScale(24)} color={theme.colors.accent.warningOrange} />
+              </View>
+              <Text style={styles.paymentMethodName}>Barangay</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.paymentMethodCard}
+              style={[styles.paymentMethodCard, isPaymentProcessing && styles.paymentMethodCardDisabled]}
               onPress={() => onPaymentMethodSelect('CityHall')}
               disabled={isPaymentProcessing}
+              activeOpacity={0.7}
             >
-              <Ionicons name="library-outline" size={moderateScale(24)} color={theme.colors.accent.safetyGreen} />
+              <View style={styles.paymentMethodIconContainer}>
+                <Ionicons name="home-outline" size={moderateScale(24)} color={theme.colors.accent.safetyGreen} />
+              </View>
               <Text style={styles.paymentMethodName}>City Hall</Text>
-              <Text style={styles.paymentMethodDesc}>Pay in person</Text>
             </TouchableOpacity>
           </View>
 
           {isPaymentProcessing && (
             <View style={styles.processingContainer}>
+              <ActivityIndicator size="small" color={theme.colors.primary[500]} />
               <Text style={styles.processingText}>Processing payment...</Text>
             </View>
           )}
+
+          {/* Payment Instructions */}
+          <View style={styles.paymentInstructions}>
+            <Ionicons name="information-circle-outline" size={moderateScale(14)} color={theme.colors.primary[500]} />
+            <Text style={styles.paymentInstructionText}>
+              After selecting a payment method, you'll be redirected to complete the payment process.
+            </Text>
+          </View>
         </View>
       )}
 
@@ -339,9 +320,11 @@ export function ApplicationDetailWidget({
 
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Payment Status</Text>
-            <Text style={[styles.detailValue, { color: theme.colors.accent.safetyGreen }]}>
-              {application.payment.status}
-            </Text>
+            <View style={[styles.paymentStatusBadge, { backgroundColor: theme.colors.accent.safetyGreen + '20' }]}>
+              <Text style={[styles.paymentStatusText, { color: theme.colors.accent.safetyGreen }]}>
+                {application.payment.status}
+              </Text>
+            </View>
           </View>
         </View>
       )}

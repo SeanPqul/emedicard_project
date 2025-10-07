@@ -39,7 +39,7 @@ interface ApplicationListWidgetProps {
   onFilterChange: (filter: FilterStatus) => void;
   onSortChange: (sort: SortOption) => void;
   onToggleFilters: () => void;
-  getStatusIcon: (status: string) => keyof typeof Ionicons.glyphMap;
+  getStatusIcon: (status: string) => string;
   getStatusDescription: (status: string) => string;
   getProgressPercentage: (status: string) => number;
   getProgressText: (status: string) => string;
@@ -149,15 +149,103 @@ export function ApplicationListWidget({
   };
 
   const renderApplicationCard = (application: ApplicationWithDetails) => {
-    const statusColor = STATUS_COLORS[application.status as keyof typeof STATUS_COLORS];
-    const creationDate = new Date(application._creationTime).toLocaleDateString();
+    const statusColor = STATUS_COLORS[application.status as keyof typeof STATUS_COLORS] || '#6C757D';
+    const creationDate = new Date(application._creationTime).toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+    const daysSinceCreation = Math.floor((Date.now() - application._creationTime) / (1000 * 60 * 60 * 24));
+    
+    // Determine what's most important for each status
+    const getStatusInfo = () => {
+      switch (application.status) {
+        case 'Pending Payment':
+          const paymentDeadline = daysSinceCreation >= 5 ? `${7 - daysSinceCreation} days left` : 'Due within 7 days';
+          return {
+            mainText: 'Awaiting Payment',
+            subText: paymentDeadline,
+            icon: 'warning-outline',
+            showPaymentBadge: true,
+            isUrgent: daysSinceCreation >= 5
+          };
+        case 'Submitted':
+          return {
+            mainText: 'Application Submitted',
+            subText: 'Under initial review',
+            icon: 'checkmark-circle-outline',
+            showPaymentBadge: false,
+            isUrgent: false
+          };
+        case 'Under Review':
+          return {
+            mainText: 'Being Processed',
+            subText: 'Medical review in progress',
+            icon: 'time-outline',
+            showPaymentBadge: false,
+            isUrgent: false
+          };
+        case 'Approved':
+          return {
+            mainText: 'Health Card Ready',
+            subText: 'Download available',
+            icon: 'checkmark-circle',
+            showPaymentBadge: false,
+            isUrgent: false
+          };
+        case 'Rejected':
+          // Check if this is a document revision case
+          const isDocumentRevision = application.remarks?.toLowerCase().includes('document') || 
+                                     application.remarks?.toLowerCase().includes('revision');
+          return {
+            mainText: isDocumentRevision ? 'Documents Rejected' : 'Application Rejected',
+            subText: isDocumentRevision ? 'Resubmission required' : (application.remarks || 'View details for more info'),
+            icon: 'close-circle',
+            showPaymentBadge: false,
+            isUrgent: true
+          };
+        default:
+          return {
+            mainText: application.status,
+            subText: 'View details',
+            icon: 'information-circle-outline',
+            showPaymentBadge: false,
+            isUrgent: false
+          };
+      }
+    };
+    
+    const statusInfo = getStatusInfo();
+    
+    // Determine primary action
+    const getPrimaryAction = () => {
+      switch (application.status) {
+        case 'Pending Payment':
+          return { text: 'Pay ₱285.00', icon: 'card-outline' };
+        case 'Approved':
+          return { text: 'Download Card', icon: 'download-outline' };
+        case 'Rejected':
+          // Check if this is a document revision case
+          const isDocumentRevision = application.remarks?.toLowerCase().includes('document') || 
+                                     application.remarks?.toLowerCase().includes('revision');
+          return isDocumentRevision 
+            ? { text: 'Fix Documents', icon: 'document-text-outline' }
+            : { text: 'View Details', icon: 'eye-outline' };
+        default:
+          return null;
+      }
+    };
+    
+    const primaryAction = getPrimaryAction();
     
     return (
       <TouchableOpacity 
         key={application._id} 
         style={styles.applicationCard}
         onPress={() => router.push(`/(screens)/(application)/${application._id}`)}
+        activeOpacity={0.7}
       >
+        {/* Card Header */}
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
             <View style={[
@@ -165,77 +253,86 @@ export function ApplicationListWidget({
               { backgroundColor: application.jobCategory?.colorCode + '20' }
             ]}>
               <Ionicons 
-                name={application.jobCategory?.name?.toLowerCase().includes('food') ? 'restaurant' : 'shield'}
-                size={moderateScale(16)} 
+                name={application.jobCategory?.name?.toLowerCase().includes('food') ? 'restaurant' as keyof typeof Ionicons.glyphMap : 'shield' as keyof typeof Ionicons.glyphMap}
+                size={moderateScale(24)} 
                 color={application.jobCategory?.colorCode}
               />
             </View>
             <View style={styles.cardHeaderInfo}>
-              <Text style={styles.applicationId}>#{application._id.slice(-8)}</Text>
-              <Text style={styles.applicationDate}>{creationDate}</Text>
+              <Text style={styles.jobCategory} numberOfLines={1} ellipsizeMode="tail">
+                {application.jobCategory?.name?.toUpperCase()}
+              </Text>
+              <Text style={styles.position} numberOfLines={1} ellipsizeMode="tail">
+                {application.form?.position}
+              </Text>
+              <Text style={styles.organization} numberOfLines={1} ellipsizeMode="tail">
+                {application.form?.organization}
+              </Text>
             </View>
           </View>
-          
-          <View style={[
-            styles.statusBadge,
-            { backgroundColor: statusColor + '20' }
-          ]}>
-            <Ionicons 
-              name={getStatusIcon(application.status)} 
-              size={moderateScale(12)} 
-              color={statusColor}
-            />
-            <Text style={[styles.statusText, { color: statusColor }]}>
-              {application.status}
-            </Text>
+          <View style={styles.cardHeaderRight}>
+            <Text style={styles.applicationId}>#{application._id.slice(-8).toUpperCase()}</Text>
+            <Text style={styles.dateApplied}>{creationDate}</Text>
           </View>
         </View>
         
-        <View style={styles.cardContent}>
-          <Text style={styles.jobCategory}>{application.jobCategory?.name}</Text>
-          <Text style={styles.position}>Position: {application.form?.position}</Text>
-          <Text style={styles.organization}>Company: {application.form?.organization}</Text>
-          
-          <View style={styles.applicationDetails}>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Type:</Text>
-              <Text style={styles.detailValue}>{application.form?.applicationType}</Text>
-            </View>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Status:</Text>
-              <Text style={styles.detailValue}>{getStatusDescription(application.status)}</Text>
+        {/* Status Section */}
+        <View style={styles.statusSection}>
+          <View style={styles.statusRow}>
+            <View style={styles.statusLeft}>
+              <Ionicons 
+                name={statusInfo.icon as keyof typeof Ionicons.glyphMap} 
+                size={moderateScale(20)} 
+                color={statusColor} 
+              />
+              <View style={styles.statusTextContainer}>
+                <Text style={[styles.statusMainText, { color: statusColor }]}>
+                  {statusInfo.mainText}
+                </Text>
+                <Text style={styles.statusSubText}>{statusInfo.subText}</Text>
+              </View>
             </View>
           </View>
-          
-          {application.remarks && (
-            <View style={styles.remarksContainer}>
-              <Text style={styles.remarksLabel}>Remarks:</Text>
-              <Text style={styles.remarksText}>{application.remarks}</Text>
-            </View>
-          )}
         </View>
         
-        <View style={styles.cardFooter}>
-          <View style={styles.progressIndicator}>
-            <View style={styles.progressBar}>
-              <View style={[
-                styles.progressFill,
-                { 
-                  width: `${getProgressPercentage(application.status)}%`,
-                  backgroundColor: statusColor
-                }
-              ]} />
-            </View>
-            <Text style={styles.progressText}>
-              {getProgressText(application.status)}
-            </Text>
+        {/* Payment Badge if needed */}
+        {statusInfo.showPaymentBadge && (
+          <View style={styles.paymentRequiredBadge}>
+            <Ionicons name="card-outline" size={moderateScale(16)} color="#FFA500" />
+            <Text style={styles.paymentBadgeText}>₱285.00 payment required</Text>
           </View>
-          
-          <TouchableOpacity style={styles.viewButton}>
-            <Text style={styles.viewButtonText}>View Details</Text>
-            <Ionicons name="chevron-forward" size={moderateScale(16)} color={theme.colors.accent.medicalBlue} />
+        )}
+        
+        {/* Primary Action if available */}
+        {primaryAction && (
+          <TouchableOpacity 
+            style={[
+              styles.primaryActionButton,
+              { borderColor: statusColor }
+            ]} 
+            activeOpacity={0.7}
+            onPress={(e) => {
+              e.stopPropagation();
+              // Handle primary action
+              router.push(`/(screens)/(application)/${application._id}`);
+            }}
+          >
+            <Ionicons name={primaryAction.icon as keyof typeof Ionicons.glyphMap} size={moderateScale(18)} color={statusColor} />
+            <Text style={[styles.primaryActionText, { color: statusColor }]}>
+              {primaryAction.text}
+            </Text>
           </TouchableOpacity>
-        </View>
+        )}
+        
+        {/* Remarks if any */}
+        {application.remarks && (
+          <View style={styles.remarksContainer}>
+            <Ionicons name="information-circle" size={moderateScale(16)} color={theme.colors.status.warning} style={styles.remarksIcon} />
+            <Text style={styles.remarksText} numberOfLines={2} ellipsizeMode="tail">
+              {application.remarks}
+            </Text>
+          </View>
+        )}
       </TouchableOpacity>
     );
   };

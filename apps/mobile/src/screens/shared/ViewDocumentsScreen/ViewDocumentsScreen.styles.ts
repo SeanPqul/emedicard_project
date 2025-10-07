@@ -3,6 +3,10 @@ import { theme } from '@shared/styles/theme';
 import { moderateScale, verticalScale, scale } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5', // Light gray background matching profile
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -33,7 +37,7 @@ export const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: theme.colors.background.secondary,
+    backgroundColor: '#F5F5F5', // Match profile screen background
   },
 
   // Summary Card
@@ -66,17 +70,24 @@ export const styles = StyleSheet.create({
     marginTop: verticalScale(theme.spacing.xs / 2),
   },
 
-  // Info Card
+  // Info Card - Updated to match profile card style
   infoCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.primary[500] + '10',
-    marginHorizontal: scale(theme.spacing.md),
-    marginBottom: verticalScale(theme.spacing.md),
-    padding: moderateScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.md,
-    borderLeftWidth: 3,
-    borderLeftColor: theme.colors.primary[500],
+    backgroundColor: theme.colors.background.primary,
+    marginHorizontal: scale(16),
+    marginTop: verticalScale(16),
+    marginBottom: verticalScale(16),
+    padding: moderateScale(16),
+    borderRadius: moderateScale(12),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     gap: scale(theme.spacing.sm),
   },
   infoText: {
@@ -86,15 +97,23 @@ export const styles = StyleSheet.create({
     lineHeight: moderateScale(13 * 1.4),
   },
 
-  // Warning Card
+  // Warning Card - Updated to match profile card style
   warningCard: {
-    backgroundColor: theme.colors.semantic.error + '10',
-    marginHorizontal: scale(theme.spacing.md),
-    marginBottom: verticalScale(theme.spacing.md),
-    padding: moderateScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.md,
-    borderLeftWidth: 3,
-    borderLeftColor: theme.colors.semantic.error,
+    backgroundColor: theme.colors.background.primary,
+    marginHorizontal: scale(16),
+    marginBottom: verticalScale(16),
+    padding: moderateScale(16),
+    borderRadius: moderateScale(12),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: theme.colors.semantic.error + '30',
   },
   warningHeader: {
     flexDirection: 'row',
@@ -138,19 +157,22 @@ export const styles = StyleSheet.create({
 
   // Documents Container
   documentsContainer: {
-    paddingHorizontal: scale(theme.spacing.md),
+    paddingTop: verticalScale(8),
     paddingBottom: verticalScale(theme.spacing.xl * 1), // Add extra bottom padding to prevent last item cutoff
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: verticalScale(theme.spacing.md),
+    marginBottom: verticalScale(12),
+    paddingHorizontal: scale(16),
   },
   sectionTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: '700' as const,
-    color: theme.colors.text.primary,
+    fontSize: moderateScale(12),
+    fontWeight: '600' as const,
+    color: '#999',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   historyButton: {
     flexDirection: 'row',
@@ -205,36 +227,42 @@ export const styles = StyleSheet.create({
     color: theme.colors.background.primary,
   },
 
-  // Document Card
+  // Document Card - Updated to match profile card style
   documentCard: {
     backgroundColor: theme.colors.background.primary,
-    padding: moderateScale(theme.spacing.md),
-    borderRadius: theme.borderRadius.lg,
-    marginBottom: verticalScale(theme.spacing.md),
-    ...theme.shadows.small,
+    marginHorizontal: scale(16),
+    marginBottom: verticalScale(16),
+    borderRadius: moderateScale(12),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   documentHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: verticalScale(theme.spacing.sm),
+    alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(14),
   },
   documentIconContainer: {
-    width: moderateScale(48),
-    height: moderateScale(48),
-    borderRadius: theme.borderRadius.md,
-    backgroundColor: theme.colors.primary[500] + '10',
+    width: moderateScale(32),
+    height: moderateScale(32),
+    borderRadius: moderateScale(16),
+    backgroundColor: '#F8F8F8',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: scale(theme.spacing.sm),
+    marginRight: scale(12),
   },
   documentInfo: {
     flex: 1,
   },
   documentName: {
     fontSize: moderateScale(15),
-    fontWeight: '600' as const,
     color: theme.colors.text.primary,
-    marginBottom: verticalScale(theme.spacing.xs / 2),
   },
   documentFileName: {
     fontSize: moderateScale(12),
@@ -251,14 +279,14 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    paddingVertical: verticalScale(theme.spacing.xs),
-    paddingHorizontal: scale(theme.spacing.sm),
+    paddingVertical: verticalScale(4),
+    paddingHorizontal: scale(8),
     borderRadius: theme.borderRadius.full,
-    marginBottom: verticalScale(theme.spacing.sm),
-    gap: scale(theme.spacing.xs),
+    marginTop: verticalScale(4),
+    gap: scale(4),
   },
   statusText: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(11),
     fontWeight: '600' as const,
   },
 
@@ -358,6 +386,21 @@ export const styles = StyleSheet.create({
     color: theme.colors.semantic.error,
     fontWeight: '500' as const,
     marginTop: verticalScale(theme.spacing.xs),
+  },
+  
+  // Document sub-item styles
+  documentSubItem: {
+    borderTopWidth: moderateScale(1),
+    borderTopColor: '#F0F0F0',
+  },
+  documentSubItemText: {
+    fontSize: moderateScale(15),
+    color: theme.colors.semantic.error,
+  },
+  rejectionReason: {
+    fontSize: moderateScale(12),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(2),
   },
 
 
