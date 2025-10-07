@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { BaseScreen } from '@shared/components/core';
 import { useNotification } from '@features/notification/hooks/useNotification';
 import { theme } from '@shared/styles/theme';
@@ -158,10 +157,9 @@ export function NotificationDetailScreen() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header with gradient background */}
-        <LinearGradient
-          colors={config?.gradient || [theme.colors.primary[500], theme.colors.primary[600]]}
-          style={styles.header}
+        {/* Header with solid color background */}
+        <View
+          style={[styles.header, { backgroundColor: config?.color || theme.colors.primary[500] }]}
         >
           <TouchableOpacity 
             style={styles.headerBackButton} 
@@ -179,7 +177,7 @@ export function NotificationDetailScreen() {
               />
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
         {/* Notification Content */}
         <View style={styles.content}>
