@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -15,19 +15,41 @@ import {
   formatTimestamp
 } from '@entities/activity/lib';
 import { ACTIVITY_FILTERS } from '@features/activity/constants';
+import { useDashboardData } from '@features/dashboard/hooks/useDashboardData';
 
 export function ActivityScreen() {
   const [filter, setFilter] = useState<string>('all');
+  const dashboardData = useDashboardData();
 
-  // TODO: Replace with actual API hook to fetch user activities
-  // const { data: activities = [], isLoading } = useQuery(api.activities.getUserActivities, { userId });
-  const activities: Activity[] = [];
+  // Transform recentActivities to Activity format
+  const activities: Activity[] = dashboardData.recentActivities?.map((activity) => ({
+    id: activity.id,
+    userId: activity.userId,
+    type: activity.type,
+    title: activity.title,
+    description: activity.description,
+    timestamp: activity.timestamp instanceof Date ? activity.timestamp : new Date(activity.timestamp),
+    status: activity.status,
+    metadata: activity.metadata,
+  })) || [];
 
   const filters = ACTIVITY_FILTERS;
 
   const filteredActivities = filter === 'all' 
     ? activities 
-    : activities.filter(activity => activity.type === filter);
+    : activities.filter(activity => {
+        // Match based on activity type patterns
+        if (filter === 'application') {
+          return activity.type.startsWith('application_');
+        }
+        if (filter === 'payment') {
+          return activity.type.startsWith('payment_');
+        }
+        if (filter === 'card_issued') {
+          return activity.type === 'health_card_issued';
+        }
+        return activity.type === filter;
+      });
 
 
   return (
@@ -71,7 +93,12 @@ export function ActivityScreen() {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {filteredActivities.length > 0 ? (
+        {dashboardData.isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={getColor('primary.500')} />
+            <Text style={styles.loadingText}>Loading activities...</Text>
+          </View>
+        ) : filteredActivities.length > 0 ? (
           <View style={styles.activityList}>
             {filteredActivities.map((activity) => (
               <View key={activity.id} style={styles.activityItem}>

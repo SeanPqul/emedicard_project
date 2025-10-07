@@ -59,7 +59,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: (width - 52) / 2,
+    width: (width - 64) / 2,
     backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),

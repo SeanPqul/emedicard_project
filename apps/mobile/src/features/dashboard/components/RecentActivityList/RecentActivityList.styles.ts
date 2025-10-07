@@ -30,4 +30,17 @@ export const styles = StyleSheet.create({
     padding: moderateScale(theme.spacing.xs),
     ...theme.shadows.medium,
   },
+  expandButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: scale(theme.spacing.xs),
+    paddingVertical: verticalScale(theme.spacing.sm),
+    marginTop: verticalScale(theme.spacing.sm),
+  },
+  expandButtonText: {
+    fontSize: moderateScale(14),
+    color: theme.colors.blue[500],
+    fontWeight: '600' as const,
+  },
 });

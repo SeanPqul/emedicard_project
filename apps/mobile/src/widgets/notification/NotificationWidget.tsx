@@ -143,8 +143,8 @@ export function NotificationWidget({
       <TouchableOpacity 
         key={notification._id}
         style={[
-          styles.notificationItem,
-          !notification.read && styles.notificationItemUnread
+          styles.notificationCard,
+          !notification.read && styles.notificationCardUnread
         ]}
         onPress={() => {
           if (!notification.read) {
@@ -152,33 +152,51 @@ export function NotificationWidget({
           }
           onNotificationPress(notification);
         }}
+        activeOpacity={0.7}
       >
+        {/* Unread indicator badge */}
+        {!notification.read && (
+          <View style={styles.unreadBadge}>
+            <View style={styles.unreadDot} />
+          </View>
+        )}
+        
+        {/* Icon Section */}
         <View style={[
-          styles.notificationIcon,
-          { backgroundColor: color + '20' }
+          styles.notificationIconContainer,
+          { backgroundColor: color + '15' }
         ]}>
-          <Ionicons name={iconName as any} size={moderateScale(20)} color={color} />
+          <Ionicons name={iconName as any} size={moderateScale(28)} color={color} />
         </View>
         
+        {/* Content Section */}
         <View style={styles.notificationContent}>
           <View style={styles.notificationHeader}>
             <Text style={[
               styles.notificationTitle,
               !notification.read && styles.notificationTitleUnread
-            ]}>{title}</Text>
+            ]} numberOfLines={2}>
+              {title}
+            </Text>
+          </View>
+          
+          <Text style={styles.notificationMessage} numberOfLines={3}>
+            {notification.message}
+          </Text>
+          
+          {/* Time at bottom with icon */}
+          <View style={styles.notificationFooter}>
+            <Ionicons 
+              name="time-outline" 
+              size={moderateScale(14)} 
+              color="#9CA3AF" 
+              style={styles.timeIcon}
+            />
             <Text style={styles.notificationTime}>
               {getRelativeTime(notification._creationTime)}
             </Text>
           </View>
-          
-          <Text style={styles.notificationMessage}>
-            {notification.message}
-          </Text>
         </View>
-        
-        {!notification.read && (
-          <View style={styles.unreadIndicator} />
-        )}
       </TouchableOpacity>
     );
   };
@@ -216,8 +234,14 @@ export function NotificationWidget({
           <View style={styles.notificationsList}>
             {Object.entries(notificationsByDate).map(([date, notifications]) => (
               <View key={date} style={styles.dateSection}>
-                <Text style={styles.dateLabel}>{getDateLabel(date)}</Text>
-                {notifications.map(renderNotificationItem)}
+                <View style={styles.dateLabelContainer}>
+                  <View style={styles.dateLabelDivider} />
+                  <Text style={styles.dateLabel}>{getDateLabel(date)}</Text>
+                  <View style={styles.dateLabelDivider} />
+                </View>
+                <View style={styles.cardsContainer}>
+                  {notifications.map(renderNotificationItem)}
+                </View>
               </View>
             ))}
           </View>
