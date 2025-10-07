@@ -162,7 +162,10 @@ export function NotificationWidget({
         
         <View style={styles.notificationContent}>
           <View style={styles.notificationHeader}>
-            <Text style={styles.notificationTitle}>{title}</Text>
+            <Text style={[
+              styles.notificationTitle,
+              !notification.read && styles.notificationTitleUnread
+            ]}>{title}</Text>
             <Text style={styles.notificationTime}>
               {getRelativeTime(notification._creationTime)}
             </Text>
@@ -171,12 +174,6 @@ export function NotificationWidget({
           <Text style={styles.notificationMessage}>
             {notification.message}
           </Text>
-          
-          {notification.applicationId && (
-            <Text style={styles.notificationAction}>
-              Tap to view details
-            </Text>
-          )}
         </View>
         
         {!notification.read && (

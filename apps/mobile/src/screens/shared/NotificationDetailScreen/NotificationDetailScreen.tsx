@@ -89,8 +89,8 @@ export function NotificationDetailScreen() {
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={moderateScale(48)} color={theme.colors.semantic.error} />
           <Text style={styles.errorText}>Notification not found</Text>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Go Back</Text>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(tabs)/notification')}>
+            <Text style={styles.backButtonText}>Back to Notifications</Text>
           </TouchableOpacity>
         </View>
       </BaseScreen>
@@ -163,7 +163,7 @@ export function NotificationDetailScreen() {
         >
           <TouchableOpacity 
             style={styles.headerBackButton} 
-            onPress={() => router.back()}
+            onPress={() => router.push('/(tabs)/notification')}
           >
             <Ionicons name="arrow-back" size={moderateScale(24)} color="white" />
           </TouchableOpacity>
@@ -172,7 +172,7 @@ export function NotificationDetailScreen() {
             <View style={styles.iconBackground}>
               <Ionicons 
                 name={config?.icon || 'notifications'} 
-                size={moderateScale(48)} 
+                size={moderateScale(36)} 
                 color={config?.color || theme.colors.primary[500]}
               />
             </View>
