@@ -352,7 +352,8 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: scale(theme.spacing.md),
-    paddingVertical: verticalScale(theme.spacing.md),
+    paddingTop: verticalScale(theme.spacing.xl + theme.spacing.md), // Extra top padding for status bar
+    paddingBottom: verticalScale(theme.spacing.md),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border.light,
     backgroundColor: theme.colors.background.primary,
