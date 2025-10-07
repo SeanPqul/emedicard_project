@@ -448,9 +448,23 @@ export const styles = StyleSheet.create({
   },
   pdfFileName: {
     fontSize: moderateScale(14),
-    color: theme.colors.text.secondary,
-    marginTop: verticalScale(theme.spacing.xs),
-    textAlign: 'center',
+    color: theme.colors.text.tertiary,
+    marginTop: moderateScale(8),
+  },
+  downloadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.primary[500],
+    paddingHorizontal: moderateScale(16),
+    paddingVertical: moderateScale(10),
+    borderRadius: moderateScale(8),
+    marginTop: moderateScale(16),
+  },
+  downloadButtonText: {
+    color: theme.colors.background.primary,
+    fontSize: moderateScale(14),
+    fontWeight: '600' as const,
+    marginLeft: moderateScale(8),
   },
   openExternalButton: {
     flexDirection: 'row',
@@ -487,6 +501,12 @@ export const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     minHeight: verticalScale(400),
+  },
+  
+  // PDF Viewer
+  pdfViewer: {
+    flex: 1,
+    backgroundColor: 'transparent',
   },
 });
 
