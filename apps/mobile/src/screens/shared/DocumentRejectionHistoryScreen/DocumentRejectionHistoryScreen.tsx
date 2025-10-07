@@ -187,6 +187,7 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 500,
     padding: scale(20),
+    overflow: 'hidden', // Clip content to border radius
     ...theme.shadows.large,
   },
 });

@@ -14,8 +14,8 @@ export const RejectionDetails: React.FC<RejectionDetailsProps> = ({
   onResubmit,
 }) => {
   const formattedDate = rejection?.rejectedAt 
-  ? String(formatRejectionDate(rejection.rejectedAt))
-  : '';
+    ? formatRejectionDate(rejection.rejectedAt)
+    : 'N/A';
 
 
   return (
@@ -26,7 +26,7 @@ export const RejectionDetails: React.FC<RejectionDetailsProps> = ({
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Text style={styles.title}>Additional Details</Text>
-          <Text style={styles.documentName}>{rejection.documentTypeName || ''}</Text>
+          <Text style={styles.documentName}>{rejection.documentTypeName || 'Unknown Document'}</Text>
         </View>
         {onClose && (
           <TouchableOpacity
@@ -52,15 +52,15 @@ export const RejectionDetails: React.FC<RejectionDetailsProps> = ({
 
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Review date:</Text>
-          <Text style={styles.detailValue}>{formattedDate || ''}</Text>
+          <Text style={styles.detailValue}>{formattedDate}</Text>
         </View>
 
-        {rejection.rejectedByRole ? (
+        {rejection.rejectedByRole && (
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Reviewer role:</Text>
-            <Text style={styles.detailValue}>{rejection.rejectedByRole || ''}</Text>
+            <Text style={styles.detailValue}>{rejection.rejectedByRole}</Text>
           </View>
-        ) : null}
+        )}
       </View>
 
       {(rejection.originalFileName || rejection.fileSize || rejection.fileType) && (
@@ -69,14 +69,14 @@ export const RejectionDetails: React.FC<RejectionDetailsProps> = ({
           {rejection.originalFileName && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>File name:</Text>
-              <Text style={styles.detailValue}>{rejection.originalFileName || ''}</Text>
+              <Text style={styles.detailValue}>{rejection.originalFileName}</Text>
             </View>
           )}
 
           {rejection.fileType && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>File type:</Text>
-              <Text style={styles.detailValue}>{rejection.fileType || ''}</Text>
+              <Text style={styles.detailValue}>{rejection.fileType}</Text>
             </View>
           )}
 

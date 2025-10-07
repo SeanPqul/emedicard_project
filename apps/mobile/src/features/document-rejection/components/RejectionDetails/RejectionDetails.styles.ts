@@ -5,9 +5,6 @@ import { moderateScale, verticalScale, scale } from '@shared/utils/responsive';
 export const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colors.background.primary,
-    borderRadius: theme.borderRadius.lg,
-    padding: moderateScale(theme.spacing.lg),
-    ...theme.shadows.large,
   },
   header: {
     flexDirection: 'row',
