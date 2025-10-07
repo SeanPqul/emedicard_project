@@ -84,7 +84,7 @@ export const createAdmin = action({ // Changed to action
         image: clerkUser.imageUrl || "",
         role: "admin",
         managedCategories: args.managedCategoryIds,
-        username: clerkUser.username || args.email.split('@')[0],
+        username: (clerkUser.username ?? args.email.split('@')[0]) || args.email,
       });
     }
 

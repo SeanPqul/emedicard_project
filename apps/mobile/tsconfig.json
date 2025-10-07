@@ -35,7 +35,6 @@
       "@emedicard/utils": ["../../packages/utils/src"],
       "@emedicard/validation": ["../../packages/validation/src"]
     },
-    "baseUrl": ".",
     "typeRoots": ["./node_modules/@types"]
   },
   "include": [
