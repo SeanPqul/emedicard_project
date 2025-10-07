@@ -460,13 +460,20 @@ export const styles = StyleSheet.create({
     paddingVertical: verticalScale(theme.spacing.md),
     paddingHorizontal: scale(theme.spacing.lg),
     borderRadius: theme.borderRadius.md,
-    marginTop: verticalScale(theme.spacing.xl),
+    marginTop: verticalScale(theme.spacing.lg),
     gap: scale(theme.spacing.sm),
   },
   openExternalButtonText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
     fontWeight: '600' as const,
     color: theme.colors.background.primary,
+  },
+  securityNote: {
+    fontSize: moderateScale(12),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(theme.spacing.md),
+    textAlign: 'center',
+    fontStyle: 'italic' as const,
   },
   
   // Image Viewer

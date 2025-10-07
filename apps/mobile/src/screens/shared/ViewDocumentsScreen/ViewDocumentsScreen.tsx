@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Image, Linking, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Image, Alert } from 'react-native';
 import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Id } from '@backend/convex/_generated/dataModel';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { getColor } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
@@ -22,7 +22,7 @@ interface DocumentWithRequirement {
   adminRemarks?: string;
   reviewedBy?: Id<'users'>;
   reviewedAt?: number;
-  fileUrl?: string | null;
+  hasFile?: boolean; // Changed from fileUrl to hasFile for security
   requirement: {
     _id: Id<'documentTypes'>;
     name: string;
@@ -37,10 +37,15 @@ export function ViewDocumentsScreen() {
   const params = useLocalSearchParams();
   const formId = params.formId as Id<'applications'>;
   const [viewingDocument, setViewingDocument] = useState<DocumentWithRequirement | null>(null);
+  const [documentUrl, setDocumentUrl] = useState<string | null>(null);
+  const [loadingDocument, setLoadingDocument] = useState(false);
   const [showResubmitModal, setShowResubmitModal] = useState(false);
   const [resubmitDocumentTypeId, setResubmitDocumentTypeId] = useState<Id<'documentTypes'> | null>(null);
   const [resubmitFieldIdentifier, setResubmitFieldIdentifier] = useState<string>('');
   const [resubmitDocumentName, setResubmitDocumentName] = useState<string>('');
+  
+  // Mutation for getting secure document URL
+  const getSecureUrl = useMutation(api.documents.secureAccessQueries.getSecureDocumentUrl);
   
   // Fetch documents with requirements
   const documentsData = useQuery(
@@ -87,23 +92,54 @@ export function ViewDocumentsScreen() {
     }
   };
 
-  const handleViewDocument = (doc: DocumentWithRequirement) => {
-    if (doc.fileUrl) {
-      setViewingDocument(doc);
-    } else {
-      Alert.alert('Error', 'Document URL not available. Please try refreshing.');
+  const handleViewDocument = async (doc: DocumentWithRequirement) => {
+    console.log('Viewing document:', doc);
+    console.log('Has file?', doc.hasFile);
+    console.log('Storage file ID:', doc.storageFileId);
+    
+    // Check if document has a file - works with both old and new backend
+    const hasDocument = doc.hasFile || !!doc.storageFileId || !!(doc as any).fileUrl;
+    
+    if (!hasDocument) {
+      Alert.alert('Error', 'Document file not available.');
+      return;
+    }
+    
+    setLoadingDocument(true);
+    setViewingDocument(doc);
+    
+    try {
+      // Get secure URL with time-limited token
+      const secureUrlData = await getSecureUrl({ documentId: doc._id });
+      setDocumentUrl(secureUrlData.url);
+    } catch (error) {
+      console.error('Error getting secure document URL:', error);
+      Alert.alert('Error', 'Unable to load document. Please try again.');
+      setViewingDocument(null);
+    } finally {
+      setLoadingDocument(false);
+    }
+  };
+  
+  // Function to refresh expired token
+  const refreshDocumentUrl = async () => {
+    if (!viewingDocument) return;
+    
+    setLoadingDocument(true);
+    try {
+      // Generate a new secure URL
+      console.log('Refreshing document URL for:', viewingDocument._id);
+      const secureUrlData = await getSecureUrl({ documentId: viewingDocument._id });
+      setDocumentUrl(secureUrlData.url);
+      console.log('New secure URL generated');
+    } catch (error) {
+      console.error('Error refreshing document URL:', error);
+      Alert.alert('Error', 'Unable to refresh document. Please try again.');
+    } finally {
+      setLoadingDocument(false);
     }
   };
 
-  const handleOpenInBrowser = async () => {
-    if (viewingDocument?.fileUrl) {
-      try {
-        await Linking.openURL(viewingDocument.fileUrl);
-      } catch (error) {
-        Alert.alert('Error', 'Unable to open document in browser');
-      }
-    }
-  };
 
   const handleAddMissingDocument = () => {
     router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}`);
@@ -283,32 +319,38 @@ export function ViewDocumentsScreen() {
         visible={!!viewingDocument}
         animationType="slide"
         transparent={false}
-        onRequestClose={() => setViewingDocument(null)}
+        onRequestClose={() => {
+          setViewingDocument(null);
+          setDocumentUrl(null);
+        }}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setViewingDocument(null)}>
+            <TouchableOpacity onPress={() => {
+              setViewingDocument(null);
+              setDocumentUrl(null);
+            }}>
               <Ionicons name="close" size={moderateScale(28)} color={getColor('text.primary')} />
             </TouchableOpacity>
             <Text style={styles.modalTitle} numberOfLines={1}>
               {viewingDocument?.requirement?.name || viewingDocument?.originalFileName}
             </Text>
-            <TouchableOpacity onPress={handleOpenInBrowser}>
-              <Ionicons name="open-outline" size={moderateScale(24)} color={getColor('primary.500')} />
-            </TouchableOpacity>
+            <View style={{ width: moderateScale(24) }} />
           </View>
           
-          {viewingDocument && (
+          {loadingDocument ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={getColor('primary.500')} />
+              <Text style={styles.loadingText}>Loading secure document...</Text>
+            </View>
+          ) : viewingDocument && documentUrl ? (
             <View style={styles.documentViewerContent}>
               {viewingDocument.originalFileName.toLowerCase().endsWith('.pdf') ? (
                 <View style={styles.pdfContainer}>
                   <Ionicons name="document-text" size={moderateScale(80)} color={getColor('text.secondary')} />
                   <Text style={styles.pdfText}>PDF Document</Text>
                   <Text style={styles.pdfFileName}>{viewingDocument.originalFileName}</Text>
-                  <TouchableOpacity style={styles.openExternalButton} onPress={handleOpenInBrowser}>
-                    <Ionicons name="open-outline" size={moderateScale(20)} color={getColor('background.primary')} />
-                    <Text style={styles.openExternalButtonText}>Open in Browser</Text>
-                  </TouchableOpacity>
+                  <Text style={styles.securityNote}>Secure document view only</Text>
                 </View>
               ) : (
                 <ScrollView 
@@ -318,14 +360,19 @@ export function ViewDocumentsScreen() {
                   pinchGestureEnabled
                 >
                   <Image 
-                    source={{ uri: viewingDocument.fileUrl || '' }}
+                    source={{ uri: documentUrl }}
                     style={styles.documentImage}
                     resizeMode="contain"
+                    onError={(error) => {
+                      console.log('Image load error, refreshing token:', error);
+                      // Silently refresh the URL if it fails to load (likely due to expired token)
+                      refreshDocumentUrl();
+                    }}
                   />
                 </ScrollView>
               )}
             </View>
-          )}
+          ) : null}
         </View>
       </Modal>
       

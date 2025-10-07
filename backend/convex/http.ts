@@ -315,4 +315,99 @@ http.route({
   }),
 });
 
+// Secure Document Access Route
+http.route({
+  path: "/secure-document",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    try {
+      // Get query parameters
+      const url = new URL(request.url);
+      const token = url.searchParams.get("token");
+      const documentId = url.searchParams.get("documentId") as any;
+      
+      if (!token || !documentId) {
+        return new Response("Missing required parameters", { status: 400 });
+      }
+
+      // Verify the access token
+      const tokenData = await ctx.runQuery(api.documents.secureAccessQueries.verifyDocumentToken, {
+        token,
+        documentId,
+      });
+
+      if (!tokenData.isValid || !tokenData.userId) {
+        return new Response("Invalid or expired token", { status: 403 });
+      }
+      
+      // Mark token as used
+      await ctx.runMutation(api.documents.secureAccessQueries.markTokenAsUsed, {
+        token,
+      });
+
+      // Get the document
+      const document = await ctx.runQuery(api.documents.secureAccessQueries.getDocumentInternal, {
+        documentId,
+        userId: tokenData.userId,
+      });
+
+      if (!document || !document.storageFileId) {
+        return new Response("Document not found", { status: 404 });
+      }
+
+      // Get the file blob from storage
+      const blob = await ctx.storage.get(document.storageFileId);
+      
+      if (!blob) {
+        return new Response("File not found", { status: 404 });
+      }
+
+      // Determine content type based on file extension
+      const fileName = document.originalFileName.toLowerCase();
+      let contentType = "application/octet-stream";
+      
+      if (fileName.endsWith(".pdf")) {
+        contentType = "application/pdf";
+      } else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+        contentType = "image/jpeg";
+      } else if (fileName.endsWith(".png")) {
+        contentType = "image/png";
+      } else if (fileName.endsWith(".gif")) {
+        contentType = "image/gif";
+      } else if (fileName.endsWith(".webp")) {
+        contentType = "image/webp";
+      }
+
+      // Set secure headers with appropriate CSP for different file types
+      let csp = "default-src 'none'; ";
+      
+      if (contentType.startsWith("image/")) {
+        // For images: allow them to be displayed
+        csp = "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'";
+      } else if (contentType === "application/pdf") {
+        // For PDFs: allow PDF rendering
+        csp = "default-src 'self'; object-src 'self'; plugin-types application/pdf";
+      }
+      
+      const headers = new Headers({
+        "Content-Type": contentType,
+        "Content-Disposition": `inline; filename="${document.originalFileName}"`,
+        "Cache-Control": "private, no-cache, no-store, must-revalidate",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "SAMEORIGIN", // Changed from DENY to allow PDF viewing
+        "Content-Security-Policy": csp,
+      });
+
+      // Return the file with secure headers
+      return new Response(blob, {
+        status: 200,
+        headers,
+      });
+    } catch (error) {
+      console.error("Error serving document:", error);
+      return new Response("Internal server error", { status: 500 });
+    }
+  }),
+});
+
 export default http;

@@ -63,16 +63,16 @@ export const getApplicationDocumentsRequirementsQuery = query({
       })
     );
 
-    // Map uploaded documents with their requirements and storage URLs
+    // Map uploaded documents with their requirements
     const documentsWithRequirements = await Promise.all(
       uploadedDocuments.map(async (doc) => {
         const requirement = await ctx.db.get(doc.documentTypeId);
-        // Get the storage URL for the document
-        const fileUrl = await ctx.storage.getUrl(doc.storageFileId);
+        // Check if the document has a file (don't expose URL directly)
+        const hasFile = !!doc.storageFileId;
         return {
           ...doc,
           requirement,
-          fileUrl, // Include the URL for viewing
+          hasFile,
         };
       })
     );
