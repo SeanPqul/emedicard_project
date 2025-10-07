@@ -152,40 +152,6 @@ export function ViewDocumentsScreen() {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Summary Card */}
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryRow}>
-            <View style={styles.summaryItem}>
-              <Ionicons name="document-text" size={moderateScale(28)} color={getColor('primary.500')} />
-              <Text style={styles.summaryValue}>{uploadedDocuments.length}</Text>
-              <Text style={styles.summaryLabel}>Uploaded</Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Ionicons name="checkmark-circle" size={moderateScale(28)} color={getColor('accent.safetyGreen')} />
-              <Text style={styles.summaryValue}>
-                {uploadedDocuments.filter((d: DocumentWithRequirement) => d.reviewStatus === 'Approved').length}
-              </Text>
-              <Text style={styles.summaryLabel}>Approved</Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Ionicons name="time-outline" size={moderateScale(28)} color={getColor('accent.warningOrange')} />
-              <Text style={styles.summaryValue}>
-                {uploadedDocuments.filter((d: DocumentWithRequirement) => d.reviewStatus === 'Pending').length}
-              </Text>
-              <Text style={styles.summaryLabel}>Pending</Text>
-            </View>
-            {uploadedDocuments.filter((d: DocumentWithRequirement) => d.reviewStatus === 'Rejected').length > 0 && (
-              <View style={styles.summaryItem}>
-                <Ionicons name="close-circle" size={moderateScale(28)} color={getColor('semantic.error')} />
-                <Text style={styles.summaryValue}>
-                  {uploadedDocuments.filter((d: DocumentWithRequirement) => d.reviewStatus === 'Rejected').length}
-                </Text>
-                <Text style={styles.summaryLabel}>Rejected</Text>
-              </View>
-            )}
-          </View>
-        </View>
-
         {/* Application Status Info */}
         {application && (
           <View style={styles.infoCard}>
@@ -228,15 +194,15 @@ export function ViewDocumentsScreen() {
 
         {/* Documents List */}
         <View style={styles.documentsContainer}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Text style={styles.sectionTitle}>Your Documents</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Your Documents ({uploadedDocuments.length})</Text>
             {rejections.length > 0 && (
               <TouchableOpacity
                 onPress={() => router.push(`/(screens)/(shared)/documents/rejection-history?formId=${formId}`)}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                style={styles.historyButton}
               >
                 <Ionicons name="time-outline" size={moderateScale(16)} color={getColor('primary.500')} />
-                <Text style={{ color: getColor('primary.500'), fontSize: moderateScale(14) }}>View History</Text>
+                <Text style={styles.historyButtonText}>History</Text>
               </TouchableOpacity>
             )}
           </View>

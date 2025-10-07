@@ -141,11 +141,30 @@ export const styles = StyleSheet.create({
     paddingHorizontal: scale(theme.spacing.md),
     paddingBottom: verticalScale(theme.spacing.xl * 1), // Add extra bottom padding to prevent last item cutoff
   },
-  sectionTitle: {
-    fontSize: moderateScale(16),
-    fontWeight: '600' as const,
-    color: theme.colors.text.primary,
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: verticalScale(theme.spacing.md),
+  },
+  sectionTitle: {
+    fontSize: moderateScale(18),
+    fontWeight: '700' as const,
+    color: theme.colors.text.primary,
+  },
+  historyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(theme.spacing.xs),
+    paddingVertical: verticalScale(theme.spacing.xs),
+    paddingHorizontal: scale(theme.spacing.sm),
+    backgroundColor: theme.colors.primary[500] + '10',
+    borderRadius: theme.borderRadius.md,
+  },
+  historyButtonText: {
+    color: theme.colors.primary[500],
+    fontSize: moderateScale(14),
+    fontWeight: '600' as const,
   },
 
   // Empty State
