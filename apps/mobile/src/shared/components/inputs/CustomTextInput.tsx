@@ -115,7 +115,7 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     ...theme.shadows.small,
-    minHeight: 44, // Accessibility minimum touch target
+    minHeight: moderateScale(44), // Accessibility minimum touch target
   },
   input: {
     flex: 1,
@@ -158,7 +158,7 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({
       />
       {rightIcon && (
         <TouchableOpacity
-          style={[defaultStyles.rightIcon, { minHeight: 44, minWidth: 44, justifyContent: 'center', alignItems: 'center' }]}
+          style={[defaultStyles.rightIcon, { minHeight: moderateScale(44), minWidth: moderateScale(44), justifyContent: 'center', alignItems: 'center' }]}
           onPress={onRightIconPress}
           accessibilityLabel={rightIconAccessibilityLabel || `${rightIcon} button`}
           accessibilityHint={rightIconAccessibilityHint}
@@ -174,7 +174,7 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({
         </TouchableOpacity>
       )}
       {errorText && (
-        <View style={{ position: 'absolute', bottom: -20, left: 0 }}>
+        <View style={{ position: 'absolute', bottom: verticalScale(-20), left: 0 }}>
           <Text style={{ 
             ...theme.typography.caption, 
             color: theme.colors.semantic.error 

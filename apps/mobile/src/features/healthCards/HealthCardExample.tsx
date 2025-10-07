@@ -9,6 +9,7 @@ import {
 import { ErrorState } from '@shared/components/feedback';
 import { SkeletonLoader, SkeletonGroup } from '@shared/components/feedback';
 import { getColor, getTypography, getSpacing, getBorderRadius } from '@shared/styles/theme';
+import { scaleFont, scaleSize } from '@shared/utils/responsive';
 
 interface HealthCardExampleProps {
   token: string;
@@ -226,9 +227,9 @@ const styles = StyleSheet.create({
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('lg'),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: scaleSize(2) },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: scaleSize(8),
     elevation: 3,
   },
   cardImageSkeleton: {
@@ -250,9 +251,9 @@ const styles = StyleSheet.create({
     borderRadius: getBorderRadius('lg'),
     margin: getSpacing('lg'),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: scaleSize(2) },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: scaleSize(8),
     elevation: 3,
     overflow: 'hidden',
   },
@@ -303,7 +304,7 @@ const styles = StyleSheet.create({
   },
   tokenText: {
     fontFamily: 'monospace',
-    fontSize: 12,
+    fontSize: scaleFont(12),
   },
   metadataSection: {
     marginTop: getSpacing('xl'),

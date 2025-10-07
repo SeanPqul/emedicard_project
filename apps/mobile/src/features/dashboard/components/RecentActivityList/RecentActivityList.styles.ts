@@ -15,12 +15,12 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(theme.spacing.sm),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600' as const,
     color: theme.colors.text.primary,
   },
   viewAllText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: theme.colors.blue[500],
     fontWeight: '600' as const,
   },

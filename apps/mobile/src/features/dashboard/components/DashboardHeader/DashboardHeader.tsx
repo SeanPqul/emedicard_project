@@ -1,8 +1,7 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
@@ -31,12 +30,15 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <View style={styles.container}>
       <View style={styles.headerLeft}>
         <View style={styles.profilePicture}>
-          <Image
-            source={{ uri: user?.imageUrl || userProfile?.image }}
-            style={styles.profileImage}
-            placeholder="👤"
-            contentFit="cover"
-          />
+          {(user?.imageUrl || userProfile?.image) ? (
+            <Image
+              source={{ uri: user?.imageUrl || userProfile?.image }}
+              style={styles.profileImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <Text style={{ fontSize: moderateScale(24) }}>👤</Text>
+          )}
         </View>
         <View style={styles.welcomeText}>
           <Text style={styles.greeting}>Good {greeting}</Text>

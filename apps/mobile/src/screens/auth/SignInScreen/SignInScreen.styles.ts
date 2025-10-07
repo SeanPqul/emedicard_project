@@ -97,7 +97,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   errorText: {
-    color: getColor('semanticUI.errorText'),
+    color: getColor('semantic.error'), // Red color: #EF4444
     fontSize: FONT_SIZES.caption,
     fontWeight: "500",
   },
@@ -116,9 +116,6 @@ export const styles = StyleSheet.create({
     marginBottom: hp(3),
     ...getShadow('medium'),
   },
-  buttonDisabled: {
-    backgroundColor: getColor('semanticUI.disabled'),
-  },
   signInButtonText: {
     color: getColor('text.inverse'),
     fontSize: FONT_SIZES.body,
@@ -126,15 +123,15 @@ export const styles = StyleSheet.create({
   },
 
   googleButton: {
-    backgroundColor: getColor('background.primary'),
+    backgroundColor: 'transparent',
     borderRadius: getBorderRadius('lg'),
-    borderWidth: 1,
-    borderColor: getColor('border.light'),
+    borderWidth: 0,
     height: hp(6.5),
     justifyContent: "center",
     alignItems: "center",
     marginBottom: verticalScale(13.2),
-    ...getShadow('small'),
+    shadowOpacity: 0,
+    elevation: 0,
   },
 
   googleIcon: {
@@ -167,13 +164,13 @@ export const styles = StyleSheet.create({
 
   line: {
     flex: 1,
-    height: 1,
+    height: moderateScale(1),
     backgroundColor: getColor('border.light'),
     marginTop: verticalScale(4)
   },
 
   orText: {
-    marginHorizontal: 10,
+    marginHorizontal: moderateScale(10),
     color: getColor('text.tertiary'),
     fontSize: FONT_SIZES.caption,
   },

@@ -10,6 +10,7 @@ import {
   View
 } from 'react-native';
 import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@shared/styles/theme';
+import { scaleFont, scaleSize } from '@shared/utils/responsive';
 import { Button as CustomButton } from '@shared/components/buttons/Button';
 
 interface DragDropUploadProps {
@@ -216,9 +217,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: scaleSize(80),
+    height: scaleSize(80),
+    borderRadius: scaleSize(40),
     backgroundColor: getColor('primary.50'),
     justifyContent: 'center',
     alignItems: 'center',
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
     ...getTypography('bodySmall'),
     color: getColor('text.secondary'),
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: scaleFont(20),
   },
   subtitleDisabled: {
     color: getColor('text.tertiary'),

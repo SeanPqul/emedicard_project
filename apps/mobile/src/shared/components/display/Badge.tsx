@@ -27,21 +27,22 @@ export const Badge: React.FC<BadgeProps> = React.memo(({
   testID,
   ...props
 }) => {
+  const { moderateScale } = require('@shared/utils/responsive');
   const sizeMap = {
     small: {
       paddingHorizontal: getSpacing('xs'),
       paddingVertical: getSpacing('xs') / 2,
-      iconSize: 12,
+      iconSize: moderateScale(12),
     },
     medium: {
       paddingHorizontal: getSpacing('sm'),
       paddingVertical: getSpacing('xs'),
-      iconSize: 14,
+      iconSize: moderateScale(14),
     },
     large: {
       paddingHorizontal: getSpacing('md'),
       paddingVertical: getSpacing('sm'),
-      iconSize: 16,
+      iconSize: moderateScale(16),
     },
   };
 

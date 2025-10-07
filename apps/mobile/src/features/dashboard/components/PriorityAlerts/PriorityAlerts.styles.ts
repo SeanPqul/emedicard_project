@@ -9,7 +9,7 @@ export const styles = StyleSheet.create({
     padding: moderateScale(theme.spacing.md),
     backgroundColor: theme.colors.status.error + '10',
     borderRadius: theme.borderRadius.lg,
-    borderWidth: 1,
+    borderWidth: moderateScale(1),
     borderColor: theme.colors.status.error + '30',
   },
   header: {
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     color: theme.colors.status.error,
   },
   title: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: theme.colors.status.error,
     fontWeight: '600' as const,
   },
@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
     paddingVertical: verticalScale(theme.spacing.xs),
   },
   alertText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: theme.colors.text.primary,
     flex: 1,
     marginRight: scale(theme.spacing.xs),

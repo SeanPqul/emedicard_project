@@ -19,6 +19,7 @@ export {
   fontScale,
   scaleFont,
   scaleSpacing,
+  scaleSize,
   SCALING_CONSTANTS,
 } from './scale';
 

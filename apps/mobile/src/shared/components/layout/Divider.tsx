@@ -1,5 +1,4 @@
-import { FONT_SIZES, FONT_WEIGHTS } from '@shared/utils/responsive';
-import { verticalScale } from '@shared/utils/responsive';
+import { FONT_SIZES, FONT_WEIGHTS, moderateScale, verticalScale } from '@shared/utils/responsive';
 import React from 'react';
 import { Text, View } from 'react-native';
 
@@ -35,12 +34,12 @@ const defaultStyles = {
   },
   line: {
     flex: 1,
-    height: 1,
+    height: moderateScale(1),
     backgroundColor: '#E5E7EB',
     marginTop: verticalScale(4),
   },
   text: {
-    marginHorizontal: 10,
+    marginHorizontal: moderateScale(10),
     color: '#9CA3AF',
     fontSize: FONT_SIZES.caption,
   },

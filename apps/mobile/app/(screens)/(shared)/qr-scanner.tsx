@@ -1,1 +1,3 @@
-export { QrScannerScreen as default } from '../../../src/screens/shared/QrScannerScreen';
+import { QrScannerScreen } from '../../../src/screens/shared/QrScannerScreen';
+
+export default QrScannerScreen;

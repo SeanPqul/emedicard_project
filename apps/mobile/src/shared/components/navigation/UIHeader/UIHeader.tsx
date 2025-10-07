@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { theme } from '@shared/styles/theme';
-import { Image } from 'expo-image';
+import { moderateScale } from '@shared/utils/responsive';
 
 interface UIHeaderProps {
   greeting: string;
@@ -91,11 +91,15 @@ export const UIHeader: React.FC<UIHeaderProps> = ({
         {/* Left Section - Profile & Greeting */}
         <View style={styles.headerLeft}>
           <View style={styles.profilePicture}>
+          {userImage ? (
             <Image
-              source={userImage ? { uri: userImage } : null}
+              source={{ uri: userImage }}
               style={styles.profileImage}
-              placeholder="👤"
+              resizeMode="cover"
             />
+          ) : (
+            <Text style={{ fontSize: moderateScale(24) }}>👤</Text>
+          )}
           </View>
           <View style={styles.welcomeText}>
             <Text style={styles.greeting}>{greeting}</Text>
@@ -115,7 +119,7 @@ export const UIHeader: React.FC<UIHeaderProps> = ({
             accessibilityLabel="Notifications"
             accessibilityHint="View your notifications"
           >
-            <Ionicons name="notifications-outline" size={20} color={theme.colors.text.primary} />
+            <Ionicons name="notifications-outline" size={moderateScale(20)} color={theme.colors.text.primary} />
             {unreadNotificationsCount > 0 && (
               <View style={styles.notificationBadge}>
                 <Text style={styles.notificationBadgeText}>
@@ -132,7 +136,7 @@ export const UIHeader: React.FC<UIHeaderProps> = ({
             accessibilityLabel="More options"
             accessibilityHint="Open menu for more options"
           >
-            <Ionicons name="ellipsis-vertical" size={20} color={theme.colors.text.primary} />
+            <Ionicons name="ellipsis-vertical" size={moderateScale(20)} color={theme.colors.text.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -164,14 +168,14 @@ export const UIHeader: React.FC<UIHeaderProps> = ({
                   >
                     <Ionicons
                       name={action.icon as any}
-                      size={24}
+                      size={moderateScale(24)}
                       color={theme.colors.text.primary}
                       style={styles.menuItemIcon}
                     />
                     <Text style={styles.menuItemText}>{action.label}</Text>
                     <Ionicons
                       name="chevron-forward"
-                      size={20}
+                      size={moderateScale(20)}
                       color={theme.colors.text.tertiary}
                     />
                   </TouchableOpacity>
@@ -213,12 +217,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   profilePicture: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: moderateScale(48),
+    height: moderateScale(48),
+    borderRadius: moderateScale(24),
     overflow: 'hidden',
     backgroundColor: theme.colors.gray[100],
     marginRight: theme.spacing.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileImage: {
     width: '100%',
@@ -246,8 +252,8 @@ const styles = StyleSheet.create({
     gap: theme.spacing.xs,
   },
   iconButton: {
-    width: 36,
-    height: 36,
+    width: moderateScale(36),
+    height: moderateScale(36),
     borderRadius: theme.borderRadius.full,
     backgroundColor: theme.colors.background.tertiary,
     justifyContent: 'center',
@@ -256,19 +262,19 @@ const styles = StyleSheet.create({
   },
   notificationBadge: {
     position: 'absolute',
-    top: -4,
-    right: -4,
+    top: moderateScale(-4),
+    right: moderateScale(-4),
     backgroundColor: theme.colors.semantic.error,
     borderRadius: theme.borderRadius.full,
-    minWidth: 18,
-    height: 18,
+    minWidth: moderateScale(18),
+    height: moderateScale(18),
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: moderateScale(4),
   },
   notificationBadgeText: {
     color: theme.colors.text.inverse,
-    fontSize: 10,
+    fontSize: moderateScale(10),
     fontWeight: '700',
   },
   modalOverlay: {
@@ -278,14 +284,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   menuContainer: {
-    marginTop: Platform.OS === 'ios' ? 100 : 80,
+    marginTop: Platform.OS === 'ios' ? moderateScale(100) : moderateScale(80),
     marginRight: theme.spacing.md,
   },
   menuContent: {
     backgroundColor: theme.colors.background.primary,
     borderRadius: theme.borderRadius.lg,
-    minWidth: 240,
-    maxWidth: 280,
+    minWidth: moderateScale(240),
+    maxWidth: moderateScale(280),
     paddingVertical: theme.spacing.sm,
     ...theme.shadows.large,
   },
@@ -303,7 +309,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
-    minHeight: 48,
+    minHeight: moderateScale(48),
   },
   menuItemIcon: {
     marginRight: theme.spacing.sm,

@@ -11,9 +11,9 @@ export const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: verticalScale(2) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: moderateScale(4),
     elevation: 3,
   },
   iconContainer: {
@@ -29,19 +29,19 @@ export const styles = StyleSheet.create({
     color: theme.colors.blue[500],
   },
   title: {
-    fontSize: 20,
+    fontSize: moderateScale(20),
     fontWeight: '700' as const,
     color: theme.colors.text.primary,
     marginBottom: verticalScale(theme.spacing.sm),
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: theme.colors.text.secondary,
     textAlign: 'center',
     marginBottom: verticalScale(theme.spacing.lg),
     paddingHorizontal: scale(theme.spacing.md),
-    lineHeight: 16 * 1.5,
+    lineHeight: moderateScale(16 * 1.5),
   },
   button: {
     flexDirection: 'row',
@@ -53,7 +53,7 @@ export const styles = StyleSheet.create({
     gap: scale(theme.spacing.xs),
   },
   buttonText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: theme.colors.text.inverse,
     fontWeight: '600' as const,
   },

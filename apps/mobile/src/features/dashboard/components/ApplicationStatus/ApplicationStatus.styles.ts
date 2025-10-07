@@ -28,13 +28,13 @@ export const styles = StyleSheet.create({
     color: theme.colors.text.inverse,
   },
   categoryText: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     color: theme.colors.text.inverse,
     fontWeight: '600' as const,
     marginLeft: scale(theme.spacing.xs),
   },
   applicationId: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     color: theme.colors.text.secondary,
   },
   progressContainer: {
@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(theme.spacing.sm),
   },
   progressTitle: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: theme.colors.text.primary,
     fontWeight: '600' as const,
   },
@@ -57,12 +57,12 @@ export const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   progressStatus: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     textTransform: 'uppercase',
     fontWeight: '600' as const,
   },
   progressBar: {
-    height: 6,
+    height: moderateScale(6),
     backgroundColor: theme.colors.background.secondary,
     borderRadius: theme.borderRadius.full,
     marginBottom: verticalScale(theme.spacing.xs),
@@ -72,7 +72,7 @@ export const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.full,
   },
   progressText: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     color: theme.colors.text.secondary,
   },
   // Status colors

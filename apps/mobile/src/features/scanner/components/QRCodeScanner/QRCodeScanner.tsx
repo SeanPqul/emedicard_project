@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme, getColor, getSpacing, getBorderRadius, getShadow, getTypography } from '@shared/styles/theme';
+import { scaleFont, scaleSize } from '@shared/utils/responsive';
 import { Button as CustomButton } from '@shared/components/buttons/Button';
 
 const { width, height } = Dimensions.get('window');
@@ -292,7 +293,7 @@ const styles = StyleSheet.create({
   },
   overlayMiddle: {
     flexDirection: 'row',
-    height: 250,
+    height: scaleSize(250),
     width: '100%',
   },
   overlayLeft: {
@@ -309,17 +310,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   scannerFrame: {
-    width: 250,
-    height: 250,
+    width: scaleSize(250),
+    height: scaleSize(250),
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
   },
   corner: {
     position: 'absolute',
-    width: 30,
-    height: 30,
-    borderWidth: 3,
+    width: scaleSize(30),
+    height: scaleSize(30),
+    borderWidth: scaleSize(3),
     borderColor: getColor('primary.500'),
   },
   topLeft: {
@@ -349,12 +350,12 @@ const styles = StyleSheet.create({
   scanLine: {
     position: 'absolute',
     width: '100%',
-    height: 2,
+    height: scaleSize(2),
     backgroundColor: getColor('primary.500'),
     shadowColor: getColor('primary.500'),
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
-    shadowRadius: 4,
+    shadowRadius: scaleSize(4),
     elevation: 4,
   },
   centerIndicator: {
@@ -377,9 +378,9 @@ const styles = StyleSheet.create({
     marginBottom: getSpacing('lg'),
   },
   statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: scaleSize(12),
+    height: scaleSize(12),
+    borderRadius: scaleSize(6),
     backgroundColor: getColor('gray.400'),
     marginRight: getSpacing('sm'),
   },
@@ -398,6 +399,6 @@ const styles = StyleSheet.create({
     ...getTypography('bodySmall'),
     color: 'rgba(255,255,255,0.7)',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: scaleFont(20),
   },
 });

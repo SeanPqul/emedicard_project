@@ -108,7 +108,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: hp(3),
     shadowColor: theme.colors.status.success,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: verticalScale(4) },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(8),
     elevation: 8,
@@ -184,7 +184,7 @@ export const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: verticalScale(4),
     },
     shadowOpacity: 0.1,
     shadowRadius: moderateScale(8),

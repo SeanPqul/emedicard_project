@@ -6,7 +6,6 @@ import {
     heightPercentageToDP as hp,
     widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-// @ts-ignore - SVG import
 import GoogleSignInButton from '../../../../assets/svgs/google-ctn-logo.svg';
 import { CustomButton, CustomTextInput, Divider } from '@shared/components';
 import { BaseScreen } from '@shared/components/core';

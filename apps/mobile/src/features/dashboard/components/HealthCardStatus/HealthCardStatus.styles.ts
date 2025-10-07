@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
     paddingVertical: verticalScale(theme.spacing.md),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600' as const,
     color: theme.colors.text.primary,
     marginBottom: verticalScale(theme.spacing.sm),
@@ -37,13 +37,13 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: theme.colors.text.primary,
     fontWeight: '600' as const,
     marginBottom: verticalScale(theme.spacing.xs / 2),
   },
   cardSubtitle: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     color: theme.colors.text.secondary,
   },
   chevron: {

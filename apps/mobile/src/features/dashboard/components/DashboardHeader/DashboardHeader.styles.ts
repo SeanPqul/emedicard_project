@@ -39,18 +39,18 @@ export const styles = StyleSheet.create({
     minWidth: 0,
   },
   greeting: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: theme.colors.text.secondary,
     fontWeight: '400' as const,
   },
   userName: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600' as const,
     color: theme.colors.text.primary,
     marginTop: verticalScale(theme.spacing.xs / 2),
   },
   currentTime: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     color: theme.colors.text.secondary,
     marginTop: verticalScale(theme.spacing.xs / 2),
   },
@@ -79,7 +79,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: scale(4),
   },
   notificationBadgeText: {
-    fontSize: 10,
+    fontSize: moderateScale(10),
     color: theme.colors.text.inverse,
     fontWeight: '600' as const,
   },

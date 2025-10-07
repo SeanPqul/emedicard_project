@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
     paddingVertical: verticalScale(theme.spacing.md),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600' as const,
     color: theme.colors.text.primary,
     marginBottom: verticalScale(theme.spacing.sm),

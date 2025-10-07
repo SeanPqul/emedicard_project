@@ -96,6 +96,16 @@ export const scaleSpacing = (size: number): number => {
   return Math.round(size * ratio);
 };
 
+/**
+ * General size scaling (alias for scale function)
+ * Used for scaling widths, heights, and other dimensions
+ * @param size - Size value to scale
+ * @returns Scaled size value
+ */
+export const scaleSize = (size: number): number => {
+  return scale(size);
+};
+
 // Export constants for external use
 export const SCALING_CONSTANTS = {
   screenWidth,

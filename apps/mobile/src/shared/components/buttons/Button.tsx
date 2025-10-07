@@ -92,16 +92,23 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
     };
   };
 
+  // Merge styles properly - custom styles should not override variant backgroundColor
+  const variantStyle = buttonVariants[variant === 'none' ? 'ghost' : variant];
+  const customStyleWithoutBg = buttonStyle ? { ...buttonStyle, backgroundColor: undefined } : {};
+  
   const finalButtonStyle: ViewStyle[] = [
     buttonVariants.base,
-    buttonVariants[disabled || loading ? 'disabled' : (variant === 'none' ? 'ghost' : variant)],
+    customStyleWithoutBg, // Apply custom styles WITHOUT backgroundColor
+    variantStyle, // Apply variant styles (including backgroundColor) AFTER custom styles
     buttonSizeVariants[size],
     getCustomButtonStyle(),
     ...(fullWidth ? [{ alignSelf: 'stretch' as const }] : []),
   ];
 
   const finalTextStyle: TextStyle[] = [
-    buttonTextVariants[disabled || loading ? 'disabled' : (variant === 'none' ? 'ghost' : variant)],
+    // Don't apply disabled text styling - keep text appearance consistent
+    buttonTextVariants[variant === 'none' ? 'ghost' : variant],
+    textStyle,
   ];
 
   const renderIcon = (position: 'left' | 'right') => {
@@ -170,7 +177,7 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
 
   return (
     <TouchableOpacity
-      style={[finalButtonStyle, buttonStyle, style]}
+      style={[finalButtonStyle, style]}
       onPress={onPress}
       disabled={disabled || loading}
       accessibilityLabel={accessibilityLabel || title || 'Button'}
@@ -181,7 +188,7 @@ export const Button: React.FC<DesignSystemButtonProps> = React.memo(({
         busy: loading,
       }}
       testID={testID}
-      activeOpacity={0.8}
+      activeOpacity={disabled || loading ? 1 : 0.8}
       {...props}
     >
       {renderContent()}

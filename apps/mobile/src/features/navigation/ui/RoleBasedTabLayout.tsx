@@ -3,6 +3,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from 'convex/react';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { moderateScale, verticalScale } from '@shared/utils/responsive';
 import { api } from '@backend/convex/_generated/api';
 import { useRoleBasedNavigation } from '../hooks';
 import { LoadingSpinner } from '@shared/components/feedback/LoadingSpinner';
@@ -45,17 +46,17 @@ export default function RoleBasedTabLayout() {
         tabBarActiveTintColor: getColor('green.500') || '#10B981',
         tabBarInactiveTintColor: getColor('gray.400') || '#9CA3AF',
         tabBarStyle: {
-          height: 50,
-          paddingTop: 6,
+          height: moderateScale(50),
+          paddingTop: verticalScale(6),
           paddingBottom: 0,
           paddingHorizontal: 0,
           backgroundColor: getColor('ui.white') || '#FFFFFF',
-          borderTopWidth: 0.5,
+          borderTopWidth: moderateScale(0.5),
           borderTopColor: getColor('border.light') || '#E5E7EB',
           elevation: 0,
           shadowOpacity: 0,
-          minHeight: 50,
-          maxHeight: 50,
+          minHeight: moderateScale(50),
+          maxHeight: moderateScale(50),
         },
       }}
     >

@@ -18,6 +18,7 @@ import {
   Dimensions,
   View,
 } from 'react-native';
+import { moderateScale, verticalScale } from '@shared/utils/responsive';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from './Button';
 import { Text } from '../typography/Text';
@@ -67,7 +68,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
 }) => {
   // Custom style for enhanced CTA appearance
   const ctaButtonStyle: ViewStyle = {
-    minHeight: size === 'large' ? 72 : 64,
+    minHeight: size === 'large' ? verticalScale(72) : verticalScale(64),
     width: fullWidth ? width - (getSpacing('lg') * 2) : 'auto',
     paddingHorizontal: getSpacing('lg'),
     paddingVertical: getSpacing('md'),
@@ -126,7 +127,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
       {icon && (
         <Ionicons 
           name={icon as any} 
-          size={size === 'large' ? 24 : 20} 
+          size={size === 'large' ? moderateScale(24) : moderateScale(20)}
           color={getIconColor()} 
         />
       )}
@@ -141,9 +142,9 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
           weight="semiBold"
           color={getTextColor()}
           style={[{ 
-            letterSpacing: 0.3,
+            letterSpacing: moderateScale(0.3),
             textAlign: 'center',
-            lineHeight: size === 'large' ? 20 : 18
+            lineHeight: size === 'large' ? moderateScale(20) : moderateScale(18)
           }, textStyle]}
           numberOfLines={1}
         >
@@ -157,9 +158,9 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
               : getColor('text.secondary')
             }
             style={{ 
-              marginTop: 2,
+              marginTop: verticalScale(2),
               textAlign: 'center',
-              lineHeight: 14
+              lineHeight: moderateScale(14)
             }}
             numberOfLines={1}
           >

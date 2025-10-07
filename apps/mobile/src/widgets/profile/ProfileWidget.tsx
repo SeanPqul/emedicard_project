@@ -1,12 +1,12 @@
 import React from 'react';
 import {
+  Image,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { ProfileLink } from '@/src/features/profile/components';
 import { SignOutButton } from '@/src/features/auth/components';
@@ -32,11 +32,17 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
         {/* Profile Header */}
         <View style={styles.header}>
           <View style={styles.profilePictureContainer}>
-            <Image
-              source={user.imageUrl}
-              style={styles.profilePicture}
-              placeholder="👤"
-            />
+            {user.imageUrl ? (
+              <Image
+                source={{ uri: user.imageUrl }}
+                style={styles.profilePicture}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={[styles.profilePicture, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={{ fontSize: moderateScale(48) }}>👤</Text>
+              </View>
+            )}
             <TouchableOpacity style={styles.editButton} onPress={() => router.push('/profile/edit')}>
               <Ionicons name="pencil" size={moderateScale(16)} color="#FFFFFF" />
             </TouchableOpacity>

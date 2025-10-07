@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 // @ts-ignore - SVG import
 import GoogleSignInButton from '../../../../assets/svgs/google-ctn-logo.svg';
 import { BaseScreen } from '@shared/components/core';
+import { CustomButton } from '@shared/components';
 import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './SignUpScreen.styles';
 import { SignUpFormData, AuthError } from '@features/auth/types';
@@ -279,15 +280,15 @@ export function SignUpScreen() {
           </View>
 
           {/* Sign Up Button */}
-          <TouchableOpacity
-            style={[styles.signUpButton, (loading || !isFormValid) && styles.buttonDisabled]}
+          <CustomButton
+            title="Continue"
+            loadingText="Signing Up…"
+            loading={loading}
+            disabled={!isFormValid || loading}
             onPress={handleSignUp}
-            disabled={loading || !isFormValid}
-          >
-            <Text style={styles.signUpButtonText}>
-              {loading ? "Signing Up…" : "Continue"}
-            </Text>
-          </TouchableOpacity>
+            buttonStyle={styles.signUpButton}
+            textStyle={styles.signUpButtonText}
+          />
 
           {/* Divider */}
           <View style={styles.orContainer}>
@@ -297,12 +298,16 @@ export function SignUpScreen() {
           </View>
 
           {/* Google Sign Up */}
-          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignUp}>
+          <CustomButton
+            variant="none"
+            onPress={handleGoogleSignUp}
+            buttonStyle={styles.googleButton}
+          >
             <GoogleSignInButton
               width={styles.googleIcon.width}
               height={styles.googleIcon.height}
             />
-          </TouchableOpacity>
+          </CustomButton>
 
           {/* Sign In Link */}
           <View style={styles.signInContainer}>
