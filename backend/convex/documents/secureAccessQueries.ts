@@ -74,72 +74,11 @@ export const generateDocumentToken = mutation({
   },
 });
 
-// Verify a document access signature (HMAC-based)
-export const verifyDocumentSignature = query({
-  args: {
-    signature: v.string(),
-    documentId: v.id("documentUploads"),
-    expiresAt: v.number(),
-  },
-  handler: async (ctx, args) => {
-    // Get signing secret from environment
-    const signingSecret = process.env.DOCUMENT_SIGNING_SECRET;
-    if (!signingSecret) {
-      console.error("Document signing secret not configured");
-      return { isValid: false, userId: null };
-    }
+// Note: Signature verification is handled in the HTTP endpoint
+// This function is kept for backward compatibility but is not actively used
 
-    // Check if URL has expired
-    if (isExpired(args.expiresAt)) {
-      return { isValid: false, userId: null };
-    }
-
-    // For verification, we need to check all possible user IDs
-    // In practice, we might want to include userId in the URL parameters
-    // For now, we'll verify without userId (less secure but simpler)
-    // TODO: Consider including userId in URL for better security
-    
-    // Since we can't verify without knowing the userId that was used to sign,
-    // we need to restructure this approach
-    // The signature should be verified in the HTTP endpoint where we have all the context
-    
-    return { 
-      isValid: true, 
-      userId: null, // Will be determined in HTTP endpoint
-    };
-  },
-});
-
-// Internal query to get document (for HTTP endpoint)
-export const getDocumentInternal = query({
-  args: {
-    documentId: v.id("documentUploads"),
-    userId: v.id("users"),
-  },
-  handler: async (ctx, args) => {
-    const document = await ctx.db.get(args.documentId);
-    if (!document) {
-      return null;
-    }
-
-    // Get the application
-    const application = await ctx.db.get(document.applicationId);
-    if (!application) {
-      return null;
-    }
-
-    // Verify user has access
-    const user = await ctx.db.get(args.userId);
-    const isOwner = application.userId === args.userId;
-    const isAdmin = user?.role === "admin" || user?.role === "inspector";
-    
-    if (!isOwner && !isAdmin) {
-      return null;
-    }
-
-    return document;
-  },
-});
+// Note: getDocumentInternal is not actively used
+// Document access is handled through getDocumentWithoutAuth and authorization in HTTP endpoint
 
 // Get document without authentication (for HMAC verification in HTTP endpoint)
 export const getDocumentWithoutAuth = query({
@@ -261,9 +200,6 @@ export const getSecureDocumentUrl = mutation({
       user._id,
       signingSecret
     );
-
-    // Log for audit trail
-    console.log(`Secure URL generated: doc=${args.documentId} user=${user._id} role=${user.role}`);
 
     return {
       url: signedUrl,

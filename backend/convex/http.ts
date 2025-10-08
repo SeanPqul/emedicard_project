@@ -1,7 +1,7 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { Webhook } from "svix";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { handleMayaWebhook } from "./payments/maya/webhook";
 
 const http = httpRouter();
@@ -320,32 +320,70 @@ http.route({
   path: "/secure-document",
   method: "GET",
   handler: httpAction(async (ctx, request) => {
+    const startTime = Date.now();
+    
+    // Extract request metadata for logging
+    const ipAddress = request.headers.get("x-forwarded-for") || 
+                      request.headers.get("x-real-ip") || 
+                      "unknown";
+    const userAgent = request.headers.get("user-agent") || undefined;
+    const referrer = request.headers.get("referer") || undefined;
+    
+    let documentId: any = null; // Declare documentId in outer scope for error handling
+    
     try {
       // Get query parameters
       const url = new URL(request.url);
       const signature = url.searchParams.get("signature");
-      const documentId = url.searchParams.get("documentId") as any;
+      documentId = url.searchParams.get("documentId") as any;
       const expiresAt = url.searchParams.get("expiresAt");
       
       if (!signature || !documentId || !expiresAt) {
-        // Log potential malformed request or tampering
-        console.warn(`SECURITY: Missing params - sig=${!!signature} doc=${!!documentId} exp=${!!expiresAt}`);
+        // Log invalid request attempt
+        await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+          documentId: documentId || "unknown" as any,
+          accessStatus: "InvalidRequest",
+          accessMethod: "signed_url",
+          errorMessage: `Missing params: sig=${!!signature} doc=${!!documentId} exp=${!!expiresAt}`,
+          ipAddress,
+          userAgent,
+          referrer,
+          responseTimeMs: Date.now() - startTime,
+        });
         return new Response("Missing required parameters", { status: 400 });
       }
 
       // Parse expiration timestamp
       const expiresAtNum = parseInt(expiresAt, 10);
       if (isNaN(expiresAtNum)) {
-        // Log potential timestamp tampering
-        console.warn(`SECURITY: Invalid timestamp - doc=${documentId} value=${expiresAt}`);
+        // Log invalid timestamp attempt
+        await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+          documentId,
+          accessStatus: "InvalidRequest",
+          accessMethod: "signed_url",
+          errorMessage: `Invalid timestamp format: ${expiresAt}`,
+          ipAddress,
+          userAgent,
+          referrer,
+          responseTimeMs: Date.now() - startTime,
+        });
         return new Response("Invalid expiration timestamp", { status: 400 });
       }
 
       // Check if URL has expired
       if (Date.now() > expiresAtNum) {
-        // Log potential replay attack (using expired URL)
         const minutesExpired = Math.round((Date.now() - expiresAtNum) / (60 * 1000));
-        console.warn(`SECURITY: Expired URL attempt - doc=${documentId} expired=${minutesExpired}min ago`);
+        // Log expired access attempt
+        await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+          documentId,
+          accessStatus: "Expired",
+          accessMethod: "signed_url",
+          errorMessage: `URL expired ${minutesExpired} minutes ago`,
+          ipAddress,
+          userAgent,
+          referrer,
+          responseTimeMs: Date.now() - startTime,
+        });
         return new Response("URL has expired", { status: 403 });
       }
 
@@ -353,15 +391,53 @@ http.route({
       const signingSecret = process.env.DOCUMENT_SIGNING_SECRET;
       if (!signingSecret) {
         console.error("Document signing secret not configured");
+        // Log server configuration issue
+        await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+          documentId,
+          accessStatus: "NoSecret",
+          accessMethod: "signed_url",
+          errorMessage: "Server signing secret not configured",
+          ipAddress,
+          userAgent,
+          referrer,
+          responseTimeMs: Date.now() - startTime,
+        });
         return new Response("Server configuration error", { status: 500 });
       }
 
       // Get the document first
-      const document = await ctx.runQuery(api.documents.secureAccessQueries.getDocumentWithoutAuth, {
-        documentId,
-      });
+      let document;
+      try {
+        document = await ctx.runQuery(api.documents.secureAccessQueries.getDocumentWithoutAuth, {
+          documentId,
+        });
+      } catch (error) {
+        // Invalid document ID format or document doesn't exist
+        await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+          documentId,
+          accessStatus: "DocumentNotFound",
+          accessMethod: "signed_url",
+          errorMessage: `Invalid document ID or document not found: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          ipAddress,
+          userAgent,
+          referrer,
+          responseTimeMs: Date.now() - startTime,
+        });
+        return new Response("Document not found", { status: 404 });
+      }
 
       if (!document || !document.storageFileId) {
+        // Log document not found
+        await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+          documentId,
+          accessStatus: "DocumentNotFound",
+          accessMethod: "signed_url",
+          errorMessage: "Document does not exist or has been deleted",
+          ipAddress,
+          userAgent,
+          referrer,
+          responseTimeMs: Date.now() - startTime,
+        });
         return new Response("Document not found", { status: 404 });
       }
 
@@ -376,6 +452,8 @@ http.route({
       // Try to verify signature against each authorized user
       let isValidSignature = false;
       let verificationAttempts = 0;
+      let authenticatedUserId: string | null = null;
+      
       for (const userId of authorizedUserIds) {
         verificationAttempts++;
         const isValid = await verifyHmacSignature(
@@ -387,23 +465,76 @@ http.route({
         );
         if (isValid) {
           isValidSignature = true;
+          authenticatedUserId = userId;
           break;
         }
       }
 
       if (!isValidSignature) {
-        // Log potential tampering attempt (signature doesn't match any authorized user)
-        console.error(`SECURITY: Invalid signature - doc=${documentId} attempts=${verificationAttempts} sig=${signature.substring(0, 8)}...`);
+        // Log invalid signature attempt
+        await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+          documentId,
+          accessStatus: "InvalidSignature",
+          accessMethod: "signed_url",
+          errorMessage: `Invalid signature after ${verificationAttempts} verification attempts`,
+          ipAddress,
+          userAgent,
+          referrer,
+          responseTimeMs: Date.now() - startTime,
+        });
         return new Response("Invalid signature", { status: 403 });
       }
 
-      // Log successful access for audit
-      console.log(`Document accessed: doc=${documentId} file=${document.originalFileName}`);
+      // Get user information for logging
+      let userEmail: string | undefined;
+      let userRole: string | undefined;
+      
+      if (authenticatedUserId) {
+        try {
+          const userInfo = await ctx.runQuery(api.users.userQueries.getUserById, {
+            userId: authenticatedUserId as any,
+          });
+          if (userInfo) {
+            userEmail = userInfo.email;
+            userRole = userInfo.role;
+          }
+        } catch (e) {
+          // User lookup failed, continue without user info
+        }
+      }
+      
+      // Get document type information
+      let documentType: string | undefined;
+      try {
+        const docTypeInfo = await ctx.runQuery(api.documents.documentQueries.getDocumentType, {
+          documentId,
+        });
+        documentType = docTypeInfo?.name;
+      } catch (e) {
+        // Document type lookup failed, continue
+      }
 
       // Get the file blob from storage
       const blob = await ctx.storage.get(document.storageFileId);
       
       if (!blob) {
+        // Log storage file not found
+        await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+          documentId,
+          applicationId: document.applicationId,
+          userId: authenticatedUserId as any,
+          userEmail,
+          userRole,
+          accessStatus: "DocumentNotFound",
+          accessMethod: "signed_url",
+          errorMessage: "Storage file not found",
+          ipAddress,
+          userAgent,
+          referrer,
+          responseTimeMs: Date.now() - startTime,
+          documentType,
+          fileName: document.originalFileName,
+        });
         return new Response("File not found", { status: 404 });
       }
 
@@ -446,6 +577,23 @@ http.route({
         "Content-Security-Policy": csp,
       });
 
+      // Log successful document access
+      await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+        documentId,
+        applicationId: document.applicationId,
+        userId: authenticatedUserId as any,
+        userEmail,
+        userRole,
+        accessStatus: "Success",
+        accessMethod: "signed_url",
+        ipAddress,
+        userAgent,
+        referrer,
+        responseTimeMs: Date.now() - startTime,
+        documentType,
+        fileName: document.originalFileName,
+      });
+
       // Return the file with secure headers
       return new Response(blob, {
         status: 200,
@@ -453,6 +601,23 @@ http.route({
       });
     } catch (error) {
       console.error("Error serving document:", error);
+      
+      // Log unexpected server error
+      try {
+        await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
+          documentId: documentId || "unknown" as any,
+          accessStatus: "InvalidRequest",
+          accessMethod: "signed_url",
+          errorMessage: error instanceof Error ? error.message : "Unknown server error",
+          ipAddress,
+          userAgent,
+          referrer,
+          responseTimeMs: Date.now() - startTime,
+        });
+      } catch (logError) {
+        console.error("Failed to log error:", logError);
+      }
+      
       return new Response("Internal server error", { status: 500 });
     }
   }),
