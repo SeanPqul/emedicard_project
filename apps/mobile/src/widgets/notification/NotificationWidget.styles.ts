@@ -47,6 +47,14 @@ export const styles = StyleSheet.create({
     color: theme.colors.brand.primary,
     fontWeight: '600',
   },
+  filtersContainer: {
+    backgroundColor: theme.colors.background.primary,
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingTop: verticalScale(theme.spacing.md),
+    paddingBottom: verticalScale(theme.spacing.sm),
+    borderBottomWidth: moderateScale(1),
+    borderBottomColor: theme.colors.border.light,
+  },
   categoriesContainer: {
     flexDirection: 'row',
   },

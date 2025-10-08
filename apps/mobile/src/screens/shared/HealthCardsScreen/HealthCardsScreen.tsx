@@ -20,6 +20,7 @@ import {
   formatDate, 
   generateCardHtml
 } from '@features/healthCards/lib';
+import { HealthCardsHeader } from './HealthCardsHeader';
 
 
 export function HealthCardsScreen() {
@@ -120,14 +121,10 @@ export function HealthCardsScreen() {
 
   return (
     <BaseScreenLayout>
-
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Health Cards</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      {/* Green Branded Header */}
+      <HealthCardsHeader
+        cardCount={userHealthCards?.length || 0}
+      />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {userHealthCards && userHealthCards.length > 0 ? (

@@ -258,18 +258,58 @@ export default defineSchema({
     .index("by_admin", ["rejectedBy"])
     .index("by_replacement", ["wasReplaced"]),
 
-  // Document Access Tokens for secure, time-limited document access
-  documentAccessTokens: defineTable({
-    token: v.string(), // Unique secure token
-    documentId: v.id("documentUploads"), // The document this token grants access to
-    userId: v.id("users"), // The user who requested the token
-    createdAt: v.float64(), // When the token was created (timestamp)
-    expiresAt: v.float64(), // When the token expires (timestamp)
-    used: v.boolean(), // Whether the token has been used (for single-use tokens if needed)
+  // Note: documentAccessTokens table has been removed in favor of HMAC-signed URLs
+  // HMAC signatures provide stateless, secure document access without database storage
+
+  // Document Access Audit Logs - tracks all document access attempts
+  documentAccessLogs: defineTable({
+    // Document and Application References
+    documentId: v.union(v.id("documentUploads"), v.string()), // Can be ID or string for invalid requests
+    applicationId: v.optional(v.id("applications")),
+    
+    // User Information
+    userId: v.optional(v.id("users")), // null if authentication failed
+    userEmail: v.optional(v.string()), // Preserved even if user is deleted
+    userRole: v.optional(v.string()),  // Role at time of access
+    
+    // Access Result
+    accessStatus: v.union(
+      v.literal("Success"),           // Document served successfully
+      v.literal("Unauthorized"),      // User lacks permission
+      v.literal("Expired"),           // Signed URL expired
+      v.literal("InvalidSignature"),  // HMAC signature invalid
+      v.literal("DocumentNotFound"),  // Document doesn't exist
+      v.literal("NoSecret"),          // Server misconfiguration
+      v.literal("InvalidRequest")     // Malformed request
+    ),
+    
+    // Access Method
+    accessMethod: v.union(
+      v.literal("signed_url"),   // HMAC-signed URL
+      v.literal("direct"),        // Direct API call (shouldn't happen)
+      v.literal("unknown")        // Fallback
+    ),
+    
+    // Error Details
+    errorMessage: v.optional(v.string()), // Detailed error for failures
+    
+    // Request Metadata
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+    referrer: v.optional(v.string()),
+    
+    // Timing
+    timestamp: v.float64(),
+    responseTimeMs: v.optional(v.float64()), // How long the request took
+    
+    // Document Info at Access Time
+    documentType: v.optional(v.string()),
+    fileName: v.optional(v.string()),
   })
-    .index("by_token", ["token"]) // For fast token lookup
-    .index("by_document", ["documentId"]) // For finding tokens by document
-    .index("by_user", ["userId"]) // For finding tokens by user
-    .index("by_expiry", ["expiresAt"]), // For efficient cleanup of expired tokens
+    .index("by_document", ["documentId", "timestamp"])
+    .index("by_user", ["userId", "timestamp"])
+    .index("by_application", ["applicationId", "timestamp"])
+    .index("by_status", ["accessStatus", "timestamp"])
+    .index("by_timestamp", ["timestamp"]),
 
 });

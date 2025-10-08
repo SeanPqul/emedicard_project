@@ -13,6 +13,7 @@ import { ResubmitModal } from '@features/document-resubmit';
 import { WebView } from 'react-native-webview';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { DocumentViewHeader } from './DocumentViewHeader';
 
 interface DocumentWithRequirement {
   _id: Id<'documentUploads'>;
@@ -229,13 +230,10 @@ export function ViewDocumentsScreen() {
   if (isLoading) {
     return (
       <BaseScreenLayout>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Uploaded Documents</Text>
-          <View style={{ width: 24 }} />
-        </View>
+        <DocumentViewHeader
+          documentCount={0}
+          rejectedCount={0}
+        />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={getColor('primary.500')} />
           <Text style={styles.loadingText}>Loading documents...</Text>
@@ -246,14 +244,11 @@ export function ViewDocumentsScreen() {
 
   return (
     <BaseScreenLayout>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={getColor('text.primary')} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Uploaded Documents</Text>
-        <View style={{ width: 24 }} />
-      </View>
+      {/* Green Branded Header */}
+      <DocumentViewHeader
+        documentCount={uploadedDocuments.length}
+        rejectedCount={activeRejections.length}
+      />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Application Status Info */}

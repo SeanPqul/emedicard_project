@@ -5,12 +5,13 @@ import { moderateScale, verticalScale, scale, wp, hp } from '@shared/utils/respo
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5', // Light gray background matching profile
+    backgroundColor: theme.colors.background.secondary,
   },
   scrollView: {
     flex: 1,
   },
   scrollViewContent: {
+    paddingTop: verticalScale(theme.spacing.sm),
     paddingBottom: verticalScale(theme.spacing.xl * 1),
   },
   loadingContainer: {
@@ -23,31 +24,6 @@ export const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     color: theme.colors.text.secondary,
     marginTop: verticalScale(theme.spacing.md),
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: scale(theme.spacing.lg),
-    paddingVertical: verticalScale(theme.spacing.md),
-    backgroundColor: theme.colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border.light,
-  },
-  backButton: {
-    padding: moderateScale(theme.spacing.xs),
-  },
-  headerTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: '600' as const,
-    color: theme.colors.text.primary,
-    flex: 1,
-    textAlign: 'center',
-  },
-  headerRight: {
-    width: moderateScale(24),
   },
 
   // Status Card - Updated to match profile card style

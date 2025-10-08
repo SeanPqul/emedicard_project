@@ -5,24 +5,7 @@ import { moderateScale, verticalScale, scale } from '@shared/utils/responsive';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5', // Light gray background matching profile
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: scale(theme.spacing.lg),
-    paddingVertical: verticalScale(theme.spacing.md),
-    backgroundColor: theme.colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border.light,
-  },
-  headerTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: '600' as const,
-    color: theme.colors.text.primary,
-    flex: 1,
-    textAlign: 'center',
+    backgroundColor: theme.colors.background.secondary,
   },
   loadingContainer: {
     flex: 1,
@@ -37,7 +20,7 @@ export const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: '#F5F5F5', // Match profile screen background
+    backgroundColor: theme.colors.background.secondary,
   },
 
   // Summary Card

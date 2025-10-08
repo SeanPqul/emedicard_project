@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View, Image } from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -26,13 +26,15 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     return `${dateStr} • ${timeStr}`;
   };
 
+  const imageUrl = user?.imageUrl || userProfile?.image;
+
   return (
     <View style={styles.container}>
       <View style={styles.headerLeft}>
         <View style={styles.profilePicture}>
-          {(user?.imageUrl || userProfile?.image) ? (
+          {imageUrl ? (
             <Image
-              source={{ uri: user?.imageUrl || userProfile?.image }}
+              source={{ uri: imageUrl }}
               style={styles.profileImage}
               resizeMode="cover"
             />

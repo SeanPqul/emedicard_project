@@ -5,7 +5,7 @@ import { BaseScreen } from '@/src/shared/components/core';
 import { FeedbackSystem, useFeedback } from '@shared/components/feedback/feedback';
 import { useNetwork } from '@shared/hooks/useNetwork';
 import { useDashboardData } from '@features/dashboard/hooks';
-import { DashboardWidget } from '@/src/widgets/dashboard';
+import { DashboardWidgetEnhanced } from '@/src/widgets/dashboard/DashboardWidget.enhanced';
 import { LoadingView } from '@shared/components';
 import { getColor } from '@shared/styles/theme';
 
@@ -25,7 +25,7 @@ export function DashboardScreen() {
 
   return (
     <BaseScreen safeArea={false}>
-      <DashboardWidget
+      <DashboardWidgetEnhanced
         data={{
           user: dashboardData.user,
           userProfile: dashboardData.userProfile,

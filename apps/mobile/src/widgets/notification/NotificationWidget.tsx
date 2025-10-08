@@ -11,6 +11,7 @@ import { EmptyState } from '@shared/components';
 import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './NotificationWidget.styles';
 import type { NotificationCategory, NotificationItem } from '@entities/notification';
+import { NotificationHeader } from './NotificationHeader';
 
 // Constants
 const NOTIFICATION_CATEGORIES: NotificationCategory[] = [
@@ -88,22 +89,9 @@ export function NotificationWidget({
   getFilteredNotifications,
 }: NotificationWidgetProps) {
   
-  const renderHeader = () => {
+  const renderCategoryFilters = () => {
     return (
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Notifications</Text>
-          {unreadCount > 0 && (
-            <TouchableOpacity 
-              style={styles.markAllButton}
-              onPress={onMarkAllRead}
-            >
-              <Text style={styles.markAllButtonText}>Mark All Read</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        
-        {/* Category Filters */}
+      <View style={styles.filtersContainer}>
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
@@ -225,7 +213,11 @@ export function NotificationWidget({
 
   return (
     <View style={styles.container}>
-      {renderHeader()}
+      {/* Green Branded Header */}
+      <NotificationHeader
+        unreadCount={unreadCount}
+        onMarkAllRead={onMarkAllRead}
+      />
       
       <ScrollView
         style={styles.content}
@@ -234,6 +226,8 @@ export function NotificationWidget({
         }
         showsVerticalScrollIndicator={false}
       >
+        {/* Category Filters */}
+        {renderCategoryFilters()}
         {!hasNotifications ? (
           renderEmptyState()
         ) : (

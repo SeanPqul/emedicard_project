@@ -10,5 +10,11 @@ export * from './WelcomeBanner';
 export { StatCard } from './StatCard';
 export { ActivityItem } from './ActivityItem';
 
+// Enhanced components
+export { DashboardHeaderEnhanced } from './DashboardHeader/DashboardHeader.enhanced';
+export { HealthCardPreview } from './HealthCardPreview/HealthCardPreview';
+export { StatCardEnhanced, PresetStatCards } from './StatCard/StatCard.enhanced';
+export { QuickActionsCarousel } from './QuickActionsCarousel/QuickActionsCarousel';
+
 // OfflineBanner is now in shared
 export { OfflineBanner } from '@shared/components';

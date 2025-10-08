@@ -1,10 +1,11 @@
 import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { buildSignedUrl, verifyHmacSignature, isExpired } from "./hmacUtils";
 
-// Token expiry time in milliseconds (15 minutes)
-const TOKEN_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
+// Token expiry time in milliseconds (5 minutes)
+const TOKEN_EXPIRY_MS = 10 * 60 * 1000; // 5 minutes
 
-// Generate a secure access token for a document
+// Generate a signed URL for secure document access using HMAC
 export const generateDocumentToken = mutation({
   args: {
     documentId: v.id("documentUploads"),
@@ -47,66 +48,42 @@ export const generateDocumentToken = mutation({
       throw new Error("Unauthorized access to document");
     }
 
-    // Generate a secure random token
-    const tokenString = generateSecureToken();
+    // Get signing secret from environment
+    const signingSecret = process.env.DOCUMENT_SIGNING_SECRET;
+    if (!signingSecret) {
+      throw new Error("Document signing secret not configured");
+    }
+
+    // Calculate expiration time
+    const expiresAt = Date.now() + TOKEN_EXPIRY_MS;
     
-    // Store token with expiry
-    await ctx.db.insert("documentAccessTokens", {
-      token: tokenString,
-      documentId: args.documentId,
-      userId: user._id,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + TOKEN_EXPIRY_MS,
-      used: false,
-    });
+    // Generate HMAC-signed URL
+    const baseUrl = process.env.CONVEX_URL || '';
+    const signedUrl = await buildSignedUrl(
+      `${baseUrl}/secure-document`,
+      args.documentId,
+      expiresAt,
+      user._id,
+      signingSecret
+    );
 
     return {
-      token: tokenString,
-      expiresAt: Date.now() + TOKEN_EXPIRY_MS,
+      url: signedUrl,
+      expiresAt: expiresAt,
     };
   },
 });
 
-// Verify a document access token
-export const verifyDocumentToken = query({
-  args: {
-    token: v.string(),
-    documentId: v.id("documentUploads"),
-  },
-  handler: async (ctx, args) => {
-    // Find the token
-    const tokenRecord = await ctx.db
-      .query("documentAccessTokens")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
-      .first();
+// Note: Signature verification is handled in the HTTP endpoint
+// This function is kept for backward compatibility but is not actively used
 
-    if (!tokenRecord) {
-      return { isValid: false, userId: null };
-    }
+// Note: getDocumentInternal is not actively used
+// Document access is handled through getDocumentWithoutAuth and authorization in HTTP endpoint
 
-    // Check if token matches the document
-    if (tokenRecord.documentId !== args.documentId) {
-      return { isValid: false, userId: null };
-    }
-
-    // Check if token has expired
-    if (tokenRecord.expiresAt < Date.now()) {
-      return { isValid: false, userId: null };
-    }
-
-    // Token is valid
-    return { 
-      isValid: true, 
-      userId: tokenRecord.userId,
-    };
-  },
-});
-
-// Internal query to get document (for HTTP endpoint)
-export const getDocumentInternal = query({
+// Get document without authentication (for HMAC verification in HTTP endpoint)
+export const getDocumentWithoutAuth = query({
   args: {
     documentId: v.id("documentUploads"),
-    userId: v.id("users"),
   },
   handler: async (ctx, args) => {
     const document = await ctx.db.get(args.documentId);
@@ -114,26 +91,56 @@ export const getDocumentInternal = query({
       return null;
     }
 
-    // Get the application
+    // Return document data needed for serving the file
+    return {
+      storageFileId: document.storageFileId,
+      originalFileName: document.originalFileName,
+      applicationId: document.applicationId,
+    };
+  },
+});
+
+// Get all users who have access to a document (for HMAC verification)
+export const getUsersWithDocumentAccess = query({
+  args: {
+    documentId: v.id("documentUploads"),
+  },
+  handler: async (ctx, args) => {
+    const document = await ctx.db.get(args.documentId);
+    if (!document) {
+      return [];
+    }
+
     const application = await ctx.db.get(document.applicationId);
     if (!application) {
-      return null;
+      return [];
     }
 
-    // Verify user has access
-    const user = await ctx.db.get(args.userId);
-    const isOwner = application.userId === args.userId;
-    const isAdmin = user?.role === "admin" || user?.role === "inspector";
+    // Get all users who can access this document
+    const authorizedUsers: string[] = [];
     
-    if (!isOwner && !isAdmin) {
-      return null;
-    }
+    // Add the application owner
+    authorizedUsers.push(application.userId);
+    
+    // Add all admin and inspector users
+    const adminUsers = await ctx.db
+      .query("users")
+      .filter((q) => 
+        q.or(
+          q.eq(q.field("role"), "admin"),
+          q.eq(q.field("role"), "inspector")
+        )
+      )
+      .collect();
+    
+    adminUsers.forEach(user => authorizedUsers.push(user._id));
 
-    return document;
+    return authorizedUsers;
   },
 });
 
 // Get secure document URL for viewing (replaces direct storage URL)
+// This is an alias for generateDocumentToken for backward compatibility
 export const getSecureDocumentUrl = mutation({
   args: {
     documentId: v.id("documentUploads"),
@@ -175,111 +182,28 @@ export const getSecureDocumentUrl = mutation({
       throw new Error("Unauthorized access to document");
     }
 
-    // Check for existing valid token first
-    const existingToken = await ctx.db
-      .query("documentAccessTokens")
-      .filter((q) => 
-        q.and(
-          q.eq(q.field("documentId"), args.documentId),
-          q.eq(q.field("userId"), user._id),
-          q.gt(q.field("expiresAt"), Date.now())
-        )
-      )
-      .first();
-
-    let tokenString: string;
-    let expiresAt: number;
-
-    if (existingToken) {
-      // Use existing valid token
-      tokenString = existingToken.token;
-      expiresAt = existingToken.expiresAt;
-    } else {
-      // Generate a new secure random token
-      tokenString = generateSecureToken();
-      expiresAt = Date.now() + TOKEN_EXPIRY_MS;
-      
-      // Store token with expiry
-      await ctx.db.insert("documentAccessTokens", {
-        token: tokenString,
-        documentId: args.documentId,
-        userId: user._id,
-        createdAt: Date.now(),
-        expiresAt: expiresAt,
-        used: false,
-      });
+    // Get signing secret from environment
+    const signingSecret = process.env.DOCUMENT_SIGNING_SECRET;
+    if (!signingSecret) {
+      throw new Error("Document signing secret not configured");
     }
-    
-    // Get the base URL from environment or use default
-    const baseUrl = process.env.CONVEX_URL;
-    
-    // Construct secure URL
-    const secureUrl = `${baseUrl}/secure-document?documentId=${args.documentId}&token=${tokenString}`;
-    
+
+    // Calculate expiration time
+    const expiresAt = Date.now() + TOKEN_EXPIRY_MS;
+
+    // Generate HMAC-signed URL
+    const baseUrl = process.env.CONVEX_URL || '';
+    const signedUrl = await buildSignedUrl(
+      `${baseUrl}/secure-document`,
+      args.documentId,
+      expiresAt,
+      user._id,
+      signingSecret
+    );
+
     return {
-      url: secureUrl,
+      url: signedUrl,
       expiresAt: expiresAt,
     };
-  },
-});
-
-// Helper function to generate secure random token
-function generateSecureToken(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let token = '';
-  
-  for (let i = 0; i < 32; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  
-  // Add timestamp for additional uniqueness
-  token += Date.now().toString(36);
-  
-  return token;
-}
-
-// Mark a token as used (called when document is accessed)
-export const markTokenAsUsed = mutation({
-  args: {
-    token: v.string(),
-  },
-  handler: async (ctx, args) => {
-    // Find the token
-    const tokenRecord = await ctx.db
-      .query("documentAccessTokens")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
-      .first();
-    
-    if (!tokenRecord) {
-      throw new Error("Token not found");
-    }
-    
-    // Update the token to mark it as used
-    await ctx.db.patch(tokenRecord._id, {
-      used: true,
-    });
-    
-    return { success: true };
-  },
-});
-
-// Cleanup expired tokens (run periodically)
-export const cleanupExpiredTokens = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const now = Date.now();
-    
-    // Find expired tokens
-    const expiredTokens = await ctx.db
-      .query("documentAccessTokens")
-      .filter((q) => q.lt(q.field("expiresAt"), now))
-      .collect();
-    
-    // Delete expired tokens
-    for (const token of expiredTokens) {
-      await ctx.db.delete(token._id);
-    }
-    
-    return { deletedCount: expiredTokens.length };
   },
 });
