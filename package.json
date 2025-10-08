@@ -15,8 +15,7 @@
     "ios": "expo run:ios"
   },
   "devDependencies": {
-    "turbo": "latest",
-    "convex": "^1.12.0"
+    "turbo": "latest"
   },
   "pnpm": {
     "allowedScriptVersions": {
@@ -27,11 +26,9 @@
       "esbuild": "*",
       "sharp": "*",
       "unrs-resolver": "*"
+    },
+    "overrides": {
+      "expo-web-browser": "15.0.8"
     }
-  },
-  "dependencies": {
-    "expo": "^53.0.22",
-    "react": "^19.0.0",
-    "react-native": "^0.79.6"
   }
 }
