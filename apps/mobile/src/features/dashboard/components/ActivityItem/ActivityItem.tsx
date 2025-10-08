@@ -13,9 +13,10 @@ import {
 
 interface ActivityItemProps {
   activity: RecentActivity | Activity;
+  isLast?: boolean;
 }
 
-export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity }) => {
+export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity, isLast = false }) => {
   const getActivityIcon = () => {
     // Handle the different type formats between RecentActivity and Activity
     if ('type' in activity) {
@@ -46,7 +47,7 @@ export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity 
 
   return (
     <View 
-      style={styles.container}
+      style={[styles.container, isLast && styles.containerLast]}
       accessibilityLabel={`${activity.title}: ${activity.description}`}
       accessibilityHint={`Activity from ${formatTimestamp(activity.timestamp)}`}
     >
@@ -69,39 +70,40 @@ ActivityItem.displayName = 'ActivityItem';
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: scale(theme.spacing.md),
-    paddingVertical: verticalScale(theme.spacing.sm),
-    borderBottomWidth: moderateScale(1),
+    alignItems: 'flex-start',
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(14),
+    borderBottomWidth: 1,
     borderBottomColor: theme.colors.border.light,
   },
+  containerLast: {
+    borderBottomWidth: 0,
+  },
   icon: {
-    width: moderateScale(36),
-    height: moderateScale(36),
-    borderRadius: theme.borderRadius.full,
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(12),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: scale(theme.spacing.md),
+    marginRight: scale(12),
   },
   content: {
     flex: 1,
   },
   title: {
-    fontSize: moderateScale(theme.typography.bodySmall.fontSize),
+    fontSize: moderateScale(15),
     fontWeight: '600',
-    lineHeight: moderateScale(theme.typography.bodySmall.lineHeight),
     color: theme.colors.text.primary,
-    marginBottom: verticalScale(theme.spacing.xs / 2),
+    marginBottom: verticalScale(4),
   },
   description: {
-    fontSize: moderateScale(theme.typography.caption.fontSize),
-    lineHeight: moderateScale(16),
+    fontSize: moderateScale(13),
+    lineHeight: moderateScale(18),
     color: theme.colors.text.secondary,
-    marginBottom: verticalScale(theme.spacing.xs / 2),
+    marginBottom: verticalScale(4),
   },
   time: {
-    fontSize: moderateScale(11),
-    lineHeight: moderateScale(theme.typography.caption.lineHeight),
+    fontSize: moderateScale(12),
     color: theme.colors.text.tertiary,
   },
 });

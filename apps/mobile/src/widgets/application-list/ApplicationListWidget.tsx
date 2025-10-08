@@ -2,7 +2,6 @@ import {
   RefreshControl,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -13,6 +12,7 @@ import { EmptyState } from '@/src/shared/components/feedback';
 import { FilterStatus, SortOption } from '@/src/features/application/hooks/useApplicationList';
 import { moderateScale } from '@/src/shared/utils/responsive';
 import { theme } from '@/src/shared/styles/theme';
+import { ApplicationListHeader } from './ApplicationListHeader';
 import { styles } from './ApplicationListWidget.styles';
 
 // UI constants
@@ -63,87 +63,56 @@ export function ApplicationListWidget({
   getProgressText,
 }: ApplicationListWidgetProps) {
   
-  const renderHeader = () => {
+  const renderFilters = () => {
+    if (!showFilters) return null;
+    
     return (
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Applications</Text>
-          <TouchableOpacity 
-            style={styles.filterButton}
-            onPress={onToggleFilters}
-          >
-            <Ionicons name="filter" size={moderateScale(20)} color={theme.colors.accent.medicalBlue} />
-            <Text style={styles.filterButtonText}>Filter</Text>
-          </TouchableOpacity>
-        </View>
-       
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={moderateScale(20)} color={theme.colors.text.secondary} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search applications..."
-            value={searchQuery}
-            onChangeText={onSearchChange}
-            placeholderTextColor={theme.colors.text.secondary}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => onSearchChange('')}>
-              <Ionicons name="close" size={moderateScale(20)} color={theme.colors.text.secondary} />
-            </TouchableOpacity>
-          )}
+      <View style={styles.filtersContainer}>
+        <View style={styles.filterSection}>
+          <Text style={styles.filterLabel}>Status:</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {FILTER_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.filterChip,
+                  selectedFilter === option && styles.filterChipActive
+                ]}
+                onPress={() => onFilterChange(option)}
+              >
+                <Text style={[
+                  styles.filterChipText,
+                  selectedFilter === option && styles.filterChipTextActive
+                ]}>
+                  {option}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
         
-        {/* Filter and Sort Options */}
-        {showFilters && (
-          <View style={styles.filtersContainer}>
-            <View style={styles.filterSection}>
-              <Text style={styles.filterLabel}>Status:</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {FILTER_OPTIONS.map((option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.filterChip,
-                      selectedFilter === option && styles.filterChipActive
-                    ]}
-                    onPress={() => onFilterChange(option)}
-                  >
-                    <Text style={[
-                      styles.filterChipText,
-                      selectedFilter === option && styles.filterChipTextActive
-                    ]}>
-                      {option}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-            
-            <View style={styles.filterSection}>
-              <Text style={styles.filterLabel}>Sort by:</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {SORT_OPTIONS.map((option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.filterChip,
-                      selectedSort === option && styles.filterChipActive
-                    ]}
-                    onPress={() => onSortChange(option)}
-                  >
-                    <Text style={[
-                      styles.filterChipText,
-                      selectedSort === option && styles.filterChipTextActive
-                    ]}>
-                      {option}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          </View>
-        )}
+        <View style={styles.filterSection}>
+          <Text style={styles.filterLabel}>Sort by:</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {SORT_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.filterChip,
+                  selectedSort === option && styles.filterChipActive
+                ]}
+                onPress={() => onSortChange(option)}
+              >
+                <Text style={[
+                  styles.filterChipText,
+                  selectedSort === option && styles.filterChipTextActive
+                ]}>
+                  {option}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       </View>
     );
   };
@@ -337,42 +306,50 @@ export function ApplicationListWidget({
     );
   };
 
-  const renderEmptyState = () => {
-    return (
-      <EmptyState
-        icon="document-outline"
-        title="No Applications Found"
-        subtitle={
-          selectedFilter === 'All' 
-            ? "You haven't submitted any applications yet"
-            : `No applications with status: ${selectedFilter}`
-        }
-        actionText="Start New Application"
-        onActionPress={() => router.push('/(tabs)/apply')}
-      />
-    );
-  };
-
   return (
     <View style={styles.container}>
-      {renderHeader()}
+      {/* Green Header */}
+      <ApplicationListHeader
+        totalCount={applications.length}
+        searchQuery={searchQuery}
+        showFilters={showFilters}
+        onSearchChange={onSearchChange}
+        onToggleFilters={onToggleFilters}
+      />
       
       <ScrollView
-        style={styles.content}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary[500]}
+            colors={[theme.colors.primary[500]]}
+          />
         }
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 20 // Add padding to account for tab bar
-        }}
       >
-        {applications.length === 0 ? (
-          renderEmptyState()
-        ) : (
-          <View style={styles.applicationsList}>
+        {/* Filters Section */}
+        {renderFilters()}
+        
+        {/* Applications List */}
+        {applications.length > 0 ? (
+          <View style={styles.listContainer}>
             {applications.map(renderApplicationCard)}
           </View>
+        ) : (
+          <EmptyState
+            icon="document-outline"
+            title="No Applications Found"
+            subtitle={
+              selectedFilter === 'All' 
+                ? "You haven't submitted any applications yet"
+                : `No applications with status: ${selectedFilter}`
+            }
+            actionText="Start New Application"
+            onActionPress={() => router.push('/(tabs)/apply')}
+          />
         )}
       </ScrollView>
     </View>

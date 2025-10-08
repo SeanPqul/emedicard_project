@@ -12,6 +12,7 @@ import { ProfileLink } from '@/src/features/profile/components';
 import { SignOutButton } from '@/src/features/auth/components';
 import { moderateScale } from '@/src/shared/utils/responsive';
 import { styles } from './ProfileWidget.styles';
+import { ProfileHeader } from './ProfileHeader';
 
 interface ProfileWidgetProps {
   user: {
@@ -29,28 +30,13 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Profile Header */}
-        <View style={styles.header}>
-          <View style={styles.profilePictureContainer}>
-            {user.imageUrl ? (
-              <Image
-                source={{ uri: user.imageUrl }}
-                style={styles.profilePicture}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={[styles.profilePicture, { justifyContent: 'center', alignItems: 'center' }]}>
-                <Text style={{ fontSize: moderateScale(48) }}>👤</Text>
-              </View>
-            )}
-            <TouchableOpacity style={styles.editButton} onPress={() => router.push('/profile/edit')}>
-              <Ionicons name="pencil" size={moderateScale(16)} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.userName}>{user.displayName}</Text>
-          <Text style={styles.userEmail}>{user.email}</Text>
-          <Text style={styles.memberSince}>Member since {user.memberSince}</Text>
-        </View>
+        {/* Green Branded Header */}
+        <ProfileHeader
+          displayName={user.displayName}
+          email={user.email}
+          memberSince={user.memberSince}
+          imageUrl={user.imageUrl}
+        />
 
         {/* Personal Information Card */}
         <View style={styles.card}>

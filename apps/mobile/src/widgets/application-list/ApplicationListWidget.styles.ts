@@ -6,7 +6,17 @@ import { scale, verticalScale, moderateScale } from "@shared/utils/responsive";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5', // Light gray background matching UI/UX handoff
+    backgroundColor: theme.colors.background.secondary,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: verticalScale(20),
+  },
+  listContainer: {
+    paddingTop: verticalScale(theme.spacing.sm),
   },
   header: {
     backgroundColor: theme.colors.background.primary,

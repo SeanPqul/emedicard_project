@@ -43,6 +43,7 @@
     "ajv-keywords": "^5.1.0",
     "backend": "workspace:*",
     "convex": "^1.27.3",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.2.1",
     "expo": "54.0.12",
     "expo-auth-session": "^7.0.8",

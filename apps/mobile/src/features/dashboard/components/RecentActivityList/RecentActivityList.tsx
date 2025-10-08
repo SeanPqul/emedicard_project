@@ -44,8 +44,12 @@ export const RecentActivityList: React.FC<RecentActivityListProps> = ({ recentAc
       {recentActivities.length > 0 ? (
         <>
           <View style={styles.activityList}>
-            {displayedActivities.map((activity) => (
-              <ActivityItem key={activity.id} activity={activity} />
+            {displayedActivities.map((activity, index) => (
+              <ActivityItem 
+                key={activity.id} 
+                activity={activity}
+                isLast={index === displayedActivities.length - 1}
+              />
             ))}
           </View>
           
@@ -61,7 +65,7 @@ export const RecentActivityList: React.FC<RecentActivityListProps> = ({ recentAc
               <Ionicons 
                 name={isExpanded ? 'chevron-up' : 'chevron-down'} 
                 size={moderateScale(18)} 
-                color={theme.colors.blue[500]} 
+                color={theme.colors.primary[500]} 
               />
             </TouchableOpacity>
           )}
