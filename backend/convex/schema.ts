@@ -258,18 +258,7 @@ export default defineSchema({
     .index("by_admin", ["rejectedBy"])
     .index("by_replacement", ["wasReplaced"]),
 
-  // Document Access Tokens for secure, time-limited document access
-  documentAccessTokens: defineTable({
-    token: v.string(), // Unique secure token
-    documentId: v.id("documentUploads"), // The document this token grants access to
-    userId: v.id("users"), // The user who requested the token
-    createdAt: v.float64(), // When the token was created (timestamp)
-    expiresAt: v.float64(), // When the token expires (timestamp)
-    used: v.boolean(), // Whether the token has been used (for single-use tokens if needed)
-  })
-    .index("by_token", ["token"]) // For fast token lookup
-    .index("by_document", ["documentId"]) // For finding tokens by document
-    .index("by_user", ["userId"]) // For finding tokens by user
-    .index("by_expiry", ["expiresAt"]), // For efficient cleanup of expired tokens
+  // Note: documentAccessTokens table has been removed in favor of HMAC-signed URLs
+  // HMAC signatures provide stateless, secure document access without database storage
 
 });

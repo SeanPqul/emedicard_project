@@ -315,7 +315,7 @@ http.route({
   }),
 });
 
-// Secure Document Access Route
+// Secure Document Access Route with HMAC Verification
 http.route({
   path: "/secure-document",
   method: "GET",
@@ -323,37 +323,82 @@ http.route({
     try {
       // Get query parameters
       const url = new URL(request.url);
-      const token = url.searchParams.get("token");
+      const signature = url.searchParams.get("signature");
       const documentId = url.searchParams.get("documentId") as any;
+      const expiresAt = url.searchParams.get("expiresAt");
       
-      if (!token || !documentId) {
+      if (!signature || !documentId || !expiresAt) {
+        // Log potential malformed request or tampering
+        console.warn(`SECURITY: Missing params - sig=${!!signature} doc=${!!documentId} exp=${!!expiresAt}`);
         return new Response("Missing required parameters", { status: 400 });
       }
 
-      // Verify the access token
-      const tokenData = await ctx.runQuery(api.documents.secureAccessQueries.verifyDocumentToken, {
-        token,
-        documentId,
-      });
-
-      if (!tokenData.isValid || !tokenData.userId) {
-        return new Response("Invalid or expired token", { status: 403 });
+      // Parse expiration timestamp
+      const expiresAtNum = parseInt(expiresAt, 10);
+      if (isNaN(expiresAtNum)) {
+        // Log potential timestamp tampering
+        console.warn(`SECURITY: Invalid timestamp - doc=${documentId} value=${expiresAt}`);
+        return new Response("Invalid expiration timestamp", { status: 400 });
       }
-      
-      // Mark token as used
-      await ctx.runMutation(api.documents.secureAccessQueries.markTokenAsUsed, {
-        token,
-      });
 
-      // Get the document
-      const document = await ctx.runQuery(api.documents.secureAccessQueries.getDocumentInternal, {
+      // Check if URL has expired
+      if (Date.now() > expiresAtNum) {
+        // Log potential replay attack (using expired URL)
+        const minutesExpired = Math.round((Date.now() - expiresAtNum) / (60 * 1000));
+        console.warn(`SECURITY: Expired URL attempt - doc=${documentId} expired=${minutesExpired}min ago`);
+        return new Response("URL has expired", { status: 403 });
+      }
+
+      // Get signing secret from environment
+      const signingSecret = process.env.DOCUMENT_SIGNING_SECRET;
+      if (!signingSecret) {
+        console.error("Document signing secret not configured");
+        return new Response("Server configuration error", { status: 500 });
+      }
+
+      // Get the document first
+      const document = await ctx.runQuery(api.documents.secureAccessQueries.getDocumentWithoutAuth, {
         documentId,
-        userId: tokenData.userId,
       });
 
       if (!document || !document.storageFileId) {
         return new Response("Document not found", { status: 404 });
       }
+
+      // Get all users who have access to this document
+      const authorizedUserIds = await ctx.runQuery(api.documents.secureAccessQueries.getUsersWithDocumentAccess, {
+        documentId,
+      });
+
+      // Import HMAC verification function dynamically
+      const { verifyHmacSignature } = await import('./documents/hmacUtils');
+
+      // Try to verify signature against each authorized user
+      let isValidSignature = false;
+      let verificationAttempts = 0;
+      for (const userId of authorizedUserIds) {
+        verificationAttempts++;
+        const isValid = await verifyHmacSignature(
+          signature,
+          documentId,
+          expiresAtNum,
+          userId,
+          signingSecret
+        );
+        if (isValid) {
+          isValidSignature = true;
+          break;
+        }
+      }
+
+      if (!isValidSignature) {
+        // Log potential tampering attempt (signature doesn't match any authorized user)
+        console.error(`SECURITY: Invalid signature - doc=${documentId} attempts=${verificationAttempts} sig=${signature.substring(0, 8)}...`);
+        return new Response("Invalid signature", { status: 403 });
+      }
+
+      // Log successful access for audit
+      console.log(`Document accessed: doc=${documentId} file=${document.originalFileName}`);
 
       // Get the file blob from storage
       const blob = await ctx.storage.get(document.storageFileId);
