@@ -9,7 +9,7 @@ import {
   PaymentSubmissionData,
   PaymentFlowResult,
   PaymentServices,
-} from '@features/payment/lib';
+} from '@features/payment';
 
 // Error handling
 import { AppError, AppErrorType } from '@shared/lib/errors';

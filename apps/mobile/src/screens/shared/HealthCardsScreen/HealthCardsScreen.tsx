@@ -19,7 +19,7 @@ import {
   generateVerificationUrl, 
   formatDate, 
   generateCardHtml
-} from '@features/healthCards/lib';
+} from '@features/healthCards';
 import { HealthCardsHeader } from './HealthCardsHeader';
 
 

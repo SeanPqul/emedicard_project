@@ -11,7 +11,7 @@ import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-document-requirements';
 import { JobCategory } from '@entities/jobCategory/model/types';
 import { useJobCategories } from '@features/jobCategory/hooks';
-import { getHealthCardTypeName, getPaymentMethods } from '@features/healthCards/lib';
+import { getHealthCardTypeName, getPaymentMethods } from '@features/healthCards';
 
 interface Requirement {
   name: string;
