@@ -6,12 +6,6 @@ import { formStorage } from '../services/formStorage';
 import { SelectedDocuments } from '@shared/types';
 import { DocumentRequirement } from '@/src/entities/application/model/types';
 
-// Extend the ApplicationFormData to include payment fields
-interface ExtendedApplicationFormData extends ApplicationFormData {
-  paymentMethod?: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall' | '';
-  paymentReference?: string;
-}
-
 interface UseApplicationFormProps {
   showSuccess: (title: string, message: string) => void;
   showError: (title: string, message?: string) => void;

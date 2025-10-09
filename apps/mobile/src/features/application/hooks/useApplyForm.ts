@@ -8,7 +8,7 @@ import { useApplicationForm } from './useApplicationForm';
 import { useDocumentSelection } from './useDocumentSelection';
 import { useSubmission } from './useSubmission';
 import { useFeedback } from '@/src/shared/components/feedback';
-import { transformRequirements } from '@/src/entities/application/lib/requirementsMapper';
+import { transformRequirements } from '@entities/application';
 import { STEP_TITLES } from '@/src/features/application/constants';
 import { DocumentRequirement } from '@/src/entities/application/model/types';
 import { JobCategory } from '@/src/entities/jobCategory/model/types';
