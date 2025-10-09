@@ -9,7 +9,12 @@ const config = getDefaultConfig(projectRoot);
 // SVG support
 config.transformer.babelTransformerPath = require.resolve('react-native-svg-transformer');
 config.resolver.assetExts = config.resolver.assetExts.filter((ext) => ext !== 'svg');
-config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
+config.resolver.sourceExts = [
+  'ts',
+  'tsx',
+  ...config.resolver.sourceExts.filter(ext => ext !== 'ts' && ext !== 'tsx'),
+  'svg',
+];
 
 // Watch other workspaces (so imports from backend/packages work)
 config.watchFolders = [
