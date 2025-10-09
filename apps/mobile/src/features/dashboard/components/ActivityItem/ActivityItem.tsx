@@ -9,7 +9,7 @@ import {
   getActivityIcon as getIcon, 
   getActivityStatusColor, 
   formatTimestamp 
-} from '@entities/activity/lib';
+} from '@entities/activity';
 
 interface ActivityItemProps {
   activity: RecentActivity | Activity;

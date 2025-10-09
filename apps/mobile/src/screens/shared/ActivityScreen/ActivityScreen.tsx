@@ -8,12 +8,12 @@ import { api } from '@backend/convex/_generated/api';
 import { EmptyState } from '@shared/components';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-activity';
-import { Activity } from '@entities/activity';
-import {
+import { 
+  Activity,
   getActivityIcon,
   getActivityStatusColor,
   formatTimestamp
-} from '@entities/activity/lib';
+} from '@entities/activity';
 import { ACTIVITY_FILTERS } from '@features/activity/constants';
 import { useDashboardData } from '@features/dashboard/hooks/useDashboardData';
 

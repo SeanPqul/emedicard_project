@@ -164,7 +164,7 @@ export function ViewDocumentsScreen() {
         
         // Create a filename for the download
         const fileName = viewingDocument.originalFileName;
-        const fileUri = FileSystem.documentDirectory + fileName;
+        const fileUri = (FileSystem as any).documentDirectory ? `${(FileSystem as any).documentDirectory}${fileName}` : fileName;
         
         // Download the file
         const downloadResult = await FileSystem.downloadAsync(
