@@ -29,6 +29,15 @@
     },
     "overrides": {
       "expo-web-browser": "15.0.8"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@clerk/shared",
+      "@tailwindcss/oxide",
+      "browser-tabs-lock",
+      "core-js",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }

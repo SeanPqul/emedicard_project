@@ -1,5 +1,5 @@
-import { mutation } from "../../_generated/server";
 import { v } from "convex/values";
+import { mutation } from "../../_generated/server";
 
 export const rejectDocument = mutation({
   args: {
@@ -52,6 +52,12 @@ export const rejectDocument = mutation({
       throw new Error("Document type not found");
     }
 
+    // Get file details from storage
+    const file = await ctx.storage.getMetadata(documentUpload.storageFileId);
+    if (!file) {
+      throw new Error("File not found in storage");
+    }
+
     // Check if document is already rejected
     if (documentUpload.reviewStatus === "Rejected") {
       throw new Error("Document is already rejected");
@@ -77,8 +83,8 @@ export const rejectDocument = mutation({
       // Preserve file data
       rejectedFileId: documentUpload.storageFileId,
       originalFileName: documentUpload.originalFileName,
-      fileSize: 0, // We'll need to get this from storage or add to documentUploads
-      fileType: "application/pdf", // Default, should be stored in documentUploads
+      fileSize: file.size,
+      fileType: file.contentType || "application/octet-stream", // Provide a default if null
       
       // Rejection information
       rejectionCategory: args.rejectionCategory,

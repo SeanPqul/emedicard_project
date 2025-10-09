@@ -1,5 +1,6 @@
 "use client";
 
+import AdminNotificationDropdown from "@/components/AdminNotificationDropdown"; // Import the new component
 import CustomUserButton from '@/components/CustomUserButton';
 import DateRangeFilterDropdown from '@/components/DateRangeFilterDropdown';
 import ErrorMessage from "@/components/ErrorMessage";
@@ -8,7 +9,6 @@ import { Doc, Id } from "@/convex/_generated/dataModel";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useAction, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
-import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import {
@@ -183,36 +183,48 @@ export default function SuperAdminPage() {
   const { isLoaded: isClerkLoaded, user } = useUser();
   const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
   const jobCategories = useQuery(api.jobCategories.getManaged.get);
-  const { totalApplications, applicationsByStatus } =
-    useQuery(api.superAdmin.queries.getApplicationStats, user ? { startDate, endDate } : "skip") || {
-      totalApplications: 0,
-      applicationsByStatus: {},
-    };
+  const { totalApplications, applicationsByStatus } = useQuery(
+    api.superAdmin.queries.getApplicationStats,
+    isClerkLoaded && user ? { startDate, endDate } : "skip"
+  ) || { totalApplications: 0, applicationsByStatus: {} };
 
-  const totalRegisteredAdmins =
-    useQuery(api.superAdmin.queries.getTotalRegisteredAdmins, user ? {} : "skip") || 0;
+  const totalRegisteredAdmins = useQuery(
+    api.superAdmin.queries.getTotalRegisteredAdmins,
+    isClerkLoaded && user ? {} : "skip"
+  ) || 0;
 
   const currentYear = new Date().getFullYear();
-  const applicantsOverTime =
-    useQuery(api.superAdmin.queries.getApplicantsOverTime, user ? { year: currentYear } : "skip") || {};
+  const applicantsOverTime = useQuery(
+    api.superAdmin.queries.getApplicantsOverTime,
+    isClerkLoaded && user ? { year: currentYear } : "skip"
+  ) || {};
 
-  const applicantsByHealthCardType =
-    useQuery(api.superAdmin.queries.getApplicantsByHealthCardType, user ? { startDate, endDate } : "skip") || {};
-  const adminsByHealthCardType =
-    useQuery(api.superAdmin.queries.getAdminsByHealthCardType, user ? {} : "skip") || {};
-  const averageApprovalTime =
-    useQuery(api.superAdmin.queries.getAverageApprovalTime, user ? { startDate, endDate } : "skip") || 0;
-  const applicationTrends =
-    useQuery(api.superAdmin.queries.getApplicationTrends, user ? { year: currentYear } : "skip") || {
-      mostSubmittedMonth: "N/A",
-      mostSubmittedDay: "N/A",
-    };
-  const mostActiveAdmins =
-    useQuery(api.superAdmin.queries.getMostActiveAdmins, user ? { startDate, endDate, limit: 5 } : "skip") || [];
+  const applicantsByHealthCardType = useQuery(
+    api.superAdmin.queries.getApplicantsByHealthCardType,
+    isClerkLoaded && user ? { startDate, endDate } : "skip"
+  ) || {};
+  const adminsByHealthCardType = useQuery(
+    api.superAdmin.queries.getAdminsByHealthCardType,
+    isClerkLoaded && user ? {} : "skip"
+  ) || {};
+  const averageApprovalTime = useQuery(
+    api.superAdmin.queries.getAverageApprovalTime,
+    isClerkLoaded && user ? { startDate, endDate } : "skip"
+  ) || 0;
+  const applicationTrends = useQuery(
+    api.superAdmin.queries.getApplicationTrends,
+    isClerkLoaded && user ? { year: currentYear } : "skip"
+  ) || { mostSubmittedMonth: "N/A", mostSubmittedDay: "N/A" };
+  const mostActiveAdmins = useQuery(
+    api.superAdmin.queries.getMostActiveAdmins,
+    isClerkLoaded && user ? { startDate, endDate, limit: 5 } : "skip"
+  ) || [];
 
   // Use the new query for all admin activities
-  const allAdminActivities: AdminActivityLogWithApplicantName[] =
-    useQuery(api.admin.activityLogs.getAllAdminActivities, user ? {} : "skip") || [];
+  const allAdminActivities: AdminActivityLogWithApplicantName[] = useQuery(
+    api.admin.activityLogs.getAllAdminActivities,
+    isClerkLoaded && user ? {} : "skip"
+  ) || [];
 
   const handleClearFilter = () => {
     setStartDate(undefined);
@@ -303,7 +315,7 @@ export default function SuperAdminPage() {
     );
   }
   if (!user) return <RedirectToSignIn />;
-  if (!adminPrivileges.isAdmin || adminPrivileges.managedCategories !== "all") {
+  if (!adminPrivileges || adminPrivileges.managedCategories !== "all") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <ErrorMessage
@@ -328,26 +340,7 @@ export default function SuperAdminPage() {
             </span>
           </div>
           <div className="flex items-center gap-5">
-            <Link
-              href="/dashboard/notification-management"
-              className="text-gray-500 hover:text-emerald-600"
-              title="Manage Notifications"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-            </Link>
+            <AdminNotificationDropdown /> {/* Use the new notification dropdown component */}
             <CustomUserButton />
           </div>
         </div>
