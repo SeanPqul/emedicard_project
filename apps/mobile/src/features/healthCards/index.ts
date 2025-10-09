@@ -1,3 +1,16 @@
 export * from './hooks';
 export { HealthCardExample } from './HealthCardExample';
-export * from './lib';
+
+// Export lib utilities explicitly to avoid path resolution issues
+export {
+  type HealthCardData,
+  type BackendHealthCard,
+  getCardColor,
+  getCardStatus,
+  getStatusColor,
+  generateVerificationUrl,
+  formatDate,
+  generateCardHtml,
+  getHealthCardTypeName,
+  getPaymentMethods
+} from './lib/health-card-display-utils';
