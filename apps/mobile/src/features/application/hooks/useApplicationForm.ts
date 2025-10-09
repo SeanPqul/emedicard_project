@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { validateApplicationStep, ApplicationFormData } from '../lib/validation';
+import { validateApplicationStep, ApplicationFormData } from '@features/application';
 import { formStorage } from '../services/formStorage';
 import { SelectedDocuments } from '@shared/types';
 import { DocumentRequirement } from '@/src/entities/application/model/types';
