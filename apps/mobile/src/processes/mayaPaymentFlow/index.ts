@@ -71,10 +71,10 @@
 // Export everything from model (hooks, types, constants)
 export * from './model';
 
-// Export utilities via barrel export for proper path resolution in EAS builds
+// Export utilities directly from source file for EAS build compatibility
 export {
   formatCurrency,
   calculateTotalAmount,
   getPaymentStatusMessage,
   generatePaymentReference,
-} from './lib';
+} from './lib/utils';

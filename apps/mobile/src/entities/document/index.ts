@@ -1,3 +1,4 @@
 // Document entity exports
 export * from './model';
-export * from './lib';
+// Export lib utilities directly from source file for EAS build compatibility
+export * from './lib/rejection-utils';
