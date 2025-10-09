@@ -2,8 +2,8 @@
 export * from './components';
 export * from './hooks';
 
-// Export lib utilities (validation)
-export { validateApplicationStep } from './lib/validation';
+// Export lib utilities via barrel export for proper path resolution in EAS builds
+export { validateApplicationStep } from './lib';
 
 // Export services
 export * from './services';

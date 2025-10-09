@@ -1,7 +1,7 @@
 export * from './hooks';
 export { HealthCardExample } from './HealthCardExample';
 
-// Export lib utilities explicitly to avoid path resolution issues
+// Export lib utilities via barrel export for proper path resolution in EAS builds
 export {
   type HealthCardData,
   type BackendHealthCard,
@@ -13,4 +13,4 @@ export {
   generateCardHtml,
   getHealthCardTypeName,
   getPaymentMethods
-} from './lib/health-card-display-utils';
+} from './lib';
