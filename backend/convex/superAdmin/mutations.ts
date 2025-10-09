@@ -66,18 +66,18 @@ export const createAdmin = action({ // Changed to action
 
     // 3. Update/Create user in Convex using runMutation
     // First, check if the user exists in Convex
-    const existingConvexUser = await ctx.runQuery(api.users.usersMain.getUserByClerkId, { clerkId: clerkUser.id });
+    const existingConvexUser = await ctx.runQuery(api.users.index.getUserByClerkId, { clerkId: clerkUser.id });
 
     if (existingConvexUser) {
       // Update existing user
-      await ctx.runMutation(api.users.usersMain.patchUserRoleAndCategories, {
+      await ctx.runMutation(api.users.index.patchUserRoleAndCategories, {
         userId: existingConvexUser._id,
         role: "admin",
         managedCategories: args.managedCategoryIds,
       });
     } else {
       // Create new user in Convex
-      await ctx.runMutation(api.users.usersMain.systemCreateUser, {
+      await ctx.runMutation(api.users.index.systemCreateUser, {
         clerkId: clerkUser.id,
         email: args.email,
         fullname: clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : args.email,

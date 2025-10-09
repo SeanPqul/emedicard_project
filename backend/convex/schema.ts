@@ -63,6 +63,7 @@ export default defineSchema({
     reviewedBy: v.optional(v.id("users")),
     storageFileId: v.id("_storage"),
     uploadedAt: v.float64(),
+    fileType: v.string(), // Added for classification
   })
     .index("by_application", ["applicationId"])
     .index("by_application_document", [
@@ -100,7 +101,10 @@ export default defineSchema({
     notificationType: v.string(),
     title: v.optional(v.string()),
     userId: v.id("users"),
-  }).index("by_user", ["userId"]),
+    jobCategoryId: v.optional(v.id("jobCategories")),
+  }).index("by_user", ["userId"])
+    .index("by_user_jobCategory", ["userId", "jobCategoryId"])
+    .index("by_user_isRead", ["userId", "isRead"]),
   orientations: defineTable({
     applicationId: v.id("applications"),
     checkInTime: v.optional(v.float64()),
@@ -199,9 +203,11 @@ export default defineSchema({
 
   adminActivityLogs: defineTable({
     adminId: v.id("users"),
-    adminUsername: v.string(),
-    adminEmail: v.string(),
-    action: v.string(), // e.g., "approved document", "rejected document", "approved application"
+    activityType: v.optional(v.string()), // e.g., "document_rejection", "payment_validation"
+    details: v.optional(v.string()),
+    adminUsername: v.optional(v.string()), // Temporarily optional for schema migration
+    adminEmail: v.optional(v.string()),   // Temporarily optional for schema migration
+    action: v.optional(v.string()),       // Temporarily optional for schema migration
     comment: v.optional(v.string()),
     timestamp: v.float64(),
     applicationId: v.optional(v.id("applications")),

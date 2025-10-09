@@ -1,7 +1,6 @@
 // src/app/dashboard/page.tsx
 'use client';
 
-import CustomUserButton from '@/components/CustomUserButton';
 import DashboardActivityLog from '@/components/DashboardActivityLog';
 import ErrorMessage from "@/components/ErrorMessage";
 import { api } from "@/convex/_generated/api";
@@ -11,6 +10,7 @@ import { useQuery } from "convex/react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import Navbar from '@/components/shared/Navbar';
 
 type ApplicationWithDetails = Doc<"applications"> & { userName: string; jobCategoryName: string };
 
@@ -106,22 +106,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/*Navbar */}
-      <nav className="bg-white shadow-md w-full sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center"><span className="text-white font-bold text-xl">eM</span></div>
-            <span className="text-2xl font-bold text-gray-800">eMediCard</span>
-          </div>
-          <div className="flex items-center gap-5">
-            <Link href="/dashboard/notification-management" className="text-gray-500 hover:text-emerald-600" title="Manage Notifications">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-            </Link>
-            <DashboardActivityLog />
-            <CustomUserButton />
-          </div>
-        </div>
-      </nav>
+      <Navbar>
+        <DashboardActivityLog />
+      </Navbar>
       
       <main className="max-w-7xl mx-auto py-8 px-6">
         <header className="mb-8">

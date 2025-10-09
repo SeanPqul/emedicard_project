@@ -1,6 +1,6 @@
 // convex/applications/getWithDocuments.ts
-import { query } from "../_generated/server";
 import { v } from "convex/values";
+import { query } from "../_generated/server";
 
 export const get = query({
   args: { id: v.id("applications") },

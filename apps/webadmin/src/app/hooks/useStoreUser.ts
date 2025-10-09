@@ -1,11 +1,10 @@
 // src/app/hooks/useStoreUser.ts
 
-import { useUser } from "@clerk/nextjs";
-import { useConvexAuth } from "convex/react";
-import { useEffect, useState } from "react";
-import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel"; // Import the Id type
+import { useUser } from "@clerk/nextjs";
+import { useConvexAuth, useMutation } from "convex/react";
+import { useEffect, useState } from "react";
 
 export const useStoreUser = () => {
   const { isAuthenticated } = useConvexAuth();
@@ -15,7 +14,7 @@ export const useStoreUser = () => {
   const [userId, setUserId] = useState<Id<"users"> | null>(null);
   
   // This mutation now correctly takes no arguments
-  const storeUser = useMutation(api.users.usersMain.getOrCreateUser);
+  const storeUser = useMutation(api.users.index.getOrCreateUser);
 
   useEffect(() => {
     // If the user is not logged in, do nothing.

@@ -114,10 +114,8 @@ export const updateApplicantStatus = mutation({
     // Log admin activity for application status update
     await ctx.db.insert("adminActivityLogs", {
       adminId: adminUser._id,
-      adminUsername: adminUser.username,
-      adminEmail: adminUser.email,
-      action: `updated application for ${applicant.fullname} to ${status}`,
-      comment: remarks,
+      activityType: "application_status_update",
+      details: `Updated application for ${applicant.fullname} to ${status}. ${remarks ? `Remarks: ${remarks}` : ""}`,
       timestamp: Date.now(),
       applicationId: existingForm._id,
       jobCategoryId: existingForm.jobCategoryId, // Ensure jobCategoryId is always included
@@ -174,10 +172,8 @@ export const verifyDocument = mutation({
     // Log admin activity
     await ctx.db.insert("adminActivityLogs", {
       adminId: adminUser._id,
-      adminUsername: adminUser.username,
-      adminEmail: adminUser.email,
-      action: `${status.toLowerCase()} document '${docName}' for ${applicant.fullname}`,
-      comment: remarks,
+      activityType: "document_verification",
+      details: `${status.toLowerCase()} document '${docName}' for ${applicant.fullname}. ${remarks ? `Remarks: ${remarks}` : ""}`,
       timestamp: Date.now(),
       documentUploadId: documentUploadId,
       applicationId: application._id, // Ensure applicationId is always included

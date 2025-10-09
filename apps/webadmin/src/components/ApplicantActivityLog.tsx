@@ -8,6 +8,10 @@ import React, { useState } from 'react';
 // Define the type for an activity log entry with applicant name
 type AdminActivityLogWithApplicantName = Doc<"adminActivityLogs"> & {
   applicantName?: string;
+  admin?: {
+    fullname?: string;
+    email?: string;
+  };
 };
 
 interface ApplicantActivityLogProps {
@@ -46,7 +50,7 @@ const ApplicantActivityLog: React.FC<ApplicantActivityLogProps> = ({ application
             {activityLogs?.map((activity: AdminActivityLogWithApplicantName) => (
               <div key={activity._id} className="mb-3 pb-3 border-b border-gray-100 last:border-b-0">
                 <p className="text-sm text-gray-800 font-medium">
-                  <span className="font-bold">{activity.adminUsername}</span> {activity.action.toLowerCase()}
+                  <span className="font-bold">{activity.admin?.fullname}</span> ({activity.admin?.email}) {(activity.details || activity.action || "performed an action").toLowerCase()}
                   {activity.applicantName && ` for `}
                   {activity.applicantName && <span className="font-bold">{activity.applicantName}</span>}.
                 </p>

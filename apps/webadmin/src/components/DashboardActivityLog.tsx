@@ -8,6 +8,10 @@ import { useEffect, useRef, useState } from 'react';
 // Define the type for an activity log entry
 type AdminActivityLog = Doc<"adminActivityLogs"> & {
   applicantName?: string; // To be populated on the frontend or extended in the backend query
+  admin?: {
+    fullname?: string;
+    email?: string;
+  };
 };
 
 // Helper to format time nicely (e.g., "1 hour ago")
@@ -71,7 +75,7 @@ export default function DashboardActivityLog() {
             {recentActivities && recentActivities.map((activity: AdminActivityLog) => (
               <div key={activity._id} className="px-4 py-3 hover:bg-gray-50">
                 <p className="text-sm font-medium text-gray-800">
-                  <span className="font-bold">{activity.adminUsername}</span> ({activity.adminEmail}) {activity.action.toLowerCase()}
+                  <span className="font-bold">{activity.admin?.fullname}</span> ({activity.admin?.email}) {(activity.details || activity.action || "performed an action").toLowerCase()}
                   {activity.applicantName && ` for `}
                   {activity.applicantName && <span className="font-bold">{activity.applicantName}</span>}.
                 </p>

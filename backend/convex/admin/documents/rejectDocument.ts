@@ -17,6 +17,7 @@ export const rejectDocument = mutation({
     specificIssues: v.array(v.string()),
   },
   handler: async (ctx, args) => {
+    try {
     // 1. Verify admin permissions
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -132,12 +133,31 @@ export const rejectDocument = mutation({
       });
     }
 
-    // 8. Return success with rejection ID
+    // 8. Create admin activity log
+    await ctx.db.insert("adminActivityLogs", {
+      adminId: admin._id,
+      activityType: "document_rejection",
+      // Truncate if necessary
+      details: `Rejected ${documentType.name} for application ${application._id}. Reason: ${args.rejectionReason}`.substring(0, 500),
+      applicationId: application._id,
+      timestamp: Date.now(),
+    });
+
+    // 9. Return success with rejection ID
     return {
       success: true,
       rejectionId: rejectionHistoryId,
       message: `Document ${documentType.name} has been rejected successfully`,
       attemptNumber: attemptNumber,
     };
+    } catch (error) {
+      console.error("Error rejecting document:", error);
+      // Provide a more specific error message if possible
+      const message = error instanceof Error ? error.message : "An unknown error occurred";
+      return {
+        success: false,
+        message: `Failed to reject document: ${message}`,
+      };
+    }
   },
 });

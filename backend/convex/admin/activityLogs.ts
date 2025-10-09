@@ -61,7 +61,22 @@ export const getRecentAdminActivities = query({
       })
     );
 
-    return activitiesWithApplicantNames;
+    const activitiesWithAdminAndApplicantNames = await Promise.all(
+      activities.map(async (activity) => {
+        const admin = await ctx.db.get(activity.adminId);
+        let applicantName = undefined;
+        if (activity.applicationId) {
+          const application = await ctx.db.get(activity.applicationId);
+          if (application) {
+            const applicant = await ctx.db.get(application.userId);
+            applicantName = applicant?.fullname;
+          }
+        }
+        return { ...activity, admin: { fullname: admin?.fullname, email: admin?.email }, applicantName };
+      })
+    );
+
+    return activitiesWithAdminAndApplicantNames;
   },
 });
 
@@ -104,20 +119,22 @@ export const getAllAdminActivities = query({
       activities = allActivities;
     }
 
-    // Fetch applicant names for each activity
-    const activitiesWithApplicantNames = await Promise.all(
+    // Fetch admin and applicant names for each activity
+    const activitiesWithAdminAndApplicantNames = await Promise.all(
       activities.map(async (activity) => {
+        const admin = await ctx.db.get(activity.adminId);
+        let applicantName = undefined;
         if (activity.applicationId) {
           const application = await ctx.db.get(activity.applicationId);
           if (application) {
             const applicant = await ctx.db.get(application.userId);
-            return { ...activity, applicantName: applicant?.fullname };
+            applicantName = applicant?.fullname;
           }
         }
-        return activity;
+        return { ...activity, admin: { fullname: admin?.fullname, email: admin?.email }, applicantName };
       })
     );
-    return activitiesWithApplicantNames;
+    return activitiesWithAdminAndApplicantNames;
   },
 });
 
@@ -154,19 +171,21 @@ export const getApplicationActivityLogs = query({
       .order("desc")
       .collect();
 
-    // Fetch applicant names for each activity
-    const activitiesWithApplicantNames = await Promise.all(
+    // Fetch admin and applicant names for each activity
+    const activitiesWithAdminAndApplicantNames = await Promise.all(
       activities.map(async (activity) => {
+        const admin = await ctx.db.get(activity.adminId);
+        let applicantName = undefined;
         if (activity.applicationId) {
           const application = await ctx.db.get(activity.applicationId);
           if (application) {
             const applicant = await ctx.db.get(application.userId);
-            return { ...activity, applicantName: applicant?.fullname };
+            applicantName = applicant?.fullname;
           }
         }
-        return activity;
+        return { ...activity, admin: { fullname: admin?.fullname, email: admin?.email }, applicantName };
       })
     );
-    return activitiesWithApplicantNames;
+    return activitiesWithAdminAndApplicantNames;
   },
 });
