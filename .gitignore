@@ -24,7 +24,10 @@ yarn.lock
 dist/
 build/
 out/
-lib/
+# Exclude lib/ build output but NOT source code in apps
+/lib/
+backend/lib/
+apps/webadmin/lib/
 es/
 cjs/
 .expo/
@@ -36,6 +39,8 @@ packages/*/build/
 packages/*/lib/
 packages/*/es/
 packages/*/cjs/
+# Allow source code lib/ directories in mobile app
+!apps/mobile/src/**/lib/
 
 # ────────────────
 # Native (Mobile)
