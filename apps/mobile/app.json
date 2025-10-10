@@ -20,11 +20,14 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "READ_MEDIA_IMAGES",
-        "READ_MEDIA_VIDEO"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_MEDIA_AUDIO"
       ]
     },
     "web": {
@@ -74,7 +77,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "acf3dd45-f763-45e0-9b89-156b66188fda"
+        "projectId": "4f8ab9c4-a643-4db9-83b0-bfb3f8ac0c74"
       }
     }
   }
