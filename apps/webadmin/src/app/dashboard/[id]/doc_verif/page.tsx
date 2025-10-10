@@ -2,20 +2,53 @@
 'use client';
 
 import ApplicantActivityLog from '@/components/ApplicantActivityLog';
-import CustomUserButton from '@/components/CustomUserButton';
+import ErrorMessage from '@/components/ErrorMessage';
+import SuccessMessage from '@/components/SuccessMessage';
+import Navbar from '@/components/shared/Navbar';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-// NEW: Import your beautiful new ErrorMessage component
-import ErrorMessage from '@/components/ErrorMessage';
-import SuccessMessage from '@/components/SuccessMessage'; // Import SuccessMessage
+import React, { useEffect, useState } from 'react';
 
 // --- Data Structures ---
 interface AppError { title: string; message: string; }
+
+type ChecklistItemWithClassification = {
+  _id: Id<"jobCategoryDocuments">;
+  requirementName: string;
+  status: string;
+  fileUrl: string | null;
+  uploadId: Id<"documentUploads"> | null;
+  remarks: string | null;
+  isRequired: boolean;
+  classificationData?: {
+    documentType?: string;
+    labels?: string[];
+    text?: string;
+    isPotentiallyBlurry?: boolean;
+    error?: string;
+    message?: string;
+  };
+};
+
+type ApplicationData = {
+  applicantName: string;
+  jobCategoryName: string;
+  checklist: ChecklistItemWithClassification[];
+};
+
 const createAppError = (message: string, title: string = 'Invalid Input'): AppError => ({ title, message });
 const remarkOptions = [ 'Invalid Government-issued ID', 'Missing Documents Request', 'Unclear Drug Test Results', 'Medical Follow-up Required', 'Others' ];
+const rejectionCategories = [
+  { value: 'quality_issue', label: 'Quality Issue' },
+  { value: 'wrong_document', label: 'Wrong Document' },
+  { value: 'expired_document', label: 'Expired Document' },
+  { value: 'incomplete_document', label: 'Incomplete Document' },
+  { value: 'invalid_document', label: 'Invalid Document' },
+  { value: 'format_issue', label: 'Format Issue' },
+  { value: 'other', label: 'Other' },
+];
 
 // --- Helper Components for this page ---
 const StatusBadge = ({ status }: { status: string }) => {
@@ -38,56 +71,64 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const params = React.use(paramsPromise);
   // --- STATE MANAGEMENT ---
   const [viewModalDocUrl, setViewModalDocUrl] = useState<string | null>(null);
-  // NEW: State for error messages, connected to your component
-  const [error, setError] = useState<AppError | null>(null); // Use AppError type
-  const [successMessage, setSuccessMessage] = useState<string | null>(null); // State for success messages
+  const [error, setError] = useState<AppError | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [openRemarkIndex, setOpenRemarkIndex] = useState<number | null>(null);
   const [selectedRemark, setSelectedRemark] = useState<string>('');
+  const [rejectionCategory, setRejectionCategory] = useState('other');
+  const [specificIssues, setSpecificIssues] = useState('');
   const router = useRouter();
 
   // --- DATA FETCHING ---
-  const data = useQuery(api.applications.getWithDocuments.get, { id: params.id });
+  const getDocumentsWithClassification = useAction(api.applications.getDocumentsWithClassification.get);
+  const [data, setData] = useState<ApplicationData | null>(null);
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
+  const rejectDocumentMutation = useMutation(api.admin.documents.rejectDocument.rejectDocument);
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const result = await getDocumentsWithClassification({ id: params.id });
+      setData(result);
+    };
+    loadData();
+  }, [getDocumentsWithClassification, params.id]);
 
   // --- HANDLER FUNCTIONS ---
   const handleStatusChange = async (index: number, uploadId: Id<'documentUploads'>, newStatus: 'Approved' | 'Rejected') => {
-    setError(null); // Clear any previous errors when the user takes an action
+    setError(null);
     if (newStatus === 'Rejected') {
-      setSelectedRemark(data?.checklist[index].remarks || ''); // Pre-fill if remark exists
+      setSelectedRemark(data?.checklist[index].remarks || '');
       setOpenRemarkIndex(index);
     } else {
-      setOpenRemarkIndex(null); // Close remark card if approved
-      await reviewDocument({ documentUploadId: uploadId, status: newStatus, remarks: "" });
+      setOpenRemarkIndex(null);
+      await reviewDocument({ documentUploadId: uploadId, status: newStatus, remarks: '' });
     }
   };
 
   const handleFinalize = async (newStatus: 'Approved' | 'Rejected') => {
     try {
-      setError(null); // Clear previous errors
-      // This is the validation logic from your prototype, now connected to real data!
-      const pendingDocs = data?.checklist.filter(doc => doc.status === 'Missing' || doc.status === 'Pending');
+      setError(null);
+      const pendingDocs = data?.checklist.filter((doc: ChecklistItemWithClassification) => doc.status === 'Missing' || doc.status === 'Pending');
       if (pendingDocs && pendingDocs.length > 0) {
         throw new Error("Please review and assign a status (Approve or Reject) to all documents before proceeding.");
       }
-      if (newStatus === 'Rejected' && !data?.checklist.some(doc => doc.status === 'Rejected')) {
+      if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItemWithClassification) => doc.status === 'Rejected')) {
         throw new Error("To reject the application, at least one document must be marked as 'Rejected'.");
       }
 
-await finalizeApplication({ applicationId: params.id, newStatus });
-  setSuccessMessage(`Application has been successfully ${newStatus.toLowerCase()}.`); // Set success message
+      await finalizeApplication({ applicationId: params.id, newStatus });
+      setSuccessMessage(`Application has been successfully ${newStatus.toLowerCase()}.`);
 
-  // Redirect after a short delay to allow the success message to be seen
-  setTimeout(() => {
-    if (newStatus === 'Approved') {
-      router.push(`/dashboard/${params.id}/payment_validation`);
-    } else {
-      router.push('/dashboard');
-    }
-  }, 2000); // Show message for 2 seconds before redirecting
+      setTimeout(() => {
+        if (newStatus === 'Approved') {
+          router.push(`/dashboard/${params.id}/payment_validation`);
+        } else {
+          router.push('/dashboard');
+        }
+      }, 2000);
 
-} catch (e: any) {
-      // This is where we "turn on the warning light"
+    } catch (e: any) {
       setError({ title: "Validation Failed", message: e.message });
     }
   };
@@ -98,20 +139,9 @@ await finalizeApplication({ applicationId: params.id, newStatus });
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => router.push('/dashboard')} className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center"><span className="text-white font-bold text-xl">eM</span></div>
-              <span className="text-2xl font-bold text-gray-800">eMediCard</span>
-            </button>
-          </div>
-          <div className="flex items-center gap-5">
-            <ApplicantActivityLog applicantName={data.applicantName} applicationId={params.id} />
-            <CustomUserButton />
-          </div>
-        </div>
-      </nav>
+      <Navbar>
+        <ApplicantActivityLog applicantName={data.applicantName} applicationId={params.id} />
+      </Navbar>
 
       <main className="max-w-screen-xl mx-auto py-8 px-6">
         <header className="flex items-center gap-4 mb-8">
@@ -164,11 +194,33 @@ await finalizeApplication({ applicationId: params.id, newStatus });
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Document Checklist</h2>
             <div className="space-y-4">
               {data.checklist.map((item, idx) => (
-                <div key={item._id || idx} className="border border-gray-200 rounded-xl p-4 transition-all hover:shadow-md">
+                <div key={item._id} className="border border-gray-200 rounded-xl p-4 transition-all hover:shadow-md">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                     <div className="flex-1 mb-3 sm:mb-0">
                       <h3 className="font-semibold text-gray-800">{item.requirementName}{item.isRequired && <span className="text-red-500 ml-1">*</span>}</h3>
                       <StatusBadge status={item.status} />
+                      {item.classificationData && (
+                        <div className="mt-2 text-xs text-gray-600">
+                          {item.classificationData.error ? (
+                            <p className="text-red-500">Classification Error: {item.classificationData.error}</p>
+                          ) : (
+                            <>
+                              {item.classificationData.labels && item.classificationData.labels.length > 0 && (
+                                <p><strong>Labels:</strong> {item.classificationData.labels.join(', ')}</p>
+                              )}
+                              {item.classificationData.isPotentiallyBlurry && (
+                                <p className="text-orange-600"><strong>Warning:</strong> Image might be blurry.</p>
+                              )}
+                              {item.classificationData.text && item.classificationData.text.length > 0 && (
+                                <p><strong>Text Snippet:</strong> {item.classificationData.text.substring(0, 100)}...</p>
+                              )}
+                              {item.classificationData.documentType && (
+                                <p><strong>Document Type:</strong> {item.classificationData.documentType}</p>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {item.fileUrl ? (
@@ -185,20 +237,56 @@ await finalizeApplication({ applicationId: params.id, newStatus });
                   {openRemarkIndex === idx && (
                     <div className="mt-4 pt-4 border-t border-gray-200 bg-gray-50 -m-4 p-4 rounded-b-xl">
                       <h4 className="font-semibold text-gray-800 mb-2">Select a Remark for "{item.requirementName}"</h4>
-                      <div className="space-y-2">
-                        {remarkOptions.map(option => (
-                          <label key={option} className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer">
-                            <input type="radio" name={`remark-${idx}`} value={option} checked={selectedRemark === option} onChange={(e) => setSelectedRemark(e.target.value)} className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300" />
-                            <span className="ml-3 text-sm text-gray-700">{option}</span>
-                          </label>
-                        ))}
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor={`rejection-category-${idx}`} className="block text-sm font-medium text-gray-700">Rejection Category</label>
+                          <select
+                            id={`rejection-category-${idx}`}
+                            name={`rejection-category-${idx}`}
+                            value={rejectionCategory}
+                            onChange={(e) => setRejectionCategory(e.target.value)}
+                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base text-gray-700 border border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md"
+                          >
+                            {rejectionCategories.map(cat => (
+                              <option key={cat.value} value={cat.value}>{cat.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor={`remark-${idx}`} className="block text-sm font-medium text-gray-700">Rejection Reason</label>
+                          <div className="mt-1 space-y-2">
+                            {remarkOptions.map(option => (
+                              <label key={option} className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer">
+                                <input type="radio" name={`remark-${idx}`} value={option} checked={selectedRemark === option} onChange={(e) => setSelectedRemark(e.target.value)} className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300" />
+                                <span className="ml-3 text-sm text-gray-700">{option}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label htmlFor={`specific-issues-${idx}`} className="block text-sm font-medium text-gray-700">Specific Issues (optional, comma-separated)</label>
+                          <textarea
+                            id={`specific-issues-${idx}`}
+                            name={`specific-issues-${idx}`}
+                            rows={3}
+                            value={specificIssues}
+                            onChange={(e) => setSpecificIssues(e.target.value)}
+                            className="mt-1 text-black block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                            placeholder="e.g., ID is blurry, Signature does not match"
+                          />
+                        </div>
                       </div>
                       <div className="flex justify-end gap-3 mt-4">
                         <button onClick={() => setOpenRemarkIndex(null)} className="bg-gray-200 text-gray-800 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-300">Cancel</button>
                         <button onClick={async () => {
                           try {
-                            if (!selectedRemark) throw new Error("Please select a remark before saving.");
-                            await reviewDocument({ documentUploadId: item.uploadId!, status: 'Rejected', remarks: selectedRemark });
+                            if (!selectedRemark) throw new Error('Please select a remark before saving.');
+                            await rejectDocumentMutation({
+                              documentUploadId: item.uploadId!,
+                              rejectionCategory: rejectionCategory as any,
+                              rejectionReason: selectedRemark,
+                              specificIssues: specificIssues.split(',').map(s => s.trim()).filter(s => s),
+                            });
                             setOpenRemarkIndex(null);
                             setError(null);
                           } catch (e: any) {
@@ -211,7 +299,21 @@ await finalizeApplication({ applicationId: params.id, newStatus });
 
                   <div className="mt-4 pt-4 border-t border-gray-100 flex gap-3">
                     <button onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} disabled={!item.uploadId || item.status === 'Approved'} className="flex-1 bg-green-50 text-green-700 px-4 py-2 rounded-lg font-semibold hover:bg-green-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">Approve</button>
-                    <button onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Rejected')} disabled={!item.uploadId || item.status === 'Rejected'} className="flex-1 bg-red-50 text-red-700 px-4 py-2 rounded-lg font-semibold hover:bg-red-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">Reject</button>
+                    <button onClick={async () => {
+                      try {
+                        if (!item.uploadId) throw new Error("Document upload ID is missing.");
+                        // Directly call rejectDocumentMutation with a default remark if no specific remark is selected
+                        await rejectDocumentMutation({
+                          documentUploadId: item.uploadId,
+                          rejectionCategory: 'other', // Default category
+                          rejectionReason: 'Document rejected by admin.', // Default reason
+                          specificIssues: [],
+                        });
+                        setError(null);
+                      } catch (e: any) {
+                        setError(createAppError(e.message, 'Rejection Error'));
+                      }
+                    }} disabled={!item.uploadId || item.status === 'Rejected'} className="flex-1 bg-red-50 text-red-700 px-4 py-2 rounded-lg font-semibold hover:bg-red-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">Reject</button>
                   </div>
                 </div>
               ))}

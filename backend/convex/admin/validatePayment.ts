@@ -41,15 +41,13 @@ export const validate = mutation({
     });
 
     // 3. Log admin activity
-    const action = args.newStatus === 'Failed' ? 'rejected a payment' : 'approved a payment';
-    const comment = `Payment for application of ${applicant.fullname} was ${args.newStatus.toLowerCase()}.`;
+    const activityType = args.newStatus === 'Failed' ? 'payment_rejection' : 'payment_approval';
+    const details = `Payment for application of ${applicant.fullname} was ${args.newStatus.toLowerCase()}.`;
 
     await ctx.db.insert("adminActivityLogs", {
       adminId: user._id,
-      adminUsername: user.username,
-      adminEmail: user.email,
-      action: action,
-      comment: comment,
+      activityType: activityType,
+      details: details,
       timestamp: Date.now(),
       applicationId: args.applicationId,
       jobCategoryId: application.jobCategoryId,

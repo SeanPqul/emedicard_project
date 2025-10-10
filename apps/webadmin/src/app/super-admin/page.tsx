@@ -1,14 +1,13 @@
 "use client";
 
-import CustomUserButton from '@/components/CustomUserButton';
 import DateRangeFilterDropdown from '@/components/DateRangeFilterDropdown';
 import ErrorMessage from "@/components/ErrorMessage";
+import Navbar from '@/components/shared/Navbar';
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useAction, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
-import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import {
@@ -27,6 +26,10 @@ import {
 // Define the type for an activity log entry with applicant name
 type AdminActivityLogWithApplicantName = Doc<"adminActivityLogs"> & {
   applicantName?: string;
+  admin?: {
+    fullname?: string;
+    email?: string;
+  };
 };
 
 // Admin Creation Modal
@@ -183,36 +186,48 @@ export default function SuperAdminPage() {
   const { isLoaded: isClerkLoaded, user } = useUser();
   const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
   const jobCategories = useQuery(api.jobCategories.getManaged.get);
-  const { totalApplications, applicationsByStatus } =
-    useQuery(api.superAdmin.queries.getApplicationStats, user ? { startDate, endDate } : "skip") || {
-      totalApplications: 0,
-      applicationsByStatus: {},
-    };
+  const { totalApplications, applicationsByStatus } = useQuery(
+    api.superAdmin.queries.getApplicationStats,
+    isClerkLoaded && user ? { startDate, endDate } : "skip"
+  ) || { totalApplications: 0, applicationsByStatus: {} };
 
-  const totalRegisteredAdmins =
-    useQuery(api.superAdmin.queries.getTotalRegisteredAdmins, user ? {} : "skip") || 0;
+  const totalRegisteredAdmins = useQuery(
+    api.superAdmin.queries.getTotalRegisteredAdmins,
+    isClerkLoaded && user ? {} : "skip"
+  ) || 0;
 
   const currentYear = new Date().getFullYear();
-  const applicantsOverTime =
-    useQuery(api.superAdmin.queries.getApplicantsOverTime, user ? { year: currentYear } : "skip") || {};
+  const applicantsOverTime = useQuery(
+    api.superAdmin.queries.getApplicantsOverTime,
+    isClerkLoaded && user ? { year: currentYear } : "skip"
+  ) || {};
 
-  const applicantsByHealthCardType =
-    useQuery(api.superAdmin.queries.getApplicantsByHealthCardType, user ? { startDate, endDate } : "skip") || {};
-  const adminsByHealthCardType =
-    useQuery(api.superAdmin.queries.getAdminsByHealthCardType, user ? {} : "skip") || {};
-  const averageApprovalTime =
-    useQuery(api.superAdmin.queries.getAverageApprovalTime, user ? { startDate, endDate } : "skip") || 0;
-  const applicationTrends =
-    useQuery(api.superAdmin.queries.getApplicationTrends, user ? { year: currentYear } : "skip") || {
-      mostSubmittedMonth: "N/A",
-      mostSubmittedDay: "N/A",
-    };
-  const mostActiveAdmins =
-    useQuery(api.superAdmin.queries.getMostActiveAdmins, user ? { startDate, endDate, limit: 5 } : "skip") || [];
+  const applicantsByHealthCardType = useQuery(
+    api.superAdmin.queries.getApplicantsByHealthCardType,
+    isClerkLoaded && user ? { startDate, endDate } : "skip"
+  ) || {};
+  const adminsByHealthCardType = useQuery(
+    api.superAdmin.queries.getAdminsByHealthCardType,
+    isClerkLoaded && user ? {} : "skip"
+  ) || {};
+  const averageApprovalTime = useQuery(
+    api.superAdmin.queries.getAverageApprovalTime,
+    isClerkLoaded && user ? { startDate, endDate } : "skip"
+  ) || 0;
+  const applicationTrends = useQuery(
+    api.superAdmin.queries.getApplicationTrends,
+    isClerkLoaded && user ? { year: currentYear } : "skip"
+  ) || { mostSubmittedMonth: "N/A", mostSubmittedDay: "N/A" };
+  const mostActiveAdmins = useQuery(
+    api.superAdmin.queries.getMostActiveAdmins,
+    isClerkLoaded && user ? { startDate, endDate, limit: 5 } : "skip"
+  ) || [];
 
   // Use the new query for all admin activities
-  const allAdminActivities: AdminActivityLogWithApplicantName[] =
-    useQuery(api.admin.activityLogs.getAllAdminActivities, user ? {} : "skip") || [];
+  const allAdminActivities: AdminActivityLogWithApplicantName[] = useQuery(
+    api.admin.activityLogs.getAllAdminActivities,
+    isClerkLoaded && user ? {} : "skip"
+  ) || [];
 
   const handleClearFilter = () => {
     setStartDate(undefined);
@@ -303,7 +318,7 @@ export default function SuperAdminPage() {
     );
   }
   if (!user) return <RedirectToSignIn />;
-  if (!adminPrivileges.isAdmin || adminPrivileges.managedCategories !== "all") {
+  if (!adminPrivileges || adminPrivileges.managedCategories !== "all") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <ErrorMessage
@@ -317,41 +332,7 @@ export default function SuperAdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 w-full sticky top-0 z-40">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">eM</span>
-            </div>
-            <span className="text-2xl font-bold text-gray-800">
-              eMediCard
-            </span>
-          </div>
-          <div className="flex items-center gap-5">
-            <Link
-              href="/dashboard/notification-management"
-              className="text-gray-500 hover:text-emerald-600"
-              title="Manage Notifications"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-            </Link>
-            <CustomUserButton />
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="max-w-screen-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <header className="mb-8 px-2">
@@ -573,9 +554,9 @@ export default function SuperAdminPage() {
                       <div>
                         <p className="text-sm font-medium text-gray-800">
                           <span className="font-bold">
-                            {activity.adminUsername}
+                            {activity.admin?.fullname}
                           </span>{" "}
-                          ({activity.adminEmail}) {activity.action.toLowerCase()}
+                          ({activity.admin?.email}) {(activity.details || activity.action || "performed an action").toLowerCase()}
                           {activity.applicantName && ` for `}
                           {activity.applicantName && <span className="font-bold">{activity.applicantName}</span>}.
                         </p>

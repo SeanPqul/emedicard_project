@@ -98,6 +98,24 @@ export const uploadDocumentsMutation = mutation({
         });
       }
 
+      // After resubmission, check if all documents for the application are now in a reviewable state
+      // If so, update the application status to "Pending Review"
+      const allDocuments = await ctx.db
+        .query("documentUploads")
+        .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
+        .collect();
+
+      const allDocumentsReviewable = allDocuments.every(
+        (doc) => doc.reviewStatus === "Pending" || doc.reviewStatus === "Approved"
+      );
+
+      if (allDocumentsReviewable && application.applicationStatus === "Documents Need Revision") {
+        await ctx.db.patch(args.applicationId, {
+          applicationStatus: "Pending Review",
+          updatedAt: Date.now(),
+        });
+      }
+
     } else {
       // This is an initial upload or an update to an existing non-rejected document
       const existingDoc = await ctx.db

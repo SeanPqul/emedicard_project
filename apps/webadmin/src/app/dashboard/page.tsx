@@ -1,16 +1,16 @@
 // src/app/dashboard/page.tsx
 'use client';
 
-import React, { useState, useEffect } from "react";
-import Link from 'next/link';
-import { useUser, RedirectToSignIn } from "@clerk/nextjs";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Doc, Id } from "@/convex/_generated/dataModel";
-import CustomUserButton from '@/components/CustomUserButton';
 import DashboardActivityLog from '@/components/DashboardActivityLog';
 import ErrorMessage from "@/components/ErrorMessage";
+import { api } from "@/convex/_generated/api";
+import { Doc, Id } from "@/convex/_generated/dataModel";
+import { RedirectToSignIn, useUser } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import Link from 'next/link';
 import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import Navbar from '@/components/shared/Navbar';
 
 type ApplicationWithDetails = Doc<"applications"> & { userName: string; jobCategoryName: string };
 
@@ -34,84 +34,54 @@ export default function DashboardPage() {
   const [categoryFilter, setCategoryFilter] = useState<string | Id<"jobCategories"> | "">("");
   const router = useRouter();
 
+  // --- Constants ---
+  const statusColorClasses: { [key: string]: { bg: string; text: string } } = {
+    "Submitted": { bg: "bg-yellow-100", text: "text-yellow-800" },
+    "Pending": { bg: "bg-blue-100", text: "text-blue-800" },
+    "For Document Verification": { bg: "bg-cyan-100", text: "text-cyan-800" },
+    "For Payment Validation": { bg: "bg-purple-100", text: "text-purple-800" },
+    "For Orientation": { bg: "bg-indigo-100", text: "text-indigo-800" },
+    "Approved": { bg: "bg-green-100", text: "text-green-800" },
+    "Rejected": { bg: "bg-red-100", text: "text-red-800" },
+    "Cancelled": { bg: "bg-gray-100", text: "text-gray-800" },
+  };
+
   // --- 2. DATA FETCHING ---
   const { isLoaded: isClerkLoaded, user } = useUser();
   const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges); 
   const managedJobCategories: Doc<"jobCategories">[] | undefined = useQuery(api.jobCategories.getManaged.get);
+
+  useEffect(() => {
+    if (adminPrivileges && adminPrivileges.managedCategories !== "all" && managedJobCategories && managedJobCategories.length > 0 && categoryFilter === "") {
+      setCategoryFilter(managedJobCategories[0]._id);
+    }
+  }, [adminPrivileges, managedJobCategories, categoryFilter]);
+
   const applications = useQuery(
     api.applications.list.list,
+    adminPrivileges === undefined ? { } : // Pass an empty object or specific defaults if adminPrivileges is still loading
     {
       status: statusFilter || undefined,
       jobCategory: categoryFilter === "" ? undefined : (categoryFilter as Id<"jobCategories">),
+      managedCategories: adminPrivileges.managedCategories as "all" | Id<"jobCategories">[] | undefined, // Explicitly cast to resolve TypeScript error
     }
   );
-  const updateApplicationStatus = useMutation(api.applications.updateApplicationStatus.updateStatus);
 
-  // --- 3. "SMART" FILTER EFFECT ---
-  useEffect(() => {
-    if (adminPrivileges) {
-      if (adminPrivileges.managedCategories === "all") {
-        setCategoryFilter(""); // Super admin defaults to "All Categories"
-        return;
-      }
-      // If a regular admin manages only one category, auto-select it.
-      if (adminPrivileges.managedCategories && adminPrivileges.managedCategories.length === 1) {
-        setCategoryFilter(adminPrivileges.managedCategories[0] as Id<"jobCategories">);
-      }
-    }
-  }, [adminPrivileges]);
-
-  // --- 4. UI LOGIC & DERIVED STATE ---
-  const statusColorClasses: Record<string, { bg: string; text: string }> = {
-    "Approved": { bg: "bg-green-100", text: "text-green-800" },
-    "Rejected": { bg: "bg-red-100", text: "text-red-800" },
-    "For Document Verification": { bg: "bg-cyan-100", text: "text-cyan-800" },
-    "For Payment Validation": { bg: "bg-purple-100", text: "text-purple-800" },
-    "For Orientation": { bg: "bg-indigo-100", text: "text-indigo-800" },
-    "Submitted": { bg: "bg-yellow-100", text: "text-yellow-800" },
-  };
-
-  const filteredApplications = (applications ?? []).filter((app: ApplicationWithDetails) =>
-    app.userName?.toLowerCase().includes(search.toLowerCase())
+  const filteredApplications = (applications ?? []).filter(app => 
+    app.userName.toLowerCase().includes(search.toLowerCase()) ||
+    app.jobCategoryName.toLowerCase().includes(search.toLowerCase()) ||
+    app.applicationStatus.toLowerCase().includes(search.toLowerCase())
   );
   
-  const totalPending = (applications ?? []).filter((a: ApplicationWithDetails) => a.applicationStatus === 'Submitted').length;
-  const totalApproved = (applications ?? []).filter((a: ApplicationWithDetails) => a.applicationStatus === 'Approved').length;
-  const totalRejected = (applications ?? []).filter((a: ApplicationWithDetails) => a.applicationStatus === 'Rejected').length;
-  const totalForDocVerification = (applications ?? []).filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Document Verification').length;
-  const totalForPaymentValidation = (applications ?? []).filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Payment Validation').length;
-  const totalForOrientation = (applications ?? []).filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Orientation').length;
+  const totalPending = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Submitted').length;
+  const totalApproved = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Approved').length;
+  const totalRejected = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Rejected').length;
+  const totalForDocVerification = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Document Verification').length;
+  const totalForPaymentValidation = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Payment Validation').length;
+  const totalForOrientation = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Orientation').length;
 
-  const handleViewApplication = async (appId: Id<"applications">, currentStatus: string) => {
-    let targetRoute = `/dashboard/${appId}/doc_verif`; // Default route
-
-    switch (currentStatus) {
-      case 'Submitted':
-        // If status is 'Submitted', update it to 'For Document Verification' and then route
-        await updateApplicationStatus({ applicationId: appId, newStatus: 'For Document Verification' });
-        targetRoute = `/dashboard/${appId}/doc_verif`;
-        break;
-      case 'For Document Verification':
-        targetRoute = `/dashboard/${appId}/doc_verif`;
-        break;
-      case 'For Payment Validation':
-        targetRoute = `/dashboard/${appId}/payment_validation`;
-        break;
-      case 'For Orientation':
-        targetRoute = `/dashboard/${appId}/orientation-scheduler`;
-        break;
-      case 'Approved':
-      case 'Rejected':
-        // For Approved/Rejected, route to doc_verif for now, but ideally a read-only view.
-        // I will ask the user about this.
-        targetRoute = `/dashboard/${appId}/doc_verif`; 
-        break;
-      default:
-        // Fallback for any other status
-        targetRoute = `/dashboard/${appId}/doc_verif`;
-        break;
-    }
-    router.push(targetRoute);
+  const handleViewApplication = (appId: Id<"applications">) => {
+    router.push(`/dashboard/${appId}/doc_verif`);
   };
 
   // --- 5. LOADING & GUARD CLAUSES ---
@@ -119,7 +89,7 @@ export default function DashboardPage() {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
   }
   if (!user) return <RedirectToSignIn />;
-  if (!adminPrivileges.isAdmin) {
+  if (!adminPrivileges || !adminPrivileges.isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <ErrorMessage title="Access Denied" message="You do not have permission to view this page." onCloseAction={() => router.push('/')} />
@@ -136,22 +106,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/*Navbar */}
-      <nav className="bg-white shadow-md w-full sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center"><span className="text-white font-bold text-xl">eM</span></div>
-            <span className="text-2xl font-bold text-gray-800">eMediCard</span>
-          </div>
-          <div className="flex items-center gap-5">
-            <Link href="/dashboard/notification-management" className="text-gray-500 hover:text-emerald-600" title="Manage Notifications">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-            </Link>
-            <DashboardActivityLog />
-            <CustomUserButton />
-          </div>
-        </div>
-      </nav>
+      <Navbar>
+        <DashboardActivityLog />
+      </Navbar>
       
       <main className="max-w-7xl mx-auto py-8 px-6">
         <header className="mb-8">
@@ -176,19 +133,24 @@ export default function DashboardPage() {
             {/* Smart Job Category Filter */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Job Category</label>
-              {adminPrivileges.managedCategories === "all" ? (
+              {managedJobCategories === undefined ? (
+                <div className="w-full md:w-auto px-4 py-2 border border-gray-200 bg-gray-100 text-gray-700 rounded-lg shadow-sm text-base">
+                  Loading categories...
+                </div>
+              ) : adminPrivileges.managedCategories === "all" ? (
                 <select 
                   className="w-full md:w-auto px-4 py-2 pr-10 border border-gray-300 text-black rounded-lg shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   value={categoryFilter} 
                   onChange={e => setCategoryFilter(e.target.value as Id<"jobCategories"> | "")}
-                  disabled={managedJobCategories === undefined}
                 >
                   <option value="">All Categories</option>
-                  {managedJobCategories?.map((cat) => ( <option key={cat._id} value={cat._id}>{cat.name}</option>))}
+                  {managedJobCategories.map((cat) => ( <option key={cat._id} value={cat._id}>{cat.name}</option>))}
                 </select>
-              ) : (
+              ) : ( // adminPrivileges.managedCategories is an array (not "all")
                 <div className="w-full md:w-auto px-4 py-2 border border-gray-200 bg-gray-100 text-gray-700 rounded-lg shadow-sm text-base">
-                  {managedJobCategories?.find(cat => cat._id === categoryFilter)?.name ?? "Loading..."}
+                  {managedJobCategories && managedJobCategories.length > 0 
+                    ? managedJobCategories[0].name 
+                    : "No categories managed"}
                 </div>
               )}
             </div>
@@ -257,7 +219,7 @@ export default function DashboardPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button onClick={() => handleViewApplication(app._id, app.applicationStatus)} className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 px-4 py-2 rounded-md font-semibold text-xs transition-all">
+                      <button onClick={() => handleViewApplication(app._id)} className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 px-4 py-2 rounded-md font-semibold text-xs transition-all">
                         View
                       </button>
                     </td>
