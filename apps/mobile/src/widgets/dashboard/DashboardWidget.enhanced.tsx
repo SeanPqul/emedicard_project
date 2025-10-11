@@ -7,6 +7,7 @@ import {
   WelcomeBanner,
   PriorityAlerts,
   RecentActivityList,
+  ActionCenter,
 } from '@features/dashboard/components';
 import { DashboardHeaderEnhanced } from '@features/dashboard/components/DashboardHeader/DashboardHeader.enhanced';
 import { HealthCardPreview } from '@features/dashboard/components/HealthCardPreview/HealthCardPreview';
@@ -109,53 +110,11 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
           userProfile={userProfile}
         />
 
-        {/* Quick Stats Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Your Overview</Text>
-          <View style={styles.statsGrid}>
-            <PresetStatCards.Applications
-              value={dashboardStats?.activeApplications || 0}
-              subtitle={dashboardStats?.activeApplications > 0 ? "In progress" : "Start your journey"}
-              onPress={() => router.push('/(tabs)/application')}
-              trend={dashboardStats?.activeApplications > 0 ? {
-                direction: 'up',
-                value: '+1 this month'
-              } : undefined}
-            />
-            
-            <PresetStatCards.Payments
-              value={dashboardStats?.pendingPayments > 0 
-                ? `₱${dashboardStats.pendingAmount?.toFixed(2) || '0.00'}` 
-                : 'All Clear'}
-              subtitle={dashboardStats?.pendingPayments > 0 
-                ? `${dashboardStats.pendingPayments} pending` 
-                : "No pending payments"}
-              onPress={() => router.push('/(screens)/(shared)/payment')}
-              badge={dashboardStats?.pendingPayments > 0 ? {
-                text: 'Due',
-                color: theme.colors.semantic.error
-              } : undefined}
-            />
-          </View>
-          
-          <View style={styles.statsGrid}>
-            <PresetStatCards.HealthCards
-              value={dashboardStats?.validHealthCards || 0}
-              subtitle={dashboardStats?.validHealthCards > 0 ? "Active cards" : "Apply for your card"}
-              onPress={() => router.push('/(screens)/(shared)/health-cards')}
-              progress={dashboardStats?.validHealthCards > 0 ? {
-                current: dashboardStats.validHealthCards,
-                total: dashboardStats.totalApplications || 1
-              } : undefined}
-            />
-            
-            <PresetStatCards.Documents
-              value={dashboardStats?.uploadedDocuments || 0}
-              subtitle="Documents uploaded"
-              onPress={() => router.push('/(screens)/(shared)/documents')}
-            />
-          </View>
-        </View>
+        {/* Action Center - Consolidated priority actions */}
+        <ActionCenter
+          currentApplication={currentApplication}
+          dashboardStats={dashboardStats}
+        />
         
         {/* Quick Actions Carousel */}
         <QuickActionsCarousel

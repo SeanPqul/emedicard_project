@@ -15,6 +15,7 @@ export { DashboardHeaderEnhanced } from './DashboardHeader/DashboardHeader.enhan
 export { HealthCardPreview } from './HealthCardPreview/HealthCardPreview';
 export { StatCardEnhanced, PresetStatCards } from './StatCard/StatCard.enhanced';
 export { QuickActionsCarousel } from './QuickActionsCarousel/QuickActionsCarousel';
+export { ActionCenter } from './ActionCenter/ActionCenter';
 
 // OfflineBanner is now in shared
 export { OfflineBanner } from '@shared/components';
