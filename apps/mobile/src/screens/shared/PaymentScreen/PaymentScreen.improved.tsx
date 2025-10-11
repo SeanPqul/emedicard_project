@@ -90,6 +90,7 @@ export function PaymentScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
+      allowsMultipleSelection: false,
       aspect: [4, 3],
       quality: 0.8,
     });
