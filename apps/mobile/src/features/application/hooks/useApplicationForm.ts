@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { validateApplicationStep, ApplicationFormData } from '@features/application';
+import { validateApplicationStep } from '../lib/validation';
+import type { ApplicationFormData } from '../services/applicationService';
 import { formStorage } from '../services/formStorage';
 import { SelectedDocuments } from '@shared/types';
 import { DocumentRequirement } from '@/src/entities/application/model/types';
@@ -220,7 +221,6 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
       // Check for app restart and clear old data
       const wasRestarted = formStorage.handleAppRestart();
       if (wasRestarted) {
-        console.log('App was restarted, starting fresh application');
       }
 
       // Check for existing temp application in MMKV (only if not restarted)
@@ -228,11 +228,9 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
       if (tempApp && !formStorage.isTempApplicationExpired() && !wasRestarted) {
         // Log queue stats for debugging
         const stats = formStorage.getQueueStats();
-        console.log('Restored deferred queue:', stats);
         
         // If the queue is in a failed state, ask user if they want to continue or start fresh
         if (stats.queueStatus === 'failed') {
-          console.log('Previous application was in failed state, clearing and starting fresh');
           formStorage.clearTempApplication();
           showError('Previous Application Failed', 'Your previous application had errors and has been cleared. Please start a new application.');
         } else {
@@ -247,7 +245,6 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
       } else if (tempApp && formStorage.isTempApplicationExpired()) {
         // Clear expired temp data
         formStorage.clearTempApplication();
-        console.log('Cleared expired application data');
       }
     } catch (error) {
       console.error('Error loading initial data:', error);
@@ -260,7 +257,6 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
     const hasData = currentStep > 0 || Object.keys(selectedDocuments).length > 0;
     if (hasData && formStorage.hasTempApplication()) {
       formStorage.saveTempApplication(formData, selectedDocuments, currentStep);
-      console.log('Saved form data at step', currentStep);
     }
   }, [formData, selectedDocuments, currentStep]);
 

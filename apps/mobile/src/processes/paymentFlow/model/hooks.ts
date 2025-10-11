@@ -5,11 +5,11 @@ import { Alert } from 'react-native';
 import {
   submitPayment,
   submitPaymentWithoutReceipt,
-  PaymentMethod,
-  PaymentSubmissionData,
-  PaymentFlowResult,
-  PaymentServices,
-} from '@features/payment';
+  type PaymentMethod,
+  type PaymentSubmissionData,
+  type PaymentFlowResult,
+  type PaymentServices,
+} from '@features/payment/lib/paymentFlow';
 
 // Error handling
 import { AppError, AppErrorType } from '@shared/lib/errors';
@@ -18,7 +18,7 @@ import { AppError, AppErrorType } from '@shared/lib/errors';
 import { Id } from '@backend/convex/_generated/dataModel';
 
 // Hooks for payment services
-import { usePayments } from '@features/payment/hooks';
+import { usePayments } from '@features/payment/hooks/usePayments';
 import { useDocumentUpload } from '@features/upload';
 
 export interface PaymentFlowState {

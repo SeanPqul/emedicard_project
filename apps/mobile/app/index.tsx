@@ -4,7 +4,6 @@ import { LoadingSpinner } from '../src/shared/components';
 import { useUsers } from '../src/features/profile';
 
 export default function Index() {
-  console.log('[Index] Component starting to render');
   const { isLoaded, isSignedIn } = useAuth();
   const { data: { currentUser }, isLoading } = useUsers();
   

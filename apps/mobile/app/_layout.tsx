@@ -9,11 +9,8 @@ import { useEffect } from "react";
 import { startAutomaticCleanup, stopAutomaticCleanup } from "@/src/shared/services/storage";
 
 export default function RootLayout() {
-  console.log('[RootLayout] Component starting to render');
-  
   // Initialize automatic storage cleanup on app start
   useEffect(() => {
-    console.log('[RootLayout] useEffect running');
     startAutomaticCleanup();
     
     // Cleanup interval when app unmounts

@@ -60,6 +60,7 @@ export const uploadDocumentsMutation = mutation({
         originalFileName: args.fileName,
         storageFileId: args.storageId,
         uploadedAt: Date.now(),
+        fileType: args.fileType,
         reviewStatus: "Pending", // Resubmitted documents start as pending
         adminRemarks: undefined,
         reviewedBy: undefined,
@@ -144,6 +145,7 @@ export const uploadDocumentsMutation = mutation({
           originalFileName: args.fileName,
           storageFileId: args.storageId,
           uploadedAt: Date.now(),
+          fileType: args.fileType,
           reviewStatus: args.reviewStatus || "Pending",
           adminRemarks: args.adminRemarks,
           reviewedBy: args.reviewedBy,
