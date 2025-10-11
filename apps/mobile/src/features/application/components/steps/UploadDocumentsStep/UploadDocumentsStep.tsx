@@ -129,12 +129,6 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
                     );
 
                     const docSize = selectedDocuments[document.fieldName]?.size;
-                    console.log('📊 Display check:', {
-                      fieldName: document.fieldName,
-                      hasDoc: !!selectedDocuments[document.fieldName],
-                      size: docSize,
-                      fullDoc: selectedDocuments[document.fieldName]
-                    });
 
                     return (
                       <>

@@ -61,3 +61,4 @@
 export * from './paymentFlow';
 export * from './abandonedPaymentFlow';
 export * from './mayaPaymentFlow';
+export * from './userSync';
