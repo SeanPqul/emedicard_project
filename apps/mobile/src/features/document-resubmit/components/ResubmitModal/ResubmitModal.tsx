@@ -100,7 +100,7 @@ export const ResubmitModal: React.FC<ResubmitModalProps> = ({
       if (result.success) {
         Alert.alert(
           'Success',
-          'Document resubmitted successfully. It will be reviewed shortly.',
+          'Your document was submitted for review. We’ll notify you once it’s checked.',
           [
             {
               text: 'OK',
@@ -112,11 +112,10 @@ export const ResubmitModal: React.FC<ResubmitModalProps> = ({
           ]
         );
       } else {
-        Alert.alert('Error', result.error || 'Failed to resubmit document');
+        Alert.alert('Unable to resubmit', result.error || 'Please try again.');
       }
     } catch (error) {
-      console.error('Error resubmitting document:', error);
-      Alert.alert('Error', 'Failed to resubmit document. Please try again.');
+      Alert.alert('Error', 'We couldn’t resubmit your document. Please try again.');
     } finally {
       setIsUploading(false);
     }
