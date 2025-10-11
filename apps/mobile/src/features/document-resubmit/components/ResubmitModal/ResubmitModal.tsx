@@ -13,7 +13,8 @@ import { ResubmitModalProps } from './ResubmitModal.types';
 import { styles } from './ResubmitModal.styles';
 import { moderateScale } from '@shared/utils/responsive';
 import { useResubmitDocument } from '../../hooks';
-import { useDocumentUpload } from '@features/upload/hooks/useDocumentUpload';
+import { useMutation } from 'convex/react';
+import { api } from '@backend/convex/_generated/api';
 
 export const ResubmitModal: React.FC<ResubmitModalProps> = ({
   visible,
@@ -29,7 +30,7 @@ export const ResubmitModal: React.FC<ResubmitModalProps> = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   
   const { resubmitDocument } = useResubmitDocument();
-  const { uploadFile } = useDocumentUpload(applicationId);
+  const generateUploadUrl = useMutation(api.storage.generateUploadUrl.generateUploadUrlMutation);
 
   const handleSelectFile = async () => {
     try {
@@ -72,12 +73,19 @@ export const ResubmitModal: React.FC<ResubmitModalProps> = ({
         uri: selectedFile.uri,
       };
       
-      // Upload file to storage
-      const uploadResult = await uploadFile(
-        fileToUpload,
-        fieldIdentifier // Use fieldIdentifier as the fieldName for backend lookup
-      );
-      const { storageId } = uploadResult;
+      // Upload file to storage directly (avoid generic upload mutation)
+      const uploadUrl = await generateUploadUrl();
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'POST',
+        body: fileToUpload as any,
+        headers: {
+          'Content-Type': mimeType,
+        },
+      });
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed: ${uploadResponse.statusText}`);
+      }
+      const { storageId } = await uploadResponse.json();
 
       // Submit document resubmission
       const result = await resubmitDocument({
