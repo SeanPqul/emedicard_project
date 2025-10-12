@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@google-cloud/vision": "^5.3.3",
+    "axios": "^1.12.2",
     "convex": "^1.25.2",
     "svix": "^1.76.1"
   },

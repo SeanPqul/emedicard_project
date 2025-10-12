@@ -7,35 +7,28 @@ import SuccessMessage from '@/components/SuccessMessage';
 import Navbar from '@/components/shared/Navbar';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation } from 'convex/react'; // Import useQuery
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 // --- Data Structures ---
 interface AppError { title: string; message: string; }
 
-type ChecklistItemWithClassification = {
+type ChecklistItem = {
   _id: Id<"jobCategoryDocuments">;
   requirementName: string;
   status: string;
   fileUrl: string | null;
-  uploadId: Id<"documentUploads"> | null;
-  remarks: string | null;
+  uploadId: Id<"documentUploads"> | null | undefined;
+  remarks: string | null | undefined;
   isRequired: boolean;
-  classificationData?: {
-    documentType?: string;
-    labels?: string[];
-    text?: string;
-    isPotentiallyBlurry?: boolean;
-    error?: string;
-    message?: string;
-  };
+  classifiedDocumentType?: string | null; // Added classifiedDocumentType
 };
 
 type ApplicationData = {
   applicantName: string;
   jobCategoryName: string;
-  checklist: ChecklistItemWithClassification[];
+  checklist: ChecklistItem[];
 };
 
 const createAppError = (message: string, title: string = 'Invalid Input'): AppError => ({ title, message });
@@ -77,24 +70,94 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [selectedRemark, setSelectedRemark] = useState<string>('');
   const [rejectionCategory, setRejectionCategory] = useState('other');
   const [specificIssues, setSpecificIssues] = useState('');
+  const [isClassifying, setIsClassifying] = useState<boolean>(false); // New loading state for classification
   const router = useRouter();
 
   // --- DATA FETCHING ---
   const getDocumentsWithClassification = useAction(api.applications.getDocumentsWithClassification.get);
+  const triggerClassificationAction = useAction(api.documents.triggerClassification.triggerClassification); // New action hook
+  const getStorageFileIdAction = useAction(api.documentUploads.getStorageFileIdAction.getStorageFileIdAction); // New action hook to get storageFileId
   const [data, setData] = useState<ApplicationData | null>(null);
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
   const rejectDocumentMutation = useMutation(api.admin.documents.rejectDocument.rejectDocument);
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
 
+  const loadData = async () => {
+    const result = await getDocumentsWithClassification({ id: params.id });
+    setData(result);
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      const result = await getDocumentsWithClassification({ id: params.id });
-      setData(result);
-    };
     loadData();
   }, [getDocumentsWithClassification, params.id]);
 
   // --- HANDLER FUNCTIONS ---
+  const handleClassifyDocument = async (item: ChecklistItem) => {
+    if (!item.uploadId || !item.fileUrl) {
+      setError(createAppError("Cannot classify document: Missing upload ID or file URL.", "Classification Error"));
+      return;
+    }
+    setIsClassifying(true);
+    setError(null);
+    try {
+      // Assuming fileUrl contains the full URL and we can extract mimeType and fileName
+      // This might need refinement based on how fileUrl is structured or if mimeType/fileName are available elsewhere
+      const fileExtension = item.fileUrl.split('?')[0].split('.').pop()?.toLowerCase();
+      let mimeType: string;
+      switch (fileExtension) {
+        case 'pdf':
+          mimeType = 'application/pdf';
+          break;
+        case 'png':
+          mimeType = 'image/png';
+          break;
+        case 'jpeg':
+        case 'jpg':
+          mimeType = 'image/jpeg';
+          break;
+        case 'docx':
+          mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+          break;
+        case 'doc':
+          mimeType = 'application/msword';
+          break;
+        case 'pptx':
+          mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+          break;
+        default:
+          // Fallback for unknown types, or if Extractous is strict, this might still fail.
+          // For now, we'll default to image/jpeg as it was the previous default for non-PDFs.
+          // A more robust solution might involve a stricter check or a user-facing error.
+          mimeType = 'image/jpeg';
+          break;
+      }
+      const fileName = item.requirementName; // Using requirementName as filename for classification
+
+      // Fetch storageFileId using the action
+      const storageFileId = await getStorageFileIdAction({ documentUploadId: item.uploadId });
+
+      if (!storageFileId) {
+        setError(createAppError("Could not retrieve storage file ID for classification.", "Classification Error"));
+        setIsClassifying(false);
+        return;
+      }
+
+      await triggerClassificationAction({
+        documentUploadId: item.uploadId,
+        storageFileId: storageFileId,
+        mimeType: mimeType,
+        fileName: fileName,
+      });
+      setSuccessMessage(`Classification triggered for '${item.requirementName}'. Please refresh to see updates.`);
+      // Optionally, refresh data after a short delay to allow classification to complete
+      setTimeout(loadData, 3000); 
+    } catch (e: any) {
+      setError(createAppError(e.message, "Classification Failed"));
+    } finally {
+      setIsClassifying(false);
+    }
+  };
+
   const handleStatusChange = async (index: number, uploadId: Id<'documentUploads'>, newStatus: 'Approved' | 'Rejected') => {
     setError(null);
     if (newStatus === 'Rejected') {
@@ -103,17 +166,19 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     } else {
       setOpenRemarkIndex(null);
       await reviewDocument({ documentUploadId: uploadId, status: newStatus, remarks: '' });
+      loadData(); // Refresh data after status change
     }
   };
 
+  // --- HANDLER FUNCTIONS ---
   const handleFinalize = async (newStatus: 'Approved' | 'Rejected') => {
     try {
       setError(null);
-      const pendingDocs = data?.checklist.filter((doc: ChecklistItemWithClassification) => doc.status === 'Missing' || doc.status === 'Pending');
+      const pendingDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Missing' || doc.status === 'Pending');
       if (pendingDocs && pendingDocs.length > 0) {
         throw new Error("Please review and assign a status (Approve or Reject) to all documents before proceeding.");
       }
-      if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItemWithClassification) => doc.status === 'Rejected')) {
+      if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Rejected')) {
         throw new Error("To reject the application, at least one document must be marked as 'Rejected'.");
       }
 
@@ -135,7 +200,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
 
   // --- RENDER ---
   if (data === undefined) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  if (data === null) return <div className="min-h-screen flex items-center justify-center">Application not found.</div>;
+  if (data === null) return <div className="min-h-screen flex items-center justify-center">Application not found</div>;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -199,32 +264,24 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     <div className="flex-1 mb-3 sm:mb-0">
                       <h3 className="font-semibold text-gray-800">{item.requirementName}{item.isRequired && <span className="text-red-500 ml-1">*</span>}</h3>
                       <StatusBadge status={item.status} />
-                      {item.classificationData && (
-                        <div className="mt-2 text-xs text-gray-600">
-                          {item.classificationData.error ? (
-                            <p className="text-red-500">Classification Error: {item.classificationData.error}</p>
-                          ) : (
-                            <>
-                              {item.classificationData.labels && item.classificationData.labels.length > 0 && (
-                                <p><strong>Labels:</strong> {item.classificationData.labels.join(', ')}</p>
-                              )}
-                              {item.classificationData.isPotentiallyBlurry && (
-                                <p className="text-orange-600"><strong>Warning:</strong> Image might be blurry.</p>
-                              )}
-                              {item.classificationData.text && item.classificationData.text.length > 0 && (
-                                <p><strong>Text Snippet:</strong> {item.classificationData.text.substring(0, 100)}...</p>
-                              )}
-                              {item.classificationData.documentType && (
-                                <p><strong>Document Type:</strong> {item.classificationData.documentType}</p>
-                              )}
-                            </>
-                          )}
-                        </div>
+                      {item.classifiedDocumentType && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Classified as: <span className="font-medium text-gray-700">{item.classifiedDocumentType}</span>
+                        </p>
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {item.fileUrl ? (
-                        <button onClick={() => setViewModalDocUrl(item.fileUrl)} className="text-sm bg-gray-100 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">View Document</button>
+                        <>
+                          <button onClick={() => setViewModalDocUrl(item.fileUrl)} className="text-sm bg-gray-100 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">View Document</button>
+                          <button
+                            onClick={() => handleClassifyDocument(item)}
+                            disabled={isClassifying || !item.uploadId || item.classifiedDocumentType === "Classification Failed"}
+                            className="text-sm bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-semibold hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isClassifying ? 'Classifying...' : 'Classify Document'}
+                          </button>
+                        </>
                       ) : (
                         <span className="text-sm text-gray-400 px-4 py-2">Not Submitted</span>
                       )}

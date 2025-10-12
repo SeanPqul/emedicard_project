@@ -64,6 +64,9 @@ export default defineSchema({
     storageFileId: v.id("_storage"),
     uploadedAt: v.float64(),
     fileType: v.string(), // Added for classification
+    classifiedDocumentType: v.optional(v.string()), // New: Document type identified by Extractous
+    extractousResponse: v.optional(v.any()), // New: Full response from Extractous
+    classifiedAt: v.optional(v.float64()), // New: Timestamp for when the document was classified
   })
     .index("by_application", ["applicationId"])
     .index("by_application_document", [

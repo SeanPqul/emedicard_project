@@ -11,8 +11,13 @@ export const get = query({
 
     // 2. Get the related user and job category
     const user = await ctx.db.get(application.userId);
+    if (!user) {
+      throw new Error(`User with ID ${application.userId} not found for application ${args.id}`);
+    }
     const jobCategory = await ctx.db.get(application.jobCategoryId);
-    if (!user || !jobCategory) return null;
+    if (!jobCategory) {
+      throw new Error(`Job Category with ID ${application.jobCategoryId} not found for application ${args.id}`);
+    }
 
     // 3. Get the list of document requirements for this job category
     const requiredDocs = await ctx.db
@@ -48,6 +53,7 @@ export const get = query({
           fileUrl: fileUrl,
           uploadId: userUpload?._id, // The ID of the documentUploads record
           remarks: userUpload?.adminRemarks,
+          classifiedDocumentType: userUpload?.classifiedDocumentType, // Include classified document type
         };
       })
     );

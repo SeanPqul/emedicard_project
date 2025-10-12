@@ -1,138 +1,94 @@
 'use node';
 
-import { ImageAnnotatorClient } from '@google-cloud/vision';
+import axios from 'axios';
 import { v } from "convex/values";
+import { api } from "../_generated/api"; // Import api to run mutations
 import { action } from "../_generated/server";
+// No explicit import for FormData, assuming native Node.js FormData is available
 
-let visionClient: ImageAnnotatorClient;
-
-// Helper function to determine document type based on text and labels
-function determineDocumentType(text: string | undefined, labels: string[] | undefined): string {
-  if (!text && !labels) return "Unknown";
-
-  const lowerText = text?.toLowerCase() || "";
-  const lowerLabels = labels?.map(label => label.toLowerCase()) || [];
-
-  // Keywords for common document types
-  if (lowerText.includes("driver's license") || lowerText.includes("drivers license") || lowerText.includes("license number")) {
-    return "Driver's License";
+// Helper function to determine document type based on Extractous response
+function determineDocumentTypeFromExtractous(extractousData: any): string {
+  // This is a placeholder. You'll need to inspect the actual structure
+  // of the Extractous response to accurately determine the document type.
+  // For example, if Extractous returns a 'document_type' field:
+  if (extractousData && extractousData.document_type) {
+    return extractousData.document_type;
   }
-  if (lowerText.includes("passport") || lowerText.includes("republic of")) {
-    return "Passport";
+  // Or if it returns a list of entities and you can infer from there
+  if (extractousData && extractousData.entities && extractousData.entities.length > 0) {
+    // Example: Look for a common entity type
+    const entityTypes = extractousData.entities.map((e: any) => e.type?.toLowerCase());
+    if (entityTypes.includes("driver_license")) return "Driver's License";
+    if (entityTypes.includes("passport")) return "Passport";
+    // Add more logic based on Extractous output
   }
-  if (lowerText.includes("birth certificate") || lowerText.includes("certificate of live birth")) {
-    return "Birth Certificate";
-  }
-  if (lowerText.includes("social security") || lowerText.includes("ssn")) {
-    return "Social Security Card";
-  }
-  if (lowerText.includes("utility bill") || lowerText.includes("electricity bill") || lowerText.includes("water bill")) {
-    return "Utility Bill";
-  }
-  if (lowerText.includes("bank statement") || lowerText.includes("account statement")) {
-    return "Bank Statement";
-  }
-  if (lowerText.includes("identification card") || lowerText.includes("id card") || lowerText.includes("identification no")) {
-    return "ID Card";
-  }
-
-  // Check labels for common document indicators
-  if (lowerLabels.some(label => label.includes("identification") || label.includes("document"))) {
-    return "Generic ID/Document";
-  }
-
   return "Unknown";
-}
-
-// Initialize Google Cloud Vision client
-if (process.env.GOOGLE_CREDENTIALS_BASE64) {
-  // For production on Convex, using base64 encoded credentials
-  const credentials = Buffer.from(process.env.GOOGLE_CREDENTIALS_BASE64, 'base64').toString('utf8');
-  visionClient = new ImageAnnotatorClient({
-    credentials: JSON.parse(credentials),
-  });
-} else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  // For local development using GOOGLE_APPLICATION_CREDENTIALS file path
-  visionClient = new ImageAnnotatorClient();
-} else {
-  // Fallback for local development if no credentials are set (might not work)
-  console.warn("Google Cloud Vision AI credentials not found. Classification might fail.");
-  visionClient = new ImageAnnotatorClient(); // This might fail without credentials
 }
 
 export const classify = action({
   args: {
+    documentUploadId: v.id("documentUploads"), // New: ID of the documentUploads entry to update
     storageFileId: v.id("_storage"),
     mimeType: v.string(),
+    fileName: v.string(),
   },
   handler: async (ctx, args) => {
+    const EXTRACTOUS_API_KEY = process.env.EXTRACTOUS_API_KEY;
+    if (!EXTRACTOUS_API_KEY) {
+      console.error("EXTRACTOUS_API_KEY environment variable is not set.");
+      // Update documentUploads with an error status if API key is missing
+      await ctx.runMutation(api.documentUploads.updateDocumentClassification.updateDocumentClassification, {
+        documentUploadId: args.documentUploadId,
+        classifiedDocumentType: "Classification Failed",
+        extractousResponse: { error: "EXTRACTOUS_API_KEY is not set." },
+      });
+      return; // Exit early
+    }
+
     const file = await ctx.storage.get(args.storageFileId);
     if (!file) {
-      throw new Error("File not found in Convex storage.");
+      console.error("File not found in Convex storage for classification.");
+      await ctx.runMutation(api.documentUploads.updateDocumentClassification.updateDocumentClassification, {
+        documentUploadId: args.documentUploadId,
+        classifiedDocumentType: "Classification Failed",
+        extractousResponse: { error: "File not found in Convex storage." },
+      });
+      return; // Exit early
     }
 
-    // Read the file content as a Buffer
     const fileBuffer = await file.arrayBuffer();
-    const base64EncodedImage = Buffer.from(fileBuffer).toString('base64');
+    const formData = new FormData(); // Use native FormData
+    formData.append('file', new Blob([fileBuffer], { type: args.mimeType }), args.fileName); // Append Blob for native FormData
+    formData.append('config', JSON.stringify({ strategy: 'FAST_WITH_OCR' }));
 
-    let classificationResults: any = {};
+    let classifiedDocumentType: string = "Unknown";
+    let extractousResponse: any = null;
 
     try {
-      if (args.mimeType.startsWith('image/')) {
-        // Perform image analysis using Google Cloud Vision AI
-        const [result] = await visionClient.annotateImage({
-          image: { content: base64EncodedImage },
-          features: [
-            { type: 'LABEL_DETECTION' },
-            { type: 'TEXT_DETECTION' },
-            { type: 'IMAGE_PROPERTIES' }, // For blurriness, etc.
-            { type: 'SAFE_SEARCH_DETECTION' },
-            { type: 'WEB_DETECTION' },
-          ],
-        });
+      const response = await axios.post('https://api.extractous.com/v1/extract', formData, {
+        headers: {
+          'X-Api-Key': EXTRACTOUS_API_KEY,
+        },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+      });
 
-        const extractedText = result.fullTextAnnotation?.text;
-        const extractedLabels = result.labelAnnotations?.map((label: any) => label.description);
-        const documentType = determineDocumentType(extractedText ?? undefined, extractedLabels); // Handle null
+      extractousResponse = response.data;
+      classifiedDocumentType = determineDocumentTypeFromExtractous(extractousResponse);
 
-        classificationResults = {
-          documentType: documentType,
-          labels: extractedLabels,
-          text: extractedText,
-          isPotentiallyBlurry: false,
-          // Add more properties as needed
-        };
+      console.log("Document classified by Extractous:", classifiedDocumentType);
 
-        // Simple heuristic for blurriness (can be improved)
-        if (result.imagePropertiesAnnotation?.dominantColors?.colors && result.imagePropertiesAnnotation.dominantColors.colors.length < 3) {
-            classificationResults.isPotentiallyBlurry = true;
-        }
-
-      } else if (args.mimeType === 'application/pdf' || args.mimeType.includes('officedocument')) {
-        const [result] = await visionClient.documentTextDetection({
-          image: { content: base64EncodedImage },
-        });
-        const extractedText = result.fullTextAnnotation?.text;
-        const documentType = determineDocumentType(extractedText ?? undefined, undefined); // Handle null
-
-        classificationResults = {
-          documentType: documentType,
-          text: extractedText,
-        };
-      } else {
-        classificationResults = {
-          message: "Unsupported file type for detailed classification.",
-          mimeType: args.mimeType,
-        };
-      }
     } catch (error: any) {
-      console.error("Error classifying document:", error);
-      classificationResults = {
-        error: error.message,
-        message: "Failed to classify document.",
-      };
+      console.error("Error classifying document with Extractous:", error.response?.data || error.message);
+      classifiedDocumentType = "Classification Failed";
+      extractousResponse = { error: error.response?.data || error.message };
     }
 
-    return classificationResults;
+    // Update the documentUploads entry with the classification results
+    await ctx.runMutation(api.documentUploads.updateDocumentClassification.updateDocumentClassification, {
+      documentUploadId: args.documentUploadId,
+      classifiedDocumentType: classifiedDocumentType,
+      extractousResponse: extractousResponse,
+    });
   },
 });

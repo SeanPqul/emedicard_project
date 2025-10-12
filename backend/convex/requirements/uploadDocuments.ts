@@ -1,6 +1,8 @@
 import { v } from "convex/values";
 import { Id } from "../_generated/dataModel";
 import { mutation } from "../_generated/server";
+// Import the classify action directly if needed, but we'll call scheduleClassification
+// import { classify } from "../documents/classifyDocument";
 
 // Upload a single document using the new documentUploads schema
 export const uploadDocumentsMutation = mutation({
@@ -60,13 +62,15 @@ export const uploadDocumentsMutation = mutation({
         originalFileName: args.fileName,
         storageFileId: args.storageId,
         uploadedAt: Date.now(),
-        fileType: args.fileType,
+        fileType: args.fileType, // Use args.fileType
         reviewStatus: "Pending", // Resubmitted documents start as pending
         adminRemarks: undefined,
         reviewedBy: undefined,
         reviewedAt: undefined,
-        fileType: args.fileType, // Added fileType
+        // Classification will be handled asynchronously by the scheduled action
       });
+
+      // Classification will not be handled asynchronously by the scheduled action
 
       // Find the most recent rejection history entry for this document type and original upload
       const rejectionHistoryEntry = await ctx.db
@@ -141,6 +145,7 @@ export const uploadDocumentsMutation = mutation({
           adminRemarks: args.adminRemarks,
           reviewedBy: args.reviewedBy,
           reviewedAt: args.reviewedAt,
+          // Classification will be handled asynchronously by the scheduled action
         });
         newDocumentUploadId = existingDoc._id;
       } else {
@@ -151,14 +156,16 @@ export const uploadDocumentsMutation = mutation({
           originalFileName: args.fileName,
           storageFileId: args.storageId,
           uploadedAt: Date.now(),
-          fileType: args.fileType,
+          fileType: args.fileType, // Use args.fileType
           reviewStatus: args.reviewStatus || "Pending",
           adminRemarks: args.adminRemarks,
           reviewedBy: args.reviewedBy,
           reviewedAt: args.reviewedAt,
-          fileType: args.fileType, // Added fileType
+          // Classification will be handled asynchronously by the scheduled action
         });
       }
+
+      // Classification will not be handled asynchronously by the scheduled action
     }
     
     return {
@@ -173,6 +180,7 @@ export const uploadDocumentsMutation = mutation({
       reviewedAt: args.reviewedAt,
       adminRemarks: args.adminRemarks,
       _id: newDocumentUploadId, // Return the ID of the new/updated document upload
+      // classifiedDocumentType is no longer returned here as it's updated asynchronously
     };
   },
 });
