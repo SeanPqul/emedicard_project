@@ -24,6 +24,9 @@ const STATUS_COLORS = {
   'Rejected': '#DC3545',
 } as const;
 
+// Business constants
+const DEFAULT_TOTAL_AMOUNT = 60; // ₱50 application + ₱10 service by default
+
 const FILTER_OPTIONS: FilterStatus[] = ['All', 'Pending Payment', 'Submitted', 'Under Review', 'Approved', 'Rejected'];
 const SORT_OPTIONS: SortOption[] = ['Date', 'Status', 'Category'];
 
@@ -190,7 +193,10 @@ export function ApplicationListWidget({
     const getPrimaryAction = () => {
       switch (application.status) {
         case 'Pending Payment':
-          return { text: 'Pay ₱285.00', icon: 'card-outline' };
+          {
+            const amount = (application as any)?.payment?.netAmount ?? DEFAULT_TOTAL_AMOUNT;
+            return { text: `Pay ₱${Number(amount).toFixed(2)}`, icon: 'card-outline' };
+          }
         case 'Approved':
           return { text: 'Download Card', icon: 'download-outline' };
         case 'Rejected':
@@ -268,7 +274,9 @@ export function ApplicationListWidget({
         {statusInfo.showPaymentBadge && (
           <View style={styles.paymentRequiredBadge}>
             <Ionicons name="card-outline" size={moderateScale(16)} color="#FFA500" />
-            <Text style={styles.paymentBadgeText}>₱285.00 payment required</Text>
+            <Text style={styles.paymentBadgeText}>
+              ₱{(((application as any)?.payment?.netAmount) ?? DEFAULT_TOTAL_AMOUNT).toFixed(2)} payment required
+            </Text>
           </View>
         )}
         

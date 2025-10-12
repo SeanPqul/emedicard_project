@@ -111,7 +111,7 @@ export function useRoleBasedNavigation(userRole?: UserRole) {
     const universalSharedScreens = ['(shared)', 'edit', 'change-password', 'qr-scanner'];
     
     // Applicant-only shared screens
-    const applicantSharedScreens = ['activity', 'document-requirements', 'health-cards', 'orientation', 'payment', 'qr-code', 'upload-documents'];
+    const applicantSharedScreens = ['activity', 'document-requirements', 'health-cards', 'orientation', 'payment', 'qr-code'];
 
     if (permissions.canAccessInspectorTabs) {
       return inspectorOnlyScreens.includes(screenName) || 

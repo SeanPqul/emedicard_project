@@ -34,7 +34,12 @@ export const useDeepLink = () => {
         handleOrientationDeepLink(queryParams ?? {});
       } else if (hostname === 'payment' || path?.startsWith('/payment/')) {
         handlePaymentDeepLink(queryParams ?? {});
-      } else if (hostname === 'upload' || path?.startsWith('/upload/')) {
+      } else if (
+        hostname === 'upload' ||
+        hostname === 'upload-documents' ||
+        path?.startsWith('/upload') ||
+        path?.startsWith('/upload-documents')
+      ) {
         handleUploadDeepLink(queryParams ?? {});
       }
     };
@@ -139,10 +144,7 @@ export const useDeepLink = () => {
   const handlePaymentDeepLink = (params: Record<string, any>) => {
     const { formId } = params;
     if (formId) {
-      router.push({
-        pathname: '/(screens)/(shared)/payment',
-        params: { formId }
-      });
+      router.push(`/(screens)/(application)/${formId}?section=payment`);
     } else {
       router.push('/(tabs)/notification');
     }
@@ -152,7 +154,7 @@ export const useDeepLink = () => {
     const { formId } = params;
     if (formId) {
       router.push({
-        pathname: '/(screens)/(shared)/documents/upload',
+        pathname: '/(screens)/(shared)/documents/view-document',
         params: { formId }
       });
     } else {

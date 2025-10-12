@@ -122,22 +122,8 @@ export const DashboardHeaderEnhanced: React.FC<DashboardHeaderProps> = ({
               size={moderateScale(20)} 
               color={theme.colors.ui.white}
             />
-            <Text style={styles.quickStatText}>Active</Text>
+            <Text style={styles.quickStatText}>Active Cards</Text>
           </View>
-          
-          <View style={styles.quickStatDivider} />
-          
-          <TouchableOpacity 
-            style={styles.quickStatItem}
-            onPress={() => router.push('/(tabs)/application')}
-          >
-            <Ionicons 
-              name="time-outline" 
-              size={moderateScale(20)} 
-              color={theme.colors.ui.white}
-            />
-            <Text style={styles.quickStatText}>Track Status</Text>
-          </TouchableOpacity>
           
           <View style={styles.quickStatDivider} />
           

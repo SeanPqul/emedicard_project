@@ -35,8 +35,8 @@ const NOTIFICATION_CONFIG = {
     icon: 'alert-circle',
     color: theme.colors.accent.warningOrange,
     gradient: [theme.colors.accent.warningOrange, '#F97316'],
-    actionText: 'Upload Documents',
-    actionIcon: 'cloud-upload-outline',
+    actionText: 'Review Documents',
+    actionIcon: 'document-text-outline',
   },
   FormApproved: {
     icon: 'checkmark-circle',
@@ -118,13 +118,13 @@ export function NotificationDetailScreen() {
       case 'PaymentReceived':
       case 'PaymentSuccessful':
         if (notification.applicationId) {
-          router.push(`/(screens)/(application)/${notification.applicationId}`);
+          router.push(`/(screens)/(application)/${notification.applicationId}?section=payment`);
         }
         break;
       case 'MissingDoc':
         if (notification.applicationId) {
           router.push({
-            pathname: '/(screens)/(shared)/documents/upload',
+            pathname: '/(screens)/(shared)/documents/view-document',
             params: { formId: notification.applicationId }
           });
         }

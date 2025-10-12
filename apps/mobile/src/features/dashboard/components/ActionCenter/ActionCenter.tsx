@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { moderateScale } from '@shared/utils/responsive';
@@ -14,6 +14,7 @@ export interface ActionCenterProps {
     activeApplications: number;
   };
   currentApplication: any;
+  userApplications?: any[];
   rejectedDocumentsCount?: number;
 }
 
@@ -30,100 +31,127 @@ interface ActionItem {
 export const ActionCenter: React.FC<ActionCenterProps> = ({
   dashboardStats,
   currentApplication,
+  userApplications = [],
   rejectedDocumentsCount = 0,
 }) => {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
   const actions: ActionItem[] = [];
 
-  // 1. Payment due (highest priority if overdue)
-  if (dashboardStats.pendingPayments > 0 && currentApplication?._id) {
-    const daysLeft = currentApplication.paymentDeadline 
-      ? Math.floor((currentApplication.paymentDeadline - Date.now()) / (1000 * 60 * 60 * 24))
+  // Normalize and dedupe applications by id
+  const apps = Array.isArray(userApplications) ? userApplications : [];
+  const uniqueAppsMap = new Map<string, any>();
+  apps.filter(Boolean).forEach((a: any) => {
+    if (a?._id && !uniqueAppsMap.has(a._id)) uniqueAppsMap.set(a._id, a);
+  });
+  const uniqueApps = Array.from(uniqueAppsMap.values());
+
+  // Statuses that still require user action (exclude Rejected/Approved/Cancelled)
+  const ACTIONABLE_STATUSES = new Set(['Pending Payment', 'Submitted', 'Under Review']);
+
+  // 1. Payment due (highest priority if overdue) - evaluate across all applications
+  const DEFAULT_TOTAL_AMOUNT = 60;
+  const paymentApps = uniqueApps.filter((app: any) => app?.status === 'Pending Payment');
+  paymentApps.forEach((app: any) => {
+    const daysLeft = app?.paymentDeadline
+      ? Math.floor((app.paymentDeadline - Date.now()) / (1000 * 60 * 60 * 24))
       : null;
-    
     const isOverdue = daysLeft !== null && daysLeft < 0;
     const isDueSoon = daysLeft !== null && daysLeft <= 3 && daysLeft >= 0;
+    const amount = (app as any)?.payment?.netAmount ?? dashboardStats?.pendingAmount ?? DEFAULT_TOTAL_AMOUNT;
 
     actions.push({
-      id: 'payment',
+      id: `payment-${app._id}`,
       icon: 'cash-outline',
       iconColor: isOverdue ? theme.colors.semantic.error : isDueSoon ? theme.colors.orange[600] : theme.colors.blue[600],
       title: `Payment ${isOverdue ? 'Overdue' : 'Due'}`,
-      subtitle: `₱${dashboardStats.pendingAmount.toFixed(2)}${daysLeft !== null ? ` • ${daysLeft <= 0 ? 'Overdue' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`}` : ''}`,
-      urgency: isOverdue ? 'high' : isDueSoon ? 'medium' : 'low',
-      onPress: () => router.push(`/(screens)/(application)/${currentApplication._id}?section=payment`),
+      subtitle: `₱${Number(amount).toFixed(2)}${daysLeft !== null ? ` • ${daysLeft <= 0 ? 'Overdue' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`}` : ''}`,
+      urgency: 'high',
+      onPress: () => router.push(`/(screens)/(application)/${app._id}?section=payment`),
     });
-  }
+  });
 
-  // 2. Rejected documents (high priority)
-  if (rejectedDocumentsCount > 0 && currentApplication?._id) {
+  // 2. Documents rejected (per application)
+  const rejectedApps = uniqueApps.filter((app: any) => {
+    const count = (app as any)?.rejectedDocumentsCount ?? (app as any)?.rejectionCount ?? 0;
+    const hasFlag = (app as any)?.hasRejectedDocuments === true;
+    return (count > 0) || hasFlag; // Only show when there are outstanding rejections for that app
+  });
+
+  rejectedApps.forEach((app: any) => {
+    const countForThisApp = (app as any)?.rejectedDocumentsCount ?? (app as any)?.rejectionCount ?? (currentApplication?._id === app._id ? rejectedDocumentsCount : 0);
     actions.push({
-      id: 'rejected-docs',
+      id: `rejected-${app._id}`,
       icon: 'alert-circle-outline',
       iconColor: theme.colors.semantic.error,
-      title: `${rejectedDocumentsCount} Document${rejectedDocumentsCount !== 1 ? 's' : ''} Rejected`,
-      subtitle: 'Re-upload required documents',
+      title: `${countForThisApp} Rejected Document${countForThisApp !== 1 ? 's' : ''}`,
+      subtitle: 'Review remarks and resubmit',
       urgency: 'high',
-      onPress: () => router.push(`/(screens)/(shared)/documents/upload-document?formId=${currentApplication._id}&rejectedOnly=true`),
+      onPress: () => router.push(`/(screens)/(shared)/documents/view-document?formId=${app._id}&openRejected=true`),
     });
-  }
+  });
 
-  // 3. Orientation required (for Yellow card holders)
-  const isFoodHandler = currentApplication?.jobCategory?.name?.toLowerCase().includes('food');
-  const requiresOrientation = isFoodHandler && currentApplication?.jobCategory?.requireOrientation === 'Yes';
-  // TODO: Check if orientation is already scheduled/completed
-  const orientationScheduled = false; // currentApplication?.orientationScheduled
-
-  if (requiresOrientation && !orientationScheduled) {
-    actions.push({
-      id: 'orientation',
-      icon: 'school-outline',
-      iconColor: theme.colors.orange[600],
-      title: 'Food Safety Orientation Required',
-      subtitle: 'Schedule your mandatory orientation',
-      urgency: 'medium',
-      onPress: () => router.push('/(screens)/(shared)/orientation'),
+  // 3. Orientation required (for Yellow card holders) - evaluate across actionable applications only
+  const orientationApps = uniqueApps
+    .filter((app: any) => ACTIONABLE_STATUSES.has(app?.status) && app?.status !== 'Pending Payment')
+    .filter((app: any) => {
+      const name = app?.jobCategory?.name?.toLowerCase?.() || '';
+      const isFoodHandler = name.includes('food');
+      const requireOrientationFlag = app?.jobCategory?.requireOrientation;
+      const requiresOrientation = isFoodHandler && (requireOrientationFlag === 'Yes' || requireOrientationFlag === true);
+      return requiresOrientation;
     });
-  }
 
-  // 4. Missing documents (only if no application exists)
-  if (dashboardStats.activeApplications === 0) {
-    actions.push({
-      id: 'start-application',
-      icon: 'document-text-outline',
-      iconColor: theme.colors.blue[600],
-      title: 'Start Your Application',
-      subtitle: 'Apply for your health card today',
-      urgency: 'low',
-      onPress: () => router.push('/(tabs)/apply'),
-    });
-  }
+  // TODO: wire orientation schedule/completion state when backend is ready
+  const orientationScheduled = false;
+
+  orientationApps.forEach((app: any) => {
+    if (!orientationScheduled) {
+      actions.push({
+        id: `orientation-${app._id}`,
+        icon: 'school-outline',
+        iconColor: theme.colors.orange[600],
+        title: 'Food Safety Orientation Required',
+        subtitle: 'Schedule your mandatory orientation',
+        urgency: 'medium',
+        onPress: () => router.push(`/(screens)/(shared)/orientation?applicationId=${app._id}`),
+      });
+    }
+  });
 
   // Sort by urgency
   const urgencyOrder = { high: 0, medium: 1, low: 2 };
   actions.sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]);
 
-  // Don't show section if no actions
+  // Pulse animation for urgent actions
+  useEffect(() => {
+    if (actions.length > 0 && actions.some(a => a.urgency === 'high')) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.02,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [actions.length]);
+
+  // Don't show section if no urgent actions
   if (actions.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Ionicons name="checkmark-circle" size={moderateScale(20)} color={theme.colors.status.success} />
-          <Text style={styles.title}>All Caught Up</Text>
-        </View>
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>
-            No pending actions. You're all set!
-          </Text>
-        </View>
-      </View>
-    );
+    return null;
   }
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { transform: [{ scale: pulseAnim }] }]}>
       <View style={styles.header}>
-        <Ionicons name="list-circle" size={moderateScale(20)} color={theme.colors.primary[500]} />
-        <Text style={styles.title}>Action Center</Text>
+        <Ionicons name="alert-circle" size={moderateScale(22)} color={theme.colors.semantic.error} />
+        <Text style={styles.title}>Action Required</Text>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{actions.length}</Text>
         </View>
@@ -156,6 +184,6 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
           </TouchableOpacity>
         ))}
       </View>
-    </View>
+    </Animated.View>
   );
 };

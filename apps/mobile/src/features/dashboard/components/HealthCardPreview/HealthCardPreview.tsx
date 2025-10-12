@@ -22,21 +22,23 @@ interface HealthCardPreviewProps {
   };
   currentApplication?: any;
   userProfile?: any;
+  isNewUser?: boolean;
 }
 
 export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
   healthCard,
   currentApplication,
   userProfile,
+  isNewUser,
 }) => {
   // If no health card, show application status card instead
   if (!healthCard && currentApplication) {
     return <ApplicationStatusCard application={currentApplication} />;
   }
 
-  // If no health card and no application, show CTA
+// If no health card and no application, suppress CTA here — WelcomeBanner owns the new-user CTA
   if (!healthCard) {
-    return <NoHealthCardCTA />;
+    return null;
   }
 
   const daysUntilExpiry = differenceInDays(new Date(healthCard.expiryDate), new Date());
@@ -131,6 +133,8 @@ export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
 const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) => {
   const getStatusColor = () => {
     switch (application.status) {
+      case 'Pending Payment':
+        return theme.colors.orange[500];
       case 'Submitted':
         return theme.colors.blue[500];
       case 'Under Review':
@@ -179,8 +183,14 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
             />
           </View>
           <Text style={styles.progressText}>
-            {application.status === 'Approved' 
-              ? 'Ready for payment' 
+            {application.status === 'Pending Payment'
+              ? 'Complete payment to proceed'
+              : application.status === 'Submitted'
+              ? 'Waiting for verification'
+              : application.status === 'Under Review'
+              ? 'Medical review in progress'
+              : application.status === 'Approved'
+              ? 'Approved'
               : 'Processing your application'}
           </Text>
         </View>
@@ -198,37 +208,3 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
   );
 };
 
-// Component for when user has no health card or application
-const NoHealthCardCTA: React.FC = () => {
-  return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => router.push('/(tabs)/apply')}
-      activeOpacity={0.8}
-    >
-      <View
-        style={[styles.ctaCard, { backgroundColor: theme.colors.primary[50] }]}
-      >
-        <View style={styles.ctaIconContainer}>
-          <Ionicons 
-            name="add-circle-outline" 
-            size={moderateScale(48)} 
-            color={theme.colors.primary[600]}
-          />
-        </View>
-        <Text style={styles.ctaTitle}>Get Your Health Card</Text>
-        <Text style={styles.ctaDescription}>
-          Start your application today and get your digital health card in just a few steps
-        </Text>
-        <View style={styles.ctaButton}>
-          <Text style={styles.ctaButtonText}>Start Application</Text>
-          <Ionicons 
-            name="arrow-forward" 
-            size={moderateScale(20)} 
-            color={theme.colors.ui.white}
-          />
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};

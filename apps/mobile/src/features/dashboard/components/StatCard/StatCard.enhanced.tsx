@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 // import { LinearGradient } from 'expo-linear-gradient'; // Disabled due to native module issues
-import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
+import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
 import { styles } from './StatCard.enhanced.styles';
 
@@ -167,18 +167,6 @@ export const PresetStatCards = {
     />
   ),
   
-  Payments: (props: Partial<StatCardEnhancedProps>) => (
-    <StatCardEnhanced
-      icon="card"
-      title="Payments"
-      gradient={[theme.colors.purple[500], theme.colors.purple[600]]}
-      {...props}
-      value={props.value || '₱0.00'}
-      subtitle={props.subtitle || 'Payment history'}
-      onPress={props.onPress || (() => {})}
-    />
-  ),
-  
   HealthCards: (props: Partial<StatCardEnhancedProps>) => (
     <StatCardEnhanced
       icon="shield-checkmark"
@@ -190,16 +178,5 @@ export const PresetStatCards = {
       onPress={props.onPress || (() => {})}
     />
   ),
-  
-  Documents: (props: Partial<StatCardEnhancedProps>) => (
-    <StatCardEnhanced
-      icon="folder"
-      title="Documents"
-      gradient={[theme.colors.orange[500], theme.colors.orange[600]]}
-      {...props}
-      value={props.value || '0'}
-      subtitle={props.subtitle || 'Uploaded files'}
-      onPress={props.onPress || (() => {})}
-    />
-  ),
+
 };

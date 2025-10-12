@@ -169,47 +169,6 @@ export const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
   },
   
-  // CTA Card Styles
-  ctaCard: {
-    borderRadius: moderateScale(16),
-    padding: scale(24),
-    alignItems: 'center',
-    ...getShadow('medium'),
-    borderWidth: moderateScale(1),
-    borderColor: theme.colors.primary[200],
-  },
-  ctaIconContainer: {
-    marginBottom: verticalScale(16),
-  },
-  ctaTitle: {
-    fontSize: moderateScale(20),
-    fontWeight: '700',
-    color: theme.colors.primary[700],
-    marginBottom: verticalScale(8),
-    textAlign: 'center',
-  },
-  ctaDescription: {
-    fontSize: moderateScale(14),
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: verticalScale(20),
-    lineHeight: moderateScale(20),
-  },
-  ctaButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.primary[500],
-    paddingHorizontal: scale(24),
-    paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(24),
-    ...getShadow('small'),
-  },
-  ctaButtonText: {
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-    color: theme.colors.ui.white,
-    marginRight: scale(8),
-  },
   
   // Common Action Row
   actionRow: {

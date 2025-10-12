@@ -214,17 +214,8 @@ export function ViewDocumentsScreen() {
   };
 
 
-  const handleAddMissingDocument = () => {
-    router.push(`/(screens)/(shared)/documents/upload-document?formId=${formId}`);
-  };
 
 
-  // Find missing required documents
-  const missingDocuments = requiredDocuments.filter((req: any) => 
-    req.required && !uploadedDocuments.some((upload: DocumentWithRequirement) => 
-      upload.documentTypeId === req._id
-    )
-  );
 
 
   if (isLoading) {
@@ -269,27 +260,6 @@ export function ViewDocumentsScreen() {
           </View>
         )}
 
-        {/* Missing Documents Warning */}
-        {missingDocuments.length > 0 && (
-          <View style={styles.warningCard}>
-            <View style={styles.warningHeader}>
-              <Ionicons name="alert-circle" size={moderateScale(24)} color={getColor('semantic.error')} />
-              <Text style={styles.warningTitle}>Missing Required Documents</Text>
-            </View>
-            <Text style={styles.warningText}>
-              You have {missingDocuments.length} required document{missingDocuments.length > 1 ? 's' : ''} that need to be uploaded:
-            </Text>
-            {missingDocuments.map((doc: any) => (
-              <Text key={doc._id} style={styles.warningItem}>
-                • {doc.name}
-              </Text>
-            ))}
-            <TouchableOpacity style={styles.uploadMissingButton} onPress={handleAddMissingDocument}>
-              <Ionicons name="cloud-upload-outline" size={moderateScale(20)} color={getColor('background.primary')} />
-              <Text style={styles.uploadMissingText}>Upload Missing Documents</Text>
-            </TouchableOpacity>
-          </View>
-        )}
 
         {/* Documents List */}
         <View style={styles.documentsContainer}>
@@ -309,13 +279,13 @@ export function ViewDocumentsScreen() {
           {uploadedDocuments.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="document-outline" size={moderateScale(64)} color={getColor('text.tertiary')} />
-              <Text style={styles.emptyStateTitle}>No Documents Uploaded</Text>
+              <Text style={styles.emptyStateTitle}>No Documents Available</Text>
               <Text style={styles.emptyStateText}>
-                You haven&apos;t uploaded any documents yet. Start by uploading the required documents for your application.
+                Documents are managed during the application process. You can view details from your application.
               </Text>
-              <TouchableOpacity style={styles.uploadButton} onPress={handleAddMissingDocument}>
-                <Ionicons name="cloud-upload-outline" size={moderateScale(20)} color={getColor('background.primary')} />
-                <Text style={styles.uploadButtonText}>Upload Documents</Text>
+              <TouchableOpacity style={styles.uploadButton} onPress={() => router.push(`/(screens)/(application)/${formId}`)}>
+                <Ionicons name="arrow-back-outline" size={moderateScale(20)} color={getColor('background.primary')} />
+                <Text style={styles.uploadButtonText}>Back to Application</Text>
               </TouchableOpacity>
             </View>
           ) : (

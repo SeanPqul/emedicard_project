@@ -25,6 +25,8 @@ export interface DashboardApplication {
   } | undefined;
   documentCount: number;
   hasPayment: boolean;
+  hasRejectedDocuments?: boolean;
+  rejectedDocumentsCount?: number;
 }
 
 // Re-export entity types for backward compatibility

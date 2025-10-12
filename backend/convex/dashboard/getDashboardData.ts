@@ -54,6 +54,13 @@ export const getDashboardDataQuery = query({
           .withIndex("by_application", (q) => q.eq("applicationId", application._id))
           .collect();
 
+        // Per-application rejected documents count (pending resubmission)
+        const rejectionHistory = await ctx.db
+          .query("documentRejectionHistory")
+          .withIndex("by_application", (q) => q.eq("applicationId", application._id))
+          .collect();
+        const rejectedPendingCount = rejectionHistory.filter(r => !r.wasReplaced).length;
+
         return {
           _id: application._id,
           _creationTime: application._creationTime,
@@ -69,6 +76,8 @@ export const getDashboardDataQuery = query({
           } : undefined,
           documentCount: documents.length,
           hasPayment: payments.some(p => p && p.applicationId === application._id),
+          hasRejectedDocuments: rejectedPendingCount > 0,
+          rejectedDocumentsCount: rejectedPendingCount,
         };
       })
     );
