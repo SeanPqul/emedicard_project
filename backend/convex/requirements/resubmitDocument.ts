@@ -86,7 +86,7 @@ export const resubmitDocument = mutation({
         originalFileName: args.fileName,
         uploadedAt: Date.now(),
         reviewStatus: "Pending",
-        fileType: args.fileType, // Added fileType
+        fileType: ""
       });
     }
 

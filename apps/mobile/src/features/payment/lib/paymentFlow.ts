@@ -1,4 +1,4 @@
-import { Id } from 'backend/convex/_generated/dataModel';
+import { Id } from '@backend/convex/_generated/dataModel';
 import { AppError, AppErrorType } from '@shared/lib/errors';
 import { PaymentMethod } from '@entities/payment';
 

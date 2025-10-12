@@ -12,28 +12,15 @@ export default function RoleBasedTabLayout() {
   const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
   const { visibleTabs } = useRoleBasedNavigation(userProfile?.role);
 
-  // Show loading while user profile is being fetched
-  if (userProfile === undefined) {
+  // Show loading state while user profile is fetching or being initialized
+  if (userProfile === undefined || userProfile === null) {
     return (
       <LoadingSpinner 
         visible={true} 
-        message="Loading navigation..." 
+        message="Loading..." 
         fullScreen 
         type="pulse" 
         icon="compass" 
-      />
-    );
-  }
-
-  // Handle error case when user profile fails to load
-  if (userProfile === null) {
-    return (
-      <LoadingSpinner 
-        visible={true} 
-        message="Unable to load user data..." 
-        fullScreen 
-        type="pulse" 
-        icon="warning" 
       />
     );
   }

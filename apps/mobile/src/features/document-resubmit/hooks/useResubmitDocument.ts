@@ -9,6 +9,21 @@ import { ApiResponse } from '../../../types/utility';
 export function useResubmitDocument() {
   const mutation = useMutation(api.requirements.resubmitDocument.resubmitDocument);
 
+  const friendlyMessage = (err: unknown): string => {
+    const raw = err instanceof Error ? err.message : String(err ?? '');
+    const m = raw.toLowerCase();
+    if (m.includes('no rejection found')) {
+      return 'This document isn’t marked for resubmission yet. Please refresh and try again once it shows as rejected.';
+    }
+    if (m.includes('not authenticated')) {
+      return 'Your session expired. Please sign in again and retry.';
+    }
+    if (m.includes('permission') || m.includes('insufficient')) {
+      return 'You don’t have permission to perform this action.';
+    }
+    return 'We couldn’t resubmit your document. Please try again.';
+  };
+
   const resubmitDocument = async (params: {
     applicationId: Id<"applications">;
     documentTypeId: Id<"documentTypes">;
@@ -24,10 +39,9 @@ export function useResubmitDocument() {
         data: result,
       };
     } catch (error) {
-      console.error('Failed to resubmit document:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to resubmit document',
+        error: friendlyMessage(error),
       };
     }
   };

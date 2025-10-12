@@ -7,7 +7,6 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { CustomButton } from '@shared/components';
-import { DragDropUpload } from '@features/upload/components';
 import { getColor } from '@shared/styles/theme';
 import { styles } from '@shared/styles/screens/shared-upload-documents';
 import { useDocumentUpload } from '@features/upload';
@@ -158,11 +157,6 @@ export function UploadDocumentsScreen() {
     setShowImagePicker(false);
   };
 
-  const handleFileSelection = (files: any[]) => {
-    if (!selectedDocumentId || files.length === 0) return;
-    handleDocumentSelected(files[0], selectedDocumentId);
-  };
-
   const pickFromGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -173,6 +167,7 @@ export function UploadDocumentsScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
+      allowsMultipleSelection: false,
       aspect: [4, 3],
       quality: 0.8,
     });
@@ -344,17 +339,6 @@ export function UploadDocumentsScreen() {
           </View>
         </View>
 
-        <View style={styles.documentUploader}>
-          <DragDropUpload
-            onFilesSelected={handleFileSelection}
-            title="Drag files here or tap to upload"
-            subtitle="Supports JPG, PNG, and PDF"
-            acceptedFormats={['jpg', 'png', 'pdf']}
-            maxFiles={1}
-            disabled={!selectedDocumentId}
-            loading={selectedDocumentId ? (getUploadState(selectedDocumentId) as any)?.uploading : false}
-          />
-        </View>
 
         {/* Document List */}
         <View style={styles.documentsContainer}>

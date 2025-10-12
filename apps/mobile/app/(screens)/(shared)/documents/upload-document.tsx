@@ -1,3 +1,1 @@
-import { UploadDocumentsScreen } from '../../../../src/screens/shared/UploadDocumentsScreen';
-
-export default UploadDocumentsScreen;
+export { UploadDocumentsScreen as default } from '../../../../src/screens/shared/UploadDocumentsScreen';

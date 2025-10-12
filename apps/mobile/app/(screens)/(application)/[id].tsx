@@ -1,4 +1,2 @@
-import { ApplicationDetailScreen } from '@/src/screens/tabs/ApplicationDetailScreen';
-
-export default ApplicationDetailScreen;
+export { ApplicationDetailScreen as default } from '../../../src/screens/tabs/ApplicationDetailScreen';
 

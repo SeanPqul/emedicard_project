@@ -271,6 +271,7 @@ export const useDocumentSelection = ({
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images',
         allowsEditing: false,
+        allowsMultipleSelection: false,
         quality: 0.8,
         exif: true, // Request EXIF data which might contain original filename
       });

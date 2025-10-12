@@ -1,7 +1,7 @@
-import { useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { RejectionCategory } from '@entities/document';
+import { useMutation } from 'convex/react';
 import { ApiResponse } from '../../../types/utility';
 
 /**
@@ -18,12 +18,17 @@ export function useRejectDocument() {
   }): Promise<ApiResponse<{ rejectionId: Id<"documentRejectionHistory"> }>> => {
     try {
       const result = await mutation(params);
+      if (!result || !result.rejectionId) {
+        return {
+          success: false,
+          error: 'Rejection ID was not returned by the server',
+        };
+      }
       return {
         success: true,
-        data: result,
+        data: { rejectionId: result.rejectionId },
       };
     } catch (error) {
-      console.error('Failed to reject document:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to reject document',

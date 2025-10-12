@@ -60,6 +60,7 @@ export const uploadDocumentsMutation = mutation({
         originalFileName: args.fileName,
         storageFileId: args.storageId,
         uploadedAt: Date.now(),
+        fileType: args.fileType,
         reviewStatus: "Pending", // Resubmitted documents start as pending
         adminRemarks: undefined,
         reviewedBy: undefined,
@@ -125,6 +126,11 @@ export const uploadDocumentsMutation = mutation({
         .unique();
 
       if (existingDoc) {
+        // Prevent resetting a rejected document to pending via the generic upload flow
+        if (existingDoc.reviewStatus === "Rejected") {
+          throw new Error("Document was rejected. Please use the resubmission flow to replace it.");
+        }
+
         // Update existing document
         await ctx.db.patch(existingDoc._id, {
           documentTypeId: documentType._id,
@@ -145,6 +151,7 @@ export const uploadDocumentsMutation = mutation({
           originalFileName: args.fileName,
           storageFileId: args.storageId,
           uploadedAt: Date.now(),
+          fileType: args.fileType,
           reviewStatus: args.reviewStatus || "Pending",
           adminRemarks: args.adminRemarks,
           reviewedBy: args.reviewedBy,
