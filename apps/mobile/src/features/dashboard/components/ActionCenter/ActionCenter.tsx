@@ -57,7 +57,29 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
       : null;
     const isOverdue = daysLeft !== null && daysLeft < 0;
     const isDueSoon = daysLeft !== null && daysLeft <= 3 && daysLeft >= 0;
-    const amount = (app as any)?.payment?.netAmount ?? dashboardStats?.pendingAmount ?? DEFAULT_TOTAL_AMOUNT;
+    // Determine amount to display per application
+    // - If the app has its own payment record with a positive netAmount, use it
+    // - If the app is Pending Payment with no payment record yet, use the default total (₱60)
+    // - If there's exactly one pending payment overall, use the aggregated pendingAmount
+    // - Otherwise, fall back to default total
+    const amount = (() => {
+      const perAppAmount = (app as any)?.payment?.netAmount;
+      if (typeof perAppAmount === 'number' && perAppAmount > 0) {
+        return perAppAmount;
+      }
+      if ((app as any)?.status === 'Pending Payment' && !(app as any)?.hasPayment) {
+        return DEFAULT_TOTAL_AMOUNT;
+      }
+      if (
+        typeof dashboardStats?.pendingAmount === 'number' &&
+        dashboardStats.pendingAmount > 0 &&
+        typeof dashboardStats?.pendingPayments === 'number' &&
+        dashboardStats.pendingPayments === 1
+      ) {
+        return dashboardStats.pendingAmount;
+      }
+      return DEFAULT_TOTAL_AMOUNT;
+    })();
 
     actions.push({
       id: `payment-${app._id}`,
