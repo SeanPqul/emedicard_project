@@ -64,6 +64,7 @@ export const uploadDocumentsMutation = mutation({
         adminRemarks: undefined,
         reviewedBy: undefined,
         reviewedAt: undefined,
+        fileType: args.fileType, // Added fileType
       });
 
       // Find the most recent rejection history entry for this document type and original upload
@@ -148,6 +149,7 @@ export const uploadDocumentsMutation = mutation({
           adminRemarks: args.adminRemarks,
           reviewedBy: args.reviewedBy,
           reviewedAt: args.reviewedAt,
+          fileType: args.fileType, // Added fileType
         });
       }
     }

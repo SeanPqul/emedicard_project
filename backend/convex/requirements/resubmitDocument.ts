@@ -1,5 +1,5 @@
-import { mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { mutation } from "../_generated/server";
 
 export const resubmitDocument = mutation({
   args: {
@@ -86,6 +86,7 @@ export const resubmitDocument = mutation({
         originalFileName: args.fileName,
         uploadedAt: Date.now(),
         reviewStatus: "Pending",
+        fileType: args.fileType, // Added fileType
       });
     }
 

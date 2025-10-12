@@ -1,11 +1,13 @@
-import { Clerk } from "@clerk/backend";
+"use node";
+import { clerkClient } from "@clerk/clerk-sdk-node";
 import { v } from "convex/values";
 import { api } from "../_generated/api"; // Import api to call mutations from action
 import { action } from "../_generated/server"; // Changed to action
 
-const clerk = Clerk({
-  secretKey: process.env.CLERK_SECRET_KEY!,
-});
+const clerk = clerkClient;
+// The secretKey is typically picked up from environment variables automatically by Clerk
+// If not, it would be configured globally or through a specific initialization function.
+// For now, assume it picks it up automatically.
 
 export const createAdmin = action({ // Changed to action
   args: {
@@ -24,9 +26,9 @@ export const createAdmin = action({ // Changed to action
     // 2. Interact with Clerk to create/find user
     let clerkUser;
     try {
-      const users = await clerk.users.getUserList({ emailAddress: [args.email] });
-      if (users.length > 0) {
-        clerkUser = users[0];
+      const usersResponse = await clerk.users.getUserList({ emailAddress: [args.email] });
+      if (usersResponse.length > 0) {
+        clerkUser = usersResponse[0];
         // If user exists, update their password if provided (Clerk doesn't allow direct password update via this method easily)
         // For existing users, a password reset flow might be more appropriate or a separate mutation.
         // For this task, we'll assume if a user exists, we're just updating their admin privileges.

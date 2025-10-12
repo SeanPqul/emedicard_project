@@ -1,3 +1,5 @@
+'use node';
+
 import { ImageAnnotatorClient } from '@google-cloud/vision';
 import { v } from "convex/values";
 import { action } from "../_generated/server";
@@ -91,7 +93,7 @@ export const classify = action({
 
         const extractedText = result.fullTextAnnotation?.text;
         const extractedLabels = result.labelAnnotations?.map((label: any) => label.description);
-        const documentType = determineDocumentType(extractedText, extractedLabels);
+        const documentType = determineDocumentType(extractedText ?? undefined, extractedLabels); // Handle null
 
         classificationResults = {
           documentType: documentType,
@@ -111,7 +113,7 @@ export const classify = action({
           image: { content: base64EncodedImage },
         });
         const extractedText = result.fullTextAnnotation?.text;
-        const documentType = determineDocumentType(extractedText, undefined);
+        const documentType = determineDocumentType(extractedText ?? undefined, undefined); // Handle null
 
         classificationResults = {
           documentType: documentType,

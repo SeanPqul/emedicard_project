@@ -3,6 +3,7 @@
 
 import DashboardActivityLog from '@/components/DashboardActivityLog';
 import ErrorMessage from "@/components/ErrorMessage";
+import Navbar from '@/components/shared/Navbar';
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
@@ -10,7 +11,6 @@ import { useQuery } from "convex/react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import Navbar from '@/components/shared/Navbar';
 
 type ApplicationWithDetails = Doc<"applications"> & { userName: string; jobCategoryName: string };
 

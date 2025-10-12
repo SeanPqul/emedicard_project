@@ -1,6 +1,11 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+
+// Helper function to extract file type from originalFileName
+function getFileTypeFromFileName(fileName: string): string {
+  const parts = fileName.split(".");
+  return parts.length > 1 ? parts[parts.length - 1] : "unknown";
+}
 
 export const resubmitDocument = mutation({
   args: {
@@ -58,6 +63,7 @@ export const resubmitDocument = mutation({
       originalFileName: args.originalFileName,
       reviewStatus: "Pending",
       uploadedAt: Date.now(),
+      fileType: getFileTypeFromFileName(args.originalFileName), // Added fileType
     });
 
     // 4. Update the rejection history
