@@ -5,6 +5,7 @@ export * from './DocumentRejectionHistoryScreen';
 export * from './DocumentRequirementsScreen';
 export * from './HealthCardsScreen';
 export * from './NotificationDetailScreen';
+export * from './OrientationScheduleScreen';
 export * from './ProfileEditScreen';
 export * from './QRCodeScreen';
 export * from './QrScannerScreen';

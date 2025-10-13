@@ -213,6 +213,22 @@ export const styles = StyleSheet.create({
     marginRight: scale(theme.spacing.xs),
   },
 
+  // Orientation Card - Similar to documents card
+  orientationCard: {
+    backgroundColor: theme.colors.background.primary,
+    marginHorizontal: scale(16),
+    marginBottom: verticalScale(16),
+    borderRadius: moderateScale(12),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
   // Payment Card - Compact design matching profile card style
   paymentCard: {
     backgroundColor: theme.colors.background.primary,
