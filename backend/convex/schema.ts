@@ -125,6 +125,60 @@ export default defineSchema({
     scheduledAt: v.float64(),
   }).index("by_application", ["applicationId"])
     .index("by_date_timeslot_venue", ["orientationDate", "timeSlot", "orientationVenue"]),
+
+  // Available orientation schedules (time slots for booking)
+  orientationSchedules: defineTable({
+    date: v.float64(), // Timestamp for the date
+    time: v.string(), // e.g., "9:00 AM - 11:00 AM"
+    venue: v.object({
+      name: v.string(),
+      address: v.string(),
+      capacity: v.float64(),
+    }),
+    availableSlots: v.float64(),
+    totalSlots: v.float64(),
+    isAvailable: v.boolean(),
+    instructor: v.optional(v.object({
+      name: v.string(),
+      designation: v.string(),
+    })),
+    notes: v.optional(v.string()),
+    createdAt: v.float64(),
+    updatedAt: v.optional(v.float64()),
+  })
+    .index("by_date", ["date"])
+    .index("by_availability", ["isAvailable", "date"]),
+
+  // User's orientation session bookings
+  orientationSessions: defineTable({
+    userId: v.string(), // Clerk user ID
+    applicationId: v.id("applications"),
+    scheduleId: v.id("orientationSchedules"),
+    scheduledDate: v.float64(), // Copy of schedule date for easy querying
+    completedDate: v.optional(v.float64()),
+    status: v.union(
+      v.literal("scheduled"),
+      v.literal("completed"),
+      v.literal("cancelled"),
+      v.literal("no-show")
+    ),
+    venue: v.object({
+      name: v.string(),
+      address: v.string(),
+    }),
+    instructor: v.optional(v.object({
+      name: v.string(),
+      designation: v.string(),
+    })),
+    certificateId: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdAt: v.float64(),
+    updatedAt: v.optional(v.float64()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_application", ["applicationId"])
+    .index("by_schedule", ["scheduleId"])
+    .index("by_status", ["status"]),
   paymentLogs: defineTable({
     amount: v.optional(v.float64()),
     currency: v.optional(v.string()),

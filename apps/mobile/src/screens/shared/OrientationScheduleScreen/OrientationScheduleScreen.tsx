@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import type { Id } from '@backend/convex/_generated/dataModel';
 import { BaseScreen } from '@shared/components/core';
-import { OrientationScheduler } from '@features/orientation';
-import { MOCK_ORIENTATION_SCHEDULES } from '@features/orientation/mocks/orientationSchedules.mock';
+import { OrientationScheduler, useOrientationSchedule } from '@features/orientation';
 import { theme } from '@shared/styles/theme';
 import { moderateScale, verticalScale, scale } from '@shared/utils/responsive';
 
@@ -17,21 +17,36 @@ import { moderateScale, verticalScale, scale } from '@shared/utils/responsive';
 export function OrientationScheduleScreen() {
   const { applicationId } = useLocalSearchParams<{ applicationId: string }>();
 
-  const handleScheduleSelect = (schedule: any) => {
+  // Use the orientation scheduling hook with real backend
+  const {
+    schedules,
+    bookedSession,
+    isLoading,
+    isBooking,
+    isCancelling,
+    bookSlot,
+    cancelBooking,
+  } = useOrientationSchedule(applicationId as Id<"applications"> | undefined);
+
+  const handleScheduleSelect = async (schedule: any) => {
     console.log('Selected schedule:', schedule);
-    // TODO: Implement booking logic once backend is ready
-    // For now, just show success and navigate back
-    alert(`Orientation booked for ${schedule.date}!\n\nYou will receive a confirmation notification.`);
+    const result = await bookSlot(schedule._id);
     
-    // Navigate back to application detail
-    router.back();
+    if (result.success) {
+      // Navigate back to application detail after successful booking
+      router.back();
+    }
   };
 
-  const handleCancelBooking = () => {
-    console.log('Cancel booking for application:', applicationId);
-    // TODO: Implement cancel logic once backend is ready
-    alert('Booking cancelled successfully');
-    router.back();
+  const handleCancelBooking = async () => {
+    if (!bookedSession) return;
+    
+    console.log('Cancel booking for session:', bookedSession._id);
+    const result = await cancelBooking(bookedSession._id as Id<"orientationSessions">);
+    
+    if (result.success) {
+      router.back();
+    }
   };
 
   return (
@@ -52,11 +67,12 @@ export function OrientationScheduleScreen() {
 
         {/* Scheduler */}
         <OrientationScheduler
-          schedules={MOCK_ORIENTATION_SCHEDULES}
-          isLoading={false}
+          schedules={schedules}
+          isLoading={isLoading || isBooking}
           onScheduleSelect={handleScheduleSelect}
-          bookedSession={null}
+          bookedSession={bookedSession}
           onCancelBooking={handleCancelBooking}
+          isCancelling={isCancelling}
         />
       </View>
     </BaseScreen>

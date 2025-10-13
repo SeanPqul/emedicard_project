@@ -1,6 +1,6 @@
 // Orientation feature types
 
-export type OrientationStatus = 'pending' | 'scheduled' | 'completed' | 'expired';
+export type OrientationStatus = 'scheduled' | 'completed' | 'cancelled' | 'no-show';
 
 export interface OrientationSession {
   _id: string;
