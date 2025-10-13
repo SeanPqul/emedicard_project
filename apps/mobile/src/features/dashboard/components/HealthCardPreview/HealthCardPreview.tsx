@@ -8,6 +8,7 @@ import { format, differenceInDays, addYears } from 'date-fns';
 import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
 import { styles } from './HealthCardPreview.styles';
+import { getJobCategoryColor, getJobCategoryIcon, getCardTypeLabel } from '@entities/jobCategory';
 
 interface HealthCardPreviewProps {
   healthCard?: {
@@ -146,6 +147,32 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
     }
   };
 
+  // Calculate step info (Step X of 3 • Next: ...)
+  const steps = ['Submitted', 'Under Review', 'Approved'];
+  const status: string = application.status || '';
+  const isPendingPayment = status === 'Pending Payment';
+  const currentIndex = isPendingPayment ? -1 : steps.indexOf(status);
+  const totalSteps = steps.length;
+  const currentStep = Math.max(0, currentIndex + 1);
+  const nextStep = currentIndex < totalSteps - 1 ? (steps[currentIndex + 1] ?? null) : null;
+
+  const getProgressWidth = () => {
+    if (isPendingPayment) return '25%';
+    switch (status) {
+      case 'Submitted': return '33%';
+      case 'Under Review': return '66%';
+      case 'Approved': return '100%';
+      default: return '25%';
+    }
+  };
+
+  // Job category info
+  const categoryName = application?.jobCategory?.name || '';
+  const categoryColor = getJobCategoryColor(categoryName);
+  const categoryIcon = getJobCategoryIcon(categoryName) as any;
+  const categoryLabel = getCardTypeLabel(categoryName);
+  const shortId = `#${String(application._id).slice(-6).toUpperCase()}`;
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -153,6 +180,27 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
       activeOpacity={0.8}
     >
       <View style={styles.applicationCard}>
+        {/* ADD: Category chip and short ID at top */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: moderateScale(12) }}>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: moderateScale(12),
+            paddingVertical: moderateScale(6),
+            borderRadius: moderateScale(999),
+            backgroundColor: categoryColor,
+          }}>
+            <Ionicons name={categoryIcon} size={moderateScale(14)} color="#FFFFFF" />
+            <Text style={{ color: '#FFFFFF', fontWeight: '700', marginLeft: moderateScale(6), fontSize: moderateScale(12) }}>
+              {categoryLabel}
+            </Text>
+          </View>
+          <Text style={{ color: theme.colors.text.secondary, fontSize: moderateScale(13), fontWeight: '600' }}>
+            {shortId}
+          </Text>
+        </View>
+
+        {/* KEEP: existing header with icon, title, and status dot */}
         <View style={styles.applicationHeader}>
           <View style={[styles.iconContainer, { backgroundColor: getStatusColor() + '20' }]}>
             <Ionicons 
@@ -168,20 +216,33 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
               <Text style={styles.statusLabel}>{application.status}</Text>
             </View>
           </View>
+          {/* ADD: Status chip (SUBMITTED) to the right of the header */}
+          <View style={{ paddingHorizontal: moderateScale(10), paddingVertical: moderateScale(4), borderRadius: moderateScale(8), backgroundColor: getStatusColor() + '20' }}>
+            <Text style={{ color: getStatusColor(), fontWeight: '700', fontSize: moderateScale(11), textTransform: 'uppercase' }}>
+              {status || 'PENDING'}
+            </Text>
+          </View>
         </View>
         
+        {/* KEEP: progress bar */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
             <View 
               style={[
                 styles.progressFill, 
                 { 
-                  width: application.status === 'Approved' ? '100%' : '66%',
-                  backgroundColor: getStatusColor()
+                  width: getProgressWidth(),
+                  backgroundColor: categoryColor
                 }
               ]} 
             />
           </View>
+          {/* ADD: Step X of 3 • Next: ... */}
+          <Text style={[styles.progressText, { fontWeight: '600', marginBottom: moderateScale(4) }]}>
+            {`Step ${Math.max(1, currentStep)} of ${totalSteps}`}
+            {nextStep ? ` • Next: ${nextStep}` : ''}
+          </Text>
+          {/* KEEP: existing descriptive text */}
           <Text style={styles.progressText}>
             {application.status === 'Pending Payment'
               ? 'Complete payment to proceed'
@@ -195,6 +256,7 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
           </Text>
         </View>
 
+        {/* KEEP: existing CTA */}
         <View style={styles.actionRow}>
           <Text style={styles.actionText}>View application status</Text>
           <Ionicons 
