@@ -15,10 +15,11 @@ export const getApplicationByIdQuery = query({
       ? await ctx.db.get(application.jobCategoryId)
       : null;
 
-    // Get payment information if exists
+    // Get payment information if exists (fetch most recent payment)
     const payment = await ctx.db
       .query("payments")
       .withIndex("by_application", (q) => q.eq("applicationId", applicationId))
+      .order("desc")
       .first();
 
     // Return enriched application data

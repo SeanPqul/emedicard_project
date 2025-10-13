@@ -24,7 +24,11 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
   if (!showAlerts) return null;
 
   const handlePaymentPress = () => {
-    router.push('/(screens)/(shared)/payment/');
+    if (currentApplication?._id) {
+      router.push(`/(screens)/(application)/${currentApplication._id}?section=payment`);
+    } else {
+      router.push('/(tabs)/application');
+    }
   };
 
   const handleOrientationPress = () => {

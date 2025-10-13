@@ -43,11 +43,10 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
     const actions: QuickActionItem[] = [];
     
     const isNewUser = (!userApplications || userApplications.length === 0) && dashboardStats?.validHealthCards === 0;
-    const hasPendingPayment = dashboardStats?.pendingPayments > 0;
     const hasActiveCard = dashboardStats?.validHealthCards > 0;
-    const isFoodHandler = currentApplication?.jobCategory?.name?.toLowerCase().includes('food');
+    const isFoodHandler = ((currentApplication?.jobCategory?.name ?? '').toLowerCase()).includes('food');
     
-    // Primary action based on user state
+    // Primary action based on user state (payments handled by ActionCenter now)
     if (isNewUser) {
       actions.push({
         id: 'start-application',
@@ -56,16 +55,6 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
         description: 'Apply for your first health card and join thousands of healthy workers',
         route: '/(tabs)/apply',
         gradient: [theme.colors.primary[500], theme.colors.primary[600]],
-      });
-    } else if (hasPendingPayment) {
-      actions.push({
-        id: 'complete-payment',
-        icon: 'card',
-        title: 'Complete Payment',
-        description: `₱${dashboardStats.pendingAmount?.toFixed(2) || '285.00'} payment due`,
-        route: '/(screens)/(shared)/payment',
-        gradient: [theme.colors.semantic.error, theme.colors.red[600]],
-        badge: { text: 'Due Now', type: 'error' },
       });
     } else if (hasActiveCard) {
       actions.push({
@@ -78,24 +67,7 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
       });
     }
     
-    // Always include these helpful actions
-    actions.push({
-      id: 'track-application',
-      icon: 'time',
-      title: 'Track Application',
-      description: 'Check the status of your health card application',
-      route: '/(tabs)/application',
-      gradient: [theme.colors.blue[500], theme.colors.blue[600]],
-    });
-    
-    actions.push({
-      id: 'upload-documents',
-      icon: 'cloud-upload',
-      title: 'Upload Documents',
-      description: 'Submit required documents for your application',
-      route: '/(screens)/(shared)/documents/upload',
-      gradient: [theme.colors.purple[500], theme.colors.purple[600]],
-    });
+    // Helpful actions
     
     if (isFoodHandler) {
       actions.push({

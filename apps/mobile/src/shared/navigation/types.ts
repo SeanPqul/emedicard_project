@@ -28,14 +28,6 @@ export type RootStackParamList = {
   // Shared routes
   '(screens)/(shared)/health-cards': undefined;
   '(screens)/(shared)/qr-code': { healthCardId: string };
-  '(screens)/(shared)/upload-documents': { 
-    formId: string;
-    applicationType: string;
-    jobCategory: string;
-    position: string;
-    organization: string;
-  };
-  '(screens)/(shared)/payment': { applicationId: string };
   
   // Inspector routes
   '(screens)/(inspector)/inspector-dashboard': undefined;

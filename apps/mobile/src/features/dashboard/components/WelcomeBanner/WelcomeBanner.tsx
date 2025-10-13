@@ -17,21 +17,22 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ isNewUser }) => {
     <View style={styles.container}>
       <View style={styles.iconContainer}>
         <Ionicons 
-          name="medical-outline" 
+          name="add-circle-outline" 
           size={moderateScale(48)} 
           color={styles.icon.color} 
         />
       </View>
-      <Text style={styles.title}>Welcome to eMediCard</Text>
+      <Text style={styles.title}>Get Your Health Card</Text>
       <Text style={styles.subtitle}>
-        Get your Davao City health card digitally. No more long queues - apply, track, and manage everything from your phone.
+        Get your Davao City health card digitally. No more long queues - apply, track, and manage everything from your device.
       </Text>
       <TouchableOpacity 
         style={styles.button}
         onPress={handleGetStarted}
-        accessibilityLabel="Get Started with your health card application"
+        accessibilityLabel="Start your health card application"
+        activeOpacity={0.85}
       >
-        <Text style={styles.buttonText}>Get Started</Text>
+        <Text style={styles.buttonText}>Start Application</Text>
         <Ionicons 
           name="arrow-forward" 
           size={moderateScale(16)} 

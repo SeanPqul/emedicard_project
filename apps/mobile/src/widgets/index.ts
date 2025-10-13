@@ -1,7 +1,7 @@
 // Widgets layer exports (FSD pattern)
 // Widgets compose features into complex UI blocks
 
-export * from './dashboard';
+// export * from './dashboard'; // Removed legacy dashboard barrel
 export * from './apply';
 export * from './payment';
 export * from './application-detail';

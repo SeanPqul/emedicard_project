@@ -49,7 +49,7 @@ export function setupDeepLinkListeners(
           if (queryParams?.paymentId) params.append('paymentId', queryParams.paymentId as string);
           if (queryParams?.applicationId) params.append('applicationId', queryParams.applicationId as string);
           
-          router.push(`/(screens)/(shared)/payment/success?${params.toString()}`);
+          router.push(`/(screens)/(payment)/success?${params.toString()}`);
         } else if (path.includes('failed')) {
           console.log('[DeepLink] Payment failure detected');
           onStatus('failed');
@@ -60,7 +60,7 @@ export function setupDeepLinkListeners(
           if (queryParams?.applicationId) params.append('applicationId', queryParams.applicationId as string);
           if (queryParams?.reason) params.append('reason', queryParams.reason as string);
           
-          router.push(`/(screens)/(shared)/payment/failed?${params.toString()}`);
+          router.push(`/(screens)/(payment)/failed?${params.toString()}`);
         } else if (path.includes('cancelled')) {
           console.log('[DeepLink] Payment cancellation detected');
           onStatus('cancelled');
@@ -70,7 +70,7 @@ export function setupDeepLinkListeners(
           if (queryParams?.paymentId) params.append('paymentId', queryParams.paymentId as string);
           if (queryParams?.applicationId) params.append('applicationId', queryParams.applicationId as string);
           
-          router.push(`/(screens)/(shared)/payment/cancelled?${params.toString()}`);
+          router.push(`/(screens)/(payment)/cancelled?${params.toString()}`);
         }
       }
     } catch (error) {

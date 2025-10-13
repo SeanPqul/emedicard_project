@@ -27,16 +27,14 @@ export function useDashboardData() {
 
   // Derive computed values with proper memoization
   const currentApplication = useMemo(() => {
-    if (!dashboardData.userApplications) return null;
-    
-    // The backend returns aggregated applications with different structure
-    const app = dashboardData.userApplications.find((app: DashboardApplication) => 
-      app.status === 'Submitted' || 
-      app.status === 'Under Review' || 
-      app.status === 'Approved'
-    );
-    
-    return app || null;
+    const apps = dashboardData.userApplications as DashboardApplication[] | undefined;
+    if (!apps || apps.length === 0) return null;
+
+    // Always show the most recent application (by creation time)
+    return apps.reduce((latest, app) => {
+      if (!latest) return app as any;
+      return (app._creationTime || 0) > (latest._creationTime || 0) ? app : latest;
+    }) as DashboardApplication;
   }, [dashboardData.userApplications]);
 
   const isNewUser = useMemo(() => {

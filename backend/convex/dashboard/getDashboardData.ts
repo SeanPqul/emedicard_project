@@ -34,12 +34,13 @@ export const getDashboardDataQuery = query({
       return applications.some((application: Doc<"applications">) => application._id === card.applicationId);
     });
 
-    // Get payments for user's applications
+    // Get payments for user's applications (fetch most recent payment per application)
     const payments = await Promise.all(
       applications.map(async (application) => {
         const payment = await ctx.db
           .query("payments")
           .withIndex("by_application", (q) => q.eq("applicationId", application._id))
+          .order("desc")
           .first();
         return payment;
       })
@@ -53,6 +54,13 @@ export const getDashboardDataQuery = query({
           .query("documentUploads")
           .withIndex("by_application", (q) => q.eq("applicationId", application._id))
           .collect();
+
+        // Per-application rejected documents count (pending resubmission)
+        const rejectionHistory = await ctx.db
+          .query("documentRejectionHistory")
+          .withIndex("by_application", (q) => q.eq("applicationId", application._id))
+          .collect();
+        const rejectedPendingCount = rejectionHistory.filter(r => !r.wasReplaced).length;
 
         return {
           _id: application._id,
@@ -69,6 +77,8 @@ export const getDashboardDataQuery = query({
           } : undefined,
           documentCount: documents.length,
           hasPayment: payments.some(p => p && p.applicationId === application._id),
+          hasRejectedDocuments: rejectedPendingCount > 0,
+          rejectedDocumentsCount: rejectedPendingCount,
         };
       })
     );

@@ -5,14 +5,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { 
   OfflineBanner,
   WelcomeBanner,
-  PriorityAlerts,
   RecentActivityList,
+  ActionCenter,
 } from '@features/dashboard/components';
 import { DashboardHeaderEnhanced } from '@features/dashboard/components/DashboardHeader/DashboardHeader.enhanced';
 import { HealthCardPreview } from '@features/dashboard/components/HealthCardPreview/HealthCardPreview';
-import { StatCardEnhanced, PresetStatCards } from '@features/dashboard/components/StatCard/StatCard.enhanced';
+import { PresetStatCards } from '@features/dashboard/components/StatCard/StatCard.enhanced';
 import { QuickActionsCarousel } from '@features/dashboard/components/QuickActionsCarousel/QuickActionsCarousel';
 import { router } from 'expo-router';
+import { useRejectedDocumentsCount } from '@features/document-rejection/hooks/useRejectedDocumentsCount';
 import { styles } from './DashboardWidget.enhanced.styles';
 import { theme } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
@@ -55,6 +56,9 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
   
   const { onRefresh, getGreeting } = handlers;
 
+  // Rejected documents count (for ActionCenter visibility)
+  const { count: rejectedDocumentsCount } = useRejectedDocumentsCount(data?.userProfile?._id);
+
   // Mock health card data for demo - replace with actual data
   const mockHealthCard = healthCard || (dashboardStats?.validHealthCards > 0 ? {
     id: '1',
@@ -96,10 +100,12 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
         {/* Welcome Banner for New Users */}
         <WelcomeBanner isNewUser={isNewUser} />
         
-        {/* Priority Alerts */}
-        <PriorityAlerts
-          dashboardStats={dashboardStats}
+        {/* Action Center - URGENT items requiring immediate attention */}
+        <ActionCenter
           currentApplication={currentApplication}
+          dashboardStats={dashboardStats}
+          userApplications={userApplications}
+          rejectedDocumentsCount={rejectedDocumentsCount}
         />
         
         {/* Health Card Preview or Application Status */}
@@ -107,38 +113,23 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
           healthCard={mockHealthCard}
           currentApplication={currentApplication}
           userProfile={userProfile}
+          isNewUser={isNewUser}
         />
 
         {/* Quick Stats Section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Your Overview</Text>
           <View style={styles.statsGrid}>
-            <PresetStatCards.Applications
-              value={dashboardStats?.activeApplications || 0}
-              subtitle={dashboardStats?.activeApplications > 0 ? "In progress" : "Start your journey"}
-              onPress={() => router.push('/(tabs)/application')}
-              trend={dashboardStats?.activeApplications > 0 ? {
-                direction: 'up',
-                value: '+1 this month'
-              } : undefined}
-            />
-            
-            <PresetStatCards.Payments
-              value={dashboardStats?.pendingPayments > 0 
-                ? `₱${dashboardStats.pendingAmount?.toFixed(2) || '0.00'}` 
-                : 'All Clear'}
-              subtitle={dashboardStats?.pendingPayments > 0 
-                ? `${dashboardStats.pendingPayments} pending` 
-                : "No pending payments"}
-              onPress={() => router.push('/(screens)/(shared)/payment')}
-              badge={dashboardStats?.pendingPayments > 0 ? {
-                text: 'Due',
-                color: theme.colors.semantic.error
-              } : undefined}
-            />
-          </View>
-          
-          <View style={styles.statsGrid}>
+            {(() => {
+              const applicationsCount = Math.max(userApplications?.length || 0, dashboardStats?.activeApplications || 0);
+              return (
+                <PresetStatCards.Applications
+                  value={applicationsCount}
+                  subtitle={applicationsCount > 0 ? "In progress" : "Start your journey"}
+                  onPress={() => router.push('/(tabs)/application')}
+                />
+              );
+            })()}
             <PresetStatCards.HealthCards
               value={dashboardStats?.validHealthCards || 0}
               subtitle={dashboardStats?.validHealthCards > 0 ? "Active cards" : "Apply for your card"}
@@ -148,15 +139,9 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                 total: dashboardStats.totalApplications || 1
               } : undefined}
             />
-            
-            <PresetStatCards.Documents
-              value={dashboardStats?.uploadedDocuments || 0}
-              subtitle="Documents uploaded"
-              onPress={() => router.push('/(screens)/(shared)/documents')}
-            />
           </View>
         </View>
-        
+
         {/* Quick Actions Carousel */}
         <QuickActionsCarousel
           userApplications={userApplications}
