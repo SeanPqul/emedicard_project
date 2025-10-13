@@ -1,8 +1,10 @@
-import { ImageAnnotatorClient } from '@google-cloud/vision';
+// Avoid a static import of '@google-cloud/vision' so the Convex bundler doesn't need to resolve it
+// when the library isn't installed. We'll dynamic-import it at runtime only if enabled.
 import { v } from "convex/values";
 import { action } from "../_generated/server";
 
-let visionClient: ImageAnnotatorClient;
+type VisionClient = any;
+let visionClient: VisionClient | null = null;
 
 // Helper function to determine document type based on text and labels
 function determineDocumentType(text: string | undefined, labels: string[] | undefined): string {
@@ -42,20 +44,29 @@ function determineDocumentType(text: string | undefined, labels: string[] | unde
   return "Unknown";
 }
 
-// Initialize Google Cloud Vision client
-if (process.env.GOOGLE_CREDENTIALS_BASE64) {
-  // For production on Convex, using base64 encoded credentials
-  const credentials = Buffer.from(process.env.GOOGLE_CREDENTIALS_BASE64, 'base64').toString('utf8');
-  visionClient = new ImageAnnotatorClient({
-    credentials: JSON.parse(credentials),
-  });
-} else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  // For local development using GOOGLE_APPLICATION_CREDENTIALS file path
-  visionClient = new ImageAnnotatorClient();
-} else {
-  // Fallback for local development if no credentials are set (might not work)
-  console.warn("Google Cloud Vision AI credentials not found. Classification might fail.");
-  visionClient = new ImageAnnotatorClient(); // This might fail without credentials
+// Initialize Google Cloud Vision client (lazy)
+async function ensureVisionClient() {
+  if (visionClient) return true;
+  if (process.env.GOOGLE_VISION_ENABLED !== 'true') {
+    return false; // Disabled explicitly
+  }
+  try {
+    const moduleName = '@google-cloud/vision';
+    const vision = await import(moduleName as string).catch(() => null);
+    if (!vision) return false;
+    const { ImageAnnotatorClient } = vision as any;
+
+    if (process.env.GOOGLE_CREDENTIALS_BASE64) {
+      const credentials = Buffer.from(process.env.GOOGLE_CREDENTIALS_BASE64, 'base64').toString('utf8');
+      visionClient = new ImageAnnotatorClient({ credentials: JSON.parse(credentials) });
+    } else {
+      visionClient = new ImageAnnotatorClient();
+    }
+    return true;
+  } catch (e) {
+    console.warn('Google Vision not available:', (e as Error).message);
+    return false;
+  }
 }
 
 export const classify = action({
@@ -76,9 +87,16 @@ export const classify = action({
     let classificationResults: any = {};
 
     try {
+      const hasVision = await ensureVisionClient();
+      if (!hasVision) {
+        return {
+          message: 'Vision analysis disabled or unavailable. Set GOOGLE_VISION_ENABLED=true and install @google-cloud/vision to enable.',
+        };
+      }
+
       if (args.mimeType.startsWith('image/')) {
         // Perform image analysis using Google Cloud Vision AI
-        const [result] = await visionClient.annotateImage({
+        const [result] = await (visionClient as any).annotateImage({
           image: { content: base64EncodedImage },
           features: [
             { type: 'LABEL_DETECTION' },
@@ -107,7 +125,7 @@ export const classify = action({
         }
 
       } else if (args.mimeType === 'application/pdf' || args.mimeType.includes('officedocument')) {
-        const [result] = await visionClient.documentTextDetection({
+        const [result] = await (visionClient as any).documentTextDetection({
           image: { content: base64EncodedImage },
         });
         const extractedText = result.fullTextAnnotation?.text;

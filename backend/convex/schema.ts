@@ -64,6 +64,10 @@ export default defineSchema({
     storageFileId: v.id("_storage"),
     uploadedAt: v.float64(),
     fileType: v.string(), // Added for classification
+    // Legacy classification fields tolerated temporarily for migration
+    classifiedAt: v.optional(v.float64()),
+    classifiedDocumentType: v.optional(v.string()),
+    extractousResponse: v.optional(v.any()),
   })
     .index("by_application", ["applicationId"])
     .index("by_application_document", [

@@ -34,12 +34,13 @@ export const getDashboardDataQuery = query({
       return applications.some((application: Doc<"applications">) => application._id === card.applicationId);
     });
 
-    // Get payments for user's applications
+    // Get payments for user's applications (fetch most recent payment per application)
     const payments = await Promise.all(
       applications.map(async (application) => {
         const payment = await ctx.db
           .query("payments")
           .withIndex("by_application", (q) => q.eq("applicationId", application._id))
+          .order("desc")
           .first();
         return payment;
       })
