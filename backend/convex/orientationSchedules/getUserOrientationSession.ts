@@ -15,14 +15,17 @@ export const getUserOrientationSessionQuery = query({
       throw new Error("Unauthorized: User must be authenticated");
     }
 
-    // Get user's session for this application
+    // Get user's ACTIVE session for this application (only scheduled, not cancelled)
     const session = await ctx.db
       .query("orientationSessions")
       .withIndex("by_application", (q) => 
         q.eq("applicationId", applicationId)
       )
       .filter((q) => 
-        q.eq(q.field("userId"), identity.subject)
+        q.and(
+          q.eq(q.field("userId"), identity.subject),
+          q.eq(q.field("status"), "scheduled")
+        )
       )
       .first();
 

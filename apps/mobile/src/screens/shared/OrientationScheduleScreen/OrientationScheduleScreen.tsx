@@ -29,7 +29,6 @@ export function OrientationScheduleScreen() {
   } = useOrientationSchedule(applicationId as Id<"applications"> | undefined);
 
   const handleScheduleSelect = async (schedule: any) => {
-    console.log('Selected schedule:', schedule);
     const result = await bookSlot(schedule._id);
     
     if (result.success) {
@@ -41,7 +40,6 @@ export function OrientationScheduleScreen() {
   const handleCancelBooking = async () => {
     if (!bookedSession) return;
     
-    console.log('Cancel booking for session:', bookedSession._id);
     const result = await cancelBooking(bookedSession._id as Id<"orientationSessions">);
     
     if (result.success) {
