@@ -20,17 +20,6 @@ export const resubmitDocument = mutation({
       throw new Error("Not authenticated");
     }
 
-    // Infer a basic file type from the original file name extension to satisfy schema
-    const ext = args.originalFileName.split('.').pop()?.toLowerCase() || '';
-    const inferredFileType =
-      ext === 'jpg' || ext === 'jpeg' || ext === 'jpe' ? 'image/jpeg'
-      : ext === 'png' ? 'image/png'
-      : ext === 'webp' ? 'image/webp'
-      : ext === 'gif' ? 'image/gif'
-      : ext === 'heic' || ext === 'heif' ? 'image/heic'
-      : ext === 'pdf' ? 'application/pdf'
-      : 'application/octet-stream';
-
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
@@ -72,7 +61,6 @@ export const resubmitDocument = mutation({
       documentTypeId: args.documentTypeId,
       storageFileId: args.storageFileId,
       originalFileName: args.originalFileName,
-      fileType: inferredFileType,
       reviewStatus: "Pending",
       uploadedAt: Date.now(),
       fileType: getFileTypeFromFileName(args.originalFileName), // Added fileType
