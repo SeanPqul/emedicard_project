@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { moderateScale } from '@shared/utils/responsive';
@@ -34,7 +34,6 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
   userApplications = [],
   rejectedDocumentsCount = 0,
 }) => {
-  const pulseAnim = useRef(new Animated.Value(1)).current;
   const actions: ActionItem[] = [];
 
   // Normalize and dedupe applications by id
@@ -144,35 +143,15 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
   const urgencyOrder = { high: 0, medium: 1, low: 2 };
   actions.sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]);
 
-  // Pulse animation for urgent actions
-  useEffect(() => {
-    if (actions.length > 0 && actions.some(a => a.urgency === 'high')) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.02,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    }
-  }, [actions.length]);
-
   // Don't show section if no urgent actions
   if (actions.length === 0) {
     return null;
   }
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ scale: pulseAnim }] }]}>
+    <View style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="alert-circle" size={moderateScale(22)} color={theme.colors.semantic.error} />
+        <Ionicons name="alert-circle" size={moderateScale(20)} color={theme.colors.orange[600]} />
         <Text style={styles.title}>Action Required</Text>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{actions.length}</Text>
@@ -206,6 +185,6 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
           </TouchableOpacity>
         ))}
       </View>
-    </Animated.View>
+    </View>
   );
 };

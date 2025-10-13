@@ -17,10 +17,32 @@ export function useApplicationDetail(applicationId: string | undefined) {
   const { initiatePayment, isProcessing: isPaymentProcessing } = useMayaPayment();
 
   // Query application details
-  const application = useQuery(
+  const applicationRaw = useQuery(
     api.applications.getApplicationById.getApplicationByIdQuery,
     applicationId ? { applicationId: applicationId as Id<"applications"> } : "skip"
   ) as ApplicationDetails | undefined;
+
+  // Always fetch the latest payment separately to avoid stale data if there are retries
+  const latestPayment = useQuery(
+    api.payments.getPaymentByFormId.getPaymentByApplicationIdQuery,
+    applicationId ? { applicationId: applicationId as Id<"applications"> } : "skip"
+  ) as any;
+
+  // Merge latest payment into application object (map Convex doc -> UI shape)
+  const application = React.useMemo(() => {
+    if (!applicationRaw) return applicationRaw;
+    if (!latestPayment) return applicationRaw;
+
+    const mappedPayment = {
+      _id: latestPayment._id,
+      amount: latestPayment.amount,
+      method: latestPayment.paymentMethod,
+      status: latestPayment.paymentStatus,
+      referenceNumber: latestPayment.referenceNumber,
+    };
+
+    return { ...applicationRaw, payment: mappedPayment } as ApplicationDetails;
+  }, [applicationRaw, latestPayment]);
   
   // Query rejected documents count
   const rejectionHistory = useQuery(
@@ -68,6 +90,10 @@ export function useApplicationDetail(applicationId: string | undefined) {
     switch (status) {
       case 'Pending Payment':
         return 'time-outline';
+      case 'For Payment Validation':
+        return 'alert-circle';
+      case 'For Orientation':
+        return 'school-outline';
       case 'Submitted':
         return 'document-text';
       case 'Under Review':

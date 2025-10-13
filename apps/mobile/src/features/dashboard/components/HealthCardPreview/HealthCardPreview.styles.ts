@@ -109,7 +109,7 @@ export const styles = StyleSheet.create({
   applicationCard: {
     backgroundColor: theme.colors.background.primary,
     borderRadius: moderateScale(16),
-    padding: scale(20),
+    padding: scale(18),
     ...getShadow('medium'),
     borderWidth: moderateScale(1),
     borderColor: theme.colors.border.light,

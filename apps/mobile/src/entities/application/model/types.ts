@@ -7,7 +7,14 @@
 import { Id } from '@backend/convex/_generated/dataModel';
 
 // ===== APPLICATION STATUS TYPES =====
-export type ApplicationStatus = 'Pending Payment' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
+export type ApplicationStatus = 
+  | 'Pending Payment' 
+  | 'For Payment Validation' 
+  | 'For Orientation' 
+  | 'Submitted' 
+  | 'Under Review' 
+  | 'Approved' 
+  | 'Rejected';
 export type ApplicationType = 'New' | 'Renew';
 export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
 export type PaymentMethod = 'Maya' | 'Gcash' | 'BaranggayHall' | 'CityHall';

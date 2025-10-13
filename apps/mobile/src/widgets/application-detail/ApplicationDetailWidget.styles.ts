@@ -169,20 +169,7 @@ export const styles = StyleSheet.create({
     height: moderateScale(12),
     borderRadius: theme.borderRadius.full,
   },
-  orientationNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: verticalScale(theme.spacing.md),
-    padding: moderateScale(theme.spacing.sm),
-    backgroundColor: theme.colors.accent.warningOrange + '20',
-    borderRadius: theme.borderRadius.md,
-    gap: scale(theme.spacing.xs),
-  },
-  orientationText: {
-    fontSize: moderateScale(12),
-    color: theme.colors.accent.warningOrange,
-    flex: 1,
-  },
+
   sectionTitle: {
     fontSize: moderateScale(12),
     fontWeight: '600' as const,

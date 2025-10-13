@@ -20,6 +20,8 @@ import { ApplicationDetailHeader } from './ApplicationDetailHeader';
 // UI constants for status colors
 const STATUS_COLORS = {
   'Pending Payment': '#FFA500',
+  'For Payment Validation': '#F5A623',
+  'For Orientation': theme.colors.accent.warningOrange,
   'Submitted': '#2E86AB',
   'Under Review': '#F18F01',
   'Approved': '#28A745',
@@ -49,7 +51,7 @@ export function ApplicationDetailWidget({
   getUrgencyColor,
   rejectedDocumentsCount = 0,
 }: ApplicationDetailWidgetProps) {
-  const statusColor = STATUS_COLORS[application.status as keyof typeof STATUS_COLORS];
+  const statusColor = STATUS_COLORS[application.status as keyof typeof STATUS_COLORS] ?? theme.colors.primary[500];
   
   const getDaysUntilDeadline = (deadline?: number) => {
     if (!deadline) return null;
@@ -154,14 +156,6 @@ export function ApplicationDetailWidget({
           <Text style={styles.detailValue}>{application.form?.civilStatus}</Text>
         </View>
 
-        {application.jobCategory?.requireOrientation === 'Yes' && (
-          <View style={styles.orientationNotice}>
-            <Ionicons name="school-outline" size={moderateScale(16)} color={theme.colors.accent.warningOrange} />
-            <Text style={styles.orientationText}>
-              Orientation required for this job category
-            </Text>
-          </View>
-        )}
       </View>
 
       {/* Documents Section */}
@@ -291,7 +285,7 @@ export function ApplicationDetailWidget({
           <View style={styles.paymentInstructions}>
             <Ionicons name="information-circle-outline" size={moderateScale(14)} color={theme.colors.primary[500]} />
             <Text style={styles.paymentInstructionText}>
-              After selecting a payment method, you'll be redirected to complete the payment process.
+              After selecting a payment method, you&apos;ll be redirected to complete the payment process.
             </Text>
           </View>
         </View>
@@ -321,11 +315,23 @@ export function ApplicationDetailWidget({
 
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Payment Status</Text>
-            <View style={[styles.paymentStatusBadge, { backgroundColor: theme.colors.accent.safetyGreen + '20' }]}>
-              <Text style={[styles.paymentStatusText, { color: theme.colors.accent.safetyGreen }]}>
-                {application.payment.status}
-              </Text>
-            </View>
+            {(() => {
+              const status = (application.payment as any).status as string;
+              const color = status === 'Complete'
+                ? theme.colors.accent.safetyGreen
+                : status === 'Pending'
+                ? theme.colors.orange[600]
+                : status === 'Processing'
+                ? theme.colors.blue[500]
+                : theme.colors.semantic.error; // Cancelled / Failed / Expired
+              return (
+                <View style={[styles.paymentStatusBadge, { backgroundColor: color + '20' }]}>
+                  <Text style={[styles.paymentStatusText, { color }]}>
+                    {status}
+                  </Text>
+                </View>
+              );
+            })()}
           </View>
         </View>
       )}

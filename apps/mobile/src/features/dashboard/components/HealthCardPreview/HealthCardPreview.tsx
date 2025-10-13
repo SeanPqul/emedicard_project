@@ -136,6 +136,10 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
     switch (application.status) {
       case 'Pending Payment':
         return theme.colors.orange[500];
+      case 'For Payment Validation':
+        return theme.colors.orange[600];
+      case 'For Orientation':
+        return theme.colors.blue[500];
       case 'Submitted':
         return theme.colors.blue[500];
       case 'Under Review':
@@ -147,23 +151,43 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
     }
   };
 
-  // Calculate step info (Step X of 3 • Next: ...)
-  const steps = ['Submitted', 'Under Review', 'Approved'];
+  // Calculate step info based on actual backend status flow:
+  // Pending Payment -> (For Payment Validation for manual) -> For Orientation -> Approved
   const status: string = application.status || '';
   const isPendingPayment = status === 'Pending Payment';
-  const currentIndex = isPendingPayment ? -1 : steps.indexOf(status);
-  const totalSteps = steps.length;
-  const currentStep = Math.max(0, currentIndex + 1);
-  const nextStep = currentIndex < totalSteps - 1 ? (steps[currentIndex + 1] ?? null) : null;
+  const isPaymentValidation = status === 'For Payment Validation';
+  const isForOrientation = status === 'For Orientation';
+  const isApproved = status === 'Approved';
+  
+  const totalSteps = 3;
+  let currentStep = 1;
+  let nextStep: string | null = null;
+  
+  if (isPendingPayment) {
+    currentStep = 0;
+    nextStep = 'Payment';
+  } else if (isPaymentValidation) {
+    currentStep = 1;
+    nextStep = 'Payment Verification';
+  } else if (isForOrientation) {
+    currentStep = 2;
+    nextStep = 'Orientation';
+  } else if (isApproved) {
+    currentStep = 3;
+    nextStep = null;
+  } else {
+    // Default for any other status (Submitted, Under Review, etc.)
+    currentStep = 2;
+    nextStep = 'Review';
+  }
 
   const getProgressWidth = () => {
-    if (isPendingPayment) return '25%';
-    switch (status) {
-      case 'Submitted': return '33%';
-      case 'Under Review': return '66%';
-      case 'Approved': return '100%';
-      default: return '25%';
-    }
+    if (isPendingPayment) return '10%';
+    if (isPaymentValidation) return '33%';
+    if (isForOrientation) return '66%';
+    if (isApproved) return '100%';
+    // For Submitted, Under Review, or other statuses
+    return '50%';
   };
 
   // Job category info
@@ -173,96 +197,214 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
   const categoryLabel = getCardTypeLabel(categoryName);
   const shortId = `#${String(application._id).slice(-6).toUpperCase()}`;
 
+  // Get action-oriented CTA text based on status
+  const getActionText = () => {
+    switch (status) {
+      case 'Pending Payment':
+        return 'Complete payment';
+      case 'For Payment Validation':
+        return 'View payment status';
+      case 'For Orientation':
+        return 'Schedule orientation';
+      case 'Under Review':
+      case 'Submitted':
+        return 'View progress';
+      case 'Approved':
+        return 'View details';
+      default:
+        return 'View application';
+    }
+  };
+
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={() => router.push('/(tabs)/application')}
-      activeOpacity={0.8}
+      onPress={() => router.push(`/(screens)/(application)/${application._id}`)}
+      activeOpacity={0.7}
+      accessibilityLabel={`${categoryLabel} application ${shortId}, ${status}`}
+      accessibilityHint="Double tap to view full application details"
     >
       <View style={styles.applicationCard}>
-        {/* ADD: Category chip and short ID at top */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: moderateScale(12) }}>
+        {/* Top metadata row: Category badge + ID - optimized spacing */}
+        <View style={{ 
+          flexDirection: 'row', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: moderateScale(18) 
+        }}>
+          {/* Category badge with icon - elevated hierarchy */}
           <View style={{
             flexDirection: 'row',
             alignItems: 'center',
-            paddingHorizontal: moderateScale(12),
-            paddingVertical: moderateScale(6),
-            borderRadius: moderateScale(999),
+            paddingHorizontal: moderateScale(15),
+            paddingVertical: moderateScale(9),
+            borderRadius: moderateScale(20),
             backgroundColor: categoryColor,
+            shadowColor: categoryColor,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            elevation: 3,
           }}>
-            <Ionicons name={categoryIcon} size={moderateScale(14)} color="#FFFFFF" />
-            <Text style={{ color: '#FFFFFF', fontWeight: '700', marginLeft: moderateScale(6), fontSize: moderateScale(12) }}>
+            <Ionicons name={categoryIcon} size={moderateScale(17)} color="#FFFFFF" />
+            <Text style={{ 
+              color: '#FFFFFF', 
+              fontWeight: '700', 
+              marginLeft: moderateScale(8), 
+              fontSize: moderateScale(13.5),
+              letterSpacing: 0.3,
+            }}>
               {categoryLabel}
             </Text>
           </View>
-          <Text style={{ color: theme.colors.text.secondary, fontSize: moderateScale(13), fontWeight: '600' }}>
+          {/* Application ID - subtle but scannable */}
+          <Text style={{ 
+            color: theme.colors.text.tertiary, 
+            fontSize: moderateScale(13), 
+            fontWeight: '600',
+            letterSpacing: 0.5,
+            opacity: 0.7,
+          }}>
             {shortId}
           </Text>
         </View>
 
-        {/* KEEP: existing header with icon, title, and status dot */}
-        <View style={styles.applicationHeader}>
-          <View style={[styles.iconContainer, { backgroundColor: getStatusColor() + '20' }]}>
-            <Ionicons 
-              name="document-text" 
-              size={moderateScale(32)} 
-              color={getStatusColor()}
-            />
-          </View>
-          <View style={styles.applicationInfo}>
-            <Text style={styles.applicationTitle}>Health Card Application</Text>
-            <View style={styles.statusRow}>
-              <View style={[styles.statusDot, { backgroundColor: getStatusColor() }]} />
-              <Text style={styles.statusLabel}>{application.status}</Text>
+        {/* Status section - clean, consolidated single message */}
+        <View style={{ marginBottom: moderateScale(16) }}>
+          <View style={{ 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+          }}>
+            {/* Single consolidated status with dot */}
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+              <View style={[styles.statusDot, { 
+                backgroundColor: getStatusColor(), 
+                width: moderateScale(8), 
+                height: moderateScale(8), 
+                marginRight: moderateScale(10) 
+              }]} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ 
+                  fontSize: moderateScale(17), 
+                  fontWeight: '700',
+                  color: theme.colors.text.primary,
+                  letterSpacing: -0.3,
+                  marginBottom: moderateScale(4),
+                }}>
+                  {application.status}
+                </Text>
+                <Text style={{ 
+                  fontSize: moderateScale(13), 
+                  color: theme.colors.text.tertiary,
+                  lineHeight: moderateScale(18),
+                }}>
+                  {isPendingPayment 
+                    ? 'Complete payment to proceed' 
+                    : isPaymentValidation
+                    ? 'Payment being verified by admin'
+                    : isForOrientation
+                    ? 'Schedule your orientation session'
+                    : isApproved
+                    ? 'Application approved successfully'
+                    : 'Processing your application'}
+                </Text>
+              </View>
             </View>
-          </View>
-          {/* ADD: Status chip (SUBMITTED) to the right of the header */}
-          <View style={{ paddingHorizontal: moderateScale(10), paddingVertical: moderateScale(4), borderRadius: moderateScale(8), backgroundColor: getStatusColor() + '20' }}>
-            <Text style={{ color: getStatusColor(), fontWeight: '700', fontSize: moderateScale(11), textTransform: 'uppercase' }}>
-              {status || 'PENDING'}
-            </Text>
           </View>
         </View>
         
-        {/* KEEP: progress bar */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
+        {/* Progress section - tighter grouping for better cohesion */}
+        <View style={[styles.progressContainer, { marginBottom: moderateScale(16) }]}>
+          {/* Progress bar with enhanced design */}
+          <View style={[styles.progressBar, { 
+            height: moderateScale(8), 
+            backgroundColor: theme.colors.gray[100],
+            marginBottom: moderateScale(12),
+            borderRadius: moderateScale(10),
+          }]}>
             <View 
               style={[
                 styles.progressFill, 
                 { 
                   width: getProgressWidth(),
-                  backgroundColor: categoryColor
+                  backgroundColor: categoryColor,
+                  borderRadius: moderateScale(10),
+                  shadowColor: categoryColor,
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 2,
                 }
               ]} 
             />
           </View>
-          {/* ADD: Step X of 3 • Next: ... */}
-          <Text style={[styles.progressText, { fontWeight: '600', marginBottom: moderateScale(4) }]}>
-            {`Step ${Math.max(1, currentStep)} of ${totalSteps}`}
-            {nextStep ? ` • Next: ${nextStep}` : ''}
+          {/* Step indicator - tighter spacing to description */}
+          <Text style={[
+            styles.progressText, 
+            { 
+              fontWeight: '700', 
+              marginBottom: moderateScale(6),
+              fontSize: moderateScale(14),
+              color: theme.colors.text.primary,
+              letterSpacing: 0.1,
+              lineHeight: moderateScale(20),
+            }
+          ]}>
+            {currentStep === 0 
+              ? 'Payment Required'
+              : `Step ${currentStep} of ${totalSteps}`}
+            {nextStep && (
+              <Text style={{ fontWeight: '600', color: theme.colors.text.secondary }}>
+                {` • Next: ${nextStep}`}
+              </Text>
+            )}
           </Text>
-          {/* KEEP: existing descriptive text */}
-          <Text style={styles.progressText}>
-            {application.status === 'Pending Payment'
-              ? 'Complete payment to proceed'
-              : application.status === 'Submitted'
-              ? 'Waiting for verification'
-              : application.status === 'Under Review'
-              ? 'Medical review in progress'
-              : application.status === 'Approved'
-              ? 'Approved'
-              : 'Processing your application'}
+          {/* Contextual description - grouped closely with step */}
+          <Text style={[
+            styles.progressText,
+            {
+              fontSize: moderateScale(13),
+              color: theme.colors.text.tertiary,
+              lineHeight: moderateScale(19),
+            }
+          ]}>
+            {isPendingPayment
+              ? 'Complete payment to proceed with your application'
+              : isPaymentValidation
+              ? 'Admin is verifying your payment receipt'
+              : isForOrientation
+              ? 'Schedule and complete your mandatory orientation'
+              : isApproved
+              ? 'Your health card will be issued soon'
+              : 'Our team is reviewing your application'}
           </Text>
         </View>
 
-        {/* KEEP: existing CTA */}
-        <View style={styles.actionRow}>
-          <Text style={styles.actionText}>View application status</Text>
+        {/* CTA - enhanced affordance with optimized spacing */}
+        <View style={[
+          styles.actionRow, 
+          { 
+            paddingTop: moderateScale(16),
+            marginTop: moderateScale(2),
+            borderTopWidth: 1,
+            borderTopColor: theme.colors.gray[100],
+          }
+        ]}>
+          <Text style={[
+            styles.actionText,
+            {
+              fontSize: moderateScale(15),
+              fontWeight: '600',
+              color: theme.colors.primary[600],
+              lineHeight: moderateScale(20),
+            }
+          ]}>
+            {getActionText()}
+          </Text>
           <Ionicons 
             name="chevron-forward" 
             size={moderateScale(20)} 
-            color={theme.colors.text.secondary}
+            color={theme.colors.primary[600]}
           />
         </View>
       </View>
