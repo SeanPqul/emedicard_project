@@ -193,6 +193,29 @@ export function ApplicationDetailWidget({
         </TouchableOpacity>
       </View>
 
+      {/* Orientation Section - Only show if status is 'For Orientation' */}
+      {application.status === 'For Orientation' && (
+        <View style={styles.orientationCard}>
+          <Text style={styles.sectionTitle}>Orientation Required</Text>
+          
+          <TouchableOpacity 
+            style={styles.viewDocumentsButton}
+            onPress={() => router.push(`/(screens)/(shared)/orientation/schedule?applicationId=${application._id}`)}
+          >
+            <View style={styles.documentsIconContainer}>
+              <Ionicons name="calendar-outline" size={moderateScale(20)} color="#666" />
+            </View>
+            <View style={styles.documentsInfo}>
+              <Text style={styles.viewDocumentsText}>Schedule Orientation Session</Text>
+              <Text style={styles.documentsStatusText}>
+                Complete your mandatory orientation to proceed
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Payment Section - Only show if pending payment */}
       {application.status === 'Pending Payment' && (
         <View style={styles.paymentCard}>

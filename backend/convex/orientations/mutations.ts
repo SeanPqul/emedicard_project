@@ -18,12 +18,13 @@ export const schedule = mutation({
       throw new Error("This applicant is already scheduled for an orientation.");
     }
 
-    // 2. Create the new orientation record
+    // 2. Create the new orientation record with QR code for attendance tracking
+    const qrCodeData = `EMC-ORIENTATION-${args.applicationId}`;
     const orientationId = await ctx.db.insert("orientations", {
       applicationId: args.applicationId,
       orientationStatus: "Scheduled",
       scheduledAt: Date.now(),
-      qrCodeUrl: `temp-qr-for-${args.applicationId}`, // Placeholder QR code
+      qrCodeUrl: qrCodeData,
     });
 
     // 3. Update the application status

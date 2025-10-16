@@ -30,17 +30,26 @@ export const validate = mutation({
       updatedAt: Date.now(),
     });
 
-    // 2. Update the overall application status to move it to the next step
-    const nextApplicationStatus = args.newStatus === "Complete" 
-      ? "For Orientation" 
-      : "Rejected"; // Or another status for failed payments
+    // 2. Check if orientation is required for this job category
+    const jobCategory = await ctx.db.get(application.jobCategoryId);
+    const requiresOrientation = jobCategory?.requireOrientation === 'Yes' || jobCategory?.requireOrientation === true;
+
+    // 3. Update the overall application status to move it to the next step
+    let nextApplicationStatus: string;
+    if (args.newStatus === "Complete") {
+      // If payment is complete, check if orientation is required
+      nextApplicationStatus = requiresOrientation ? "For Orientation" : "Under Review";
+    } else {
+      // Payment failed
+      nextApplicationStatus = "Rejected";
+    }
 
     await ctx.db.patch(args.applicationId, {
       applicationStatus: nextApplicationStatus,
       updatedAt: Date.now(),
     });
 
-    // 3. Log admin activity
+    // 4. Log admin activity
     const activityType = args.newStatus === 'Failed' ? 'payment_rejection' : 'payment_approval';
     const details = `Payment for application of ${applicant.fullname} was ${args.newStatus.toLowerCase()}.`;
 
