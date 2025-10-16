@@ -71,6 +71,7 @@ export function OrientationScheduleScreen() {
           bookedSession={bookedSession}
           onCancelBooking={handleCancelBooking}
           isCancelling={isCancelling}
+          applicationId={applicationId}
         />
       </View>
     </BaseScreen>

@@ -31,13 +31,18 @@ export const bookOrientationSlotMutation = mutation({
       throw new Error("Unauthorized: Application does not belong to user");
     }
 
-    // Check if user already has a session for this application
+    // Check if user already has an active (scheduled) session for this application
     const existingSession = await ctx.db
       .query("orientationSessions")
       .withIndex("by_application", (q) => 
         q.eq("applicationId", applicationId)
       )
-      .filter((q) => q.eq(q.field("userId"), identity.subject))
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("userId"), identity.subject),
+          q.eq(q.field("status"), "scheduled")
+        )
+      )
       .first();
 
     if (existingSession) {
@@ -76,6 +81,38 @@ export const bookOrientationSlotMutation = mutation({
       instructor: schedule.instructor,
       createdAt: Date.now(),
     });
+
+    // Generate QR code data for attendance tracking
+    const qrCodeData = `EMC-ORIENTATION-${applicationId}`;
+
+    // Check if orientation record already exists
+    const existingOrientation = await ctx.db
+      .query("orientations")
+      .withIndex("by_application", (q) => q.eq("applicationId", applicationId))
+      .unique();
+
+    if (existingOrientation) {
+      // Update existing orientation with new schedule details
+      await ctx.db.patch(existingOrientation._id, {
+        orientationDate: schedule.date,
+        timeSlot: schedule.time,
+        orientationVenue: schedule.venue.name,
+        orientationStatus: "Scheduled",
+        qrCodeUrl: qrCodeData,
+        scheduledAt: Date.now(),
+      });
+    } else {
+      // Create new orientation record with QR code for check-in/check-out
+      await ctx.db.insert("orientations", {
+        applicationId,
+        orientationDate: schedule.date,
+        timeSlot: schedule.time,
+        orientationVenue: schedule.venue.name,
+        orientationStatus: "Scheduled",
+        qrCodeUrl: qrCodeData,
+        scheduledAt: Date.now(),
+      });
+    }
 
     // Update available slots atomically
     const newAvailableSlots = schedule.availableSlots - 1;

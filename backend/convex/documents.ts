@@ -4,7 +4,8 @@ import { mutation } from "./_generated/server";
 // Helper function to extract file type from originalFileName
 function getFileTypeFromFileName(fileName: string): string {
   const parts = fileName.split(".");
-  return parts.length > 1 ? parts[parts.length - 1] : "unknown";
+  const extension = parts.length > 1 ? parts[parts.length - 1] : undefined;
+  return extension || "unknown";
 }
 
 export const resubmitDocument = mutation({

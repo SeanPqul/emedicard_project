@@ -40,8 +40,8 @@ export const scheduleOrientation = mutation({
       });
     } else {
       // Create new orientation
-      // Placeholder for QR code URL - will need to be generated
-      const qrCodeUrl = "https://via.placeholder.com/150";
+      // Generate QR code data containing the application ID for scanning
+      const qrCodeData = `EMC-ORIENTATION-${args.applicationId}`;
 
       return await ctx.db.insert("orientations", {
         applicationId: args.applicationId,
@@ -50,7 +50,7 @@ export const scheduleOrientation = mutation({
         assignedInspectorId: args.assignedInspectorId,
         orientationVenue: args.orientationVenue,
         orientationStatus: "Scheduled",
-        qrCodeUrl: qrCodeUrl,
+        qrCodeUrl: qrCodeData,
         scheduledAt: Date.now(),
       });
     }

@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { format, parseISO } from 'date-fns';
 import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
@@ -30,6 +31,7 @@ interface OrientationSchedulerProps {
   } | null;
   onCancelBooking?: () => void;
   isCancelling?: boolean;
+  applicationId?: string; // For navigating to QR code
 }
 
 export function OrientationScheduler({
@@ -40,6 +42,7 @@ export function OrientationScheduler({
   bookedSession,
   onCancelBooking,
   isCancelling = false,
+  applicationId,
 }: OrientationSchedulerProps) {
   const [selectedSchedule, setSelectedSchedule] = useState<OrientationSchedule | null>(null);
 
@@ -124,6 +127,17 @@ export function OrientationScheduler({
               Please arrive 15 minutes before the scheduled time. Bring a valid ID and your application reference number.
             </Text>
           </View>
+
+          {/* View QR Code Button */}
+          {applicationId && (
+            <TouchableOpacity
+              style={styles.qrButton}
+              onPress={() => router.push(`/(screens)/(shared)/orientation-qr?applicationId=${applicationId}`)}
+            >
+              <Ionicons name="qr-code" size={moderateScale(20)} color="#FFFFFF" />
+              <Text style={styles.qrButtonText}>View My QR Code</Text>
+            </TouchableOpacity>
+          )}
 
           {onCancelBooking && (
             <TouchableOpacity

@@ -287,6 +287,27 @@ export const styles = StyleSheet.create({
     lineHeight: moderateScale(18),
   },
 
+  qrButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: verticalScale(14),
+    borderRadius: moderateScale(10),
+    backgroundColor: theme.colors.primary[600],
+    marginTop: verticalScale(16),
+    gap: scale(8),
+    shadowColor: theme.colors.primary[600],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  qrButtonText: {
+    fontSize: moderateScale(15),
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+
   cancelButton: {
     flexDirection: 'row',
     alignItems: 'center',

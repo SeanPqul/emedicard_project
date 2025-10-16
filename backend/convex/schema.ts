@@ -43,6 +43,7 @@ export default defineSchema({
     updatedAt: v.optional(v.float64()),
     userId: v.id("users"),
     lastUpdatedBy: v.optional(v.id("users")), // New field to track which admin last updated the application
+    orientationCompleted: v.optional(v.boolean()), // Track if user completed check-in/check-out for orientation
   }).index("by_user", ["userId"]),
   
   documentTypes: defineTable({

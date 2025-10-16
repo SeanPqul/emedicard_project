@@ -48,6 +48,16 @@ export const cancelOrientationBookingMutation = mutation({
       updatedAt: Date.now(),
     });
 
+    // Also delete the orientation record (with QR code) if it exists
+    const orientation = await ctx.db
+      .query("orientations")
+      .withIndex("by_application", (q) => q.eq("applicationId", session.applicationId))
+      .unique();
+    
+    if (orientation) {
+      await ctx.db.delete(orientation._id);
+    }
+
     return { 
       success: true,
       message: "Booking cancelled successfully" 

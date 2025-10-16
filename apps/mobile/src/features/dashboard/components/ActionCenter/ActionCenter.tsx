@@ -122,11 +122,11 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
       return requiresOrientation;
     });
 
-  // TODO: wire orientation schedule/completion state when backend is ready
-  const orientationScheduled = false;
-
   orientationApps.forEach((app: any) => {
-    if (!orientationScheduled) {
+    // Check if orientation is completed for this application
+    const orientationCompleted = app?.orientationCompleted === true;
+    
+    if (!orientationCompleted) {
       actions.push({
         id: `orientation-${app._id}`,
         icon: 'school-outline',

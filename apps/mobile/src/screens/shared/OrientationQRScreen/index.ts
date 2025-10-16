@@ -1,0 +1,1 @@
+export { OrientationQRScreen } from './OrientationQRScreen';

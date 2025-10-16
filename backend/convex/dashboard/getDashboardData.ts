@@ -62,6 +62,9 @@ export const getDashboardDataQuery = query({
           .collect();
         const rejectedPendingCount = rejectionHistory.filter(r => !r.wasReplaced).length;
 
+        // Check if all documents are verified
+        const documentsVerified = documents.length > 0 && documents.every(doc => doc.reviewStatus === "Verified");
+
         return {
           _id: application._id,
           _creationTime: application._creationTime,
@@ -79,6 +82,8 @@ export const getDashboardDataQuery = query({
           hasPayment: payments.some(p => p && p.applicationId === application._id),
           hasRejectedDocuments: rejectedPendingCount > 0,
           rejectedDocumentsCount: rejectedPendingCount,
+          documentsVerified,
+          orientationCompleted: application.orientationCompleted || false,
         };
       })
     );
