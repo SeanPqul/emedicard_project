@@ -53,7 +53,7 @@ export const get = query({
           fileUrl: fileUrl,
           uploadId: userUpload?._id, // The ID of the documentUploads record
           remarks: userUpload?.adminRemarks,
-          classifiedDocumentType: userUpload?.classifiedDocumentType, // Include classified document type
+          extractedText: userUpload?.extractedText, // Include extractedText
         };
       })
     );

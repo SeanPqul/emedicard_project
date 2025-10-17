@@ -65,9 +65,8 @@ export default defineSchema({
     storageFileId: v.id("_storage"),
     uploadedAt: v.float64(),
     fileType: v.string(), // Added for classification
-    classifiedDocumentType: v.optional(v.string()), // New: Document type identified by Extractous
-    extractousResponse: v.optional(v.any()), // New: Full response from Extractous
-    classifiedAt: v.optional(v.float64()), // New: Timestamp for when the document was classified
+    extractedText: v.optional(v.string()), // New field for extracted OCR text
+    classification: v.optional(v.string()), // New field for document classification
   })
     .index("by_application", ["applicationId"])
     .index("by_application_document", [
@@ -375,5 +374,12 @@ export default defineSchema({
     .index("by_application", ["applicationId", "timestamp"])
     .index("by_status", ["accessStatus", "timestamp"])
     .index("by_timestamp", ["timestamp"]),
+
+  ocr_results: defineTable({
+    fileName: v.string(),
+    fileType: v.string(),
+    extractedText: v.string(),
+    createdAt: v.string(), // Storing as string for simplicity, can be v.float64() for timestamp
+  }).index("by_createdAt", ["createdAt"]),
 
 });

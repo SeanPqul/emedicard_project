@@ -1,6 +1,6 @@
 // convex/admin/reviewDocument.ts
-import { mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { mutation } from "../_generated/server";
 import { AdminRole } from "../users/roles";
 
 export const review = mutation({
@@ -9,6 +9,8 @@ export const review = mutation({
     documentUploadId: v.id("documentUploads"),
     status: v.union(v.literal("Approved"), v.literal("Rejected")),
     remarks: v.optional(v.string()),
+    extractedText: v.optional(v.string()), // New field
+    fileType: v.optional(v.string()), // New field
   },
   handler: async (ctx, args) => {
     const adminCheck = await AdminRole(ctx);
@@ -23,6 +25,8 @@ export const review = mutation({
       adminRemarks: args.remarks,
       reviewedAt: Date.now(),
       reviewedBy: adminUser._id,
+      extractedText: args.extractedText, // Save extracted text
+      fileType: args.fileType, // Save file type
     });
 
     return { success: true };

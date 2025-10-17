@@ -12,13 +12,11 @@ type DocumentChecklistItem = {
   fileUrl: string | null;
   uploadId: Id<"documentUploads"> | null | undefined;
   remarks: string | null | undefined;
-  classifiedDocumentType?: string | null; // Added classifiedDocumentType
+  extractedText: string | null | undefined; // Add extractedText property
 };
 
 // Define the expected structure of a checklist item with classification data
-type ChecklistItemWithClassification = DocumentChecklistItem & {
-  classifiedDocumentType?: string | null;
-};
+type ChecklistItemWithClassification = DocumentChecklistItem;
 
 export const get = action({
     args: { id: v.id("applications") },
@@ -40,7 +38,7 @@ export const get = action({
       // 2. Return checklist with classification data
       const checklistWithClassification = applicationData.checklist.map((item: DocumentChecklistItem) => ({
         ...item,
-        classifiedDocumentType: item.classifiedDocumentType,
+        extractedText: item.extractedText, // Ensure extractedText is passed through
       }));
 
       return {

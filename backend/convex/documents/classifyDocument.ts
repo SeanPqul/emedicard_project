@@ -1,94 +1,59 @@
-'use node';
-
-import axios from 'axios';
 import { v } from "convex/values";
-import { api } from "../_generated/api"; // Import api to run mutations
-import { action } from "../_generated/server";
-// No explicit import for FormData, assuming native Node.js FormData is available
-
-// Helper function to determine document type based on Extractous response
-function determineDocumentTypeFromExtractous(extractousData: any): string {
-  // This is a placeholder. You'll need to inspect the actual structure
-  // of the Extractous response to accurately determine the document type.
-  // For example, if Extractous returns a 'document_type' field:
-  if (extractousData && extractousData.document_type) {
-    return extractousData.document_type;
-  }
-  // Or if it returns a list of entities and you can infer from there
-  if (extractousData && extractousData.entities && extractousData.entities.length > 0) {
-    // Example: Look for a common entity type
-    const entityTypes = extractousData.entities.map((e: any) => e.type?.toLowerCase());
-    if (entityTypes.includes("driver_license")) return "Driver's License";
-    if (entityTypes.includes("passport")) return "Passport";
-    // Add more logic based on Extractous output
-  }
-  return "Unknown";
-}
+import { api } from "../_generated/api";
+import { action, mutation } from "../_generated/server";
 
 export const classify = action({
   args: {
-    documentUploadId: v.id("documentUploads"), // New: ID of the documentUploads entry to update
+    documentUploadId: v.id("documentUploads"),
     storageFileId: v.id("_storage"),
     mimeType: v.string(),
     fileName: v.string(),
   },
   handler: async (ctx, args) => {
-    const EXTRACTOUS_API_KEY = process.env.EXTRACTOUS_API_KEY;
-    if (!EXTRACTOUS_API_KEY) {
-      console.error("EXTRACTOUS_API_KEY environment variable is not set.");
-      // Update documentUploads with an error status if API key is missing
-      await ctx.runMutation(api.documentUploads.updateDocumentClassification.updateDocumentClassification, {
-        documentUploadId: args.documentUploadId,
-        classifiedDocumentType: "Classification Failed",
-        extractousResponse: { error: "EXTRACTOUS_API_KEY is not set." },
-      });
-      return; // Exit early
-    }
+    console.log("Classifying document:", args.documentUploadId);
+    // Placeholder for actual classification logic
+    // This would typically involve calling an external OCR service or AI model
+    // For now, let's just simulate a classification and update the document.
 
-    const file = await ctx.storage.get(args.storageFileId);
-    if (!file) {
-      console.error("File not found in Convex storage for classification.");
-      await ctx.runMutation(api.documentUploads.updateDocumentClassification.updateDocumentClassification, {
-        documentUploadId: args.documentUploadId,
-        classifiedDocumentType: "Classification Failed",
-        extractousResponse: { error: "File not found in Convex storage." },
-      });
-      return; // Exit early
-    }
+    // Simulate classification result
+    const simulatedClassification = "Passport"; // Example classification
 
-    const fileBuffer = await file.arrayBuffer();
-    const formData = new FormData(); // Use native FormData
-    formData.append('file', new Blob([fileBuffer], { type: args.mimeType }), args.fileName); // Append Blob for native FormData
-    formData.append('config', JSON.stringify({ strategy: 'FAST_WITH_OCR' }));
-
-    let classifiedDocumentType: string = "Unknown";
-    let extractousResponse: any = null;
-
-    try {
-      const response = await axios.post('https://api.extractous.com/v1/extract', formData, {
-        headers: {
-          'X-Api-Key': EXTRACTOUS_API_KEY,
-        },
-        maxBodyLength: Infinity,
-        maxContentLength: Infinity,
-      });
-
-      extractousResponse = response.data;
-      classifiedDocumentType = determineDocumentTypeFromExtractous(extractousResponse);
-
-      console.log("Document classified by Extractous:", classifiedDocumentType);
-
-    } catch (error: any) {
-      console.error("Error classifying document with Extractous:", error.response?.data || error.message);
-      classifiedDocumentType = "Classification Failed";
-      extractousResponse = { error: error.response?.data || error.message };
-    }
-
-    // Update the documentUploads entry with the classification results
-    await ctx.runMutation(api.documentUploads.updateDocumentClassification.updateDocumentClassification, {
+    // Update the document classification in the database
+    await ctx.runMutation(api.documents.classifyDocument.updateDocumentClassification, {
       documentUploadId: args.documentUploadId,
-      classifiedDocumentType: classifiedDocumentType,
-      extractousResponse: extractousResponse,
+      classification: simulatedClassification,
     });
+
+    return { success: true, classification: simulatedClassification };
+  },
+});
+
+export const updateDocumentClassification = mutation({
+  args: {
+    documentUploadId: v.id("documentUploads"),
+    classification: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user || user.role !== "admin") {
+      throw new Error("Not authorized to update document classification");
+    }
+
+    await ctx.db.patch(args.documentUploadId, {
+      classification: args.classification,
+      reviewedAt: Date.now(),
+      reviewStatus: "Classified", // Assuming classification implies it's reviewed
+    });
+
+    return { success: true };
   },
 });

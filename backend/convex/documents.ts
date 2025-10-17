@@ -109,3 +109,35 @@ export const resubmitDocument = mutation({
     return { success: true, documentUploadId: newDocumentUploadId };
   },
 });
+
+export const updateDocumentClassification = mutation({
+  args: {
+    documentUploadId: v.id("documentUploads"),
+    extractedText: v.string(),
+    classification: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user || user.role !== "admin") {
+      throw new Error("Not authorized to update document classification");
+    }
+
+    await ctx.db.patch(args.documentUploadId, {
+      extractedText: args.extractedText,
+      classification: args.classification,
+      reviewedAt: Date.now(),
+      reviewStatus: "Classified", // Assuming classification implies it's reviewed
+    });
+
+    return { success: true };
+  },
+});

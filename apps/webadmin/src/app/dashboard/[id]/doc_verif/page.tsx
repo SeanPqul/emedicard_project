@@ -5,9 +5,9 @@ import ApplicantActivityLog from '@/components/ApplicantActivityLog';
 import ErrorMessage from '@/components/ErrorMessage';
 import SuccessMessage from '@/components/SuccessMessage';
 import Navbar from '@/components/shared/Navbar';
-import { api } from '@/convex/_generated/api';
+import { api } from '@/convex/_generated/api'; // Moved to top
 import { Id } from '@/convex/_generated/dataModel';
-import { useAction, useMutation } from 'convex/react'; // Import useQuery
+import { useAction, useMutation } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -22,7 +22,7 @@ type ChecklistItem = {
   uploadId: Id<"documentUploads"> | null | undefined;
   remarks: string | null | undefined;
   isRequired: boolean;
-  classifiedDocumentType?: string | null; // Added classifiedDocumentType
+  extractedText: string | null | undefined;
 };
 
 type ApplicationData = {
@@ -70,13 +70,12 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [selectedRemark, setSelectedRemark] = useState<string>('');
   const [rejectionCategory, setRejectionCategory] = useState('other');
   const [specificIssues, setSpecificIssues] = useState('');
-  const [isClassifying, setIsClassifying] = useState<boolean>(false); // New loading state for classification
+  const [extractedText, setExtractedText] = useState<string[] | null>(null); // New state for extracted text
+  const [showOcrModal, setShowOcrModal] = useState<boolean>(false); // New state for OCR modal visibility
   const router = useRouter();
 
   // --- DATA FETCHING ---
   const getDocumentsWithClassification = useAction(api.applications.getDocumentsWithClassification.get);
-  const triggerClassificationAction = useAction(api.documents.triggerClassification.triggerClassification); // New action hook
-  const getStorageFileIdAction = useAction(api.documentUploads.getStorageFileIdAction.getStorageFileIdAction); // New action hook to get storageFileId
   const [data, setData] = useState<ApplicationData | null>(null);
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
   const rejectDocumentMutation = useMutation(api.admin.documents.rejectDocument.rejectDocument);
@@ -91,73 +90,6 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     loadData();
   }, [getDocumentsWithClassification, params.id]);
 
-  // --- HANDLER FUNCTIONS ---
-  const handleClassifyDocument = async (item: ChecklistItem) => {
-    if (!item.uploadId || !item.fileUrl) {
-      setError(createAppError("Cannot classify document: Missing upload ID or file URL.", "Classification Error"));
-      return;
-    }
-    setIsClassifying(true);
-    setError(null);
-    try {
-      // Assuming fileUrl contains the full URL and we can extract mimeType and fileName
-      // This might need refinement based on how fileUrl is structured or if mimeType/fileName are available elsewhere
-      const fileExtension = item.fileUrl.split('?')[0].split('.').pop()?.toLowerCase();
-      let mimeType: string;
-      switch (fileExtension) {
-        case 'pdf':
-          mimeType = 'application/pdf';
-          break;
-        case 'png':
-          mimeType = 'image/png';
-          break;
-        case 'jpeg':
-        case 'jpg':
-          mimeType = 'image/jpeg';
-          break;
-        case 'docx':
-          mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-          break;
-        case 'doc':
-          mimeType = 'application/msword';
-          break;
-        case 'pptx':
-          mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-          break;
-        default:
-          // Fallback for unknown types, or if Extractous is strict, this might still fail.
-          // For now, we'll default to image/jpeg as it was the previous default for non-PDFs.
-          // A more robust solution might involve a stricter check or a user-facing error.
-          mimeType = 'image/jpeg';
-          break;
-      }
-      const fileName = item.requirementName; // Using requirementName as filename for classification
-
-      // Fetch storageFileId using the action
-      const storageFileId = await getStorageFileIdAction({ documentUploadId: item.uploadId });
-
-      if (!storageFileId) {
-        setError(createAppError("Could not retrieve storage file ID for classification.", "Classification Error"));
-        setIsClassifying(false);
-        return;
-      }
-
-      await triggerClassificationAction({
-        documentUploadId: item.uploadId,
-        storageFileId: storageFileId,
-        mimeType: mimeType,
-        fileName: fileName,
-      });
-      setSuccessMessage(`Classification triggered for '${item.requirementName}'. Please refresh to see updates.`);
-      // Optionally, refresh data after a short delay to allow classification to complete
-      setTimeout(loadData, 3000); 
-    } catch (e: any) {
-      setError(createAppError(e.message, "Classification Failed"));
-    } finally {
-      setIsClassifying(false);
-    }
-  };
-
   const handleStatusChange = async (index: number, uploadId: Id<'documentUploads'>, newStatus: 'Approved' | 'Rejected') => {
     setError(null);
     if (newStatus === 'Rejected') {
@@ -165,7 +97,14 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
       setOpenRemarkIndex(index);
     } else {
       setOpenRemarkIndex(null);
-      await reviewDocument({ documentUploadId: uploadId, status: newStatus, remarks: '' });
+      const documentItem = data?.checklist[index];
+      await reviewDocument({
+        documentUploadId: uploadId,
+        status: newStatus,
+        remarks: '',
+        extractedText: documentItem?.extractedText || '', // Pass extracted text
+        fileType: documentItem?.fileUrl?.split('.').pop() || '', // Infer file type from URL
+      });
       loadData(); // Refresh data after status change
     }
   };
@@ -264,22 +203,45 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     <div className="flex-1 mb-3 sm:mb-0">
                       <h3 className="font-semibold text-gray-800">{item.requirementName}{item.isRequired && <span className="text-red-500 ml-1">*</span>}</h3>
                       <StatusBadge status={item.status} />
-                      {item.classifiedDocumentType && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          Classified as: <span className="font-medium text-gray-700">{item.classifiedDocumentType}</span>
-                        </p>
-                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {item.fileUrl ? (
                         <>
                           <button onClick={() => setViewModalDocUrl(item.fileUrl)} className="text-sm bg-gray-100 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">View Document</button>
                           <button
-                            onClick={() => handleClassifyDocument(item)}
-                            disabled={isClassifying || !item.uploadId || item.classifiedDocumentType === "Classification Failed"}
-                            className="text-sm bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-semibold hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={async () => {
+                              if (item.fileUrl) {
+                                try {
+                                  const response = await fetch(item.fileUrl);
+                                  const blob = await response.blob();
+                                  const file = new File([blob], "document", { type: blob.type });
+
+                                  const formData = new FormData();
+                                  formData.append("file", file);
+
+                                  const ocrResponse = await fetch("/api/ocr", {
+                                    method: "POST",
+                                    body: formData,
+                                  });
+
+                                  if (!ocrResponse.ok) {
+                                    const errorData = await ocrResponse.json();
+                                    throw new Error(errorData.error || "Failed to extract text.");
+                                  }
+
+                                  const result = await ocrResponse.json();
+                                  setExtractedText(result.text ? result.text.split('\n') : ["No text found."]);
+                                  setShowOcrModal(true);
+                                } catch (error: any) {
+                                  console.error("OCR Error:", error);
+                                  setError({ title: "OCR Failed", message: error.message || "Could not extract text from the document." });
+                                }
+                              }
+                            }}
+                            disabled={!item.fileUrl}
+                            className="text-sm bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-semibold hover:bg-blue-200 disabled:opacity-40 disabled:cursor-not-allowed"
                           >
-                            {isClassifying ? 'Classifying...' : 'Classify Document'}
+                            Extract Text
                           </button>
                         </>
                       ) : (
@@ -392,6 +354,23 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
               )}
             </div>
             <button onClick={() => setViewModalDocUrl(null)} className="mt-4 w-full bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300">Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* OCR Extracted Text Modal */}
+      {showOcrModal && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setShowOcrModal(false)}>
+          <div className="relative bg-white p-4 rounded-lg shadow-xl w-full max-w-2xl h-full max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg text-gray-800 font-semibold mb-4">Extracted Text (OCR)</h3>
+            <div className="w-full h-[calc(100%-80px)] bg-gray-100 p-3 rounded-md overflow-auto text-sm text-gray-800">
+              {extractedText && extractedText.length > 0 ? (
+                extractedText.map((line, i) => <p key={i}>{line}</p>)
+              ) : (
+                <p>No text extracted or document is empty.</p>
+              )}
+            </div>
+            <button onClick={() => setShowOcrModal(false)} className="mt-4 w-full bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300">Close</button>
           </div>
         </div>
       )}
