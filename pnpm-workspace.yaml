@@ -2,3 +2,4 @@ packages:
   - "apps/*"
   - "packages/*"
   - "backend"
+  - "backend/ocr-service"
