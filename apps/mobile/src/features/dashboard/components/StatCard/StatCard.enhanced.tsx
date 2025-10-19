@@ -179,4 +179,28 @@ export const PresetStatCards = {
     />
   ),
 
+  DocumentVerification: (props: Partial<StatCardEnhancedProps>) => (
+    <StatCardEnhanced
+      icon="shield-checkmark-outline"
+      title="Document Status"
+      gradient={[theme.colors.indigo[500], theme.colors.indigo[600]]}
+      {...props}
+      value={props.value || '-'}
+      subtitle={props.subtitle || 'No documents yet'}
+      onPress={props.onPress || (() => {})}
+    />
+  ),
+
+  HealthCard: (props: Partial<StatCardEnhancedProps>) => (
+    <StatCardEnhanced
+      icon="shield-checkmark"
+      title="Health Card"
+      gradient={[theme.colors.primary[500], theme.colors.primary[600]]}
+      {...props}
+      value={props.value || '-'}
+      subtitle={props.subtitle || 'No active card'}
+      onPress={props.onPress || (() => {})}
+    />
+  ),
+
 };

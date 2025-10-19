@@ -81,7 +81,11 @@ export function useNotificationList() {
         break;
       case 'Applications':
         filtered = filtered.filter(n => 
-          n.type === 'MissingDoc' || n.type === 'FormApproved'
+          n.type === 'MissingDoc' || 
+          n.type === 'FormApproved' || 
+          n.type === 'DocumentRejection' ||
+          n.type === 'ApplicationSubmitted' ||
+          n.type === 'DocumentApproved'
         );
         break;
       case 'Payments':
