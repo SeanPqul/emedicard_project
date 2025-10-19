@@ -121,24 +121,178 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
           <Text style={styles.sectionTitle}>Your Overview</Text>
           <View style={styles.statsGrid}>
             {(() => {
-              const applicationsCount = Math.max(userApplications?.length || 0, dashboardStats?.activeApplications || 0);
+              // Application Summary Logic
+              const hasApplication = currentApplication !== null;
+              
+              if (!hasApplication) {
+                // No application
+                return (
+                  <PresetStatCards.Applications
+                    value="-"
+                    subtitle={isNewUser ? "Start your journey" : "No active application"}
+                    onPress={() => router.push(isNewUser ? '/(tabs)/apply' : '/(tabs)/application')}
+                  />
+                );
+              }
+              
+              // Show application type
+              const applicationType = currentApplication?.applicationType || 'New';
+              
+              // Always use blue gradient
+              const cardGradient: [string, string] = [theme.colors.blue[500], theme.colors.blue[600]];
+              
+              // Status badge - smaller, cleaner styling
+              let statusBadge: { text: string; color: string } | undefined;
+              const status = currentApplication?.status || '';
+              
+              if (status === 'Pending Payment') {
+                statusBadge = { text: 'Payment Due', color: '#DC2626' }; // Clean red
+              } else if (status === 'Rejected') {
+                statusBadge = { text: 'Action Needed', color: '#DC2626' }; // Clean red
+              } else if (status === 'Approved' || status === 'Completed') {
+                statusBadge = { text: 'Approved', color: '#059669' }; // Clean green
+              } else if (status === 'Under Review' || status === 'Submitted') {
+                statusBadge = { text: 'In Review', color: '#2563EB' }; // Blue
+              }
+              
               return (
                 <PresetStatCards.Applications
-                  value={applicationsCount}
-                  subtitle={applicationsCount > 0 ? "In progress" : "Start your journey"}
+                  value={applicationType === 'Renew' ? 'Renewal' : 'New'}
+                  subtitle="Application"
                   onPress={() => router.push('/(tabs)/application')}
+                  badge={statusBadge}
+                  gradient={cardGradient}
                 />
               );
             })()}
-            <PresetStatCards.HealthCards
-              value={dashboardStats?.validHealthCards || 0}
-              subtitle={dashboardStats?.validHealthCards > 0 ? "Active cards" : "Apply for your card"}
-              onPress={() => router.push('/(screens)/(shared)/health-cards')}
-              progress={dashboardStats?.validHealthCards > 0 ? {
-                current: dashboardStats.validHealthCards,
-                total: dashboardStats.totalApplications || 1
-              } : undefined}
-            />
+            {(() => {
+              // Document Verification Logic
+              const hasApplication = currentApplication !== null;
+              
+              if (!hasApplication) {
+                // No application yet
+                return (
+                  <PresetStatCards.DocumentVerification
+                    value="-"
+                    subtitle={isNewUser ? "Start your application" : "No active application"}
+                    onPress={() => router.push(isNewUser ? '/(tabs)/apply' : '/(tabs)/application')}
+                  />
+                );
+              }
+              
+              // Get document counts from current application
+              const totalDocs = currentApplication?.documentCount || 0;
+              const allVerified = currentApplication?.documentsVerified || false;
+              
+              if (totalDocs === 0) {
+                // Documents not uploaded yet (edge case)
+                return (
+                  <PresetStatCards.DocumentVerification
+                    value="0"
+                    subtitle="Upload required documents"
+                    onPress={() => router.push(`/(screens)/(shared)/documents/view-document?formId=${currentApplication._id}`)}
+                    badge={{ text: 'Action Required', color: theme.colors.orange[700] }}
+                  />
+                );
+              }
+              
+              // Determine verification status
+              let statusValue: string;
+              let statusText: string;
+              let statusBadge: { text: string; color: string } | undefined;
+              let cardGradient: [string, string] | undefined;
+              
+              if (allVerified) {
+                // All documents verified
+                statusValue = '✓';
+                statusText = 'All documents verified';
+                cardGradient = [theme.colors.primary[500], theme.colors.primary[600]];
+              } else {
+                // Documents pending verification
+                statusValue = String(totalDocs);
+                statusText = 'Awaiting admin review';
+                statusBadge = { text: 'Under Review', color: theme.colors.indigo[700] };
+                cardGradient = [theme.colors.indigo[500], theme.colors.indigo[600]];
+              }
+              
+              return (
+                <PresetStatCards.DocumentVerification
+                  value={statusValue}
+                  subtitle={statusText}
+                  onPress={() => router.push(`/(screens)/(shared)/documents/view-document?formId=${currentApplication._id}`)}
+                  badge={statusBadge}
+                  gradient={cardGradient}
+                />
+              );
+            })()}
+            {(() => {
+              // Health Card Comprehensive Logic (Possession + Validity)
+              const hasValidCard = dashboardStats?.validHealthCards > 0;
+              const cardExpiryDate = mockHealthCard?.expiryDate || healthCard?.expiryDate;
+              
+              if (!hasValidCard || !cardExpiryDate) {
+                // No active card
+                return (
+                  <PresetStatCards.HealthCard
+                    value="-"
+                    subtitle={isNewUser ? "Apply for your card" : "No active card"}
+                    onPress={() => {}}
+                  />
+                );
+              }
+              
+              // Calculate days until expiration
+              const expiryTime = new Date(cardExpiryDate).getTime();
+              const currentTimeMs = currentTime.getTime();
+              const daysUntilExpiry = Math.ceil((expiryTime - currentTimeMs) / (1000 * 60 * 60 * 24));
+              
+              // Format expiry date
+              const expiryDateFormatted = new Date(cardExpiryDate).toLocaleDateString('en-US', {
+                month: 'short',
+                year: 'numeric'
+              });
+              
+              // Determine status and styling
+              let statusValue: string;
+              let statusText: string;
+              let statusBadge: { text: string; color: string } | undefined;
+              let cardGradient: [string, string] | undefined;
+              
+              if (daysUntilExpiry < 0) {
+                // Expired
+                statusValue = 'Expired';
+                statusText = 'Renew required';
+                statusBadge = { text: 'Expired', color: theme.colors.red[700] };
+                cardGradient = [theme.colors.red[500], theme.colors.red[600]];
+              } else if (daysUntilExpiry <= 7) {
+                // Expiring soon (< 7 days)
+                statusValue = `${daysUntilExpiry}d`;
+                statusText = `Expires in ${daysUntilExpiry} day${daysUntilExpiry > 1 ? 's' : ''}`;
+                statusBadge = { text: 'Urgent', color: theme.colors.red[700] };
+                cardGradient = [theme.colors.orange[500], theme.colors.orange[600]];
+              } else if (daysUntilExpiry <= 30) {
+                // Expires soon (7-30 days)
+                statusValue = `${daysUntilExpiry}d`;
+                statusText = `Expires in ${daysUntilExpiry} days`;
+                statusBadge = { text: 'Renew Soon', color: theme.colors.orange[700] };
+                cardGradient = [theme.colors.orange[400], theme.colors.orange[500]];
+              } else {
+                // Valid (> 30 days)
+                statusValue = '✅'; // Green check emoji
+                statusText = `Valid until ${expiryDateFormatted}`;
+                cardGradient = [theme.colors.primary[500], theme.colors.primary[600]];
+              }
+              
+              return (
+                <PresetStatCards.HealthCard
+                  value={statusValue}
+                  subtitle={statusText}
+                  onPress={() => {}}
+                  badge={statusBadge}
+                  gradient={cardGradient}
+                />
+              );
+            })()}
           </View>
         </View>
 

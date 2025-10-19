@@ -59,6 +59,27 @@ const NOTIFICATION_CONFIG = {
     actionText: 'View Health Card',
     actionIcon: 'card-outline',
   },
+  DocumentRejection: {
+    icon: 'close-circle',
+    color: theme.colors.semantic.error,
+    gradient: [theme.colors.semantic.error, '#DC2626'],
+    actionText: 'Resubmit Document',
+    actionIcon: 'cloud-upload-outline',
+  },
+  ApplicationSubmitted: {
+    icon: 'checkmark-done',
+    color: theme.colors.accent.medicalBlue,
+    gradient: [theme.colors.accent.medicalBlue, '#3B82F6'],
+    actionText: 'View Application',
+    actionIcon: 'document-text-outline',
+  },
+  DocumentApproved: {
+    icon: 'checkmark-circle',
+    color: theme.colors.accent.safetyGreen,
+    gradient: [theme.colors.accent.safetyGreen, '#22C55E'],
+    actionText: 'View Documents',
+    actionIcon: 'document-text-outline',
+  },
 } as const;
 
 export function NotificationDetailScreen() {
@@ -144,6 +165,27 @@ export function NotificationDetailScreen() {
         break;
       case 'CardIssue':
         router.push('/(screens)/(shared)/health-cards');
+        break;
+      case 'DocumentRejection':
+        // Use actionUrl from backend if available, or navigate to documents view
+        if (notification.actionUrl) {
+          // actionUrl format: /applications/{appId}/resubmit/{docTypeId}
+          // Convert to Expo Router format
+          const path = notification.actionUrl.replace(/^\//, ''); // Remove leading slash
+          router.push(path as any);
+        } else if (notification.applicationId) {
+          // Fallback: Navigate to view documents screen
+          router.push({
+            pathname: '/(screens)/(shared)/documents/view-document',
+            params: { formId: notification.applicationId }
+          });
+        }
+        break;
+      case 'ApplicationSubmitted':
+      case 'DocumentApproved':
+        if (notification.applicationId) {
+          router.push(`/(screens)/(application)/${notification.applicationId}`);
+        }
         break;
       default:
         router.push('/(tabs)/application');

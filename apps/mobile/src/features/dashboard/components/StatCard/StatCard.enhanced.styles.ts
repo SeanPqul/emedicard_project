@@ -4,10 +4,15 @@ import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    marginHorizontal: scale(8),
+    width: '48%',
     minHeight: moderateScale(180),
-    marginBottom: verticalScale(16),
+    marginBottom: verticalScale(12),
+  },
+  containerCentered: {
+    width: '47%',
+    minHeight: moderateScale(180),
+    marginBottom: verticalScale(12),
+    alignSelf: 'flex-start',
   },
   gradientBackground: {
     flex: 1,
@@ -22,6 +27,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: verticalScale(12),
+    gap: scale(5),
   },
   iconContainer: {
     width: moderateScale(48),
@@ -33,12 +39,13 @@ export const styles = StyleSheet.create({
   },
   badge: {
     paddingHorizontal: scale(10),
-    paddingVertical: verticalScale(4),
-    borderRadius: moderateScale(12),
+    paddingVertical: verticalScale(3),
+    borderRadius: moderateScale(10),
     backgroundColor: theme.colors.semantic.error,
+    marginLeft: scale(4),
   },
   badgeText: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(10),
     fontWeight: '700',
     color: theme.colors.ui.white,
   },
