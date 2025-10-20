@@ -35,9 +35,9 @@ export const triggerClassification = action({
       throw new Error("Could not get file URL for classification");
     }
 
-    // Call the OCR service to extract text
+    // Call the OCR service to extract text  
     const extractedText = await ctx.runAction(
-      api.ocr.extractDocumentText.extractDocumentText,
+      (api as any)["ocr/extractDocumentText"],
       {
         fileUrl: fileUrl,
       }
