@@ -8,8 +8,10 @@ import { moderateScale } from '@shared/utils/responsive';
 import { useUser } from '@clerk/clerk-expo';
 
 type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
+type Gender = 'Male' | 'Female' | 'Other';
 
 const CIVIL_STATUS_OPTIONS: CivilStatus[] = ['Single', 'Married', 'Divorced', 'Widowed', 'Separated'];
+const GENDER_OPTIONS: Gender[] = ['Male', 'Female', 'Other'];
 
 export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
   formData,
@@ -27,15 +29,78 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
         Complete your {selectedCategory?.name || 'job'} application details.
       </Text>
 
-      {/* Auto-fill from profile notice */}
-      {user && (
-        <View style={styles.infoBox}>
-          <Ionicons name="person-circle-outline" size={moderateScale(20)} color={theme.colors.brand.secondary} />
-          <Text style={styles.infoText}>
-            Using profile info for {user?.firstName} {user?.lastName}
-          </Text>
+      {/* Info notice for legal name */}
+      <View style={styles.infoBox}>
+        <Ionicons name="information-circle-outline" size={moderateScale(20)} color={theme.colors.brand.secondary} />
+        <Text style={styles.infoText}>
+          Please enter your full legal name as it appears on your valid ID
+        </Text>
+      </View>
+      
+      {/* Name Fields - Always Required */}
+      <View style={styles.inputGroup}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>First Name</Text>
+          <Text style={{ color: theme.colors.semantic.error, marginLeft: moderateScale(4) }}>*</Text>
         </View>
-      )}
+        <View style={[
+          styles.inputContainer,
+          errors.firstName && styles.inputContainerError
+        ]}>
+          <Ionicons 
+            name="person-outline" 
+            size={moderateScale(20)} 
+            color={errors.firstName ? theme.colors.semantic.error : '#6B7280'} 
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.input}
+            value={formData.firstName}
+            onChangeText={(text) => setFormData({ ...formData, firstName: text })}
+            placeholder="Enter your legal first name"
+            placeholderTextColor="#9CA3AF"
+            autoCapitalize="words"
+          />
+        </View>
+        {errors.firstName && (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+            <Text style={styles.errorText}>{errors.firstName}</Text>
+          </View>
+        )}
+      </View>
+      
+      <View style={styles.inputGroup}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>Last Name</Text>
+          <Text style={{ color: theme.colors.semantic.error, marginLeft: moderateScale(4) }}>*</Text>
+        </View>
+        <View style={[
+          styles.inputContainer,
+          errors.lastName && styles.inputContainerError
+        ]}>
+          <Ionicons 
+            name="person-outline" 
+            size={moderateScale(20)} 
+            color={errors.lastName ? theme.colors.semantic.error : '#6B7280'} 
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.input}
+            value={formData.lastName}
+            onChangeText={(text) => setFormData({ ...formData, lastName: text })}
+            placeholder="Enter your legal last name"
+            placeholderTextColor="#9CA3AF"
+            autoCapitalize="words"
+          />
+        </View>
+        {errors.lastName && (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+            <Text style={styles.errorText}>{errors.lastName}</Text>
+          </View>
+        )}
+      </View>
       
       <View style={styles.inputGroup}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -97,6 +162,39 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
             <Text style={styles.errorText}>{errors.organization}</Text>
+          </View>
+        )}
+      </View>
+      
+      <View style={styles.inputGroup}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>Gender</Text>
+          <Text style={{ color: theme.colors.semantic.error, marginLeft: moderateScale(4) }}>*</Text>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.civilStatusContainer}>
+          {GENDER_OPTIONS.map((gender) => (
+            <TouchableOpacity
+              key={gender}
+              style={[
+                styles.civilStatusOption,
+                formData.gender === gender && styles.civilStatusOptionSelected
+              ]}
+              onPress={() => setFormData({ ...formData, gender })}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.civilStatusText,
+                formData.gender === gender && styles.civilStatusTextSelected
+              ]}>
+                {gender}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        {errors.gender && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: moderateScale(8) }}>
+            <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+            <Text style={styles.errorText}>{errors.gender}</Text>
           </View>
         )}
       </View>

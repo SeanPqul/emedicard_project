@@ -36,6 +36,13 @@ export default defineSchema({
     ),
     approvedAt: v.optional(v.float64()),
     civilStatus: v.string(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    gender: v.optional(v.union(
+      v.literal("Male"),
+      v.literal("Female"),
+      v.literal("Other")
+    )),
     jobCategoryId: v.id("jobCategories"),
     organization: v.string(),
     paymentDeadline: v.optional(v.float64()),

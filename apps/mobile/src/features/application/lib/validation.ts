@@ -15,6 +15,9 @@ export interface ApplicationFormData {
   position: string;
   organization: string;
   civilStatus: CivilStatus;
+  firstName?: string;
+  lastName?: string;
+  gender?: 'Male' | 'Female' | 'Other';
 }
 
 export interface ValidationResult {
@@ -139,6 +142,17 @@ export const validateApplicationStep = (
       if (!formData.organization.trim()) {
         newErrors.organization = 'Organization is required';
       }
+      // Validate legal name fields (always required)
+      if (!formData.firstName?.trim()) {
+        newErrors.firstName = 'First name is required';
+      }
+      if (!formData.lastName?.trim()) {
+        newErrors.lastName = 'Last name is required';
+      }
+      // Validate gender (required field)
+      if (!formData.gender) {
+        newErrors.gender = 'Please select your gender';
+      }
       break;
       
     case 3:
@@ -211,6 +225,11 @@ export const validateFormData = (formData: ApplicationFormData): boolean => {
     formData.position.trim() &&
     formData.organization &&
     formData.organization.trim() &&
-    formData.civilStatus
+    formData.civilStatus &&
+    formData.firstName &&
+    formData.firstName.trim() &&
+    formData.lastName &&
+    formData.lastName.trim() &&
+    formData.gender
   );
 };

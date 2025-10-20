@@ -18,6 +18,9 @@ export function useApplications(applicationId?: string) {
     position: string;
     organization: string;
     civilStatus: string;
+    firstName?: string;
+    lastName?: string;
+    gender?: 'Male' | 'Female' | 'Other';
   }) => {
     return createApplicationMutation(input);
   };

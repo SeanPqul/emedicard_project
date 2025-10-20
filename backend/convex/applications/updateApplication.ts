@@ -9,6 +9,9 @@ export const updateApplicationMutation = mutation({
     position: v.optional(v.string()),
     organization: v.optional(v.string()),
     civilStatus: v.optional(v.string()),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    gender: v.optional(v.union(v.literal("Male"), v.literal("Female"), v.literal("Other"))),
     applicationStatus: v.optional(v.union(
       v.literal("Draft"),
       v.literal("Pending Payment"),

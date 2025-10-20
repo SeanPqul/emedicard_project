@@ -15,6 +15,9 @@ interface ApplicationFormData {
   position: string;
   organization: string;
   civilStatus: CivilStatus;
+  firstName?: string;
+  lastName?: string;
+  gender?: 'Male' | 'Female' | 'Other';
 }
 
 interface UseSubmissionProps {
@@ -190,6 +193,9 @@ export const useSubmission = ({
           position: formData.position,
           organization: formData.organization,
           civilStatus: formData.civilStatus,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          gender: formData.gender,
         });
       } else {
         // Create new draft application
@@ -199,6 +205,9 @@ export const useSubmission = ({
           position: formData.position,
           organization: formData.organization,
           civilStatus: formData.civilStatus,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          gender: formData.gender,
         });
         
         // Save application ID to local storage for future resume capability
@@ -482,6 +491,9 @@ export const useSubmission = ({
           position: formData.position,
           organization: formData.organization,
           civilStatus: formData.civilStatus,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          gender: formData.gender,
         });
       } else {
         // Create new draft application
@@ -491,6 +503,9 @@ export const useSubmission = ({
           position: formData.position,
           organization: formData.organization,
           civilStatus: formData.civilStatus,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          gender: formData.gender,
         });
         
         // Save application ID to local storage for future resume capability

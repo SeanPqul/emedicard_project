@@ -6,6 +6,9 @@ export interface ApplicationFormData {
   position: string;
   organization: string;
   civilStatus: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
+  firstName?: string;
+  lastName?: string;
+  gender?: 'Male' | 'Female' | 'Other';
 }
 
 export interface ApplicationTypeStepProps {

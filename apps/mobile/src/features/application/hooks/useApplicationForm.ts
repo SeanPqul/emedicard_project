@@ -20,6 +20,9 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
     position: '',
     organization: '',
     civilStatus: 'Single',
+    firstName: '',
+    lastName: '',
+    gender: undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedDocuments, setSelectedDocuments] = useState<SelectedDocuments>({});
@@ -82,8 +85,11 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
       
       if (currentStep === 2) {
         const missingFields = [];
+        if (validation.errors.firstName) missingFields.push('• First Name');
+        if (validation.errors.lastName) missingFields.push('• Last Name');
         if (validation.errors.position) missingFields.push('• Position/Job Title');
         if (validation.errors.organization) missingFields.push('• Organization/Company');
+        if (validation.errors.gender) missingFields.push('• Gender');
         
         if (missingFields.length > 0) {
           showError(
@@ -203,6 +209,9 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
               position: '',
               organization: '',
               civilStatus: 'Single',
+              firstName: '',
+              lastName: '',
+              gender: undefined,
             });
             setSelectedDocuments({});
             setCurrentStep(0);
@@ -268,6 +277,9 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
       position: '',
       organization: '',
       civilStatus: 'Single',
+      firstName: '',
+      lastName: '',
+      gender: undefined,
     });
     
     // Reset selected documents
