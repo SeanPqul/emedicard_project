@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Dimensions, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
+import { View, Text, ScrollView, Pressable, Dimensions, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-// import { LinearGradient } from 'expo-linear-gradient'; // Disabled due to native module issues
+import { LinearGradient } from 'expo-linear-gradient';
 import { moderateScale, scale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
 import { styles } from './QuickActionsCarousel.styles';
@@ -112,13 +112,19 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
 
   const ActionCard: React.FC<{ action: QuickActionItem; index: number }> = ({ action, index }) => {
     return (
-      <TouchableOpacity
-        style={[styles.cardContainer, { width: CARD_WIDTH }]}
+      <Pressable
+        style={({ pressed }) => [
+          styles.cardContainer,
+          { width: CARD_WIDTH },
+          pressed && { opacity: 0.85 },
+        ]}
         onPress={() => router.push(action.route as any)}
-        activeOpacity={0.9}
       >
-        <View
-          style={[styles.cardGradient, { backgroundColor: action.gradient[0] }]}
+        <LinearGradient
+          colors={action.gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.cardGradient}
         >
           {/* Badge */}
           {action.badge && (
@@ -153,8 +159,8 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
           {/* Decorative Elements */}
           <View style={styles.decorativeShape1} />
           <View style={styles.decorativeShape2} />
-        </View>
-      </TouchableOpacity>
+        </LinearGradient>
+      </Pressable>
     );
   };
 

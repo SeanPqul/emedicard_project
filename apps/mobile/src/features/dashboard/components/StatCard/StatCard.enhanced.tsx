@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// import { LinearGradient } from 'expo-linear-gradient'; // Disabled due to native module issues
+import { LinearGradient } from 'expo-linear-gradient';
 import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
 import { styles } from './StatCard.enhanced.styles';
@@ -67,16 +67,22 @@ export const StatCardEnhanced: React.FC<StatCardEnhancedProps> = ({
   };
 
   return (
-    <TouchableOpacity
-      style={styles.container}
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && { opacity: 0.85 },
+      ]}
       onPress={onPress}
-      activeOpacity={0.8}
+      android_ripple={{ color: 'transparent' }}
       accessibilityLabel={`${title}: ${value} ${subtitle}`}
       accessibilityHint={`Tap to view ${title.toLowerCase()}`}
       accessibilityRole="button"
     >
-      <View
-        style={[styles.gradientBackground, { backgroundColor: cardColor }]}
+      <LinearGradient
+        colors={gradient || [cardColor, cardColor]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradientBackground}
       >
         {/* Header with Icon and Badge */}
         <View style={styles.header}>
@@ -139,7 +145,7 @@ export const StatCardEnhanced: React.FC<StatCardEnhancedProps> = ({
         {/* Decorative Elements */}
         <View style={styles.decorativeCircle} />
         <View style={styles.decorativeLine} />
-      </View>
+      </LinearGradient>
 
       {/* Action Indicator */}
       <View style={styles.actionIndicator}>
@@ -149,7 +155,7 @@ export const StatCardEnhanced: React.FC<StatCardEnhancedProps> = ({
           color={color || '#10B981'}
         />
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

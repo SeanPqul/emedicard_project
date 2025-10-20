@@ -6,7 +6,7 @@ import { theme } from '@shared/styles/theme';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, Pressable, View } from 'react-native';
 
 interface StatCardProps {
   icon: string;
@@ -47,13 +47,17 @@ export const StatCard: React.FC<StatCardProps> = React.memo(({
   };
 
   return (
-    <TouchableOpacity 
-      style={[cardVariants.base, cardVariants.interactive, styles.container]} 
+    <Pressable 
+      style={({ pressed }) => [
+        cardVariants.base,
+        cardVariants.interactive,
+        styles.container,
+        pressed && { opacity: 0.7 }
+      ]}
       onPress={onPress}
       accessibilityLabel={`${title}: ${value} ${subtitle}`}
       accessibilityHint={`Tap to view ${title.toLowerCase()}`}
       accessibilityRole="button"
-      activeOpacity={0.7}
     >
       <View style={[styles.icon, { backgroundColor: getBackgroundColor(color) }]}>
         <Ionicons name={icon as any} size={moderateScale(24)} color={color} />
@@ -61,7 +65,7 @@ export const StatCard: React.FC<StatCardProps> = React.memo(({
       <Text style={styles.value}>{value}</Text>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 });
 
@@ -73,8 +77,8 @@ const styles = StyleSheet.create({
     marginHorizontal: scale(theme.spacing.xs),
     minHeight: moderateScale(140),
     justifyContent: 'center',
-    // Enhanced touch target
     minWidth: moderateScale(150),
+    overflow: 'hidden',
   },
   icon: {
     width: moderateScale(48),

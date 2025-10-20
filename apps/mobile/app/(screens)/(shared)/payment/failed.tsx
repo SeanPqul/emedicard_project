@@ -106,10 +106,10 @@ export default function PaymentFailedScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.centerContent}>
-        <Text style={styles.failureIcon}>?</Text>
+        <Text style={styles.failureIcon}>❌</Text>
         <Text style={styles.title}>Payment Failed</Text>
         <Text style={styles.subtitle}>
-          Your ?60 health card payment could not be processed
+          Your ₱60 health card payment could not be processed
         </Text>
         <View style={styles.reasonContainer}>
           <Text style={styles.reasonLabel}>Reason:</Text>

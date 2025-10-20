@@ -27,6 +27,8 @@ export const styles = StyleSheet.create({
   cardContainer: {
     marginRight: scale(16),
     height: moderateScale(200),
+    overflow: 'hidden',
+    borderRadius: moderateScale(20),
   },
   cardGradient: {
     flex: 1,

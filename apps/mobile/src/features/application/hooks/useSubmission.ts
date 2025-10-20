@@ -617,7 +617,7 @@ export const useSubmission = ({
         
         Alert.alert(
           'Application Submitted!',
-          'Your application has been successfully submitted.\n\nYou have 7 days to complete the payment of ?60.\n\nYou can pay now or later from your applications list.',
+          'Your application has been successfully submitted.\n\nYou have 7 days to complete the payment of ₱60.\n\nYou can pay now or later from your applications list.',
           [
             {
               text: 'Pay Now',

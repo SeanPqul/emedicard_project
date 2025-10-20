@@ -103,9 +103,10 @@ export function DocumentRequirementsScreen() {
           {jobCategories?.map((category: JobCategory) => (
             <Pressable
               key={category._id}
-              style={[
+              style={({ pressed }) => [
                 styles.categoryCard,
                 selectedCategoryId === category._id && styles.selectedCategoryCard,
+                pressed && { opacity: 0.7 },
               ]}
               onPress={() => handleCategorySelect(category._id)}
               android_ripple={{
@@ -120,7 +121,7 @@ export function DocumentRequirementsScreen() {
                   <Text style={styles.cardType}>{getHealthCardTypeName(category.name)}</Text>
                   {(category.requireOrientation === 'Yes' || category.requireOrientation === true) && (
                     <View style={styles.orientationBadge}>
-                      <Ionicons name="school-outline" size={moderateScale(12)} color={theme.colors.primary[500]} />
+                      <Ionicons name="school-outline" size={moderateScale(10)} color={theme.colors.primary[500]} />
                       <Text style={styles.orientationText}>Orientation Required</Text>
                     </View>
                   )}
@@ -132,7 +133,7 @@ export function DocumentRequirementsScreen() {
               ]}>
                 <Ionicons 
                   name={selectedCategoryId === category._id ? "chevron-up" : "chevron-down"} 
-                  size={moderateScale(18)} 
+                  size={moderateScale(16)} 
                   color={selectedCategoryId === category._id 
                     ? theme.colors.primary[500] 
                     : theme.colors.text.secondary}
@@ -151,13 +152,13 @@ export function DocumentRequirementsScreen() {
             
             <View style={styles.requirementsSummary}>
               <View style={styles.summaryItem}>
-                <Ionicons name="document-text-outline" size={moderateScale(20)} color={theme.colors.primary[500]} />
+                <Ionicons name="document-text-outline" size={moderateScale(18)} color={theme.colors.primary[500]} />
                 <Text style={styles.summaryText}>
                   {requirementsByCategory.totalRequirements} Documents Required
                 </Text>
               </View>
               <View style={styles.summaryItem}>
-                <Ionicons name="card-outline" size={moderateScale(20)} color={theme.colors.accent.safetyGreen} />
+                <Ionicons name="card-outline" size={moderateScale(18)} color={theme.colors.accent.safetyGreen} />
                 <Text style={styles.summaryText}>
                   Application Fee: ₱60
                 </Text>
@@ -171,7 +172,7 @@ export function DocumentRequirementsScreen() {
                   <View style={[styles.requirementIcon, { backgroundColor: getDocumentIconBg(requirement.icon) }]}>
                     <Ionicons 
                       name={requirement.icon as any} 
-                      size={28} 
+                      size={moderateScale(24)} 
                       color={getDocumentIconColor(requirement.icon)}
                     />
                   </View>
@@ -219,23 +220,6 @@ export function DocumentRequirementsScreen() {
                   For Barangay Hall or City Hall payments, you&apos;ll need to upload your Official Receipt (OR) during the application process.
                 </Text>
               </View>
-            </View>
-
-            {/* Action Buttons */}
-            <View style={styles.actionButtons}>
-              <TouchableOpacity 
-                style={styles.primaryButton}
-                onPress={() => router.push('/(tabs)/apply')}
-              >
-                <Text style={styles.primaryButtonText}>Start New Application</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.secondaryButton}
-                onPress={() => router.push('/(tabs)/application')}
-              >
-                <Text style={styles.secondaryButtonText}>View Applications</Text>
-              </TouchableOpacity>
             </View>
           </View>
         )}

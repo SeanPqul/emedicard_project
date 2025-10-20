@@ -7,6 +7,8 @@ export const styles = StyleSheet.create({
     marginHorizontal: scale(20),
     marginTop: verticalScale(16),
     marginBottom: verticalScale(12),
+    overflow: 'hidden',
+    borderRadius: moderateScale(16),
   },
   
   // Health Card Styles
@@ -113,6 +115,7 @@ export const styles = StyleSheet.create({
     ...getShadow('medium'),
     borderWidth: moderateScale(1),
     borderColor: theme.colors.border.light,
+    overflow: 'hidden',
   },
   applicationHeader: {
     flexDirection: 'row',

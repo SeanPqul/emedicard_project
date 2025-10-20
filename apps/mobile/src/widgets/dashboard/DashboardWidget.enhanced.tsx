@@ -1,6 +1,5 @@
 import React from 'react';
 import { RefreshControl, ScrollView, View, Text, Animated, TouchableOpacity } from 'react-native';
-// import { LinearGradient } from 'expo-linear-gradient'; // Disabled due to native module issues
 import { Ionicons } from '@expo/vector-icons';
 import { 
   OfflineBanner,

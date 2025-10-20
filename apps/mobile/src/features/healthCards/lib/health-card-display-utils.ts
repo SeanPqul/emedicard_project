@@ -148,28 +148,40 @@ export const generateCardHtml = (card: HealthCardData | BackendHealthCard & { jo
 export const getHealthCardTypeName = (categoryName: string): string => {
   if (!categoryName) return 'Standard Health Card';
   
-  // Map job category names to health card types
-  const mapping: { [key: string]: string } = {
-    'food handler': 'Food Handler\'s Card',
-    'food handlers': 'Food Handler\'s Card',
-    'food': 'Food Handler\'s Card',
-    'security': 'Security Guard Card',
-    'security guard': 'Security Guard Card',
-    'driver': 'Professional Driver\'s Card',
-    'drivers': 'Professional Driver\'s Card',
-    'healthcare': 'Healthcare Worker Card',
-    'healthcare worker': 'Healthcare Worker Card',
-    'general': 'General Health Card',
-    'standard': 'Standard Health Card',
-  };
-
   const lowerCaseName = categoryName.toLowerCase();
   
-  // Find matching card type
-  for (const [key, value] of Object.entries(mapping)) {
-    if (lowerCaseName.includes(key)) {
-      return value;
-    }
+  // Map job category names to health card types
+  // Check more specific matches first to avoid conflicts
+  if (lowerCaseName.includes('non-food') || lowerCaseName.includes('nonfood')) {
+    return 'Non-Food Handler\'s Card';
+  }
+  
+  if (lowerCaseName.includes('skin-to-skin') || lowerCaseName.includes('skin to skin')) {
+    return 'Skin-to-Skin Contact Worker Health Card';
+  }
+  
+  if (lowerCaseName.includes('food handler') || lowerCaseName.includes('food')) {
+    return 'Food Handler\'s Card';
+  }
+  
+  if (lowerCaseName.includes('security')) {
+    return 'Security Guard Card';
+  }
+  
+  if (lowerCaseName.includes('driver')) {
+    return 'Professional Driver\'s Card';
+  }
+  
+  if (lowerCaseName.includes('healthcare') || lowerCaseName.includes('health care')) {
+    return 'Healthcare Worker Card';
+  }
+  
+  if (lowerCaseName.includes('general')) {
+    return 'General Health Card';
+  }
+  
+  if (lowerCaseName.includes('standard')) {
+    return 'Standard Health Card';
   }
   
   // Default to using the category name

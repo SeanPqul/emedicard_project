@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-// import { LinearGradient } from 'expo-linear-gradient'; // Disabled due to native module issues
+import { LinearGradient } from 'expo-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
 import { format, differenceInDays, addYears } from 'date-fns';
 import { moderateScale } from '@shared/utils/responsive';
@@ -70,13 +70,18 @@ export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
   };
 
   return (
-    <TouchableOpacity
-      style={styles.container}
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && { opacity: 0.8 }
+      ]}
       onPress={() => router.push('/(screens)/(shared)/health-card-details')}
-      activeOpacity={0.8}
     >
-      <View
-        style={[styles.gradientBackground, { backgroundColor: getCardColor() }]}
+      <LinearGradient
+        colors={[getCardColor(), getCardColor() + 'DD']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradientBackground}
       >
         {/* Card Header */}
         <View style={styles.cardHeader}>
@@ -116,7 +121,7 @@ export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
         {/* Decorative Elements */}
         <View style={styles.decorativeCircle1} />
         <View style={styles.decorativeCircle2} />
-      </View>
+      </LinearGradient>
 
       {/* View Details Button */}
       <View style={styles.actionRow}>
@@ -127,7 +132,7 @@ export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
           color={theme.colors.text.secondary}
         />
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -184,13 +189,7 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
   };
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => router.push(`/(screens)/(application)/${application._id}`)}
-      activeOpacity={0.7}
-      accessibilityLabel={`${categoryLabel} application ${shortId}, ${status}`}
-      accessibilityHint="Double tap to view full application details"
-    >
+    <View style={styles.container}>
       <View style={styles.applicationCard}>
         {/* Top metadata row: Category badge + ID - optimized spacing */}
         <View style={{ 
@@ -270,15 +269,21 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
         </View>
 
         {/* CTA - enhanced affordance with optimized spacing */}
-        <View style={[
-          styles.actionRow, 
-          { 
-            paddingTop: moderateScale(16),
-            marginTop: moderateScale(2),
-            borderTopWidth: 1,
-            borderTopColor: theme.colors.gray[100],
-          }
-        ]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.actionRow, 
+            { 
+              paddingTop: moderateScale(16),
+              marginTop: moderateScale(2),
+              borderTopWidth: 1,
+              borderTopColor: theme.colors.gray[100],
+            },
+            pressed && { opacity: 0.6 }
+          ]}
+          onPress={() => router.push(`/(screens)/(application)/${application._id}`)}
+          accessibilityLabel={getActionText()}
+          accessibilityHint="Double tap to view application details"
+        >
           <Text style={[
             styles.actionText,
             {
@@ -295,9 +300,9 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
             size={moderateScale(20)} 
             color={theme.colors.primary[600]}
           />
-        </View>
+        </Pressable>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 
