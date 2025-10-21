@@ -30,10 +30,30 @@ export function useDashboardData() {
     const apps = dashboardData.userApplications as DashboardApplication[] | undefined;
     if (!apps || apps.length === 0) return null;
 
-    // Always show the most recent application (by creation time)
-    return apps.reduce((latest, app) => {
-      if (!latest) return app as any;
-      return (app._creationTime || 0) > (latest._creationTime || 0) ? app : latest;
+    // Priority order: show applications being actively processed first
+    const statusPriority: Record<string, number> = {
+      'Under Review': 1,        // Highest priority - actively being reviewed
+      'For Orientation': 2,     // Ready for orientation
+      'For Payment Validation': 3, // Payment being validated
+      'Submitted': 4,           // Just submitted
+      'Approved': 5,            // Completed
+      'Pending Payment': 6,     // Waiting for user payment
+      'Rejected': 7,            // Lowest priority
+    };
+
+    return apps.reduce((best, app) => {
+      if (!best) return app as any;
+      
+      const bestPriority = statusPriority[best.status] || 999;
+      const appPriority = statusPriority[app.status] || 999;
+      
+      // If same priority, show most recent
+      if (appPriority === bestPriority) {
+        return (app._creationTime || 0) > (best._creationTime || 0) ? app : best;
+      }
+      
+      // Otherwise show higher priority (lower number)
+      return appPriority < bestPriority ? app : best;
     }) as DashboardApplication;
   }, [dashboardData.userApplications]);
 

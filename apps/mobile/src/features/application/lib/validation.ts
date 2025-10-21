@@ -114,8 +114,8 @@ export const validateApplicationStep = (
   documentRequirements: DocumentRequirement[] = [],
   selectedDocuments: SelectedDocuments = {},
   getUploadState?: (docKey: string) => { uploading?: boolean; error?: string | null; success?: boolean; queued?: boolean }
-): { isValid: boolean; errors: Partial<ApplicationFormData> } => {
-  const newErrors: Partial<ApplicationFormData> = {};
+): { isValid: boolean; errors: Partial<Record<keyof ApplicationFormData, string>> } => {
+  const newErrors: Partial<Record<keyof ApplicationFormData, string>> = {};
   
   switch (currentStep) {
     case 0:

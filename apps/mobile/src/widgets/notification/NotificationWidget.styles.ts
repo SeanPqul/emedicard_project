@@ -107,7 +107,8 @@ export const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    paddingHorizontal: scale(theme.spacing.sm),
+    paddingHorizontal: scale(12),
+    minWidth: scale(70),
   },
   cardsContainer: {
     paddingHorizontal: 0,

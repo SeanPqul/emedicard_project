@@ -6,16 +6,7 @@
 
 import { JobCategory, DocumentRequirement } from '@/src/entities/application';
 import { SelectedDocuments } from '@shared/types';
-
-export type ApplicationType = 'New' | 'Renew';
-
-export interface ApplicationFormData {
-  applicationType: ApplicationType;
-  jobCategory: string;
-  position: string;
-  organization: string;
-  civilStatus: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
-}
+import { ApplicationFormData } from '../../../lib/validation';
 
 export interface UploadState {
   uploading: boolean;
