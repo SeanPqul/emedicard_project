@@ -334,7 +334,7 @@ export default defineSchema({
   // Document Access Audit Logs - tracks all document access attempts
   documentAccessLogs: defineTable({
     // Document and Application References
-    documentId: v.union(v.id("documentUploads"), v.string()), // Can be ID or string for invalid requests
+    documentId: v.string(), // Can be ID or string for invalid requests
     applicationId: v.optional(v.id("applications")),
     
     // User Information

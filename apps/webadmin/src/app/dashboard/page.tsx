@@ -67,7 +67,7 @@ export default function DashboardPage() {
     }
   );
 
-  const filteredApplications = (applications ?? []).filter(app => 
+  const filteredApplications = (applications ?? []).filter((app: ApplicationWithDetails) => 
     app.userName.toLowerCase().includes(search.toLowerCase()) ||
     app.jobCategoryName.toLowerCase().includes(search.toLowerCase()) ||
     app.applicationStatus.toLowerCase().includes(search.toLowerCase())
@@ -208,7 +208,7 @@ export default function DashboardPage() {
                 {applications && filteredApplications.length === 0 && (
                   <tr><td colSpan={5} className="text-center py-8 text-gray-400">No applicants found.</td></tr>
                 )}
-                {applications && filteredApplications.map((app) => (
+                {applications && filteredApplications.map((app: ApplicationWithDetails) => (
                   <tr key={app._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap"><div className="font-medium text-gray-900">{app.userName}</div></td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">{app.jobCategoryName}</td>

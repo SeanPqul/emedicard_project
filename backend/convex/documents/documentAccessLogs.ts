@@ -4,7 +4,7 @@ import { v } from "convex/values";
 // Internal mutation to log document access attempts (called from HTTP endpoint)
 export const logDocumentAccess = internalMutation({
   args: {
-    documentId: v.union(v.id("documentUploads"), v.string()), // Accept both valid IDs and strings for invalid requests
+    documentId: v.string(), // Accept both valid IDs and strings for invalid requests
     applicationId: v.optional(v.id("applications")),
     userId: v.optional(v.id("users")),
     userEmail: v.optional(v.string()),
@@ -42,7 +42,7 @@ export const logDocumentAccess = internalMutation({
 // Query to get document access logs for a specific document
 export const getDocumentAccessLogs = query({
   args: {
-    documentId: v.id("documentUploads"),
+    documentId: v.string(),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {

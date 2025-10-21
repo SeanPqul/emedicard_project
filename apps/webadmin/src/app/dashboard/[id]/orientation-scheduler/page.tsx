@@ -7,31 +7,32 @@ import { Id } from '@/convex/_generated/dataModel';
 
 type PageProps = {
   params: {
-    id: Id<'forms'>;
+    id: Id<'applications'>;
   };
 };
 
 export default function OrientationSchedulerPage({ params }: PageProps) {
-  const form = useQuery(api.forms.get, { id: params.id });
-  const inspectors = useQuery(api.admins.getInspectors);
-  const scheduleOrientation = useMutation(api.admins.scheduleOrientation);
+  const application = useQuery(api.applications.getApplicationById.getApplicationByIdQuery, { applicationId: params.id });
+  const inspectors = useQuery(api.admin.orientation.getInspectors);
+  const scheduleOrientation = useMutation(api.admin.orientation.scheduleOrientation);
 
   const [scheduleDate, setScheduleDate] = useState('');
   const [venue, setVenue] = useState('');
   const [inspectorId, setInspectorId] = useState<Id<'users'>>();
 
   const handleSchedule = () => {
-    if (form && scheduleDate && venue && inspectorId) {
+    if (application && scheduleDate && venue && inspectorId) {
       scheduleOrientation({
-        formId: form._id,
-        scheduleAt: new Date(scheduleDate).getTime(),
-        venue,
-        inspectorId,
+        applicationId: application._id,
+        orientationDate: new Date(scheduleDate).getTime(),
+        timeSlot: scheduleDate,
+        assignedInspectorId: inspectorId,
+        orientationVenue: venue,
       });
     }
   };
 
-  if (!form || !inspectors) {
+  if (!application || !inspectors) {
     return <div>Loading...</div>;
   }
 
@@ -39,8 +40,8 @@ export default function OrientationSchedulerPage({ params }: PageProps) {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Orientation Scheduler</h1>
       <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-2">{form.userName}</h2>
-        <p className="text-gray-600 mb-4">{form.jobCategoryName}</p>
+        <h2 className="text-xl font-semibold mb-2">{application.userName}</h2>
+        <p className="text-gray-600 mb-4">{application.jobCategoryName}</p>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Schedule Date</label>
@@ -67,7 +68,7 @@ export default function OrientationSchedulerPage({ params }: PageProps) {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             >
               <option>Select Inspector</option>
-              {inspectors.map((inspector) => (
+              {inspectors.map((inspector: { _id: Id<'users'>; fullname: string }) => (
                 <option key={inspector._id} value={inspector._id}>
                   {inspector.fullname}
                 </option>

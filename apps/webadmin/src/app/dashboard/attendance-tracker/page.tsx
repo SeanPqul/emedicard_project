@@ -7,8 +7,8 @@ import { Id } from '@/convex/_generated/dataModel';
 
 export default function AttendanceTrackerPage() {
   const [selectedDate, setSelectedDate] = useState('');
-  const orientations = useQuery(api.orientations.getByDate, selectedDate ? { date: new Date(selectedDate).getTime() } : 'skip');
-  const trackAttendance = useMutation(api.admins.trackOrientationAttendance);
+  const orientations = useQuery(api.orientations.queries.getApplicantsForScheduling);
+  const trackAttendance = useMutation(api.admin.adminMain.trackOrientationAttendance);
 
   const handleStatusChange = (orientationId: Id<'orientations'>, status: 'Completed' | 'Missed') => {
     trackAttendance({ orientationId, status });
@@ -27,26 +27,11 @@ export default function AttendanceTrackerPage() {
         />
       </div>
       <div className="bg-white p-4 rounded-lg shadow-md">
-        {orientations?.map((orientation) => (
-          <div key={orientation._id} className="flex items-center justify-between p-2 border-b">
+        {orientations?.map((application: { _id: Id<'applications'>; applicantName: string }) => (
+          <div key={application._id} className="flex items-center justify-between p-2 border-b">
             <div>
-              <p className="font-semibold">{orientation.userName}</p>
-              <p className="text-sm text-gray-500">{new Date(orientation.scheduleAt).toLocaleString()}</p>
-              <p className="text-sm text-gray-500">{orientation.venue}</p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleStatusChange(orientation._id, 'Completed')}
-                className="bg-green-500 text-white px-3 py-1 rounded-lg"
-              >
-                Attended
-              </button>
-              <button
-                onClick={() => handleStatusChange(orientation._id, 'Missed')}
-                className="bg-yellow-500 text-white px-3 py-1 rounded-lg"
-              >
-                Missed
-              </button>
+              <p className="font-semibold">{application.applicantName}</p>
+              <p className="text-sm text-gray-500">Awaiting orientation schedule</p>
             </div>
           </div>
         ))}
