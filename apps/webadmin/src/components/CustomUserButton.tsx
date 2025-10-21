@@ -60,7 +60,7 @@ export default function CustomUserButton() {
               <p className="text-sm text-gray-500 truncate">{user.primaryEmailAddress?.emailAddress}</p>
             </div>
             <div className="py-1 border-t border-gray-100">
-              <a href={user.publicMetadata.manageAccountUrl as string || '#'} target="_blank" rel="noopener noreferrer"
+              <a href="/manage-account"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 role="menuitem"
               >

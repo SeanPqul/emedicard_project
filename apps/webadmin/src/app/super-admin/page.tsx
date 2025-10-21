@@ -2,6 +2,7 @@
 
 import DateRangeFilterDropdown from '@/components/DateRangeFilterDropdown';
 import ErrorMessage from "@/components/ErrorMessage";
+import LoadingScreen from '@/components/shared/LoadingScreen';
 import Navbar from '@/components/shared/Navbar';
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
@@ -311,11 +312,7 @@ export default function SuperAdminPage() {
   };
 
   if (!isClerkLoaded || adminPrivileges === undefined) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        Loading...
-      </div>
-    );
+    return <LoadingScreen title="Loading Super Admin Dashboard" message="Please wait while we fetch your super admin data..." />;
   }
   if (!user) return <RedirectToSignIn />;
   if (!adminPrivileges || adminPrivileges.managedCategories !== "all") {
@@ -406,7 +403,25 @@ export default function SuperAdminPage() {
                 Clear Filter
               </button>
             </div>
-            <div className="flex-shrink-0 flex gap-3">
+            <div className="flex-shrink-0 flex flex-wrap gap-3">
+              <button
+                onClick={() => router.push("/super-admin/rejection-history")}
+                className="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Rejection History
+              </button>
               <button
                 onClick={() => router.push("/super-admin/orientation-schedules")}
                 className="bg-purple-600 text-white hover:bg-purple-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"

@@ -3,6 +3,7 @@
 
 import DashboardActivityLog from '@/components/DashboardActivityLog';
 import ErrorMessage from "@/components/ErrorMessage";
+import LoadingScreen from '@/components/shared/LoadingScreen';
 import Navbar from '@/components/shared/Navbar';
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
@@ -86,7 +87,7 @@ export default function DashboardPage() {
 
   // --- 5. LOADING & GUARD CLAUSES ---
   if (!isClerkLoaded || adminPrivileges === undefined) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
+    return <LoadingScreen title="Loading Dashboard" message="Please wait while we fetch your dashboard data..." />;
   }
   if (!user) return <RedirectToSignIn />;
   if (!adminPrivileges || !adminPrivileges.isAdmin) {
@@ -171,6 +172,10 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            {/* Rejection History Link */}
+            <Link href="/dashboard/rejection-history" className="flex items-center justify-center bg-red-100 text-red-900 px-4 py-2 rounded-lg font-medium hover:bg-red-200 transition-colors">
+              Rejection History
+            </Link>
             {/* Attendance Tracker Link */}
             {managedJobCategories?.some(cat => cat.name === "Food Handler") && (
                 <Link href="/dashboard/attendance-tracker" className="flex items-center justify-center bg-emerald-100 text-emerald-900 px-4 py-2 rounded-lg font-medium hover:bg-emerald-500 transition-colors">Track Attendance</Link>

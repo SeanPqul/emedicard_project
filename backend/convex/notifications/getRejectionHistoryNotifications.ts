@@ -20,29 +20,43 @@ export const getRejectionHistoryNotifications = query({
       throw new Error("User not found");
     }
 
-    let rejectionHistoryQuery = ctx.db.query("documentRejectionHistory");
+    // Only get rejection history where documents were actually resubmitted (wasReplaced = true)
+    const rejectionHistory = await ctx.db
+      .query("documentRejectionHistory")
+      .withIndex("by_replacement", (q) => q.eq("wasReplaced", true))
+      .order("desc")
+      .collect();
 
+    // Filter by job category if provided
+    let filteredRejections = rejectionHistory;
     if (args.jobCategory) {
-      // This is a bit tricky since jobCategory is on the application, not the rejection history.
-      // This would require a join or a more complex query structure.
-      // For now, we'll fetch all and filter in memory.
+      filteredRejections = await Promise.all(
+        rejectionHistory.map(async (rejection) => {
+          const application = await ctx.db.get(rejection.applicationId);
+          if (!application) return null;
+          const jobCategory = await ctx.db.get(application.jobCategoryId);
+          return jobCategory?.name === args.jobCategory ? rejection : null;
+        })
+      ).then(results => results.filter(r => r !== null) as typeof rejectionHistory);
     }
 
-    const rejectionHistory = await rejectionHistoryQuery.order("desc").collect();
-
     const notifications = await Promise.all(
-      rejectionHistory.map(async (rejection) => {
+      filteredRejections.map(async (rejection) => {
         const application = await ctx.db.get(rejection.applicationId);
         const user = application ? await ctx.db.get(application.userId) : null;
         const documentType = await ctx.db.get(rejection.documentTypeId);
+        
+        // Check if current admin has read this notification
+        const isReadByCurrentAdmin = rejection.adminReadBy?.includes(admin._id) || false;
+        
         return {
           _id: rejection._id,
           title: `Document Resubmitted`,
-          message: `${user?.fullname} has resubmitted their ${documentType?.name}.`,
+          message: `${user?.fullname || 'User'} has resubmitted their ${documentType?.name || 'document'}. Please review.`,
           actionUrl: `/dashboard/${rejection.applicationId}/doc_verif`,
-          isRead: rejection.wasReplaced, // Consider 'wasReplaced' as 'isRead'
+          isRead: isReadByCurrentAdmin,
           notificationType: "DocumentResubmission",
-          _creationTime: rejection.rejectedAt,
+          _creationTime: rejection.replacedAt || rejection.rejectedAt, // Use replacedAt timestamp
         };
       })
     );

@@ -15,7 +15,7 @@ function NotificationManagementPage() {
   const { user } = useUser();
   const adminId = useStoreUser();
 
-  const adminNotifications = useQuery(api.notifications.getAdminNotifications, adminId ? { adminId: adminId } : "skip");
+  const adminNotifications = useQuery(api.notifications.getAdminNotifications, { notificationType: undefined });
   const rejectionHistoryNotifications = useQuery(api.notifications.getRejectionHistoryNotifications, {});
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);

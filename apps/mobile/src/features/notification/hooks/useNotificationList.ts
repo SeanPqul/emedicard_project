@@ -23,7 +23,7 @@ const mapNotification = (backendNotif: BackendNotification): NotificationItem =>
   return {
     ...backendNotif,
     type: backendNotif.notificationType,
-    read: backendNotif.isRead
+    read: backendNotif.isRead ?? false
   };
 };
 

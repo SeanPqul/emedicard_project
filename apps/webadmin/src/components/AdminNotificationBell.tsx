@@ -5,14 +5,18 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function AdminNotificationBell() {
   const adminId = useStoreUser();
+  const router = useRouter();
 
-  const adminNotifications = useQuery(api.notifications.getAdminNotifications, adminId ? { adminId, notificationType: undefined } : "skip");
+  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
+  const adminNotifications = useQuery(api.notifications.getAdminNotifications, { notificationType: undefined });
   const rejectionHistoryNotifications = useQuery(api.notifications.getRejectionHistoryNotifications, {});
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
+  const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);
   const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -21,10 +25,11 @@ export default function AdminNotificationBell() {
 
   const unreadCount = notifications?.filter(n => !n.isRead).length || 0;
 
-  const handleNotificationClick = (notificationId: Id<"notifications"> | Id<"documentRejectionHistory">) => {
-    // This needs to be adjusted to handle both types of notifications
-    // For now, we'll just mark the notification as read if it's a regular notification
-    if ('markAsRead' in api.notifications) {
+  const handleNotificationClick = (notificationId: Id<"notifications"> | Id<"documentRejectionHistory">, notificationType: string) => {
+    // Mark as read based on notification type
+    if (notificationType === "DocumentResubmission") {
+      markRejectionAsRead({ rejectionId: notificationId as Id<"documentRejectionHistory"> });
+    } else {
       markAsRead({ notificationId: notificationId as Id<"notifications"> });
     }
     setIsOpen(false);
@@ -32,6 +37,14 @@ export default function AdminNotificationBell() {
 
   const handleMarkAllAsRead = () => {
     markAllAsRead();
+  };
+
+  const handleViewAll = () => {
+    setIsOpen(false);
+    // Determine the correct route based on admin privileges
+    const isSuperAdmin = adminPrivileges?.managedCategories === "all";
+    const notificationsRoute = isSuperAdmin ? "/super-admin/notifications" : "/dashboard/notifications";
+    router.push(notificationsRoute);
   };
 
   return (
@@ -51,7 +64,7 @@ export default function AdminNotificationBell() {
             </div>
             <div className="max-h-96 overflow-y-auto">
               {notifications?.map(notification => (
-                <Link key={notification._id} href={notification.actionUrl || '#'} onClick={() => handleNotificationClick(notification._id)} className={`block px-4 py-3 text-sm hover:bg-gray-100 ${notification.isRead ? 'text-gray-600' : 'text-gray-900 font-semibold'}`}>
+                <Link key={notification._id} href={notification.actionUrl || '#'} onClick={() => handleNotificationClick(notification._id, notification.notificationType)} className={`block px-4 py-3 text-sm hover:bg-gray-100 ${notification.isRead ? 'text-gray-600' : 'text-gray-900 font-semibold'}`}>
                     <p>{notification.title}</p>
                     <p className={`text-xs ${notification.isRead ? 'text-gray-400' : 'text-gray-500'}`}>{notification.message}</p>
                 </Link>
@@ -61,7 +74,7 @@ export default function AdminNotificationBell() {
               )}
             </div>
             <div className="border-t border-gray-200 px-4 py-2">
-                <Link href="/dashboard/notification-management" onClick={() => setIsOpen(false)} className="text-sm text-emerald-600 hover:text-emerald-800 text-center block">View all notifications</Link>
+              <button onClick={handleViewAll} className="text-sm text-emerald-600 hover:text-emerald-800 text-center block w-full">View all notifications</button>
             </div>
           </div>
         </div>

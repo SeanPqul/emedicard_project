@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  // Enable compiler optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
+
+  // Enable static optimization
+  reactStrictMode: true,
+
   images: {
     remotePatterns: [
       {
@@ -15,6 +23,8 @@ const nextConfig: NextConfig = {
   experimental: {
     // allow imports from outside of webadmin/
     externalDir: true,
+    // Enable optimized package imports
+    optimizePackageImports: ['lucide-react', 'date-fns', 'recharts'],
   },
 
   turbopack: {

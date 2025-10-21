@@ -3,11 +3,12 @@
 
 import ApplicantActivityLog from '@/components/ApplicantActivityLog';
 import ErrorMessage from '@/components/ErrorMessage';
+import LoadingScreen from '@/components/shared/LoadingScreen';
 import SuccessMessage from '@/components/SuccessMessage';
 import Navbar from '@/components/shared/Navbar';
 import { api } from '@/convex/_generated/api'; // Moved to top
 import { Id } from '@/convex/_generated/dataModel';
-import { useAction, useMutation } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -77,18 +78,34 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   // --- DATA FETCHING ---
   const getDocumentsWithClassification = useAction(api.applications.getDocumentsWithClassification.get);
   const [data, setData] = useState<ApplicationData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
   const rejectDocumentMutation = useMutation(api.admin.documents.rejectDocument.rejectDocument);
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
 
   const loadData = async () => {
-    const result = await getDocumentsWithClassification({ id: params.id });
-    setData(result);
+    try {
+      const result = await getDocumentsWithClassification({ id: params.id });
+      setData(result);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setData(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
   }, [getDocumentsWithClassification, params.id]);
+
+  // Add polling for live updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadData();
+    }, 3000); // Poll every 3 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   const handleStatusChange = async (index: number, uploadId: Id<'documentUploads'>, newStatus: 'Approved' | 'Rejected') => {
     setError(null);
@@ -105,7 +122,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
         extractedText: documentItem?.extractedText || '', // Pass extracted text
         fileType: documentItem?.fileUrl?.split('.').pop() || '', // Infer file type from URL
       });
-      loadData(); // Refresh data after status change
+      await loadData(); // Refresh data after status change
     }
   };
 
@@ -138,8 +155,27 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   };
 
   // --- RENDER ---
-  if (data === undefined) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  if (data === null) return <div className="min-h-screen flex items-center justify-center">Application not found</div>;
+  if (isLoading) {
+    return <LoadingScreen title="Loading Application" message="Please wait while we fetch the application details..." />;
+  }
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-lg text-center max-w-md">
+          <div className="bg-red-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Application Not Found</h2>
+          <p className="text-gray-600 mb-6">The application you're looking for doesn't exist or has been removed.</p>
+          <button onClick={() => router.push('/dashboard')} className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition-all">
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -186,9 +222,38 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   <SuccessMessage message={successMessage} />
                 </div>
               )}
+              {(() => {
+                const rejectedCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected').length || 0;
+                if (rejectedCount > 0) {
+                  return (
+                    <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <div className="flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div className="text-sm text-blue-800">
+                          <p className="font-semibold mb-1">Rejection Notifications Queued ({rejectedCount})</p>
+                          <p className="text-blue-700">
+                            {rejectedCount === 1 
+                              ? 'The rejected document notification will be sent to the applicant when you click "Reject Application" below.'
+                              : `${rejectedCount} individual notifications will be sent to the applicant (one per rejected document) when you click "Reject Application" below.`
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
               <div className="flex flex-col gap-3">
                 <button onClick={() => handleFinalize('Approved')} className="w-full bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-all transform hover:scale-105">Approve & Continue</button>
-                <button onClick={() => handleFinalize('Rejected')} className="w-full bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-all transform hover:scale-105">Reject Application</button>
+                <button onClick={() => handleFinalize('Rejected')} className="w-full bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-all transform hover:scale-105">
+                  {data?.checklist.some((doc: ChecklistItem) => doc.status === 'Rejected') 
+                    ? 'Reject Application & Notify Applicant'
+                    : 'Reject Application'
+                  }
+                </button>
               </div>
             </div>
           </div>
@@ -306,6 +371,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               rejectionReason: selectedRemark,
                               specificIssues: specificIssues.split(',').map(s => s.trim()).filter(s => s),
                             });
+                            await loadData(); // Refresh data after rejection with remarks
                             setOpenRemarkIndex(null);
                             setError(null);
                           } catch (e: any) {
@@ -328,6 +394,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           rejectionReason: 'Document rejected by admin.', // Default reason
                           specificIssues: [],
                         });
+                        await loadData(); // Refresh data after rejection
                         setError(null);
                       } catch (e: any) {
                         setError(createAppError(e.message, 'Rejection Error'));
@@ -361,16 +428,72 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
       {/* OCR Extracted Text Modal */}
       {showOcrModal && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setShowOcrModal(false)}>
-          <div className="relative bg-white p-4 rounded-lg shadow-xl w-full max-w-2xl h-full max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg text-gray-800 font-semibold mb-4">Extracted Text (OCR)</h3>
-            <div className="w-full h-[calc(100%-80px)] bg-gray-100 p-3 rounded-md overflow-auto text-sm text-gray-800">
-              {extractedText && extractedText.length > 0 ? (
-                extractedText.map((line, i) => <p key={i}>{line}</p>)
-              ) : (
-                <p>No text extracted or document is empty.</p>
-              )}
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 rounded-lg p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Extracted Text (OCR)</h3>
+                  <p className="text-sm text-gray-500">Optical Character Recognition Results</p>
+                </div>
+              </div>
+              <button onClick={() => setShowOcrModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <button onClick={() => setShowOcrModal(false)} className="mt-4 w-full bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300">Close</button>
+            
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-inner">
+                {extractedText && extractedText.length > 0 ? (
+                  <div className="space-y-2 font-mono text-sm text-gray-800 leading-relaxed">
+                    {extractedText.map((line, i) => (
+                      <p key={i} className={`${line.trim() ? 'text-gray-900' : 'text-gray-400'} transition-colors hover:bg-white/50 px-2 py-1 rounded`}>
+                        {line || '\u00A0'}
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="bg-yellow-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-600 font-medium">No text extracted or document is empty.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => {
+                    const text = extractedText?.join('\n') || '';
+                    navigator.clipboard.writeText(text);
+                    alert('Text copied to clipboard!');
+                  }}
+                  className="flex-1 bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy Text
+                </button>
+                <button onClick={() => setShowOcrModal(false)} className="flex-1 bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all">
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
