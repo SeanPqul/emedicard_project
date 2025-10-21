@@ -8,8 +8,8 @@ import { theme } from '@shared/styles/theme';
 export const HEADER_CONSTANTS = {
   // Padding & Spacing
   HORIZONTAL_PADDING: scale(20), // Consistent horizontal padding
-  TOP_PADDING: verticalScale(48), // Top padding for status bar + spacing
-  BOTTOM_PADDING: verticalScale(16), // Bottom padding before wave/content
+  TOP_PADDING: verticalScale(32), // Top padding for status bar + spacing
+  BOTTOM_PADDING: verticalScale(28), // Bottom padding before wave/content
   
   // Icon Sizes
   ICON_SIZE: moderateScale(24), // Standard icon size
@@ -40,5 +40,6 @@ export const HEADER_CONSTANTS = {
   WHITE: '#FFFFFF',
   WHITE_OVERLAY: 'rgba(255, 255, 255, 0.2)',
   WHITE_TRANSPARENT: 'rgba(255, 255, 255, 0.85)',
+  PRIMARY_GREEN: theme.colors.brand.primary,
 } as const;
 

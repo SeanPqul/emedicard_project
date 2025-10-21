@@ -24,6 +24,7 @@ export const useOptimizedDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [cachedJobCategories, setCachedJobCategories] = useState<JobCategory[] | null>(null);
+  const [cachedDashboardData, setCachedDashboardData] = useState<any>(null);
 
   // Primary aggregated query that minimizes round-trips
   const dashboardData = useQuery(api.dashboard.getDashboardData.getDashboardDataQuery);
@@ -34,6 +35,13 @@ export const useOptimizedDashboard = () => {
     api.jobCategories.getAllJobCategories.getAllJobCategoriesQuery,
     shouldFetchJobCategories ? {} : 'skip'
   );
+
+  // Cache dashboard data when it loads
+  useEffect(() => {
+    if (dashboardData) {
+      setCachedDashboardData(dashboardData);
+    }
+  }, [dashboardData]);
 
   // Load cached job categories on mount
   useEffect(() => {
@@ -84,9 +92,12 @@ export const useOptimizedDashboard = () => {
     return (statusMap[status as keyof typeof statusMap] || statusMap.default) as 'success' | 'pending' | 'error';
   }, []);
 
+  // Use cached or fresh data (prefer fresh, fallback to cache)
+  const effectiveDashboardData = dashboardData || cachedDashboardData;
+
   // Dashboard stats from aggregated query (pre-calculated on server)
   const dashboardStats = useMemo((): DashboardStats => {
-    if (!dashboardData?.stats) {
+    if (!effectiveDashboardData?.stats) {
       return {
         activeApplications: 0,
         pendingPayments: 0,
@@ -97,22 +108,22 @@ export const useOptimizedDashboard = () => {
     }
 
     return {
-      activeApplications: dashboardData.stats.activeApplications,
-      pendingPayments: dashboardData.stats.pendingPayments,
-      validHealthCards: dashboardData.stats.validHealthCards,
-      pendingAmount: dashboardData.stats.pendingAmount,
-      unreadNotifications: dashboardData.stats.unreadNotifications || 0,
+      activeApplications: effectiveDashboardData.stats.activeApplications,
+      pendingPayments: effectiveDashboardData.stats.pendingPayments,
+      validHealthCards: effectiveDashboardData.stats.validHealthCards,
+      pendingAmount: effectiveDashboardData.stats.pendingAmount,
+      unreadNotifications: effectiveDashboardData.stats.unreadNotifications || 0,
     };
-  }, [dashboardData?.stats]);
+  }, [effectiveDashboardData?.stats]);
 
   // Recent activities from aggregated data
   const recentActivities = useMemo((): RecentActivity[] => {
     const activities: RecentActivity[] = [];
     
-    if (!dashboardData) return activities;
+    if (!effectiveDashboardData) return activities;
     
     // Add from pre-filtered notifications
-    dashboardData.notifications?.forEach(notification => {
+    effectiveDashboardData.notifications?.forEach(notification => {
       activities.push({
         id: notification._id,
         userId: user?.id || '', // userId is not part of notification object, use current user's id
@@ -125,7 +136,7 @@ export const useOptimizedDashboard = () => {
     });
 
     // Add from applications (pre-limited on server)
-    dashboardData.applications?.slice(0, 2).forEach(application => {
+    effectiveDashboardData.applications?.slice(0, 2).forEach(application => {
       activities.push({
         id: application._id,
         userId: user?.id || '',
@@ -137,7 +148,7 @@ export const useOptimizedDashboard = () => {
       });
     });
 
-    dashboardData.payments?.forEach(payment => {
+    effectiveDashboardData.payments?.forEach(payment => {
       if (payment) {
         activities.push({
           id: payment._id,
@@ -154,7 +165,7 @@ export const useOptimizedDashboard = () => {
     return activities
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 5);
-  }, [dashboardData, getNotificationDescription, getApplicationActivityStatus]);
+  }, [effectiveDashboardData, getNotificationDescription, getApplicationActivityStatus]);
 
   // Network-aware refresh handler
   const onRefresh = async () => {
@@ -175,8 +186,8 @@ export const useOptimizedDashboard = () => {
     }
   };
 
-  // Optimized loading state
-  const isLoading = user && !dashboardData && !cachedJobCategories;
+  // Optimized loading state - only show loading on initial mount
+  const isLoading = user && !dashboardData && !cachedDashboardData;
 
   // Greeting helper (unchanged but memoized)
   const getGreeting = useMemo(() => () => {
@@ -199,12 +210,12 @@ export const useOptimizedDashboard = () => {
   return {
     // Data (optimized payloads)
     user,
-    userProfile: dashboardData?.user,
-    userApplications: dashboardData?.applications,
+    userProfile: effectiveDashboardData?.user,
+    userApplications: effectiveDashboardData?.applications,
     dashboardStats,
     recentActivities,
     currentTime,
-    unreadNotificationsCount: dashboardData?.stats?.unreadNotifications || 0,
+    unreadNotificationsCount: effectiveDashboardData?.stats?.unreadNotifications || 0,
     jobCategories,
     
     // Network status
