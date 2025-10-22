@@ -1,15 +1,11 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, ScrollView, Pressable, Dimensions, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
+import React from 'react';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { moderateScale, scale } from '@shared/utils/responsive';
+import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
 import { styles } from './QuickActionsCarousel.styles';
-
-const { width: screenWidth } = Dimensions.get('window');
-const CARD_WIDTH = screenWidth * 0.75; // 75% of screen width
-const CARD_SPACING = scale(16);
 
 interface QuickActionItem {
   id: string;
@@ -35,8 +31,6 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
   dashboardStats,
   currentApplication,
 }) => {
-  const scrollViewRef = useRef<ScrollView>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
   
   // Generate contextual quick actions based on user state
   const getQuickActions = (): QuickActionItem[] => {
@@ -104,18 +98,11 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
 
   const quickActions = getQuickActions();
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const scrollPosition = event.nativeEvent.contentOffset.x;
-    const index = Math.round(scrollPosition / (CARD_WIDTH + CARD_SPACING));
-    setActiveIndex(index);
-  };
-
-  const ActionCard: React.FC<{ action: QuickActionItem; index: number }> = ({ action, index }) => {
+  const ActionCard: React.FC<{ action: QuickActionItem }> = ({ action }) => {
     return (
       <Pressable
         style={({ pressed }) => [
           styles.cardContainer,
-          { width: CARD_WIDTH },
           pressed && { opacity: 0.85 },
         ]}
         onPress={() => router.push(action.route as any)}
@@ -126,32 +113,33 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
           end={{ x: 1, y: 1 }}
           style={styles.cardGradient}
         >
-          {/* Badge */}
-          {action.badge && (
-            <View style={[styles.badge, styles[`badge${action.badge.type}`]]}>
-              <Text style={styles.badgeText}>{action.badge.text}</Text>
-            </View>
-          )}
-          
           {/* Icon */}
           <View style={styles.iconContainer}>
             <Ionicons 
               name={action.icon as any} 
-              size={moderateScale(36)} 
+              size={moderateScale(28)} 
               color={theme.colors.ui.white}
             />
           </View>
           
-          {/* Content */}
-          <Text style={styles.cardTitle}>{action.title}</Text>
-          <Text style={styles.cardDescription}>{action.description}</Text>
+          {/* Content - takes up remaining space */}
+          <View style={styles.cardContent}>
+            <View style={styles.titleRow}>
+              <Text style={styles.cardTitle}>{action.title}</Text>
+              {action.badge && (
+                <View style={[styles.badgeInline, styles[`badge${action.badge.type}`]]}>
+                  <Text style={styles.badgeText}>{action.badge.text}</Text>
+                </View>
+              )}
+            </View>
+            <Text style={styles.cardDescription} numberOfLines={2}>{action.description}</Text>
+          </View>
           
-          {/* Action Button */}
-          <View style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Get Started</Text>
+          {/* Arrow Icon */}
+          <View style={styles.arrowIcon}>
             <Ionicons 
-              name="arrow-forward" 
-              size={moderateScale(18)} 
+              name="chevron-forward" 
+              size={moderateScale(20)} 
               color={theme.colors.ui.white}
             />
           </View>
@@ -167,36 +155,13 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <Text style={styles.sectionSubtitle}>Swipe to explore more</Text>
+        <Text style={styles.sectionTitle}>Helpful Resources</Text>
+        <Text style={styles.sectionSubtitle}>Guides and information to help you</Text>
       </View>
       
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        snapToInterval={CARD_WIDTH + CARD_SPACING}
-        decelerationRate="fast"
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      >
-        {quickActions.map((action, index) => (
-          <ActionCard key={action.id} action={action} index={index} />
-        ))}
-      </ScrollView>
-      
-      {/* Page Indicator */}
-      <View style={styles.pageIndicatorContainer}>
-        {quickActions.slice(0, 5).map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.pageIndicator,
-              index === activeIndex && styles.pageIndicatorActive,
-            ]}
-          />
+      <View style={styles.cardsStack}>
+        {quickActions.map((action) => (
+          <ActionCard key={action.id} action={action} />
         ))}
       </View>
     </View>
