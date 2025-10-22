@@ -311,8 +311,9 @@ export const getOrientationSchedulesForDate = query({
 
         // Get instructor details from the first orientation if assigned
         let instructorDetails = null;
-        if (orientations.length > 0 && orientations[0].assignedInspectorId) {
-          const inspector = await ctx.db.get(orientations[0].assignedInspectorId);
+        const firstOrientation = orientations[0];
+        if (firstOrientation && firstOrientation.assignedInspectorId) {
+          const inspector = await ctx.db.get(firstOrientation.assignedInspectorId);
           if (inspector) {
             instructorDetails = {
               name: inspector.fullname,

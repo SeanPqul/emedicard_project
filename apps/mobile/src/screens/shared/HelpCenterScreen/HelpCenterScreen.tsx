@@ -40,7 +40,7 @@ export function HelpCenterScreen() {
     {
       id: 'what-is-health-card',
       question: 'What is the Health Card?',
-      answer: 'The Davao City Health Card is a mandatory work requirement for individuals who handle food. It is processed by the City Health Office (CHO) and released by sanitary inspectors to ensure compliance with health and safety standards.',
+      answer: `The Davao City Health Card is an official certificate from the City Health Office confirming you've completed required medical screening and are cleared to work in regulated jobs and establishments across the city.\n\nIt enables employer compliance during sanitary inspections and follows national sanitation rules; validity and required tests vary by occupation, and certain job titles include extra steps before release.`
     },
     {
       id: 'who-needs',
@@ -114,51 +114,6 @@ export function HelpCenterScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Quick Links */}
-          <View style={styles.quickLinksContainer}>
-            <Text style={styles.sectionTitle}>Quick Links</Text>
-            <View style={styles.quickLinks}>
-              <Pressable 
-                style={({ pressed }) => [
-                  styles.quickLinkCard,
-                  pressed && { opacity: 0.7 }
-                ]}
-                onPress={() => router.push('/(screens)/(shared)/documents/requirements')}
-              >
-                <View style={[styles.quickLinkIcon, { backgroundColor: theme.colors.blue[50] }]}>
-                  <Ionicons name="list" size={moderateScale(24)} color={theme.colors.blue[600]} />
-                </View>
-                <Text style={styles.quickLinkText}>Requirements</Text>
-              </Pressable>
-
-              <Pressable 
-                style={({ pressed }) => [
-                  styles.quickLinkCard,
-                  pressed && { opacity: 0.7 }
-                ]}
-                onPress={() => router.push('/(screens)/(shared)/orientation/food-safety-info')}
-              >
-                <View style={[styles.quickLinkIcon, { backgroundColor: theme.colors.orange[50] }]}>
-                  <Ionicons name="restaurant" size={moderateScale(24)} color={theme.colors.orange[600]} />
-                </View>
-                <Text style={styles.quickLinkText}>Food Safety</Text>
-              </Pressable>
-
-              <Pressable 
-                style={({ pressed }) => [
-                  styles.quickLinkCard,
-                  pressed && { opacity: 0.7 }
-                ]}
-                onPress={handleCallCHO}
-              >
-                <View style={[styles.quickLinkIcon, { backgroundColor: theme.colors.green[50] }]}>
-                  <Ionicons name="call" size={moderateScale(24)} color={theme.colors.green[600]} />
-                </View>
-                <Text style={styles.quickLinkText}>Call CHO</Text>
-              </Pressable>
-            </View>
-          </View>
-
           {/* Venue Card */}
           <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -314,46 +269,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: scale(16),
-    paddingBottom: verticalScale(100),
+    paddingBottom: verticalScale(40),
   },
   sectionTitle: {
     fontSize: moderateScale(16),
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: verticalScale(12),
-  },
-  quickLinksContainer: {
-    marginBottom: verticalScale(24),
-  },
-  quickLinks: {
-    flexDirection: 'row',
-    gap: scale(12),
-  },
-  quickLinkCard: {
-    flex: 1,
-    backgroundColor: theme.colors.ui.white,
-    borderRadius: moderateScale(12),
-    padding: scale(16),
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  quickLinkIcon: {
-    width: moderateScale(48),
-    height: moderateScale(48),
-    borderRadius: moderateScale(24),
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: verticalScale(8),
-  },
-  quickLinkText: {
-    fontSize: moderateScale(12),
-    fontWeight: '600',
-    color: theme.colors.text.primary,
-    textAlign: 'center',
   },
   card: {
     backgroundColor: theme.colors.ui.white,
