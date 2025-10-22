@@ -100,6 +100,10 @@ export const rejectDocument = mutation({
       wasReplaced: false,
       attemptNumber: attemptNumber,
       
+      // Notification tracking
+      notificationSent: false,
+      notificationSentAt: undefined,
+      
       // Audit fields (can be enhanced later)
       ipAddress: undefined,
       userAgent: undefined,
@@ -119,19 +123,8 @@ export const rejectDocument = mutation({
       updatedAt: Date.now(),
     });
 
-    // 7. Send notification to user
-    const applicant = await ctx.db.get(application.userId);
-    if (applicant) {
-      await ctx.db.insert("notifications", {
-        userId: application.userId,
-        applicationId: documentUpload.applicationId,
-        title: "Document Rejected",
-        message: `Your ${documentType.name} has been rejected. Reason: ${args.rejectionReason}. Please upload a new document.`,
-        notificationType: "DocumentRejection",
-        isRead: false,
-        actionUrl: `/applications/${documentUpload.applicationId}/resubmit/${documentUpload.documentTypeId}`,
-      });
-    }
+    // 7. Notification will be sent when "Reject Application" button is clicked
+    // Skipping immediate notification to allow stacking multiple rejections
 
     // 8. Create admin activity log
     await ctx.db.insert("adminActivityLogs", {

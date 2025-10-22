@@ -1,7 +1,7 @@
 import { httpRouter } from "convex/server";
-import { httpAction } from "./_generated/server";
 import { Webhook } from "svix";
 import { api, internal } from "./_generated/api";
+import { httpAction } from "./_generated/server";
 import { handleMayaWebhook } from "./payments/maya/webhook";
 
 const http = httpRouter();
@@ -329,19 +329,20 @@ http.route({
     const userAgent = request.headers.get("user-agent") || undefined;
     const referrer = request.headers.get("referer") || undefined;
     
-    let documentId: any = null; // Declare documentId in outer scope for error handling
+    let documentId: string | null = null; // Declare documentId in outer scope for error handling
     
     try {
       // Get query parameters
       const url = new URL(request.url);
       const signature = url.searchParams.get("signature");
-      documentId = url.searchParams.get("documentId") as any;
+      documentId = url.searchParams.get("documentId");
       const expiresAt = url.searchParams.get("expiresAt");
       
       if (!signature || !documentId || !expiresAt) {
         // Log invalid request attempt
+        // @ts-ignore - Deep type instantiation limitation
         await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
-          documentId: documentId || "unknown" as any,
+          documentId: documentId || "missing-document-id",
           accessStatus: "InvalidRequest",
           accessMethod: "signed_url",
           errorMessage: `Missing params: sig=${!!signature} doc=${!!documentId} exp=${!!expiresAt}`,
@@ -358,7 +359,7 @@ http.route({
       if (isNaN(expiresAtNum)) {
         // Log invalid timestamp attempt
         await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
-          documentId,
+          documentId: documentId || "invalid-timestamp-document-id",
           accessStatus: "InvalidRequest",
           accessMethod: "signed_url",
           errorMessage: `Invalid timestamp format: ${expiresAt}`,
@@ -375,7 +376,7 @@ http.route({
         const minutesExpired = Math.round((Date.now() - expiresAtNum) / (60 * 1000));
         // Log expired access attempt
         await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
-          documentId,
+          documentId: documentId || "expired-document-id",
           accessStatus: "Expired",
           accessMethod: "signed_url",
           errorMessage: `URL expired ${minutesExpired} minutes ago`,
@@ -393,7 +394,7 @@ http.route({
         console.error("Document signing secret not configured");
         // Log server configuration issue
         await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
-          documentId,
+          documentId: documentId || "no-secret-document-id",
           accessStatus: "NoSecret",
           accessMethod: "signed_url",
           errorMessage: "Server signing secret not configured",
@@ -408,13 +409,14 @@ http.route({
       // Get the document first
       let document;
       try {
+        // @ts-ignore - Deep type instantiation limitation
         document = await ctx.runQuery(api.documents.secureAccessQueries.getDocumentWithoutAuth, {
-          documentId,
+          documentId: documentId as any,
         });
       } catch (error) {
         // Invalid document ID format or document doesn't exist
         await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
-          documentId,
+          documentId: documentId || "document-not-found-id",
           accessStatus: "DocumentNotFound",
           accessMethod: "signed_url",
           errorMessage: `Invalid document ID or document not found: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -429,7 +431,7 @@ http.route({
       if (!document || !document.storageFileId) {
         // Log document not found
         await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
-          documentId,
+          documentId: documentId || "document-deleted-id",
           accessStatus: "DocumentNotFound",
           accessMethod: "signed_url",
           errorMessage: "Document does not exist or has been deleted",
@@ -443,7 +445,7 @@ http.route({
 
       // Get all users who have access to this document
       const authorizedUserIds = await ctx.runQuery(api.documents.secureAccessQueries.getUsersWithDocumentAccess, {
-        documentId,
+        documentId: documentId as any,
       });
 
       // Import HMAC verification function dynamically
@@ -473,7 +475,7 @@ http.route({
       if (!isValidSignature) {
         // Log invalid signature attempt
         await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
-          documentId,
+          documentId: documentId || "invalid-signature-document-id",
           accessStatus: "InvalidSignature",
           accessMethod: "signed_url",
           errorMessage: `Invalid signature after ${verificationAttempts} verification attempts`,
@@ -507,7 +509,7 @@ http.route({
       let documentType: string | undefined;
       try {
         const docTypeInfo = await ctx.runQuery(api.documents.documentQueries.getDocumentType, {
-          documentId,
+          documentId: documentId as any,
         });
         documentType = docTypeInfo?.name;
       } catch (e) {
@@ -579,7 +581,7 @@ http.route({
 
       // Log successful document access
       await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
-        documentId,
+        documentId: documentId || "success-document-id",
         applicationId: document.applicationId,
         userId: authenticatedUserId as any,
         userEmail,
@@ -605,7 +607,7 @@ http.route({
       // Log unexpected server error
       try {
         await ctx.runMutation(internal.documents.documentAccessLogs.logDocumentAccess, {
-          documentId: documentId || "unknown" as any,
+          documentId: documentId || "unknown-error-document-id",
           accessStatus: "InvalidRequest",
           accessMethod: "signed_url",
           errorMessage: error instanceof Error ? error.message : "Unknown server error",

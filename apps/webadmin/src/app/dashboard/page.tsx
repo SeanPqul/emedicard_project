@@ -3,6 +3,7 @@
 
 import DashboardActivityLog from '@/components/DashboardActivityLog';
 import ErrorMessage from "@/components/ErrorMessage";
+import LoadingScreen from '@/components/shared/LoadingScreen';
 import Navbar from '@/components/shared/Navbar';
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
@@ -67,7 +68,7 @@ export default function DashboardPage() {
     }
   );
 
-  const filteredApplications = (applications ?? []).filter(app => 
+  const filteredApplications = (applications ?? []).filter((app: ApplicationWithDetails) => 
     app.userName.toLowerCase().includes(search.toLowerCase()) ||
     app.jobCategoryName.toLowerCase().includes(search.toLowerCase()) ||
     app.applicationStatus.toLowerCase().includes(search.toLowerCase())
@@ -86,7 +87,7 @@ export default function DashboardPage() {
 
   // --- 5. LOADING & GUARD CLAUSES ---
   if (!isClerkLoaded || adminPrivileges === undefined) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
+    return <LoadingScreen title="Loading Dashboard" message="Please wait while we fetch your dashboard data..." />;
   }
   if (!user) return <RedirectToSignIn />;
   if (!adminPrivileges || !adminPrivileges.isAdmin) {
@@ -171,6 +172,10 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            {/* Rejection History Link */}
+            <Link href="/dashboard/rejection-history" className="flex items-center justify-center bg-red-100 text-red-900 px-4 py-2 rounded-lg font-medium hover:bg-red-200 transition-colors">
+              Rejection History
+            </Link>
             {/* Attendance Tracker Link */}
             {managedJobCategories?.some(cat => cat.name === "Food Handler") && (
                 <Link href="/dashboard/attendance-tracker" className="flex items-center justify-center bg-emerald-100 text-emerald-900 px-4 py-2 rounded-lg font-medium hover:bg-emerald-500 transition-colors">Track Attendance</Link>
@@ -208,7 +213,7 @@ export default function DashboardPage() {
                 {applications && filteredApplications.length === 0 && (
                   <tr><td colSpan={5} className="text-center py-8 text-gray-400">No applicants found.</td></tr>
                 )}
-                {applications && filteredApplications.map((app) => (
+                {applications && filteredApplications.map((app: ApplicationWithDetails) => (
                   <tr key={app._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap"><div className="font-medium text-gray-900">{app.userName}</div></td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">{app.jobCategoryName}</td>

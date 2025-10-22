@@ -186,7 +186,12 @@ export const styles = StyleSheet.create({
   notificationFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: verticalScale(2),
+    justifyContent: 'space-between',
+    marginTop: verticalScale(4),
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   timeIcon: {
     marginRight: scale(theme.spacing.xs),
@@ -196,5 +201,12 @@ export const styles = StyleSheet.create({
     lineHeight: moderateScale(15),
     color: '#9CA3AF',
     fontWeight: '500',
+  },
+  notificationTimestamp: {
+    fontSize: moderateScale(10),
+    lineHeight: moderateScale(14),
+    color: '#9CA3AF',
+    fontWeight: '400',
+    fontStyle: 'italic',
   },
 });

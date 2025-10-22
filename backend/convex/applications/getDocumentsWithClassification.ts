@@ -18,17 +18,17 @@ type DocumentChecklistItem = {
 // Define the expected structure of a checklist item with classification data
 type ChecklistItemWithClassification = DocumentChecklistItem;
 
+type GetDocumentsResult = {
+  applicantName: string;
+  jobCategoryName: string;
+  checklist: ChecklistItemWithClassification[];
+} | null;
+
 export const get = action({
     args: { id: v.id("applications") },
-    handler: async (
-      ctx,
-      args
-    ): Promise<{
-      applicantName: string;
-      jobCategoryName: string;
-      checklist: ChecklistItemWithClassification[];
-    } | null> => {
+    handler: async (ctx, args): Promise<GetDocumentsResult> => {
       // 1. Call the existing query to get application data and document checklist
+      // @ts-ignore - Type instantiation depth limitation
       const applicationData = await ctx.runQuery(api.applications.getWithDocuments.get, { id: args.id });
 
       if (!applicationData) {

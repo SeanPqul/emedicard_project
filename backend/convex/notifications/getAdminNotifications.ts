@@ -5,12 +5,11 @@ import { query } from "../_generated/server";
 
 export const getAdminNotifications = query({
   args: {
-    adminId: v.id("users"),
     notificationType: v.optional(v.string()), // Optional filter for notification type
   },
   handler: async (
     ctx: QueryCtx,
-    args: { adminId: Id<"users">; notificationType?: string }
+    args: { notificationType?: string }
   ) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -22,13 +21,13 @@ export const getAdminNotifications = query({
       .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (!admin || admin._id !== args.adminId) {
-      throw new Error("Not authorized to view these notifications.");
+    if (!admin) {
+      throw new Error("User not found");
     }
 
     let notificationsQuery = ctx.db
       .query("notifications")
-      .withIndex("by_user", (q: any) => q.eq("userId", args.adminId));
+      .withIndex("by_user", (q: any) => q.eq("userId", admin._id));
 
     if (args.notificationType) {
       notificationsQuery = notificationsQuery.filter((q) =>

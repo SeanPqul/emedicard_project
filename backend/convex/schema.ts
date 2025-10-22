@@ -319,6 +319,13 @@ export default defineSchema({
     replacedAt: v.optional(v.float64()),
     attemptNumber: v.float64(), // 1st, 2nd, 3rd attempt
     
+    // Notification Tracking
+    notificationSent: v.optional(v.boolean()), // Whether applicant has been notified (default: true for old records)
+    notificationSentAt: v.optional(v.float64()), // When notification was sent
+    
+    // Notification Read Tracking (for admins)
+    adminReadBy: v.optional(v.array(v.id("users"))), // List of admin IDs who have read this
+    
     // Audit Fields
     ipAddress: v.optional(v.string()),
     userAgent: v.optional(v.string()),
@@ -334,7 +341,7 @@ export default defineSchema({
   // Document Access Audit Logs - tracks all document access attempts
   documentAccessLogs: defineTable({
     // Document and Application References
-    documentId: v.union(v.id("documentUploads"), v.string()), // Can be ID or string for invalid requests
+    documentId: v.string(), // Can be ID or string for invalid requests
     applicationId: v.optional(v.id("applications")),
     
     // User Information

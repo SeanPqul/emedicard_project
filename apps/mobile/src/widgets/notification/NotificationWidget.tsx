@@ -133,6 +133,16 @@ export function NotificationWidget({
     const color = NOTIFICATION_COLORS[notification.type] || '#6B7280';
     const title = NOTIFICATION_TITLES[notification.type] || notification.type;
     
+    // Format absolute timestamp
+    const timestamp = new Date(notification._creationTime).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    
     return (
       <TouchableOpacity 
         key={notification._id}
@@ -178,16 +188,21 @@ export function NotificationWidget({
             {notification.message}
           </Text>
           
-          {/* Time at bottom with icon */}
+          {/* Time at bottom with icon and timestamp */}
           <View style={styles.notificationFooter}>
-            <Ionicons 
-              name="time-outline" 
-              size={moderateScale(12)} 
-              color="#9CA3AF" 
-              style={styles.timeIcon}
-            />
-            <Text style={styles.notificationTime}>
-              {getRelativeTime(notification._creationTime)}
+            <View style={styles.timeContainer}>
+              <Ionicons 
+                name="time-outline" 
+                size={moderateScale(12)} 
+                color="#9CA3AF" 
+                style={styles.timeIcon}
+              />
+              <Text style={styles.notificationTime}>
+                {getRelativeTime(notification._creationTime)}
+              </Text>
+            </View>
+            <Text style={styles.notificationTimestamp}>
+              {timestamp}
             </Text>
           </View>
         </View>

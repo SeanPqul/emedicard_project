@@ -45,7 +45,8 @@ export default function PaymentValidationPage() {
       applicationId,
       newStatus: 'Complete',
     });
-    router.push(`/dashboard/${applicationId}/orientation-scheduler`);
+    // Redirect back to dashboard - applicant will book their own orientation slot from mobile app
+    router.push('/dashboard');
   };
 
   const handleReject = async () => {
