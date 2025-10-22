@@ -70,7 +70,7 @@ interface NotificationWidgetProps {
   onNotificationPress: (notification: NotificationItem) => void;
   getRelativeTime: (timestamp: number) => string;
   getDateLabel: (dateString: string) => string;
-  getFilteredNotifications: () => NotificationItem[];
+  getFilteredNotifications: (category?: NotificationCategory) => NotificationItem[];
 }
 
 export function NotificationWidget({
@@ -103,7 +103,7 @@ export function NotificationWidget({
               ? notificationsData?.length || 0
               : category === 'Unread'
               ? notificationsData?.filter(n => !n.read).length || 0
-              : getFilteredNotifications().length;
+              : getFilteredNotifications(category).length;
               
             return (
               <TouchableOpacity

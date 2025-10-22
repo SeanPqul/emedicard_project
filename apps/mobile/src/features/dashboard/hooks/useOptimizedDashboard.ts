@@ -123,7 +123,7 @@ export const useOptimizedDashboard = () => {
     if (!effectiveDashboardData) return activities;
     
     // Add from pre-filtered notifications
-    effectiveDashboardData.notifications?.forEach(notification => {
+    effectiveDashboardData.notifications?.forEach((notification: any) => {
       activities.push({
         id: notification._id,
         userId: user?.id || '', // userId is not part of notification object, use current user's id
@@ -136,7 +136,7 @@ export const useOptimizedDashboard = () => {
     });
 
     // Add from applications (pre-limited on server)
-    effectiveDashboardData.applications?.slice(0, 2).forEach(application => {
+    effectiveDashboardData.applications?.slice(0, 2).forEach((application: any) => {
       activities.push({
         id: application._id,
         userId: user?.id || '',
@@ -148,7 +148,7 @@ export const useOptimizedDashboard = () => {
       });
     });
 
-    effectiveDashboardData.payments?.forEach(payment => {
+    effectiveDashboardData.payments?.forEach((payment: any) => {
       if (payment) {
         activities.push({
           id: payment._id,

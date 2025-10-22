@@ -75,7 +75,7 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
         icon: 'restaurant',
         title: 'Food Safety Training',
         description: 'Complete required food handler orientation',
-        route: '/(screens)/(shared)/orientation',
+        route: '/(screens)/(shared)/orientation/food-safety-info',
         gradient: [theme.colors.orange[500], theme.colors.orange[600]],
         badge: { text: 'Required', type: 'warning' },
       });
@@ -95,7 +95,7 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
       icon: 'help-circle',
       title: 'Help Center',
       description: 'Get answers to frequently asked questions',
-      route: '/(tabs)/notification',
+      route: '/(screens)/(shared)/help-center',
       gradient: [theme.colors.indigo[500], theme.colors.indigo[600]],
     });
     

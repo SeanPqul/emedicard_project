@@ -70,12 +70,13 @@ export function useNotificationList() {
   };
 
   // Utility functions
-  const getFilteredNotifications = () => {
+  const getFilteredNotifications = (category?: NotificationCategory) => {
     if (!notificationsData) return [];
 
+    const filterCategory = category || selectedCategory;
     let filtered = notificationsData;
 
-    switch (selectedCategory) {
+    switch (filterCategory) {
       case 'Unread':
         filtered = filtered.filter(n => !n.read);
         break;
@@ -85,11 +86,15 @@ export function useNotificationList() {
           n.type === 'FormApproved' || 
           n.type === 'DocumentRejection' ||
           n.type === 'ApplicationSubmitted' ||
+          n.type === 'ApplicationApproved' ||
           n.type === 'DocumentApproved'
         );
         break;
       case 'Payments':
-        filtered = filtered.filter(n => n.type === 'PaymentReceived');
+        filtered = filtered.filter(n => 
+          n.type === 'PaymentReceived' || 
+          n.type === 'Payment'
+        );
         break;
       case 'Orientations':
         filtered = filtered.filter(n => n.type === 'OrientationScheduled');
