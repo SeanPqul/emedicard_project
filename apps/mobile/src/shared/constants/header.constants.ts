@@ -22,7 +22,12 @@ export const HEADER_CONSTANTS = {
   // Typography
   TITLE_FONT_SIZE: moderateScale(22),
   TITLE_LINE_HEIGHT: moderateScale(28),
+  TITLE_FONT_WEIGHT: '700' as const,
   SUBTITLE_FONT_SIZE: moderateScale(13),
+  SUBTITLE_OPACITY: 0.85,
+  
+  // Border Radius
+  BORDER_RADIUS: 20,
   
   // Badge
   BADGE_MIN_WIDTH: moderateScale(18),

@@ -1,19 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@shared/styles/theme';
-import { StatCard } from '@features/dashboard/components';
 import { LoadingSpinner } from '@shared/components';
 import { useRoleBasedNavigation } from '@features/navigation';
 import { useRouter } from 'expo-router';
-import { User } from '@entities/user/model/types';
 import { useUsers } from '@features/profile';
+import { useInspectorDashboard } from '@features/inspector/hooks';
+import { InspectorStats, CurrentSessionCard, SessionCard } from '@features/inspector/components';
+import { HEADER_CONSTANTS } from '@shared/constants/header.constants';
+import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { styles } from '@shared/styles/screens/inspector-dashboard';
 
 export function InspectorDashboardScreen() {
-  // Use new hooks pattern
-  const { data: { currentUser: userProfile }, isLoading: loading } = useUsers();
+  const { data: { currentUser: userProfile }, isLoading: userLoading } = useUsers();
   const { canAccessScreen } = useRoleBasedNavigation(userProfile?.role);
+  const { data: dashboardData, isLoading: dashboardLoading } = useInspectorDashboard();
   const router = useRouter();
 
   React.useEffect(() => {
@@ -22,7 +25,7 @@ export function InspectorDashboardScreen() {
     }
   }, [userProfile, canAccessScreen, router]);
 
-  if (loading) {
+  if (userLoading || dashboardLoading) {
     return (
       <LoadingSpinner 
         visible={true} 
@@ -48,59 +51,95 @@ export function InspectorDashboardScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Inspector Dashboard</Text>
-          <Text style={styles.subtitle}>Review & Approve Applications</Text>
-        </View>
-
-        <View style={styles.statsContainer}>
-          <StatCard
-            icon="clipboard"
-            title="Pending Review"
-            value="42"
-            subtitle="Applications"
-            color={theme.colors.semantic.warning}
-            onPress={() => router.push('/(screens)/(inspector)/review-applications')}
-          />
-          
-          <StatCard
-            icon="list"
-            title="Queue"
-            value="15"
-            subtitle="Awaiting inspection"
-            color={theme.colors.blue[500]}
-            onPress={() => router.push('/(screens)/(inspector)/inspection-queue')}
-          />
-          
-          <StatCard
-            icon="checkmark-circle"
-            title="Completed"
-            value="128"
-            subtitle="This week"
-            color={theme.colors.semantic.success}
-            onPress={() => {}}
-          />
-          
-          <StatCard
-            icon="scan"
-            title="Scanner"
-            value="Ready"
-            subtitle="QR Code scanner"
-            color={theme.colors.green[500]}
-            onPress={() => router.push('/(screens)/(inspector)/scanner')}
-          />
-        </View>
-
-        <View style={styles.recentActivity}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <View style={styles.activityCard}>
-            <Text style={styles.placeholderText}>
-              Recent inspection activities will be displayed here
-            </Text>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Green Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerTitleContainer}>
+            <Ionicons
+              name="clipboard"
+              size={HEADER_CONSTANTS.ICON_SIZE}
+              color={HEADER_CONSTANTS.WHITE}
+            />
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.title}>Inspector Dashboard</Text>
+              <Text style={styles.subtitle}>Food Safety Orientation Tracker</Text>
+            </View>
           </View>
+          <TouchableOpacity
+            style={styles.scanHistoryButton}
+            onPress={() => router.push('/(screens)/(inspector)/scan-history')}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="document-text-outline"
+              size={HEADER_CONSTANTS.ACTION_BUTTON_ICON_SIZE}
+              color={HEADER_CONSTANTS.WHITE}
+            />
+          </TouchableOpacity>
         </View>
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Today's Stats */}
+        {dashboardData && <InspectorStats stats={dashboardData.stats} />}
+
+        {/* Current Session */}
+        {dashboardData && (
+          <CurrentSessionCard session={dashboardData.currentSession} />
+        )}
+
+        {/* Upcoming Sessions */}
+        {dashboardData && dashboardData.upcomingSessions.length > 0 && (
+          <View style={styles.upcomingSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>UPCOMING SESSIONS TODAY</Text>
+              <TouchableOpacity
+                onPress={() => router.push('/(screens)/(inspector)/sessions')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.viewAllText}>View All</Text>
+              </TouchableOpacity>
+            </View>
+            {dashboardData.upcomingSessions.slice(0, 3).map((session) => (
+              <SessionCard key={session._id} session={session} />
+            ))}
+          </View>
+        )}
+
+        {/* Quick Actions */}
+        <View style={styles.quickActions}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push('/(screens)/(inspector)/sessions')}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="calendar-outline"
+              size={moderateScale(20)}
+              color={theme.colors.primary[500]}
+            />
+            <Text style={styles.actionButtonText}>View All Sessions</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push('/(screens)/(inspector)/orientation-attendance')}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="qr-code-outline"
+              size={moderateScale(20)}
+              color={theme.colors.primary[500]}
+            />
+            <Text style={styles.actionButtonText}>Scan QR Code</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );

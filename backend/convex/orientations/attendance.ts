@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
+import { Doc } from "../_generated/dataModel";
 import { AdminRole } from "../users/roles";
 
 /**
@@ -41,10 +42,26 @@ export const checkIn = mutation({
       throw new Error(`Cannot check in. Orientation status is: ${orientation.orientationStatus}`);
     }
 
+    // Get current inspector user
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required");
+    }
+
+    const inspector = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!inspector) {
+      throw new Error("Inspector user not found");
+    }
+
     // Perform check-in
     const checkInTime = Date.now();
     await ctx.db.patch(orientation._id, {
       checkInTime,
+      checkedInBy: inspector._id,
     });
 
     // Get application and user for notification
@@ -107,10 +124,26 @@ export const checkOut = mutation({
       throw new Error("Cannot check out without checking in first");
     }
 
+    // Get current inspector user
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required");
+    }
+
+    const inspector = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!inspector) {
+      throw new Error("Inspector user not found");
+    }
+
     // Perform check-out
     const checkOutTime = Date.now();
     await ctx.db.patch(orientation._id, {
       checkOutTime,
+      checkedOutBy: inspector._id,
       orientationStatus: "Completed",
     });
 
@@ -481,5 +514,142 @@ export const finalizeSessionAttendance = mutation({
       missedCount,
       message: `Session finalized. ${completedCount} completed, ${missedCount} missed.`,
     };
+  },
+});
+
+/**
+ * Get inspector's scan history with filtering options
+ * Returns all check-in and check-out events performed by the inspector
+ */
+export const getInspectorScanHistory = query({
+  args: {
+    startDate: v.optional(v.float64()),
+    endDate: v.optional(v.float64()),
+    scanType: v.optional(v.union(v.literal("check-in"), v.literal("check-out"))),
+    limit: v.optional(v.float64()),
+  },
+  handler: async (ctx, args) => {
+    // Verify admin/inspector role
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isAdmin) {
+      throw new Error("Unauthorized");
+    }
+
+    // Get current inspector user
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required");
+    }
+
+    const inspector = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!inspector) {
+      throw new Error("Inspector user not found");
+    }
+
+    // Collect both check-ins and check-outs
+    const scanEvents: Array<{
+      scanType: "check-in" | "check-out";
+      timestamp: number;
+      orientation: any;
+    }> = [];
+
+    // Get check-ins performed by this inspector
+    if (!args.scanType || args.scanType === "check-in") {
+      const checkIns = await ctx.db
+        .query("orientations")
+        .withIndex("by_checked_in_by", (q) => q.eq("checkedInBy", inspector._id))
+        .collect();
+
+      for (const orientation of checkIns) {
+        if (orientation.checkInTime) {
+          // Apply date filter
+          if (args.startDate && orientation.checkInTime < args.startDate) continue;
+          if (args.endDate && orientation.checkInTime > args.endDate) continue;
+
+          scanEvents.push({
+            scanType: "check-in",
+            timestamp: orientation.checkInTime,
+            orientation,
+          });
+        }
+      }
+    }
+
+    // Get check-outs performed by this inspector
+    if (!args.scanType || args.scanType === "check-out") {
+      const checkOuts = await ctx.db
+        .query("orientations")
+        .withIndex("by_checked_out_by", (q) => q.eq("checkedOutBy", inspector._id))
+        .collect();
+
+      for (const orientation of checkOuts) {
+        if (orientation.checkOutTime) {
+          // Apply date filter
+          if (args.startDate && orientation.checkOutTime < args.startDate) continue;
+          if (args.endDate && orientation.checkOutTime > args.endDate) continue;
+
+          scanEvents.push({
+            scanType: "check-out",
+            timestamp: orientation.checkOutTime,
+            orientation,
+          });
+        }
+      }
+    }
+
+    // Sort by timestamp descending (newest first)
+    scanEvents.sort((a, b) => b.timestamp - a.timestamp);
+
+    // Apply limit if specified
+    const limitedEvents = args.limit
+      ? scanEvents.slice(0, args.limit)
+      : scanEvents;
+
+    // Enrich with application and user data
+    const enrichedEvents = await Promise.all(
+      limitedEvents.map(async (event) => {
+        try {
+          const applicationDoc = await ctx.db.get(event.orientation.applicationId);
+          if (!applicationDoc) return null;
+
+          // Type guard to ensure it's an application document
+          if (!('userId' in applicationDoc) || !applicationDoc.userId) return null;
+
+          // Type assertion after validation
+          const application = applicationDoc as Doc<"applications">;
+
+          const userDoc = await ctx.db.get(application.userId);
+          if (!userDoc) return null;
+
+          // Type guard to ensure it's a user document
+          if (!('fullname' in userDoc)) return null;
+
+          // Type assertion after validation
+          const user = userDoc as Doc<"users">;
+
+          return {
+            scanType: event.scanType,
+            timestamp: event.timestamp,
+            attendeeName: user.fullname,
+            applicationId: event.orientation.applicationId,
+            orientationDate: event.orientation.orientationDate,
+            timeSlot: event.orientation.timeSlot,
+            venue: event.orientation.orientationVenue,
+            checkInTime: event.orientation.checkInTime,
+            checkOutTime: event.orientation.checkOutTime,
+            orientationStatus: event.orientation.orientationStatus,
+          };
+        } catch (error) {
+          // Handle case where application or user might not exist
+          return null;
+        }
+      })
+    );
+
+    return enrichedEvents.filter((e) => e !== null);
   },
 });

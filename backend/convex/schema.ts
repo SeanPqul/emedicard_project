@@ -119,6 +119,8 @@ export default defineSchema({
     applicationId: v.id("applications"),
     checkInTime: v.optional(v.float64()),
     checkOutTime: v.optional(v.float64()),
+    checkedInBy: v.optional(v.id("users")), // Inspector who performed check-in
+    checkedOutBy: v.optional(v.id("users")), // Inspector who performed check-out
     orientationDate: v.optional(v.float64()), // Timestamp for the orientation date
     timeSlot: v.optional(v.string()), // e.g., "9:00 AM - 11:00 AM"
     assignedInspectorId: v.optional(v.id("users")), // Reference to the assigned inspector
@@ -131,7 +133,9 @@ export default defineSchema({
     qrCodeUrl: v.string(),
     scheduledAt: v.float64(),
   }).index("by_application", ["applicationId"])
-    .index("by_date_timeslot_venue", ["orientationDate", "timeSlot", "orientationVenue"]),
+    .index("by_date_timeslot_venue", ["orientationDate", "timeSlot", "orientationVenue"])
+    .index("by_checked_in_by", ["checkedInBy", "checkInTime"])
+    .index("by_checked_out_by", ["checkedOutBy", "checkOutTime"]),
 
   // Available orientation schedules (time slots for booking)
   orientationSchedules: defineTable({
