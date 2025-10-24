@@ -44,8 +44,8 @@ export const finalize = mutation({
 
     // 3. THIS IS THE FIX: Determine the next status in the workflow.
     const nextApplicationStatus = args.newStatus === "Approved" 
-      ? "For Payment Validation" // If approved, move to payment.
-      : "Rejected";             // If rejected, the process stops here.
+      ? "Payment Validation" // If approved, move to payment validation.
+      : "Rejected";           // If rejected, the process stops here.
 
     // 4. Update the application's overall status.
     await ctx.db.patch(args.applicationId, {

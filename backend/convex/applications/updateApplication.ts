@@ -13,18 +13,16 @@ export const updateApplicationMutation = mutation({
     lastName: v.optional(v.string()),
     gender: v.optional(v.union(v.literal("Male"), v.literal("Female"), v.literal("Other"))),
     applicationStatus: v.optional(v.union(
-      v.literal("Draft"),
-      v.literal("Pending Payment"),
       v.literal("Submitted"),
-      v.literal("Documents Need Revision"),
-      v.literal("Under Review"),
-      v.literal("For Payment Validation"),
-      v.literal("For Document Verification"),
       v.literal("For Orientation"),
-      v.literal("Pending"),
-      v.literal("Cancelled"),
+      v.literal("For Document Verification"),
+      v.literal("Payment Validation"),
+      v.literal("Scheduled"),
+      v.literal("Attendance Validation"),
+      v.literal("Under Review"),
       v.literal("Approved"),
-      v.literal("Rejected")
+      v.literal("Rejected"),
+      v.literal("Expired")
     )),
   },
   handler: async (ctx, args) => {

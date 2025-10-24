@@ -29,7 +29,7 @@ export default defineSchema({
 
   applications: defineTable({
     adminRemarks: v.optional(v.string()),
-    applicationStatus: v.string(),
+    applicationStatus: v.string(), // Keep as string for backward compatibility with existing data
     applicationType: v.union(
       v.literal("New"),
       v.literal("Renew")
@@ -126,8 +126,10 @@ export default defineSchema({
     orientationStatus: v.union(
       v.literal("Scheduled"),
       v.literal("Completed"),
-      v.literal("Missed")
+      v.literal("Missed"),
+      v.literal("Excused")
     ),
+    inspectorNotes: v.optional(v.string()), // Notes from inspector (e.g., reason for excused/pending)
     qrCodeUrl: v.string(),
     scheduledAt: v.float64(),
   }).index("by_application", ["applicationId"])

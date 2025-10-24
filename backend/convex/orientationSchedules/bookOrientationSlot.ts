@@ -114,6 +114,22 @@ export const bookOrientationSlotMutation = mutation({
       });
     }
 
+    // Update application status to "Scheduled" when orientation is booked
+    await ctx.db.patch(applicationId, {
+      applicationStatus: "Scheduled",
+      updatedAt: Date.now(),
+    });
+
+    // Send notification to user
+    await ctx.db.insert("notifications", {
+      userId: application.userId,
+      applicationId,
+      title: "Orientation Scheduled",
+      message: `Your food safety orientation has been scheduled for ${new Date(schedule.date).toLocaleDateString()} at ${schedule.time}. Venue: ${schedule.venue.name}`,
+      notificationType: "Orientation",
+      isRead: false,
+    });
+
     // Update available slots atomically
     const newAvailableSlots = schedule.availableSlots - 1;
     await ctx.db.patch(scheduleId, {

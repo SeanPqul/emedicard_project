@@ -112,12 +112,13 @@ export const uploadDocumentsMutation = mutation({
         .collect();
 
       const allDocumentsReviewable = allDocuments.every(
-        (doc) => doc.reviewStatus === "Pending" || doc.reviewStatus === "Approved"
+        (doc) => doc.reviewStatus === "Pending" || doc.reviewStatus === "Verified"
       );
 
-      if (allDocumentsReviewable && application.applicationStatus === "Documents Need Revision") {
+      // If all documents are now reviewable, update status
+      if (allDocumentsReviewable) {
         await ctx.db.patch(args.applicationId, {
-          applicationStatus: "Pending Review",
+          applicationStatus: "Under Review",
           updatedAt: Date.now(),
         });
       }

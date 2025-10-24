@@ -30,15 +30,16 @@ export const validate = mutation({
       updatedAt: Date.now(),
     });
 
-    // 2. Check if orientation is required for this job category
+    // 2. Check if orientation is required for this job category (Yellow Card = Food Handler)
     const jobCategory = await ctx.db.get(application.jobCategoryId);
-    const requiresOrientation = jobCategory?.requireOrientation === 'Yes' || jobCategory?.requireOrientation === true;
+    const requiresOrientation = jobCategory?.requireOrientation === true || jobCategory?.requireOrientation === "true";
 
     // 3. Update the overall application status to move it to the next step
-    let nextApplicationStatus: string;
+    let nextApplicationStatus: "For Orientation" | "For Document Verification" | "Rejected";
     if (args.newStatus === "Complete") {
       // If payment is complete, check if orientation is required
-      nextApplicationStatus = requiresOrientation ? "For Orientation" : "Under Review";
+      // Yellow Card → For Orientation, Others → For Document Verification
+      nextApplicationStatus = requiresOrientation ? "For Orientation" : "For Document Verification";
     } else {
       // Payment failed
       nextApplicationStatus = "Rejected";

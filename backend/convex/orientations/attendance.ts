@@ -114,36 +114,23 @@ export const checkOut = mutation({
       orientationStatus: "Completed",
     });
 
-    // Update application and mark orientation as completed
+    // Update application status to "Attendance Validation" after check-out
     const application = await ctx.db.get(args.applicationId);
     if (application) {
-      // Check if all documents are verified
-      const documents = await ctx.db
-        .query("documentUploads")
-        .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
-        .collect();
-      
-      const allDocumentsVerified = documents.length > 0 && documents.every(doc => doc.reviewStatus === "Verified");
-      
-      // Only progress to "Under Review" if documents are verified
-      // Otherwise keep current status but mark orientation as complete
-      const newStatus = allDocumentsVerified ? "Under Review" : application.applicationStatus;
-      
+      // After inspector completes check-in + check-out, set status to "Attendance Validation"
+      // The Yellow Card Admin will then finalize attendance validation
       await ctx.db.patch(args.applicationId, {
-        applicationStatus: newStatus,
+        applicationStatus: "Attendance Validation",
         orientationCompleted: true,
+        updatedAt: Date.now(),
       });
 
-      // Send appropriate notification based on status
-      const message = allDocumentsVerified 
-        ? "You have successfully completed your food safety orientation. Your application will now be reviewed."
-        : "You have successfully completed your food safety orientation. Please ensure all documents are submitted and verified.";
-      
+      // Notify user that orientation is completed and awaiting validation
       await ctx.db.insert("notifications", {
         userId: application.userId,
         applicationId: args.applicationId,
         title: "Orientation Completed!",
-        message,
+        message: "You have successfully completed your food safety orientation. Your attendance is now being validated by the admin.",
         notificationType: "Orientation",
         isRead: false,
       });
@@ -258,11 +245,21 @@ export const getOrientationSchedulesForDate = query({
       throw new Error("Unauthorized: Admin access required");
     }
 
+    console.log('🔍 Backend Query:', {
+      receivedTimestamp: args.selectedDate,
+      receivedDate: new Date(args.selectedDate).toISOString(),
+    });
+
     // Get all orientation schedules for the selected date
     const schedules = await ctx.db
       .query("orientationSchedules")
       .withIndex("by_date", (q) => q.eq("date", args.selectedDate))
       .collect();
+
+    console.log('📅 Schedules Found:', schedules.length);
+    if (schedules.length > 0) {
+      console.log('First schedule date:', new Date(schedules[0].date).toISOString());
+    }
 
     // For each schedule, get the attendees and their attendance status
     const schedulesWithAttendees = await Promise.all(
@@ -296,12 +293,14 @@ export const getOrientationSchedulesForDate = query({
               orientationId: orientation._id,
               applicationId: orientation.applicationId,
               fullname: user.fullname,
+              gender: user.gender || application.gender || "N/A",
               jobCategory: jobCategory?.name || "Unknown",
               jobCategoryColor: jobCategory?.colorCode || "#gray",
               applicationStatus: application.applicationStatus,
               orientationStatus: orientation.orientationStatus,
               checkInTime: orientation.checkInTime,
               checkOutTime: orientation.checkOutTime,
+              inspectorNotes: orientation.inspectorNotes,
               qrCodeUrl: orientation.qrCodeUrl,
             };
           })
@@ -341,6 +340,70 @@ export const getOrientationSchedulesForDate = query({
     );
 
     return schedulesWithAttendees;
+  },
+});
+
+/**
+ * Update inspector notes and status for an orientation
+ * Allows inspectors to mark applicants as excused with reasons
+ */
+export const updateInspectorNotes = mutation({
+  args: {
+    orientationId: v.id("orientations"),
+    notes: v.string(),
+    status: v.optional(v.union(
+      v.literal("Scheduled"),
+      v.literal("Completed"),
+      v.literal("Missed"),
+      v.literal("Excused")
+    )),
+  },
+  handler: async (ctx, args) => {
+    // Verify admin/inspector role
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isAdmin) {
+      throw new Error("Unauthorized: Admin/Inspector access required");
+    }
+
+    const orientation = await ctx.db.get(args.orientationId);
+    if (!orientation) {
+      throw new Error("Orientation not found");
+    }
+
+    // Update orientation with inspector notes and optionally status
+    const updateData: any = {
+      inspectorNotes: args.notes,
+    };
+
+    if (args.status) {
+      updateData.orientationStatus = args.status;
+    }
+
+    await ctx.db.patch(args.orientationId, updateData);
+
+    // Log the activity
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity) {
+      const adminUser = await ctx.db
+        .query("users")
+        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+        .unique();
+
+      if (adminUser) {
+        await ctx.db.insert("adminActivityLogs", {
+          adminId: adminUser._id,
+          activityType: "orientation_notes_update",
+          details: `Updated orientation notes: ${args.notes}${args.status ? ` | Status: ${args.status}` : ""}`,
+          timestamp: Date.now(),
+          applicationId: orientation.applicationId,
+        });
+      }
+    }
+
+    return {
+      success: true,
+      message: "Inspector notes updated successfully",
+    };
   },
 });
 
@@ -388,6 +451,7 @@ export const finalizeSessionAttendance = mutation({
 
     let completedCount = 0;
     let missedCount = 0;
+    let excusedCount = 0;
 
     // Process each orientation
     for (const orientation of orientations) {
@@ -400,25 +464,9 @@ export const finalizeSessionAttendance = mutation({
         orientation.checkOutTime &&
         orientation.orientationStatus === "Completed"
       ) {
-        // Check if all documents are verified
-        const documents = await ctx.db
-          .query("documentUploads")
-          .withIndex("by_application", (q) =>
-            q.eq("applicationId", orientation.applicationId)
-          )
-          .collect();
-
-        const allDocumentsVerified =
-          documents.length > 0 &&
-          documents.every((doc) => doc.reviewStatus === "Verified");
-
-        // Update application status based on document verification
-        const newStatus = allDocumentsVerified
-          ? "Under Review"
-          : application.applicationStatus;
-
+        // Update application status to "Approved" (Ready for Health Card)
         await ctx.db.patch(orientation.applicationId, {
-          applicationStatus: newStatus,
+          applicationStatus: "Approved",
           orientationCompleted: true,
           updatedAt: Date.now(),
           lastUpdatedBy: adminUser._id,
@@ -430,34 +478,45 @@ export const finalizeSessionAttendance = mutation({
           await ctx.db.insert("notifications", {
             userId: user._id,
             applicationId: orientation.applicationId,
-            title: "Orientation Attendance Validated",
-            message: allDocumentsVerified
-              ? "Your orientation attendance has been validated. Your application is now under review."
-              : "Your orientation attendance has been validated. Please ensure all documents are submitted and verified.",
+            title: "Application Approved!",
+            message: "Your attendance has been validated. Your application is now approved and your health card will be issued soon.",
             notificationType: "Orientation",
             isRead: false,
           });
         }
 
         completedCount++;
+      } else if (orientation.orientationStatus === "Excused") {
+        // Excused applicants - keep their current status for manual handling
+        // The admin has already marked them as excused with notes
+        excusedCount++;
       } else if (
         !orientation.checkInTime ||
-        !orientation.checkOutTime
+        !orientation.checkOutTime ||
+        orientation.orientationStatus === "Missed"
       ) {
-        // Mark as missed if not fully attended
+        // Mark as missed and reject application (send back to "For Orientation")
         await ctx.db.patch(orientation._id, {
           orientationStatus: "Missed",
         });
 
-        // Notify applicant
+        // Update application status back to "For Orientation" so they can rebook
+        await ctx.db.patch(orientation.applicationId, {
+          applicationStatus: "For Orientation",
+          orientationCompleted: false,
+          updatedAt: Date.now(),
+          lastUpdatedBy: adminUser._id,
+        });
+
+        // Notify applicant that they need to reschedule
         const user = await ctx.db.get(application.userId);
         if (user) {
           await ctx.db.insert("notifications", {
             userId: user._id,
             applicationId: orientation.applicationId,
-            title: "Orientation Attendance: Missed",
+            title: "Orientation Not Attended",
             message:
-              "You did not complete the orientation session. Please reschedule your orientation.",
+              "Your application has been returned because you did not complete the food safety orientation. Please schedule a new orientation session to continue.",
             notificationType: "Orientation",
             isRead: false,
           });
@@ -471,7 +530,7 @@ export const finalizeSessionAttendance = mutation({
     await ctx.db.insert("adminActivityLogs", {
       adminId: adminUser._id,
       activityType: "orientation_finalization",
-      details: `Finalized orientation session on ${new Date(args.selectedDate).toLocaleDateString()} at ${args.timeSlot} (${args.venue}). Completed: ${completedCount}, Missed: ${missedCount}`,
+      details: `Finalized orientation session on ${new Date(args.selectedDate).toLocaleDateString()} at ${args.timeSlot} (${args.venue}). Completed: ${completedCount}, Missed: ${missedCount}, Excused: ${excusedCount}`,
       timestamp: Date.now(),
     });
 
@@ -479,7 +538,8 @@ export const finalizeSessionAttendance = mutation({
       success: true,
       completedCount,
       missedCount,
-      message: `Session finalized. ${completedCount} completed, ${missedCount} missed.`,
+      excusedCount,
+      message: `Session finalized. ${completedCount} approved, ${missedCount} missed, ${excusedCount} excused.`,
     };
   },
 });

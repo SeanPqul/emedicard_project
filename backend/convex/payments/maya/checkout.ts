@@ -135,9 +135,9 @@ export const saveMayaCheckout = internalMutation({
     // Don't update for placeholder records
     if (args.mayaCheckoutId !== "pending" && args.checkoutUrl !== "pending") {
       const application = await ctx.db.get(args.applicationId);
-      if (application && (application.applicationStatus === "Submitted" || application.applicationStatus === "Pending Payment")) {
+      if (application && application.applicationStatus === "Submitted") {
         await ctx.db.patch(args.applicationId, {
-          applicationStatus: "For Payment Validation",
+          applicationStatus: "Payment Validation",
           updatedAt: Date.now(),
         });
       }
@@ -431,17 +431,9 @@ export const cancelMayaCheckout = mutation({
       timestamp: Date.now(),
     });
     
-    // Update application status back to appropriate state
-    // Check if there's a payment deadline to determine if it was "Pending Payment"
+    // Update application status back to Submitted
     const application = await ctx.db.get(payment.applicationId);
-    if (application && application.paymentDeadline) {
-      // If there's a payment deadline, it was "Pending Payment"
-      await ctx.db.patch(payment.applicationId, {
-        applicationStatus: "Pending Payment",
-        updatedAt: Date.now(),
-      });
-    } else {
-      // Otherwise, it was "Submitted"
+    if (application) {
       await ctx.db.patch(payment.applicationId, {
         applicationStatus: "Submitted",
         updatedAt: Date.now(),

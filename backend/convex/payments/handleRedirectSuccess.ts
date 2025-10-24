@@ -54,12 +54,13 @@ export const handleRedirectSuccess = mutation({
       timestamp: Date.now(),
     });
     
-    // Get job category to determine next status
+    // Get job category to determine next status (Yellow Card = Food Handler)
     const jobCategory = await ctx.db.get(application.jobCategoryId);
-    const requiresOrientation = jobCategory?.requireOrientation || false;
+    const requiresOrientation = jobCategory?.requireOrientation === true || jobCategory?.requireOrientation === "true";
     
-    // Determine next status
-    const nextStatus = requiresOrientation ? "For Orientation" : "Approved";
+    // If requires orientation (Yellow Card), go to "For Orientation"
+    // Otherwise, go to "For Document Verification"
+    const nextStatus = requiresOrientation ? "For Orientation" : "For Document Verification";
     
     // Update application status
     await ctx.db.patch(args.applicationId, {
@@ -73,8 +74,8 @@ export const handleRedirectSuccess = mutation({
       applicationId: application._id,
       title: "Payment Successful",
       message: requiresOrientation 
-        ? "Your payment has been confirmed. Please proceed to orientation scheduling."
-        : "Your payment has been confirmed. Your health card will be issued soon.",
+        ? "Your payment has been confirmed. Please proceed to schedule your food safety orientation."
+        : "Your payment has been confirmed. Please proceed to document verification.",
       notificationType: "Payment",
       isRead: false,
     });

@@ -72,13 +72,16 @@ export const updateApplicantStatus = mutation({
   args: {
     userId: v.id("users"),
     status: v.union(
-      v.literal("Pending"),
-      v.literal("For Document Verification"),
-      v.literal("For Payment Validation"),
+      v.literal("Submitted"),
       v.literal("For Orientation"),
+      v.literal("For Document Verification"),
+      v.literal("Payment Validation"),
+      v.literal("Scheduled"),
+      v.literal("Attendance Validation"),
+      v.literal("Under Review"),
       v.literal("Approved"),
       v.literal("Rejected"),
-      v.literal("Cancelled")
+      v.literal("Expired")
     ),
     remarks: v.optional(v.string()),
   },

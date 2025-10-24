@@ -37,7 +37,7 @@ export const createApplicationMutation = mutation({
       firstName: args.firstName,
       lastName: args.lastName,
       gender: args.gender,
-      applicationStatus: "Draft", // Start as Draft, will be set to Submitted after payment
+      applicationStatus: "Submitted", // Start as Submitted
     });
 
     return applicationId;

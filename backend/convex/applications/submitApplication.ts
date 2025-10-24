@@ -40,13 +40,8 @@ export const submitApplicationMutation = mutation({
     }
 
     // Check if application is already submitted
-    if (application.applicationStatus === "Submitted" || application.applicationStatus === "Under Review" || application.applicationStatus === "Approved") {
+    if (application.applicationStatus === "Under Review" || application.applicationStatus === "Approved") {
       throw new Error("Application has already been submitted");
-    }
-    
-    // Also check for payment to prevent duplicate submissions
-    if (application.applicationStatus !== "Draft") {
-      throw new Error("Application is not in a valid state for submission");
     }
 
     // Get job category
@@ -128,10 +123,10 @@ export const submitApplicationMutation = mutation({
 
       // Update application status based on payment flow
       if (isPaymentDeferred) {
-        // NEW FLOW: Set status to "Pending Payment" and set payment deadline
+        // NEW FLOW: Set status to "Submitted" and set payment deadline
         const paymentDeadline = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days from now
         await ctx.db.patch(args.applicationId, {
-          applicationStatus: "Pending Payment",
+          applicationStatus: "Submitted",
           paymentDeadline: paymentDeadline,
           updatedAt: Date.now(),
         });

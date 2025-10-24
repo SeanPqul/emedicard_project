@@ -64,6 +64,18 @@ export default function AttendanceTrackerPage() {
     { selectedDate: selectedTimestamp }
   );
 
+  // Debug logging
+  React.useEffect(() => {
+    if (schedules !== undefined) {
+      console.log('📊 Query Result:', {
+        selectedDate: selectedDate.toLocaleDateString(),
+        timestamp: selectedTimestamp,
+        schedulesFound: schedules?.length || 0,
+        schedules: schedules
+      });
+    }
+  }, [schedules, selectedDate, selectedTimestamp]);
+
   // Mutation to finalize attendance
   const finalizeAttendance = useMutation(
     api.orientations.attendance.finalizeSessionAttendance
@@ -72,6 +84,12 @@ export default function AttendanceTrackerPage() {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = new Date(e.target.value);
     date.setHours(0, 0, 0, 0);
+    console.log('🔍 Date Filter Changed:', {
+      inputValue: e.target.value,
+      dateObject: date,
+      timestamp: date.getTime(),
+      formatted: date.toLocaleDateString()
+    });
     setSelectedDate(date);
   };
 
@@ -211,7 +229,7 @@ export default function AttendanceTrackerPage() {
               No orientation schedules found
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              There are no orientation sessions scheduled for {selectedDate.toLocaleDateString()}.
+              There are no orientation sessions scheduled for {new Date(selectedTimestamp).toLocaleDateString()}.
             </p>
           </div>
         )}

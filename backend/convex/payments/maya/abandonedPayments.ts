@@ -90,19 +90,11 @@ export const handleAbandonedPayment = mutation({
       timestamp: Date.now(),
     });
 
-    // Update application status back to appropriate state
+    // Update application status back to Submitted
     const application = await ctx.db.get(payment.applicationId);
     if (application) {
-      // Determine the correct status to revert to
-      let newStatus: "Submitted" | "Pending Payment" = "Submitted";
-      
-      // If there's a payment deadline, it should go back to "Pending Payment"
-      if (application.paymentDeadline) {
-        newStatus = "Pending Payment";
-      }
-
       await ctx.db.patch(payment.applicationId, {
-        applicationStatus: newStatus,
+        applicationStatus: "Submitted",
         updatedAt: Date.now(),
       });
 
@@ -203,12 +195,11 @@ export const cleanupAbandonedPayments = mutation({
           timestamp: Date.now(),
         });
 
-        // Update application status
+        // Update application status back to Submitted
         const application = await ctx.db.get(payment.applicationId);
         if (application) {
-          const newStatus = application.paymentDeadline ? "Pending Payment" : "Submitted";
           await ctx.db.patch(payment.applicationId, {
-            applicationStatus: newStatus,
+            applicationStatus: "Submitted",
             updatedAt: Date.now(),
           });
         }

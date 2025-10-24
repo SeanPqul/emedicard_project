@@ -109,11 +109,13 @@ export const updatePaymentSuccess = mutation({
     // Update application status to next step
     const application = await ctx.db.get(payment.applicationId);
     if (application) {
-      // Determine next status based on job category
+      // Determine next status based on job category (Yellow Card = Food Handler)
       const jobCategory = await ctx.db.get(application.jobCategoryId);
-      const requiresOrientation = jobCategory?.requireOrientation;
+      const requiresOrientation = jobCategory?.requireOrientation === true || jobCategory?.requireOrientation === "true";
       
-      const nextStatus = requiresOrientation ? "For Orientation" : "Approved";
+      // If requires orientation (Yellow Card), go to "For Orientation"
+      // Otherwise, go to "For Document Verification"
+      const nextStatus = requiresOrientation ? "For Orientation" : "For Document Verification";
       
       await ctx.db.patch(application._id, {
         applicationStatus: nextStatus,
@@ -126,8 +128,8 @@ export const updatePaymentSuccess = mutation({
         applicationId: application._id,
         title: "Payment Successful",
         message: requiresOrientation 
-          ? "Your payment has been confirmed. Please proceed to orientation scheduling."
-          : "Your payment has been confirmed. Your health card will be issued soon.",
+          ? "Your payment has been confirmed. Please proceed to schedule your food safety orientation."
+          : "Your payment has been confirmed. Please proceed to document verification.",
         notificationType: "Payment",
         isRead: false,
       });

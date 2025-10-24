@@ -117,9 +117,9 @@ export const rejectDocument = mutation({
       reviewedAt: Date.now(),
     });
 
-    // 6. Update application status to "Documents Need Revision"
+    // 6. Update application status to "Under Review" (document needs resubmission)
     await ctx.db.patch(documentUpload.applicationId, {
-      applicationStatus: "Documents Need Revision",
+      applicationStatus: "Under Review",
       updatedAt: Date.now(),
     });
 

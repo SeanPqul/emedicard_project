@@ -74,9 +74,9 @@ export const resubmitDocument = mutation({
       replacedAt: Date.now(),
     });
 
-    // 5. Update the application status
+    // 5. Update the application status to Under Review (document resubmitted)
     await ctx.db.patch(args.applicationId, {
-      applicationStatus: "Pending", // Or another appropriate status
+      applicationStatus: "Under Review",
       updatedAt: Date.now(),
     });
 
