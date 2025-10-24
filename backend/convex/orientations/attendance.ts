@@ -12,9 +12,23 @@ export const checkIn = mutation({
     applicationId: v.id("applications"),
   },
   handler: async (ctx, args) => {
+    // Get current user
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required");
+    }
+
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
+
     // Verify admin/inspector role
-    const adminCheck = await AdminRole(ctx);
-    if (!adminCheck.isAdmin) {
+    if (currentUser.role !== "admin" && currentUser.role !== "inspector") {
       throw new Error("Only inspectors can check in attendees");
     }
 
@@ -42,26 +56,11 @@ export const checkIn = mutation({
       throw new Error(`Cannot check in. Orientation status is: ${orientation.orientationStatus}`);
     }
 
-    // Get current inspector user
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Authentication required");
-    }
-
-    const inspector = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!inspector) {
-      throw new Error("Inspector user not found");
-    }
-
     // Perform check-in
     const checkInTime = Date.now();
     await ctx.db.patch(orientation._id, {
       checkInTime,
-      checkedInBy: inspector._id,
+      checkedInBy: currentUser._id,
     });
 
     // Get application and user for notification
@@ -94,9 +93,23 @@ export const checkOut = mutation({
     applicationId: v.id("applications"),
   },
   handler: async (ctx, args) => {
+    // Get current user
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required");
+    }
+
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
+
     // Verify admin/inspector role
-    const adminCheck = await AdminRole(ctx);
-    if (!adminCheck.isAdmin) {
+    if (currentUser.role !== "admin" && currentUser.role !== "inspector") {
       throw new Error("Only inspectors can check out attendees");
     }
 
@@ -124,26 +137,11 @@ export const checkOut = mutation({
       throw new Error("Cannot check out without checking in first");
     }
 
-    // Get current inspector user
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Authentication required");
-    }
-
-    const inspector = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!inspector) {
-      throw new Error("Inspector user not found");
-    }
-
     // Perform check-out
     const checkOutTime = Date.now();
     await ctx.db.patch(orientation._id, {
       checkOutTime,
-      checkedOutBy: inspector._id,
+      checkedOutBy: currentUser._id,
       orientationStatus: "Completed",
     });
 
@@ -233,9 +231,18 @@ export const getAttendeesForSession = query({
   },
   handler: async (ctx, args) => {
     // Verify admin/inspector role
-    const adminCheck = await AdminRole(ctx);
-    if (!adminCheck.isAdmin) {
-      throw new Error("Unauthorized");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized: Authentication required");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user || (user.role !== "admin" && user.role !== "inspector")) {
+      throw new Error("Unauthorized: Admin or Inspector access required");
     }
 
     // Get all orientations for this session
@@ -285,10 +292,19 @@ export const getOrientationSchedulesForDate = query({
     selectedDate: v.float64(), // Timestamp of selected date (start of day)
   },
   handler: async (ctx, args) => {
-    // Verify admin role
-    const adminCheck = await AdminRole(ctx);
-    if (!adminCheck.isAdmin) {
-      throw new Error("Unauthorized: Admin access required");
+    // Verify admin/inspector role
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized: Authentication required");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user || (user.role !== "admin" && user.role !== "inspector")) {
+      throw new Error("Unauthorized: Admin or Inspector access required");
     }
 
     // Get all orientation schedules for the selected date
@@ -529,16 +545,10 @@ export const getInspectorScanHistory = query({
     limit: v.optional(v.float64()),
   },
   handler: async (ctx, args) => {
-    // Verify admin/inspector role
-    const adminCheck = await AdminRole(ctx);
-    if (!adminCheck.isAdmin) {
-      throw new Error("Unauthorized");
-    }
-
-    // Get current inspector user
+    // Get current inspector/admin user
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Authentication required");
+      throw new Error("Unauthorized: Authentication required");
     }
 
     const inspector = await ctx.db
@@ -547,7 +557,12 @@ export const getInspectorScanHistory = query({
       .unique();
 
     if (!inspector) {
-      throw new Error("Inspector user not found");
+      throw new Error("User not found");
+    }
+
+    // Verify admin/inspector role
+    if (inspector.role !== "admin" && inspector.role !== "inspector") {
+      throw new Error("Unauthorized: Admin or Inspector access required");
     }
 
     // Collect both check-ins and check-outs

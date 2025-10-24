@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { theme } from '@shared/styles/theme';
-import { LoadingSpinner } from '@shared/components';
+import { SkeletonLoader, ErrorState } from '@shared/components';
 import { HEADER_CONSTANTS } from '@shared/constants/header.constants';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { useSessionAttendees } from '@features/inspector/hooks';
@@ -137,18 +137,6 @@ export function SessionAttendeesScreen() {
     </>
   );
 
-  if (isLoading) {
-    return (
-      <LoadingSpinner
-        visible={true}
-        message="Loading attendees..."
-        fullScreen
-        type="pulse"
-        icon="people"
-      />
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Green Header */}
@@ -175,23 +163,30 @@ export function SessionAttendeesScreen() {
       </View>
 
       {/* Attendees List */}
-      <FlatList
-        data={attendees}
-        renderItem={renderAttendee}
-        keyExtractor={(item) => item.applicationId}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmptyState}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[theme.colors.primary[500]]}
-            tintColor={theme.colors.primary[500]}
-          />
-        }
-      />
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingTitle}>Loading attendees...</Text>
+          <SkeletonLoader count={5} height={100} style={styles.skeletonList} />
+        </View>
+      ) : (
+        <FlatList
+          data={attendees}
+          renderItem={renderAttendee}
+          keyExtractor={(item) => item.applicationId}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderEmptyState}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[theme.colors.primary[500]]}
+              tintColor={theme.colors.primary[500]}
+            />
+          }
+        />
+      )}
 
       {/* Floating Scan Button */}
       <TouchableOpacity
@@ -360,5 +355,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     marginLeft: scale(8),
+  },
+  loadingContainer: {
+    flex: 1,
+    paddingHorizontal: scale(16),
+    paddingTop: verticalScale(24),
+  },
+  loadingTitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '600',
+    color: theme.colors.text.secondary,
+    marginBottom: verticalScale(16),
+  },
+  skeletonList: {
+    gap: verticalScale(12),
   },
 });

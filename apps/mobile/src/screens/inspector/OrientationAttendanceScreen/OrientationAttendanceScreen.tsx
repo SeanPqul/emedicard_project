@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
+import { useToast } from '@shared/components';
 import type { Id } from '@backend/convex/_generated/dataModel';
 import { QRCodeScanner } from '@features/scanner/components';
 import { theme } from '@shared/styles/theme';
@@ -17,6 +18,7 @@ import { moderateScale, verticalScale, scale } from '@shared/utils/responsive';
  * Handles check-in and check-out for orientation attendance
  */
 export function OrientationAttendanceScreen() {
+  const { showToast } = useToast();
   const [scannerActive, setScannerActive] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastScannedData, setLastScannedData] = useState<{
@@ -49,11 +51,8 @@ export function OrientationAttendanceScreen() {
     const parsed = parseQRData(data);
     
     if (!parsed) {
-      Alert.alert(
-        'Invalid QR Code',
-        'This QR code is not valid for orientation attendance.',
-        [{ text: 'OK', onPress: () => setScannerActive(true) }]
-      );
+      showToast('Invalid QR code for orientation attendance', 'error', 4000);
+      setScannerActive(true);
       return;
     }
 
@@ -72,17 +71,9 @@ export function OrientationAttendanceScreen() {
             timestamp: Date.now()
           });
 
-          Alert.alert(
-            'Check-In Successful! ✓',
-            'Attendee has been checked in for orientation.',
-            [{ 
-              text: 'OK', 
-              onPress: () => {
-                setIsProcessing(false);
-                setScannerActive(true);
-              }
-            }]
-          );
+          showToast('✓ Check-In Successful! Attendee checked in for orientation.', 'success', 3000);
+          setIsProcessing(false);
+          setScannerActive(true);
         } else {
           // Already checked in, try check-out
           const checkOutResult = await checkOutMutation({ applicationId: parsed.applicationId });
@@ -94,17 +85,9 @@ export function OrientationAttendanceScreen() {
               timestamp: Date.now()
             });
 
-            Alert.alert(
-              'Check-Out Successful! ✓',
-              'Orientation completed! The application will now proceed to review.',
-              [{ 
-                text: 'OK', 
-                onPress: () => {
-                  setIsProcessing(false);
-                  setScannerActive(true);
-                }
-              }]
-            );
+            showToast('✓ Check-Out Successful! Orientation completed.', 'success', 3000);
+            setIsProcessing(false);
+            setScannerActive(true);
           } else {
             throw new Error(checkOutResult.message || 'Check-out failed');
           }
@@ -123,17 +106,9 @@ export function OrientationAttendanceScreen() {
               timestamp: Date.now()
             });
 
-            Alert.alert(
-              'Check-Out Successful! ✓',
-              'Orientation completed! The application will now proceed to review.',
-              [{ 
-                text: 'OK', 
-                onPress: () => {
-                  setIsProcessing(false);
-                  setScannerActive(true);
-                }
-              }]
-            );
+            showToast('✓ Check-Out Successful! Orientation completed.', 'success', 3000);
+            setIsProcessing(false);
+            setScannerActive(true);
           } else {
             throw checkInError;
           }
@@ -142,17 +117,10 @@ export function OrientationAttendanceScreen() {
         }
       }
     } catch (error) {
-      Alert.alert(
-        'Error',
-        error instanceof Error ? error.message : 'Failed to process attendance',
-        [{ 
-          text: 'OK', 
-          onPress: () => {
-            setIsProcessing(false);
-            setScannerActive(true);
-          }
-        }]
-      );
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process attendance';
+      showToast(errorMessage, 'error', 4000);
+      setIsProcessing(false);
+      setScannerActive(true);
     }
   };
 

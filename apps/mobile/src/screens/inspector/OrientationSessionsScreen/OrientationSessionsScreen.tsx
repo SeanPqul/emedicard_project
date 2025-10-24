@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { theme } from '@shared/styles/theme';
-import { LoadingSpinner } from '@shared/components';
+import { SkeletonLoader, ErrorState } from '@shared/components';
 import { HEADER_CONSTANTS } from '@shared/constants/header.constants';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { useOrientationSessions } from '@features/inspector/hooks';
@@ -23,6 +23,8 @@ export function OrientationSessionsScreen() {
     sessionCounts,
     isLoading,
     isEmpty,
+    error,
+    refetch,
   } = useOrientationSessions();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -38,17 +40,6 @@ export function OrientationSessionsScreen() {
     router.push('/(screens)/(inspector)/orientation-attendance');
   };
 
-  if (isLoading) {
-    return (
-      <LoadingSpinner
-        visible={true}
-        message="Loading orientation sessions..."
-        fullScreen
-        type="pulse"
-        icon="calendar"
-      />
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -159,7 +150,20 @@ export function OrientationSessionsScreen() {
 
         {/* Sessions List */}
         <View style={styles.sessionsSection}>
-          {isEmpty ? (
+          {isLoading ? (
+            <>
+              <Text style={styles.listTitle}>Loading sessions...</Text>
+              <SkeletonLoader count={3} height={140} />
+            </>
+          ) : error ? (
+            <ErrorState
+              type="network"
+              title="Failed to Load Sessions"
+              message="Unable to fetch orientation sessions. Please check your connection and try again."
+              onRetry={refetch}
+              variant="card"
+            />
+          ) : isEmpty ? (
             <View style={styles.emptyState}>
               <Ionicons
                 name="calendar-outline"

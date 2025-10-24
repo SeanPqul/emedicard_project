@@ -96,7 +96,7 @@ export function useInspectorDashboard() {
   return {
     data: dashboardData,
     isLoading: schedules === undefined,
-    error: null,
+    error: null, // Convex doesn't expose errors directly
     refetch: () => {
       // Convex queries automatically refetch, but we can expose this for manual refresh
     },

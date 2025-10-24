@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { theme } from '@shared/styles/theme';
+import { SkeletonLoader, ErrorState } from '@shared/components';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { HEADER_CONSTANTS } from '@shared/constants/header.constants';
 import { useScanHistory } from '@features/inspector/hooks/useScanHistory';
@@ -231,8 +232,9 @@ export function ScanHistoryScreen() {
 
         {/* Scan History List */}
         {isLoading ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Loading scan history...</Text>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingTitle}>Loading scan history...</Text>
+            <SkeletonLoader count={4} height={120} />
           </View>
         ) : isEmpty ? (
           <View style={styles.emptyContainer}>
@@ -482,5 +484,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+  },
+  loadingContainer: {
+    paddingVertical: verticalScale(24),
+  },
+  loadingTitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '600',
+    color: theme.colors.text.secondary,
+    marginBottom: verticalScale(16),
   },
 });

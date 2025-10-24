@@ -110,6 +110,16 @@ export function useOrientationSessions(initialDate?: number) {
     );
   }, [sessions]);
 
+  // Convex doesn't directly expose errors, but we can infer from undefined schedules after loading
+  // For now, we'll return null for error state (can be enhanced later)
+  const refetch = () => {
+    // Convex automatically refetches on retry
+    // We can force a refetch by changing the date slightly and back
+    const currentDate = selectedDate;
+    setSelectedDate(currentDate + 1);
+    setTimeout(() => setSelectedDate(currentDate), 100);
+  };
+
   return {
     sessions,
     selectedDate,
@@ -119,5 +129,7 @@ export function useOrientationSessions(initialDate?: number) {
     sessionCounts,
     isLoading: schedules === undefined,
     isEmpty: sessions?.length === 0,
+    error: null, // Convex doesn't expose errors in this way
+    refetch,
   };
 }
