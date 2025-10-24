@@ -124,9 +124,8 @@ export function OrientationAttendanceScreen() {
     }
   };
 
-  const handleClose = () => {
-    setScannerActive(false);
-    router.back();
+  const handleToggleScanner = () => {
+    setScannerActive(!scannerActive);
   };
 
   return (
@@ -134,25 +133,20 @@ export function OrientationAttendanceScreen() {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleClose}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="arrow-back" size={moderateScale(24)} color={theme.colors.text.primary} />
-          </TouchableOpacity>
+          <View style={styles.headerIconContainer}>
+            <Ionicons name="qr-code" size={moderateScale(28)} color={theme.colors.primary[500]} />
+          </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Orientation Attendance</Text>
+            <Text style={styles.headerTitle}>Scanner</Text>
             <Text style={styles.headerSubtitle}>Scan QR for check-in/check-out</Text>
           </View>
-          <View style={styles.headerSpacer} />
         </View>
 
         {/* Scanner or Processing Overlay */}
         {scannerActive && !isProcessing ? (
           <QRCodeScanner
             onScan={handleScan}
-            onClose={handleClose}
+            onClose={handleToggleScanner}
             active={scannerActive}
             title="Scan Orientation QR"
             subtitle="Align the QR code within the frame"
@@ -218,7 +212,6 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: scale(16),
     paddingTop: verticalScale(12),
     paddingBottom: verticalScale(12),
@@ -226,15 +219,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.gray[200],
   },
-  backButton: {
+  headerIconContainer: {
     width: moderateScale(40),
     height: moderateScale(40),
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: scale(12),
   },
   headerTextContainer: {
     flex: 1,
-    alignItems: 'center',
   },
   headerTitle: {
     fontSize: moderateScale(18),
@@ -245,9 +238,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     color: theme.colors.text.secondary,
     marginTop: verticalScale(2),
-  },
-  headerSpacer: {
-    width: moderateScale(40),
   },
   processingContainer: {
     flex: 1,

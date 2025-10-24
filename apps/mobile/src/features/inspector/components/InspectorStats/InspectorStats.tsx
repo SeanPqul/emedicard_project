@@ -12,7 +12,7 @@ interface InspectorStatsProps {
 export function InspectorStats({ stats }: InspectorStatsProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>TODAY'S STATS</Text>
+      <Text style={styles.sectionTitle}>TODAY&apos;S STATS</Text>
       
       <View style={styles.row}>
         <StatCard

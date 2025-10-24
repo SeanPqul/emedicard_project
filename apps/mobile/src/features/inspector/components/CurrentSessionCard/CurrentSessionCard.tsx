@@ -31,7 +31,7 @@ export function CurrentSessionCard({ session }: CurrentSessionCardProps) {
   }
 
   const handleScanPress = () => {
-    router.push('/(screens)/(inspector)/orientation-attendance');
+    router.push('/(inspector-tabs)/scanner');
   };
 
   const handleViewAttendeesPress = () => {
@@ -74,26 +74,42 @@ export function CurrentSessionCard({ session }: CurrentSessionCardProps) {
           <Text style={styles.venueText}>{session.venue}</Text>
         </View>
 
-        <View style={styles.divider} />
-
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{session.stats.totalAttendees}</Text>
-            <Text style={styles.statLabel}>attendees</Text>
+            <Text style={styles.statLabel}>Expected</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: theme.colors.semantic.success }]}>
               {session.stats.checkedIn}
             </Text>
-            <Text style={styles.statLabel}>checked in</Text>
+            <Text style={styles.statLabel}>Check-In</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: theme.colors.semantic.warning }]}>
-              {session.stats.pending}
+            <Text style={[styles.statValue, { color: theme.colors.purple[500] }]}>
+              {session.stats.completed}
             </Text>
-            <Text style={styles.statLabel}>pending</Text>
+            <Text style={styles.statLabel}>Completed</Text>
+          </View>
+        </View>
+
+        {/* Progress Bar */}
+        <View style={styles.progressSection}>
+          <View style={styles.progressHeader}>
+            <Text style={styles.progressLabel}>Progress</Text>
+            <Text style={styles.progressText}>
+              {session.stats.checkedIn}/{session.stats.totalAttendees} ({Math.round((session.stats.checkedIn / session.stats.totalAttendees) * 100) || 0}%)
+            </Text>
+          </View>
+          <View style={styles.progressBarContainer}>
+            <View 
+              style={[
+                styles.progressBarFill, 
+                { width: `${Math.min((session.stats.checkedIn / session.stats.totalAttendees) * 100, 100) || 0}%` }
+              ]} 
+            />
           </View>
         </View>
 
@@ -248,6 +264,37 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     backgroundColor: theme.colors.border.light,
+  },
+  progressSection: {
+    marginTop: verticalScale(16),
+    marginBottom: verticalScale(16),
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: verticalScale(8),
+  },
+  progressLabel: {
+    fontSize: moderateScale(12),
+    fontWeight: '600',
+    color: theme.colors.text.secondary,
+  },
+  progressText: {
+    fontSize: moderateScale(12),
+    fontWeight: '700',
+    color: theme.colors.primary[500],
+  },
+  progressBarContainer: {
+    height: moderateScale(8),
+    backgroundColor: theme.colors.border.light,
+    borderRadius: moderateScale(4),
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: theme.colors.primary[500],
+    borderRadius: moderateScale(4),
   },
   buttonRow: {
     flexDirection: 'row',

@@ -43,7 +43,7 @@ export function SessionAttendeesScreen() {
   } = useSessionAttendees(orientationDate, timeSlot, venue);
 
   const handleScanPress = () => {
-    router.push('/(screens)/(inspector)/orientation-attendance');
+    router.push('/(inspector-tabs)/scanner');
   };
 
   const renderAttendee = ({ item }: { item: AttendeeWithStatus }) => (
@@ -138,7 +138,7 @@ export function SessionAttendeesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={[]}>
       {/* Green Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>

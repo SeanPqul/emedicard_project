@@ -37,29 +37,25 @@ export function OrientationSessionsScreen() {
   };
 
   const handleScanPress = () => {
-    router.push('/(screens)/(inspector)/orientation-attendance');
+    router.push('/(inspector-tabs)/scanner');
   };
 
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={[]}>
       {/* Green Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-            activeOpacity={0.7}
-          >
+          <View style={styles.headerTitleContainer}>
             <Ionicons
-              name="arrow-back"
+              name="calendar"
               size={HEADER_CONSTANTS.ICON_SIZE}
               color={HEADER_CONSTANTS.WHITE}
             />
-          </TouchableOpacity>
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.title}>Orientation Sessions</Text>
-            <Text style={styles.subtitle}>View sessions by date</Text>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.title}>Orientation Sessions</Text>
+              <Text style={styles.subtitle}>View sessions by date</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -180,7 +176,7 @@ export function OrientationSessionsScreen() {
                   onPress={goToToday}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.emptyButtonText}>View Today's Sessions</Text>
+                  <Text style={styles.emptyButtonText}>View Today&apos;s Sessions</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -230,23 +226,20 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: moderateScale(24),
     borderBottomRightRadius: moderateScale(24),
     paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
-    paddingTop: HEADER_CONSTANTS.TOP_PADDING,
-    paddingBottom: HEADER_CONSTANTS.BOTTOM_PADDING,
+    paddingTop: verticalScale(16),
+    paddingBottom: verticalScale(24),
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  backButton: {
-    width: HEADER_CONSTANTS.ICON_BUTTON_SIZE,
-    height: HEADER_CONSTANTS.ICON_BUTTON_SIZE,
-    borderRadius: HEADER_CONSTANTS.ICON_BUTTON_SIZE / 2,
-    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
-    justifyContent: 'center',
+  headerTitleContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: HEADER_CONSTANTS.ICON_TEXT_GAP,
+    flex: 1,
   },
   headerTextContainer: {
+    marginLeft: HEADER_CONSTANTS.ICON_TEXT_GAP,
     flex: 1,
   },
   title: {
@@ -411,6 +404,6 @@ const styles = StyleSheet.create({
     color: HEADER_CONSTANTS.WHITE,
   },
   bottomSpacer: {
-    height: verticalScale(24),
+    height: verticalScale(90),
   },
 });

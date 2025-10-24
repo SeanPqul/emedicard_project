@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { theme } from '@shared/styles/theme';
 import { useRouter } from 'expo-router';
 import { useUsers } from '@features/profile';
@@ -11,23 +13,13 @@ import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 export function InspectorSettingsScreen() {
   const { data: { currentUser: userProfile } } = useUsers();
   const router = useRouter();
+  const appVersion = Constants.expoConfig?.version || '1.0.0';
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={[]}>
       {/* Green Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name="arrow-back"
-              size={HEADER_CONSTANTS.ACTION_BUTTON_ICON_SIZE}
-              color={HEADER_CONSTANTS.WHITE}
-            />
-          </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
             <Ionicons
               name="settings"
@@ -36,7 +28,7 @@ export function InspectorSettingsScreen() {
             />
             <View style={styles.headerTextContainer}>
               <Text style={styles.title}>Settings</Text>
-              <Text style={styles.subtitle}>Manage your inspector account</Text>
+              <Text style={styles.subtitle}>Manage your account</Text>
             </View>
           </View>
         </View>
@@ -70,100 +62,22 @@ export function InspectorSettingsScreen() {
               <Text style={styles.roleText}>Inspector</Text>
             </View>
           </View>
+          
+          {/* Admin Notice */}
+          <View style={styles.adminNotice}>
+            <Ionicons
+              name="information-circle"
+              size={moderateScale(16)}
+              color={theme.colors.blue[500]}
+            />
+            <Text style={styles.adminNoticeText}>Account managed by administrator</Text>
+          </View>
         </View>
 
-        {/* Inspector Tools Card */}
+        {/* Security Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Inspector Tools</Text>
+          <Text style={styles.cardTitle}>SECURITY</Text>
           
-          <TouchableOpacity
-            style={styles.cardItem}
-            onPress={() => router.push('/(screens)/(inspector)/sessions')}
-            activeOpacity={0.7}
-          >
-            <View style={styles.cardItemLeft}>
-              <View style={styles.iconContainer}>
-                <Ionicons
-                  name="calendar-outline"
-                  size={moderateScale(20)}
-                  color={theme.colors.primary[500]}
-                />
-              </View>
-              <View style={styles.cardItemTextContainer}>
-                <Text style={styles.cardItemTitle}>Orientation Sessions</Text>
-                <Text style={styles.cardItemDescription}>Manage and view all sessions</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={moderateScale(20)} color="#ADB5BD" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.cardItem}
-            onPress={() => router.push('/(screens)/(inspector)/scan-history')}
-            activeOpacity={0.7}
-          >
-            <View style={styles.cardItemLeft}>
-              <View style={styles.iconContainer}>
-                <Ionicons
-                  name="document-text-outline"
-                  size={moderateScale(20)}
-                  color={theme.colors.primary[500]}
-                />
-              </View>
-              <View style={styles.cardItemTextContainer}>
-                <Text style={styles.cardItemTitle}>Scan History</Text>
-                <Text style={styles.cardItemDescription}>Review past QR scans</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={moderateScale(20)} color="#ADB5BD" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.cardItem, styles.lastCardItem]}
-            onPress={() => router.push('/(screens)/(inspector)/orientation-attendance')}
-            activeOpacity={0.7}
-          >
-            <View style={styles.cardItemLeft}>
-              <View style={styles.iconContainer}>
-                <Ionicons
-                  name="qr-code-outline"
-                  size={moderateScale(20)}
-                  color={theme.colors.primary[500]}
-                />
-              </View>
-              <View style={styles.cardItemTextContainer}>
-                <Text style={styles.cardItemTitle}>QR Scanner</Text>
-                <Text style={styles.cardItemDescription}>Scan attendee QR codes</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={moderateScale(20)} color="#ADB5BD" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Account Settings Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Account Settings</Text>
-          
-          <TouchableOpacity
-            style={styles.cardItem}
-            activeOpacity={0.7}
-          >
-            <View style={styles.cardItemLeft}>
-              <View style={styles.iconContainer}>
-                <Ionicons
-                  name="person-outline"
-                  size={moderateScale(20)}
-                  color="#666"
-                />
-              </View>
-              <View style={styles.cardItemTextContainer}>
-                <Text style={styles.cardItemTitle}>Edit Profile</Text>
-                <Text style={styles.cardItemDescription}>Update your personal information</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={moderateScale(20)} color="#ADB5BD" />
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.cardItem, styles.lastCardItem]}
             activeOpacity={0.7}
@@ -171,26 +85,27 @@ export function InspectorSettingsScreen() {
             <View style={styles.cardItemLeft}>
               <View style={styles.iconContainer}>
                 <Ionicons
-                  name="lock-closed-outline"
+                  name="lock-closed"
                   size={moderateScale(20)}
-                  color="#666"
+                  color={theme.colors.primary[500]}
                 />
               </View>
               <View style={styles.cardItemTextContainer}>
                 <Text style={styles.cardItemTitle}>Change Password</Text>
-                <Text style={styles.cardItemDescription}>Update your account password</Text>
+                <Text style={styles.cardItemDescription}>Update your login password</Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#ADB5BD" />
           </TouchableOpacity>
         </View>
 
-        {/* Support Card */}
+        {/* Support & Information Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Support & Help</Text>
+          <Text style={styles.cardTitle}>SUPPORT & INFORMATION</Text>
           
           <TouchableOpacity
             style={styles.cardItem}
+            onPress={() => router.push('/(screens)/(inspector)/help-center')}
             activeOpacity={0.7}
           >
             <View style={styles.cardItemLeft}>
@@ -198,12 +113,12 @@ export function InspectorSettingsScreen() {
                 <Ionicons
                   name="help-circle-outline"
                   size={moderateScale(20)}
-                  color="#666"
+                  color={theme.colors.primary[500]}
                 />
               </View>
               <View style={styles.cardItemTextContainer}>
                 <Text style={styles.cardItemTitle}>Help Center</Text>
-                <Text style={styles.cardItemDescription}>Find answers to common questions</Text>
+                <Text style={styles.cardItemDescription}>Get help and support</Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#ADB5BD" />
@@ -223,7 +138,7 @@ export function InspectorSettingsScreen() {
               </View>
               <View style={styles.cardItemTextContainer}>
                 <Text style={styles.cardItemTitle}>About</Text>
-                <Text style={styles.cardItemDescription}>App version and information</Text>
+                <Text style={styles.cardItemDescription}>App version {appVersion}</Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#ADB5BD" />
@@ -237,7 +152,7 @@ export function InspectorSettingsScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -256,15 +171,6 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButton: {
-    marginRight: moderateScale(12),
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: moderateScale(20),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitleContainer: {
@@ -350,6 +256,22 @@ const styles = StyleSheet.create({
     color: theme.colors.primary[500],
     marginLeft: moderateScale(6),
   },
+  adminNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.blue[50],
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: verticalScale(10),
+    borderRadius: moderateScale(8),
+    marginTop: verticalScale(16),
+    gap: scale(8),
+  },
+  adminNoticeText: {
+    fontSize: moderateScale(12),
+    color: theme.colors.blue[700],
+    fontWeight: '500',
+    flex: 1,
+  },
   card: {
     backgroundColor: HEADER_CONSTANTS.WHITE,
     marginHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
@@ -416,6 +338,6 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(24),
   },
   bottomSpacer: {
-    height: verticalScale(24),
+    height: verticalScale(90),
   },
 });

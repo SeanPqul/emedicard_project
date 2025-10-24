@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@shared/styles/theme';
 import { LoadingSpinner, ErrorState } from '@shared/components';
@@ -7,7 +8,7 @@ import { useRoleBasedNavigation } from '@features/navigation';
 import { useRouter } from 'expo-router';
 import { useUsers } from '@features/profile';
 import { useInspectorDashboard } from '@features/inspector/hooks';
-import { InspectorStats, CurrentSessionCard, SessionCard } from '@features/inspector/components';
+import { DailyGreeting, CurrentSessionCard, SessionCard, RecentActivity } from '@features/inspector/components';
 import { HEADER_CONSTANTS } from '@shared/constants/header.constants';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 
@@ -71,7 +72,7 @@ export function InspectorDashboardScreen() {
             type="network"
             title="Failed to Load Dashboard"
             message="Unable to fetch dashboard data. Please check your connection and try again."
-            onRetry={() => router.replace('/(screens)/(inspector)/dashboard')}
+          onRetry={() => router.replace('/(inspector-tabs)/dashboard')}
             variant="card"
           />
         </View>
@@ -80,7 +81,7 @@ export function InspectorDashboardScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={[]}>
       {/* Green Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
@@ -95,40 +96,23 @@ export function InspectorDashboardScreen() {
               <Text style={styles.subtitle}>Food Safety Orientation Tracker</Text>
             </View>
           </View>
-          <View style={styles.headerActions}>
-            <TouchableOpacity
-              style={styles.headerActionButton}
-              onPress={() => router.push('/(screens)/(inspector)/scan-history')}
-              activeOpacity={0.7}
-            >
-              <Ionicons
-                name="document-text-outline"
-                size={HEADER_CONSTANTS.ACTION_BUTTON_ICON_SIZE}
-                color={HEADER_CONSTANTS.WHITE}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.headerActionButton}
-              onPress={() => router.push('/(screens)/(inspector)/settings')}
-              activeOpacity={0.7}
-            >
-              <Ionicons
-                name="settings-outline"
-                size={HEADER_CONSTANTS.ACTION_BUTTON_ICON_SIZE}
-                color={HEADER_CONSTANTS.WHITE}
-              />
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
 
+      {/* Daily Greeting */}
+      {dashboardData && userProfile && (
+        <DailyGreeting
+          inspectorName={userProfile.fullname?.split(' ')[0] || 'Inspector'}
+          totalSessions={dashboardData.allSessions.length}
+          totalAttendees={dashboardData.stats.totalScheduled}
+        />
+      )}
+
       <ScrollView
         style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Today's Stats */}
-        {dashboardData && <InspectorStats stats={dashboardData.stats} />}
-
         {/* Current Session */}
         {dashboardData && (
           <CurrentSessionCard session={dashboardData.currentSession} />
@@ -140,7 +124,7 @@ export function InspectorDashboardScreen() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>UPCOMING SESSIONS TODAY</Text>
               <TouchableOpacity
-                onPress={() => router.push('/(screens)/(inspector)/sessions')}
+                onPress={() => router.push('/(inspector-tabs)/sessions')}
                 activeOpacity={0.7}
               >
                 <Text style={styles.viewAllText}>View All</Text>
@@ -152,38 +136,11 @@ export function InspectorDashboardScreen() {
           </View>
         )}
 
-        {/* Quick Actions */}
-        <View style={styles.quickActions}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => router.push('/(screens)/(inspector)/sessions')}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name="calendar-outline"
-              size={moderateScale(20)}
-              color={theme.colors.primary[500]}
-            />
-            <Text style={styles.actionButtonText}>View All Sessions</Text>
-          </TouchableOpacity>
+        {/* Recent Activity */}
+        <RecentActivity scans={[]} />
 
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => router.push('/(screens)/(inspector)/orientation-attendance')}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name="qr-code-outline"
-              size={moderateScale(20)}
-              color={theme.colors.primary[500]}
-            />
-            <Text style={styles.actionButtonText}>Scan QR Code</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.bottomSpacer} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -199,6 +156,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
     paddingTop: verticalScale(16),
     paddingBottom: verticalScale(24),
+  },
+  scrollViewContent: {
+    paddingBottom: verticalScale(80),
   },
   headerContent: {
     flexDirection: 'row',
@@ -225,18 +185,6 @@ const styles = StyleSheet.create({
     color: HEADER_CONSTANTS.WHITE_TRANSPARENT,
     marginTop: verticalScale(2),
   },
-  headerActions: {
-    flexDirection: 'row',
-    gap: moderateScale(8),
-  },
-  headerActionButton: {
-    width: HEADER_CONSTANTS.ACTION_BUTTON_SIZE,
-    height: HEADER_CONSTANTS.ACTION_BUTTON_SIZE,
-    borderRadius: HEADER_CONSTANTS.ACTION_BUTTON_RADIUS,
-    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   scrollView: {
     flex: 1,
   },
@@ -260,35 +208,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontWeight: '600',
     color: theme.colors.primary[500],
-  },
-  quickActions: {
-    flexDirection: 'row',
-    paddingHorizontal: scale(16),
-    marginTop: verticalScale(24),
-    gap: scale(12),
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colors.background.primary,
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(12),
-    gap: scale(8),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  actionButtonText: {
-    fontSize: moderateScale(14),
-    fontWeight: '600',
-    color: theme.colors.primary[500],
-  },
-  bottomSpacer: {
-    height: verticalScale(24),
   },
   unauthorizedContainer: {
     flex: 1,

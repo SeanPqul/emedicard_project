@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -81,17 +82,13 @@ export function ScanHistoryScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={[]}>
       {/* Green Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="arrow-back" size={moderateScale(24)} color="#FFFFFF" />
-          </TouchableOpacity>
+          <View style={styles.headerIconContainer}>
+            <Ionicons name="document-text" size={moderateScale(28)} color="#FFFFFF" />
+          </View>
           <View style={styles.headerTitleContainer}>
             <Text style={styles.headerTitle}>Scan History</Text>
             <Text style={styles.headerSubtitle}>My attendance scans</Text>
@@ -266,7 +263,7 @@ export function ScanHistoryScreen() {
       {!isEmpty && (
         <TouchableOpacity
           style={styles.floatingButton}
-          onPress={() => router.push('/(screens)/(inspector)/orientation-attendance')}
+          onPress={() => router.push('/(inspector-tabs)/scanner')}
           activeOpacity={0.8}
         >
           <Ionicons name="qr-code" size={moderateScale(28)} color="#FFFFFF" />
@@ -283,7 +280,7 @@ export function ScanHistoryScreen() {
           maximumDate={new Date()}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -305,8 +302,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: scale(12),
   },
-  backButton: {
-    padding: moderateScale(4),
+  headerIconContainer: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitleContainer: {
     flex: 1,
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: scale(16),
-    paddingBottom: verticalScale(32),
+    paddingBottom: verticalScale(100),
   },
   statsCard: {
     backgroundColor: theme.colors.background.primary,
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
   floatingButton: {
     position: 'absolute',
     right: scale(16),
-    bottom: verticalScale(24),
+    bottom: verticalScale(90),
     width: moderateScale(60),
     height: moderateScale(60),
     borderRadius: moderateScale(30),
