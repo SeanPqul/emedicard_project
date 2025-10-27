@@ -144,7 +144,6 @@ export const StatCardEnhanced: React.FC<StatCardEnhancedProps> = ({
 
         {/* Decorative Elements */}
         <View style={styles.decorativeCircle} />
-        <View style={styles.decorativeLine} />
       </LinearGradient>
 
       {/* Action Indicator */}

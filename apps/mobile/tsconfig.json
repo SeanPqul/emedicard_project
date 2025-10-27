@@ -50,8 +50,6 @@
     ".expo",
     "dist",
     "build",
-    "convex",
-    "../../backend",
-    "../../packages"
+    "convex"
   ]
 }

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
+import { useToast } from '@shared/components';
 import type { Id } from '@backend/convex/_generated/dataModel';
 import { QRCodeScanner } from '@features/scanner/components';
 import { theme } from '@shared/styles/theme';
@@ -17,7 +18,8 @@ import { moderateScale, verticalScale, scale } from '@shared/utils/responsive';
  * Handles check-in and check-out for orientation attendance
  */
 export function OrientationAttendanceScreen() {
-  const [scannerActive, setScannerActive] = useState(true);
+  const { showToast } = useToast();
+  const [scannerActive, setScannerActive] = useState(false); // Start with scanner OFF
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastScannedData, setLastScannedData] = useState<{
     applicationId: string;
@@ -49,11 +51,8 @@ export function OrientationAttendanceScreen() {
     const parsed = parseQRData(data);
     
     if (!parsed) {
-      Alert.alert(
-        'Invalid QR Code',
-        'This QR code is not valid for orientation attendance.',
-        [{ text: 'OK', onPress: () => setScannerActive(true) }]
-      );
+      showToast('Invalid QR code for orientation attendance', 'error', 4000);
+      setScannerActive(true);
       return;
     }
 
@@ -61,183 +60,179 @@ export function OrientationAttendanceScreen() {
     setScannerActive(false);
 
     try {
-      // Try check-in first, if already checked in it will fail and we'll try check-out
-      try {
-        const checkInResult = await checkInMutation({ applicationId: parsed.applicationId });
+      // Try check-in first
+      const checkInResult = await checkInMutation({ applicationId: parsed.applicationId });
+      
+      if (checkInResult.success) {
+        // Successful check-in
+        setLastScannedData({
+          applicationId: parsed.applicationId,
+          action: 'check-in',
+          timestamp: Date.now()
+        });
+
+        showToast('✓ Check-In Successful! Attendee checked in for orientation.', 'success', 3000);
+        setIsProcessing(false);
+        setScannerActive(true);
+      } else {
+        // Already checked in, try check-out
+        const checkOutResult = await checkOutMutation({ applicationId: parsed.applicationId });
         
-        if (checkInResult.success) {
+        if (checkOutResult.success) {
+          // Successful check-out
           setLastScannedData({
             applicationId: parsed.applicationId,
-            action: 'check-in',
+            action: 'check-out',
             timestamp: Date.now()
           });
 
-          Alert.alert(
-            'Check-In Successful! ✓',
-            'Attendee has been checked in for orientation.',
-            [{ 
-              text: 'OK', 
-              onPress: () => {
-                setIsProcessing(false);
-                setScannerActive(true);
-              }
-            }]
+          showToast('✓ Check-Out Successful! Orientation completed.', 'success', 3000);
+          setIsProcessing(false);
+          setScannerActive(true);
+        } else {
+          // Already checked out - duplicate scan detected
+          const checkOutTime = new Date(checkOutResult.checkOutTime || 0).toLocaleTimeString();
+          showToast(
+            `⚠️ Already Checked Out\nThis attendee completed orientation at ${checkOutTime}`, 
+            'warning', 
+            4000
           );
-        } else {
-          // Already checked in, try check-out
-          const checkOutResult = await checkOutMutation({ applicationId: parsed.applicationId });
-          
-          if (checkOutResult.success) {
-            setLastScannedData({
-              applicationId: parsed.applicationId,
-              action: 'check-out',
-              timestamp: Date.now()
-            });
-
-            Alert.alert(
-              'Check-Out Successful! ✓',
-              'Orientation completed! The application will now proceed to review.',
-              [{ 
-                text: 'OK', 
-                onPress: () => {
-                  setIsProcessing(false);
-                  setScannerActive(true);
-                }
-              }]
-            );
-          } else {
-            throw new Error(checkOutResult.message || 'Check-out failed');
-          }
-        }
-      } catch (checkInError: any) {
-        // If check-in fails, it might be because they're already checked in
-        // Try check-out instead
-        if (checkInError.message?.includes('Already checked in') || 
-            checkInError.message?.includes('Cannot check in')) {
-          const checkOutResult = await checkOutMutation({ applicationId: parsed.applicationId });
-          
-          if (checkOutResult.success) {
-            setLastScannedData({
-              applicationId: parsed.applicationId,
-              action: 'check-out',
-              timestamp: Date.now()
-            });
-
-            Alert.alert(
-              'Check-Out Successful! ✓',
-              'Orientation completed! The application will now proceed to review.',
-              [{ 
-                text: 'OK', 
-                onPress: () => {
-                  setIsProcessing(false);
-                  setScannerActive(true);
-                }
-              }]
-            );
-          } else {
-            throw checkInError;
-          }
-        } else {
-          throw checkInError;
+          setIsProcessing(false);
+          setScannerActive(true);
         }
       }
     } catch (error) {
-      Alert.alert(
-        'Error',
-        error instanceof Error ? error.message : 'Failed to process attendance',
-        [{ 
-          text: 'OK', 
-          onPress: () => {
-            setIsProcessing(false);
-            setScannerActive(true);
-          }
-        }]
-      );
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process attendance';
+      
+      // Enhanced error feedback with better UX
+      if (errorMessage.includes('scheduled for')) {
+        // Wrong date error - make it very clear
+        showToast(
+          `📅 Wrong Date\n${errorMessage}`,
+          'error',
+          5000 // Longer duration for important errors
+        );
+      } else if (errorMessage.includes('requires minimum')) {
+        // Duration not met error - helpful feedback
+        showToast(
+          `⏱️ Too Early\n${errorMessage}`,
+          'warning',
+          5000
+        );
+      } else if (errorMessage.includes('Cannot check out without checking in')) {
+        // Not checked in yet
+        showToast(
+          `⚠️ Not Checked In\nThis attendee must check in first before checking out.`,
+          'error',
+          4000
+        );
+      } else {
+        // Generic error
+        showToast(errorMessage, 'error', 4000);
+      }
+      
+      setIsProcessing(false);
+      setScannerActive(true);
     }
   };
 
-  const handleClose = () => {
-    setScannerActive(false);
-    router.back();
+  const handleToggleScanner = () => {
+    setScannerActive(!scannerActive);
+  };
+
+  const handleStartScanning = () => {
+    setScannerActive(true);
   };
 
   return (
     <BaseScreen safeArea={false}>
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleClose}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="arrow-back" size={moderateScale(24)} color={theme.colors.text.primary} />
-          </TouchableOpacity>
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Orientation Attendance</Text>
-            <Text style={styles.headerSubtitle}>Scan QR for check-in/check-out</Text>
-          </View>
-          <View style={styles.headerSpacer} />
-        </View>
-
-        {/* Scanner or Processing Overlay */}
-        {scannerActive && !isProcessing ? (
-          <QRCodeScanner
-            onScan={handleScan}
-            onClose={handleClose}
-            active={scannerActive}
-            title="Scan Orientation QR"
-            subtitle="Align the QR code within the frame"
-          />
-        ) : (
-          <View style={styles.processingContainer}>
-            <ActivityIndicator size="large" color={theme.colors.primary[600]} />
-            <Text style={styles.processingText}>Processing attendance...</Text>
-          </View>
-        )}
-
-        {/* Last Scanned Info */}
-        {lastScannedData && (
-          <View style={styles.lastScannedContainer}>
-            <Ionicons 
-              name={lastScannedData.action === 'check-in' ? 'log-in' : 'log-out'} 
-              size={moderateScale(24)} 
-              color={theme.colors.semantic.success} 
-            />
-            <View style={styles.lastScannedTextContainer}>
-              <Text style={styles.lastScannedTitle}>
-                Last {lastScannedData.action === 'check-in' ? 'Check-In' : 'Check-Out'}
-              </Text>
-              <Text style={styles.lastScannedTime}>
-                {new Date(lastScannedData.timestamp).toLocaleTimeString()}
-              </Text>
+      {scannerActive && !isProcessing ? (
+        // Full screen scanner
+        <QRCodeScanner
+          onScan={handleScan}
+          onClose={handleToggleScanner}
+          active={scannerActive}
+          title="Scan Orientation QR"
+          subtitle="Align the QR code within the frame"
+        />
+      ) : (
+        // Normal UI when scanner is not active
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerIconContainer}>
+              <Ionicons name="qr-code" size={moderateScale(28)} color={theme.colors.primary[500]} />
+            </View>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.headerTitle}>Scanner</Text>
+              <Text style={styles.headerSubtitle}>Scan QR for check-in/check-out</Text>
             </View>
           </View>
-        )}
 
-        {/* Instructions */}
-        <View style={styles.instructionsContainer}>
-          <Text style={styles.instructionsTitle}>Instructions</Text>
-          <View style={styles.instructionItem}>
-            <Ionicons name="qr-code-outline" size={moderateScale(20)} color={theme.colors.primary[600]} />
-            <Text style={styles.instructionText}>
-              Scan attendee's QR code when they arrive for check-in
-            </Text>
-          </View>
-          <View style={styles.instructionItem}>
-            <Ionicons name="qr-code-outline" size={moderateScale(20)} color={theme.colors.primary[600]} />
-            <Text style={styles.instructionText}>
-              Scan the same QR code again when orientation completes for check-out
-            </Text>
-          </View>
-          <View style={styles.instructionItem}>
-            <Ionicons name="information-circle-outline" size={moderateScale(20)} color={theme.colors.blue[600]} />
-            <Text style={styles.instructionText}>
-              The system automatically detects whether to check-in or check-out
-            </Text>
-          </View>
+          {isProcessing ? (
+            <View style={styles.processingContainer}>
+              <ActivityIndicator size="large" color={theme.colors.primary[600]} />
+              <Text style={styles.processingText}>Processing attendance...</Text>
+            </View>
+          ) : (
+            <>
+              {/* Last Scanned Info */}
+              {lastScannedData && (
+                <View style={styles.lastScannedContainer}>
+                  <Ionicons 
+                    name={lastScannedData.action === 'check-in' ? 'log-in' : 'log-out'} 
+                    size={moderateScale(24)} 
+                    color={theme.colors.semantic.success} 
+                  />
+                  <View style={styles.lastScannedTextContainer}>
+                    <Text style={styles.lastScannedTitle}>
+                      Last {lastScannedData.action === 'check-in' ? 'Check-In' : 'Check-Out'}
+                    </Text>
+                    <Text style={styles.lastScannedTime}>
+                      {new Date(lastScannedData.timestamp).toLocaleTimeString()}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Start Scanning Button */}
+              <View style={styles.scanButtonContainer}>
+                <TouchableOpacity 
+                  style={styles.startScanButton}
+                  onPress={handleStartScanning}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="qr-code" size={moderateScale(32)} color="#FFFFFF" />
+                  <Text style={styles.startScanButtonText}>Start Scanning</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Instructions */}
+              <View style={styles.instructionsContainer}>
+                <Text style={styles.instructionsTitle}>Instructions</Text>
+                <View style={styles.instructionItem}>
+                  <Ionicons name="qr-code-outline" size={moderateScale(20)} color={theme.colors.primary[600]} />
+                  <Text style={styles.instructionText}>
+                    Scan attendee's QR code when they arrive for check-in
+                  </Text>
+                </View>
+                <View style={styles.instructionItem}>
+                  <Ionicons name="qr-code-outline" size={moderateScale(20)} color={theme.colors.primary[600]} />
+                  <Text style={styles.instructionText}>
+                    Scan the same QR code again when orientation completes for check-out
+                  </Text>
+                </View>
+                <View style={styles.instructionItem}>
+                  <Ionicons name="information-circle-outline" size={moderateScale(20)} color={theme.colors.blue[600]} />
+                  <Text style={styles.instructionText}>
+                    The system automatically detects whether to check-in or check-out
+                  </Text>
+                </View>
+              </View>
+            </>
+          )}
         </View>
-      </View>
+      )}
     </BaseScreen>
   );
 }
@@ -250,7 +245,6 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: scale(16),
     paddingTop: verticalScale(12),
     paddingBottom: verticalScale(12),
@@ -258,15 +252,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.gray[200],
   },
-  backButton: {
+  headerIconContainer: {
     width: moderateScale(40),
     height: moderateScale(40),
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: scale(12),
   },
   headerTextContainer: {
     flex: 1,
-    alignItems: 'center',
   },
   headerTitle: {
     fontSize: moderateScale(18),
@@ -277,9 +271,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     color: theme.colors.text.secondary,
     marginTop: verticalScale(2),
-  },
-  headerSpacer: {
-    width: moderateScale(40),
   },
   processingContainer: {
     flex: 1,
@@ -314,6 +305,31 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     color: theme.colors.text.secondary,
     marginTop: verticalScale(2),
+  },
+  scanButtonContainer: {
+    alignItems: 'center',
+    marginVertical: verticalScale(32),
+  },
+  startScanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.primary[500],
+    paddingHorizontal: scale(32),
+    paddingVertical: verticalScale(16),
+    borderRadius: moderateScale(50),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+    minWidth: scale(200),
+  },
+  startScanButtonText: {
+    fontSize: moderateScale(18),
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginLeft: scale(12),
   },
   instructionsContainer: {
     backgroundColor: '#FFFFFF',

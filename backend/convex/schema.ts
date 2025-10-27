@@ -119,6 +119,8 @@ export default defineSchema({
     applicationId: v.id("applications"),
     checkInTime: v.optional(v.float64()),
     checkOutTime: v.optional(v.float64()),
+    checkedInBy: v.optional(v.id("users")), // Inspector who performed check-in
+    checkedOutBy: v.optional(v.id("users")), // Inspector who performed check-out
     orientationDate: v.optional(v.float64()), // Timestamp for the orientation date
     timeSlot: v.optional(v.string()), // e.g., "9:00 AM - 11:00 AM"
     assignedInspectorId: v.optional(v.id("users")), // Reference to the assigned inspector
@@ -133,12 +135,17 @@ export default defineSchema({
     qrCodeUrl: v.string(),
     scheduledAt: v.float64(),
   }).index("by_application", ["applicationId"])
-    .index("by_date_timeslot_venue", ["orientationDate", "timeSlot", "orientationVenue"]),
+    .index("by_date_timeslot_venue", ["orientationDate", "timeSlot", "orientationVenue"])
+    .index("by_checked_in_by", ["checkedInBy", "checkInTime"])
+    .index("by_checked_out_by", ["checkedOutBy", "checkOutTime"]),
 
   // Available orientation schedules (time slots for booking)
   orientationSchedules: defineTable({
-    date: v.float64(), // Timestamp for the date
-    time: v.string(), // e.g., "9:00 AM - 11:00 AM"
+    date: v.float64(), // Timestamp for the date (UTC midnight)
+    startMinutes: v.optional(v.float64()), // Minutes since midnight (0-1439) e.g., 540 = 9:00 AM
+    endMinutes: v.optional(v.float64()), // Minutes since midnight (0-1439) e.g., 660 = 11:00 AM
+    time: v.string(), // Display string e.g., "9:00 AM - 11:00 AM" (auto-generated from start/end)
+    durationMinutes: v.optional(v.float64()), // Duration in minutes (auto-calculated: end - start)
     venue: v.object({
       name: v.string(),
       address: v.string(),
@@ -156,7 +163,8 @@ export default defineSchema({
     updatedAt: v.optional(v.float64()),
   })
     .index("by_date", ["date"])
-    .index("by_availability", ["isAvailable", "date"]),
+    .index("by_availability", ["isAvailable", "date"])
+    .index("by_date_start", ["date", "startMinutes"]), // For sorting schedules by time
 
   // User's orientation session bookings
   orientationSessions: defineTable({

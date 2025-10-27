@@ -1,0 +1,1 @@
+export { DailyGreeting } from './DailyGreeting';

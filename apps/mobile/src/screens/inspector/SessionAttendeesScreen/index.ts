@@ -1,0 +1,1 @@
+export { SessionAttendeesScreen } from './SessionAttendeesScreen';

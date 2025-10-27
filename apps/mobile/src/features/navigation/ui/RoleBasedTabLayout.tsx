@@ -7,6 +7,7 @@ import { moderateScale, verticalScale } from '@shared/utils/responsive';
 import { api } from '@backend/convex/_generated/api';
 import { useRoleBasedNavigation } from '../hooks';
 import { LoadingSpinner } from '@shared/components/feedback/LoadingSpinner';
+import ApplicantTabBar from '../components/ApplicantTabBar';
 
 export default function RoleBasedTabLayout() {
   const userProfile = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
@@ -32,20 +33,8 @@ export default function RoleBasedTabLayout() {
         headerShown: false,
         tabBarActiveTintColor: getColor('green.500') || '#10B981',
         tabBarInactiveTintColor: getColor('gray.400') || '#9CA3AF',
-        tabBarStyle: {
-          height: moderateScale(50),
-          paddingTop: verticalScale(6),
-          paddingBottom: 0,
-          paddingHorizontal: 0,
-          backgroundColor: getColor('ui.white') || '#FFFFFF',
-          borderTopWidth: moderateScale(0.5),
-          borderTopColor: getColor('border.light') || '#E5E7EB',
-          elevation: 0,
-          shadowOpacity: 0,
-          minHeight: moderateScale(50),
-          maxHeight: moderateScale(50),
-        },
       }}
+      tabBar={(props) => <ApplicantTabBar {...props} />}
     >
       {visibleTabs.map((tab) => (
         <Tabs.Screen 

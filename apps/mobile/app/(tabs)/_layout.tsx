@@ -41,9 +41,9 @@ export default function TabLayout() {
   }
 
   // Only applicants should access tab navigation
-  // Inspectors should be redirected to their Stack-based navigation
+  // Inspectors should be redirected to their Tab-based navigation
   if (userProfile?.role === 'inspector') {
-    return <Redirect href="/(screens)/(inspector)/dashboard" />;
+    return <Redirect href="/(inspector-tabs)/dashboard" />;
   }
 
   // Render tab navigation for authenticated users

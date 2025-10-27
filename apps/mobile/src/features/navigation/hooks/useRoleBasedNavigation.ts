@@ -31,7 +31,7 @@ export function useRoleBasedNavigation(userRole?: UserRole) {
           canManageUsers: false,
           canApproveApplications: true,
           canViewAnalytics: false,
-          defaultRoute: '/(screens)/(inspector)/dashboard',
+          defaultRoute: '/(inspector-tabs)/dashboard',
         };
       
       case 'applicant':

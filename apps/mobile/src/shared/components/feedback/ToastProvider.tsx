@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Toast, ToastType } from '@shared/components/feedback/feedback';
+import { Toast, ToastType } from './feedback';
 
 interface ToastContextType {
   showToast: (message: string, type?: ToastType, duration?: number) => void;

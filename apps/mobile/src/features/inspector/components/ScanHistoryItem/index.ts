@@ -1,0 +1,1 @@
+export { ScanHistoryItem } from './ScanHistoryItem';

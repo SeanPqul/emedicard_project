@@ -7,7 +7,8 @@ import {
   View
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { hp } from '@/src/shared/utils/responsive';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { hp, verticalScale } from '@/src/shared/utils/responsive';
 import { formStorage } from '@/src/features/application/services/formStorage';
 import { STEP_TITLES } from '@/src/features/application/constants';
 import { FeedbackSystem } from '@/src/shared/components/feedback';
@@ -102,6 +103,7 @@ export function ApplyWidget({
   messages,
   dismissFeedback,
 }: ApplyWidgetProps) {
+  const insets = useSafeAreaInsets();
 
   const renderCurrentStep = () => {
     switch (currentStep) {
@@ -190,7 +192,7 @@ export function ApplyWidget({
           style={styles.content} 
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ 
-            paddingBottom: hp(10),
+            paddingBottom: hp(25),
             flexGrow: 1
           }}
           keyboardShouldPersistTaps="handled"
@@ -202,7 +204,7 @@ export function ApplyWidget({
       </KeyboardAvoidingView>
 
       {/* Navigation Buttons */}
-      <View style={styles.navigationButtons}>
+      <View style={[styles.navigationButtons, { paddingBottom: insets.bottom + verticalScale(80) }]}>
         {currentStep > 0 && (
           <TouchableOpacity 
             style={styles.previousButton} 

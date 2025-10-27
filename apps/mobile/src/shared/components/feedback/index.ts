@@ -8,3 +8,4 @@ export { ErrorText } from './ErrorText';
 // Re-export feedback system components
 export { FeedbackSystem, useFeedback } from './feedback/FeedbackSystem';
 export { Toast, type ToastType, type ToastProps } from './feedback/Toast';
+export { ToastProvider, useToast } from './ToastProvider';

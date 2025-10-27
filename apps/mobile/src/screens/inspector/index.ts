@@ -4,3 +4,6 @@ export * from './InspectionQueueScreen';
 export * from './ReviewApplicationsScreen';
 export * from './InspectorScannerScreen';
 export * from './OrientationAttendanceScreen';
+export * from './OrientationSessionsScreen';
+export * from './SessionAttendeesScreen';
+export * from './ScanHistoryScreen';

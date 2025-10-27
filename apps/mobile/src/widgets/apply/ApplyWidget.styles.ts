@@ -55,7 +55,6 @@ export const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: verticalScale(10),
     gap: scale(theme.spacing.md),
   },
   previousButton: {

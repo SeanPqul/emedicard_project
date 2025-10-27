@@ -8,7 +8,15 @@ import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { addDays, format, startOfWeek } from "date-fns";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import {
+  timeToMinutes,
+  minutesToTime,
+  formatTimeRange,
+  calculateDuration,
+  formatDuration,
+  validateTimeRange,
+} from "@/lib/timeUtils";
 
 type Schedule = Doc<"orientationSchedules">;
 
@@ -25,7 +33,12 @@ const ScheduleModal = ({
   onSave: () => void;
 }) => {
   const [date, setDate] = useState(schedule ? new Date(schedule.date).toISOString().split("T")[0] : "");
-  const [time, setTime] = useState(schedule?.time || "");
+  const [startTime, setStartTime] = useState(
+    schedule?.startMinutes !== undefined ? minutesToTime(schedule.startMinutes) : "09:00"
+  );
+  const [endTime, setEndTime] = useState(
+    schedule?.endMinutes !== undefined ? minutesToTime(schedule.endMinutes) : "11:00"
+  );
   const [venueName, setVenueName] = useState(schedule?.venue.name || "");
   const [venueAddress, setVenueAddress] = useState(schedule?.venue.address || "");
   const [capacity, setCapacity] = useState(schedule?.venue.capacity.toString() || "");
@@ -39,6 +52,11 @@ const ScheduleModal = ({
   const createSchedule = useMutation(api.orientationSchedules.mutations.createSchedule) as any;
   const updateSchedule = useMutation(api.orientationSchedules.mutations.updateSchedule) as any;
 
+  // Live preview and validation
+  const timePreview = useMemo(() => formatTimeRange(startTime, endTime), [startTime, endTime]);
+  const duration = useMemo(() => calculateDuration(startTime, endTime), [startTime, endTime]);
+  const timeError = useMemo(() => validateTimeRange(startTime, endTime), [startTime, endTime]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,9 +65,22 @@ const ScheduleModal = ({
     setError(null);
 
     try {
+      // Validate time range
+      if (timeError) {
+        setError(timeError);
+        setIsLoading(false);
+        return;
+      }
+
+      // Parse date string (YYYY-MM-DD) and create UTC midnight timestamp
+      // This ensures consistent date handling regardless of admin's timezone
+      const [year, month, day] = date.split('-').map(Number);
+      const utcTimestamp = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
+      
       const scheduleData = {
-        date: new Date(date).getTime(),
-        time,
+        date: utcTimestamp,
+        startMinutes: timeToMinutes(startTime),
+        endMinutes: timeToMinutes(endTime),
         venue: {
           name: venueName,
           address: venueAddress,
@@ -114,20 +145,60 @@ const ScheduleModal = ({
               />
             </div>
 
-            {/* Time */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Time Slot <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                placeholder="e.g., 9:00 AM - 11:00 AM"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                required
-                disabled={isLoading}
-              />
+            {/* Time Section */}
+            <div className="md:col-span-2">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-700">Time Schedule</h3>
+                <span className="text-xs text-gray-500">🇵🇭 Philippine Time (UTC+8)</span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    Start Time <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    step="900"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    End Time <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    step="900"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+              {/* Live Preview */}
+              <div className="mt-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 font-medium">Time Slot:</span>
+                  <span className="text-emerald-700 font-semibold">{timePreview}</span>
+                </div>
+                {duration > 0 && (
+                  <div className="flex items-center justify-between text-xs mt-1">
+                    <span className="text-gray-500">Duration:</span>
+                    <span className="text-gray-700">{formatDuration(duration)}</span>
+                  </div>
+                )}
+                {timeError && (
+                  <div className="mt-2 text-xs text-red-600 font-medium">
+                    ⚠️ {timeError}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -341,7 +412,8 @@ const BulkCreateModal = ({
   const [startDate, setStartDate] = useState("");
   const [weeksCount, setWeeksCount] = useState("4");
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([1]); // Monday by default
-  const [time, setTime] = useState("");
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("11:00");
   const [venueName, setVenueName] = useState("");
   const [venueAddress, setVenueAddress] = useState("");
   const [capacity, setCapacity] = useState("");
@@ -353,6 +425,11 @@ const BulkCreateModal = ({
   const [error, setError] = useState<string | null>(null);
 
   const bulkCreateSchedules = useMutation(api.orientationSchedules.mutations.bulkCreateSchedules) as any;
+
+  // Live preview and validation
+  const timePreview = useMemo(() => formatTimeRange(startTime, endTime), [startTime, endTime]);
+  const duration = useMemo(() => calculateDuration(startTime, endTime), [startTime, endTime]);
+  const timeError = useMemo(() => validateTimeRange(startTime, endTime), [startTime, endTime]);
 
   if (!isOpen) return null;
 
@@ -368,20 +445,34 @@ const BulkCreateModal = ({
     setError(null);
 
     try {
+      // Validate time range
+      if (timeError) {
+        setError(timeError);
+        setIsLoading(false);
+        return;
+      }
+
       const start = startOfWeek(new Date(startDate), { weekStartsOn: 0 });
       const weeks = parseInt(weeksCount);
       const dates: number[] = [];
-
-      for (let week = 0; week < weeks; week++) {
+      for (let week = 0; week < parseInt(weeksCount); week++) {
         for (const day of daysOfWeek) {
           const scheduleDate = addDays(start, week * 7 + day);
-          dates.push(scheduleDate.getTime());
+          // Normalize to UTC midnight for consistency with mobile app
+          const utcTimestamp = Date.UTC(
+            scheduleDate.getFullYear(),
+            scheduleDate.getMonth(),
+            scheduleDate.getDate(),
+            0, 0, 0, 0
+          );
+          dates.push(utcTimestamp);
         }
       }
 
       await bulkCreateSchedules({
         dates,
-        time,
+        startMinutes: timeToMinutes(startTime),
+        endMinutes: timeToMinutes(endTime),
         venue: {
           name: venueName,
           address: venueAddress,
@@ -495,18 +586,58 @@ const BulkCreateModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Time Slot <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                placeholder="e.g., 9:00 AM - 11:00 AM"
-                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                required
-                disabled={isLoading}
-              />
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-700">Time Schedule</h3>
+                <span className="text-xs text-gray-500">🇵🇭 Philippine Time (UTC+8)</span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    Start Time <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    step="900"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    End Time <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    step="900"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+              {/* Live Preview */}
+              <div className="mt-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 font-medium">Time Slot:</span>
+                  <span className="text-emerald-700 font-semibold">{timePreview}</span>
+                </div>
+                {duration > 0 && (
+                  <div className="flex items-center justify-between text-xs mt-1">
+                    <span className="text-gray-500">Duration:</span>
+                    <span className="text-gray-700">{formatDuration(duration)}</span>
+                  </div>
+                )}
+                {timeError && (
+                  <div className="mt-2 text-xs text-red-600 font-medium">
+                    ⚠️ {timeError}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

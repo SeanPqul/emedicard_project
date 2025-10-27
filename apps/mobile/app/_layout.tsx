@@ -1,5 +1,4 @@
-import { ErrorBoundary } from "@/src/shared/components/feedback/ErrorBoundary";
-import { ToastProvider } from "@/src/app-layer/providers/ToastProvider";
+import { ErrorBoundary, ToastProvider } from "@/src/shared/components/feedback";
 import ClerkAndConvexProvider from "@/src/app-layer/providers/ClerkAndConvexProvider";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
