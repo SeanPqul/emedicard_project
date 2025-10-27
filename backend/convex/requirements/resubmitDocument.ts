@@ -137,17 +137,25 @@ export const resubmitDocument = mutation({
     const documentType = await ctx.db.get(args.documentTypeId);
     const documentTypeName = documentType ? documentType.name : "Document";
 
-    // Notify all admins about resubmission
+    // Notify only admins who manage this health card category
     for (const admin of admins) {
-      await ctx.db.insert("notifications", {
-        userId: admin._id,
-        applicationId: args.applicationId,
-        title: "Document Resubmitted",
-        message: `User ${user.fullname} has resubmitted their ${documentTypeName}. Please review.`,
-        notificationType: "DocumentResubmission",
-        isRead: false,
-        actionUrl: `/admin/applications/${args.applicationId}/review`,
-      });
+      // Check if admin manages this health card category
+      const shouldNotify = !admin.managedCategories ||
+        admin.managedCategories.length === 0 ||
+        admin.managedCategories.includes(application.jobCategoryId);
+
+      if (shouldNotify) {
+        await ctx.db.insert("notifications", {
+          userId: admin._id,
+          applicationId: args.applicationId,
+          jobCategoryId: application.jobCategoryId,
+          title: "Document Resubmitted",
+          message: `User ${user.fullname} has resubmitted their ${documentTypeName}. Please review.`,
+          notificationType: "DocumentResubmission",
+          isRead: false,
+          actionUrl: `/admin/applications/${args.applicationId}/review`,
+        });
+      }
     }
 
     // 8. Return success response

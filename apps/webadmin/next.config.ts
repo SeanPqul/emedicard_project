@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+// Only import bundle analyzer when needed
+const withBundleAnalyzer = process.env.ANALYZE === 'true'
+  ? require('@next/bundle-analyzer')({
+      enabled: true,
+    })
+  : (config: NextConfig) => config;
+
 const nextConfig: NextConfig = {
   // Enable compiler optimizations
   compiler: {
@@ -48,4 +55,4 @@ const nextConfig: NextConfig = {
 
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

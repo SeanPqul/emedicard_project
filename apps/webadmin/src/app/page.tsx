@@ -67,7 +67,9 @@ export default function LandingPage() {
         router.push('/dashboard');
         setShowLoginModal(false);
       } else {
-        console.warn('Incomplete authentication:', { status: attempt.status });
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Incomplete authentication:', { status: attempt.status });
+        }
         setError('Please complete the additional verification steps.');
       }
     } catch (err: any) {

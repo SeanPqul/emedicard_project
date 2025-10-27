@@ -24,26 +24,34 @@ function logDetailedError(error: any, context: Record<string, any>): void {
   const errorType = error instanceof Error ? error.name : 'UnknownErrorType';
   const stackTrace = error instanceof Error ? error.stack : undefined;
 
-  // Use a collapsed group to keep the console clean. The dev can expand it for details.
-  console.groupCollapsed(
-    `%c[Error Logged] %c${context.type || 'Unknown'}`,
-    'color: red; font-weight: bold;',
-    'color: gray; font-weight: normal;'
-  );
-  
-  console.error(`Message: ${errorMessage}`);
-  console.log(`Error ID: ${context.id}`);
-  console.log(`Timestamp: ${new Date().toISOString()}`);
-  console.log(`Error Type: ${errorType}`);
-  
-  if (stackTrace) {
-    console.log("Stack Trace:", stackTrace.trim());
+  // Only log in development mode
+  if (process.env.NODE_ENV === 'development') {
+    // Use a collapsed group to keep the console clean. The dev can expand it for details.
+    console.groupCollapsed(
+      `%c[Error Logged] %c${context.type || 'Unknown'}`,
+      'color: red; font-weight: bold;',
+      'color: gray; font-weight: normal;'
+    );
+    
+    console.error(`Message: ${errorMessage}`);
+    console.log(`Error ID: ${context.id}`);
+    console.log(`Timestamp: ${new Date().toISOString()}`);
+    console.log(`Error Type: ${errorType}`);
+    
+    if (stackTrace) {
+      console.log("Stack Trace:", stackTrace.trim());
+    }
+    
+    console.log("Context:", context);
+    console.log("Raw Error Object:", error);
+    
+    console.groupEnd();
   }
   
-  console.log("Context:", context);
-  console.log("Raw Error Object:", error);
-  
-  console.groupEnd();
+  // TODO: In production, send to error tracking service (e.g., Sentry)
+  // if (process.env.NODE_ENV === 'production') {
+  //   Sentry.captureException(error, { extra: context });
+  // }
 }
 
 /**

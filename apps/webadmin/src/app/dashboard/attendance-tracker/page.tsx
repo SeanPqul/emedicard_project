@@ -1,26 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { CheckCircle, XCircle, Clock, MapPin, User, Calendar, Users, ArrowLeft } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, MapPin, User, Calendar, Users, ArrowLeft, Search, Filter, Edit2 } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import DashboardActivityLog from '@/components/DashboardActivityLog';
 import { useRouter } from 'next/navigation';
 
-type AttendanceStatus = 'Scheduled' | 'Completed' | 'Missed';
+type AttendanceStatus = 'Scheduled' | 'Completed' | 'Missed' | 'Excused';
 
 interface Attendee {
   orientationId: Id<'orientations'>;
   applicationId: Id<'applications'>;
   fullname: string;
+  gender: string;
   jobCategory: string;
   jobCategoryColor: string;
   applicationStatus: string;
   orientationStatus: AttendanceStatus;
   checkInTime?: number;
   checkOutTime?: number;
+  inspectorNotes?: string;
   qrCodeUrl: string;
 }
 
@@ -53,7 +55,17 @@ export default function AttendanceTrackerPage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const [selectedDate, setSelectedDate] = useState<Date>(today);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<{ [key: string]: string }>({});
   const [finalizingSession, setFinalizingSession] = useState<string | null>(null);
+  const [editingAttendee, setEditingAttendee] = useState<{
+    orientationId: Id<'orientations'>;
+    scheduleId: string;
+  } | null>(null);
+  const [statusUpdateForm, setStatusUpdateForm] = useState<{
+    status: AttendanceStatus;
+    notes: string;
+  }>({ status: 'Completed', notes: '' });
 
   // Convert selected date to timestamp (start of day)
   const selectedTimestamp = selectedDate.getTime();
@@ -76,9 +88,12 @@ export default function AttendanceTrackerPage() {
     }
   }, [schedules, selectedDate, selectedTimestamp]);
 
-  // Mutation to finalize attendance
+  // Mutations
   const finalizeAttendance = useMutation(
     api.orientations.attendance.finalizeSessionAttendance
+  );
+  const manuallyUpdateStatus = useMutation(
+    api.orientations.attendance.manuallyUpdateAttendanceStatus
   );
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +106,15 @@ export default function AttendanceTrackerPage() {
       formatted: date.toLocaleDateString()
     });
     setSelectedDate(date);
+    setSelectedTimeSlot('all'); // Reset time slot filter when date changes
+  };
+
+  const handleTimeSlotChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTimeSlot(e.target.value);
+  };
+
+  const handleSearchChange = (scheduleId: string, query: string) => {
+    setSearchQuery(prev => ({ ...prev, [scheduleId]: query }));
   };
 
   const handleFinalizeSession = async (schedule: OrientationSchedule) => {
@@ -105,7 +129,7 @@ export default function AttendanceTrackerPage() {
 
       if (result.success) {
         alert(
-          `✅ ${result.message}\n\nCompleted: ${result.completedCount}\nMissed: ${result.missedCount}`
+          `✅ ${result.message}\n\nCompleted: ${result.completedCount}\nMissed: ${result.missedCount}${result.excusedCount ? `\nExcused: ${result.excusedCount}` : ''}`
         );
       }
     } catch (error) {
@@ -113,6 +137,27 @@ export default function AttendanceTrackerPage() {
       alert('❌ Failed to finalize session. Please try again.');
     } finally {
       setFinalizingSession(null);
+    }
+  };
+
+  const handleManualStatusUpdate = async () => {
+    if (!editingAttendee) return;
+
+    try {
+      const result = await manuallyUpdateStatus({
+        orientationId: editingAttendee.orientationId,
+        newStatus: statusUpdateForm.status,
+        adminNotes: statusUpdateForm.notes || undefined,
+      });
+
+      if (result.success) {
+        alert(`✅ ${result.message}`);
+        setEditingAttendee(null);
+        setStatusUpdateForm({ status: 'Completed', notes: '' });
+      }
+    } catch (error: any) {
+      console.error('Error updating status:', error);
+      alert(`❌ ${error.message || 'Failed to update status. Please try again.'}`);
     }
   };
 
@@ -130,6 +175,13 @@ export default function AttendanceTrackerPage() {
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
             <XCircle className="w-3 h-3" />
             Missed
+          </span>
+        );
+      case 'Excused':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+            <Clock className="w-3 h-3" />
+            Excused
           </span>
         );
       case 'Scheduled':
@@ -177,40 +229,94 @@ export default function AttendanceTrackerPage() {
     return date.toISOString().split('T')[0];
   };
 
+  // Get unique time slots from schedules
+  const availableTimeSlots = useMemo(() => {
+    if (!schedules) return [];
+    const slots = schedules.map(s => s.time);
+    return [...new Set(slots)];
+  }, [schedules]);
+
+  // Filter schedules by selected time slot
+  const filteredSchedules = useMemo(() => {
+    if (!schedules) return [];
+    if (selectedTimeSlot === 'all') return schedules;
+    return schedules.filter(s => s.time === selectedTimeSlot);
+  }, [schedules, selectedTimeSlot]);
+
+  // Filter attendees by search query
+  const getFilteredAttendees = (scheduleId: string, attendees: Attendee[]) => {
+    const query = searchQuery[scheduleId]?.toLowerCase() || '';
+    if (!query) return attendees;
+    return attendees.filter(a => a.fullname.toLowerCase().includes(query));
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Navbar>
         <DashboardActivityLog />
       </Navbar>
       
-      <main className="max-w-7xl mx-auto py-8 px-6">
-        {/* Header with Back Button */}
-        <div className="mb-8">
+      <main className="max-w-[1600px] mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Enhanced Header */}
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={() => router.push('/dashboard')}
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 mb-4 transition-colors font-medium"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="font-medium">Back to Dashboard</span>
+            <span>Back to Dashboard</span>
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Orientation Attendance Tracker</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Track and finalize orientation attendance for food safety sessions.
-          </p>
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-2xl shadow-lg">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Attendance Tracker</h1>
+              <p className="mt-1 text-xs sm:text-sm text-gray-600">
+                Track and finalize orientation attendance for food safety sessions
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Date Selector */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <Calendar className="inline w-4 h-4 mr-2" />
-            Select Date
-          </label>
-          <input
-            type="date"
-            value={formatDateForInput(selectedDate)}
-            onChange={handleDateChange}
-            className="block w-full max-w-xs px-4 py-2 border text-gray-700 border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+        {/* Enhanced Date and Time Slot Filters */}
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Date Selector */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <Calendar className="w-5 h-5 text-emerald-600" />
+                Select Date
+              </label>
+              <input
+                type="date"
+                value={formatDateForInput(selectedDate)}
+                onChange={handleDateChange}
+                className="block w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+              />
+            </div>
+
+            {/* Time Slot Filter */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <Filter className="w-5 h-5 text-emerald-600" />
+                Filter by Time Slot
+              </label>
+              <select
+                value={selectedTimeSlot}
+                onChange={handleTimeSlotChange}
+                disabled={!schedules || schedules.length === 0}
+                className="block w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+              >
+                <option value="all">All Time Slots</option>
+                {availableTimeSlots.map(slot => (
+                  <option key={slot} value={slot}>{slot}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Loading State */}
@@ -226,75 +332,113 @@ export default function AttendanceTrackerPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <Calendar className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-semibold text-gray-900">
-              No orientation schedules found
+              No finished orientation sessions
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              There are no orientation sessions scheduled for {new Date(selectedTimestamp).toLocaleDateString()}.
+              There are no finished orientation sessions for {new Date(selectedTimestamp).toLocaleDateString()}.
+              Only sessions that have ended can be finalized.
+            </p>
+          </div>
+        )}
+
+        {/* No Filtered Schedules */}
+        {schedules && schedules.length > 0 && filteredSchedules.length === 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            <Filter className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-semibold text-gray-900">
+              No sessions match the selected filter
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Try selecting a different time slot or choose "All Time Slots".
             </p>
           </div>
         )}
 
         {/* Orientation Sessions */}
-        {schedules && schedules.length > 0 && (
+        {filteredSchedules && filteredSchedules.length > 0 && (
           <div className="space-y-6">
-            {schedules.map((schedule) => (
+            {filteredSchedules.map((schedule) => (
               <div
                 key={schedule.scheduleId}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden hover:border-emerald-300 transition-all"
               >
-                {/* Session Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-xl font-semibold">
-                        Food Safety Orientation
-                      </h2>
-                      <div className="mt-2 flex flex-wrap gap-4 text-sm">
-                        <span className="flex items-center gap-1">
+                {/* Enhanced Session Header */}
+                <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 px-6 py-5 text-white">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        </div>
+                        <h2 className="text-xl font-bold">
+                          Food Safety Orientation
+                        </h2>
+                      </div>
+                      <div className="flex flex-wrap gap-4 text-sm">
+                        <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg backdrop-blur-sm">
                           <Clock className="w-4 h-4" />
                           {schedule.time}
                         </span>
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg backdrop-blur-sm">
                           <MapPin className="w-4 h-4" />
                           {schedule.venue.name}
                         </span>
                         {schedule.instructor && (
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg backdrop-blur-sm">
                             <User className="w-4 h-4" />
-                            Instructor: {schedule.instructor.name}
+                            {schedule.instructor.name}
                           </span>
                         )}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold">
+                    <div className="text-right bg-white/10 px-6 py-3 rounded-xl backdrop-blur-sm">
+                      <div className="text-3xl font-bold">
                         {schedule.attendeeCount}/{schedule.totalSlots}
                       </div>
-                      <div className="text-xs opacity-90">Registered</div>
+                      <div className="text-xs opacity-90 mt-1">Registered</div>
                     </div>
                   </div>
                 </div>
 
-                {/* Session Stats */}
-                <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                  <div className="flex gap-8 text-sm">
-                    <div>
-                      <span className="text-gray-600">Checked In:</span>
-                      <span className="ml-2 font-semibold text-blue-600">
-                        {schedule.checkedInCount}
-                      </span>
+                {/* Enhanced Session Stats */}
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                  <div className="flex flex-wrap gap-6 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                      </div>
+                      <div>
+                        <span className="block text-xs text-gray-500">Checked In</span>
+                        <span className="text-lg font-bold text-blue-600">
+                          {schedule.checkedInCount}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-gray-600">Completed:</span>
-                      <span className="ml-2 font-semibold text-green-600">
-                        {schedule.completedCount}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div>
+                        <span className="block text-xs text-gray-500">Completed</span>
+                        <span className="text-lg font-bold text-green-600">
+                          {schedule.completedCount}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-gray-600">Pending:</span>
-                      <span className="ml-2 font-semibold text-gray-600">
-                        {schedule.attendeeCount - schedule.completedCount}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                        <Clock className="w-4 h-4 text-gray-600" />
+                      </div>
+                      <div>
+                        <span className="block text-xs text-gray-500">Pending</span>
+                        <span className="text-lg font-bold text-gray-600">
+                          {schedule.attendeeCount - schedule.completedCount}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -307,30 +451,61 @@ export default function AttendanceTrackerPage() {
                       <p>No attendees registered for this session.</p>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead>
-                          <tr className="bg-gray-50">
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Applicant Name
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Job Category
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Status
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Attendance
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {schedule.attendees.map((attendee) => (
+                    <>
+                      {/* Search Bar */}
+                      <div className="mb-4">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Search attendees by name..."
+                            value={searchQuery[schedule.scheduleId] || ''}
+                            onChange={(e) => handleSearchChange(schedule.scheduleId, e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Applicant Name
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Gender
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Job Category
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Attendance
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {getFilteredAttendees(schedule.scheduleId, schedule.attendees).map((attendee) => (
                             <tr key={attendee.applicationId} className="hover:bg-gray-50">
                               <td className="px-4 py-4 whitespace-nowrap">
                                 <div className="text-sm font-medium text-gray-900">
                                   {attendee.fullname}
+                                </div>
+                                {attendee.inspectorNotes && (
+                                  <div className="text-xs text-gray-500 mt-1 italic">
+                                    Note: {attendee.inspectorNotes}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-700">
+                                  {attendee.gender}
                                 </div>
                               </td>
                               <td className="px-4 py-4 whitespace-nowrap">
@@ -350,11 +525,30 @@ export default function AttendanceTrackerPage() {
                               <td className="px-4 py-4">
                                 {getAttendanceStatus(attendee)}
                               </td>
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                <button
+                                  onClick={() => {
+                                    setEditingAttendee({
+                                      orientationId: attendee.orientationId,
+                                      scheduleId: schedule.scheduleId,
+                                    });
+                                    setStatusUpdateForm({
+                                      status: attendee.orientationStatus === 'Scheduled' ? 'Completed' : attendee.orientationStatus,
+                                      notes: attendee.inspectorNotes || '',
+                                    });
+                                  }}
+                                  className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                  Edit Status
+                                </button>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
+                    </>
                   )}
                 </div>
 
@@ -387,6 +581,74 @@ export default function AttendanceTrackerPage() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Manual Status Update Modal */}
+        {editingAttendee && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Update Attendance Status
+              </h3>
+              
+              <div className="space-y-4">
+                {/* Status Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={statusUpdateForm.status}
+                    onChange={(e) => setStatusUpdateForm(prev => ({ 
+                      ...prev, 
+                      status: e.target.value as AttendanceStatus 
+                    }))}
+                    className="block w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="Completed">Completed</option>
+                    <option value="Excused">Excused</option>
+                    <option value="Missed">Missed</option>
+                  </select>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Admin Notes (Optional)
+                  </label>
+                  <textarea
+                    value={statusUpdateForm.notes}
+                    onChange={(e) => setStatusUpdateForm(prev => ({ 
+                      ...prev, 
+                      notes: e.target.value 
+                    }))}
+                    rows={3}
+                    placeholder="Add any notes about this status change..."
+                    className="block w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setEditingAttendee(null);
+                    setStatusUpdateForm({ status: 'Completed', notes: '' });
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleManualStatusUpdate}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
+                >
+                  Update Status
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>

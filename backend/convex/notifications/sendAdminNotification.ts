@@ -11,6 +11,7 @@ export const sendAdminNotification = mutation({
     title: v.optional(v.string()),
     actionUrl: v.optional(v.string()),
     applicationId: v.optional(v.id("applications")),
+    jobCategoryId: v.optional(v.id("jobCategories")),
   },
   handler: async (ctx: MutationCtx, args: {
     userId: Id<"users">;
@@ -19,8 +20,9 @@ export const sendAdminNotification = mutation({
     title?: string;
     actionUrl?: string;
     applicationId?: Id<"applications">;
+    jobCategoryId?: Id<"jobCategories">;
   }) => {
-    const { userId, notificationType, message, title, actionUrl, applicationId } = args;
+    const { userId, notificationType, message, title, actionUrl, applicationId, jobCategoryId } = args;
 
     // Optional: Add validation or authorization checks here
     // For example, ensure the user making this call is an admin.
@@ -48,6 +50,7 @@ export const sendAdminNotification = mutation({
       title,
       actionUrl,
       applicationId,
+      jobCategoryId,
       isRead: false,
     });
   },
