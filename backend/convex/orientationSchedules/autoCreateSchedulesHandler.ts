@@ -1,15 +1,16 @@
 import { v } from "convex/values";
 import { internalMutation } from "../_generated/server";
+import { formatTimeRange, calculateDuration, validateTimeRange } from "./timeUtils";
 
 /**
  * DEFAULT SCHEDULE CONFIGURATION
  * Customize these values based on your organization's needs
  */
 const DEFAULT_CONFIG = {
-  // Time slots for each weekday
+  // Time slots for each weekday (using structured time: minutes since midnight)
   timeSlots: [
-    "9:00 AM - 11:00 AM",
-    "2:00 PM - 4:00 PM",
+    { startMinutes: 540, endMinutes: 660 }, // 9:00 AM - 11:00 AM
+    { startMinutes: 840, endMinutes: 960 }, // 2:00 PM - 4:00 PM
   ],
   
   // Venue information
@@ -49,9 +50,6 @@ async function createSchedulesLogic(ctx: any) {
   const nextMonday = new Date(now + (daysUntilNextMonday * oneDay));
   nextMonday.setHours(0, 0, 0, 0);
   
-  console.log(`Creating schedules starting from: ${nextMonday.toDateString()}`);
-  
-  const schedulesToCreate = [];
   const createdSchedules = [];
   const skippedSchedules = [];
   
@@ -62,6 +60,15 @@ async function createSchedulesLogic(ctx: any) {
     
     // Create schedules for each time slot
     for (const timeSlot of DEFAULT_CONFIG.timeSlots) {
+      const { startMinutes, endMinutes } = timeSlot;
+      
+      // Validate time range
+      validateTimeRange(startMinutes, endMinutes);
+      
+      // Generate display string and duration
+      const time = formatTimeRange(startMinutes, endMinutes);
+      const durationMinutes = calculateDuration(startMinutes, endMinutes);
+      
       // Check if schedule already exists for this date and time
       const schedulesOnDate = await ctx.db
         .query("orientationSchedules")
@@ -69,13 +76,16 @@ async function createSchedulesLogic(ctx: any) {
         .collect();
       
       const existingSchedule = schedulesOnDate.find(
-        (s: { date: number; time: string }) => s.date === dateTimestamp && s.time === timeSlot
+        (s: { date: number; startMinutes?: number; endMinutes?: number }) => 
+          s.date === dateTimestamp && 
+          s.startMinutes === startMinutes && 
+          s.endMinutes === endMinutes
       );
       
       if (existingSchedule) {
         skippedSchedules.push({
           date: scheduleDate.toDateString(),
-          time: timeSlot,
+          time,
           reason: "Already exists",
         });
         continue;
@@ -84,7 +94,10 @@ async function createSchedulesLogic(ctx: any) {
       // Create new schedule
       const scheduleId = await ctx.db.insert("orientationSchedules", {
         date: dateTimestamp,
-        time: timeSlot,
+        startMinutes,
+        endMinutes,
+        time,
+        durationMinutes,
         venue: DEFAULT_CONFIG.venue,
         availableSlots: DEFAULT_CONFIG.totalSlots,
         totalSlots: DEFAULT_CONFIG.totalSlots,
@@ -98,19 +111,10 @@ async function createSchedulesLogic(ctx: any) {
       createdSchedules.push({
         id: scheduleId,
         date: scheduleDate.toDateString(),
-        time: timeSlot,
-      });
-      
-      schedulesToCreate.push({
-        date: scheduleDate.toDateString(),
-        time: timeSlot,
+        time,
       });
     }
   }
-  
-  // Log the results
-  console.log(`✅ Created ${createdSchedules.length} new schedules`);
-  console.log(`⏭️  Skipped ${skippedSchedules.length} existing schedules`);
   
   return {
     success: true,
@@ -140,7 +144,6 @@ export const createNextWeekSchedules = internalMutation({
 export const testAutoCreate = internalMutation({
   args: {},
   handler: async (ctx) => {
-    console.log("🧪 Testing automatic schedule creation...");
     return await createSchedulesLogic(ctx);
   },
 });
@@ -151,7 +154,10 @@ export const testAutoCreate = internalMutation({
  */
 export const updateDefaultConfig = internalMutation({
   args: {
-    timeSlots: v.optional(v.array(v.string())),
+    timeSlots: v.optional(v.array(v.object({
+      startMinutes: v.float64(),
+      endMinutes: v.float64(),
+    }))),
     venueName: v.optional(v.string()),
     venueAddress: v.optional(v.string()),
     venueCapacity: v.optional(v.float64()),

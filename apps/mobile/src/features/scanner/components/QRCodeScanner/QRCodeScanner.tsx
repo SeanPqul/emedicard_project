@@ -6,14 +6,13 @@ import {
   Animated,
   TouchableOpacity,
   Dimensions,
-  Alert,
   StatusBar,
   Platform,
 } from 'react-native';
+import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import { theme, getColor, getSpacing, getBorderRadius, getShadow, getTypography } from '@shared/styles/theme';
+import { theme, getColor, getSpacing, getShadow, getTypography } from '@shared/styles/theme';
 import { scaleFont, scaleSize } from '@shared/utils/responsive';
-import { Button as CustomButton } from '@shared/components/buttons/Button';
 
 const { width, height } = Dimensions.get('window');
 
@@ -38,14 +37,24 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   onFlashToggle,
   accessibilityLabel = 'QR code scanner',
 }) => {
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanning, setScanning] = useState(false);
   const [scaleAnim] = useState(new Animated.Value(1));
   const [opacityAnim] = useState(new Animated.Value(1));
-  const [rotateAnim] = useState(new Animated.Value(0));
+  const [torchOn, setTorchOn] = useState(false);
   const scanLineAnim = useRef(new Animated.Value(0)).current;
+  const lastScanTime = useRef(0);
 
   useEffect(() => {
-    if (active) {
+    // Request camera permission
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (active && hasPermission) {
       // Start scan line animation
       const animateScanLine = () => {
         Animated.sequence([
@@ -63,9 +72,16 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
       };
       animateScanLine();
     }
-  }, [active, scanLineAnim]);
+  }, [active, hasPermission, scanLineAnim]);
 
-  const handleSimulateScan = () => {
+  const handleBarCodeScanned = ({ data }: BarcodeScanningResult) => {
+    // Prevent rapid consecutive scans
+    const now = Date.now();
+    if (now - lastScanTime.current < 2000) {
+      return;
+    }
+    lastScanTime.current = now;
+
     if (scanning) return;
     
     setScanning(true);
@@ -84,26 +100,15 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
       }),
     ]).start();
 
-    // Simulate scan process
+    // Process the scanned QR code
     setTimeout(() => {
       setScanning(false);
-      
-      // Simulate successful scan
-      const mockQRData = JSON.stringify({
-        cardId: 'HC-FH-2024-001',
-        type: 'Food Handler',
-        status: 'Valid',
-        expiryDate: '2025-01-15',
-        holderName: 'John Doe',
-        issuedDate: '2024-01-15',
-        clinic: 'Davao City Health Center',
-      });
-      
-      onScan(mockQRData);
-    }, 2000);
+      onScan(data);
+    }, 500);
   };
 
   const handleFlashToggle = () => {
+    setTorchOn(!torchOn);
     if (onFlashToggle) {
       onFlashToggle();
     }
@@ -118,19 +123,61 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     return null;
   }
 
+  // Permission UI
+  if (hasPermission === null) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="rgba(0,0,0,0.8)" />
+        <View style={styles.permissionContainer}>
+          <Ionicons name="camera-outline" size={64} color={getColor('ui.textMuted')} />
+          <Text style={styles.permissionText}>Requesting camera permission...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (hasPermission === false) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="rgba(0,0,0,0.8)" />
+        <View style={styles.permissionContainer}>
+          <Ionicons name="camera-outline" size={64} color={getColor('status.error')} />
+          <Text style={styles.permissionTitle}>Camera Access Required</Text>
+          <Text style={styles.permissionText}>
+            Please enable camera access in your device settings to scan QR codes.
+          </Text>
+          <TouchableOpacity style={styles.closeButtonAlt} onPress={onClose}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="rgba(0,0,0,0.8)" />
       
+      {/* Real Camera View */}
+      <CameraView
+        style={StyleSheet.absoluteFillObject}
+        facing="back"
+        enableTorch={torchOn}
+        barcodeScannerSettings={{
+          barcodeTypes: ['qr'],
+        }}
+        onBarcodeScanned={scanning ? undefined : handleBarCodeScanned}
+      />
+      
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={styles.closeButton}
+          style={styles.backButton}
           onPress={onClose}
           accessibilityLabel="Close scanner"
           accessibilityRole="button"
         >
-          <Ionicons name="close" size={28} color={getColor('ui.white')} />
+          <Ionicons name="arrow-back" size={28} color={getColor('ui.white')} />
         </TouchableOpacity>
         
         <View style={styles.headerContent}>
@@ -138,23 +185,21 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
           <Text style={styles.headerSubtitle}>{subtitle}</Text>
         </View>
         
-        {onFlashToggle && (
-          <TouchableOpacity
-            style={styles.flashButton}
-            onPress={handleFlashToggle}
-            accessibilityLabel={`Turn flash ${flashEnabled ? 'off' : 'on'}`}
-            accessibilityRole="button"
-          >
-            <Ionicons 
-              name={flashEnabled ? "flash" : "flash-off"} 
-              size={24} 
-              color={flashEnabled ? getColor('accent.highlightYellow') : getColor('ui.white')} 
-            />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={styles.flashButton}
+          onPress={handleFlashToggle}
+          accessibilityLabel={`Turn flash ${torchOn ? 'off' : 'on'}`}
+          accessibilityRole="button"
+        >
+          <Ionicons 
+            name={torchOn ? "flash" : "flash-off"} 
+            size={24} 
+            color={torchOn ? getColor('accent.highlightYellow') : getColor('ui.white')} 
+          />
+        </TouchableOpacity>
       </View>
 
-      {/* Scanner Area */}
+      {/* Scanner Area Overlay */}
       <View style={styles.scannerArea}>
         <View style={styles.overlay}>
           {/* Top overlay */}
@@ -210,34 +255,24 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
         </View>
       </View>
 
-      {/* Controls */}
+      {/* Status Footer - with safe area padding */}
       <View style={styles.controls}>
         <View style={styles.controlsContent}>
           {/* Status indicator */}
           <View style={styles.statusContainer}>
             <View style={[styles.statusDot, scanning && styles.statusDotActive]} />
             <Text style={styles.statusText}>
-              {scanning ? 'Scanning...' : 'Ready to scan'}
+              {scanning ? 'Processing...' : 'Ready to scan'}
             </Text>
           </View>
-
-          {/* Scan button */}
-          <CustomButton
-            title={scanning ? 'Scanning...' : 'Simulate Scan'}
-            variant="primary"
-            size="large"
-            onPress={handleSimulateScan}
-            disabled={scanning}
-            loading={scanning}
-            buttonStyle={styles.scanButton}
-            accessibilityLabel="Simulate QR code scan"
-          />
           
           {/* Help text */}
           <Text style={styles.helpText}>
             Position the QR code within the frame above
           </Text>
         </View>
+        {/* Extra padding for bottom safe area */}
+        <View style={styles.bottomSafeArea} />
       </View>
     </View>
   );
@@ -256,9 +291,9 @@ const styles = StyleSheet.create({
     paddingBottom: getSpacing('lg'),
     backgroundColor: 'rgba(0,0,0,0.8)',
   },
-  closeButton: {
+  backButton: {
     padding: getSpacing('sm'),
-    marginLeft: -getSpacing('sm'),
+    marginRight: getSpacing('md'),
   },
   headerContent: {
     flex: 1,
@@ -366,11 +401,14 @@ const styles = StyleSheet.create({
   controls: {
     backgroundColor: 'rgba(0,0,0,0.8)',
     paddingHorizontal: getSpacing('lg'),
-    paddingVertical: getSpacing('xl'),
-    paddingBottom: Platform.OS === 'ios' ? 40 : getSpacing('xl'),
+    paddingTop: getSpacing('lg'),
   },
   controlsContent: {
     alignItems: 'center',
+    paddingBottom: getSpacing('md'),
+  },
+  bottomSafeArea: {
+    height: Platform.OS === 'ios' ? 34 : 0, // iPhone safe area
   },
   statusContainer: {
     flexDirection: 'row',
@@ -391,14 +429,40 @@ const styles = StyleSheet.create({
     ...getTypography('body'),
     color: getColor('ui.white'),
   },
-  scanButton: {
-    minWidth: 200,
-    marginBottom: getSpacing('lg'),
-  },
   helpText: {
     ...getTypography('bodySmall'),
     color: 'rgba(255,255,255,0.7)',
     textAlign: 'center',
     lineHeight: scaleFont(20),
+  },
+  permissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: getSpacing('xl'),
+  },
+  permissionTitle: {
+    ...getTypography('h3'),
+    color: getColor('ui.white'),
+    marginTop: getSpacing('lg'),
+    marginBottom: getSpacing('md'),
+    textAlign: 'center',
+  },
+  permissionText: {
+    ...getTypography('body'),
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+    lineHeight: scaleFont(22),
+  },
+  closeButtonAlt: {
+    marginTop: getSpacing('xl'),
+    paddingHorizontal: getSpacing('xl'),
+    paddingVertical: getSpacing('md'),
+    backgroundColor: getColor('primary.500'),
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    ...getTypography('button'),
+    color: getColor('ui.white'),
   },
 });

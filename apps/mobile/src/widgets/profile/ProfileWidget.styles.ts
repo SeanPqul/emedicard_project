@@ -71,6 +71,6 @@ export const styles = StyleSheet.create({
   signOutSection: {
     paddingHorizontal: scale(16),
     paddingTop: verticalScale(8),
-    paddingBottom: verticalScale(20),
+    paddingBottom: verticalScale(100),
   },
 });

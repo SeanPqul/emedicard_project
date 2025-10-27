@@ -1,5 +1,10 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
+import {
+  formatTimeRange,
+  validateTimeRange,
+  calculateDuration,
+} from "./timeUtils";
 
 /**
  * Create a new orientation schedule
@@ -7,7 +12,8 @@ import { v } from "convex/values";
 export const createSchedule = mutation({
   args: {
     date: v.float64(),
-    time: v.string(),
+    startMinutes: v.float64(),
+    endMinutes: v.float64(),
     venue: v.object({
       name: v.string(),
       address: v.string(),
@@ -23,13 +29,23 @@ export const createSchedule = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Validate time range
+    validateTimeRange(args.startMinutes, args.endMinutes);
+
+    // Generate formatted time string from structured data
+    const time = formatTimeRange(args.startMinutes, args.endMinutes);
+    const durationMinutes = calculateDuration(args.startMinutes, args.endMinutes);
+
     const now = Date.now();
 
     const scheduleId = await ctx.db.insert("orientationSchedules", {
       date: args.date,
-      time: args.time,
+      time,
+      startMinutes: args.startMinutes,
+      endMinutes: args.endMinutes,
+      durationMinutes,
       venue: args.venue,
-      availableSlots: args.totalSlots, // Initially all slots are available
+      availableSlots: args.totalSlots,
       totalSlots: args.totalSlots,
       isAvailable: true,
       instructor: args.instructor,
@@ -49,7 +65,8 @@ export const updateSchedule = mutation({
   args: {
     scheduleId: v.id("orientationSchedules"),
     date: v.optional(v.float64()),
-    time: v.optional(v.string()),
+    startMinutes: v.optional(v.float64()),
+    endMinutes: v.optional(v.float64()),
     venue: v.optional(
       v.object({
         name: v.string(),
@@ -75,12 +92,30 @@ export const updateSchedule = mutation({
       throw new Error("Schedule not found");
     }
 
+    // Determine final start/end minutes
+    const finalStartMinutes = updates.startMinutes ?? existingSchedule.startMinutes;
+    const finalEndMinutes = updates.endMinutes ?? existingSchedule.endMinutes;
+
+    // If time is being updated, validate and regenerate time string
+    let timeUpdate: { time?: string; startMinutes?: number; endMinutes?: number; durationMinutes?: number } = {};
+    if (updates.startMinutes !== undefined || updates.endMinutes !== undefined) {
+      if (finalStartMinutes === undefined || finalEndMinutes === undefined) {
+        throw new Error("Both startMinutes and endMinutes must be provided when updating time");
+      }
+      validateTimeRange(finalStartMinutes, finalEndMinutes);
+      timeUpdate = {
+        time: formatTimeRange(finalStartMinutes, finalEndMinutes),
+        startMinutes: finalStartMinutes,
+        endMinutes: finalEndMinutes,
+        durationMinutes: calculateDuration(finalStartMinutes, finalEndMinutes),
+      };
+    }
+
     // If totalSlots is updated, adjust availableSlots proportionally
     let availableSlots = updates.availableSlots;
     if (updates.totalSlots && !updates.availableSlots) {
       const slotsDifference = updates.totalSlots - existingSchedule.totalSlots;
       availableSlots = existingSchedule.availableSlots + slotsDifference;
-      // Ensure availableSlots doesn't go negative
       availableSlots = Math.max(0, availableSlots);
     }
 
@@ -90,11 +125,11 @@ export const updateSchedule = mutation({
       ? updates.isAvailable 
       : existingSchedule.isAvailable;
     
-    // If slots are 0 or less, force unavailable
     const finalIsAvailable = finalAvailableSlots <= 0 ? false : shouldBeAvailable;
 
     await ctx.db.patch(scheduleId, {
       ...updates,
+      ...timeUpdate,
       ...(availableSlots !== undefined && { availableSlots }),
       isAvailable: finalIsAvailable,
       updatedAt: Date.now(),
@@ -138,7 +173,8 @@ export const deleteSchedule = mutation({
 export const bulkCreateSchedules = mutation({
   args: {
     dates: v.array(v.float64()),
-    time: v.string(),
+    startMinutes: v.float64(),
+    endMinutes: v.float64(),
     venue: v.object({
       name: v.string(),
       address: v.string(),
@@ -154,13 +190,21 @@ export const bulkCreateSchedules = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Validate time range once for all schedules
+    validateTimeRange(args.startMinutes, args.endMinutes);
+    const time = formatTimeRange(args.startMinutes, args.endMinutes);
+    const durationMinutes = calculateDuration(args.startMinutes, args.endMinutes);
+
     const now = Date.now();
     const scheduleIds = [];
 
     for (const date of args.dates) {
       const scheduleId = await ctx.db.insert("orientationSchedules", {
         date,
-        time: args.time,
+        time,
+        startMinutes: args.startMinutes,
+        endMinutes: args.endMinutes,
+        durationMinutes,
         venue: args.venue,
         availableSlots: args.totalSlots,
         totalSlots: args.totalSlots,

@@ -42,9 +42,6 @@ export function SessionAttendeesScreen() {
     handleRefresh,
   } = useSessionAttendees(orientationDate, timeSlot, venue);
 
-  const handleScanPress = () => {
-    router.push('/(inspector-tabs)/scanner');
-  };
 
   const renderAttendee = ({ item }: { item: AttendeeWithStatus }) => (
     <AttendeeListItem attendee={item} />
@@ -188,15 +185,6 @@ export function SessionAttendeesScreen() {
         />
       )}
 
-      {/* Floating Scan Button */}
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={handleScanPress}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="qr-code" size={moderateScale(24)} color="#FFFFFF" />
-        <Text style={styles.floatingButtonText}>Scan QR</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -333,28 +321,6 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     textAlign: 'center',
     lineHeight: moderateScale(20),
-  },
-  floatingButton: {
-    position: 'absolute',
-    bottom: verticalScale(24),
-    right: scale(24),
-    backgroundColor: theme.colors.primary[500],
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: verticalScale(14),
-    paddingHorizontal: scale(20),
-    borderRadius: moderateScale(30),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  floatingButtonText: {
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginLeft: scale(8),
   },
   loadingContainer: {
     flex: 1,

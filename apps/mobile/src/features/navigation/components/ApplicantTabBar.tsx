@@ -1,39 +1,37 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import { Tabs, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
-import ElevatedTabButton from '../components/ElevatedTabButton';
+import ElevatedTabButton from './ElevatedTabButton';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 const ICONS = {
-  dashboard: {
+  index: {
     focused: 'home' as const,
     unfocused: 'home-outline' as const,
   },
-  sessions: {
-    focused: 'calendar' as const,
-    unfocused: 'calendar-outline' as const,
-  },
-  scanner: {
-    focused: 'qr-code' as const,
-    unfocused: 'qr-code' as const,
-  },
-  history: {
+  application: {
     focused: 'document-text' as const,
     unfocused: 'document-text-outline' as const,
   },
-  settings: {
-    focused: 'settings' as const,
-    unfocused: 'settings-outline' as const,
+  apply: {
+    focused: 'add-circle' as const,
+    unfocused: 'add-circle' as const,
+  },
+  notification: {
+    focused: 'notifications' as const,
+    unfocused: 'notifications-outline' as const,
+  },
+  profile: {
+    focused: 'person' as const,
+    unfocused: 'person-outline' as const,
   },
 };
 
-function InspectorTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export default function ApplicantTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
 
   return (
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom || moderateScale(8) }]}>
@@ -49,7 +47,7 @@ function InspectorTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
           });
 
           if (!isFocused && !event.defaultPrevented) {
-            router.push(`/(inspector-tabs)/${route.name}` as any);
+            navigation.navigate(route.name, route.params);
           }
         };
 
@@ -60,15 +58,16 @@ function InspectorTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
           });
         };
 
-        if (routeName === 'scanner') {
+        // Elevated center button for "apply" tab
+        if (routeName === 'apply') {
           return (
             <View key={route.key} style={styles.centerButtonContainer}>
               <ElevatedTabButton
                 onPress={onPress}
                 focused={isFocused}
                 testID={`tab-${route.name}`}
-                iconName="qr-code"
-                gradientColors={['#2E86AB', '#1D4ED8']}
+                iconName="add-circle"
+                gradientColors={['#10B981', '#059669']}
                 iconColor="#FFFFFF"
               />
             </View>
@@ -84,7 +83,7 @@ function InspectorTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={descriptors[route.key]?.options.tabBarAccessibilityLabel}
-            testID={route.name}
+            testID={`tab-${route.name}`}
             onPress={onPress}
             onLongPress={onLongPress}
             style={styles.tabButton}
@@ -95,66 +94,6 @@ function InspectorTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
         );
       })}
     </View>
-  );
-}
-
-export default function InspectorTabLayout() {
-  return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: '#10B981',
-        tabBarInactiveTintColor: '#9CA3AF',
-      }}
-      tabBar={(props) => <InspectorTabBar {...props} />}
-    >
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="sessions"
-        options={{
-          title: 'Sessions',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="scanner"
-        options={{
-          title: 'Scan',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="qr-code" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="history"
-        options={{
-          title: 'History',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="document-text-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
   );
 }
 

@@ -84,9 +84,9 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({
               style={[
                 styles.categoryCard,
                 isSelected && styles.categoryCardSelected,
-                { 
+                {
+                  // Keep border width constant to prevent layout shift on selection
                   borderColor: isSelected ? category.colorCode : '#E5E7EB',
-                  borderWidth: isSelected ? moderateScale(3) : moderateScale(1),
                 },
                 // Center the third card if there are 3 categories total
                 jobCategoriesData.length === 3 && index === 2 && styles.categoryCardCentered
@@ -107,8 +107,6 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({
                 styles.categoryIcon,
                 { 
                   backgroundColor: isSelected ? `${category.colorCode}30` : `${category.colorCode}15`,
-                  borderWidth: isSelected ? moderateScale(2) : 0,
-                  borderColor: isSelected ? category.colorCode : 'transparent',
                 }
               ]}>
                 <Ionicons 

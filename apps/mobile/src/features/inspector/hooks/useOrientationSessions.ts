@@ -13,17 +13,17 @@ export function useOrientationSessions(initialDate?: number) {
     initialDate || getStartOfDay(Date.now())
   );
 
-  // Fetch orientation schedules for the selected date
+  // Fetch orientation schedules for the selected date (includes schedules with 0 attendees)
   const schedules = useQuery(
-    api.orientations.attendance.getOrientationSchedulesForDate,
+    api.orientationSchedules.getSchedulesForDate,
     { selectedDate }
   );
 
-  // Enrich sessions with computed stats
+  // Enrich sessions with computed stats and sort by time (latest first)
   const sessions = useMemo<SessionWithStats[] | null>(() => {
     if (!schedules) return null;
 
-    return schedules.map((schedule: any) =>
+    const enrichedSessions = schedules.map((schedule: any) =>
       enrichSessionData({
         _id: schedule.scheduleId,
         date: schedule.date,
@@ -34,6 +34,38 @@ export function useOrientationSessions(initialDate?: number) {
         attendees: schedule.attendees,
       })
     );
+
+    // Sort by time slot - latest session first (descending order)
+    // Use startMinutes if available, otherwise parse time string
+    return enrichedSessions.sort((a, b) => {
+      // Try to use startMinutes from backend if available
+      const aSchedule = schedules.find((s: any) => s.scheduleId === a._id);
+      const bSchedule = schedules.find((s: any) => s.scheduleId === b._id);
+      
+      if (aSchedule?.startMinutes !== undefined && bSchedule?.startMinutes !== undefined) {
+        return bSchedule.startMinutes - aSchedule.startMinutes; // Descending
+      }
+      
+      // Fallback to parsing time string
+      const parseTime = (timeSlot: string): number => {
+        const match = timeSlot.match(/(\d+):(\d+)\s*(AM|PM)/);
+        if (!match) return 0;
+        
+        let hour = parseInt(match[1] || '0', 10);
+        const minute = parseInt(match[2] || '0', 10);
+        const isPM = match[3] === 'PM';
+        
+        if (isPM && hour !== 12) hour += 12;
+        if (!isPM && hour === 12) hour = 0;
+        
+        return hour * 60 + minute;
+      };
+      
+      const aTime = parseTime(a.timeSlot);
+      const bTime = parseTime(b.timeSlot);
+      
+      return bTime - aTime; // Descending (latest first)
+    });
   }, [schedules]);
 
   // Helper to change date
@@ -122,6 +154,7 @@ export function useOrientationSessions(initialDate?: number) {
 
   return {
     sessions,
+    schedules, // Raw schedules with backend status flags
     selectedDate,
     changeDate,
     goToToday,

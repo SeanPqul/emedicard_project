@@ -12,6 +12,7 @@ interface SessionCardProps {
 
 export function SessionCard({ session }: SessionCardProps) {
   const router = useRouter();
+  const hasAttendees = session.stats.totalAttendees > 0;
 
   const handleViewAttendees = () => {
     router.push({
@@ -26,7 +27,7 @@ export function SessionCard({ session }: SessionCardProps) {
 
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, !hasAttendees && styles.emptyCard]}
       onPress={handleViewAttendees}
       activeOpacity={0.7}
     >
@@ -55,11 +56,22 @@ export function SessionCard({ session }: SessionCardProps) {
         <Text style={styles.venueText}>{session.venue}</Text>
       </View>
 
-      <Text style={styles.attendeeText}>
-        {session.stats.totalAttendees} attendee{session.stats.totalAttendees !== 1 ? 's' : ''} scheduled
-      </Text>
+      {hasAttendees ? (
+        <Text style={styles.attendeeText}>
+          {session.stats.totalAttendees} attendee{session.stats.totalAttendees !== 1 ? 's' : ''} scheduled
+        </Text>
+      ) : (
+        <View style={styles.emptyBadge}>
+          <Ionicons
+            name="people-outline"
+            size={moderateScale(14)}
+            color={theme.colors.text.tertiary}
+          />
+          <Text style={styles.emptyBadgeText}>No bookings yet</Text>
+        </View>
+      )}
 
-      {session.stats.totalAttendees > 0 && (
+      {hasAttendees && (
         <View style={styles.statusRow}>
           <View style={styles.statusItem}>
             <View style={[styles.statusDot, { backgroundColor: theme.colors.semantic.success }]} />
@@ -90,6 +102,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
+  },
+  emptyCard: {
+    opacity: 0.7,
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    borderStyle: 'dashed',
+  },
+  emptyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: verticalScale(8),
+    paddingHorizontal: scale(12),
+    backgroundColor: `${theme.colors.text.tertiary}10`,
+    borderRadius: moderateScale(8),
+    alignSelf: 'flex-start',
+    marginBottom: verticalScale(4),
+    gap: scale(6),
+  },
+  emptyBadgeText: {
+    fontSize: moderateScale(12),
+    color: theme.colors.text.tertiary,
+    fontWeight: '500',
   },
   header: {
     flexDirection: 'row',

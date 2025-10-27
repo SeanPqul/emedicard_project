@@ -8,25 +8,35 @@ interface ElevatedTabButtonProps {
   onPress: () => void;
   focused?: boolean;
   testID?: string;
+  iconName?: keyof typeof Ionicons.glyphMap;
+  gradientColors?: [string, string];
+  iconColor?: string;
 }
 
-export default function ElevatedTabButton({ onPress, focused = false, testID }: ElevatedTabButtonProps) {
+export default function ElevatedTabButton({ 
+  onPress, 
+  focused = false, 
+  testID,
+  iconName = 'qr-code',
+  gradientColors = ['#2E86AB', '#1D4ED8'],
+  iconColor = '#FFFFFF'
+}: ElevatedTabButtonProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={styles.container}
       activeOpacity={0.7}
       accessibilityRole="button"
-      accessibilityLabel="Scan QR code"
+      accessibilityLabel={iconName === 'qr-code' ? 'Scan QR code' : 'Apply for health card'}
       testID={testID}
     >
       <LinearGradient
-        colors={['#8B5CF6', '#6366F1']}
+        colors={gradientColors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.gradient, focused && styles.gradientFocused]}
       >
-        <Ionicons name="qr-code" size={moderateScale(28)} color="#FFFFFF" />
+        <Ionicons name={iconName} size={moderateScale(28)} color={iconColor} />
       </LinearGradient>
     </TouchableOpacity>
   );

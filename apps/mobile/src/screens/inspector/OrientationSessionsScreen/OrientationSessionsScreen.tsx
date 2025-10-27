@@ -12,10 +12,14 @@ import { useOrientationSessions } from '@features/inspector/hooks';
 import { SessionCard } from '@features/inspector/components';
 import { formatDate } from '@features/inspector/lib/utils';
 
+type FilterType = 'all' | 'upcoming' | 'completed';
+type SortType = 'time-asc' | 'time-desc';
+
 export function OrientationSessionsScreen() {
   const router = useRouter();
   const {
     sessions,
+    schedules,
     selectedDate,
     changeDate,
     goToToday,
@@ -28,6 +32,9 @@ export function OrientationSessionsScreen() {
   } = useOrientationSessions();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showSortModal, setShowSortModal] = useState(false);
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [sortBy, setSortBy] = useState<SortType>('time-desc');
 
   const handleDateChange = (_event: any, date?: Date) => {
     setShowDatePicker(Platform.OS === 'ios'); // Keep open on iOS
@@ -36,109 +43,190 @@ export function OrientationSessionsScreen() {
     }
   };
 
-  const handleScanPress = () => {
-    router.push('/(inspector-tabs)/scanner');
+
+  // Filter and sort sessions - use backend status flags directly from schedules
+  const filteredSessions = React.useMemo(() => {
+    if (!sessions || !schedules) return null;
+    
+    let filtered = sessions;
+    
+    // Apply filter using backend-provided status
+    if (filter !== 'all') {
+      filtered = sessions.filter(session => {
+        // Find the corresponding schedule with backend status
+        const schedule = schedules.find((s: any) => s.scheduleId === session._id);
+        if (!schedule) return false;
+        
+        if (filter === 'upcoming') return schedule.isUpcoming === true;
+        if (filter === 'completed') return schedule.isPast === true;
+        return true;
+      });
+    }
+    
+    // Apply sort (already sorted by time-desc in hook, just reverse if needed)
+    if (sortBy === 'time-asc') {
+      filtered = [...filtered].reverse();
+    }
+    
+    return filtered;
+  }, [sessions, schedules, filter, sortBy]);
+
+  // Build subtitle with quick stats
+  const buildSubtitle = () => {
+    if (isLoading) return 'Loading...';
+    if (isEmpty) return 'No sessions scheduled';
+    
+    const parts = [];
+    parts.push(`${sessionCounts.total} ${sessionCounts.total === 1 ? 'session' : 'sessions'}`);
+    if (sessionCounts.upcoming > 0) parts.push(`${sessionCounts.upcoming} upcoming`);
+    
+    return parts.join(' • ');
   };
 
 
   return (
     <SafeAreaView style={styles.container} edges={[]}>
-      {/* Green Header */}
+      {/* Improved Green Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <View style={styles.headerTitleContainer}>
-            <Ionicons
-              name="calendar"
-              size={HEADER_CONSTANTS.ICON_SIZE}
-              color={HEADER_CONSTANTS.WHITE}
-            />
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.title}>Orientation Sessions</Text>
-              <Text style={styles.subtitle}>View sessions by date</Text>
+          {/* Row 1: Title + Action Button */}
+          <View style={styles.headerRow}>
+            <View style={styles.headerTitleContainer}>
+              <Ionicons
+                name="calendar"
+                size={HEADER_CONSTANTS.ICON_SIZE}
+                color={HEADER_CONSTANTS.WHITE}
+              />
+              <View style={styles.headerTextContainer}>
+                <Text style={styles.title}>Orientation Sessions</Text>
+                <Text style={styles.subtitle}>{buildSubtitle()}</Text>
+              </View>
             </View>
+            
+            {/* Sort Button */}
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => setShowSortModal(true)}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name="swap-vertical-outline"
+                size={HEADER_CONSTANTS.ACTION_BUTTON_ICON_SIZE}
+                color={HEADER_CONSTANTS.WHITE}
+              />
+            </TouchableOpacity>
           </View>
-        </View>
-      </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Date Selector */}
-        <View style={styles.dateSection}>
-          <View style={styles.dateHeader}>
-            <Text style={styles.sectionTitle}>
-              {isToday ? "TODAY'S SESSIONS" : 'SESSIONS'}
-            </Text>
+          {/* Row 2: Inline Date Picker */}
+          <View style={styles.datePickerRow}>
+            <TouchableOpacity
+              style={styles.headerDatePicker}
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.datePickerContent}>
+                <Ionicons
+                  name="calendar-outline"
+                  size={moderateScale(16)}
+                  color={HEADER_CONSTANTS.WHITE}
+                />
+                <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
+              </View>
+              <Ionicons
+                name="chevron-down"
+                size={moderateScale(16)}
+                color={HEADER_CONSTANTS.WHITE_TRANSPARENT}
+              />
+            </TouchableOpacity>
+
             {!isToday && (
               <TouchableOpacity
                 style={styles.todayButton}
                 onPress={goToToday}
                 activeOpacity={0.7}
               >
-                <Text style={styles.todayButtonText}>Go to Today</Text>
+                <Text style={styles.todayButtonText}>Today</Text>
               </TouchableOpacity>
             )}
           </View>
-
-          <TouchableOpacity
-            style={styles.datePickerButton}
-            onPress={() => setShowDatePicker(true)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.datePickerContent}>
-              <Ionicons
-                name="calendar"
-                size={moderateScale(20)}
-                color={theme.colors.primary[500]}
-              />
-              <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
-            </View>
-            <Ionicons
-              name="chevron-down"
-              size={moderateScale(20)}
-              color={theme.colors.text.tertiary}
-            />
-          </TouchableOpacity>
-
-          {showDatePicker && (
-            <DateTimePicker
-              value={new Date(selectedDate)}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={handleDateChange}
-            />
-          )}
         </View>
+      </View>
 
-        {/* Session Stats */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date(selectedDate)}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handleDateChange}
+        />
+      )}
+
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+
+        {/* Quick Filter Chips & Metrics */}
         {!isEmpty && (
-          <View style={styles.statsSection}>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{sessionCounts.total}</Text>
-                <Text style={styles.statLabel}>Total</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={[styles.statValue, { color: theme.colors.semantic.success }]}>
-                  {sessionCounts.completed}
-                </Text>
-                <Text style={styles.statLabel}>Completed</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={[styles.statValue, { color: theme.colors.semantic.warning }]}>
-                  {sessionCounts.active}
-                </Text>
-                <Text style={styles.statLabel}>Active</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={[styles.statValue, { color: theme.colors.blue[500] }]}>
-                  {sessionCounts.upcoming}
-                </Text>
-                <Text style={styles.statLabel}>Upcoming</Text>
+          <View style={styles.quickSection}>
+            {/* Filter Chips */}
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filterChipsContainer}
+            >
+              {[{ value: 'all', label: 'All', icon: 'list' }, 
+                { value: 'upcoming', label: 'Upcoming', icon: 'time' }, 
+                { value: 'completed', label: 'Completed', icon: 'checkmark-circle' }].map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.filterChip,
+                    filter === option.value && styles.filterChipActive,
+                  ]}
+                  onPress={() => setFilter(option.value as FilterType)}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={option.icon as any}
+                    size={moderateScale(16)}
+                    color={filter === option.value ? theme.colors.primary[500] : theme.colors.text.secondary}
+                  />
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      filter === option.value && styles.filterChipTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {/* Actionable Metrics */}
+            <View style={styles.metricsCard}>
+              <View style={styles.metricRow}>
+                <View style={styles.metric}>
+                  <Text style={styles.metricValue}>
+                    {sessions?.reduce((sum, s) => sum + s.currentBookings, 0) || 0}
+                  </Text>
+                  <Text style={styles.metricLabel}>Total Attendees</Text>
+                </View>
+                <View style={styles.metricDivider} />
+                <View style={styles.metric}>
+                  <Text style={styles.metricValue}>
+                    {sessions?.reduce((sum, s) => sum + s.stats.checkedIn, 0) || 0}
+                  </Text>
+                  <Text style={styles.metricLabel}>Checked In</Text>
+                </View>
+                <View style={styles.metricDivider} />
+                <View style={styles.metric}>
+                  <Text style={styles.metricValue}>
+                    {sessions?.reduce((sum, s) => sum + s.stats.completed, 0) || 0}
+                  </Text>
+                  <Text style={styles.metricLabel}>Completed</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -182,36 +270,85 @@ export function OrientationSessionsScreen() {
             </View>
           ) : (
             <>
-              <Text style={styles.listTitle}>
-                {sessionCounts.total} {sessionCounts.total === 1 ? 'Session' : 'Sessions'}
-              </Text>
-              {sessions?.map((session) => (
+              <View style={styles.listHeader}>
+                <Text style={styles.listTitle}>
+                  {filteredSessions?.length || 0} {filteredSessions?.length === 1 ? 'Session' : 'Sessions'}
+                </Text>
+              </View>
+              {filteredSessions?.map((session) => (
                 <SessionCard key={session._id} session={session} />
               ))}
             </>
           )}
         </View>
 
-        {/* Quick Scan Button */}
-        {!isEmpty && (
-          <View style={styles.quickActionSection}>
-            <TouchableOpacity
-              style={styles.scanButton}
-              onPress={handleScanPress}
-              activeOpacity={0.7}
-            >
-              <Ionicons
-                name="qr-code"
-                size={moderateScale(24)}
-                color={HEADER_CONSTANTS.WHITE}
-              />
-              <Text style={styles.scanButtonText}>Scan QR Code</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      {/* Sort Modal */}
+      {showSortModal && (
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity 
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setShowSortModal(false)}
+          />
+          <View style={styles.sortModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Sort Sessions</Text>
+              <TouchableOpacity onPress={() => setShowSortModal(false)}>
+                <Ionicons name="close" size={moderateScale(24)} color={theme.colors.text.secondary} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Sort Options */}
+            <View style={styles.modalSection}>
+              <Text style={styles.sectionLabel}>Order</Text>
+              <View style={styles.sortOptions}>
+                {[{ value: 'time-desc', label: 'Newest First', icon: 'arrow-down' }, 
+                  { value: 'time-asc', label: 'Oldest First', icon: 'arrow-up' }].map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.sortOption,
+                      sortBy === option.value && styles.sortOptionActive,
+                    ]}
+                    onPress={() => {
+                      setSortBy(option.value as SortType);
+                      setShowSortModal(false);
+                    }}
+                  >
+                    <View style={styles.sortOptionLeft}>
+                      <Ionicons
+                        name={option.icon as any}
+                        size={moderateScale(20)}
+                        color={sortBy === option.value ? theme.colors.primary[500] : theme.colors.text.secondary}
+                      />
+                      <View>
+                        <Text
+                          style={[
+                            styles.sortOptionText,
+                            sortBy === option.value && styles.sortOptionTextActive,
+                          ]}
+                        >
+                          {option.label}
+                        </Text>
+                      </View>
+                    </View>
+                    {sortBy === option.value && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={moderateScale(22)}
+                        color={theme.colors.primary[500]}
+                      />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -223,15 +360,19 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: theme.colors.primary[500],
-    borderBottomLeftRadius: moderateScale(24),
-    borderBottomRightRadius: moderateScale(24),
+    borderBottomLeftRadius: moderateScale(HEADER_CONSTANTS.BORDER_RADIUS),
+    borderBottomRightRadius: moderateScale(HEADER_CONSTANTS.BORDER_RADIUS),
     paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
-    paddingTop: verticalScale(16),
-    paddingBottom: verticalScale(24),
+    paddingTop: HEADER_CONSTANTS.TOP_PADDING,
+    paddingBottom: HEADER_CONSTANTS.BOTTOM_PADDING,
   },
   headerContent: {
+    gap: verticalScale(16),
+  },
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTitleContainer: {
     flexDirection: 'row',
@@ -244,99 +385,124 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: HEADER_CONSTANTS.TITLE_FONT_SIZE,
-    fontWeight: '600',
+    fontWeight: HEADER_CONSTANTS.TITLE_FONT_WEIGHT,
     color: HEADER_CONSTANTS.WHITE,
     lineHeight: HEADER_CONSTANTS.TITLE_LINE_HEIGHT,
   },
   subtitle: {
     fontSize: HEADER_CONSTANTS.SUBTITLE_FONT_SIZE,
     color: HEADER_CONSTANTS.WHITE_TRANSPARENT,
-    marginTop: verticalScale(2),
+    marginTop: HEADER_CONSTANTS.TITLE_MARGIN_BOTTOM,
   },
-  scrollView: {
+  actionButton: {
+    width: HEADER_CONSTANTS.ACTION_BUTTON_SIZE,
+    height: HEADER_CONSTANTS.ACTION_BUTTON_SIZE,
+    borderRadius: HEADER_CONSTANTS.ACTION_BUTTON_RADIUS,
+    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  datePickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(8),
+  },
+  headerDatePicker: {
     flex: 1,
-  },
-  dateSection: {
-    paddingHorizontal: scale(16),
-    marginTop: verticalScale(24),
-  },
-  dateHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: verticalScale(12),
-  },
-  sectionTitle: {
-    fontSize: moderateScale(12),
-    fontWeight: '700',
-    color: theme.colors.text.tertiary,
-    letterSpacing: 1,
-  },
-  todayButton: {
+    justifyContent: 'space-between',
+    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
     paddingHorizontal: scale(12),
-    paddingVertical: verticalScale(6),
-    borderRadius: moderateScale(8),
-    backgroundColor: `${theme.colors.primary[500]}15`,
-  },
-  todayButtonText: {
-    fontSize: moderateScale(12),
-    fontWeight: '600',
-    color: theme.colors.primary[500],
-  },
-  datePickerButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background.primary,
-    paddingHorizontal: scale(16),
-    paddingVertical: verticalScale(14),
-    borderRadius: moderateScale(12),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    paddingVertical: verticalScale(10),
+    borderRadius: moderateScale(10),
   },
   datePickerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(12),
+    gap: scale(8),
   },
   dateText: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(14),
     fontWeight: '600',
-    color: theme.colors.text.primary,
+    color: HEADER_CONSTANTS.WHITE,
   },
-  statsSection: {
+  todayButton: {
     paddingHorizontal: scale(16),
-    marginTop: verticalScale(20),
+    paddingVertical: verticalScale(10),
+    borderRadius: moderateScale(10),
+    backgroundColor: HEADER_CONSTANTS.WHITE,
   },
-  statsRow: {
+  todayButtonText: {
+    fontSize: moderateScale(13),
+    fontWeight: '600',
+    color: theme.colors.primary[500],
+  },
+  scrollView: {
+    flex: 1,
+  },
+  quickSection: {
+    paddingTop: verticalScale(16),
+    gap: verticalScale(16),
+  },
+  filterChipsContainer: {
+    paddingHorizontal: scale(16),
+    gap: scale(8),
+  },
+  filterChip: {
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(6),
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(8),
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: moderateScale(20),
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+  },
+  filterChipActive: {
+    backgroundColor: `${theme.colors.primary[500]}10`,
+    borderColor: theme.colors.primary[500],
+  },
+  filterChipText: {
+    fontSize: moderateScale(14),
+    fontWeight: '500',
+    color: theme.colors.text.secondary,
+  },
+  filterChipTextActive: {
+    color: theme.colors.primary[500],
+    fontWeight: '600',
+  },
+  metricsCard: {
+    marginHorizontal: scale(16),
     backgroundColor: theme.colors.background.primary,
     borderRadius: moderateScale(12),
     padding: moderateScale(16),
-    justifyContent: 'space-around',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
-  statItem: {
+  metricRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  metric: {
     alignItems: 'center',
   },
-  statValue: {
-    fontSize: moderateScale(24),
+  metricValue: {
+    fontSize: moderateScale(22),
     fontWeight: '700',
-    color: theme.colors.text.primary,
+    color: theme.colors.primary[500],
   },
-  statLabel: {
+  metricLabel: {
     fontSize: moderateScale(11),
     color: theme.colors.text.secondary,
     marginTop: verticalScale(4),
+    textAlign: 'center',
   },
-  statDivider: {
+  metricDivider: {
     width: 1,
     backgroundColor: theme.colors.border.light,
   },
@@ -344,11 +510,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(16),
     marginTop: verticalScale(24),
   },
+  listHeader: {
+    marginBottom: verticalScale(12),
+  },
   listTitle: {
     fontSize: moderateScale(16),
     fontWeight: '600',
     color: theme.colors.text.primary,
-    marginBottom: verticalScale(12),
+  },
+  filterIndicator: {
+    fontSize: moderateScale(14),
+    fontWeight: '500',
+    color: theme.colors.primary[500],
   },
   emptyState: {
     alignItems: 'center',
@@ -405,5 +578,85 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: verticalScale(90),
+  },
+  // Filter Modal Styles
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  sortModal: {
+    backgroundColor: theme.colors.background.primary,
+    borderTopLeftRadius: moderateScale(20),
+    borderTopRightRadius: moderateScale(20),
+    paddingBottom: verticalScale(32),
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: scale(20),
+    paddingVertical: verticalScale(20),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light,
+  },
+  modalTitle: {
+    fontSize: moderateScale(20),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+  },
+  modalSection: {
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(20),
+  },
+  sectionLabel: {
+    fontSize: moderateScale(13),
+    fontWeight: '600',
+    color: theme.colors.text.secondary,
+    marginBottom: verticalScale(12),
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  sortOptions: {
+    gap: verticalScale(10),
+  },
+  sortOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(16),
+    backgroundColor: theme.colors.background.secondary,
+    borderRadius: moderateScale(12),
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  sortOptionActive: {
+    backgroundColor: `${theme.colors.primary[500]}10`,
+    borderColor: theme.colors.primary[500],
+  },
+  sortOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(12),
+  },
+  sortOptionText: {
+    fontSize: moderateScale(15),
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+  },
+  sortOptionTextActive: {
+    color: theme.colors.primary[500],
   },
 });

@@ -112,16 +112,6 @@ export const styles = StyleSheet.create({
     top: -moderateScale(40),
     right: -moderateScale(40),
   },
-  decorativeLine: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: moderateScale(4),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderBottomLeftRadius: moderateScale(20),
-    borderBottomRightRadius: moderateScale(20),
-  },
   actionIndicator: {
     position: 'absolute',
     bottom: scale(16),

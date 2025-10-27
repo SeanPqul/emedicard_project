@@ -21,12 +21,12 @@ import { QR_CODE } from './constants';
 // ============================================================================
 
 /**
- * Get start of day timestamp (00:00:00)
- */
+ | * Get start of day timestamp (00:00:00 UTC)
+ | * Using UTC to ensure consistency with server-side dates
+ | */
 export const getStartOfDay = (date: Date | number = new Date()): number => {
   const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
+  return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
 };
 
 /**
@@ -116,27 +116,40 @@ export const parseTimeSlot = (timeSlot: string): { start: string; end: string } 
 };
 
 /**
- * Check if current time is within a time slot
+ | * Check if current time is within a time slot
+ | * @param timeSlot Time slot string (e.g., "9:00 AM - 10:00 AM")
+ | * @param date Session date timestamp (optional, defaults to today)
+ | */
+export const isTimeSlotActive = (timeSlot: string, date?: number): boolean => {
+  const now = Date.now();
+  const sessionDate = date ? new Date(date) : new Date();
+
+  // Must be same day (UTC-boundary check)
+  if (getStartOfDay(Date.now()) !== getStartOfDay(sessionDate)) {
+    return false;
+  }
+
+  const { startTs, endTs } = getSessionBounds(date ?? Date.now(), timeSlot);
+  return now >= startTs && now < endTs;
+};
+
+/**
+ * Check if a time slot has ended (current time is after the end time)
  * @param timeSlot Time slot string (e.g., "9:00 AM - 10:00 AM")
  * @param date Session date timestamp (optional, defaults to today)
  */
-export const isTimeSlotActive = (timeSlot: string, date?: number): boolean => {
-  const now = new Date();
-  const sessionDate = date ? new Date(date) : now;
-  
-  // Check if it's the same day
-  if (getStartOfDay(now) !== getStartOfDay(sessionDate)) {
-    return false;
-  }
-  
-  const { start, end } = parseTimeSlot(timeSlot);
-  
-  // Convert time strings to timestamps for today
-  const startTime = parseTimeString(start);
-  const endTime = parseTimeString(end);
-  const currentTime = now.getHours() * 60 + now.getMinutes();
-  
-  return currentTime >= startTime && currentTime < endTime;
+export const isTimeSlotEnded = (timeSlot: string, date?: number): boolean => {
+  const now = Date.now();
+  const sessionDate = date ? new Date(date) : new Date();
+
+  const sessionDayStart = getStartOfDay(sessionDate);
+  const todayStart = getStartOfDay(Date.now());
+
+  if (sessionDayStart < todayStart) return true; // Past day
+  if (sessionDayStart > todayStart) return false; // Future day
+
+  const { endTs } = getSessionBounds(date ?? Date.now(), timeSlot);
+  return now >= endTs;
 };
 
 /**
@@ -144,8 +157,8 @@ export const isTimeSlotActive = (timeSlot: string, date?: number): boolean => {
  * @example "9:30 AM" => 570
  */
 const parseTimeString = (timeStr: string): number => {
-  const [time, period] = timeStr.split(' ');
-  if (!time || !period) return 0;
+  const [time, rawPeriod] = timeStr.split(' ');
+  if (!time || !rawPeriod) return 0;
   
   const timeParts = time.split(':').map(Number);
   const hours = timeParts[0];
@@ -153,11 +166,48 @@ const parseTimeString = (timeStr: string): number => {
   
   if (hours === undefined || minutes === undefined || isNaN(hours) || isNaN(minutes)) return 0;
   
+  const period = rawPeriod.toUpperCase();
   let hour24 = hours;
   if (period === 'PM' && hours !== 12) hour24 += 12;
   if (period === 'AM' && hours === 12) hour24 = 0;
   
   return hour24 * 60 + minutes;
+};
+
+/**
+ * Given a date (UTC midnight timestamp) and a time slot string, return
+ * local start and end timestamps for that session.
+ */
+export const getSessionBounds = (
+  date: number,
+  timeSlot: string
+): { startTs: number; endTs: number } => {
+  const { start, end } = parseTimeSlot(timeSlot);
+  
+  // Get the local date from UTC midnight timestamp
+  const utcDate = new Date(date);
+  const year = utcDate.getUTCFullYear();
+  const month = utcDate.getUTCMonth();
+  const day = utcDate.getUTCDate();
+  
+  // Create local date at midnight
+  const localMidnight = new Date(year, month, day, 0, 0, 0, 0);
+
+  // Compute start time in local timezone
+  const startMinutes = parseTimeString(start);
+  const startHours = Math.floor(startMinutes / 60);
+  const startMins = startMinutes % 60;
+  const startDate = new Date(localMidnight);
+  startDate.setHours(startHours, startMins, 0, 0);
+
+  // Compute end time in local timezone
+  const endMinutes = parseTimeString(end);
+  const endHours = Math.floor(endMinutes / 60);
+  const endMins = endMinutes % 60;
+  const endDate = new Date(localMidnight);
+  endDate.setHours(endHours, endMins, 0, 0);
+
+  return { startTs: startDate.getTime(), endTs: endDate.getTime() };
 };
 
 // ============================================================================
@@ -253,19 +303,20 @@ export const calculateSessionStats = (attendees: AttendeeData[]): SessionStats =
 export const enrichSessionData = (session: OrientationSession): SessionWithStats => {
   const stats = calculateSessionStats(session.attendees);
   const isActive = isTimeSlotActive(session.timeSlot, session.date);
+  const hasEnded = isTimeSlotEnded(session.timeSlot, session.date);
   
   // Determine if session is past or future
-  const { end } = parseTimeSlot(session.timeSlot);
-  const endTimeMinutes = parseTimeString(end);
-  const sessionEndTime = new Date(session.date);
-  sessionEndTime.setHours(Math.floor(endTimeMinutes / 60), endTimeMinutes % 60);
+  const { start } = parseTimeSlot(session.timeSlot);
+  const startTimeMinutes = parseTimeString(start);
+  const sessionStartTime = new Date(session.date);
+  sessionStartTime.setHours(Math.floor(startTimeMinutes / 60), startTimeMinutes % 60);
   
   return {
     ...session,
     stats,
     isActive,
-    isPast: isPast(sessionEndTime.getTime()),
-    isFuture: isFuture(session.date),
+    isPast: hasEnded,
+    isFuture: sessionStartTime.getTime() > Date.now(),
   };
 };
 

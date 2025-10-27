@@ -45,6 +45,9 @@ export function CurrentSessionCard({ session }: CurrentSessionCardProps) {
     });
   };
 
+  // Determine if session is currently active or upcoming
+  const isLive = session.isActive;
+
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>CURRENT SESSION</Text>
@@ -59,10 +62,21 @@ export function CurrentSessionCard({ session }: CurrentSessionCardProps) {
             />
             <Text style={styles.timeText}>{session.timeSlot}</Text>
           </View>
-          <View style={styles.liveBadge}>
-            <View style={styles.liveDot} />
-            <Text style={styles.liveText}>LIVE</Text>
-          </View>
+          {isLive ? (
+            <View style={styles.liveBadge}>
+              <View style={styles.liveDot} />
+              <Text style={styles.liveText}>LIVE</Text>
+            </View>
+          ) : (
+            <View style={styles.upcomingBadge}>
+              <Ionicons
+                name="time-outline"
+                size={moderateScale(12)}
+                color={theme.colors.primary[500]}
+              />
+              <Text style={styles.upcomingText}>UPCOMING</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.venueRow}>
@@ -226,6 +240,21 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(11),
     fontWeight: '700',
     color: theme.colors.semantic.error,
+    letterSpacing: 0.5,
+  },
+  upcomingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${theme.colors.primary[500]}15`,
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(6),
+    borderRadius: moderateScale(12),
+    gap: scale(4),
+  },
+  upcomingText: {
+    fontSize: moderateScale(11),
+    fontWeight: '700',
+    color: theme.colors.primary[500],
     letterSpacing: 0.5,
   },
   venueRow: {

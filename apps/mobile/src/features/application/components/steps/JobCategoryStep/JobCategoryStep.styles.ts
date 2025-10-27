@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(theme.spacing.xl),
   },
   categoryCard: {
-    width: (width - scale(52)) / 2,
+    width: (width - scale(55)) / 2,
     minHeight: verticalScale(150),
     backgroundColor: '#FFFFFF',
     borderRadius: theme.borderRadius.lg,
@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   categoryCardSelected: {
-    borderWidth: moderateScale(3),
-    transform: [{ scale: 1.02 }],
+    // Border color changes dynamically in component
+    // Keeping same border width to prevent layout shift
   },
   categoryCardCentered: {
     alignSelf: 'center',
@@ -180,8 +180,7 @@ const styles = StyleSheet.create({
     padding: scale(theme.spacing.md),
     borderRadius: theme.borderRadius.md,
     borderLeftWidth: moderateScale(4),
-    borderLeftColor: '#2E86AB',
-    marginTop: verticalScale(theme.spacing.sm),
+    borderLeftColor: '#2E86AB'
   },
   helpText: {
     fontSize: moderateScale(13),

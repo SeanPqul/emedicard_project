@@ -1,7 +1,14 @@
 import { v } from "convex/values";
+import { calculateSessionBounds, isSessionActive, isSessionPast, isSessionUpcoming } from "../lib/timezone";
 import { mutation, query } from "../_generated/server";
 import { Doc } from "../_generated/dataModel";
 import { AdminRole } from "../users/roles";
+
+/**
+ * ORIENTATION SECURITY CONFIGURATION
+ * Default minimum duration if not specified in schedule
+ */
+const DEFAULT_MINIMUM_DURATION_MINUTES = 20; // Default: 20 minutes
 
 /**
  * Check-in attendee via QR code scan
@@ -54,6 +61,24 @@ export const checkIn = mutation({
     // Check if orientation status is Scheduled
     if (orientation.orientationStatus !== "Scheduled") {
       throw new Error(`Cannot check in. Orientation status is: ${orientation.orientationStatus}`);
+    }
+
+    // Validate orientation date (must be today)
+    if (orientation.orientationDate) {
+      const orientationDate = new Date(orientation.orientationDate);
+      const today = new Date();
+      
+      // Set both to start of day for comparison
+      orientationDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      
+      if (orientationDate.getTime() !== today.getTime()) {
+        const scheduledDateStr = new Date(orientation.orientationDate).toLocaleDateString();
+        throw new Error(
+          `Cannot check in. This orientation is scheduled for ${scheduledDateStr}. ` +
+          `Please return on the scheduled date.`
+        );
+      }
     }
 
     // Perform check-in
@@ -135,6 +160,32 @@ export const checkOut = mutation({
     // Check if checked in first
     if (!orientation.checkInTime) {
       throw new Error("Cannot check out without checking in first");
+    }
+
+    // Get the orientation schedule to check duration requirement
+    const orientationSchedules = orientation.orientationDate && orientation.timeSlot
+      ? await ctx.db
+          .query("orientationSchedules")
+          .withIndex("by_date", (q) => q.eq("date", orientation.orientationDate!))
+          .filter((q) => 
+            q.eq(q.field("time"), orientation.timeSlot!)
+          )
+          .first()
+      : null;
+
+    // Determine required duration (use schedule duration or default)
+    const requiredDurationMinutes = orientationSchedules?.durationMinutes || DEFAULT_MINIMUM_DURATION_MINUTES;
+    const requiredDurationMs = requiredDurationMinutes * 60 * 1000;
+
+    // Validate minimum orientation duration to prevent fraudulent early check-outs
+    const timeElapsed = Date.now() - orientation.checkInTime;
+    const timeElapsedMinutes = Math.floor(timeElapsed / (60 * 1000));
+    
+    if (timeElapsed < requiredDurationMs) {
+      const remainingMinutes = Math.ceil((requiredDurationMs - timeElapsed) / (60 * 1000));
+      throw new Error(
+        `Cannot check out yet. This orientation requires ${requiredDurationMinutes} minutes. Time elapsed: ${timeElapsedMinutes} minutes. Please wait ${remainingMinutes} more minutes.`
+      );
     }
 
     // Perform check-out
@@ -371,10 +422,29 @@ export const getOrientationSchedulesForDate = query({
           }
         }
 
+        // Calculate session status based on current time
+        const now = Date.now();
+        const startMinutes = schedule.startMinutes ?? 0;
+        const endMinutes = schedule.endMinutes ?? 1439;
+        
+        // Calculate session bounds in Philippine timezone
+        const { sessionStart, sessionEnd } = calculateSessionBounds(
+          schedule.date,
+          startMinutes,
+          endMinutes
+        );
+        
+        // Determine session status
+        const isActive = isSessionActive(sessionStart, sessionEnd, now);
+        const isPast = isSessionPast(sessionEnd, now);
+        const isUpcoming = isSessionUpcoming(sessionStart, now);
+
         return {
           scheduleId: schedule._id,
           date: schedule.date,
           time: schedule.time,
+          startMinutes: schedule.startMinutes,
+          endMinutes: schedule.endMinutes,
           venue: schedule.venue,
           instructor: schedule.instructor || instructorDetails,
           totalSlots: schedule.totalSlots,
@@ -385,6 +455,9 @@ export const getOrientationSchedulesForDate = query({
             (a) => a.orientationStatus === "Completed"
           ).length,
           checkedInCount: validAttendees.filter((a) => a.checkInTime).length,
+          isActive,
+          isPast,
+          isUpcoming,
         };
       })
     );

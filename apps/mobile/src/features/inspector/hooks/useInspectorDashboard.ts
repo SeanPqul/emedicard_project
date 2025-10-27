@@ -11,6 +11,7 @@ import {
   calculateSessionStats,
   enrichSessionData,
   isTimeSlotActive,
+  getSessionBounds,
 } from '../lib/utils';
 
 /**
@@ -30,9 +31,9 @@ export function useInspectorDashboard() {
   const dashboardData = useMemo<DashboardData | null>(() => {
     if (!schedules) return null;
 
-    // Enrich sessions with computed stats
-    const enrichedSessions: SessionWithStats[] = schedules.map((schedule: any) =>
-      enrichSessionData({
+    // Enrich sessions with computed stats and server-provided status
+    const enrichedSessions: SessionWithStats[] = schedules.map((schedule: any) => {
+      const baseSession = {
         _id: schedule.scheduleId,
         date: schedule.date,
         timeSlot: schedule.time,
@@ -40,8 +41,18 @@ export function useInspectorDashboard() {
         maxCapacity: schedule.totalSlots,
         currentBookings: schedule.attendeeCount,
         attendees: schedule.attendees,
-      })
-    );
+      };
+      
+      const stats = calculateSessionStats(schedule.attendees);
+      
+      return {
+        ...baseSession,
+        stats,
+        isActive: schedule.isActive ?? false,
+        isPast: schedule.isPast ?? false,
+        isFuture: schedule.isUpcoming ?? false,
+      };
+    });
 
     // Calculate overall stats
     const stats: DashboardStats = {
@@ -60,35 +71,29 @@ export function useInspectorDashboard() {
       stats.completed += session.stats.completed;
     });
 
-    // Find current active session
-    const currentSession = enrichedSessions.find((session) =>
-      isTimeSlotActive(session.timeSlot)
-    );
+    // Find current active session (use server-calculated status)
+    let currentSession = enrichedSessions.find((session) => session.isActive);
 
-    // Get upcoming sessions (after current time)
-    const now = Date.now();
+    // Get upcoming sessions (use server-calculated status)
     const upcomingSessions = enrichedSessions
-      .filter((session) => {
-        const [startTime] = session.timeSlot.split(' - ');
-        if (!startTime) return false;
-        const sessionDate = new Date(session.date);
-        const [hours, minutes] = startTime.match(/(\d+):(\d+)/)?.slice(1) || ['0', '0'];
-        const isPM = startTime.includes('PM') && !startTime.startsWith('12');
-        const isAM = startTime.includes('AM') && startTime.startsWith('12');
-        
-        let hour = parseInt(hours || '0', 10);
-        if (isPM) hour += 12;
-        if (isAM) hour = 0;
-        
-        sessionDate.setHours(hour, parseInt(minutes || '0', 10), 0, 0);
-        return sessionDate.getTime() > now;
-      })
+      .filter((session) => session.isFuture)
       .slice(0, 5); // Limit to next 5 sessions
+
+    // If no active session, show the next upcoming session as current
+    // Only if there are actually upcoming sessions
+    if (!currentSession && upcomingSessions.length > 0) {
+      currentSession = upcomingSessions[0];
+    }
+
+    // Avoid showing the same session in both current and upcoming lists
+    const filteredUpcoming = currentSession
+      ? upcomingSessions.filter((s) => s._id !== currentSession!._id)
+      : upcomingSessions;
 
     return {
       stats,
       currentSession: currentSession || null,
-      upcomingSessions,
+      upcomingSessions: filteredUpcoming,
       allSessions: enrichedSessions,
     };
   }, [schedules]);
