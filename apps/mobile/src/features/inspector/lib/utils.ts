@@ -4,6 +4,8 @@
  * Helper functions for the inspector module
  */
 
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { startOfDay } from 'date-fns';
 import type {
   AttendeeData,
   AttendeeStatus,
@@ -16,17 +18,34 @@ import type {
 } from './types';
 import { QR_CODE } from './constants';
 
+// Philippine Time timezone
+const PHILIPPINE_TIMEZONE = 'Asia/Manila';
+
 // ============================================================================
 // DATE & TIME UTILITIES
 // ============================================================================
 
 /**
- | * Get start of day timestamp (00:00:00 UTC)
- | * Using UTC to ensure consistency with server-side dates
- | */
+ * Get start of day timestamp in Philippine Time (Asia/Manila)
+ * 
+ * This function converts the given date to Philippine Time,
+ * gets the start of that day (00:00:00), and returns the UTC timestamp.
+ * 
+ * This ensures consistent "today" calculation regardless of device timezone,
+ * and makes the app tamper-resistant to device clock changes.
+ * 
+ * @param date - Date or timestamp to get start of day for (defaults to current time)
+ * @returns UTC timestamp of the start of day in Philippine Time
+ */
 export const getStartOfDay = (date: Date | number = new Date()): number => {
-  const d = new Date(date);
-  return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  // Convert input to PHT timezone
+  const phtDate = toZonedTime(date, PHILIPPINE_TIMEZONE);
+  
+  // Get start of that day in PHT
+  const phtStartOfDay = startOfDay(phtDate);
+  
+  // Convert back to UTC timestamp
+  return fromZonedTime(phtStartOfDay, PHILIPPINE_TIMEZONE).getTime();
 };
 
 /**
@@ -39,10 +58,13 @@ export const getEndOfDay = (date: Date | number = new Date()): number => {
 };
 
 /**
- * Format timestamp to time string (e.g., "9:30 AM")
+ * Format timestamp to time string in Philippine Time (e.g., "9:30 AM")
  */
 export const formatTime = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleTimeString('en-US', {
+  // Convert to PHT for display
+  const phtDate = toZonedTime(timestamp, PHILIPPINE_TIMEZONE);
+  
+  return phtDate.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
@@ -50,10 +72,13 @@ export const formatTime = (timestamp: number): string => {
 };
 
 /**
- * Format timestamp to date string (e.g., "Jan 15, 2025")
+ * Format timestamp to date string in Philippine Time (e.g., "Jan 15, 2025")
  */
 export const formatDate = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleDateString('en-US', {
+  // Convert to PHT for display
+  const phtDate = toZonedTime(timestamp, PHILIPPINE_TIMEZONE);
+  
+  return phtDate.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

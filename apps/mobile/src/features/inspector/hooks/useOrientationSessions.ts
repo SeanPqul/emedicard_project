@@ -1,22 +1,33 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { SessionWithStats } from '../lib/types';
 import { getStartOfDay, enrichSessionData } from '../lib/utils';
 
 /**
- * Hook for fetching orientation sessions for a specific date
+ * Hook to manage orientation sessions for the inspector
  * Provides date selection and session data with computed statistics
  */
 export function useOrientationSessions(initialDate?: number) {
-  const [selectedDate, setSelectedDate] = useState<number>(
-    initialDate || getStartOfDay(Date.now())
-  );
+  // Get server date (tamper-proof)
+  const serverDate = useQuery(api.orientations.attendance.getCurrentPHTDate);
+  
+  // Use server date as initial date if not provided
+  const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  
+  // Initialize selectedDate with server date when available
+  useEffect(() => {
+    if (serverDate !== undefined && selectedDate === null && !initialDate) {
+      setSelectedDate(serverDate);
+    } else if (initialDate && selectedDate === null) {
+      setSelectedDate(initialDate);
+    }
+  }, [serverDate, initialDate, selectedDate]);
 
   // Fetch orientation schedules for the selected date (includes schedules with 0 attendees)
   const schedules = useQuery(
     api.orientationSchedules.getSchedulesForDate,
-    { selectedDate }
+    selectedDate !== null ? { selectedDate } : "skip"
   );
 
   // Enrich sessions with computed stats and sort by time (latest first)
@@ -73,65 +84,37 @@ export function useOrientationSessions(initialDate?: number) {
     setSelectedDate(getStartOfDay(newDate));
   };
 
-  // Helper to go to today
+  // Helper to go to today (using server date)
   const goToToday = () => {
-    setSelectedDate(getStartOfDay(Date.now()));
+    if (serverDate !== undefined) {
+      setSelectedDate(serverDate);
+    }
   };
 
-  // Check if viewing today
+  // Check if viewing today (based on server date)
   const isToday = useMemo(() => {
-    const today = getStartOfDay(Date.now());
-    return selectedDate === today;
-  }, [selectedDate]);
+    return selectedDate === serverDate;
+  }, [selectedDate, serverDate]);
 
-  // Count sessions by status
+  // Count sessions by status using backend flags
   const sessionCounts = useMemo(() => {
-    if (!sessions) {
+    if (!sessions || !schedules) {
       return { total: 0, upcoming: 0, active: 0, completed: 0 };
     }
 
-    const now = Date.now();
-    
     return sessions.reduce(
       (counts, session) => {
-        const [startTime, endTime] = session.timeSlot.split(' - ');
-        const sessionDate = new Date(session.date);
+        // Find the corresponding schedule with backend status flags
+        const schedule = schedules.find((s: any) => s.scheduleId === session._id);
         
-        // Parse start time
-        if (!startTime || !endTime) return counts;
-        const startMatch = startTime.match(/(\d+):(\d+)\s*(AM|PM)/);
-        if (startMatch) {
-          let startHour = parseInt(startMatch[1] || '0', 10);
-          const startMin = parseInt(startMatch[2] || '0', 10);
-          const isPM = startMatch[3] === 'PM';
-          
-          if (isPM && startHour !== 12) startHour += 12;
-          if (!isPM && startHour === 12) startHour = 0;
-          
-          sessionDate.setHours(startHour, startMin, 0, 0);
-          const sessionStart = sessionDate.getTime();
-          
-          // Parse end time for session end
-          const endMatch = endTime.match(/(\d+):(\d+)\s*(AM|PM)/);
-          if (endMatch) {
-            let endHour = parseInt(endMatch[1] || '0', 10);
-            const endMin = parseInt(endMatch[2] || '0', 10);
-            const endIsPM = endMatch[3] === 'PM';
-            
-            if (endIsPM && endHour !== 12) endHour += 12;
-            if (!endIsPM && endHour === 12) endHour = 0;
-            
-            const sessionEndDate = new Date(session.date);
-            sessionEndDate.setHours(endHour, endMin, 0, 0);
-            const sessionEnd = sessionEndDate.getTime();
-            
-            if (now >= sessionStart && now <= sessionEnd) {
-              counts.active++;
-            } else if (now < sessionStart) {
-              counts.upcoming++;
-            } else {
-              counts.completed++;
-            }
+        if (schedule) {
+          if (schedule.isUpcoming === true) {
+            counts.upcoming++;
+          } else if (schedule.isPast === true) {
+            counts.completed++;
+          } else {
+            // Neither upcoming nor past = currently active
+            counts.active++;
           }
         }
         
@@ -140,7 +123,7 @@ export function useOrientationSessions(initialDate?: number) {
       },
       { total: 0, upcoming: 0, active: 0, completed: 0 }
     );
-  }, [sessions]);
+  }, [sessions, schedules]);
 
   // Convex doesn't directly expose errors, but we can infer from undefined schedules after loading
   // For now, we'll return null for error state (can be enhanced later)
@@ -155,12 +138,12 @@ export function useOrientationSessions(initialDate?: number) {
   return {
     sessions,
     schedules, // Raw schedules with backend status flags
-    selectedDate,
+    selectedDate: selectedDate ?? serverDate ?? getStartOfDay(Date.now()), // Fallback chain
     changeDate,
     goToToday,
     isToday,
     sessionCounts,
-    isLoading: schedules === undefined,
+    isLoading: serverDate === undefined || selectedDate === null || schedules === undefined,
     isEmpty: sessions?.length === 0,
     error: null, // Convex doesn't expose errors in this way
     refetch,

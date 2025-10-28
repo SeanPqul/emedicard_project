@@ -1,1 +1,1 @@
-export { OrientationAttendanceScreen as default } from '../../src/screens/inspector/OrientationAttendanceScreen';
+export { InspectorScannerScreen as default } from '../../src/screens/inspector/InspectorScannerScreen';

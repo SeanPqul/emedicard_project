@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { toZonedTime } from 'date-fns-tz';
 import { theme } from '@shared/styles/theme';
 import { SkeletonLoader, ErrorState } from '@shared/components';
 import { HEADER_CONSTANTS } from '@shared/constants/header.constants';
@@ -11,6 +12,8 @@ import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { useOrientationSessions } from '@features/inspector/hooks';
 import { SessionCard } from '@features/inspector/components';
 import { formatDate } from '@features/inspector/lib/utils';
+
+const PHT_TZ = 'Asia/Manila';
 
 type FilterType = 'all' | 'upcoming' | 'completed';
 type SortType = 'time-asc' | 'time-desc';
@@ -36,10 +39,32 @@ export function OrientationSessionsScreen() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('time-desc');
 
+  // Convert PHT midnight timestamp to a Date for the picker display
+  // This must be at the top level, not inside conditional rendering
+  const datePickerValue = useMemo(() => {
+    const phtDate = toZonedTime(selectedDate, PHT_TZ);
+    const y = phtDate.getFullYear();
+    const m = phtDate.getMonth();
+    const d = phtDate.getDate();
+    // Return a device-local Date at noon for stable picker display
+    return new Date(y, m, d, 12, 0, 0, 0);
+  }, [selectedDate]);
+
   const handleDateChange = (_event: any, date?: Date) => {
     setShowDatePicker(Platform.OS === 'ios'); // Keep open on iOS
     if (date) {
-      changeDate(date.getTime());
+      // Convert the device-local date picker selection to PHT
+      // Extract Y-M-D from picker in device timezone, then interpret as PHT
+      const y = date.getFullYear();
+      const m = date.getMonth();
+      const d = date.getDate();
+      
+      // Create a Date object at noon in device timezone to avoid DST issues
+      // This represents the user's intended calendar date
+      const pickerDate = new Date(y, m, d, 12, 0, 0, 0);
+      
+      // Pass to changeDate which will apply getStartOfDay (PHT midnight)
+      changeDate(pickerDate.getTime());
     }
   };
 
@@ -154,7 +179,7 @@ export function OrientationSessionsScreen() {
 
       {showDatePicker && (
         <DateTimePicker
-          value={new Date(selectedDate)}
+          value={datePickerValue}
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleDateChange}

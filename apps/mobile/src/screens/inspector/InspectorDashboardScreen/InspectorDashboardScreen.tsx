@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { formatInTimeZone } from 'date-fns-tz';
 import { theme } from '@shared/styles/theme';
 import { LoadingSpinner, ErrorState } from '@shared/components';
 import { useRoleBasedNavigation } from '@features/navigation';
@@ -12,11 +13,31 @@ import { DailyGreeting, CurrentSessionCard, SessionCard, RecentActivity } from '
 import { HEADER_CONSTANTS } from '@shared/constants/header.constants';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 
+const PHT_TZ = 'Asia/Manila';
+
 export function InspectorDashboardScreen() {
   const { data: { currentUser: userProfile }, isLoading: userLoading } = useUsers();
   const { canAccessScreen } = useRoleBasedNavigation(userProfile?.role);
-  const { data: dashboardData, isLoading: dashboardLoading, error } = useInspectorDashboard();
+  const { data: dashboardData, serverTime, isLoading: dashboardLoading, error } = useInspectorDashboard();
   const router = useRouter();
+  const [currentTime, setCurrentTime] = useState('');
+
+  // Update current time display every second
+  useEffect(() => {
+    let offset = 0;
+    if (serverTime) {
+      offset = serverTime - Date.now();
+    }
+
+    const updateTime = () => {
+      const currentServerTime = Date.now() + offset;
+      setCurrentTime(formatInTimeZone(currentServerTime, PHT_TZ, 'h:mm:ss a'));
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, [serverTime]);
 
   React.useEffect(() => {
     if (userProfile && !canAccessScreen('inspector-dashboard')) {
@@ -82,30 +103,44 @@ export function InspectorDashboardScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={[]}>
-      {/* Green Header */}
+      {/* Minimal Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.headerTitleContainer}>
-            <Ionicons
-              name="clipboard"
-              size={HEADER_CONSTANTS.ICON_SIZE}
-              color={HEADER_CONSTANTS.WHITE}
-            />
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.title}>Inspector Dashboard</Text>
-              <Text style={styles.subtitle}>Food Safety Orientation Tracker</Text>
+            <View style={styles.iconBadge}>
+              <Ionicons
+                name="clipboard"
+                size={moderateScale(20)}
+                color={HEADER_CONSTANTS.WHITE}
+              />
             </View>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.title}>Dashboard</Text>
+              <Text style={styles.subtitle}>Orientation Tracker</Text>
+            </View>
+          </View>
+          {/* Server Time Display */}
+          <View style={styles.timeIndicator}>
+            <Ionicons name="time" size={moderateScale(14)} color={HEADER_CONSTANTS.WHITE} />
+            <Text style={styles.timeText}>{currentTime}</Text>
+            <Text style={styles.timezoneLabel}>PHT</Text>
           </View>
         </View>
       </View>
 
-      {/* Daily Greeting */}
+      {/* Simple Greeting */}
       {dashboardData && userProfile && (
-        <DailyGreeting
-          inspectorName={userProfile.fullname?.split(' ')[0] || 'Inspector'}
-          totalSessions={dashboardData.allSessions.length}
-          totalAttendees={dashboardData.stats.totalScheduled}
-        />
+        <View style={styles.greetingContainer}>
+          <Text style={styles.greeting}>
+            {getGreeting()}, {userProfile.fullname?.split(' ')[0] || 'Inspector'} 👋
+          </Text>
+          <View style={styles.sessionBadge}>
+            <Ionicons name="calendar-outline" size={moderateScale(14)} color={theme.colors.primary[500]} />
+            <Text style={styles.sessionCount}>
+              {dashboardData.allSessions.length} {dashboardData.allSessions.length === 1 ? 'session' : 'sessions'} today
+            </Text>
+          </View>
+        </View>
       )}
 
       <ScrollView
@@ -113,16 +148,19 @@ export function InspectorDashboardScreen() {
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Current Session */}
+        {/* Current Session - Most Important */}
         {dashboardData && (
-          <CurrentSessionCard session={dashboardData.currentSession} />
+          <CurrentSessionCard 
+            session={dashboardData.currentSession} 
+            serverTime={serverTime}
+          />
         )}
 
-        {/* Upcoming Sessions */}
+        {/* Upcoming Sessions Preview */}
         {dashboardData && dashboardData.upcomingSessions.length > 0 && (
           <View style={styles.upcomingSection}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>UPCOMING SESSIONS TODAY</Text>
+              <Text style={styles.sectionTitle}>UPCOMING TODAY</Text>
               <TouchableOpacity
                 onPress={() => router.push('/(inspector-tabs)/sessions')}
                 activeOpacity={0.7}
@@ -130,18 +168,22 @@ export function InspectorDashboardScreen() {
                 <Text style={styles.viewAllText}>View All</Text>
               </TouchableOpacity>
             </View>
-            {dashboardData.upcomingSessions.slice(0, 3).map((session) => (
+            {dashboardData.upcomingSessions.slice(0, 2).map((session) => (
               <SessionCard key={session._id} session={session} />
             ))}
           </View>
         )}
 
-        {/* Recent Activity */}
-        <RecentActivity scans={[]} />
-
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
 }
 
 const styles = StyleSheet.create({
@@ -151,18 +193,22 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: theme.colors.primary[500],
-    borderBottomLeftRadius: moderateScale(24),
-    borderBottomRightRadius: moderateScale(24),
-    paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
+    borderBottomLeftRadius: moderateScale(20),
+    borderBottomRightRadius: moderateScale(20),
+    paddingHorizontal: scale(20),
     paddingTop: verticalScale(16),
-    paddingBottom: verticalScale(24),
+    paddingBottom: verticalScale(18),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
   scrollViewContent: {
-    paddingBottom: verticalScale(80),
+    paddingBottom: verticalScale(100), // Extra space for tab bar on all devices
   },
   headerContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
   headerTitleContainer: {
@@ -170,20 +216,79 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  iconBadge: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(12),
+    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   headerTextContainer: {
-    marginLeft: HEADER_CONSTANTS.ICON_TEXT_GAP,
+    marginLeft: scale(12),
     flex: 1,
   },
   title: {
-    fontSize: HEADER_CONSTANTS.TITLE_FONT_SIZE,
-    fontWeight: '600',
+    fontSize: moderateScale(22),
+    fontWeight: '700',
     color: HEADER_CONSTANTS.WHITE,
-    lineHeight: HEADER_CONSTANTS.TITLE_LINE_HEIGHT,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: HEADER_CONSTANTS.SUBTITLE_FONT_SIZE,
+    fontSize: moderateScale(12),
     color: HEADER_CONSTANTS.WHITE_TRANSPARENT,
     marginTop: verticalScale(2),
+    fontWeight: '500',
+  },
+  timeIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
+    paddingHorizontal: scale(10),
+    paddingVertical: verticalScale(6),
+    borderRadius: moderateScale(12),
+    gap: scale(4),
+  },
+  timeText: {
+    fontSize: moderateScale(12),
+    fontWeight: '600',
+    color: HEADER_CONSTANTS.WHITE,
+    letterSpacing: 0.5,
+  },
+  timezoneLabel: {
+    fontSize: moderateScale(10),
+    fontWeight: '700',
+    color: HEADER_CONSTANTS.WHITE_TRANSPARENT,
+    letterSpacing: 0.5,
+    marginLeft: scale(2),
+  },
+  greetingContainer: {
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(20),
+    paddingBottom: verticalScale(16),
+    backgroundColor: theme.colors.background.primary,
+  },
+  greeting: {
+    fontSize: moderateScale(22),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(8),
+    letterSpacing: -0.3,
+  },
+  sessionBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(6),
+    alignSelf: 'flex-start',
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(6),
+    backgroundColor: `${theme.colors.primary[500]}10`,
+    borderRadius: moderateScale(20),
+  },
+  sessionCount: {
+    fontSize: moderateScale(13),
+    fontWeight: '600',
+    color: theme.colors.primary[500],
   },
   scrollView: {
     flex: 1,

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { calculateSessionBounds, isSessionActive, isSessionPast, isSessionUpcoming } from "../lib/timezone";
+import { calculateSessionBounds, isSessionActive, isSessionPast, isSessionUpcoming, getPhilippineTimeComponents } from "../lib/timezone";
 import { mutation, query } from "../_generated/server";
 import { Doc } from "../_generated/dataModel";
 import { AdminRole } from "../users/roles";
@@ -322,6 +322,45 @@ export const getAttendeesForSession = query({
 });
 
 /**
+ * Get current server time (for tamper-proof time display)
+ * Returns the current UTC timestamp from the server
+ */
+export const getCurrentServerTime = query({
+  handler: async () => {
+    return Date.now();
+  },
+});
+
+/**
+ * Get current date in Philippine Time (start of day timestamp)
+ * This prevents client-side time manipulation by always using server time
+ */
+export const getCurrentPHTDate = query({
+  handler: async () => {
+    const now = Date.now();
+    const phtComponents = getPhilippineTimeComponents(now);
+    
+    // Create a date object at midnight PHT using the components
+    const phtMidnight = new Date(
+      Date.UTC(
+        phtComponents.year,
+        phtComponents.month,
+        phtComponents.day,
+        0,
+        0,
+        0,
+        0
+      )
+    );
+    
+    // Adjust for timezone offset (PHT is UTC+8, so subtract 8 hours to get UTC timestamp of PHT midnight)
+    const phtMidnightUTC = phtMidnight.getTime() - (8 * 60 * 60 * 1000);
+    
+    return phtMidnightUTC;
+  },
+});
+
+/**
  * Get orientation schedules for a specific date with attendance details
  * (Yellow Admin view for attendance tracking)
  */
@@ -345,21 +384,11 @@ export const getOrientationSchedulesForDate = query({
       throw new Error("Unauthorized: Admin or Inspector access required");
     }
 
-    console.log('🔍 Backend Query:', {
-      receivedTimestamp: args.selectedDate,
-      receivedDate: new Date(args.selectedDate).toISOString(),
-    });
-
     // Get all orientation schedules for the selected date
     const schedules = await ctx.db
       .query("orientationSchedules")
       .withIndex("by_date", (q) => q.eq("date", args.selectedDate))
       .collect();
-
-    console.log('📅 Schedules Found:', schedules.length);
-    if (schedules.length > 0) {
-      console.log('First schedule date:', new Date(schedules[0].date).toISOString());
-    }
 
     // For each schedule, get the attendees and their attendance status
     const schedulesWithAttendees = await Promise.all(

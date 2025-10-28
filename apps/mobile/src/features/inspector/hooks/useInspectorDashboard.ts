@@ -19,12 +19,16 @@ import {
  * Fetches orientation schedules for today and calculates statistics
  */
 export function useInspectorDashboard() {
-  const today = useMemo(() => getStartOfDay(Date.now()), []);
+  // Get current server time (prevents client-side time manipulation)
+  const serverTime = useQuery(api.orientations.attendance.getCurrentServerTime);
+  
+  // Get current date from server (prevents client-side time manipulation)
+  const serverDate = useQuery(api.orientations.attendance.getCurrentPHTDate);
 
   // Fetch orientation schedules for today
   const schedules = useQuery(
     api.orientations.attendance.getOrientationSchedulesForDate,
-    { selectedDate: today }
+    serverDate !== undefined ? { selectedDate: serverDate } : "skip"
   );
 
   // Calculate dashboard data
@@ -100,7 +104,8 @@ export function useInspectorDashboard() {
 
   return {
     data: dashboardData,
-    isLoading: schedules === undefined,
+    serverTime: serverTime ?? Date.now(), // Fallback to client time during loading
+    isLoading: serverTime === undefined || serverDate === undefined || schedules === undefined,
     error: null, // Convex doesn't expose errors directly
     refetch: () => {
       // Convex queries automatically refetch, but we can expose this for manual refresh

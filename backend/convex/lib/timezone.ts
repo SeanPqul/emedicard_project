@@ -67,10 +67,10 @@ export function calculateSessionBounds(
   startMinutes: number,
   endMinutes: number
 ): { sessionStart: number; sessionEnd: number } {
-  // Add time offset to UTC midnight
-  // Subtract timezone offset to convert from local time to UTC
-  const sessionStart = dateUtcMidnight + (startMinutes * 60 * 1000) - (APP_TIMEZONE_OFFSET_MINUTES * 60 * 1000);
-  const sessionEnd = dateUtcMidnight + (endMinutes * 60 * 1000) - (APP_TIMEZONE_OFFSET_MINUTES * 60 * 1000);
+  // dateUtcMidnight is already a UTC timestamp representing midnight in PHT
+  // Simply add the time offset (startMinutes/endMinutes) to get session bounds
+  const sessionStart = dateUtcMidnight + (startMinutes * 60 * 1000);
+  const sessionEnd = dateUtcMidnight + (endMinutes * 60 * 1000);
   
   return { sessionStart, sessionEnd };
 }

@@ -1,17 +1,118 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
+import { isSameDay, isBefore } from 'date-fns';
 import { theme } from '@shared/styles/theme';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { SessionWithStats } from '../../lib/types';
 
+const PHT_TZ = 'Asia/Manila';
+
 interface CurrentSessionCardProps {
   session: SessionWithStats | null;
+  serverTime?: number; // Server time for tamper-proof calculations
 }
 
-export function CurrentSessionCard({ session }: CurrentSessionCardProps) {
+// Parse time string to minutes since midnight
+function parseTimeString(timeStr: string): number | null {
+  const match = timeStr.trim().match(/(\d+):(\d+)\s*(AM|PM)/);
+  if (!match) return null;
+  let hours = parseInt(match[1] || '0');
+  const minutes = parseInt(match[2] || '0');
+  const period = match[3];
+  if (period === 'PM' && hours !== 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+  return hours * 60 + minutes;
+}
+
+// Calculate session timestamps from date and timeslot
+function getSessionTimestamps(
+  sessionDate: number,
+  timeSlot: string
+): { startTs: number; endTs: number } | null {
+  const [startTime, endTime] = timeSlot.split(' - ');
+  if (!startTime || !endTime) return null;
+
+  const startMins = parseTimeString(startTime);
+  const endMins = parseTimeString(endTime);
+  if (startMins === null || endMins === null) return null;
+
+  // sessionDate is already a UTC timestamp representing PHT midnight
+  // Add the minutes offset directly to get session start/end in UTC
+  const startTs = sessionDate + (startMins * 60 * 1000);
+  const endTs = sessionDate + (endMins * 60 * 1000);
+
+  return {
+    startTs,
+    endTs,
+  };
+}
+
+// Helper to calculate time context using PHT
+function getTimeContext(
+  session: SessionWithStats,
+  currentTime: number
+): string {
+  const timestamps = getSessionTimestamps(session.date, session.timeSlot);
+  if (!timestamps) return '';
+
+  const { startTs, endTs } = timestamps;
+  const now = currentTime;
+  const nowPHT = toZonedTime(now, PHT_TZ);
+  const startPHT = toZonedTime(startTs, PHT_TZ);
+
+  // Trust backend isActive flag for LIVE status
+  if (session.isActive) {
+    const minsLeft = Math.max(0, Math.ceil((endTs - now) / 60000));
+    if (minsLeft < 15) return `⚠️ Ending in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}`;
+    if (minsLeft < 60) return `Ends in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}`;
+    const hoursLeft = Math.floor(minsLeft / 60);
+    const remainingMins = minsLeft % 60;
+    return `Ends in ${hoursLeft}h ${remainingMins}m`;
+  }
+
+  // For upcoming sessions
+  if (isBefore(nowPHT, startPHT)) {
+    const minsUntil = Math.max(0, Math.ceil((startTs - now) / 60000));
+    const todayInPHT = isSameDay(nowPHT, startPHT);
+
+    if (todayInPHT) {
+      if (minsUntil < 60) return `Starts in ${minsUntil} minute${minsUntil !== 1 ? 's' : ''}`;
+      const hoursUntil = Math.floor(minsUntil / 60);
+      const remainingMins = minsUntil % 60;
+      return `Starts in ${hoursUntil}h ${remainingMins}m`;
+    }
+
+    return `Starts ${formatInTimeZone(startTs, PHT_TZ, "EEE, MMM d 'at' h:mm a")}`;
+  }
+
+  return 'Session ended';
+}
+
+export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardProps) {
   const router = useRouter();
+  const [timeContext, setTimeContext] = useState('');
+
+  // Update time context continuously using server-adjusted time
+  useEffect(() => {
+    if (!session || !serverTime) return;
+    
+    // Calculate offset once
+    const offset = serverTime - Date.now();
+    
+    const updateTime = () => {
+      // Use server time by adding the calculated offset to current client time
+      const currentServerTime = Date.now() + offset;
+      setTimeContext(getTimeContext(session, currentServerTime));
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 60000); // Update every minute
+    
+    return () => clearInterval(interval);
+  }, [session, serverTime]);
 
   if (!session) {
     return (
@@ -29,10 +130,6 @@ export function CurrentSessionCard({ session }: CurrentSessionCardProps) {
       </View>
     );
   }
-
-  const handleScanPress = () => {
-    router.push('/(inspector-tabs)/scanner');
-  };
 
   const handleViewAttendeesPress = () => {
     router.push({
@@ -88,6 +185,30 @@ export function CurrentSessionCard({ session }: CurrentSessionCardProps) {
           <Text style={styles.venueText}>{session.venue}</Text>
         </View>
 
+        {/* Time Context & Capacity */}
+        <View style={styles.infoRow}>
+          {timeContext && (
+            <View style={styles.infoChip}>
+              <Ionicons
+                name="time-outline"
+                size={moderateScale(14)}
+                color={theme.colors.primary[500]}
+              />
+              <Text style={styles.infoChipText}>{timeContext}</Text>
+            </View>
+          )}
+          <View style={styles.infoChip}>
+            <Ionicons
+              name="people-outline"
+              size={moderateScale(14)}
+              color={theme.colors.text.secondary}
+            />
+            <Text style={styles.infoChipText}>
+              {session.currentBookings}/{session.maxCapacity} capacity
+            </Text>
+          </View>
+        </View>
+
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{session.stats.totalAttendees}</Text>
@@ -127,33 +248,18 @@ export function CurrentSessionCard({ session }: CurrentSessionCardProps) {
           </View>
         </View>
 
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
-            onPress={handleScanPress}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name="qr-code-outline"
-              size={moderateScale(20)}
-              color="#FFFFFF"
-            />
-            <Text style={styles.primaryButtonText}>Scan QR Code</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
-            onPress={handleViewAttendeesPress}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name="people-outline"
-              size={moderateScale(20)}
-              color={theme.colors.primary[500]}
-            />
-            <Text style={styles.secondaryButtonText}>View Attendees</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.viewAttendeesButton}
+          onPress={handleViewAttendeesPress}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="people-outline"
+            size={moderateScale(20)}
+            color="#FFFFFF"
+          />
+          <Text style={styles.viewAttendeesButtonText}>View Attendees</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -162,7 +268,7 @@ export function CurrentSessionCard({ session }: CurrentSessionCardProps) {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: scale(16),
-    marginTop: verticalScale(24),
+    marginTop: verticalScale(20),
   },
   sectionTitle: {
     fontSize: moderateScale(12),
@@ -260,12 +366,32 @@ const styles = StyleSheet.create({
   venueRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: verticalScale(16),
+    marginBottom: verticalScale(12),
   },
   venueText: {
     fontSize: moderateScale(14),
     color: theme.colors.text.secondary,
     marginLeft: scale(4),
+  },
+  infoRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: scale(8),
+    marginBottom: verticalScale(16),
+  },
+  infoChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+    backgroundColor: theme.colors.background.secondary,
+    paddingHorizontal: scale(10),
+    paddingVertical: verticalScale(6),
+    borderRadius: moderateScale(8),
+  },
+  infoChipText: {
+    fontSize: moderateScale(12),
+    fontWeight: '500',
+    color: theme.colors.text.secondary,
   },
   divider: {
     height: 1,
@@ -325,35 +451,18 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary[500],
     borderRadius: moderateScale(4),
   },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: scale(12),
-  },
-  button: {
-    flex: 1,
+  viewAttendeesButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: verticalScale(14),
     borderRadius: moderateScale(12),
     gap: scale(8),
-  },
-  primaryButton: {
     backgroundColor: theme.colors.primary[500],
   },
-  primaryButtonText: {
+  viewAttendeesButtonText: {
     fontSize: moderateScale(14),
     fontWeight: '600',
     color: '#FFFFFF',
-  },
-  secondaryButton: {
-    backgroundColor: `${theme.colors.primary[500]}15`,
-    borderWidth: 1,
-    borderColor: theme.colors.primary[500],
-  },
-  secondaryButtonText: {
-    fontSize: moderateScale(14),
-    fontWeight: '600',
-    color: theme.colors.primary[500],
   },
 });
