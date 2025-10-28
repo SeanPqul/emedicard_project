@@ -43,7 +43,14 @@ export const getAdminNotifications = query({
     if (admin.managedCategories && admin.managedCategories.length > 0) {
       const filteredNotifications = [];
       for (const notification of notifications) {
-        if (notification.applicationId) {
+        // First check if notification has a jobCategoryId (new approach)
+        if (notification.jobCategoryId) {
+          if (admin.managedCategories.includes(notification.jobCategoryId)) {
+            filteredNotifications.push(notification);
+          }
+        }
+        // Fallback: check via applicationId (for backward compatibility)
+        else if (notification.applicationId) {
           const application = await ctx.db.get(notification.applicationId);
           if (
             application &&
@@ -52,7 +59,7 @@ export const getAdminNotifications = query({
             filteredNotifications.push(notification);
           }
         } else {
-          // Include notifications not tied to a specific application (e.g., general admin notifications)
+          // Include notifications not tied to a specific category (e.g., general admin notifications)
           filteredNotifications.push(notification);
         }
       }

@@ -517,6 +517,30 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(12),
     paddingHorizontal: scale(4),
   },
+  sessionOptionDisabled: {
+    opacity: 0.5,
+    backgroundColor: theme.colors.background.secondary,
+  },
+  sessionOptionTimeDisabled: {
+    color: theme.colors.text.tertiary,
+  },
+  sessionOptionVenueDisabled: {
+    color: theme.colors.text.tertiary,
+  },
+  sessionOptionCapacityDisabled: {
+    color: theme.colors.text.tertiary,
+  },
+  pastBadge: {
+    backgroundColor: `${theme.colors.text.tertiary}15`,
+    paddingHorizontal: scale(6),
+    paddingVertical: verticalScale(2),
+    borderRadius: moderateScale(8),
+  },
+  pastText: {
+    fontSize: moderateScale(9),
+    fontWeight: '700',
+    color: theme.colors.text.tertiary,
+  },
 });
 
 // Session Option Card Component
@@ -604,33 +628,3 @@ const SessionOptionCard: React.FC<SessionOptionCardProps> = ({
   );
 };
 
-// Add disabled styles
-const disabledStyles = StyleSheet.create({
-  sessionOptionDisabled: {
-    opacity: 0.5,
-    backgroundColor: theme.colors.background.secondary,
-  },
-  sessionOptionTimeDisabled: {
-    color: theme.colors.text.tertiary,
-  },
-  sessionOptionVenueDisabled: {
-    color: theme.colors.text.tertiary,
-  },
-  sessionOptionCapacityDisabled: {
-    color: theme.colors.text.tertiary,
-  },
-  pastBadge: {
-    backgroundColor: `${theme.colors.text.tertiary}15`,
-    paddingHorizontal: scale(6),
-    paddingVertical: verticalScale(2),
-    borderRadius: moderateScale(8),
-  },
-  pastText: {
-    fontSize: moderateScale(9),
-    fontWeight: '700',
-    color: theme.colors.text.tertiary,
-  },
-});
-
-// Merge disabled styles into main styles
-Object.assign(styles, disabledStyles);

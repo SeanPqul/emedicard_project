@@ -94,14 +94,22 @@ export const uploadDocumentsMutation = mutation({
       // Notify admin about the resubmission
       const admins = await ctx.db.query("users").withIndex("by_role", (q) => q.eq("role", "admin")).collect();
       for (const admin of admins) {
-        await ctx.db.insert("notifications", {
-          userId: admin._id,
-          title: "Document Resubmitted",
-          message: `Applicant ${user.fullname} has resubmitted '${documentType.name}' for application ${application._id}.`,
-          notificationType: "document_resubmission",
-          isRead: false,
-          applicationId: application._id,
-        });
+        // Check if admin manages this health card category
+        const shouldNotify = !admin.managedCategories ||
+          admin.managedCategories.length === 0 ||
+          admin.managedCategories.includes(application.jobCategoryId);
+
+        if (shouldNotify) {
+          await ctx.db.insert("notifications", {
+            userId: admin._id,
+            title: "Document Resubmitted",
+            message: `Applicant ${user.fullname} has resubmitted '${documentType.name}' for application ${application._id}.`,
+            notificationType: "document_resubmission",
+            isRead: false,
+            applicationId: application._id,
+            jobCategoryId: application.jobCategoryId,
+          });
+        }
       }
 
       // After resubmission, check if all documents for the application are now in a reviewable state

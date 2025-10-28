@@ -44,6 +44,24 @@ export const get = query({
           fileUrl = await ctx.storage.getUrl(userUpload.storageFileId);
         }
 
+        // Check if this document was previously rejected and resubmitted
+        let isResubmission = false;
+        if (userUpload) {
+          const rejectionHistory = await ctx.db
+            .query("documentRejectionHistory")
+            .withIndex("by_document_type", (q) => 
+              q.eq("applicationId", application._id)
+               .eq("documentTypeId", req.documentTypeId)
+            )
+            .order("desc")
+            .first();
+          
+          // If there's a rejection history and it was replaced, this is a resubmission
+          if (rejectionHistory && rejectionHistory.wasReplaced) {
+            isResubmission = true;
+          }
+        }
+
         return {
           _id: req._id, // Add the requirement's ID
           requirementName: documentType?.name ?? "Unknown Requirement",
@@ -54,6 +72,7 @@ export const get = query({
           uploadId: userUpload?._id, // The ID of the documentUploads record
           remarks: userUpload?.adminRemarks,
           extractedText: userUpload?.extractedText, // Include extractedText
+          isResubmission: isResubmission, // Track if this is a resubmission
         };
       })
     );

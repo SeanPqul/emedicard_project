@@ -385,14 +385,14 @@ export const getOrientationSchedulesForDate = query({
     }
 
     // Get all orientation schedules for the selected date
-    const schedules = await ctx.db
+    const allSchedules = await ctx.db
       .query("orientationSchedules")
       .withIndex("by_date", (q) => q.eq("date", args.selectedDate))
       .collect();
 
     // For each schedule, get the attendees and their attendance status
     const schedulesWithAttendees = await Promise.all(
-      schedules.map(async (schedule) => {
+      allSchedules.map(async (schedule) => {
         // Get all orientations matching this schedule
         const orientations = await ctx.db
           .query("orientations")
@@ -554,6 +554,91 @@ export const updateInspectorNotes = mutation({
     return {
       success: true,
       message: "Inspector notes updated successfully",
+    };
+  },
+});
+
+/**
+ * Manually update orientation status (for admin override)
+ * Allows admin to mark attendees as Completed or Excused manually
+ */
+export const manuallyUpdateAttendanceStatus = mutation({
+  args: {
+    orientationId: v.id("orientations"),
+    newStatus: v.union(
+      v.literal("Completed"),
+      v.literal("Excused"),
+      v.literal("Missed")
+    ),
+    adminNotes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Verify admin role
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isAdmin) {
+      throw new Error("Unauthorized: Admin access required");
+    }
+
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Authentication failed");
+
+    const adminUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!adminUser) throw new Error("Admin user not found");
+
+    const orientation = await ctx.db.get(args.orientationId);
+    if (!orientation) {
+      throw new Error("Orientation not found");
+    }
+
+    // Update orientation status
+    const updateData: any = {
+      orientationStatus: args.newStatus,
+    };
+
+    // If marking as Completed, ensure check-in and check-out times exist
+    if (args.newStatus === "Completed") {
+      if (!orientation.checkInTime) {
+        updateData.checkInTime = Date.now();
+        updateData.checkedInBy = adminUser._id;
+      }
+      if (!orientation.checkOutTime) {
+        updateData.checkOutTime = Date.now();
+        updateData.checkedOutBy = adminUser._id;
+      }
+    }
+
+    if (args.adminNotes) {
+      updateData.inspectorNotes = args.adminNotes;
+    }
+
+    await ctx.db.patch(args.orientationId, updateData);
+
+    // Update application status if marked as Completed
+    if (args.newStatus === "Completed") {
+      await ctx.db.patch(orientation.applicationId, {
+        applicationStatus: "Attendance Validation",
+        orientationCompleted: true,
+        updatedAt: Date.now(),
+        lastUpdatedBy: adminUser._id,
+      });
+    }
+
+    // Log admin activity
+    await ctx.db.insert("adminActivityLogs", {
+      adminId: adminUser._id,
+      activityType: "orientation_manual_status_update",
+      details: `Manually updated orientation status to ${args.newStatus}${args.adminNotes ? ` - Notes: ${args.adminNotes}` : ""}`,
+      timestamp: Date.now(),
+      applicationId: orientation.applicationId,
+    });
+
+    return {
+      success: true,
+      message: `Orientation status updated to ${args.newStatus}`,
     };
   },
 });

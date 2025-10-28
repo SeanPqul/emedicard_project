@@ -94,28 +94,36 @@ export const logAuthError = (error: any, context: ErrorContext): void => {
     } : null,
   };
 
-  // Structured console logging for developers
-  console.group(' Authentication Error - Developer Debug Info');
-  console.error(' Error Summary:', {
-    code: errorDetails.errorCode,
-    message: errorDetails.errorMessage,
-    timestamp: context.timestamp,
-  });
-  console.error('🔍 Detailed Error:', errorDetails);
-  console.error('👤 User Context:', {
-    email: context.email,
-    url: context.url,
-    timestamp: context.timestamp,
-  });
-  console.error('🌐 Browser Info:', errorDetails.browserInfo);
-  if (errorDetails.connection) {
-    console.error('📡 Network Info:', errorDetails.connection);
-  }
-  console.error('📚 Full Error Object:', error);
-  console.groupEnd();
+  // Only log in development mode
+  if (process.env.NODE_ENV === 'development') {
+    // Structured console logging for developers
+    console.group(' Authentication Error - Developer Debug Info');
+    console.error(' Error Summary:', {
+      code: errorDetails.errorCode,
+      message: errorDetails.errorMessage,
+      timestamp: context.timestamp,
+    });
+    console.error('🔍 Detailed Error:', errorDetails);
+    console.error('👤 User Context:', {
+      email: context.email,
+      url: context.url,
+      timestamp: context.timestamp,
+    });
+    console.error('🌐 Browser Info:', errorDetails.browserInfo);
+    if (errorDetails.connection) {
+      console.error('📡 Network Info:', errorDetails.connection);
+    }
+    console.error('📚 Full Error Object:', error);
+    console.groupEnd();
 
-  // Also log a simplified version for quick debugging
-  console.error(`Auth Error [${errorDetails.errorCode}]: ${errorDetails.errorMessage}`);
+    // Also log a simplified version for quick debugging
+    console.error(`Auth Error [${errorDetails.errorCode}]: ${errorDetails.errorMessage}`);
+  }
+  
+  // TODO: In production, send to error tracking service (e.g., Sentry)
+  // if (process.env.NODE_ENV === 'production') {
+  //   Sentry.captureException(error, { contexts: { auth: errorDetails } });
+  // }
 };
 
 /**

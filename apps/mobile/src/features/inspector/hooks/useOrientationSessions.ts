@@ -130,9 +130,11 @@ export function useOrientationSessions(initialDate?: number) {
   const refetch = () => {
     // Convex automatically refetches on retry
     // We can force a refetch by changing the date slightly and back
-    const currentDate = selectedDate;
-    setSelectedDate(currentDate + 1);
-    setTimeout(() => setSelectedDate(currentDate), 100);
+    if (selectedDate !== null) {
+      const currentDate = selectedDate;
+      setSelectedDate(currentDate + 1);
+      setTimeout(() => setSelectedDate(currentDate), 100);
+    }
   };
 
   return {

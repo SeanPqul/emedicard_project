@@ -14,6 +14,8 @@ export const createAdmin = action({ // Changed to action
     email: v.string(),
     password: v.string(),
     managedCategoryIds: v.array(v.id("jobCategories")),
+    role: v.optional(v.union(v.literal("admin"), v.literal("inspector"))),
+    fullname: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // 1. Verify Super Admin privileges (optional, but good for security)
@@ -35,11 +37,16 @@ export const createAdmin = action({ // Changed to action
         // If the user wants to update password for existing admin, a different flow is needed.
       } else {
         // If user doesn't exist in Clerk, create them with the provided password.
+        const names = args.fullname ? args.fullname.split(' ') : [];
+        const firstName = names[0] || args.email.split('@')[0];
+        const lastName = names.slice(1).join(' ') || '';
+        
         clerkUser = await clerk.users.createUser({
           emailAddress: [args.email],
           password: args.password,
           skipPasswordChecks: false,
-          // You can also set firstName, lastName if you have them
+          firstName: firstName,
+          lastName: lastName || undefined,
         });
       }
     } catch (error: any) { // Explicitly type error as any to access properties
@@ -70,11 +77,19 @@ export const createAdmin = action({ // Changed to action
     // First, check if the user exists in Convex
     const existingConvexUser = await ctx.runQuery(api.users.index.getUserByClerkId, { clerkId: clerkUser.id });
 
+    // Determine the final role: use provided role if specified, otherwise default to "admin"
+    const finalRole = args.role || "admin";
+    
+    // Determine the fullname to use
+    const finalFullname = args.fullname || 
+                          (clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : 
+                           clerkUser.firstName || args.email);
+
     if (existingConvexUser) {
       // Update existing user
       await ctx.runMutation(api.users.index.patchUserRoleAndCategories, {
         userId: existingConvexUser._id,
-        role: "admin",
+        role: finalRole,
         managedCategories: args.managedCategoryIds,
       });
     } else {
@@ -82,9 +97,9 @@ export const createAdmin = action({ // Changed to action
       await ctx.runMutation(api.users.index.systemCreateUser, {
         clerkId: clerkUser.id,
         email: args.email,
-        fullname: clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : args.email,
+        fullname: finalFullname,
         image: clerkUser.imageUrl || "",
-        role: "admin",
+        role: finalRole,
         managedCategories: args.managedCategoryIds,
         username: (clerkUser.username ?? args.email.split('@')[0]) || args.email,
       });
