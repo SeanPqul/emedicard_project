@@ -8,7 +8,6 @@ import {
   TextInput,
   Linking,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { theme } from '@shared/styles/theme';
@@ -145,33 +144,31 @@ export function InspectorHelpCenterScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={[]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name="arrow-back"
-              size={HEADER_CONSTANTS.ICON_SIZE}
-              color={HEADER_CONSTANTS.WHITE}
-            />
-          </TouchableOpacity>
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.title}>Help Center</Text>
-            <Text style={styles.subtitle}>Find answers and get support</Text>
-          </View>
-        </View>
-      </View>
-
+    <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Inline Title with Back Button */}
+        <View style={styles.titleSection}>
+          <TouchableOpacity
+            style={styles.inlineBackButton}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="arrow-back"
+              size={moderateScale(24)}
+              color={theme.colors.text.primary}
+            />
+          </TouchableOpacity>
+          <View style={styles.titleContent}>
+            <Text style={styles.pageTitle}>Help Center</Text>
+            <Text style={styles.pageSubtitle}>Find answers and get support</Text>
+          </View>
+        </View>
+
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <Ionicons
@@ -320,7 +317,7 @@ export function InspectorHelpCenterScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -329,34 +326,37 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
-  header: {
-    backgroundColor: theme.colors.primary[500],
-    borderBottomLeftRadius: moderateScale(24),
-    borderBottomRightRadius: moderateScale(24),
-    paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
-    paddingTop: verticalScale(16),
-    paddingBottom: verticalScale(24),
-  },
-  headerContent: {
+  titleSection: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingTop: verticalScale(4),
+    paddingBottom: verticalScale(12),
+    backgroundColor: theme.colors.background.secondary,
+    gap: scale(12),
   },
-  backButton: {
-    marginRight: scale(12),
-    padding: moderateScale(4),
+  inlineBackButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
+    backgroundColor: theme.colors.background.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  headerTextContainer: {
+  titleContent: {
     flex: 1,
   },
-  title: {
-    fontSize: moderateScale(24),
+  pageTitle: {
+    fontSize: moderateScale(32),
     fontWeight: '700',
-    color: HEADER_CONSTANTS.WHITE,
-    marginBottom: verticalScale(2),
+    color: theme.colors.text.primary,
+    letterSpacing: -0.5,
+    marginBottom: verticalScale(4),
   },
-  subtitle: {
-    fontSize: moderateScale(14),
-    color: 'rgba(255, 255, 255, 0.9)',
+  pageSubtitle: {
+    fontSize: moderateScale(16),
+    fontWeight: '400',
+    color: theme.colors.text.secondary,
   },
   scrollView: {
     flex: 1,

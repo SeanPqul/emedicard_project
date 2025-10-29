@@ -46,5 +46,33 @@ export const HEADER_CONSTANTS = {
   WHITE_OVERLAY: 'rgba(255, 255, 255, 0.2)',
   WHITE_TRANSPARENT: 'rgba(255, 255, 255, 0.85)',
   PRIMARY_GREEN: theme.colors.brand.primary,
+  
+  // Shadow & Elevation (for consistent depth across headers)
+  SHADOW: {
+    color: '#000',
+    offset: { width: 0, height: 4 },
+    opacity: 0.15,
+    radius: 12,
+  } as const,
+  ELEVATION: 8,
+  
+  // Layout Presets (standardized header heights)
+  LAYOUT: {
+    // Full height - For headers with multiple rows (date pickers, filters, etc.)
+    FULL: {
+      paddingTop: verticalScale(32),
+      paddingBottom: verticalScale(28),
+    },
+    // Compact - For simple single-row headers (title + optional action)
+    COMPACT: {
+      paddingTop: verticalScale(20),
+      paddingBottom: verticalScale(20),
+    },
+    // Extended - For headers with secondary info row
+    EXTENDED: {
+      paddingTop: verticalScale(24),
+      paddingBottom: verticalScale(24),
+    },
+  } as const,
 } as const;
 

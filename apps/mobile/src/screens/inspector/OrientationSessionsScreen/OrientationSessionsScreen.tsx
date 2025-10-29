@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -20,6 +20,7 @@ type SortType = 'time-asc' | 'time-desc';
 
 export function OrientationSessionsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const {
     sessions,
     schedules,
@@ -88,12 +89,23 @@ export function OrientationSessionsScreen() {
       });
     }
     
-    // Apply sort (already sorted by time-desc in hook, just reverse if needed)
-    if (sortBy === 'time-asc') {
-      filtered = [...filtered].reverse();
-    }
+    // Apply sort - always create a new sorted array to ensure correct order
+    const sorted = [...filtered].sort((a, b) => {
+      // Find schedules to get time info
+      const aSchedule = schedules.find((s: any) => s.scheduleId === a._id);
+      const bSchedule = schedules.find((s: any) => s.scheduleId === b._id);
+      
+      if (aSchedule?.startMinutes !== undefined && bSchedule?.startMinutes !== undefined) {
+        // time-desc means newest/latest first (higher startMinutes first)
+        return sortBy === 'time-desc' 
+          ? bSchedule.startMinutes - aSchedule.startMinutes 
+          : aSchedule.startMinutes - bSchedule.startMinutes;
+      }
+      
+      return 0;
+    });
     
-    return filtered;
+    return sorted;
   }, [sessions, schedules, filter, sortBy]);
 
   // Build subtitle with quick stats
@@ -110,57 +122,48 @@ export function OrientationSessionsScreen() {
 
 
   return (
-    <SafeAreaView style={styles.container} edges={[]}>
-      {/* Improved Green Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          {/* Row 1: Title + Action Button */}
-          <View style={styles.headerRow}>
-            <View style={styles.headerTitleContainer}>
-              <Ionicons
-                name="calendar"
-                size={HEADER_CONSTANTS.ICON_SIZE}
-                color={HEADER_CONSTANTS.WHITE}
-              />
-              <View style={styles.headerTextContainer}>
-                <Text style={styles.title}>Orientation Sessions</Text>
-                <Text style={styles.subtitle}>{buildSubtitle()}</Text>
-              </View>
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Modern Inline Header */}
+        <View style={styles.headerSection}>
+          <View style={styles.titleRow}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.pageTitle}>Orientation Sessions</Text>
+              <Text style={styles.subtitle}>{buildSubtitle()}</Text>
             </View>
-            
-            {/* Sort Button */}
             <TouchableOpacity
-              style={styles.actionButton}
+              style={styles.sortButton}
               onPress={() => setShowSortModal(true)}
               activeOpacity={0.7}
             >
               <Ionicons
                 name="swap-vertical-outline"
-                size={HEADER_CONSTANTS.ACTION_BUTTON_ICON_SIZE}
-                color={HEADER_CONSTANTS.WHITE}
+                size={moderateScale(20)}
+                color={theme.colors.text.secondary}
               />
             </TouchableOpacity>
           </View>
 
-          {/* Row 2: Inline Date Picker */}
+          {/* Date Picker Row */}
           <View style={styles.datePickerRow}>
             <TouchableOpacity
-              style={styles.headerDatePicker}
+              style={styles.datePicker}
               onPress={() => setShowDatePicker(true)}
               activeOpacity={0.7}
             >
-              <View style={styles.datePickerContent}>
-                <Ionicons
-                  name="calendar-outline"
-                  size={moderateScale(16)}
-                  color={HEADER_CONSTANTS.WHITE}
-                />
-                <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
-              </View>
+              <Ionicons
+                name="calendar-outline"
+                size={moderateScale(16)}
+                color={theme.colors.primary[500]}
+              />
+              <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
               <Ionicons
                 name="chevron-down"
                 size={moderateScale(16)}
-                color={HEADER_CONSTANTS.WHITE_TRANSPARENT}
+                color={theme.colors.text.tertiary}
               />
             </TouchableOpacity>
 
@@ -175,21 +178,6 @@ export function OrientationSessionsScreen() {
             )}
           </View>
         </View>
-      </View>
-
-      {showDatePicker && (
-        <DateTimePicker
-          value={datePickerValue}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={handleDateChange}
-        />
-      )}
-
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
 
         {/* Quick Filter Chips & Metrics */}
         {!isEmpty && (
@@ -318,7 +306,7 @@ export function OrientationSessionsScreen() {
             activeOpacity={1}
             onPress={() => setShowSortModal(false)}
           />
-          <View style={styles.sortModal}>
+          <View style={[styles.sortModal, { paddingBottom: Math.max(insets.bottom + verticalScale(80), verticalScale(100)) }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Sort Sessions</Text>
               <TouchableOpacity onPress={() => setShowSortModal(false)}>
@@ -328,53 +316,79 @@ export function OrientationSessionsScreen() {
 
             {/* Sort Options */}
             <View style={styles.modalSection}>
-              <Text style={styles.sectionLabel}>Order</Text>
-              <View style={styles.sortOptions}>
-                {[{ value: 'time-desc', label: 'Newest First', icon: 'arrow-down' }, 
-                  { value: 'time-asc', label: 'Oldest First', icon: 'arrow-up' }].map((option) => (
-                  <TouchableOpacity
-                    key={option.value}
+                <Text style={styles.sectionLabel}>ORDER</Text>
+                <TouchableOpacity
+                  style={[
+                    styles.sortOption,
+                    sortBy === 'time-desc' && styles.sortOptionActive,
+                  ]}
+                  onPress={() => {
+                    setSortBy('time-desc');
+                    setShowSortModal(false);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text
                     style={[
-                      styles.sortOption,
-                      sortBy === option.value && styles.sortOptionActive,
+                      styles.sortOptionText,
+                      sortBy === 'time-desc' && styles.sortOptionTextActive,
                     ]}
-                    onPress={() => {
-                      setSortBy(option.value as SortType);
-                      setShowSortModal(false);
-                    }}
                   >
-                    <View style={styles.sortOptionLeft}>
-                      <Ionicons
-                        name={option.icon as any}
-                        size={moderateScale(20)}
-                        color={sortBy === option.value ? theme.colors.primary[500] : theme.colors.text.secondary}
-                      />
-                      <View>
-                        <Text
-                          style={[
-                            styles.sortOptionText,
-                            sortBy === option.value && styles.sortOptionTextActive,
-                          ]}
-                        >
-                          {option.label}
-                        </Text>
-                      </View>
-                    </View>
-                    {sortBy === option.value && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={moderateScale(22)}
-                        color={theme.colors.primary[500]}
-                      />
-                    )}
-                  </TouchableOpacity>
-                ))}
+                    Newest First
+                  </Text>
+                  {sortBy === 'time-desc' && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={moderateScale(22)}
+                      color={theme.colors.primary[500]}
+                    />
+                  )}
+                </TouchableOpacity>
+                
+                <View style={{ height: verticalScale(12) }} />
+                
+                <TouchableOpacity
+                  style={[
+                    styles.sortOption,
+                    sortBy === 'time-asc' && styles.sortOptionActive,
+                  ]}
+                  onPress={() => {
+                    setSortBy('time-asc');
+                    setShowSortModal(false);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.sortOptionText,
+                      sortBy === 'time-asc' && styles.sortOptionTextActive,
+                    ]}
+                  >
+                    Oldest First
+                  </Text>
+                  {sortBy === 'time-asc' && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={moderateScale(22)}
+                      color={theme.colors.primary[500]}
+                    />
+                  )}
+                </TouchableOpacity>
               </View>
             </View>
-          </View>
         </View>
       )}
-    </SafeAreaView>
+
+      {/* Date Picker Modal */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={datePickerValue}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handleDateChange}
+        />
+      )}
+    </View>
   );
 }
 
@@ -383,85 +397,73 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
-  header: {
-    backgroundColor: theme.colors.primary[500],
-    borderBottomLeftRadius: moderateScale(HEADER_CONSTANTS.BORDER_RADIUS),
-    borderBottomRightRadius: moderateScale(HEADER_CONSTANTS.BORDER_RADIUS),
-    paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
-    paddingTop: HEADER_CONSTANTS.TOP_PADDING,
-    paddingBottom: HEADER_CONSTANTS.BOTTOM_PADDING,
+  headerSection: {
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(8),
+    paddingBottom: verticalScale(16),
+    backgroundColor: theme.colors.background.primary,
   },
-  headerContent: {
-    gap: verticalScale(16),
-  },
-  headerRow: {
+  titleRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: verticalScale(16),
   },
-  headerTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  titleContainer: {
     flex: 1,
   },
-  headerTextContainer: {
-    marginLeft: HEADER_CONSTANTS.ICON_TEXT_GAP,
-    flex: 1,
-  },
-  title: {
-    fontSize: HEADER_CONSTANTS.TITLE_FONT_SIZE,
-    fontWeight: HEADER_CONSTANTS.TITLE_FONT_WEIGHT,
-    color: HEADER_CONSTANTS.WHITE,
-    lineHeight: HEADER_CONSTANTS.TITLE_LINE_HEIGHT,
+  pageTitle: {
+    fontSize: moderateScale(32),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    letterSpacing: -0.5,
+    marginBottom: verticalScale(4),
   },
   subtitle: {
-    fontSize: HEADER_CONSTANTS.SUBTITLE_FONT_SIZE,
-    color: HEADER_CONSTANTS.WHITE_TRANSPARENT,
-    marginTop: HEADER_CONSTANTS.TITLE_MARGIN_BOTTOM,
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+    fontWeight: '500',
   },
-  actionButton: {
-    width: HEADER_CONSTANTS.ACTION_BUTTON_SIZE,
-    height: HEADER_CONSTANTS.ACTION_BUTTON_SIZE,
-    borderRadius: HEADER_CONSTANTS.ACTION_BUTTON_RADIUS,
-    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
+  sortButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
+    backgroundColor: theme.colors.background.secondary,
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: scale(12),
   },
   datePickerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(8),
   },
-  headerDatePicker: {
+  datePicker: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
+    gap: scale(8),
+    backgroundColor: theme.colors.background.secondary,
     paddingHorizontal: scale(12),
     paddingVertical: verticalScale(10),
     borderRadius: moderateScale(10),
   },
-  datePickerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(8),
-  },
   dateText: {
+    flex: 1,
     fontSize: moderateScale(14),
     fontWeight: '600',
-    color: HEADER_CONSTANTS.WHITE,
+    color: theme.colors.text.primary,
   },
   todayButton: {
     paddingHorizontal: scale(16),
     paddingVertical: verticalScale(10),
     borderRadius: moderateScale(10),
-    backgroundColor: HEADER_CONSTANTS.WHITE,
+    backgroundColor: theme.colors.primary[500],
   },
   todayButtonText: {
     fontSize: moderateScale(13),
     fontWeight: '600',
-    color: theme.colors.primary[500],
+    color: '#FFFFFF',
   },
   scrollView: {
     flex: 1,
@@ -612,6 +614,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     justifyContent: 'flex-end',
+    zIndex: 1000,
   },
   modalBackdrop: {
     position: 'absolute',
@@ -625,7 +628,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.primary,
     borderTopLeftRadius: moderateScale(20),
     borderTopRightRadius: moderateScale(20),
-    paddingBottom: verticalScale(32),
   },
   modalHeader: {
     flexDirection: 'row',
@@ -644,6 +646,7 @@ const styles = StyleSheet.create({
   modalSection: {
     paddingHorizontal: scale(20),
     paddingTop: verticalScale(20),
+    paddingBottom: verticalScale(20),
   },
   sectionLabel: {
     fontSize: moderateScale(13),
@@ -654,7 +657,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   sortOptions: {
-    gap: verticalScale(10),
+    flexDirection: 'column',
+    gap: verticalScale(12),
   },
   sortOption: {
     flexDirection: 'row',

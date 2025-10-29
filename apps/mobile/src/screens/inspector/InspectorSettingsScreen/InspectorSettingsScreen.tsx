@@ -16,29 +16,17 @@ export function InspectorSettingsScreen() {
   const appVersion = Constants.expoConfig?.version || '1.0.0';
 
   return (
-    <SafeAreaView style={styles.container} edges={[]}>
-      {/* Green Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.headerTitleContainer}>
-            <Ionicons
-              name="settings"
-              size={HEADER_CONSTANTS.ICON_SIZE}
-              color={HEADER_CONSTANTS.WHITE}
-            />
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.title}>Settings</Text>
-              <Text style={styles.subtitle}>Manage your account</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
+    <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Inline Title */}
+        <View style={styles.titleSection}>
+          <Text style={styles.pageTitle}>Settings</Text>
+        </View>
+
         {/* Profile Section */}
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
@@ -152,7 +140,7 @@ export function InspectorSettingsScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -161,38 +149,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
-  header: {
-    backgroundColor: theme.colors.primary[500],
-    borderBottomLeftRadius: moderateScale(24),
-    borderBottomRightRadius: moderateScale(24),
-    paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
-    paddingTop: verticalScale(16),
-    paddingBottom: verticalScale(24),
+  titleSection: {
+    paddingHorizontal: scale(20),
+    paddingTop: 0,
+    paddingBottom: verticalScale(8),
+    backgroundColor: theme.colors.background.secondary,
   },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  headerTextContainer: {
-    marginLeft: moderateScale(12),
-    flex: 1,
-  },
-  title: {
-    fontSize: moderateScale(24),
+  pageTitle: {
+    fontSize: moderateScale(32),
     fontWeight: '700',
-    color: HEADER_CONSTANTS.WHITE,
-    letterSpacing: 0.3,
-  },
-  subtitle: {
-    fontSize: moderateScale(14),
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginTop: verticalScale(4),
-    fontWeight: '400',
+    color: theme.colors.text.primary,
+    letterSpacing: -0.5,
   },
   scrollView: {
     flex: 1,

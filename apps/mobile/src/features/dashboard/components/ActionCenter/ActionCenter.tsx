@@ -112,8 +112,9 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
   });
 
   // 3. Orientation required (for Yellow card holders) - evaluate across actionable applications only
+  // Note: Food handlers with Pending Payment still need to schedule orientation
   const orientationApps = uniqueApps
-    .filter((app: any) => ACTIONABLE_STATUSES.has(app?.status) && app?.status !== 'Pending Payment')
+    .filter((app: any) => ACTIONABLE_STATUSES.has(app?.status))
     .filter((app: any) => {
       const name = app?.jobCategory?.name?.toLowerCase?.() || '';
       const isFoodHandler = name.includes('food');

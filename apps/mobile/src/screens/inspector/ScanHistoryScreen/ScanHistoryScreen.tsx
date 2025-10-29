@@ -82,20 +82,7 @@ export function ScanHistoryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={[]}>
-      {/* Green Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View style={styles.headerIconContainer}>
-            <Ionicons name="document-text" size={moderateScale(28)} color="#FFFFFF" />
-          </View>
-          <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>Scan History</Text>
-            <Text style={styles.headerSubtitle}>My attendance scans</Text>
-          </View>
-        </View>
-      </View>
-
+    <View style={styles.container}>
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
@@ -103,6 +90,11 @@ export function ScanHistoryScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
+        {/* Inline Title */}
+        <View style={styles.titleSection}>
+          <Text style={styles.pageTitle}>Scan History</Text>
+        </View>
+
         {/* Statistics Card */}
         <View style={styles.statsCard}>
           <Text style={styles.statsTitle}>Scan Statistics</Text>
@@ -280,7 +272,7 @@ export function ScanHistoryScreen() {
           maximumDate={new Date()}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -289,49 +281,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
-  header: {
-    backgroundColor: theme.colors.primary[500],
-    borderBottomLeftRadius: moderateScale(24),
-    borderBottomRightRadius: moderateScale(24),
-    paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
-    paddingTop: HEADER_CONSTANTS.TOP_PADDING,
-    paddingBottom: HEADER_CONSTANTS.BOTTOM_PADDING,
+  titleSection: {
+    paddingHorizontal: scale(16),
+    paddingTop: 0,
+    paddingBottom: verticalScale(8),
+    backgroundColor: theme.colors.background.secondary,
   },
-  headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(12),
-  },
-  headerIconContainer: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitleContainer: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: moderateScale(22),
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: verticalScale(2),
-  },
-  headerSubtitle: {
-    fontSize: moderateScale(13),
-    color: 'rgba(255, 255, 255, 0.8)',
+  pageTitle: {
+    fontSize: moderateScale(32),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    letterSpacing: -0.5,
   },
   content: {
     flex: 1,
   },
   contentContainer: {
-    padding: scale(16),
     paddingBottom: verticalScale(100),
   },
   statsCard: {
     backgroundColor: theme.colors.background.primary,
     borderRadius: moderateScale(12),
     padding: moderateScale(20),
+    marginHorizontal: scale(16),
     marginBottom: verticalScale(16),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -370,6 +342,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.primary,
     borderRadius: moderateScale(12),
     padding: moderateScale(20),
+    marginHorizontal: scale(16),
     marginBottom: verticalScale(16),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -442,6 +415,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   dateGroup: {
+    marginHorizontal: scale(16),
     marginBottom: verticalScale(24),
   },
   dateHeader: {
@@ -455,6 +429,7 @@ const styles = StyleSheet.create({
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginHorizontal: scale(16),
     paddingVertical: verticalScale(64),
   },
   emptyTitle: {
@@ -486,6 +461,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   loadingContainer: {
+    marginHorizontal: scale(16),
     paddingVertical: verticalScale(24),
   },
   loadingTitle: {

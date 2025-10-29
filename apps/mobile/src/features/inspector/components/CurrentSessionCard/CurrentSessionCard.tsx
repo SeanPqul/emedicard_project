@@ -117,7 +117,7 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
   if (!session) {
     return (
       <View style={styles.container}>
-        <Text style={styles.sectionTitle}>CURRENT SESSION</Text>
+        <Text style={styles.sectionTitle}>SESSION</Text>
         <View style={styles.emptyCard}>
           <Ionicons
             name="calendar-outline"
@@ -147,7 +147,7 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>CURRENT SESSION</Text>
+      <Text style={styles.sectionTitle}>SESSION</Text>
       
       <View style={styles.card}>
         <View style={styles.header}>
@@ -157,7 +157,7 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
               size={moderateScale(20)}
               color={theme.colors.primary[500]}
             />
-            <Text style={styles.timeText}>{session.timeSlot}</Text>
+            <Text style={styles.cardTimeText}>{session.timeSlot}</Text>
           </View>
           {isLive ? (
             <View style={styles.liveBadge}>
@@ -322,6 +322,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timeText: {
+    fontSize: moderateScale(11),
+    fontWeight: '600',
+    color: theme.colors.primary[500],
+    letterSpacing: 0.3,
+  },
+  timezoneLabel: {
+    fontSize: moderateScale(10),
+    fontWeight: '600',
+    color: theme.colors.text.tertiary,
+    letterSpacing: 0.3,
+  },
+  cardTimeText: {
     fontSize: moderateScale(18),
     fontWeight: '700',
     color: theme.colors.text.primary,

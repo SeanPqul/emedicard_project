@@ -20,24 +20,6 @@ export function InspectorDashboardScreen() {
   const { canAccessScreen } = useRoleBasedNavigation(userProfile?.role);
   const { data: dashboardData, serverTime, isLoading: dashboardLoading, error } = useInspectorDashboard();
   const router = useRouter();
-  const [currentTime, setCurrentTime] = useState('');
-
-  // Update current time display every second
-  useEffect(() => {
-    let offset = 0;
-    if (serverTime) {
-      offset = serverTime - Date.now();
-    }
-
-    const updateTime = () => {
-      const currentServerTime = Date.now() + offset;
-      setCurrentTime(formatInTimeZone(currentServerTime, PHT_TZ, 'h:mm:ss a'));
-    };
-    
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, [serverTime]);
 
   React.useEffect(() => {
     if (userProfile && !canAccessScreen('inspector-dashboard')) {
@@ -73,27 +55,12 @@ export function InspectorDashboardScreen() {
   if (error) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <View style={styles.headerTitleContainer}>
-              <Ionicons
-                name="clipboard"
-                size={HEADER_CONSTANTS.ICON_SIZE}
-                color={HEADER_CONSTANTS.WHITE}
-              />
-              <View style={styles.headerTextContainer}>
-                <Text style={styles.title}>Inspector Dashboard</Text>
-                <Text style={styles.subtitle}>Food Safety Orientation Tracker</Text>
-              </View>
-            </View>
-          </View>
-        </View>
         <View style={styles.errorContainer}>
           <ErrorState
             type="network"
             title="Failed to Load Dashboard"
             message="Unable to fetch dashboard data. Please check your connection and try again."
-          onRetry={() => router.replace('/(inspector-tabs)/dashboard')}
+            onRetry={() => router.replace('/(inspector-tabs)/dashboard')}
             variant="card"
           />
         </View>
@@ -102,52 +69,31 @@ export function InspectorDashboardScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={[]}>
-      {/* Minimal Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.headerTitleContainer}>
-            <View style={styles.iconBadge}>
-              <Ionicons
-                name="clipboard"
-                size={moderateScale(20)}
-                color={HEADER_CONSTANTS.WHITE}
-              />
-            </View>
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.title}>Dashboard</Text>
-              <Text style={styles.subtitle}>Orientation Tracker</Text>
-            </View>
-          </View>
-          {/* Server Time Display */}
-          <View style={styles.timeIndicator}>
-            <Ionicons name="time" size={moderateScale(14)} color={HEADER_CONSTANTS.WHITE} />
-            <Text style={styles.timeText}>{currentTime}</Text>
-            <Text style={styles.timezoneLabel}>PHT</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Simple Greeting */}
-      {dashboardData && userProfile && (
-        <View style={styles.greetingContainer}>
-          <Text style={styles.greeting}>
-            {getGreeting()}, {userProfile.fullname?.split(' ')[0] || 'Inspector'} 👋
-          </Text>
-          <View style={styles.sessionBadge}>
-            <Ionicons name="calendar-outline" size={moderateScale(14)} color={theme.colors.primary[500]} />
-            <Text style={styles.sessionCount}>
-              {dashboardData.allSessions.length} {dashboardData.allSessions.length === 1 ? 'session' : 'sessions'} today
-            </Text>
-          </View>
-        </View>
-      )}
-
+    <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Inline Title & Greeting */}
+        {userProfile && serverTime && dashboardData && (
+          <View style={styles.headerSection}>
+            <View style={styles.titleRow}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.pageTitle}>Overview</Text>
+                <View style={styles.sessionBadge}>
+                  <Text style={styles.sessionBadgeText}>
+                    {dashboardData.allSessions.length} {dashboardData.allSessions.length === 1 ? 'session' : 'sessions'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <Text style={styles.greeting}>
+              {getGreeting(serverTime)}, {userProfile.fullname?.split(' ')[0] || 'Inspector'} 👋
+            </Text>
+          </View>
+        )}
+
         {/* Current Session - Most Important */}
         {dashboardData && (
           <CurrentSessionCard 
@@ -175,12 +121,13 @@ export function InspectorDashboardScreen() {
         )}
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
+function getGreeting(serverTime: number): string {
+  // Get the hour in PHT timezone
+  const hour = parseInt(formatInTimeZone(serverTime, PHT_TZ, 'H'), 10);
   if (hour < 12) return 'Good morning';
   if (hour < 18) return 'Good afternoon';
   return 'Good evening';
@@ -189,109 +136,53 @@ function getGreeting(): string {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background.secondary,
-  },
-  header: {
-    backgroundColor: theme.colors.primary[500],
-    borderBottomLeftRadius: moderateScale(20),
-    borderBottomRightRadius: moderateScale(20),
-    paddingHorizontal: scale(20),
-    paddingTop: verticalScale(16),
-    paddingBottom: verticalScale(18),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  scrollViewContent: {
-    paddingBottom: verticalScale(100), // Extra space for tab bar on all devices
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  iconBadge: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: moderateScale(12),
-    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTextContainer: {
-    marginLeft: scale(12),
-    flex: 1,
-  },
-  title: {
-    fontSize: moderateScale(22),
-    fontWeight: '700',
-    color: HEADER_CONSTANTS.WHITE,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: moderateScale(12),
-    color: HEADER_CONSTANTS.WHITE_TRANSPARENT,
-    marginTop: verticalScale(2),
-    fontWeight: '500',
-  },
-  timeIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
-    paddingHorizontal: scale(10),
-    paddingVertical: verticalScale(6),
-    borderRadius: moderateScale(12),
-    gap: scale(4),
-  },
-  timeText: {
-    fontSize: moderateScale(12),
-    fontWeight: '600',
-    color: HEADER_CONSTANTS.WHITE,
-    letterSpacing: 0.5,
-  },
-  timezoneLabel: {
-    fontSize: moderateScale(10),
-    fontWeight: '700',
-    color: HEADER_CONSTANTS.WHITE_TRANSPARENT,
-    letterSpacing: 0.5,
-    marginLeft: scale(2),
-  },
-  greetingContainer: {
-    paddingHorizontal: scale(20),
-    paddingTop: verticalScale(20),
-    paddingBottom: verticalScale(16),
     backgroundColor: theme.colors.background.primary,
   },
-  greeting: {
-    fontSize: moderateScale(22),
-    fontWeight: '700',
-    color: theme.colors.text.primary,
-    marginBottom: verticalScale(8),
-    letterSpacing: -0.3,
-  },
-  sessionBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(6),
-    alignSelf: 'flex-start',
-    paddingHorizontal: scale(12),
-    paddingVertical: verticalScale(6),
-    backgroundColor: `${theme.colors.primary[500]}10`,
-    borderRadius: moderateScale(20),
-  },
-  sessionCount: {
-    fontSize: moderateScale(13),
-    fontWeight: '600',
-    color: theme.colors.primary[500],
+  scrollViewContent: {
+    paddingBottom: verticalScale(100),
   },
   scrollView: {
     flex: 1,
+    backgroundColor: theme.colors.background.secondary,
+  },
+  headerSection: {
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(8),
+    paddingBottom: verticalScale(16),
+    backgroundColor: theme.colors.background.primary,
+    borderBottomLeftRadius: moderateScale(24),
+    borderBottomRightRadius: moderateScale(24),
+  },
+  titleRow: {
+    marginBottom: verticalScale(12),
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(12),
+  },
+  pageTitle: {
+    fontSize: moderateScale(32),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    letterSpacing: -0.5,
+  },
+  sessionBadge: {
+    backgroundColor: `${theme.colors.primary[500]}12`,
+    paddingHorizontal: scale(10),
+    paddingVertical: verticalScale(4),
+    borderRadius: moderateScale(12),
+  },
+  sessionBadgeText: {
+    fontSize: moderateScale(12),
+    fontWeight: '600',
+    color: theme.colors.primary[500],
+  },
+  greeting: {
+    fontSize: moderateScale(18),
+    fontWeight: '500',
+    color: theme.colors.text.secondary,
+    letterSpacing: -0.2,
   },
   upcomingSection: {
     paddingHorizontal: scale(16),
