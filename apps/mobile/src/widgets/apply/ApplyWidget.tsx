@@ -184,15 +184,15 @@ export function ApplyWidget({
 
       {/* Content with Keyboard Avoiding */}
       <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         <ScrollView 
           style={styles.content} 
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ 
-            paddingBottom: hp(25),
+            paddingBottom: hp(20),
             flexGrow: 1
           }}
           keyboardShouldPersistTaps="handled"
@@ -204,7 +204,7 @@ export function ApplyWidget({
       </KeyboardAvoidingView>
 
       {/* Navigation Buttons */}
-      <View style={[styles.navigationButtons, { paddingBottom: insets.bottom + verticalScale(80) }]}>
+      <View style={[styles.navigationButtons, { paddingBottom: insets.bottom || 16 }]}>
         {currentStep > 0 && (
           <TouchableOpacity 
             style={styles.previousButton} 
