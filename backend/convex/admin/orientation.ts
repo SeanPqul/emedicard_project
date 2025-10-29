@@ -21,12 +21,39 @@ export const scheduleOrientation = mutation({
     timeSlot: v.string(),
     assignedInspectorId: v.id("users"),
     orientationVenue: v.string(),
+    allowConflict: v.optional(v.boolean()), // Allow override
   },
   handler: async (ctx: MutationCtx, args) => {
     // Check for existing orientation for this application
     const existingOrientation = await ctx.db.query("orientations")
       .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
       .unique();
+
+    // Check for inspector conflicts (unless allowConflict is true)
+    if (!args.allowConflict) {
+      const allOrientations = await ctx.db.query("orientations").collect();
+      
+      const conflicts = allOrientations.filter((orientation) => {
+        // Skip if it's the same application (for updates)
+        if (existingOrientation && orientation.applicationId === args.applicationId) {
+          return false;
+        }
+
+        // Check if same inspector, date, and time slot
+        return (
+          orientation.assignedInspectorId === args.assignedInspectorId &&
+          orientation.orientationDate === args.orientationDate &&
+          orientation.timeSlot === args.timeSlot
+        );
+      });
+
+      if (conflicts.length > 0) {
+        throw new Error(
+          `Inspector is already assigned to ${conflicts.length} orientation(s) at this time. ` +
+          `Set allowConflict=true to override.`
+        );
+      }
+    }
 
     if (existingOrientation) {
       // Update existing orientation

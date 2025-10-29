@@ -43,11 +43,13 @@ const ScheduleModal = ({
   const [venueAddress, setVenueAddress] = useState(schedule?.venue.address || "");
   const [capacity, setCapacity] = useState(schedule?.venue.capacity.toString() || "");
   const [totalSlots, setTotalSlots] = useState(schedule?.totalSlots.toString() || "");
-  const [instructorName, setInstructorName] = useState(schedule?.instructor?.name || "");
-  const [instructorDesignation, setInstructorDesignation] = useState(schedule?.instructor?.designation || "");
+  const [selectedInspectorId, setSelectedInspectorId] = useState<Id<'users'> | ''>('' as any);
   const [notes, setNotes] = useState(schedule?.notes || "");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Get all inspectors
+  const inspectors = useQuery(api.admin.orientation.getInspectors);
 
   const createSchedule = useMutation(api.orientationSchedules.mutations.createSchedule) as any;
   const updateSchedule = useMutation(api.orientationSchedules.mutations.updateSchedule) as any;
@@ -77,6 +79,11 @@ const ScheduleModal = ({
       const [year, month, day] = date.split('-').map(Number);
       const utcTimestamp = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
       
+      // Get selected inspector details if one is selected
+      const selectedInspector = selectedInspectorId && inspectors
+        ? inspectors.find((i: any) => i._id === selectedInspectorId)
+        : null;
+
       const scheduleData = {
         date: utcTimestamp,
         startMinutes: timeToMinutes(startTime),
@@ -87,7 +94,7 @@ const ScheduleModal = ({
           capacity: parseFloat(capacity),
         },
         totalSlots: parseFloat(totalSlots),
-        instructor: instructorName ? { name: instructorName, designation: instructorDesignation } : undefined,
+        instructor: selectedInspector ? { name: selectedInspector.fullname, designation: "Health Inspector" } : undefined,
         notes: notes || undefined,
       };
 
@@ -269,38 +276,30 @@ const ScheduleModal = ({
             </div>
           </div>
 
-          {/* Instructor Section */}
+          {/* Inspector Selection */}
           <div className="space-y-4 p-4 bg-emerald-50 rounded-lg">
-            <h3 className="font-semibold text-gray-900">Instructor Details (Optional)</h3>
+            <h3 className="font-semibold text-gray-900">Assigned Inspector (Optional)</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Instructor Name
-                </label>
-                <input
-                  type="text"
-                  value={instructorName}
-                  onChange={(e) => setInstructorName(e.target.value)}
-                  placeholder="e.g., Dr. Maria Santos"
-                  className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Designation
-                </label>
-                <input
-                  type="text"
-                  value={instructorDesignation}
-                  onChange={(e) => setInstructorDesignation(e.target.value)}
-                  placeholder="e.g., Health Inspector"
-                  className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                  disabled={isLoading}
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Select Health Inspector
+              </label>
+              <select
+                value={selectedInspectorId}
+                onChange={(e) => setSelectedInspectorId(e.target.value as Id<'users'>)}
+                className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                disabled={isLoading || !inspectors}
+              >
+                <option value="">No inspector assigned</option>
+                {inspectors?.map((inspector: any) => (
+                  <option key={inspector._id} value={inspector._id}>
+                    {inspector.fullname}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-2">
+                Leave empty if instructor will be assigned later
+              </p>
             </div>
           </div>
 
@@ -418,11 +417,13 @@ const BulkCreateModal = ({
   const [venueAddress, setVenueAddress] = useState("");
   const [capacity, setCapacity] = useState("");
   const [totalSlots, setTotalSlots] = useState("");
-  const [instructorName, setInstructorName] = useState("");
-  const [instructorDesignation, setInstructorDesignation] = useState("");
+  const [selectedInspectorId, setSelectedInspectorId] = useState<Id<'users'> | ''>('' as any);
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Get all inspectors
+  const inspectors = useQuery(api.admin.orientation.getInspectors);
 
   const bulkCreateSchedules = useMutation(api.orientationSchedules.mutations.bulkCreateSchedules) as any;
 
@@ -469,6 +470,11 @@ const BulkCreateModal = ({
         }
       }
 
+      // Get selected inspector details if one is selected
+      const selectedInspector = selectedInspectorId && inspectors
+        ? inspectors.find((i: any) => i._id === selectedInspectorId)
+        : null;
+
       await bulkCreateSchedules({
         dates,
         startMinutes: timeToMinutes(startTime),
@@ -479,7 +485,7 @@ const BulkCreateModal = ({
           capacity: parseFloat(capacity),
         },
         totalSlots: parseFloat(totalSlots),
-        instructor: instructorName ? { name: instructorName, designation: instructorDesignation } : undefined,
+        instructor: selectedInspector ? { name: selectedInspector.fullname, designation: "Health Inspector" } : undefined,
         notes: notes || undefined,
       });
 
@@ -689,35 +695,45 @@ const BulkCreateModal = ({
             </div>
           </div>
 
-          {/* Instructor (Optional) */}
+          {/* Inspector Selection (Optional) */}
           <div className="space-y-4 p-4 bg-emerald-50 rounded-lg">
-            <h3 className="font-semibold text-gray-900">Instructor (Optional)</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                type="text"
-                value={instructorName}
-                onChange={(e) => setInstructorName(e.target.value)}
-                placeholder="Instructor Name"
-                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                disabled={isLoading}
-              />
-              <input
-                type="text"
-                value={instructorDesignation}
-                onChange={(e) => setInstructorDesignation(e.target.value)}
-                placeholder="Designation"
-                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            <h3 className="font-semibold text-gray-900">Assigned Inspector (Optional)</h3>
+            
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Select Health Inspector
+              </label>
+              <select
+                value={selectedInspectorId}
+                onChange={(e) => setSelectedInspectorId(e.target.value as Id<'users'>)}
+                className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                disabled={isLoading || !inspectors}
+              >
+                <option value="">No inspector assigned</option>
+                {inspectors?.map((inspector: any) => (
+                  <option key={inspector._id} value={inspector._id}>
+                    {inspector.fullname}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-2">
+                Leave empty if instructor will be assigned later
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Notes
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Any additional information..."
+                rows={2}
+                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors resize-none"
                 disabled={isLoading}
               />
             </div>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes"
-              rows={2}
-              className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors resize-none"
-              disabled={isLoading}
-            />
           </div>
 
           <div className="flex gap-3 pt-4">

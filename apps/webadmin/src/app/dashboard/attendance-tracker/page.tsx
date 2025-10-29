@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from 'convex/react';
+import DashboardActivityLog from '@/components/DashboardActivityLog';
+import Navbar from '@/components/shared/Navbar';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { CheckCircle, XCircle, Clock, MapPin, User, Calendar, Users, ArrowLeft, Search, Filter, Edit2 } from 'lucide-react';
-import Navbar from '@/components/shared/Navbar';
-import DashboardActivityLog from '@/components/DashboardActivityLog';
+import { useMutation, useQuery } from 'convex/react';
+import { ArrowLeft, Calendar, CheckCircle, Clock, Edit2, Filter, MapPin, Search, User, Users, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import React, { useMemo, useState } from 'react';
 
 type AttendanceStatus = 'Scheduled' | 'Completed' | 'Missed' | 'Excused';
 

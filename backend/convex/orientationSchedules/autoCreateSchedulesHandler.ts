@@ -23,7 +23,7 @@ const DEFAULT_CONFIG = {
   // Slots configuration
   totalSlots: 25,
   
-  // Instructor information (optional)
+  // Instructor information (optional - used if no inspector assigned)
   instructor: {
     name: "Dr. Maria Santos",
     designation: "Health Inspector",
@@ -31,6 +31,9 @@ const DEFAULT_CONFIG = {
   
   // Default notes
   notes: "Please bring valid ID and application reference number. Arrive 15 minutes early.",
+  
+  // Auto-assign inspectors (set to false to use default instructor)
+  autoAssignInspectors: false, // Set to true to enable round-robin inspector assignment
 };
 
 /**
@@ -49,6 +52,17 @@ async function createSchedulesLogic(ctx: any) {
   const daysUntilNextMonday = currentDayOfWeek === 0 ? 1 : 8 - currentDayOfWeek;
   const nextMonday = new Date(now + (daysUntilNextMonday * oneDay));
   nextMonday.setHours(0, 0, 0, 0);
+  
+  // Get available inspectors if auto-assignment is enabled
+  let availableInspectors: any[] = [];
+  let inspectorIndex = 0;
+  
+  if (DEFAULT_CONFIG.autoAssignInspectors) {
+    availableInspectors = await ctx.db
+      .query("users")
+      .withIndex("by_role", (q: any) => q.eq("role", "inspector"))
+      .collect();
+  }
   
   const createdSchedules = [];
   const skippedSchedules = [];
@@ -91,6 +105,22 @@ async function createSchedulesLogic(ctx: any) {
         continue;
       }
       
+      // Determine instructor info
+      // If auto-assign is enabled and inspectors are available, use round-robin
+      // Otherwise, use default instructor from config
+      let instructorInfo = DEFAULT_CONFIG.instructor;
+      
+      if (DEFAULT_CONFIG.autoAssignInspectors && availableInspectors.length > 0) {
+        // Round-robin assignment
+        const assignedInspector = availableInspectors[inspectorIndex % availableInspectors.length];
+        inspectorIndex++;
+        
+        instructorInfo = {
+          name: assignedInspector.fullname,
+          designation: "Health Inspector",
+        };
+      }
+      
       // Create new schedule
       const scheduleId = await ctx.db.insert("orientationSchedules", {
         date: dateTimestamp,
@@ -102,7 +132,7 @@ async function createSchedulesLogic(ctx: any) {
         availableSlots: DEFAULT_CONFIG.totalSlots,
         totalSlots: DEFAULT_CONFIG.totalSlots,
         isAvailable: true,
-        instructor: DEFAULT_CONFIG.instructor,
+        instructor: instructorInfo,
         notes: DEFAULT_CONFIG.notes,
         createdAt: now,
         updatedAt: now,
