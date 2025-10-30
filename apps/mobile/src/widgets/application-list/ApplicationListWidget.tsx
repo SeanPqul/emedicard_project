@@ -2,6 +2,7 @@ import {
   RefreshControl,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -12,7 +13,6 @@ import { EmptyState } from '@/src/shared/components/feedback';
 import { FilterStatus, SortOption } from '@/src/features/application/hooks/useApplicationList';
 import { moderateScale } from '@/src/shared/utils/responsive';
 import { theme } from '@/src/shared/styles/theme';
-import { ApplicationListHeader } from './ApplicationListHeader';
 import { styles } from './ApplicationListWidget.styles';
 
 // UI constants
@@ -316,15 +316,6 @@ export function ApplicationListWidget({
 
   return (
     <View style={styles.container}>
-      {/* Green Header */}
-      <ApplicationListHeader
-        totalCount={applications.length}
-        searchQuery={searchQuery}
-        showFilters={showFilters}
-        onSearchChange={onSearchChange}
-        onToggleFilters={onToggleFilters}
-      />
-      
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -338,6 +329,63 @@ export function ApplicationListWidget({
         }
         showsVerticalScrollIndicator={false}
       >
+        {/* Inline Header Section */}
+        <View style={styles.inlineHeaderSection}>
+          <View style={styles.headerRow}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.pageTitle}>Applications</Text>
+              <View style={styles.countBadge}>
+                <Text style={styles.countBadgeText}>{applications.length}</Text>
+              </View>
+            </View>
+            
+            <TouchableOpacity 
+              style={[
+                styles.filterButton,
+                showFilters && styles.filterButtonActive
+              ]}
+              onPress={onToggleFilters}
+              activeOpacity={0.7}
+            >
+              <Ionicons 
+                name={showFilters ? 'funnel' : 'funnel-outline'} 
+                size={moderateScale(20)} 
+                color={showFilters ? theme.colors.brand.primary : theme.colors.text.secondary}
+              />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={styles.subtitle}>
+            {applications.length} {applications.length === 1 ? 'application' : 'applications'} total
+          </Text>
+          
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Ionicons 
+              name="search" 
+              size={moderateScale(18)} 
+              color={theme.colors.text.tertiary}
+              style={styles.searchIcon} 
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search applications..."
+              placeholderTextColor={theme.colors.text.tertiary}
+              value={searchQuery}
+              onChangeText={onSearchChange}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => onSearchChange('')}>
+                <Ionicons 
+                  name="close-circle" 
+                  size={moderateScale(18)} 
+                  color={theme.colors.text.tertiary}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+        
         {/* Filters Section */}
         {renderFilters()}
         

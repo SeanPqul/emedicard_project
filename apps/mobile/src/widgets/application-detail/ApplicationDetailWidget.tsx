@@ -15,7 +15,6 @@ import { styles } from './ApplicationDetailWidget.styles';
 import { theme } from '@shared/styles/theme';
 import MayaLogo from '@/assets/svgs/maya-logo-brandlogos.net_gpvn1r359.svg';
 import GCashLogo from '@/assets/svgs/gcash-logo-brandlogos.net_arv9ck6s2.svg';
-import { ApplicationDetailHeader } from './ApplicationDetailHeader';
 
 // UI constants for status colors
 const STATUS_COLORS = {
@@ -65,14 +64,6 @@ export function ApplicationDetailWidget({
 
   return (
     <View style={styles.container}>
-      {/* Green Branded Header */}
-      <ApplicationDetailHeader
-        applicationId={application._id.slice(-8)}
-        status={application.status}
-        statusColor={statusColor}
-        statusIcon={getStatusIcon(application.status)}
-      />
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
@@ -81,6 +72,26 @@ export function ApplicationDetailWidget({
         }
         showsVerticalScrollIndicator={false}
       >
+        {/* Minimal Header with Back Button */}
+        <View style={styles.inlineHeaderSection}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity 
+              onPress={() => router.replace('/(tabs)/application')} 
+              style={styles.backButton}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="arrow-back" size={moderateScale(24)} color={theme.colors.text.primary} />
+            </TouchableOpacity>
+            
+            <View style={styles.titleContainer}>
+              <Text style={styles.pageTitle}>Application Details</Text>
+            </View>
+            
+            <View style={styles.headerSpacer} />
+          </View>
+          
+          <Text style={styles.applicationIdSubtitle}>#{application._id.slice(-8).toUpperCase()}</Text>
+        </View>
 
       {/* Status Card */}
       <View style={styles.statusCard}>

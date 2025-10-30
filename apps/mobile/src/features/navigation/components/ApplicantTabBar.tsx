@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
 import ElevatedTabButton from './ElevatedTabButton';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useQuery } from 'convex/react';
+import { api } from '@backend/convex/_generated/api';
 
 const ICONS = {
   index: {
@@ -32,6 +34,9 @@ const ICONS = {
 
 export default function ApplicantTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  
+  // Get unread notifications count
+  const unreadCount = useQuery(api.notifications.getUnreadCount.getUnreadCountQuery) || 0;
 
   return (
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom || moderateScale(8) }]}>
@@ -89,7 +94,16 @@ export default function ApplicantTabBar({ state, descriptors, navigation }: Bott
             style={styles.tabButton}
             activeOpacity={0.7}
           >
-            <Ionicons name={iconName} size={moderateScale(24)} color={color} />
+            <View>
+              <Ionicons name={iconName} size={moderateScale(24)} color={color} />
+              {routeName === 'notification' && unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </View>
           </TouchableOpacity>
         );
       })}
@@ -135,5 +149,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: -moderateScale(6),
+    right: -moderateScale(10),
+    backgroundColor: '#EF4444',
+    borderRadius: moderateScale(10),
+    minWidth: moderateScale(18),
+    height: moderateScale(18),
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: moderateScale(4),
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: moderateScale(10),
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });

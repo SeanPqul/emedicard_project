@@ -570,4 +570,52 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: scale(theme.spacing.sm),
   },
+  // Modern Inline Header Styles
+  inlineHeaderSection: {
+    backgroundColor: theme.colors.background.primary,
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(12),
+    paddingBottom: verticalScale(16),
+    marginBottom: verticalScale(8),
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: verticalScale(8),
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(12),
+  },
+  pageTitle: {
+    fontSize: moderateScale(22),
+    fontWeight: '600',
+    letterSpacing: -0.3,
+    color: theme.colors.text.primary,
+  },
+  countBadge: {
+    backgroundColor: theme.colors.brand.primary,
+    paddingHorizontal: scale(8),
+    paddingVertical: verticalScale(2),
+    borderRadius: moderateScale(12),
+    minWidth: moderateScale(24),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countBadgeText: {
+    fontSize: moderateScale(12),
+    fontWeight: '700',
+    color: theme.colors.text.inverse,
+  },
+  filterButtonActive: {
+    backgroundColor: theme.colors.brand.primary + '15',
+  },
+  subtitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '500',
+    color: theme.colors.text.secondary,
+    marginBottom: verticalScale(12),
+  },
 });

@@ -520,4 +520,42 @@ export const styles = StyleSheet.create({
     paddingBottom: verticalScale(theme.spacing.xl),
     gap: verticalScale(theme.spacing.sm),
   },
+  // Minimal Inline Header Styles
+  inlineHeaderSection: {
+    backgroundColor: theme.colors.background.primary,
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(12),
+    paddingBottom: verticalScale(16),
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: verticalScale(8),
+  },
+  backButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: scale(12),
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  pageTitle: {
+    fontSize: moderateScale(20),
+    fontWeight: '600',
+    letterSpacing: -0.3,
+    color: theme.colors.text.primary,
+  },
+  headerSpacer: {
+    width: moderateScale(40),
+  },
+  applicationIdSubtitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '500',
+    color: theme.colors.text.secondary,
+    marginLeft: scale(52),
+  },
 });

@@ -7,12 +7,12 @@ export const styles = StyleSheet.create({
     paddingVertical: moderateScale(4),
   },
   stepContainer: {
-    marginBottom: moderateScale(4),
+    marginBottom: moderateScale(8),
   },
   stepRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: moderateScale(8),
+    paddingVertical: moderateScale(10),
   },
   iconContainer: {
     marginRight: moderateScale(12),
@@ -61,5 +61,21 @@ export const styles = StyleSheet.create({
     fontSize: moderateScale(11),
     fontWeight: '600',
     letterSpacing: 0.3,
+  },
+  toggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: moderateScale(10),
+    paddingHorizontal: moderateScale(16),
+    marginTop: moderateScale(8),
+    borderRadius: moderateScale(8),
+    backgroundColor: theme.colors.background.secondary,
+  },
+  toggleText: {
+    fontSize: moderateScale(13),
+    fontWeight: '600',
+    color: theme.colors.primary[600],
+    marginRight: moderateScale(6),
   },
 });

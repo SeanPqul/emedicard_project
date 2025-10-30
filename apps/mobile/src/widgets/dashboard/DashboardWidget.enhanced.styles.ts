@@ -72,4 +72,39 @@ export const styles = StyleSheet.create({
   bottomSpacing: {
     height: verticalScale(100),
   },
+  // Modern Inline Header Styles
+  inlineHeaderSection: {
+    backgroundColor: theme.colors.background.primary,
+    paddingTop: verticalScale(8),
+    paddingBottom: verticalScale(16),
+    borderBottomLeftRadius: moderateScale(24),
+    borderBottomRightRadius: moderateScale(24),
+  },
+  statusBar: {
+    paddingHorizontal: scale(20),
+    paddingVertical: verticalScale(12),
+  },
+  dateText: {
+    fontSize: moderateScale(15),
+    fontWeight: '600',
+    color: theme.colors.text.secondary,
+  },
+  inlineHeader: {
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(12),
+    paddingBottom: verticalScale(4),
+  },
+  pageTitle: {
+    fontSize: moderateScale(22),
+    fontWeight: '600',
+    letterSpacing: -0.3,
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(6),
+  },
+  greeting: {
+    fontSize: moderateScale(18),
+    fontWeight: '600',
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(24),
+  },
 });

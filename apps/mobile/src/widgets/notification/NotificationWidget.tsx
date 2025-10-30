@@ -11,7 +11,6 @@ import { EmptyState } from '@shared/components';
 import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './NotificationWidget.styles';
 import type { NotificationCategory, NotificationItem } from '@entities/notification';
-import { NotificationHeader } from './NotificationHeader';
 
 // Constants
 const NOTIFICATION_CATEGORIES: NotificationCategory[] = [
@@ -228,12 +227,6 @@ export function NotificationWidget({
 
   return (
     <View style={styles.container}>
-      {/* Green Branded Header */}
-      <NotificationHeader
-        unreadCount={unreadCount}
-        onMarkAllRead={onMarkAllRead}
-      />
-      
       <ScrollView
         style={styles.content}
         refreshControl={
@@ -241,6 +234,37 @@ export function NotificationWidget({
         }
         showsVerticalScrollIndicator={false}
       >
+        {/* Inline Header Section */}
+        <View style={styles.inlineHeaderSection}>
+          <View style={styles.headerRow}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.pageTitle}>Notifications</Text>
+              {unreadCount > 0 && (
+                <View style={styles.headerUnreadBadge}>
+                  <Text style={styles.headerUnreadBadgeText}>{unreadCount}</Text>
+                </View>
+              )}
+            </View>
+            
+            {unreadCount > 0 && (
+              <TouchableOpacity 
+                style={styles.markAllButton}
+                onPress={onMarkAllRead}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.markAllButtonText}>Mark all read</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          <Text style={styles.subtitle}>
+            {unreadCount === 0 
+              ? 'All caught up!' 
+              : `${unreadCount} unread ${unreadCount === 1 ? 'notification' : 'notifications'}`
+            }
+          </Text>
+        </View>
+        
         {/* Category Filters */}
         {renderCategoryFilters()}
         {!hasNotifications ? (

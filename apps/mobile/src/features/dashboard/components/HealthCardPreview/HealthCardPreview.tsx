@@ -242,12 +242,6 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
             alignItems: 'center', 
             marginBottom: moderateScale(12),
           }}>
-            <View style={[styles.statusDot, { 
-              backgroundColor: getStatusColor(), 
-              width: moderateScale(8), 
-              height: moderateScale(8), 
-              marginRight: moderateScale(10) 
-            }]} />
             <Text style={{ 
               fontSize: moderateScale(17), 
               fontWeight: '700',
@@ -268,13 +262,13 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
           />
         </View>
 
-        {/* CTA - enhanced affordance with optimized spacing */}
+        {/* CTA - Subtle text link */}
         <Pressable
           style={({ pressed }) => [
-            styles.actionRow, 
-            { 
+            styles.actionRow,
+            {
               paddingTop: moderateScale(16),
-              marginTop: moderateScale(2),
+              marginTop: moderateScale(4),
               borderTopWidth: 1,
               borderTopColor: theme.colors.gray[100],
             },
@@ -290,13 +284,12 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
               fontSize: moderateScale(15),
               fontWeight: '600',
               color: theme.colors.primary[600],
-              lineHeight: moderateScale(20),
             }
           ]}>
             {getActionText()}
           </Text>
           <Ionicons 
-            name="chevron-forward" 
+            name="arrow-forward" 
             size={moderateScale(20)} 
             color={theme.colors.primary[600]}
           />

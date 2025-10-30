@@ -7,7 +7,6 @@ import {
   RecentActivityList,
   ActionCenter,
 } from '@features/dashboard/components';
-import { DashboardHeaderEnhanced } from '@features/dashboard/components/DashboardHeader/DashboardHeader.enhanced';
 import { HealthCardPreview } from '@features/dashboard/components/HealthCardPreview/HealthCardPreview';
 import { PresetStatCards } from '@features/dashboard/components/StatCard/StatCard.enhanced';
 import { QuickActionsCarousel } from '@features/dashboard/components/QuickActionsCarousel/QuickActionsCarousel';
@@ -88,13 +87,21 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
         showsVerticalScrollIndicator={false}
         testID="dashboard-scroll-view"
       >
-        {/* Enhanced Header with Profile */}
-        <DashboardHeaderEnhanced
-          userProfile={userProfile}
-          greeting={getGreeting()}
-          currentTime={currentTime}
-          unreadNotificationsCount={unreadNotificationsCount}
-        />
+        {/* Inline Header Section */}
+        <View style={styles.inlineHeaderSection}>
+          <View style={styles.statusBar}>
+            <Text style={styles.dateText}>
+              {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </Text>
+          </View>
+          
+          <View style={styles.inlineHeader}>
+            <Text style={styles.pageTitle}>Overview</Text>
+            <Text style={styles.greeting}>
+              {getGreeting()}, {userProfile?.fullname || 'User'}
+            </Text>
+          </View>
+        </View>
 
         {/* Welcome Banner for New Users */}
         <WelcomeBanner isNewUser={isNewUser} />
@@ -117,7 +124,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
 
         {/* Quick Stats Section */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Your Overview</Text>
+          <Text style={styles.sectionTitle}>Quick Stats</Text>
           <View style={styles.statsGrid}>
             {(() => {
               // Application Summary Logic

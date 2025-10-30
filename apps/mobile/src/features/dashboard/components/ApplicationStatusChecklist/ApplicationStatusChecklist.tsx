@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
@@ -27,6 +27,7 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
   orientationCompleted = false,
   documentsVerified = false,
 }) => {
+  const [showAll, setShowAll] = React.useState(false);
   const getSteps = (): ChecklistStep[] => {
     const status = currentStatus || '';
     
@@ -186,39 +187,83 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
     }
   };
 
+  // Find current step index
+  const currentIndex = steps.findIndex(s => s.status === 'current');
+  
+  // Show completed steps + current + next 1 step by default
+  const visibleSteps = showAll 
+    ? steps 
+    : steps.filter((step, index) => {
+        // Always show completed steps
+        if (step.status === 'completed') return true;
+        // Always show current step
+        if (step.status === 'current') return true;
+        // Show next 1 upcoming step after current
+        if (step.status === 'upcoming' && currentIndex >= 0) {
+          return index <= currentIndex + 2;
+        }
+        return false;
+      });
+  
+  const hiddenCount = steps.length - visibleSteps.length;
+
   return (
     <View style={styles.container}>
-      {steps.map((step, index) => (
-        <View key={step.id} style={styles.stepContainer}>
-          <View style={styles.stepRow}>
-            <View style={styles.iconContainer}>
-              <Ionicons
-                name={getStepIcon(step.status)}
-                size={moderateScale(20)}
-                color={getStepColor(step.status)}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.stepText, getStepTextStyle(step.status)]}>
-                {step.label}
-              </Text>
-              {step.subtitle && step.status !== 'upcoming' && (
-                <Text style={styles.stepSubtitle}>
-                  {step.subtitle}
+      {visibleSteps.map((step, index) => {
+        const isLastVisible = index === visibleSteps.length - 1;
+        const originalIndex = steps.indexOf(step);
+        const hasMoreSteps = originalIndex < steps.length - 1;
+        
+        return (
+          <View key={step.id} style={styles.stepContainer}>
+            <View style={styles.stepRow}>
+              <View style={styles.iconContainer}>
+                <Ionicons
+                  name={getStepIcon(step.status)}
+                  size={moderateScale(20)}
+                  color={getStepColor(step.status)}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.stepText, getStepTextStyle(step.status)]}>
+                  {step.label}
                 </Text>
+                {step.subtitle && step.status !== 'upcoming' && (
+                  <Text style={styles.stepSubtitle}>
+                    {step.subtitle}
+                  </Text>
+                )}
+              </View>
+              {step.status === 'current' && (
+                <View style={[styles.currentBadge, { backgroundColor: categoryColor }]}>
+                  <Text style={styles.currentBadgeText}>Current</Text>
+                </View>
               )}
             </View>
-            {step.status === 'current' && (
-              <View style={[styles.currentBadge, { backgroundColor: categoryColor }]}>
-                <Text style={styles.currentBadgeText}>Current</Text>
-              </View>
+            {hasMoreSteps && !isLastVisible && (
+              <View style={[styles.connector, step.status === 'completed' && styles.connectorCompleted]} />
             )}
           </View>
-          {index < steps.length - 1 && (
-            <View style={[styles.connector, step.status === 'completed' && styles.connectorCompleted]} />
-          )}
-        </View>
-      ))}
+        );
+      })}
+      
+      {/* Show more/less toggle */}
+      {hiddenCount > 0 && (
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={() => setShowAll(!showAll)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.toggleText}>
+            {showAll ? 'Show less' : `View ${hiddenCount} more step${hiddenCount !== 1 ? 's' : ''}`}
+          </Text>
+          <Ionicons
+            name={showAll ? 'chevron-up' : 'chevron-down'}
+            size={moderateScale(16)}
+            color={theme.colors.primary[600]}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

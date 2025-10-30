@@ -73,4 +73,71 @@ export const styles = StyleSheet.create({
     paddingTop: verticalScale(8),
     paddingBottom: verticalScale(100),
   },
+  // Modern Inline Header Styles
+  inlineHeaderSection: {
+    backgroundColor: theme.colors.background.primary,
+    paddingTop: verticalScale(8),
+    paddingBottom: verticalScale(16),
+    marginBottom: verticalScale(16),
+  },
+  inlineHeader: {
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(12),
+    paddingBottom: verticalScale(12),
+  },
+  pageTitle: {
+    fontSize: moderateScale(22),
+    fontWeight: '600',
+    letterSpacing: -0.3,
+    color: theme.colors.text.primary,
+  },
+  profileCard: {
+    backgroundColor: theme.colors.background.primary,
+    marginHorizontal: scale(16),
+    borderRadius: moderateScale(16),
+    ...theme.shadows?.medium,
+    overflow: 'hidden',
+  },
+  profileContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: scale(16),
+  },
+  profilePictureContainer: {
+    marginRight: scale(16),
+  },
+  profilePicture: {
+    width: moderateScale(64),
+    height: moderateScale(64),
+    borderRadius: moderateScale(32),
+    backgroundColor: theme.colors.gray[200],
+  },
+  profilePicturePlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.primary[100],
+  },
+  profilePicturePlaceholderText: {
+    fontSize: moderateScale(32),
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: moderateScale(18),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(2),
+  },
+  userEmail: {
+    fontSize: moderateScale(14),
+    fontWeight: '500',
+    color: theme.colors.text.secondary,
+    marginBottom: verticalScale(4),
+  },
+  memberSince: {
+    fontSize: moderateScale(12),
+    fontWeight: '500',
+    color: theme.colors.text.tertiary,
+  },
 });

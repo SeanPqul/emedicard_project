@@ -12,7 +12,6 @@ import { ProfileLink } from '@/src/features/profile/components';
 import { SignOutButton } from '@/src/features/auth/components';
 import { moderateScale } from '@/src/shared/utils/responsive';
 import { styles } from './ProfileWidget.styles';
-import { ProfileHeader } from './ProfileHeader';
 
 interface ProfileWidgetProps {
   user: {
@@ -30,13 +29,45 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Green Branded Header */}
-        <ProfileHeader
-          displayName={user.displayName}
-          email={user.email}
-          memberSince={user.memberSince}
-          imageUrl={user.imageUrl}
-        />
+        {/* Inline Header with Profile */}
+        <View style={styles.inlineHeaderSection}>
+          <View style={styles.inlineHeader}>
+            <Text style={styles.pageTitle}>Profile</Text>
+          </View>
+          
+          {/* Profile Card */}
+          <View style={styles.profileCard}>
+            <TouchableOpacity 
+              style={styles.profileContent}
+              onPress={() => router.push('/profile/edit')}
+              activeOpacity={0.8}
+            >
+              {/* Profile Picture */}
+              <View style={styles.profilePictureContainer}>
+                {user.imageUrl ? (
+                  <Image
+                    source={{ uri: user.imageUrl }}
+                    style={styles.profilePicture}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={[styles.profilePicture, styles.profilePicturePlaceholder]}>
+                    <Text style={styles.profilePicturePlaceholderText}>👤</Text>
+                  </View>
+                )}
+              </View>
+              
+              {/* User Info */}
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>{user.displayName}</Text>
+                {user.email && <Text style={styles.userEmail}>{user.email}</Text>}
+                <Text style={styles.memberSince}>Member since {user.memberSince}</Text>
+              </View>
+              
+              <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
+            </TouchableOpacity>
+          </View>
+        </View>
 
         {/* Personal Information Card */}
         <View style={styles.card}>
