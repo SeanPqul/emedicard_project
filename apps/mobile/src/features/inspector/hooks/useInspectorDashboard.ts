@@ -1,6 +1,7 @@
 import { useMemo, useEffect } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
+import { useAuth } from '@clerk/clerk-expo';
 import {
   DashboardData,
   DashboardStats,
@@ -19,16 +20,23 @@ import {
  * Fetches orientation schedules for today and calculates statistics
  */
 export function useInspectorDashboard() {
+  // Check if user is authenticated
+  const { isSignedIn } = useAuth();
+  
   // Get current server time (prevents client-side time manipulation)
-  const serverTime = useQuery(api.orientations.attendance.getCurrentServerTime);
+  const serverTime = useQuery(
+    isSignedIn ? api.orientations.attendance.getCurrentServerTime : "skip"
+  );
   
   // Get current date from server (prevents client-side time manipulation)
-  const serverDate = useQuery(api.orientations.attendance.getCurrentPHTDate);
+  const serverDate = useQuery(
+    isSignedIn ? api.orientations.attendance.getCurrentPHTDate : "skip"
+  );
 
   // Fetch orientation schedules for today
   const schedules = useQuery(
     api.orientations.attendance.getOrientationSchedulesForDate,
-    serverDate !== undefined ? { selectedDate: serverDate } : "skip"
+    isSignedIn && serverDate !== undefined ? { selectedDate: serverDate } : "skip"
   );
 
   // Calculate dashboard data

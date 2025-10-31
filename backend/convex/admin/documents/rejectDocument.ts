@@ -123,8 +123,46 @@ export const rejectDocument = mutation({
       updatedAt: Date.now(),
     });
 
-    // 7. Notification will be sent when "Reject Application" button is clicked
-    // Skipping immediate notification to allow stacking multiple rejections
+    // 7. Send admin notification to other admins managing this category
+    const allAdmins = await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "admin"))
+      .collect();
+
+    // Get the job category for this application
+    const jobCategory = await ctx.db.get(application.jobCategoryId);
+    
+    // Filter admins who manage this category (exclude the current admin who performed the action)
+    const relevantAdmins = allAdmins.filter((adminUser) => {
+      // Skip the current admin
+      if (adminUser._id === admin._id) return false;
+      
+      // Super admin (no managed categories or empty array) can see all
+      if (!adminUser.managedCategories || adminUser.managedCategories.length === 0) {
+        return true;
+      }
+      
+      // Regular admin - check if they manage this category
+      return adminUser.managedCategories.includes(application.jobCategoryId);
+    });
+
+    // Get applicant info for notification
+    const applicant = await ctx.db.get(application.userId);
+    const applicantName = applicant?.fullname || "Unknown Applicant";
+
+    // Send notification to each relevant admin
+    for (const targetAdmin of relevantAdmins) {
+      await ctx.db.insert("notifications", {
+        userId: targetAdmin._id,
+        notificationType: "document_rejection",
+        title: "Document Rejected",
+        message: `${admin.fullname || admin.email} has rejected ${documentType.name} for ${applicantName}'s application. Reason: ${args.rejectionReason}`,
+        actionUrl: `/dashboard/${application._id}/doc_verif`,
+        applicationId: application._id,
+        jobCategoryId: application.jobCategoryId,
+        isRead: false,
+      });
+    }
 
     // 8. Create admin activity log
     await ctx.db.insert("adminActivityLogs", {
@@ -133,6 +171,7 @@ export const rejectDocument = mutation({
       // Truncate if necessary
       details: `Rejected ${documentType.name} for application ${application._id}. Reason: ${args.rejectionReason}`.substring(0, 500),
       applicationId: application._id,
+      jobCategoryId: application.jobCategoryId, // Add jobCategoryId for filtering
       timestamp: Date.now(),
     });
 

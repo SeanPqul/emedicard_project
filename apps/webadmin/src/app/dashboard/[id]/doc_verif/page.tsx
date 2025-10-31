@@ -4,11 +4,11 @@
 import ApplicantActivityLog from '@/components/ApplicantActivityLog';
 import ErrorMessage from '@/components/ErrorMessage';
 import LoadingScreen from '@/components/shared/LoadingScreen';
-import SuccessMessage from '@/components/SuccessMessage';
 import Navbar from '@/components/shared/Navbar';
+import SuccessMessage from '@/components/SuccessMessage';
 import { api } from '@/convex/_generated/api'; // Moved to top
 import { Id } from '@/convex/_generated/dataModel';
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -48,13 +48,13 @@ const rejectionCategories = [
 // --- Helper Components for this page ---
 const StatusBadge = ({ status }: { status: string }) => {
   const statusStyles: Record<string, string> = {
-    'Approved': 'bg-green-100 text-green-800 ring-1 ring-inset ring-green-600/20',
-    'Rejected': 'bg-red-100 text-red-800 ring-1 ring-inset ring-red-600/20',
-    'Pending': 'bg-yellow-100 text-yellow-800 ring-1 ring-inset ring-yellow-600/20',
-    'Missing': 'bg-gray-100 text-gray-600 ring-1 ring-inset ring-gray-500/10',
+    'Approved': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+    'Rejected': 'bg-rose-50 text-rose-700 border border-rose-200',
+    'Pending': 'bg-amber-50 text-amber-700 border border-amber-200',
+    'Missing': 'bg-gray-50 text-gray-600 border border-gray-200',
   };
   return (
-    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+    <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-medium rounded-lg ${statusStyles[status] || 'bg-gray-50 text-gray-700 border border-gray-200'}`}>
       {status}
     </span>
   );
@@ -75,6 +75,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [extractedText, setExtractedText] = useState<string[] | null>(null); // New state for extracted text
   const [showOcrModal, setShowOcrModal] = useState<boolean>(false); // New state for OCR modal visibility
   const [isRejectConfirmModalOpen, setIsRejectConfirmModalOpen] = useState(false); // New state for rejection confirmation
+  const [rejectError, setRejectError] = useState<{[key: number]: string}>({}); // Track reject button errors per document
   const router = useRouter();
 
   // --- DATA FETCHING ---
@@ -133,9 +134,17 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     try {
       setError(null);
       const pendingDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Missing' || doc.status === 'Pending');
+      const rejectedDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected') || [];
+      
       if (pendingDocs && pendingDocs.length > 0) {
         throw new Error("Please review and assign a status (Approve or Reject) to all documents before proceeding.");
       }
+      
+      // BUG FIX #2: Prevent approval if any documents are rejected
+      if (newStatus === 'Approved' && rejectedDocs.length > 0) {
+        throw new Error(`Cannot approve application. ${rejectedDocs.length} document(s) are rejected. Please use 'Reject & Notify Applicant' button instead.`);
+      }
+      
       if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Rejected')) {
         throw new Error("To reject the application, at least one document must be marked as 'Rejected'.");
       }
@@ -202,18 +211,18 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-gray-50 to-slate-100">
       <Navbar>
         <ApplicantActivityLog applicantName={data.applicantName} applicationId={params.id} />
       </Navbar>
 
       <main className="max-w-[1600px] mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <header className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-white/80 transition-all shadow-sm" aria-label="Go back">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          <button onClick={() => router.back()} className="p-2.5 rounded-xl hover:bg-white/70 transition-all border border-gray-200 bg-white/50" aria-label="Go back">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Document Verification</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Document Verification</h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">Review and validate the applicant's submitted documents.</p>
           </div>
         </header>
@@ -222,45 +231,45 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
           {/* Left Column: Applicant Info & Actions */}
           <div className="lg:col-span-1 space-y-4 sm:space-y-6 lg:sticky lg:top-20">
             {/* Applicant Card with Avatar */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-linear-to-br from-teal-400 to-emerald-500 px-6 py-5">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg">
-                    <span className="text-2xl font-bold text-emerald-600">{data.applicantName.charAt(0).toUpperCase()}</span>
+                  <div className="w-16 h-16 rounded-full bg-white/95 flex items-center justify-center shadow-md">
+                    <span className="text-2xl font-bold text-teal-600">{data.applicantName.charAt(0).toUpperCase()}</span>
                   </div>
                   <div>
-                    <h2 className="text-sm font-medium text-emerald-100">Applicant</h2>
-                    <p className="text-lg font-bold text-white">{data.applicantName}</p>
+                    <h2 className="text-xs font-medium text-white/80 uppercase tracking-wide">Applicant</h2>
+                    <p className="text-lg font-bold text-white mt-0.5">{data.applicantName}</p>
                   </div>
                 </div>
               </div>
               <div className="p-6">
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     <div>
-                      <label className="text-xs font-medium text-gray-500">Job Category</label>
-                      <p className="text-sm font-semibold text-gray-900">{data.jobCategoryName}</p>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Job Category</label>
+                      <p className="text-sm font-semibold text-gray-800 mt-0.5">{data.jobCategoryName}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <div>
-                      <label className="text-xs font-medium text-gray-500">Total Documents</label>
-                      <p className="text-sm font-semibold text-gray-900">{data.checklist.length} items</p>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Documents</label>
+                      <p className="text-sm font-semibold text-gray-800 mt-0.5">{data.checklist.length} items</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-3 p-3.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                    <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div>
-                      <label className="text-xs font-medium text-gray-500">Approved</label>
-                      <p className="text-sm font-semibold text-green-700">{data.checklist.filter(d => d.status === 'Approved').length} docs</p>
+                      <label className="text-xs font-medium text-emerald-600 uppercase tracking-wide">Approved</label>
+                      <p className="text-sm font-semibold text-emerald-700 mt-0.5">{data.checklist.filter(d => d.status === 'Approved').length} docs</p>
                     </div>
                   </div>
                 </div>
@@ -268,12 +277,12 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
             </div>
             
             {/* Actions Card */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
-                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <h2 className="text-lg font-bold text-gray-900">Final Actions</h2>
+                <h2 className="text-lg font-bold text-gray-800">Final Actions</h2>
               </div>
               {error && (
                 <div className="mb-4">
@@ -312,7 +321,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={() => handleFinalize('Approved')} 
-                  className="group w-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-3.5 rounded-xl font-bold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-xl flex items-center justify-center gap-2"
+                  className="group w-full bg-gradient-to-r from-teal-400 to-emerald-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-teal-500 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -321,7 +330,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 </button>
                 <button 
                   onClick={handleRejectClick} 
-                  className="group w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3.5 rounded-xl font-bold hover:from-red-700 hover:to-red-800 transition-all shadow-md hover:shadow-xl flex items-center justify-center gap-2"
+                  className="group w-full bg-gradient-to-r from-rose-400 to-red-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-rose-500 hover:to-red-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -336,24 +345,24 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
           </div>
 
           {/* Right Column: Document Checklist */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-md border border-gray-200">
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200">
+            <div className="bg-gradient-to-r from-slate-50 to-gray-50 px-6 py-5 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="bg-emerald-100 p-2 rounded-lg">
-                    <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="bg-teal-50 p-2.5 rounded-xl border border-teal-100">
+                    <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Document Checklist</h2>
+                    <h2 className="text-xl font-bold text-gray-800">Document Checklist</h2>
                     <p className="text-xs text-gray-600 mt-0.5">Review each document carefully before approval</p>
                   </div>
                 </div>
                 <div className="hidden sm:flex items-center gap-2">
                   <div className="text-right">
-                    <p className="text-xs text-gray-500">Progress</p>
-                    <p className="text-sm font-bold text-emerald-600">{Math.round((data.checklist.filter(d => d.status === 'Approved').length / data.checklist.length) * 100)}%</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Progress</p>
+                    <p className="text-sm font-bold text-teal-600">{Math.round((data.checklist.filter(d => d.status === 'Approved').length / data.checklist.length) * 100)}%</p>
                   </div>
                 </div>
               </div>
@@ -394,26 +403,26 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
             
             <div className="space-y-4">
               {data.checklist.map((item, idx) => (
-                <div key={item._id} className="group border-2 border-gray-200 rounded-2xl p-5 transition-all hover:shadow-lg hover:border-emerald-300 bg-white">
+                <div key={item._id} className="group border border-gray-200 rounded-2xl p-5 transition-all hover:shadow-md hover:border-teal-200 bg-white">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                     <div className="flex-1 mb-3 sm:mb-0">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-2">
                           {item.status === 'Approved' && (
-                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
+                              <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                             </div>
                           )}
                           {item.status === 'Rejected' && (
-                            <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center">
-                              <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-6 h-6 rounded-full bg-rose-100 border border-rose-200 flex items-center justify-center">
+                              <svg className="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             </div>
                           )}
-                          <h3 className="font-bold text-gray-900 text-base">{item.requirementName}{item.isRequired && <span className="text-red-500 ml-1">*</span>}</h3>
+                          <h3 className="font-bold text-gray-800 text-base">{item.requirementName}{item.isRequired && <span className="text-rose-500 ml-1">*</span>}</h3>
                         </div>
                         {item.isResubmission && (
                           <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300 shadow-sm">
@@ -426,7 +435,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {item.fileUrl ? (
                         <>
-                          <button onClick={() => setViewModalDocUrl(item.fileUrl)} className="text-sm bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 px-4 py-2 rounded-xl font-semibold hover:from-gray-200 hover:to-gray-300 transition-all shadow-sm flex items-center gap-2">
+                          <button onClick={() => setViewModalDocUrl(item.fileUrl)} className="text-sm bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-medium hover:bg-slate-200 transition-all border border-slate-200 flex items-center gap-2">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -464,7 +473,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               }
                             }}
                             disabled={!item.fileUrl}
-                            className="text-sm bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-semibold hover:bg-blue-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="text-sm bg-sky-50 text-sky-700 px-4 py-2 rounded-xl font-medium hover:bg-sky-100 disabled:opacity-40 disabled:cursor-not-allowed border border-sky-100 flex items-center gap-2"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -475,8 +484,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       ) : (
                         <span className="text-sm text-gray-400 px-4 py-2 italic">Not Submitted</span>
                       )}
-                      <button onClick={() => setOpenRemarkIndex(openRemarkIndex === idx ? null : idx)} disabled={!item.uploadId} className="p-2.5 rounded-xl hover:bg-emerald-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors" aria-label="Add remark">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-600" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>
+                      <button onClick={() => setOpenRemarkIndex(openRemarkIndex === idx ? null : idx)} disabled={!item.uploadId} className="p-2.5 rounded-xl hover:bg-teal-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-transparent hover:border-teal-100" aria-label="Add remark">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal-600" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>
                       </button>
                     </div>
                   </div>
@@ -549,31 +558,26 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     <button 
                       onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} 
                       disabled={!item.uploadId || item.status === 'Approved'} 
-                      className="flex-1 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 px-4 py-2.5 rounded-xl font-bold hover:from-emerald-100 hover:to-emerald-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all shadow-sm disabled:shadow-none flex items-center justify-center gap-2"
+                      className="flex-1 bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-emerald-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       Approve
                     </button>
-                    <button onClick={async () => {
-                      try {
-                        if (!item.uploadId) throw new Error("Document upload ID is missing.");
-                        // Directly call rejectDocumentMutation with a default remark if no specific remark is selected
-                        await rejectDocumentMutation({
-                          documentUploadId: item.uploadId,
-                          rejectionCategory: 'other', // Default category
-                          rejectionReason: 'Document rejected by admin.', // Default reason
-                          specificIssues: [],
-                        });
-                        await loadData(); // Refresh data after rejection
-                        setError(null);
-                      } catch (e: any) {
-                        setError(createAppError(e.message, 'Rejection Error'));
+                    <button onClick={() => {
+                      // BUG FIX #1: Show error if trying to reject without adding remarks
+                      if (!item.remarks || item.remarks.trim() === '') {
+                        setRejectError({...rejectError, [idx]: 'Please add remarks first using the edit icon before rejecting this document.'});
+                        setTimeout(() => {
+                          setRejectError(prev => {const newState = {...prev}; delete newState[idx]; return newState;});
+                        }, 5000); // Clear error after 5 seconds
+                      } else {
+                        setOpenRemarkIndex(idx); // Open remark panel to review
                       }
                     }} 
                     disabled={!item.uploadId || item.status === 'Rejected'} 
-                    className="flex-1 bg-gradient-to-r from-red-50 to-red-100 text-red-700 px-4 py-2.5 rounded-xl font-bold hover:from-red-100 hover:to-red-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all shadow-sm disabled:shadow-none flex items-center justify-center gap-2"
+                    className="flex-1 bg-rose-50 text-rose-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-rose-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-rose-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -581,6 +585,16 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     Reject
                   </button>
                   </div>
+                  
+                  {/* Error message for reject button */}
+                  {rejectError[idx] && (
+                    <div className="mt-3 p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
+                      <svg className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <p className="text-sm text-rose-700 font-medium">{rejectError[idx]}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -592,7 +606,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
       {viewModalDocUrl && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setViewModalDocUrl(null)}>
           <div className="relative bg-white p-4 rounded-lg shadow-xl w-full max-w-4xl h-full max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold mb-4">Document Preview</h3>
+            <h3 className="text-lg text-gray-900 font-semibold mb-4">Document Preview</h3>
             <div className="w-full h-[calc(100%-80px)] bg-gray-200 rounded-md">
               {viewModalDocUrl.endsWith('.pdf') ? (
                 <iframe src={viewModalDocUrl} className="w-full h-full" title="Document Preview"></iframe>

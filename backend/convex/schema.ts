@@ -345,6 +345,58 @@ export default defineSchema({
     .index("by_admin", ["rejectedBy"])
     .index("by_replacement", ["wasReplaced"]),
 
+  // Payment Rejection History
+  paymentRejectionHistory: defineTable({
+    // Core References
+    applicationId: v.id("applications"),
+    paymentId: v.id("payments"), // Original payment
+    
+    // Preserved Receipt Data
+    rejectedReceiptId: v.optional(v.id("_storage")), // Receipt storage ID (if exists)
+    referenceNumber: v.string(), // Payment reference number
+    paymentMethod: v.string(), // Payment method used
+    amount: v.float64(), // Payment amount
+    
+    // Rejection Information
+    rejectionCategory: v.union(
+      v.literal("invalid_receipt"),     // Receipt is fake, manipulated, or invalid
+      v.literal("wrong_amount"),        // Incorrect payment amount
+      v.literal("unclear_receipt"),     // Receipt is blurry or unreadable
+      v.literal("expired_receipt"),     // Receipt is too old or expired
+      v.literal("duplicate_payment"),   // Payment already used/duplicate
+      v.literal("wrong_account"),       // Payment made to wrong account
+      v.literal("incomplete_info"),     // Missing required information on receipt
+      v.literal("other")                // Other reasons
+    ),
+    rejectionReason: v.string(), // Detailed explanation
+    specificIssues: v.array(v.string()), // Bullet points of issues
+    
+    // Tracking
+    rejectedBy: v.id("users"), // Admin who rejected
+    rejectedAt: v.float64(),
+    
+    // Resubmission Tracking
+    wasReplaced: v.boolean(),
+    replacementPaymentId: v.optional(v.id("payments")),
+    replacedAt: v.optional(v.float64()),
+    attemptNumber: v.float64(), // 1st, 2nd, 3rd attempt
+    
+    // Notification Tracking
+    notificationSent: v.optional(v.boolean()), // Whether applicant has been notified
+    notificationSentAt: v.optional(v.float64()), // When notification was sent
+    
+    // Notification Read Tracking (for admins)
+    adminReadBy: v.optional(v.array(v.id("users"))), // List of admin IDs who have read this
+    
+    // Audit Fields
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+  }).index("by_application", ["applicationId"])
+    .index("by_payment", ["paymentId"])
+    .index("by_rejected_at", ["rejectedAt"])
+    .index("by_admin", ["rejectedBy"])
+    .index("by_replacement", ["wasReplaced"]),
+
   // Note: documentAccessTokens table has been removed in favor of HMAC-signed URLs
   // HMAC signatures provide stateless, secure document access without database storage
 

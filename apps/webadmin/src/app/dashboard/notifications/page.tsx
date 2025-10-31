@@ -27,12 +27,18 @@ export default function AdminNotificationsPage() {
   const router = useRouter();
 
   const { isLoaded: isClerkLoaded, user } = useUser();
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
+  const adminPrivileges = useQuery(
+    user ? api.users.roles.getAdminPrivileges : "skip"
+  );
   
-  const adminNotifications = useQuery(api.notifications.getAdminNotifications, 
+  const adminNotifications = useQuery(
+    user ? api.notifications.getAdminNotifications : "skip",
     user ? { notificationType: undefined } : "skip"
   );
-  const rejectionNotifications = useQuery(api.notifications.getRejectionHistoryNotifications, {});
+  const rejectionNotifications = useQuery(
+    user ? api.notifications.getRejectionHistoryNotifications : "skip",
+    user ? {} : "skip"
+  );
   
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);

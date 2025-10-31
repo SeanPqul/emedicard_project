@@ -73,11 +73,13 @@ export default function DashboardPage() {
     }
   );
 
-  const filteredApplications = (applications ?? []).filter((app: ApplicationWithDetails) => 
-    app.userName.toLowerCase().includes(search.toLowerCase()) ||
-    app.jobCategoryName.toLowerCase().includes(search.toLowerCase()) ||
-    app.applicationStatus.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredApplications = (applications ?? [])
+    .filter((app: ApplicationWithDetails) => 
+      app.userName.toLowerCase().includes(search.toLowerCase()) ||
+      app.jobCategoryName.toLowerCase().includes(search.toLowerCase()) ||
+      app.applicationStatus.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => b._creationTime - a._creationTime); // Sort by latest first
   
   const totalPending = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Submitted').length;
   const totalApproved = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Approved').length;
@@ -86,8 +88,29 @@ export default function DashboardPage() {
   const totalForPaymentValidation = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Payment Validation').length;
   const totalForOrientation = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Orientation').length;
 
-  const handleViewApplication = (appId: Id<"applications">) => {
-    router.push(`/dashboard/${appId}/doc_verif`);
+  const handleViewApplication = (app: ApplicationWithDetails) => {
+    // Smart routing based on application status
+    let targetRoute = `/dashboard/${app._id}/doc_verif`; // Default
+    
+    switch (app.applicationStatus) {
+      case "Payment Validation":
+        targetRoute = `/dashboard/${app._id}/payment_validation`;
+        break;
+      case "For Document Verification":
+      case "Documents Need Revision":
+      case "Under Review":
+      case "Submitted":
+      case "For Orientation":
+      case "Scheduled":
+      case "Attendance Validation":
+      case "Approved":
+      case "Rejected":
+      default:
+        targetRoute = `/dashboard/${app._id}/doc_verif`;
+        break;
+    }
+    
+    router.push(targetRoute);
   };
 
   // --- 5. LOADING & GUARD CLAUSES ---
@@ -136,12 +159,12 @@ export default function DashboardPage() {
 
         {/* Stats Grid - Improved Layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5 mb-8">
-          <StatCard title="Submitted" value={totalPending} icon={<StatIcon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />} colorClass="bg-gradient-to-br from-yellow-500 to-yellow-600" />
-          <StatCard title="Doc Verification" value={totalForDocVerification} icon={<StatIcon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />} colorClass="bg-gradient-to-br from-cyan-500 to-cyan-600" />
-          <StatCard title="Payment Validation" value={totalForPaymentValidation} icon={<StatIcon d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z" />} colorClass="bg-gradient-to-br from-purple-600 to-purple-700" />
-          <StatCard title="For Orientation" value={totalForOrientation} icon={<StatIcon d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />} colorClass="bg-gradient-to-br from-indigo-500 to-indigo-600" />
-          <StatCard title="Approved" value={totalApproved} icon={<StatIcon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-emerald-500 to-emerald-600" />
-          <StatCard title="Rejected" value={totalRejected} icon={<StatIcon d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-red-500 to-red-600" />
+          <StatCard title="Submitted" value={totalPending} icon={<StatIcon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />} colorClass="bg-gradient-to-br from-yellow-400 to-yellow-500" />
+          <StatCard title="Doc Verification" value={totalForDocVerification} icon={<StatIcon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />} colorClass="bg-gradient-to-br from-cyan-400 to-cyan-500" />
+          <StatCard title="Payment Validation" value={totalForPaymentValidation} icon={<StatIcon d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z" />} colorClass="bg-gradient-to-br from-purple-500 to-purple-600" />
+          <StatCard title="For Orientation" value={totalForOrientation} icon={<StatIcon d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />} colorClass="bg-gradient-to-br from-indigo-400 to-indigo-500" />
+          <StatCard title="Approved" value={totalApproved} icon={<StatIcon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-emerald-400 to-emerald-500" />
+          <StatCard title="Rejected" value={totalRejected} icon={<StatIcon d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-red-400 to-red-500" />
         </div>
 
         {/* Controls Panel - Improved Layout */}
@@ -313,7 +336,7 @@ export default function DashboardPage() {
                   <tr key={app._id} className="hover:bg-gray-50 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
                           {app.userName.charAt(0).toUpperCase()}
                         </div>
                         <div className="font-semibold text-gray-900 text-sm">{app.userName}</div>
@@ -332,7 +355,7 @@ export default function DashboardPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button 
-                        onClick={() => handleViewApplication(app._id)} 
+                        onClick={() => handleViewApplication(app)} 
                         className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm hover:shadow group-hover:scale-105"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

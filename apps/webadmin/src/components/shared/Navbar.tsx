@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import AdminNotificationBell from '@/components/AdminNotificationBell';
 import CustomUserButton from '@/components/CustomUserButton';
+import { useRouter } from 'next/navigation';
 
 interface NavbarProps {
   children?: React.ReactNode;
@@ -22,7 +22,7 @@ export default function Navbar({ children }: NavbarProps) {
               className="flex items-center gap-3 group transition-all duration-200 hover:opacity-80"
               aria-label="Go to dashboard"
             >
-              <div className="w-11 h-11 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
+              <div className="w-11 h-11 bg-gradient-to-br from-emerald-300 to-emerald-400 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
                 <span className="text-white font-bold text-lg">eM</span>
               </div>
               <span className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight hidden sm:block">

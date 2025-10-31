@@ -47,6 +47,12 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
   const [error, setError] = useState<{ title: string; message: string } | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  
+  // Rejection Form State
+  const [rejectionCategory, setRejectionCategory] = useState<string>("");
+  const [rejectionReason, setRejectionReason] = useState<string>("");
+  const [specificIssues, setSpecificIssues] = useState<string[]>([]);
+  const [newIssue, setNewIssue] = useState<string>("");
 
   // Data Fetching
   const paymentData = useQuery(api.payments.getForApplication.get, {
@@ -91,6 +97,16 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
   // Reject Handler
   const handleConfirmReject = async () => {
     try {
+      // Validate rejection form
+      if (!rejectionCategory) {
+        setError({ title: 'Validation Error', message: 'Please select a rejection category.' });
+        return;
+      }
+      if (!rejectionReason.trim()) {
+        setError({ title: 'Validation Error', message: 'Please provide a rejection reason.' });
+        return;
+      }
+      
       if (!paymentData?.paymentId) {
         throw new Error('Payment ID not found');
       }
@@ -98,12 +114,19 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
       await rejectPaymentMutation({
         applicationId: params.id,
         paymentId: paymentData.paymentId,
-        rejectionReason: 'Payment Rejected',
+        rejectionCategory,
+        rejectionReason,
+        specificIssues,
       });
 
-      addLogEntry('Payment Rejected', 'The submitted payment was rejected by admin.');
+      addLogEntry('Payment Rejected', `Category: ${rejectionCategory}. Reason: ${rejectionReason}`);
       setSuccessMessage('Payment rejected. Applicant will be notified.');
       setIsRejectModalOpen(false);
+      
+      // Reset form
+      setRejectionCategory("");
+      setRejectionReason("");
+      setSpecificIssues([]);
 
       setTimeout(() => {
         router.push('/dashboard');
@@ -112,6 +135,19 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
       setError({ title: 'Rejection Failed', message: err.message || 'Failed to reject payment.' });
       setIsRejectModalOpen(false);
     }
+  };
+  
+  // Add issue to list
+  const handleAddIssue = () => {
+    if (newIssue.trim() && !specificIssues.includes(newIssue.trim())) {
+      setSpecificIssues([...specificIssues, newIssue.trim()]);
+      setNewIssue("");
+    }
+  };
+  
+  // Remove issue from list
+  const handleRemoveIssue = (issue: string) => {
+    setSpecificIssues(specificIssues.filter(i => i !== issue));
   };
 
   // Format Date
@@ -163,9 +199,9 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
         {/* Header */}
         <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <button 
-            onClick={() => router.back()} 
+            onClick={() => router.push(`/dashboard/${params.id}/doc_verif`)} 
             className="p-2 rounded-lg hover:bg-white/80 transition-all shadow-sm" 
-            aria-label="Go back"
+            aria-label="Back to document verification"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -194,10 +230,10 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
           {/* Left Column: Receipt Image & Action Buttons */}
           <div className="lg:col-span-1 space-y-4 sm:space-y-6 lg:sticky lg:top-20">
             {/* Receipt Image Card */}
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-              <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4">
-                <h3 className="text-lg font-bold text-white">Payment Receipt</h3>
-                <p className="text-emerald-100 text-sm">Proof of payment</p>
+            <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-gray-800">Payment Receipt</h3>
+                <p className="text-gray-600 text-sm">Proof of payment</p>
               </div>
               
               <div className="p-4">
@@ -237,12 +273,12 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
             </div>
 
             {/* Action Buttons */}
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">Actions</h3>
               <div className="flex flex-col gap-3">
                 <button
                   onClick={handleApproveAndProceed}
-                  className="w-full bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -251,7 +287,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                 </button>
                 <button
                   onClick={() => setIsRejectModalOpen(true)}
-                  className="w-full bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  className="w-full bg-white text-red-600 px-6 py-3 rounded-xl font-semibold hover:bg-red-50 border border-red-200 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -264,18 +300,18 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
 
           {/* Right Column: Payment Details */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+            <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
               {/* Card Header */}
-              <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-6">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="bg-emerald-100 p-3 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Payment Information</h2>
-                    <p className="text-emerald-100 text-sm">Verify all details before approval</p>
+                    <h2 className="text-xl font-bold text-gray-800">Payment Information</h2>
+                    <p className="text-gray-600 text-sm">Verify all details before approval</p>
                   </div>
                 </div>
               </div>
@@ -292,7 +328,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                     id="applicantName"
                     value={paymentData.applicantName}
                     readOnly
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 bg-gray-50 cursor-not-allowed font-medium focus:outline-none"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 bg-gray-50 cursor-not-allowed font-medium focus:outline-none"
                   />
                 </div>
 
@@ -306,7 +342,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                     id="submissionDate"
                     value={formatDate(paymentData.submissionDate)}
                     readOnly
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 bg-gray-50 cursor-not-allowed font-medium focus:outline-none"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 bg-gray-50 cursor-not-allowed font-medium focus:outline-none"
                   />
                 </div>
 
@@ -320,7 +356,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                     id="paymentMethod"
                     value={paymentData.paymentMethod}
                     readOnly
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 bg-gray-50 cursor-not-allowed font-medium focus:outline-none"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 bg-gray-50 cursor-not-allowed font-medium focus:outline-none"
                   />
                 </div>
 
@@ -334,7 +370,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                     id="referenceNumber"
                     value={paymentData.referenceNumber}
                     readOnly
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 bg-gray-50 cursor-not-allowed font-mono font-medium focus:outline-none"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 bg-gray-50 cursor-not-allowed font-mono font-medium focus:outline-none"
                   />
                 </div>
 
@@ -418,39 +454,159 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
         </div>
       )}
 
-      {/* Reject Confirmation Modal */}
+      {/* Reject Modal with Detailed Form */}
       {isRejectModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn overflow-y-auto">
           <div 
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center transform transition-all" 
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8 transform transition-all" 
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Warning Icon */}
-            <div className="mx-auto mb-5 w-20 h-20 flex items-center justify-center bg-red-100 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-red-50 to-red-100 px-6 py-5 border-b border-red-200 rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-100 p-3 rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900">Reject Payment</h2>
+                  <p className="text-sm text-gray-600">Provide detailed rejection information for {paymentData?.applicantName}</p>
+                </div>
+                <button
+                  onClick={() => setIsRejectModalOpen(false)}
+                  className="p-2 hover:bg-red-200 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
-            {/* Modal Content */}
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Reject Payment?</h2>
-            <p className="text-gray-600 mb-8 leading-relaxed">
-              Are you sure you want to reject this payment? This action will add the rejection to the history and notify the applicant to resubmit payment.
-            </p>
+            {/* Modal Body */}
+            <div className="p-6 space-y-6 max-h-[calc(90vh-200px)] overflow-y-auto">
+              {/* Rejection Category */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Rejection Category <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={rejectionCategory}
+                  onChange={(e) => setRejectionCategory(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 font-medium transition-all"
+                  required
+                >
+                  <option value="">Select a category...</option>
+                  <option value="invalid_receipt">Invalid Receipt - Fake, manipulated, or not authentic</option>
+                  <option value="wrong_amount">Wrong Amount - Payment amount doesn't match requirements</option>
+                  <option value="unclear_receipt">Unclear Receipt - Blurry, dark, or unreadable</option>
+                  <option value="expired_receipt">Expired Receipt - Receipt is too old or past validity</option>
+                  <option value="duplicate_payment">Duplicate Payment - Already used or duplicate transaction</option>
+                  <option value="wrong_account">Wrong Account - Payment made to incorrect account</option>
+                  <option value="incomplete_info">Incomplete Information - Missing required details</option>
+                  <option value="other">Other - Specify in reason below</option>
+                </select>
+              </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center gap-3">
+              {/* Rejection Reason */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Detailed Rejection Reason <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Provide a clear explanation why this payment is being rejected..."
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 resize-none transition-all"
+                  rows={4}
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">This will be sent to the applicant</p>
+              </div>
+
+              {/* Specific Issues */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Specific Issues (Optional)
+                </label>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newIssue}
+                      onChange={(e) => setNewIssue(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddIssue())}
+                      placeholder="Add specific issue (e.g., 'Reference number not visible')..."
+                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddIssue}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all text-sm"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  
+                  {/* Issues List */}
+                  {specificIssues.length > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                      {specificIssues.map((issue, index) => (
+                        <div key={index} className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-gray-200">
+                          <span className="text-sm text-gray-700">• {issue}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveIssue(issue)}
+                            className="text-red-600 hover:text-red-700 p-1"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Warning Notice */}
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <h4 className="text-sm font-bold text-yellow-800">Important Notice</h4>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      The applicant will be notified and asked to resubmit their payment. This action will be recorded in the rejection history.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-6 py-4 rounded-b-2xl border-t border-gray-200 flex flex-col sm:flex-row justify-end gap-3">
               <button
-                onClick={() => setIsRejectModalOpen(false)}
-                className="flex-1 px-8 py-3 rounded-lg font-semibold bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all"
+                onClick={() => {
+                  setIsRejectModalOpen(false);
+                  setRejectionCategory("");
+                  setRejectionReason("");
+                  setSpecificIssues([]);
+                }}
+                className="px-6 py-3 rounded-lg font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmReject}
-                className="flex-1 px-8 py-3 rounded-lg font-semibold bg-red-600 text-white hover:bg-red-700 transition-all shadow-lg"
+                disabled={!rejectionCategory || !rejectionReason.trim()}
+                className="px-6 py-3 rounded-lg font-semibold bg-red-600 text-white hover:bg-red-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Confirm Reject
+                Confirm Rejection
               </button>
             </div>
           </div>

@@ -8,9 +8,8 @@ import { Id } from "@/convex/_generated/dataModel";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
 
 type Notification = {
   _id: Id<"notifications"> | Id<"documentRejectionHistory">;
