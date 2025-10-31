@@ -104,7 +104,7 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4 animate-fadeIn">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-gray-200 transform transition-all">
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-6 rounded-t-2xl">
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-6 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="bg-white/20 p-3 rounded-xl">
@@ -321,7 +321,7 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
               </button>
               <button
                 type="submit"
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-bold hover:from-emerald-600 hover:to-teal-600 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -530,7 +530,7 @@ export default function SuperAdminPage() {
         {/* Enhanced Header */}
         <header className="mb-6 sm:mb-8">
           <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-br from-purple-600 to-purple-700 p-4 rounded-2xl shadow-lg">
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-4 rounded-2xl shadow-lg">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
@@ -657,7 +657,7 @@ export default function SuperAdminPage() {
             </button>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800 px-5 py-2 rounded-xl font-bold transition-all shadow-md hover:shadow-lg"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 px-5 py-2 rounded-xl font-bold transition-all shadow-md hover:shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -781,7 +781,7 @@ export default function SuperAdminPage() {
                       className="flex items-start space-x-3 bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-xl border border-purple-100 hover:border-purple-200 transition-all duration-200"
                     >
                       <div className="flex-shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-md">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-md">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 text-white"
@@ -837,7 +837,7 @@ export default function SuperAdminPage() {
             </div>
             <button
               onClick={() => router.push("/super-admin/admin-activity")}
-              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 px-5 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg"
+              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 px-5 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -851,7 +851,7 @@ export default function SuperAdminPage() {
         {showQuickMetricsDetails && (
           <div className="mb-8 animate-fadeIn">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden mb-8">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
                 <div className="flex items-center gap-3">
                   <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -875,25 +875,25 @@ export default function SuperAdminPage() {
                   </h2>
                 </div>
                 <div className="space-y-4">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-100">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold text-gray-700">Average Approval Time</span>
                       <span className="text-lg font-bold text-blue-700">{formatDuration(averageApprovalTime)}</span>
                     </div>
                   </div>
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
+                  <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl border border-green-100">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold text-gray-700">Most Submitted Month ({currentYear})</span>
                       <span className="text-lg font-bold text-green-700">{applicationTrends.mostSubmittedMonth}</span>
                     </div>
                   </div>
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-100">
+                  <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-100">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold text-gray-700">Most Submitted Day ({currentYear})</span>
                       <span className="text-lg font-bold text-purple-700">{applicationTrends.mostSubmittedDay}</span>
                     </div>
                   </div>
-                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-100">
+                  <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-100">
                     <h3 className="text-sm font-bold text-gray-900 mb-3">Most Active Admins</h3>
                     <ul className="space-y-2">
                       {mostActiveAdmins.map((admin: { adminName: string; activityCount: number }, index: number) => (
@@ -922,7 +922,7 @@ export default function SuperAdminPage() {
                 </div>
                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                   {Object.entries(adminsByHealthCardType).map(([categoryName, admins]: [string, string[]]) => (
-                    <div key={categoryName} className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-xl border border-emerald-100">
+                    <div key={categoryName} className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 rounded-xl border border-emerald-100">
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-bold text-gray-900">{categoryName}</h3>
                         <span className="px-3 py-1 bg-emerald-600 text-white text-xs font-bold rounded-full">{admins.length} admins</span>
@@ -964,7 +964,7 @@ export default function SuperAdminPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={pieChartData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value">
-                        {pieChartData.map((entry, index) => (
+                        {pieChartData.map((_, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -990,7 +990,7 @@ export default function SuperAdminPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={Object.entries(applicantsByHealthCardType).map(([name, value]) => ({ name, value }))} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value">
-                        {Object.entries(applicantsByHealthCardType).map((entry, index) => (
+                        {Object.entries(applicantsByHealthCardType).map((_, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>

@@ -76,17 +76,70 @@ export const getAllRejections = query({
       })
     );
 
-    // Get admin activity logs for payment and orientation rejections
+    // Get payment rejections from paymentRejectionHistory
+    const paymentRejections = await ctx.db
+      .query("paymentRejectionHistory")
+      .order("desc")
+      .collect();
+
+    // Filter payment rejections by managed categories if not super admin
+    let filteredPaymentRejections = paymentRejections;
+    if (!isSuperAdmin) {
+      const managedCategoryIds = user.managedCategories || [];
+      
+      const allApplications = await ctx.db.query("applications").collect();
+      const applicationsInManagedCategories = allApplications.filter(app => 
+        managedCategoryIds.includes(app.jobCategoryId)
+      );
+      
+      const managedApplicationIds = new Set(
+        applicationsInManagedCategories.map(app => app._id)
+      );
+      
+      filteredPaymentRejections = paymentRejections.filter(rejection => 
+        managedApplicationIds.has(rejection.applicationId)
+      );
+    }
+
+    // Enrich payment rejection data
+    const enrichedPaymentRejections = await Promise.all(
+      filteredPaymentRejections.map(async (rejection) => {
+        const application = await ctx.db.get(rejection.applicationId);
+        const applicant = application ? await ctx.db.get(application.userId) : null;
+        const jobCategory = application ? await ctx.db.get(application.jobCategoryId) : null;
+        const rejectedBy = await ctx.db.get(rejection.rejectedBy);
+        
+        return {
+          _id: rejection._id,
+          type: "payment" as const,
+          applicationId: rejection.applicationId,
+          applicantName: applicant?.fullname || "Unknown",
+          applicantEmail: applicant?.email || "N/A",
+          jobCategory: jobCategory?.name || "Unknown",
+          documentType: "Payment Receipt",
+          rejectionCategory: rejection.rejectionCategory,
+          rejectionReason: rejection.rejectionReason,
+          specificIssues: rejection.specificIssues || [],
+          rejectedAt: rejection.rejectedAt,
+          rejectedBy: rejectedBy?.fullname || "Admin",
+          rejectedByEmail: rejectedBy?.email || "N/A",
+          attemptNumber: rejection.attemptNumber || 1,
+          wasReplaced: rejection.wasReplaced || false,
+          replacedAt: rejection.replacedAt,
+        };
+      })
+    );
+
+    // Get admin activity logs for orientation rejections only
+    // Document and payment rejections are now in their dedicated tables
     const activityLogs = await ctx.db
       .query("adminActivityLogs")
       .order("desc")
       .collect();
 
-    // Filter activity logs for rejection actions
+    // Filter activity logs for orientation rejection actions only
     const rejectionLogs = activityLogs.filter(log => 
-      log.action === "Payment Rejected" || 
-      log.action === "Orientation Rejected" ||
-      log.details?.toLowerCase().includes("reject")
+      log.action === "Orientation Rejected"
     );
 
     // Filter by managed categories if not super admin
@@ -130,8 +183,12 @@ export const getAllRejections = query({
       })
     );
 
-    // Combine all rejections and sort by date
-    const allRejections = [...enrichedRejections, ...enrichedLogs].sort(
+    // Combine all rejections (documents, payments, and orientations) and sort by date
+    const allRejections = [
+      ...enrichedRejections, 
+      ...enrichedPaymentRejections, 
+      ...enrichedLogs
+    ].sort(
       (a, b) => b.rejectedAt - a.rejectedAt
     );
 
@@ -157,10 +214,18 @@ export const getRejectionStats = query({
 
     const isSuperAdmin = !user.managedCategories || user.managedCategories.length === 0;
 
-    // Get all rejections
-    const allRejections = await ctx.db
+    // Get all document rejections
+    const allDocumentRejections = await ctx.db
       .query("documentRejectionHistory")
       .collect();
+
+    // Get all payment rejections
+    const allPaymentRejections = await ctx.db
+      .query("paymentRejectionHistory")
+      .collect();
+
+    // Combine all rejections
+    const allRejections = [...allDocumentRejections, ...allPaymentRejections];
 
     // Filter by managed categories if needed
     let filteredRejections = allRejections;

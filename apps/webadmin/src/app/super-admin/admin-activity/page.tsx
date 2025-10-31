@@ -9,7 +9,7 @@ import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
 
 type AdminActivityLogWithApplicantName = Doc<"adminActivityLogs"> & {
   applicantName?: string;
@@ -101,7 +101,7 @@ export default function AdminActivityPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <div className="bg-gradient-to-br from-purple-600 to-indigo-700 p-4 rounded-2xl shadow-lg">
+            <div className="bg-gradient-to-br from-purple-500 to-indigo-500 p-4 rounded-2xl shadow-lg">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -198,11 +198,11 @@ export default function AdminActivityPage() {
                 {filteredActivities.map((activity) => (
                   <div
                     key={activity._id}
-                    className="bg-gradient-to-r from-purple-50 to-indigo-50 p-5 rounded-xl border border-purple-100 hover:border-purple-200 transition-all duration-200 hover:shadow-md"
+                    className="bg-gradient-to-r from-purple-50 to-purple-100 p-5 rounded-xl border border-purple-100 hover:border-purple-200 transition-all duration-200 hover:shadow-md"
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-md">
                           <svg
                             className="h-6 w-6 text-white"
                             fill="none"

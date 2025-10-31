@@ -4,6 +4,7 @@ import { useStoreUser } from '@/app/hooks/useStoreUser';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
+import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -11,10 +12,19 @@ import { useState } from 'react';
 export default function AdminNotificationBell() {
   const adminId = useStoreUser();
   const router = useRouter();
+  const { isSignedIn } = useAuth();
 
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
-  const adminNotifications = useQuery(api.notifications.getAdminNotifications, { notificationType: undefined });
-  const rejectionHistoryNotifications = useQuery(api.notifications.getRejectionHistoryNotifications, {});
+  const adminPrivileges = useQuery(
+    isSignedIn ? api.users.roles.getAdminPrivileges : "skip"
+  );
+  const adminNotifications = useQuery(
+    isSignedIn ? api.notifications.getAdminNotifications : "skip",
+    isSignedIn ? { notificationType: undefined } : "skip"
+  );
+  const rejectionHistoryNotifications = useQuery(
+    isSignedIn ? api.notifications.getRejectionHistoryNotifications : "skip",
+    isSignedIn ? {} : "skip"
+  );
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);
   const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);

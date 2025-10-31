@@ -3,6 +3,7 @@
 import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
+import { useAuth } from '@clerk/nextjs';
 import { useEffect, useRef, useState } from 'react';
 
 // Define the type for an activity log entry
@@ -31,10 +32,13 @@ const timeAgo = (date: number): string => {
 };
 
 export default function DashboardActivityLog() {
+  const { isSignedIn } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   // Use the new query to fetch recent admin activities
-  const recentActivities = useQuery(api.admin.activityLogs.getRecentAdminActivities);
+  const recentActivities = useQuery(
+    isSignedIn ? api.admin.activityLogs.getRecentAdminActivities : "skip"
+  );
 
   // Logic to close dropdown when clicking outside
   useEffect(() => {

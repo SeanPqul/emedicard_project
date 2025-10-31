@@ -10,7 +10,7 @@ import { useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
 
 type RejectionType = "document" | "payment" | "orientation" | "other";
 
@@ -126,7 +126,7 @@ export default function RejectionHistoryPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <div className="bg-gradient-to-br from-red-600 to-red-700 p-4 rounded-2xl shadow-lg">
+            <div className="bg-gradient-to-br from-red-400 to-red-500 p-4 rounded-2xl shadow-lg">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -145,7 +145,7 @@ export default function RejectionHistoryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 mb-8">
             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 shadow-lg">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-red-300 to-red-400 shadow-lg">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-7 w-7 text-white"
@@ -172,7 +172,7 @@ export default function RejectionHistoryPage() {
 
             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-yellow-300 to-yellow-400 shadow-lg">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-7 w-7 text-white"
@@ -199,7 +199,7 @@ export default function RejectionHistoryPage() {
 
             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-green-500 to-green-600 shadow-lg">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-green-300 to-green-400 shadow-lg">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-7 w-7 text-white"
@@ -224,7 +224,7 @@ export default function RejectionHistoryPage() {
 
             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-300 to-blue-400 shadow-lg">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-7 w-7 text-white"
@@ -409,7 +409,7 @@ export default function RejectionHistoryPage() {
                         {rejection.applicationId && (
                           <Link
                             href={`/dashboard/${rejection.applicationId}/doc_verif`}
-                            className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800 px-4 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm hover:shadow-md"
+                            className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-400 to-emerald-500 text-white hover:from-emerald-500 hover:to-emerald-600 px-4 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm hover:shadow-md"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

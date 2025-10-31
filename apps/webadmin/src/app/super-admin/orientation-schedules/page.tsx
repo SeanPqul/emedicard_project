@@ -4,19 +4,19 @@ import ErrorMessage from "@/components/ErrorMessage";
 import Navbar from "@/components/shared/Navbar";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
+import {
+  calculateDuration,
+  formatDuration,
+  formatTimeRange,
+  minutesToTime,
+  timeToMinutes,
+  validateTimeRange,
+} from "@/lib/timeUtils";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { addDays, format, startOfWeek } from "date-fns";
 import { useRouter } from "next/navigation";
-import React, { useState, useMemo } from "react";
-import {
-  timeToMinutes,
-  minutesToTime,
-  formatTimeRange,
-  calculateDuration,
-  formatDuration,
-  validateTimeRange,
-} from "@/lib/timeUtils";
+import React, { useMemo, useState } from "react";
 
 type Schedule = Doc<"orientationSchedules">;
 
@@ -454,7 +454,6 @@ const BulkCreateModal = ({
       }
 
       const start = startOfWeek(new Date(startDate), { weekStartsOn: 0 });
-      const weeks = parseInt(weeksCount);
       const dates: number[] = [];
       for (let week = 0; week < parseInt(weeksCount); week++) {
         for (const day of daysOfWeek) {
@@ -774,8 +773,8 @@ export default function OrientationSchedulesPage() {
   const { isLoaded: isClerkLoaded, user } = useUser();
   
   const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
-  const allSchedules = useQuery(api.orientationSchedules.queries.getAllSchedules) as Schedule[] | undefined;
-  const upcomingSchedules = useQuery(api.orientationSchedules.queries.getUpcomingSchedules) as Schedule[] | undefined;
+  const allSchedules = useQuery(api.orientationSchedules.queries.getAllSchedules);
+  const upcomingSchedules = useQuery(api.orientationSchedules.queries.getUpcomingSchedules);
   
   const deleteSchedule = useMutation(api.orientationSchedules.mutations.deleteSchedule);
   const toggleAvailability = useMutation(api.orientationSchedules.mutations.toggleAvailability);
@@ -858,7 +857,7 @@ export default function OrientationSchedulesPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 p-4 rounded-2xl shadow-lg">
+            <div className="bg-gradient-to-br from-indigo-400 to-indigo-500 p-4 rounded-2xl shadow-lg">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -901,7 +900,7 @@ export default function OrientationSchedulesPage() {
                   onClick={() => setViewMode("upcoming")}
                   className={`px-5 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${
                     viewMode === "upcoming"
-                      ? "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-md"
+                      ? "bg-gradient-to-r from-emerald-400 to-emerald-500 text-white shadow-md"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
                   }`}
                 >
@@ -911,7 +910,7 @@ export default function OrientationSchedulesPage() {
                   onClick={() => setViewMode("all")}
                   className={`px-5 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${
                     viewMode === "all"
-                      ? "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-md"
+                      ? "bg-gradient-to-r from-emerald-400 to-emerald-500 text-white shadow-md"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
                   }`}
                 >
@@ -931,7 +930,7 @@ export default function OrientationSchedulesPage() {
                 </button>
                 <button
                   onClick={() => setIsCreateModalOpen(true)}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800 px-5 py-2.5 rounded-xl font-bold transition-all shadow-md hover:shadow-lg"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-400 to-emerald-500 text-white hover:from-emerald-500 hover:to-emerald-600 px-5 py-2.5 rounded-xl font-bold transition-all shadow-md hover:shadow-lg"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -996,7 +995,7 @@ export default function OrientationSchedulesPage() {
                     </td>
                   </tr>
                 )}
-                {schedules && (schedules as any[]).map((schedule: Schedule) => {
+                {schedules && Array.isArray(schedules) && schedules.map((schedule: Schedule) => {
                   const slotPercentage = (schedule.availableSlots / schedule.totalSlots) * 100;
                   const isPast = schedule.date < Date.now();
                   const isFull = schedule.availableSlots <= 0;

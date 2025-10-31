@@ -5,6 +5,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { useSignIn, useUser } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
 import Footer from '../components/Footer';
+import LoadingScreen from '../components/shared/LoadingScreen';
 
 import { 
   getUserFriendlyErrorMessage, 
@@ -88,14 +89,7 @@ export default function LandingPage() {
   };
 
   if (!isUserLoaded || isSignedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-emerald-500 mx-auto"></div>
-          <h2 className="mt-4 text-xl font-semibold text-gray-700">Loading...</h2>
-        </div>
-      </div>
-    );
+    return <LoadingScreen title="Loading" message="Redirecting to dashboard..." />;
   }
 
   return (
