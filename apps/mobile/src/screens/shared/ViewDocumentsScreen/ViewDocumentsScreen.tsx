@@ -13,7 +13,6 @@ import { ResubmitModal } from '@features/document-resubmit';
 import { WebView } from 'react-native-webview';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { DocumentViewHeader } from './DocumentViewHeader';
 
 interface DocumentWithRequirement {
   _id: Id<'documentUploads'>;
@@ -221,10 +220,6 @@ export function ViewDocumentsScreen() {
   if (isLoading) {
     return (
       <BaseScreenLayout>
-        <DocumentViewHeader
-          documentCount={0}
-          rejectedCount={0}
-        />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={getColor('primary.500')} />
           <Text style={styles.loadingText}>Loading documents...</Text>
@@ -235,13 +230,21 @@ export function ViewDocumentsScreen() {
 
   return (
     <BaseScreenLayout>
-      {/* Green Branded Header */}
-      <DocumentViewHeader
-        documentCount={uploadedDocuments.length}
-        rejectedCount={activeRejections.length}
-      />
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Inline Header Section */}
+        <View style={styles.inlineHeaderSection}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={moderateScale(24)} color={getColor('text.primary')} />
+            </TouchableOpacity>
+            
+            <View style={styles.titleContainer}>
+              <Text style={styles.pageTitle}>Documents</Text>
+            </View>
+            
+            <View style={styles.headerSpacer} />
+          </View>
+        </View>
         {/* Application Status Info */}
         {application && (
           <View style={styles.infoCard}>

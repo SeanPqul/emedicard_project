@@ -75,24 +75,13 @@ export const styles = StyleSheet.create({
   // Modern Inline Header Styles
   inlineHeaderSection: {
     backgroundColor: theme.colors.background.primary,
-    paddingTop: verticalScale(8),
+    paddingTop: verticalScale(16),
     paddingBottom: verticalScale(16),
     borderBottomLeftRadius: moderateScale(24),
     borderBottomRightRadius: moderateScale(24),
   },
-  statusBar: {
-    paddingHorizontal: scale(20),
-    paddingVertical: verticalScale(12),
-  },
-  dateText: {
-    fontSize: moderateScale(15),
-    fontWeight: '600',
-    color: theme.colors.text.secondary,
-  },
   inlineHeader: {
     paddingHorizontal: scale(20),
-    paddingTop: verticalScale(12),
-    paddingBottom: verticalScale(4),
   },
   pageTitle: {
     fontSize: moderateScale(22),

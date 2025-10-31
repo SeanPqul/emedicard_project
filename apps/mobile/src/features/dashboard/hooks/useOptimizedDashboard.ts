@@ -192,9 +192,9 @@ export const useOptimizedDashboard = () => {
   // Greeting helper (unchanged but memoized)
   const getGreeting = useMemo(() => () => {
     const hour = currentTime.getHours();
-    if (hour < 12) return 'Morning';
-    if (hour < 17) return 'Afternoon';
-    return 'Evening';
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
   }, [currentTime]);
 
   // Get job categories from cache or fresh data

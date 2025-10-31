@@ -523,21 +523,20 @@ export const styles = StyleSheet.create({
   // Minimal Inline Header Styles
   inlineHeaderSection: {
     backgroundColor: theme.colors.background.primary,
-    paddingHorizontal: scale(20),
     paddingTop: verticalScale(12),
     paddingBottom: verticalScale(16),
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: verticalScale(8),
+    paddingHorizontal: scale(16),
   },
   backButton: {
     width: moderateScale(40),
     height: moderateScale(40),
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: scale(-8), // Align icon to screen edge
     marginRight: scale(12),
   },
   titleContainer: {
@@ -556,6 +555,6 @@ export const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontWeight: '500',
     color: theme.colors.text.secondary,
-    marginLeft: scale(52),
+    marginTop: verticalScale(4),
   },
 });

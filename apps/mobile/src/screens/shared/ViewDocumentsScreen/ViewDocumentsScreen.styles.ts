@@ -23,6 +23,45 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.secondary,
   },
 
+  // Inline Header Section
+  inlineHeaderSection: {
+    backgroundColor: theme.colors.background.primary,
+    paddingTop: verticalScale(12),
+    paddingBottom: verticalScale(16),
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: scale(16),
+  },
+  backButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: scale(-8), // Align icon to screen edge
+    marginRight: scale(8),
+  },
+  titleContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  pageTitle: {
+    fontSize: moderateScale(20),
+    fontWeight: '600' as const,
+    letterSpacing: -0.3,
+    color: theme.colors.text.primary,
+  },
+  subtitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '500' as const,
+    color: theme.colors.text.secondary,
+    paddingLeft: scale(48), // Align with title (back button width + margin)
+  },
+  headerSpacer: {
+    width: moderateScale(40), // Same as back button for visual balance
+  },
+
   // Summary Card
   summaryCard: {
     backgroundColor: theme.colors.background.primary,

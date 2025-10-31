@@ -85,12 +85,11 @@ export function ApplicationDetailWidget({
             
             <View style={styles.titleContainer}>
               <Text style={styles.pageTitle}>Application Details</Text>
+              <Text style={styles.applicationIdSubtitle}>#{application._id.slice(-8).toUpperCase()}</Text>
             </View>
             
             <View style={styles.headerSpacer} />
           </View>
-          
-          <Text style={styles.applicationIdSubtitle}>#{application._id.slice(-8).toUpperCase()}</Text>
         </View>
 
       {/* Status Card */}

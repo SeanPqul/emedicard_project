@@ -89,12 +89,6 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
       >
         {/* Inline Header Section */}
         <View style={styles.inlineHeaderSection}>
-          <View style={styles.statusBar}>
-            <Text style={styles.dateText}>
-              {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-            </Text>
-          </View>
-          
           <View style={styles.inlineHeader}>
             <Text style={styles.pageTitle}>Overview</Text>
             <Text style={styles.greeting}>

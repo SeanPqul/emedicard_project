@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Linking, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, Linking, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Path } from 'react-native-svg';
 import { BaseScreen } from '@shared/components/core';
 import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
-import { HEADER_CONSTANTS } from '@shared/constants/header.constants';
 
 interface FAQItem {
   id: string;
@@ -77,43 +74,29 @@ export function HelpCenterScreen() {
   return (
     <BaseScreen safeArea={false}>
       <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.headerContainer}>
-          <LinearGradient
-            colors={[theme.colors.indigo[500], theme.colors.indigo[600]]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.header}
-          >
-            <Pressable
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Ionicons name="arrow-back" size={HEADER_CONSTANTS.ICON_SIZE} color={HEADER_CONSTANTS.WHITE} />
-            </Pressable>
-
-            <View style={styles.headerIcon}>
-              <Ionicons name="help-circle" size={moderateScale(32)} color={theme.colors.ui.white} />
-            </View>
-            
-            <Text style={styles.headerTitle}>Help Center</Text>
-            <Text style={styles.headerSubtitle}>Everything you need to know</Text>
-          </LinearGradient>
-
-          {/* Wave Decoration */}
-          <Svg height="30" width="100%" viewBox="0 0 1440 100" style={styles.wave}>
-            <Path
-              fill={theme.colors.background.secondary}
-              d="M0,32L80,37.3C160,43,320,53,480,58.7C640,64,800,64,960,58.7C1120,53,1280,43,1360,37.3L1440,32L1440,100L1360,100C1280,100,1120,100,960,100C800,100,640,100,480,100C320,100,160,100,80,100L0,100Z"
-            />
-          </Svg>
-        </View>
-
         <ScrollView 
           style={styles.content}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
+          {/* Inline Title with Back Button */}
+          <View style={styles.titleSection}>
+            <TouchableOpacity
+              style={styles.inlineBackButton}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name="arrow-back"
+                size={moderateScale(24)}
+                color={theme.colors.text.primary}
+              />
+            </TouchableOpacity>
+            <View style={styles.titleContent}>
+              <Text style={styles.pageTitle}>Help Center</Text>
+              <Text style={styles.pageSubtitle}>Everything you need to know</Text>
+            </View>
+          </View>
           {/* Venue Card */}
           <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -215,72 +198,55 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
-  headerContainer: {
-    position: 'relative',
-  },
-  header: {
-    paddingTop: verticalScale(44),
-    paddingBottom: verticalScale(20),
-    paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
-    alignItems: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    top: verticalScale(12),
-    left: scale(16),
-    width: HEADER_CONSTANTS.ICON_BUTTON_SIZE,
-    height: HEADER_CONSTANTS.ICON_BUTTON_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: HEADER_CONSTANTS.ACTION_BUTTON_RADIUS,
-    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
-    zIndex: 10,
-  },
-  headerIcon: {
-    width: moderateScale(48),
-    height: moderateScale(48),
-    borderRadius: moderateScale(24),
-    backgroundColor: HEADER_CONSTANTS.WHITE_OVERLAY,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: verticalScale(8),
-  },
-  headerTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: '700',
-    color: HEADER_CONSTANTS.WHITE,
-    textAlign: 'center',
-    marginBottom: verticalScale(2),
-  },
-  headerSubtitle: {
-    fontSize: moderateScale(12),
-    color: HEADER_CONSTANTS.WHITE,
-    opacity: 0.85,
-    textAlign: 'center',
-  },
-  wave: {
-    position: 'absolute',
-    bottom: -1,
-    left: 0,
-    right: 0,
-  },
   content: {
     flex: 1,
   },
   scrollContent: {
-    padding: scale(16),
     paddingBottom: verticalScale(40),
+  },
+  titleSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingTop: verticalScale(4),
+    paddingBottom: verticalScale(16),
+    backgroundColor: theme.colors.background.secondary,
+  },
+  inlineBackButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: scale(-8),
+    marginRight: scale(8),
+  },
+  titleContent: {
+    flex: 1,
+  },
+  pageTitle: {
+    fontSize: moderateScale(24),
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+    letterSpacing: -0.4,
+    marginBottom: verticalScale(4),
+  },
+  pageSubtitle: {
+    fontSize: moderateScale(15),
+    fontWeight: '400',
+    color: theme.colors.text.secondary,
   },
   sectionTitle: {
     fontSize: moderateScale(16),
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: verticalScale(12),
+    paddingHorizontal: scale(16),
   },
   card: {
     backgroundColor: theme.colors.ui.white,
     borderRadius: moderateScale(16),
     padding: scale(20),
+    marginHorizontal: scale(16),
     marginBottom: verticalScale(16),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -326,6 +292,7 @@ const styles = StyleSheet.create({
   },
   faqContainer: {
     marginBottom: verticalScale(16),
+    paddingHorizontal: scale(16),
   },
   faqCard: {
     backgroundColor: theme.colors.ui.white,
