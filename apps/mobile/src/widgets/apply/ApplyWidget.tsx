@@ -1,11 +1,10 @@
 import { 
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
+import { useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { hp, verticalScale } from '@/src/shared/utils/responsive';
@@ -29,6 +28,7 @@ import type { JobCategory, DocumentRequirement } from '@/src/entities/applicatio
 import type { SelectedDocuments } from '@shared/types';
 
 import { styles } from './ApplyWidget.styles';
+import { moderateScale } from '../../shared/utils/responsive/scale';
 
 // Define UploadState interface
 interface UploadState {
@@ -182,29 +182,23 @@ export function ApplyWidget({
       {/* Step Indicator */}
       <StepIndicator currentStep={currentStep} stepTitles={STEP_TITLES} />
 
-      {/* Content with Keyboard Avoiding */}
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-        style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      {/* Scrollable Content */}
+      <ScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ 
+          paddingBottom: verticalScale(150) + (insets.bottom || 0),
+          flexGrow: 1
+        }}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView 
-          style={styles.content} 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ 
-            paddingBottom: hp(20),
-            flexGrow: 1
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.contentWrapper}>
-            {renderCurrentStep()}
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <View style={styles.contentWrapper}>
+          {renderCurrentStep()}
+        </View>
+      </ScrollView>
 
-      {/* Navigation Buttons */}
-      <View style={[styles.navigationButtons, { paddingBottom: insets.bottom || 16 }]}>
+      {/* Navigation Buttons - Absolute positioned above tab bar */}
+      <View style={[styles.navigationButtons, { bottom: moderateScale(60) + (insets.bottom || 0) }]}>
         {currentStep > 0 && (
           <TouchableOpacity 
             style={styles.previousButton} 

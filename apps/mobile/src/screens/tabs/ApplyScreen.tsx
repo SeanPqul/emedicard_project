@@ -65,7 +65,7 @@ export function ApplyScreen() {
   }
 
   return (
-    <BaseScreen safeArea={false}>
+    <BaseScreen safeArea={false} keyboardAvoiding={false}>
       <ApplyWidget
         // State
         currentStep={currentStep}

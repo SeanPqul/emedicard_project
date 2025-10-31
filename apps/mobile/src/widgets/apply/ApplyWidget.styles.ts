@@ -9,9 +9,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.primary,
   },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
   content: {
     flex: 1,
   },
@@ -45,17 +42,16 @@ export const styles = StyleSheet.create({
 
   // Navigation Buttons
   navigationButtons: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     paddingHorizontal: scale(theme.spacing.lg),
     paddingVertical: verticalScale(theme.spacing.md),
     backgroundColor: theme.colors.background.primary,
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    gap: scale(theme.spacing.md),
+    gap: scale(theme.spacing.md)
   },
   previousButton: {
     flex: 1,
