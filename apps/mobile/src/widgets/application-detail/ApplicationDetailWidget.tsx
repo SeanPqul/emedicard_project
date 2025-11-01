@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ApplicationDetails, PaymentMethod } from '@entities/application';
@@ -50,6 +51,24 @@ export function ApplicationDetailWidget({
   getUrgencyColor,
   rejectedDocumentsCount = 0,
 }: ApplicationDetailWidgetProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  const toggleExpanded = () => {
+    setIsExpanded(prev => !prev);
+  };
+  
+  // Define collapsible rows data
+  const collapsibleRows = [
+    { label: 'Middle Name', value: application.form?.middleName || 'N/A' },
+    { label: 'Last Name', value: application.form?.lastName },
+    { label: 'Age', value: application.form?.age },
+    { label: 'Nationality', value: application.form?.nationality },
+    { label: 'Gender', value: application.form?.gender },
+    { label: 'Position', value: application.form?.position },
+    { label: 'Organization', value: application.form?.organization },
+    { label: 'Civil Status', value: application.form?.civilStatus },
+  ];
+  
   const statusColor = STATUS_COLORS[application.status as keyof typeof STATUS_COLORS] ?? theme.colors.primary[500];
   
   const getDaysUntilDeadline = (deadline?: number) => {
@@ -129,10 +148,13 @@ export function ApplicationDetailWidget({
         )}
       </View>
 
-      {/* Application Details */}
+      {/* Application Details - Collapsible */}
       <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>Application Information</Text>
+        <View style={styles.collapsibleHeader}>
+          <Text style={styles.sectionTitle}>Application Information</Text>
+        </View>
         
+        {/* Always visible items */}
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Type</Text>
           <Text style={styles.detailValue}>{application.form?.applicationType} Application</Text>
@@ -152,20 +174,48 @@ export function ApplicationDetailWidget({
         </View>
 
         <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Position</Text>
-          <Text style={styles.detailValue}>{application.form?.position}</Text>
+          <Text style={styles.detailLabel}>First Name</Text>
+          <Text style={styles.detailValue}>{application.form?.firstName}</Text>
         </View>
 
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Organization</Text>
-          <Text style={styles.detailValue}>{application.form?.organization}</Text>
-        </View>
+        {/* Collapsible content with fade effect */}
+        {!isExpanded && (
+          <Animated.View 
+            exiting={FadeOut.duration(150)}
+            style={[styles.detailRow, styles.fadedRow]}
+          >
+            <Text style={styles.detailLabel}>Middle Name</Text>
+            <Text style={styles.detailValue}>{application.form?.middleName || 'N/A'}</Text>
+          </Animated.View>
+        )}
 
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Civil Status</Text>
-          <Text style={styles.detailValue}>{application.form?.civilStatus}</Text>
-        </View>
-
+        {/* Expanded content with staggered animation */}
+        {isExpanded && collapsibleRows.map((row, index) => (
+          <Animated.View 
+            key={row.label}
+            entering={FadeIn.delay(index * 60).duration(300)} 
+            exiting={FadeOut.duration(150)}
+            layout={Layout.springify()}
+            style={styles.detailRow}
+          >
+            <Text style={styles.detailLabel}>{row.label}</Text>
+            <Text style={styles.detailValue}>{row.value}</Text>
+          </Animated.View>
+        ))}
+        
+        {/* Bottom toggle button */}
+        <TouchableOpacity 
+          onPress={toggleExpanded}
+          activeOpacity={0.7}
+          style={isExpanded ? styles.collapseButton : styles.expandButton}
+        >
+          {!isExpanded && <View style={styles.expandButtonShadow} />}
+          <Ionicons 
+            name={isExpanded ? "chevron-up" : "chevron-down"}
+            size={moderateScale(24)} 
+            color={theme.colors.text.secondary}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Documents Section */}

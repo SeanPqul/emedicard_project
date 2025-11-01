@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -93,26 +93,28 @@ function getTimeContext(
 
 export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardProps) {
   const router = useRouter();
-  const [timeContext, setTimeContext] = useState('');
+  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
 
-  // Update time context continuously using server-adjusted time
-  useEffect(() => {
-    if (!session || !serverTime) return;
-    
-    // Calculate offset once
-    const offset = serverTime - Date.now();
-    
-    const updateTime = () => {
-      // Use server time by adding the calculated offset to current client time
-      const currentServerTime = Date.now() + offset;
-      setTimeContext(getTimeContext(session, currentServerTime));
-    };
-    
-    updateTime();
-    const interval = setInterval(updateTime, 60000); // Update every minute
-    
-    return () => clearInterval(interval);
-  }, [session, serverTime]);
+  // Update timer every second for live countdown
+  React.useEffect(() => {
+    if (session && !session.isActive) {
+      const timer = setInterval(() => {
+        forceUpdate();
+      }, 1000); // Update every second for smooth countdown
+
+      return () => clearInterval(timer);
+    }
+  }, [session]);
+
+  // Calculate time context during every render (calculation is very cheap)
+  // For upcoming sessions, this will update every second due to forceUpdate
+  let timeContext = '';
+  if (session && serverTime) {
+    // Use current client time - the serverTime prop should be the initial server timestamp
+    // The hook passes serverTime correctly, we just use Date.now() for current time
+    const currentServerTime = Date.now();
+    timeContext = getTimeContext(session, currentServerTime);
+  }
 
   if (!session) {
     return (
@@ -148,7 +150,7 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>SESSION</Text>
-      
+
       <View style={styles.card}>
         <View style={styles.header}>
           <View style={styles.timeContainer}>
@@ -239,11 +241,11 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
             </Text>
           </View>
           <View style={styles.progressBarContainer}>
-            <View 
+            <View
               style={[
-                styles.progressBarFill, 
+                styles.progressBarFill,
                 { width: `${Math.min((session.stats.checkedIn / session.stats.totalAttendees) * 100, 100) || 0}%` }
-              ]} 
+              ]}
             />
           </View>
         </View>

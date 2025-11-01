@@ -99,12 +99,12 @@ export function useOrientationSchedule(applicationId: Id<"applications"> | undef
   /**
    * Cancel an orientation booking
    */
-  const cancelBooking = async (sessionId: Id<"orientationSessions">) => {
+  const cancelBooking = async (bookingId: Id<"orientationBookings">) => {
     setIsCancelling(true);
     setError(null);
 
     try {
-      await cancelBookingMutation({ sessionId });
+      await cancelBookingMutation({ bookingId });
       
       Alert.alert(
         'Booking Cancelled',

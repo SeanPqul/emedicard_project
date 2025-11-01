@@ -21,7 +21,10 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
     organization: '',
     civilStatus: 'Single',
     firstName: '',
+    middleName: '',
     lastName: '',
+    age: 0,
+    nationality: '',
     gender: undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -86,7 +89,10 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
       if (currentStep === 2) {
         const missingFields = [];
         if (validation.errors.firstName) missingFields.push('• First Name');
+        // Middle name is optional, so no error for it
         if (validation.errors.lastName) missingFields.push('• Last Name');
+        if (validation.errors.age) missingFields.push('• Age');
+        if (validation.errors.nationality) missingFields.push('• Nationality');
         if (validation.errors.position) missingFields.push('• Position/Job Title');
         if (validation.errors.organization) missingFields.push('• Organization/Company');
         if (validation.errors.gender) missingFields.push('• Gender');

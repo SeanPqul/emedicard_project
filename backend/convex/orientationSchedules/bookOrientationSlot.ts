@@ -4,6 +4,8 @@ import { v } from "convex/values";
 /**
  * Book an orientation slot for a user's application
  * Validates availability and updates slot count atomically
+ *
+ * UPDATED: Uses unified orientationBookings table
  */
 export const bookOrientationSlotMutation = mutation({
   args: {
@@ -31,13 +33,13 @@ export const bookOrientationSlotMutation = mutation({
       throw new Error("Unauthorized: Application does not belong to user");
     }
 
-    // Check if user already has an active (scheduled) session for this application
-    const existingSession = await ctx.db
-      .query("orientationSessions")
-      .withIndex("by_application", (q) => 
+    // Check if user already has an active (scheduled) booking for this application
+    const existingBooking = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_application", (q) =>
         q.eq("applicationId", applicationId)
       )
-      .filter((q) => 
+      .filter((q) =>
         q.and(
           q.eq(q.field("userId"), identity.subject),
           q.eq(q.field("status"), "scheduled")
@@ -45,7 +47,7 @@ export const bookOrientationSlotMutation = mutation({
       )
       .first();
 
-    if (existingSession) {
+    if (existingBooking) {
       throw new Error("You already have an orientation session booked for this application");
     }
 
@@ -67,52 +69,36 @@ export const bookOrientationSlotMutation = mutation({
       throw new Error("Cannot book past schedules");
     }
 
-    // Create the session booking
-    const sessionId = await ctx.db.insert("orientationSessions", {
+    // Generate QR code data for attendance tracking
+    const qrCodeData = `EMC-ORIENTATION-${applicationId}`;
+
+    // Create the unified booking record
+    const bookingId = await ctx.db.insert("orientationBookings", {
+      // User & Application
       userId: identity.subject,
       applicationId,
+
+      // Schedule Reference
       scheduleId,
+
+      // Booking Details (denormalized for historical accuracy)
       scheduledDate: schedule.date,
-      status: "scheduled",
+      scheduledTime: schedule.time,
       venue: {
         name: schedule.venue.name,
         address: schedule.venue.address,
       },
       instructor: schedule.instructor,
+
+      // Status
+      status: "scheduled",
+
+      // QR Code
+      qrCodeUrl: qrCodeData,
+
+      // Timestamps
       createdAt: Date.now(),
     });
-
-    // Generate QR code data for attendance tracking
-    const qrCodeData = `EMC-ORIENTATION-${applicationId}`;
-
-    // Check if orientation record already exists
-    const existingOrientation = await ctx.db
-      .query("orientations")
-      .withIndex("by_application", (q) => q.eq("applicationId", applicationId))
-      .unique();
-
-    if (existingOrientation) {
-      // Update existing orientation with new schedule details
-      await ctx.db.patch(existingOrientation._id, {
-        orientationDate: schedule.date,
-        timeSlot: schedule.time,
-        orientationVenue: schedule.venue.name,
-        orientationStatus: "Scheduled",
-        qrCodeUrl: qrCodeData,
-        scheduledAt: Date.now(),
-      });
-    } else {
-      // Create new orientation record with QR code for check-in/check-out
-      await ctx.db.insert("orientations", {
-        applicationId,
-        orientationDate: schedule.date,
-        timeSlot: schedule.time,
-        orientationVenue: schedule.venue.name,
-        orientationStatus: "Scheduled",
-        qrCodeUrl: qrCodeData,
-        scheduledAt: Date.now(),
-      });
-    }
 
     // Update application status to "Scheduled" when orientation is booked
     await ctx.db.patch(applicationId, {
@@ -138,13 +124,16 @@ export const bookOrientationSlotMutation = mutation({
       updatedAt: Date.now(),
     });
 
-    // Get the created session to return
-    const createdSession = await ctx.db.get(sessionId);
+    // Get the created booking to return
+    const createdBooking = await ctx.db.get(bookingId);
 
     return {
       success: true,
-      sessionId,
-      session: createdSession,
+      bookingId,
+      booking: createdBooking,
+      // Legacy aliases for backward compatibility
+      sessionId: bookingId,
+      session: createdBooking,
     };
   },
 });

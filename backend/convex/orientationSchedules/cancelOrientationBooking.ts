@@ -4,63 +4,64 @@ import { v } from "convex/values";
 /**
  * Cancel a user's orientation booking
  * Restores the slot back to the schedule
+ *
+ * UPDATED: Uses unified orientationBookings table
  */
 export const cancelOrientationBookingMutation = mutation({
-  args: { 
-    sessionId: v.id("orientationSessions") 
+  args: {
+    bookingId: v.id("orientationBookings"),
+    // Legacy support
+    sessionId: v.optional(v.id("orientationBookings")),
   },
-  handler: async (ctx, { sessionId }) => {
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Unauthorized: User must be authenticated");
     }
 
-    // Get the session
-    const session = await ctx.db.get(sessionId);
-    if (!session) {
-      throw new Error("Session not found");
+    // Support both bookingId and sessionId (legacy)
+    const id = args.bookingId || args.sessionId;
+    if (!id) {
+      throw new Error("Booking ID is required");
     }
 
-    // Verify the session belongs to the user
-    if (session.userId !== identity.subject) {
-      throw new Error("Unauthorized: Session does not belong to user");
+    // Get the booking
+    const booking = await ctx.db.get(id);
+    if (!booking) {
+      throw new Error("Booking not found");
     }
 
-    // Only allow canceling scheduled sessions
-    if (session.status !== "scheduled") {
-      throw new Error(`Cannot cancel a ${session.status} session`);
+    // Verify the booking belongs to the user
+    if (booking.userId !== identity.subject) {
+      throw new Error("Unauthorized: Booking does not belong to user");
+    }
+
+    // Only allow canceling scheduled bookings
+    if (booking.status !== "scheduled") {
+      throw new Error(`Cannot cancel a ${booking.status} booking`);
     }
 
     // Get the schedule to restore the slot
-    const schedule = await ctx.db.get(session.scheduleId);
+    const schedule = await ctx.db.get(booking.scheduleId);
     if (schedule) {
       // Restore the slot
-      await ctx.db.patch(session.scheduleId, {
+      await ctx.db.patch(booking.scheduleId, {
         availableSlots: schedule.availableSlots + 1,
         isAvailable: true, // Re-enable if it was disabled due to no slots
         updatedAt: Date.now(),
       });
     }
 
-    // Update session status to cancelled
-    await ctx.db.patch(sessionId, {
+    // Update booking status to cancelled
+    await ctx.db.patch(id, {
       status: "cancelled",
+      cancellationReason: "User cancelled booking",
       updatedAt: Date.now(),
     });
 
-    // Also delete the orientation record (with QR code) if it exists
-    const orientation = await ctx.db
-      .query("orientations")
-      .withIndex("by_application", (q) => q.eq("applicationId", session.applicationId))
-      .unique();
-    
-    if (orientation) {
-      await ctx.db.delete(orientation._id);
-    }
-
-    return { 
+    return {
       success: true,
-      message: "Booking cancelled successfully" 
+      message: "Booking cancelled successfully"
     };
   },
 });

@@ -4,6 +4,7 @@ import { query } from "../_generated/server";
 
 /**
  * Check if an inspector is available for a specific date and time slot
+ * UPDATED: Uses orientationBookings table
  */
 export const checkInspectorAvailability = query({
   args: {
@@ -13,23 +14,23 @@ export const checkInspectorAvailability = query({
     excludeApplicationId: v.optional(v.id("applications")), // For updates
   },
   handler: async (ctx: QueryCtx, args) => {
-    // Get all orientations for this inspector on this date/time
-    const allOrientations = await ctx.db
-      .query("orientations")
+    // Get all bookings for this inspector on this date/time
+    const allBookings = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_date_time", (q) => 
+        q.eq("scheduledDate", args.orientationDate)
+         .eq("scheduledTime", args.timeSlot)
+      )
       .collect();
 
-    const conflicts = allOrientations.filter((orientation) => {
+    const conflicts = allBookings.filter((booking) => {
       // Skip if it's the same application (for updates)
-      if (args.excludeApplicationId && orientation.applicationId === args.excludeApplicationId) {
+      if (args.excludeApplicationId && booking.applicationId === args.excludeApplicationId) {
         return false;
       }
 
-      // Check if same inspector, date, and time slot
-      return (
-        orientation.assignedInspectorId === args.inspectorId &&
-        orientation.orientationDate === args.orientationDate &&
-        orientation.timeSlot === args.timeSlot
-      );
+      // Check if same inspector assigned (checkedInBy tracks the inspector)
+      return booking.checkedInBy === args.inspectorId;
     });
 
     return {
@@ -37,8 +38,8 @@ export const checkInspectorAvailability = query({
       conflictCount: conflicts.length,
       conflicts: conflicts.map((c) => ({
         applicationId: c.applicationId,
-        timeSlot: c.timeSlot,
-        venue: c.orientationVenue,
+        timeSlot: c.scheduledTime,
+        venue: c.venue.name,
       })),
     };
   },
@@ -46,6 +47,7 @@ export const checkInspectorAvailability = query({
 
 /**
  * Get all inspectors with their availability status for a specific date/time
+ * UPDATED: Uses orientationBookings table
  */
 export const getInspectorsWithAvailability = query({
   args: {
@@ -60,38 +62,38 @@ export const getInspectorsWithAvailability = query({
       .withIndex("by_role", (q) => q.eq("role", "inspector"))
       .collect();
 
-    // Get all orientations for this date/time
-    const allOrientations = await ctx.db
-      .query("orientations")
+    // Get all bookings for this date/time
+    const bookingsOnDateTime = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_date_time", (q) => 
+        q.eq("scheduledDate", args.orientationDate)
+         .eq("scheduledTime", args.timeSlot)
+      )
       .collect();
 
-    const orientationsOnDateTime = allOrientations.filter((orientation) => {
+    const filteredBookings = bookingsOnDateTime.filter((booking) => {
       // Skip if it's the same application (for updates)
-      if (args.excludeApplicationId && orientation.applicationId === args.excludeApplicationId) {
+      if (args.excludeApplicationId && booking.applicationId === args.excludeApplicationId) {
         return false;
       }
-
-      return (
-        orientation.orientationDate === args.orientationDate &&
-        orientation.timeSlot === args.timeSlot
-      );
+      return true;
     });
 
     // Map inspectors with their availability
     return inspectors.map((inspector) => {
-      const assignedOrientations = orientationsOnDateTime.filter(
-        (o) => o.assignedInspectorId === inspector._id
+      const assignedBookings = filteredBookings.filter(
+        (b) => b.checkedInBy === inspector._id
       );
 
       return {
         _id: inspector._id,
         fullname: inspector.fullname,
         email: inspector.email,
-        isAvailable: assignedOrientations.length === 0,
-        assignedCount: assignedOrientations.length,
-        conflicts: assignedOrientations.map((o) => ({
-          applicationId: o.applicationId,
-          venue: o.orientationVenue,
+        isAvailable: assignedBookings.length === 0,
+        assignedCount: assignedBookings.length,
+        conflicts: assignedBookings.map((b) => ({
+          applicationId: b.applicationId,
+          venue: b.venue.name,
         })),
       };
     });
@@ -100,6 +102,7 @@ export const getInspectorsWithAvailability = query({
 
 /**
  * Get inspector's schedule for a specific date (all time slots)
+ * UPDATED: Uses orientationBookings table
  */
 export const getInspectorDailySchedule = query({
   args: {
@@ -107,25 +110,27 @@ export const getInspectorDailySchedule = query({
     orientationDate: v.float64(),
   },
   handler: async (ctx: QueryCtx, args) => {
-    const allOrientations = await ctx.db
-      .query("orientations")
+    // Get all bookings where this inspector checked in
+    const allBookings = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_checked_in_by", (q) => 
+        q.eq("checkedInBy", args.inspectorId)
+      )
       .collect();
 
-    const dailySchedule = allOrientations.filter(
-      (orientation) =>
-        orientation.assignedInspectorId === args.inspectorId &&
-        orientation.orientationDate === args.orientationDate
+    const dailySchedule = allBookings.filter(
+      (booking) => booking.scheduledDate === args.orientationDate
     );
 
     return {
       inspectorId: args.inspectorId,
       date: args.orientationDate,
       totalAssignments: dailySchedule.length,
-      schedule: dailySchedule.map((o) => ({
-        applicationId: o.applicationId,
-        timeSlot: o.timeSlot,
-        venue: o.orientationVenue,
-        status: o.orientationStatus,
+      schedule: dailySchedule.map((b) => ({
+        applicationId: b.applicationId,
+        timeSlot: b.scheduledTime,
+        venue: b.venue.name,
+        status: b.status,
       })),
     };
   },

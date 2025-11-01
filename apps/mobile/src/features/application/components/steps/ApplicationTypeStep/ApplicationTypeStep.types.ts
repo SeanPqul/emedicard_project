@@ -7,7 +7,10 @@ export interface ApplicationFormData {
   organization: string;
   civilStatus: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
   firstName?: string;
+  middleName?: string;
   lastName?: string;
+  age?: number;
+  nationality?: string;
   gender?: 'Male' | 'Female' | 'Other';
 }
 

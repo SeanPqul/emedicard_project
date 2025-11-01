@@ -1,0 +1,13 @@
+export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardProps) {
+  const router = useRouter();
+
+  // Calculate time context during every render (calculation is very cheap)
+  // The session prop is updated every 10s by useInspectorDashboard hook
+  let timeContext = '';
+  if (session && serverTime) {
+    // Calculate current server time using offset
+    const currentServerTime = Date.now() + (serverTime - Date.now());
+    timeContext = getTimeContext(session, currentServerTime);
+  }
+
+  if (!session) {

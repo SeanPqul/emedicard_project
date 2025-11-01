@@ -86,7 +86,7 @@ export class OrientationService {
   async bookSlot(
     applicationId: Id<"applications">,
     scheduleId: Id<"orientationSchedules">
-  ): Promise<{ success: boolean; sessionId: Id<"orientationSessions">; session: any }> {
+  ): Promise<{ success: boolean; bookingId: Id<"orientationBookings">; booking: any }> {
     try {
       const result = await this.convexClient.mutation(
         api.orientationSchedules.bookOrientationSlotMutation,
@@ -113,11 +113,11 @@ export class OrientationService {
   /**
    * Cancel an orientation booking
    */
-  async cancelBooking(sessionId: Id<"orientationSessions">): Promise<{ success: boolean; message: string }> {
+  async cancelBooking(bookingId: Id<"orientationBookings">): Promise<{ success: boolean; message: string }> {
     try {
       const result = await this.convexClient.mutation(
         api.orientationSchedules.cancelOrientationBookingMutation,
-        { sessionId }
+        { bookingId }
       );
       
       return result;

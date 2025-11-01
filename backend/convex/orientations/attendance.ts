@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { calculateSessionBounds, isSessionActive, isSessionPast, isSessionUpcoming, getPhilippineTimeComponents } from "../lib/timezone";
 import { mutation, query } from "../_generated/server";
-import { Doc } from "../_generated/dataModel";
+import { Doc, Id } from "../_generated/dataModel";
 import { AdminRole } from "../users/roles";
 
 /**
@@ -13,6 +13,8 @@ const DEFAULT_MINIMUM_DURATION_MINUTES = 20; // Default: 20 minutes
 /**
  * Check-in attendee via QR code scan
  * Inspector scans user's QR code when they arrive
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const checkIn = mutation({
   args: {
@@ -39,41 +41,37 @@ export const checkIn = mutation({
       throw new Error("Only inspectors can check in attendees");
     }
 
-    // Get orientation record
-    const orientation = await ctx.db
-      .query("orientations")
+    // Get orientation booking record
+    const booking = await ctx.db
+      .query("orientationBookings")
       .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
-      .unique();
+      .filter((q) => q.eq(q.field("status"), "scheduled"))
+      .first();
 
-    if (!orientation) {
+    if (!booking) {
       throw new Error("No orientation scheduled for this application");
     }
 
     // Check if already checked in
-    if (orientation.checkInTime) {
+    if (booking.checkInTime) {
       return {
         success: false,
         message: "Already checked in",
-        checkInTime: orientation.checkInTime,
+        checkInTime: booking.checkInTime,
       };
     }
 
-    // Check if orientation status is Scheduled
-    if (orientation.orientationStatus !== "Scheduled") {
-      throw new Error(`Cannot check in. Orientation status is: ${orientation.orientationStatus}`);
-    }
-
     // Validate orientation date (must be today)
-    if (orientation.orientationDate) {
-      const orientationDate = new Date(orientation.orientationDate);
+    if (booking.scheduledDate) {
+      const orientationDate = new Date(booking.scheduledDate);
       const today = new Date();
-      
+
       // Set both to start of day for comparison
       orientationDate.setHours(0, 0, 0, 0);
       today.setHours(0, 0, 0, 0);
-      
+
       if (orientationDate.getTime() !== today.getTime()) {
-        const scheduledDateStr = new Date(orientation.orientationDate).toLocaleDateString();
+        const scheduledDateStr = new Date(booking.scheduledDate).toLocaleDateString();
         throw new Error(
           `Cannot check in. This orientation is scheduled for ${scheduledDateStr}. ` +
           `Please return on the scheduled date.`
@@ -83,9 +81,11 @@ export const checkIn = mutation({
 
     // Perform check-in
     const checkInTime = Date.now();
-    await ctx.db.patch(orientation._id, {
+    await ctx.db.patch(booking._id, {
       checkInTime,
       checkedInBy: currentUser._id,
+      status: "checked-in",
+      updatedAt: checkInTime,
     });
 
     // Get application and user for notification
@@ -112,6 +112,8 @@ export const checkIn = mutation({
 /**
  * Check-out attendee via QR code scan
  * Inspector scans user's QR code when orientation is finished
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const checkOut = mutation({
   args: {
@@ -138,49 +140,42 @@ export const checkOut = mutation({
       throw new Error("Only inspectors can check out attendees");
     }
 
-    // Get orientation record
-    const orientation = await ctx.db
-      .query("orientations")
+    // Get orientation booking record
+    const booking = await ctx.db
+      .query("orientationBookings")
       .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
-      .unique();
+      .filter((q) => q.eq(q.field("status"), "checked-in"))
+      .first();
 
-    if (!orientation) {
-      throw new Error("No orientation scheduled for this application");
+    if (!booking) {
+      throw new Error("No checked-in orientation found for this application");
     }
 
     // Check if already checked out
-    if (orientation.checkOutTime) {
+    if (booking.checkOutTime) {
       return {
         success: false,
         message: "Already checked out",
-        checkOutTime: orientation.checkOutTime,
+        checkOutTime: booking.checkOutTime,
       };
     }
 
     // Check if checked in first
-    if (!orientation.checkInTime) {
+    if (!booking.checkInTime) {
       throw new Error("Cannot check out without checking in first");
     }
 
     // Get the orientation schedule to check duration requirement
-    const orientationSchedules = orientation.orientationDate && orientation.timeSlot
-      ? await ctx.db
-          .query("orientationSchedules")
-          .withIndex("by_date", (q) => q.eq("date", orientation.orientationDate!))
-          .filter((q) => 
-            q.eq(q.field("time"), orientation.timeSlot!)
-          )
-          .first()
-      : null;
+    const schedule = await ctx.db.get(booking.scheduleId);
 
     // Determine required duration (use schedule duration or default)
-    const requiredDurationMinutes = orientationSchedules?.durationMinutes || DEFAULT_MINIMUM_DURATION_MINUTES;
+    const requiredDurationMinutes = schedule?.durationMinutes || DEFAULT_MINIMUM_DURATION_MINUTES;
     const requiredDurationMs = requiredDurationMinutes * 60 * 1000;
 
     // Validate minimum orientation duration to prevent fraudulent early check-outs
-    const timeElapsed = Date.now() - orientation.checkInTime;
+    const timeElapsed = Date.now() - booking.checkInTime;
     const timeElapsedMinutes = Math.floor(timeElapsed / (60 * 1000));
-    
+
     if (timeElapsed < requiredDurationMs) {
       const remainingMinutes = Math.ceil((requiredDurationMs - timeElapsed) / (60 * 1000));
       throw new Error(
@@ -190,10 +185,12 @@ export const checkOut = mutation({
 
     // Perform check-out
     const checkOutTime = Date.now();
-    await ctx.db.patch(orientation._id, {
+    await ctx.db.patch(booking._id, {
       checkOutTime,
       checkedOutBy: currentUser._id,
-      orientationStatus: "Completed",
+      status: "completed",
+      completedAt: checkOutTime,
+      updatedAt: checkOutTime,
     });
 
     // Update application status to "Attendance Validation" after check-out
@@ -228,18 +225,20 @@ export const checkOut = mutation({
 
 /**
  * Get attendance status for an application
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const getAttendanceStatus = query({
   args: {
     applicationId: v.id("applications"),
   },
   handler: async (ctx, args) => {
-    const orientation = await ctx.db
-      .query("orientations")
+    const booking = await ctx.db
+      .query("orientationBookings")
       .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
-      .unique();
+      .first();
 
-    if (!orientation) {
+    if (!booking) {
       return {
         hasOrientation: false,
         status: "Not Scheduled",
@@ -248,18 +247,20 @@ export const getAttendanceStatus = query({
 
     return {
       hasOrientation: true,
-      status: orientation.orientationStatus,
-      checkInTime: orientation.checkInTime,
-      checkOutTime: orientation.checkOutTime,
-      isCheckedIn: !!orientation.checkInTime,
-      isCheckedOut: !!orientation.checkOutTime,
-      isCompleted: orientation.orientationStatus === "Completed",
+      status: booking.status,
+      checkInTime: booking.checkInTime,
+      checkOutTime: booking.checkOutTime,
+      isCheckedIn: !!booking.checkInTime,
+      isCheckedOut: !!booking.checkOutTime,
+      isCompleted: booking.status === "completed",
     };
   },
 });
 
 /**
  * Get all attendees for a specific date/time/venue (for inspector view)
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const getAttendeesForSession = query({
   args: {
@@ -283,36 +284,34 @@ export const getAttendeesForSession = query({
       throw new Error("Unauthorized: Admin or Inspector access required");
     }
 
-    // Get all orientations for this session
-    const orientations = await ctx.db
-      .query("orientations")
-      .withIndex("by_date_timeslot_venue", (q) =>
-        q.eq("orientationDate", args.orientationDate)
-      )
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("timeSlot"), args.timeSlot),
-          q.eq(q.field("orientationVenue"), args.orientationVenue)
-        )
+    // Get all bookings for this session
+    const allBookings = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_date_time", (q) =>
+        q.eq("scheduledDate", args.orientationDate)
+         .eq("scheduledTime", args.timeSlot)
       )
       .collect();
 
-    // Get application and user details for each orientation
+    // Filter by venue name (can't use nested field in Convex filter)
+    const bookings = allBookings.filter(b => b.venue.name === args.orientationVenue);
+
+    // Get application and user details for each booking
     const attendees = await Promise.all(
-      orientations.map(async (orientation) => {
-        const application = await ctx.db.get(orientation.applicationId);
+      bookings.map(async (booking) => {
+        const application = await ctx.db.get(booking.applicationId);
         if (!application) return null;
 
         const user = await ctx.db.get(application.userId);
         if (!user) return null;
 
         return {
-          applicationId: orientation.applicationId,
+          applicationId: booking.applicationId,
           fullname: user.fullname,
-          orientationStatus: orientation.orientationStatus,
-          checkInTime: orientation.checkInTime,
-          checkOutTime: orientation.checkOutTime,
-          qrCodeUrl: orientation.qrCodeUrl,
+          orientationStatus: booking.status,
+          checkInTime: booking.checkInTime,
+          checkOutTime: booking.checkOutTime,
+          qrCodeUrl: booking.qrCodeUrl,
         };
       })
     );
@@ -322,47 +321,10 @@ export const getAttendeesForSession = query({
 });
 
 /**
- * Get current server time (for tamper-proof time display)
- * Returns the current UTC timestamp from the server
- */
-export const getCurrentServerTime = query({
-  handler: async () => {
-    return Date.now();
-  },
-});
-
-/**
- * Get current date in Philippine Time (start of day timestamp)
- * This prevents client-side time manipulation by always using server time
- */
-export const getCurrentPHTDate = query({
-  handler: async () => {
-    const now = Date.now();
-    const phtComponents = getPhilippineTimeComponents(now);
-    
-    // Create a date object at midnight PHT using the components
-    const phtMidnight = new Date(
-      Date.UTC(
-        phtComponents.year,
-        phtComponents.month,
-        phtComponents.day,
-        0,
-        0,
-        0,
-        0
-      )
-    );
-    
-    // Adjust for timezone offset (PHT is UTC+8, so subtract 8 hours to get UTC timestamp of PHT midnight)
-    const phtMidnightUTC = phtMidnight.getTime() - (8 * 60 * 60 * 1000);
-    
-    return phtMidnightUTC;
-  },
-});
-
-/**
  * Get orientation schedules for a specific date with attendance details
  * (Yellow Admin view for attendance tracking)
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const getOrientationSchedulesForDate = query({
   args: {
@@ -406,24 +368,22 @@ export const getOrientationSchedulesForDate = query({
     // For each schedule, get the attendees and their attendance status
     const schedulesWithAttendees = await Promise.all(
       pastSchedules.map(async (schedule) => {
-        // Get all orientations matching this schedule
-        const orientations = await ctx.db
-          .query("orientations")
-          .withIndex("by_date_timeslot_venue", (q) =>
-            q.eq("orientationDate", schedule.date)
-          )
-          .filter((q) =>
-            q.and(
-              q.eq(q.field("timeSlot"), schedule.time),
-              q.eq(q.field("orientationVenue"), schedule.venue.name)
-            )
+        // Get all bookings matching this schedule
+        const allBookings = await ctx.db
+          .query("orientationBookings")
+          .withIndex("by_date_time", (q) =>
+            q.eq("scheduledDate", schedule.date)
+             .eq("scheduledTime", schedule.time)
           )
           .collect();
 
+        // Filter by venue name (can't use nested field in Convex filter)
+        const bookings = allBookings.filter(b => b.venue.name === schedule.venue.name);
+
         // Get attendee details
         const attendees = await Promise.all(
-          orientations.map(async (orientation) => {
-            const application = await ctx.db.get(orientation.applicationId);
+          bookings.map(async (booking) => {
+            const application = await ctx.db.get(booking.applicationId);
             if (!application) return null;
 
             const user = await ctx.db.get(application.userId);
@@ -432,49 +392,39 @@ export const getOrientationSchedulesForDate = query({
             const jobCategory = await ctx.db.get(application.jobCategoryId);
 
             return {
-              orientationId: orientation._id,
-              applicationId: orientation.applicationId,
+              bookingId: booking._id,  // UPDATED: Use bookingId instead of orientationId
+              applicationId: booking.applicationId,
               fullname: user.fullname,
               gender: user.gender || application.gender || "N/A",
               jobCategory: jobCategory?.name || "Unknown",
               jobCategoryColor: jobCategory?.colorCode || "#gray",
               applicationStatus: application.applicationStatus,
-              orientationStatus: orientation.orientationStatus,
-              checkInTime: orientation.checkInTime,
-              checkOutTime: orientation.checkOutTime,
-              inspectorNotes: orientation.inspectorNotes,
-              qrCodeUrl: orientation.qrCodeUrl,
+              orientationStatus: booking.status,
+              checkInTime: booking.checkInTime,
+              checkOutTime: booking.checkOutTime,
+              inspectorNotes: booking.inspectorNotes,
+              qrCodeUrl: booking.qrCodeUrl,
             };
           })
         );
 
         const validAttendees = attendees.filter((a) => a !== null);
 
-        // Get instructor details from the first orientation if assigned
-        let instructorDetails = null;
-        const firstOrientation = orientations[0];
-        if (firstOrientation && firstOrientation.assignedInspectorId) {
-          const inspector = await ctx.db.get(firstOrientation.assignedInspectorId);
-          if (inspector) {
-            instructorDetails = {
-              name: inspector.fullname,
-              email: inspector.email,
-            };
-          }
-        }
+        // Get instructor details from the schedule
+        let instructorDetails = schedule.instructor || null;
 
         // Calculate session status based on current time
         const now = Date.now();
         const startMinutes = schedule.startMinutes ?? 0;
         const endMinutes = schedule.endMinutes ?? 1439;
-        
+
         // Calculate session bounds in Philippine timezone
         const { sessionStart, sessionEnd } = calculateSessionBounds(
           schedule.date,
           startMinutes,
           endMinutes
         );
-        
+
         // Determine session status
         const isActive = isSessionActive(sessionStart, sessionEnd, now);
         const isPast = isSessionPast(sessionEnd, now);
@@ -487,13 +437,13 @@ export const getOrientationSchedulesForDate = query({
           startMinutes: schedule.startMinutes,
           endMinutes: schedule.endMinutes,
           venue: schedule.venue,
-          instructor: schedule.instructor || instructorDetails,
+          instructor: instructorDetails,
           totalSlots: schedule.totalSlots,
           availableSlots: schedule.availableSlots,
           attendees: validAttendees,
           attendeeCount: validAttendees.length,
           completedCount: validAttendees.filter(
-            (a) => a.orientationStatus === "Completed"
+            (a) => a.orientationStatus === "completed"
           ).length,
           checkedInCount: validAttendees.filter((a) => a.checkInTime).length,
           isActive,
@@ -510,16 +460,18 @@ export const getOrientationSchedulesForDate = query({
 /**
  * Update inspector notes and status for an orientation
  * Allows inspectors to mark applicants as excused with reasons
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const updateInspectorNotes = mutation({
   args: {
-    orientationId: v.id("orientations"),
+    orientationId: v.id("orientationBookings"),
     notes: v.string(),
     status: v.optional(v.union(
-      v.literal("Scheduled"),
-      v.literal("Completed"),
-      v.literal("Missed"),
-      v.literal("Excused")
+      v.literal("scheduled"),
+      v.literal("completed"),
+      v.literal("missed"),
+      v.literal("excused")
     )),
   },
   handler: async (ctx, args) => {
@@ -529,18 +481,19 @@ export const updateInspectorNotes = mutation({
       throw new Error("Unauthorized: Admin/Inspector access required");
     }
 
-    const orientation = await ctx.db.get(args.orientationId);
-    if (!orientation) {
-      throw new Error("Orientation not found");
+    const booking = await ctx.db.get(args.orientationId);
+    if (!booking) {
+      throw new Error("Orientation booking not found");
     }
 
-    // Update orientation with inspector notes and optionally status
+    // Update booking with inspector notes and optionally status
     const updateData: any = {
       inspectorNotes: args.notes,
+      updatedAt: Date.now(),
     };
 
     if (args.status) {
-      updateData.orientationStatus = args.status;
+      updateData.status = args.status;
     }
 
     await ctx.db.patch(args.orientationId, updateData);
@@ -559,7 +512,7 @@ export const updateInspectorNotes = mutation({
           activityType: "orientation_notes_update",
           details: `Updated orientation notes: ${args.notes}${args.status ? ` | Status: ${args.status}` : ""}`,
           timestamp: Date.now(),
-          applicationId: orientation.applicationId,
+          applicationId: booking.applicationId,
         });
       }
     }
@@ -574,18 +527,27 @@ export const updateInspectorNotes = mutation({
 /**
  * Manually update orientation status (for admin override)
  * Allows admin to mark attendees as Completed or Excused manually
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const manuallyUpdateAttendanceStatus = mutation({
   args: {
-    orientationId: v.id("orientations"),
+    // Accept both names for compatibility
+    bookingId: v.optional(v.id("orientationBookings")),
+    orientationId: v.optional(v.id("orientationBookings")),
     newStatus: v.union(
-      v.literal("Completed"),
-      v.literal("Excused"),
-      v.literal("Missed")
+      v.literal("completed"),
+      v.literal("excused"),
+      v.literal("missed")
     ),
     adminNotes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Support both parameter names
+    const bookingId = args.bookingId || args.orientationId;
+    if (!bookingId) {
+      throw new Error("Booking ID is required");
+    }
     // Verify admin role
     const adminCheck = await AdminRole(ctx);
     if (!adminCheck.isAdmin) {
@@ -602,25 +564,27 @@ export const manuallyUpdateAttendanceStatus = mutation({
 
     if (!adminUser) throw new Error("Admin user not found");
 
-    const orientation = await ctx.db.get(args.orientationId);
-    if (!orientation) {
-      throw new Error("Orientation not found");
+    const booking = await ctx.db.get(bookingId);
+    if (!booking) {
+      throw new Error("Orientation booking not found");
     }
 
-    // Update orientation status
+    // Update booking status
     const updateData: any = {
-      orientationStatus: args.newStatus,
+      status: args.newStatus,
+      updatedAt: Date.now(),
     };
 
     // If marking as Completed, ensure check-in and check-out times exist
-    if (args.newStatus === "Completed") {
-      if (!orientation.checkInTime) {
+    if (args.newStatus === "completed") {
+      if (!booking.checkInTime) {
         updateData.checkInTime = Date.now();
         updateData.checkedInBy = adminUser._id;
       }
-      if (!orientation.checkOutTime) {
+      if (!booking.checkOutTime) {
         updateData.checkOutTime = Date.now();
         updateData.checkedOutBy = adminUser._id;
+        updateData.completedAt = Date.now();
       }
     }
 
@@ -628,11 +592,11 @@ export const manuallyUpdateAttendanceStatus = mutation({
       updateData.inspectorNotes = args.adminNotes;
     }
 
-    await ctx.db.patch(args.orientationId, updateData);
+    await ctx.db.patch(bookingId, updateData);
 
     // Update application status if marked as Completed
-    if (args.newStatus === "Completed") {
-      await ctx.db.patch(orientation.applicationId, {
+    if (args.newStatus === "completed") {
+      await ctx.db.patch(booking.applicationId, {
         applicationStatus: "Attendance Validation",
         orientationCompleted: true,
         updatedAt: Date.now(),
@@ -646,7 +610,7 @@ export const manuallyUpdateAttendanceStatus = mutation({
       activityType: "orientation_manual_status_update",
       details: `Manually updated orientation status to ${args.newStatus}${args.adminNotes ? ` - Notes: ${args.adminNotes}` : ""}`,
       timestamp: Date.now(),
-      applicationId: orientation.applicationId,
+      applicationId: booking.applicationId,
     });
 
     return {
@@ -659,6 +623,8 @@ export const manuallyUpdateAttendanceStatus = mutation({
 /**
  * Finalize attendance validation for a session
  * Updates applicants who completed orientation to next status
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const finalizeSessionAttendance = mutation({
   args: {
@@ -684,37 +650,35 @@ export const finalizeSessionAttendance = mutation({
 
     if (!adminUser) throw new Error("Admin user not found");
 
-    // Get all orientations for this session
-    const orientations = await ctx.db
-      .query("orientations")
-      .withIndex("by_date_timeslot_venue", (q) =>
-        q.eq("orientationDate", args.selectedDate)
-      )
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("timeSlot"), args.timeSlot),
-          q.eq(q.field("orientationVenue"), args.venue)
-        )
+    // Get all bookings for this session
+    const allBookings = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_date_time", (q) =>
+        q.eq("scheduledDate", args.selectedDate)
+         .eq("scheduledTime", args.timeSlot)
       )
       .collect();
+
+    // Filter by venue name (can't use nested field in Convex filter)
+    const bookings = allBookings.filter(b => b.venue.name === args.venue);
 
     let completedCount = 0;
     let missedCount = 0;
     let excusedCount = 0;
 
-    // Process each orientation
-    for (const orientation of orientations) {
-      const application = await ctx.db.get(orientation.applicationId);
+    // Process each booking
+    for (const booking of bookings) {
+      const application = await ctx.db.get(booking.applicationId);
       if (!application) continue;
 
       // Check if orientation was completed (checked in AND checked out)
       if (
-        orientation.checkInTime &&
-        orientation.checkOutTime &&
-        orientation.orientationStatus === "Completed"
+        booking.checkInTime &&
+        booking.checkOutTime &&
+        booking.status === "completed"
       ) {
         // Update application status to "Approved" (Ready for Health Card)
-        await ctx.db.patch(orientation.applicationId, {
+        await ctx.db.patch(booking.applicationId, {
           applicationStatus: "Approved",
           orientationCompleted: true,
           updatedAt: Date.now(),
@@ -726,7 +690,7 @@ export const finalizeSessionAttendance = mutation({
         if (user) {
           await ctx.db.insert("notifications", {
             userId: user._id,
-            applicationId: orientation.applicationId,
+            applicationId: booking.applicationId,
             title: "Application Approved!",
             message: "Your attendance has been validated. Your application is now approved and your health card will be issued soon.",
             notificationType: "Orientation",
@@ -735,22 +699,23 @@ export const finalizeSessionAttendance = mutation({
         }
 
         completedCount++;
-      } else if (orientation.orientationStatus === "Excused") {
+      } else if (booking.status === "excused") {
         // Excused applicants - keep their current status for manual handling
         // The admin has already marked them as excused with notes
         excusedCount++;
       } else if (
-        !orientation.checkInTime ||
-        !orientation.checkOutTime ||
-        orientation.orientationStatus === "Missed"
+        !booking.checkInTime ||
+        !booking.checkOutTime ||
+        booking.status === "missed"
       ) {
         // Mark as missed and reject application (send back to "For Orientation")
-        await ctx.db.patch(orientation._id, {
-          orientationStatus: "Missed",
+        await ctx.db.patch(booking._id, {
+          status: "missed",
+          updatedAt: Date.now(),
         });
 
         // Update application status back to "For Orientation" so they can rebook
-        await ctx.db.patch(orientation.applicationId, {
+        await ctx.db.patch(booking.applicationId, {
           applicationStatus: "For Orientation",
           orientationCompleted: false,
           updatedAt: Date.now(),
@@ -762,7 +727,7 @@ export const finalizeSessionAttendance = mutation({
         if (user) {
           await ctx.db.insert("notifications", {
             userId: user._id,
-            applicationId: orientation.applicationId,
+            applicationId: booking.applicationId,
             title: "Orientation Not Attended",
             message:
               "Your application has been returned because you did not complete the food safety orientation. Please schedule a new orientation session to continue.",
@@ -796,6 +761,8 @@ export const finalizeSessionAttendance = mutation({
 /**
  * Get inspector's scan history with filtering options
  * Returns all check-in and check-out events performed by the inspector
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const getInspectorScanHistory = query({
   args: {
@@ -829,26 +796,26 @@ export const getInspectorScanHistory = query({
     const scanEvents: Array<{
       scanType: "check-in" | "check-out";
       timestamp: number;
-      orientation: any;
+      booking: any;
     }> = [];
 
     // Get check-ins performed by this inspector
     if (!args.scanType || args.scanType === "check-in") {
       const checkIns = await ctx.db
-        .query("orientations")
+        .query("orientationBookings")
         .withIndex("by_checked_in_by", (q) => q.eq("checkedInBy", inspector._id))
         .collect();
 
-      for (const orientation of checkIns) {
-        if (orientation.checkInTime) {
+      for (const booking of checkIns) {
+        if (booking.checkInTime) {
           // Apply date filter
-          if (args.startDate && orientation.checkInTime < args.startDate) continue;
-          if (args.endDate && orientation.checkInTime > args.endDate) continue;
+          if (args.startDate && booking.checkInTime < args.startDate) continue;
+          if (args.endDate && booking.checkInTime > args.endDate) continue;
 
           scanEvents.push({
             scanType: "check-in",
-            timestamp: orientation.checkInTime,
-            orientation,
+            timestamp: booking.checkInTime,
+            booking,
           });
         }
       }
@@ -857,26 +824,26 @@ export const getInspectorScanHistory = query({
     // Get check-outs performed by this inspector
     if (!args.scanType || args.scanType === "check-out") {
       const checkOuts = await ctx.db
-        .query("orientations")
+        .query("orientationBookings")
         .withIndex("by_checked_out_by", (q) => q.eq("checkedOutBy", inspector._id))
         .collect();
 
-      for (const orientation of checkOuts) {
-        if (orientation.checkOutTime) {
+      for (const booking of checkOuts) {
+        if (booking.checkOutTime) {
           // Apply date filter
-          if (args.startDate && orientation.checkOutTime < args.startDate) continue;
-          if (args.endDate && orientation.checkOutTime > args.endDate) continue;
+          if (args.startDate && booking.checkOutTime < args.startDate) continue;
+          if (args.endDate && booking.checkOutTime > args.endDate) continue;
 
           scanEvents.push({
             scanType: "check-out",
-            timestamp: orientation.checkOutTime,
-            orientation,
+            timestamp: booking.checkOutTime,
+            booking,
           });
         }
       }
     }
 
-    // Sort by timestamp descending (newest first)
+    // Sort by timestamp (newest first)
     scanEvents.sort((a, b) => b.timestamp - a.timestamp);
 
     // Apply limit if specified
@@ -884,44 +851,25 @@ export const getInspectorScanHistory = query({
       ? scanEvents.slice(0, args.limit)
       : scanEvents;
 
-    // Enrich with application and user data
+    // Enrich with user/application details
     const enrichedEvents = await Promise.all(
       limitedEvents.map(async (event) => {
-        try {
-          const applicationDoc = await ctx.db.get(event.orientation.applicationId);
-          if (!applicationDoc) return null;
+        const application = await ctx.db.get(event.booking.applicationId) as Doc<"applications"> | null;
+        if (!application) return null;
 
-          // Type guard to ensure it's an application document
-          if (!('userId' in applicationDoc) || !applicationDoc.userId) return null;
+        const appUser = await ctx.db.get(application.userId);
+        if (!appUser) return null;
 
-          // Type assertion after validation
-          const application = applicationDoc as Doc<"applications">;
-
-          const userDoc = await ctx.db.get(application.userId);
-          if (!userDoc) return null;
-
-          // Type guard to ensure it's a user document
-          if (!('fullname' in userDoc)) return null;
-
-          // Type assertion after validation
-          const user = userDoc as Doc<"users">;
-
-          return {
-            scanType: event.scanType,
-            timestamp: event.timestamp,
-            attendeeName: user.fullname,
-            applicationId: event.orientation.applicationId,
-            orientationDate: event.orientation.orientationDate,
-            timeSlot: event.orientation.timeSlot,
-            venue: event.orientation.orientationVenue,
-            checkInTime: event.orientation.checkInTime,
-            checkOutTime: event.orientation.checkOutTime,
-            orientationStatus: event.orientation.orientationStatus,
-          };
-        } catch (error) {
-          // Handle case where application or user might not exist
-          return null;
-        }
+        return {
+          scanType: event.scanType,
+          timestamp: event.timestamp,
+          attendeeName: appUser.fullname,
+          applicationId: event.booking.applicationId,
+          orientationDate: event.booking.scheduledDate,
+          orientationTime: event.booking.scheduledTime,
+          venue: event.booking.venue.name,
+          orientationStatus: event.booking.status,
+        };
       })
     );
 
