@@ -71,8 +71,8 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
 
         {/* Personal Information Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Personal Information</Text>
-          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/profile/edit')}>
+          <Text style={styles.cardTitle}>PERSONAL INFORMATION</Text>
+          <TouchableOpacity style={[styles.cardItem, styles.lastCardItem]} onPress={() => router.push('/profile/edit')}>
             <View style={styles.cardItemLeft}>
               <View style={styles.iconContainer}>
                 <Ionicons name="person-outline" size={moderateScale(20)} color="#666" />
@@ -81,28 +81,12 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
             </View>
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
           </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/screens/shared/health-cards')}>
-            <View style={styles.cardItemLeft}>
-              <View style={styles.iconContainer}>
-                <Ionicons name="card-outline" size={moderateScale(20)} color="#666" />
-              </View>
-              <Text style={styles.cardItemText}>View and manage your health cards</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/(tabs)/application')}>
-            <View style={styles.cardItemLeft}>
-              <View style={styles.iconContainer}>
-                <Ionicons name="document-text-outline" size={moderateScale(20)} color="#666" />
-              </View>
-              <Text style={styles.cardItemText}>Track your health card applications</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[styles.cardItem, styles.lastCardItem]} onPress={() => router.push('/payment-history')}>
+        </View>
+
+        {/* Account Settings Card */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>ACCOUNT SETTINGS</Text>
+          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/payment-history')}>
             <View style={styles.cardItemLeft}>
               <View style={styles.iconContainer}>
                 <Ionicons name="wallet-outline" size={moderateScale(20)} color="#666" />
@@ -111,12 +95,8 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
             </View>
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
           </TouchableOpacity>
-        </View>
-
-        {/* Account Settings Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Account Settings</Text>
-          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/profile/change-password')}>
+          
+          <TouchableOpacity style={[styles.cardItem, styles.lastCardItem]} onPress={() => router.push('/profile/change-password')}>
             <View style={styles.cardItemLeft}>
               <View style={styles.iconContainer}>
                 <Ionicons name="lock-closed-outline" size={moderateScale(20)} color="#666" />
@@ -125,47 +105,37 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
             </View>
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
           </TouchableOpacity>
-          
-          <TouchableOpacity style={[styles.cardItem, styles.lastCardItem]} onPress={() => router.push('/profile/2fa')}>
-            <View style={styles.cardItemLeft}>
-              <View style={styles.iconContainer}>
-                <Ionicons name="shield-checkmark-outline" size={moderateScale(20)} color="#666" />
-              </View>
-              <Text style={styles.cardItemText}>Add an extra layer of security to your account</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
-          </TouchableOpacity>
         </View>
 
         {/* Support & Help Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Support & Help</Text>
-          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/support/faq')}>
+          <Text style={styles.cardTitle}>SUPPORT & HELP</Text>
+          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/(screens)/(shared)/help-center')}>
             <View style={styles.cardItemLeft}>
               <View style={styles.iconContainer}>
                 <Ionicons name="help-circle-outline" size={moderateScale(20)} color="#666" />
               </View>
-              <Text style={styles.cardItemText}>Find answers to common questions</Text>
+              <Text style={styles.cardItemText}>Help Center</Text>
             </View>
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/support/contact')}>
+          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/(screens)/(shared)/terms')}>
             <View style={styles.cardItemLeft}>
               <View style={styles.iconContainer}>
-                <Ionicons name="mail-outline" size={moderateScale(20)} color="#666" />
+                <Ionicons name="document-text-outline" size={moderateScale(20)} color="#666" />
               </View>
-              <Text style={styles.cardItemText}>Get help from our support team</Text>
+              <Text style={styles.cardItemText}>Terms & Conditions</Text>
             </View>
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
           </TouchableOpacity>
           
-          <TouchableOpacity style={[styles.cardItem, styles.lastCardItem]} onPress={() => router.push('/about')}>
+          <TouchableOpacity style={[styles.cardItem, styles.lastCardItem]} onPress={() => router.push('/(screens)/(shared)/privacy')}>
             <View style={styles.cardItemLeft}>
               <View style={styles.iconContainer}>
-                <Ionicons name="information-circle-outline" size={moderateScale(20)} color="#666" />
+                <Ionicons name="shield-outline" size={moderateScale(20)} color="#666" />
               </View>
-              <Text style={styles.cardItemText}>App version, project documentation and system info</Text>
+              <Text style={styles.cardItemText}>Privacy Policy</Text>
             </View>
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
           </TouchableOpacity>

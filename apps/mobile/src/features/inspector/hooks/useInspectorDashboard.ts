@@ -25,12 +25,14 @@ export function useInspectorDashboard() {
   
   // Get current server time (prevents client-side time manipulation)
   const serverTime = useQuery(
-    isSignedIn ? api.orientations.attendance.getCurrentServerTime : "skip"
+    api.orientations.attendance.getCurrentServerTime,
+    isSignedIn ? {} : "skip"
   );
   
   // Get current date from server (prevents client-side time manipulation)
   const serverDate = useQuery(
-    isSignedIn ? api.orientations.attendance.getCurrentPHTDate : "skip"
+    api.orientations.attendance.getCurrentPHTDate,
+    isSignedIn ? {} : "skip"
   );
 
   // Fetch orientation schedules for today

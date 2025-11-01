@@ -3,6 +3,8 @@ import { mutation } from "../_generated/server";
 
 export const updateUserMutation = mutation({
     args: {
+        firstName: v.optional(v.string()),
+        lastName: v.optional(v.string()),
         fullname: v.optional(v.string()),
         username: v.optional(v.string()),
         gender: v.optional(v.string()),
@@ -24,10 +26,20 @@ export const updateUserMutation = mutation({
             throw new Error("User not found");
         }
 
-        // Filter out undefined values
-        const updates = Object.fromEntries(
-            Object.entries(args).filter(([_, value]) => value !== undefined)
-        );
+        // Construct fullname from firstName, lastName if provided
+        let updates: Record<string, string> = {};
+        
+        if (args.firstName && args.lastName) {
+            updates.fullname = `${args.firstName} ${args.lastName}`.trim();
+        } else if (args.fullname) {
+            updates.fullname = args.fullname;
+        }
+        
+        // Add other optional fields
+        if (args.username !== undefined) updates.username = args.username;
+        if (args.gender !== undefined) updates.gender = args.gender;
+        if (args.birthDate !== undefined) updates.birthDate = args.birthDate;
+        if (args.phoneNumber !== undefined) updates.phoneNumber = args.phoneNumber;
 
         await ctx.db.patch(user._id, updates);
         return user._id;
