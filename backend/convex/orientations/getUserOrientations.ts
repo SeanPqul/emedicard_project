@@ -1,5 +1,9 @@
 import { query } from "../_generated/server";
 
+/**
+ * Get all orientation bookings for the current user
+ * UPDATED: Uses orientationBookings table
+ */
 export const getUserOrientationsQuery = query({
   args: {},
   handler: async (ctx) => {
@@ -17,13 +21,27 @@ export const getUserOrientationsQuery = query({
       return [];
     }
 
-    // For now, return empty array - implement actual orientation logic later
-    // const orientations = await ctx.db
-    //   .query("orientations")
-    //   .withIndex("by_application", (q) => q.eq("applicationId", user._id)) // Assuming a user can have multiple applications, and orientations are linked to applications
-    //   .collect();
+    // Get all bookings for this user
+    const bookings = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .collect();
 
-    return [];
+    // Enrich with schedule and application data
+    const enrichedBookings = await Promise.all(
+      bookings.map(async (booking) => {
+        const schedule = await ctx.db.get(booking.scheduleId);
+        const application = await ctx.db.get(booking.applicationId);
+        
+        return {
+          ...booking,
+          schedule,
+          application,
+        };
+      })
+    );
+
+    return enrichedBookings;
   },
 });
 

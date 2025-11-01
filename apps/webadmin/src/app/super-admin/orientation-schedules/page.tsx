@@ -12,6 +12,7 @@ import {
   timeToMinutes,
   validateTimeRange,
 } from "@/lib/timeUtils";
+import { dateStringToPHTMidnight, dateToPHTMidnight } from "@/lib/dateUtils";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { addDays, format, startOfWeek } from "date-fns";
@@ -73,11 +74,8 @@ const ScheduleModal = ({
         setIsLoading(false);
         return;
       }
-
-      // Parse date string (YYYY-MM-DD) and create UTC midnight timestamp
-      // This ensures consistent date handling regardless of admin's timezone
-      const [year, month, day] = date.split('-').map(Number);
-      const utcTimestamp = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
+      // Use centralized timezone utility for consistent date handling
+      const utcTimestamp = dateStringToPHTMidnight(date);
       
       // Get selected inspector details if one is selected
       const selectedInspector = selectedInspectorId && inspectors
@@ -458,13 +456,8 @@ const BulkCreateModal = ({
       for (let week = 0; week < parseInt(weeksCount); week++) {
         for (const day of daysOfWeek) {
           const scheduleDate = addDays(start, week * 7 + day);
-          // Normalize to UTC midnight for consistency with mobile app
-          const utcTimestamp = Date.UTC(
-            scheduleDate.getFullYear(),
-            scheduleDate.getMonth(),
-            scheduleDate.getDate(),
-            0, 0, 0, 0
-          );
+          // Use centralized timezone utility for consistent date handling
+          const utcTimestamp = dateToPHTMidnight(scheduleDate);
           dates.push(utcTimestamp);
         }
       }
@@ -997,7 +990,10 @@ export default function OrientationSchedulesPage() {
                 )}
                 {schedules && Array.isArray(schedules) && schedules.map((schedule: Schedule) => {
                   const slotPercentage = (schedule.availableSlots / schedule.totalSlots) * 100;
-                  const isPast = schedule.date < Date.now();
+                  // Calculate isPast correctly: check if session END time has passed
+                  const endMinutes = schedule.endMinutes ?? 1439; // Default to end of day if not set
+                  const sessionEndTimestamp = schedule.date + (endMinutes * 60 * 1000);
+                  const isPast = sessionEndTimestamp < Date.now();
                   const isFull = schedule.availableSlots <= 0;
                   const isActuallyAvailable = schedule.isAvailable && !isFull;
                   

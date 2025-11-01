@@ -16,7 +16,10 @@ export interface ApplicationFormData {
   organization: string;
   civilStatus: CivilStatus;
   firstName?: string;
+  middleName?: string;
   lastName?: string;
+  age?: number;
+  nationality?: string;
   gender?: 'Male' | 'Female' | 'Other';
 }
 
@@ -146,8 +149,19 @@ export const validateApplicationStep = (
       if (!formData.firstName?.trim()) {
         newErrors.firstName = 'First name is required';
       }
+      // Middle name is optional - no validation needed
       if (!formData.lastName?.trim()) {
         newErrors.lastName = 'Last name is required';
+      }
+      // Validate age (required field)
+      if (!formData.age || formData.age === 0) {
+        newErrors.age = 'Age is required';
+      } else if (formData.age < 15 || formData.age > 100) {
+        newErrors.age = 'Age must be between 15 and 100';
+      }
+      // Validate nationality (required field)
+      if (!formData.nationality?.trim()) {
+        newErrors.nationality = 'Nationality is required';
       }
       // Validate gender (required field)
       if (!formData.gender) {
@@ -228,8 +242,14 @@ export const validateFormData = (formData: ApplicationFormData): boolean => {
     formData.civilStatus &&
     formData.firstName &&
     formData.firstName.trim() &&
+    // middleName is optional
     formData.lastName &&
     formData.lastName.trim() &&
+    formData.age &&
+    formData.age >= 15 &&
+    formData.age <= 100 &&
+    formData.nationality &&
+    formData.nationality.trim() &&
     formData.gender
   );
 };

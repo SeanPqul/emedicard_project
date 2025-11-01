@@ -69,6 +69,29 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           </View>
         )}
       </View>
+
+      <View style={styles.inputGroup}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>Middle Name</Text>
+          <Text style={{ color: '#6B7280', marginLeft: moderateScale(4), fontSize: moderateScale(12) }}>(Optional)</Text>
+        </View>
+        <View style={styles.inputContainer}>
+          <Ionicons 
+            name="person-outline" 
+            size={moderateScale(20)} 
+            color={'#6B7280'} 
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.input}
+            value={formData.middleName}
+            onChangeText={(text) => setFormData({ ...formData, middleName: text })}
+            placeholder="Enter your legal middle name (if applicable)"
+            placeholderTextColor="#9CA3AF"
+            autoCapitalize="words"
+          />
+        </View>
+      </View>
       
       <View style={styles.inputGroup}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -98,6 +121,73 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
             <Text style={styles.errorText}>{errors.lastName}</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.inputGroup}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>Age</Text>
+          <Text style={{ color: theme.colors.semantic.error, marginLeft: moderateScale(4) }}>*</Text>
+        </View>
+        <View style={[
+          styles.inputContainer,
+          errors.age && styles.inputContainerError
+        ]}>
+          <Ionicons 
+            name="calendar-outline" 
+            size={moderateScale(20)} 
+            color={errors.age ? theme.colors.semantic.error : '#6B7280'} 
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.input}
+            value={formData.age ? String(formData.age) : ''}
+            onChangeText={(text) => {
+              const numericValue = text.replace(/[^0-9]/g, '');
+              setFormData({ ...formData, age: numericValue ? parseInt(numericValue) : 0 });
+            }}
+            placeholder="e.g., 25"
+            placeholderTextColor="#9CA3AF"
+            keyboardType="numeric"
+          />
+        </View>
+        {errors.age && (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+            <Text style={styles.errorText}>{errors.age}</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.inputGroup}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>Nationality</Text>
+          <Text style={{ color: theme.colors.semantic.error, marginLeft: moderateScale(4) }}>*</Text>
+        </View>
+        <View style={[
+          styles.inputContainer,
+          errors.nationality && styles.inputContainerError
+        ]}>
+          <Ionicons 
+            name="flag-outline" 
+            size={moderateScale(20)} 
+            color={errors.nationality ? theme.colors.semantic.error : '#6B7280'} 
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.input}
+            value={formData.nationality}
+            onChangeText={(text) => setFormData({ ...formData, nationality: text })}
+            placeholder="e.g., Filipino"
+            placeholderTextColor="#9CA3AF"
+            autoCapitalize="words"
+          />
+        </View>
+        {errors.nationality && (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+            <Text style={styles.errorText}>{errors.nationality}</Text>
           </View>
         )}
       </View>

@@ -6,6 +6,8 @@ import { getPhilippineTimeComponents } from "../lib/timezone";
  * Get orientation schedules for a specific date with server-side status calculation
  * Uses server time (tamper-proof) to determine isPast, isUpcoming, isActive
  * 
+ * UPDATED: Uses orientationBookings table instead of orientationSessions
+ * 
  * @param selectedDate - UTC timestamp for the date (midnight in PHT)
  * @returns Schedules with attendance data and server-calculated status flags
  */
@@ -27,16 +29,16 @@ export const getSchedulesForDate = query({
     // For each schedule, get attendees and calculate status
     const schedulesWithAttendees = await Promise.all(
       schedules.map(async (schedule) => {
-        // Get all orientation sessions (bookings) for this schedule
-        const sessions = await ctx.db
-          .query("orientationSessions")
+        // Get all orientation bookings for this schedule
+        const bookings = await ctx.db
+          .query("orientationBookings")
           .withIndex("by_schedule", (q) => q.eq("scheduleId", schedule._id))
           .collect();
 
-        // Get attendee details for each session
+        // Get attendee details for each booking
         const attendees = await Promise.all(
-          sessions.map(async (session) => {
-            const application = await ctx.db.get(session.applicationId);
+          bookings.map(async (booking) => {
+            const application = await ctx.db.get(booking.applicationId);
             if (!application) return null;
 
             const user = await ctx.db.get(application.userId);
@@ -45,14 +47,14 @@ export const getSchedulesForDate = query({
             const jobCategory = await ctx.db.get(application.jobCategoryId);
 
             return {
-              sessionId: session._id,
-              applicationId: session.applicationId,
+              bookingId: booking._id,  // UPDATED: Use bookingId
+              applicationId: booking.applicationId,
               fullname: user.fullname,
               jobCategory: jobCategory?.name || "Unknown",
               jobCategoryColor: jobCategory?.colorCode || "#gray",
               applicationStatus: application.applicationStatus,
-              sessionStatus: session.status,
-              scheduledDate: session.scheduledDate,
+              bookingStatus: booking.status,  // UPDATED: Use bookingStatus
+              scheduledDate: booking.scheduledDate,
             };
           })
         );
@@ -80,9 +82,20 @@ export const getSchedulesForDate = query({
             isUpcoming = serverPhtMinutes < schedule.startMinutes;
             isActive = serverPhtMinutes >= schedule.startMinutes && serverPhtMinutes <= schedule.endMinutes;
           } else {
-            // For other dates: compare dates
-            isPast = schedule.date < serverNow;
-            isUpcoming = schedule.date > serverNow;
+            // For other dates: compare the date itself (not time)
+            const serverPhtDate = new Date(
+              serverPhtComponents.year,
+              serverPhtComponents.month,
+              serverPhtComponents.day
+            ).getTime();
+            const schedulePhtDate = new Date(
+              schedulePhtComponents.year,
+              schedulePhtComponents.month,
+              schedulePhtComponents.day
+            ).getTime();
+            
+            isPast = schedulePhtDate < serverPhtDate;
+            isUpcoming = schedulePhtDate > serverPhtDate;
           }
         }
 
@@ -100,7 +113,7 @@ export const getSchedulesForDate = query({
           isAvailable: schedule.isAvailable,
           attendees: validAttendees,
           attendeeCount: validAttendees.length,
-          bookedSlots: sessions.length,
+          bookedSlots: bookings.length,  // UPDATED: Use bookings
           // Server-calculated status (tamper-proof)
           isPast,
           isUpcoming,

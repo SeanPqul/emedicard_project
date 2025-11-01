@@ -32,6 +32,12 @@ export const getApplicationByIdQuery = query({
       form: {
         _id: application._id, // Use application ID since there's no separate form
         applicationType: application.applicationType,
+        firstName: application.firstName,
+        middleName: application.middleName,
+        lastName: application.lastName,
+        age: application.age,
+        nationality: application.nationality,
+        gender: application.gender,
         position: application.position,
         organization: application.organization,
         civilStatus: application.civilStatus,

@@ -1,7 +1,23 @@
 // Orientation feature types
 
-export type OrientationStatus = 'scheduled' | 'completed' | 'cancelled' | 'no-show';
+/**
+ * Unified orientation status flow (matches backend orientationBookings.status)
+ * scheduled → checked-in → completed
+ *          ↓  cancelled / missed / excused / no-show
+ */
+export type OrientationStatus =
+  | 'scheduled'     // Initial booking
+  | 'checked-in'    // Arrived and checked in
+  | 'completed'     // Check-in + check-out done
+  | 'cancelled'     // User cancelled
+  | 'missed'        // No-show (after finalization)
+  | 'excused'       // Admin excused
+  | 'no-show';      // Marked as no-show
 
+/**
+ * Orientation booking/session
+ * Represents a user's orientation booking (unified table: orientationBookings)
+ */
 export interface OrientationSession {
   _id: string;
   userId: string;
@@ -21,6 +37,9 @@ export interface OrientationSession {
   certificateId?: string;
   notes?: string;
 }
+
+// Type alias for clarity (OrientationSession = OrientationBooking)
+export type OrientationBooking = OrientationSession;
 
 export interface OrientationCertificate {
   _id: string;

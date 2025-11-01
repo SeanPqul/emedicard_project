@@ -43,7 +43,10 @@ export const useSubmission = ({
         organization: formData.organization,
         civilStatus: formData.civilStatus,
         firstName: formData.firstName,
+        middleName: formData.middleName,
         lastName: formData.lastName,
+        age: formData.age,
+        nationality: formData.nationality,
         gender: formData.gender,
       });
       return existingAppId;
@@ -56,7 +59,10 @@ export const useSubmission = ({
       organization: formData.organization,
       civilStatus: formData.civilStatus,
       firstName: formData.firstName,
+      middleName: formData.middleName,
       lastName: formData.lastName,
+      age: formData.age,
+      nationality: formData.nationality,
       gender: formData.gender,
     });
     formStorage.setApplicationId(applicationId);

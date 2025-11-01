@@ -37,7 +37,10 @@ export default defineSchema({
     approvedAt: v.optional(v.float64()),
     civilStatus: v.string(),
     firstName: v.optional(v.string()),
+    middleName: v.optional(v.string()),
     lastName: v.optional(v.string()),
+    age: v.optional(v.float64()),
+    nationality: v.optional(v.string()),
     gender: v.optional(v.union(
       v.literal("Male"),
       v.literal("Female"),
@@ -115,29 +118,6 @@ export default defineSchema({
   }).index("by_user", ["userId"])
     .index("by_user_jobCategory", ["userId", "jobCategoryId"])
     .index("by_user_isRead", ["userId", "isRead"]),
-  orientations: defineTable({
-    applicationId: v.id("applications"),
-    checkInTime: v.optional(v.float64()),
-    checkOutTime: v.optional(v.float64()),
-    checkedInBy: v.optional(v.id("users")), // Inspector who performed check-in
-    checkedOutBy: v.optional(v.id("users")), // Inspector who performed check-out
-    orientationDate: v.optional(v.float64()), // Timestamp for the orientation date
-    timeSlot: v.optional(v.string()), // e.g., "9:00 AM - 11:00 AM"
-    assignedInspectorId: v.optional(v.id("users")), // Reference to the assigned inspector
-    orientationVenue: v.optional(v.string()), // e.g., "Gaisano Ilustre"
-    orientationStatus: v.union(
-      v.literal("Scheduled"),
-      v.literal("Completed"),
-      v.literal("Missed"),
-      v.literal("Excused")
-    ),
-    inspectorNotes: v.optional(v.string()), // Notes from inspector (e.g., reason for excused/pending)
-    qrCodeUrl: v.string(),
-    scheduledAt: v.float64(),
-  }).index("by_application", ["applicationId"])
-    .index("by_date_timeslot_venue", ["orientationDate", "timeSlot", "orientationVenue"])
-    .index("by_checked_in_by", ["checkedInBy", "checkInTime"])
-    .index("by_checked_out_by", ["checkedOutBy", "checkOutTime"]),
 
   // Available orientation schedules (time slots for booking)
   orientationSchedules: defineTable({
@@ -166,19 +146,18 @@ export default defineSchema({
     .index("by_availability", ["isAvailable", "date"])
     .index("by_date_start", ["date", "startMinutes"]), // For sorting schedules by time
 
-  // User's orientation session bookings
-  orientationSessions: defineTable({
+  // Unified orientation bookings table (merges old orientations + orientationSessions tables)
+  orientationBookings: defineTable({
+    // User & Application
     userId: v.string(), // Clerk user ID
     applicationId: v.id("applications"),
+
+    // Schedule Reference
     scheduleId: v.id("orientationSchedules"),
-    scheduledDate: v.float64(), // Copy of schedule date for easy querying
-    completedDate: v.optional(v.float64()),
-    status: v.union(
-      v.literal("scheduled"),
-      v.literal("completed"),
-      v.literal("cancelled"),
-      v.literal("no-show")
-    ),
+
+    // Booking Details (denormalized from schedule for historical accuracy)
+    scheduledDate: v.float64(),
+    scheduledTime: v.string(), // "9:00 AM - 11:00 AM"
     venue: v.object({
       name: v.string(),
       address: v.string(),
@@ -187,15 +166,68 @@ export default defineSchema({
       name: v.string(),
       designation: v.string(),
     })),
+
+    // Unified Status Flow
+    // scheduled → checked-in → completed
+    //          ↓  cancelled
+    //          ↓  missed / excused / no-show
+    status: v.union(
+      v.literal("scheduled"),
+      v.literal("checked-in"),
+      v.literal("completed"),
+      v.literal("cancelled"),
+      v.literal("missed"),
+      v.literal("excused"),
+      v.literal("no-show")
+    ),
+
+    // Attendance Tracking
+    checkInTime: v.optional(v.float64()),
+    checkOutTime: v.optional(v.float64()),
+    checkedInBy: v.optional(v.id("users")), // Inspector ID
+    checkedOutBy: v.optional(v.id("users")), // Inspector ID
+
+    // QR Code
+    qrCodeUrl: v.string(),
+
+    // Notes & Metadata
+    inspectorNotes: v.optional(v.string()),
+    cancellationReason: v.optional(v.string()),
     certificateId: v.optional(v.string()),
-    notes: v.optional(v.string()),
-    createdAt: v.float64(),
+
+    // Timestamps
+    createdAt: v.float64(), // Booking timestamp
     updatedAt: v.optional(v.float64()),
+    completedAt: v.optional(v.float64()),
   })
     .index("by_user", ["userId"])
     .index("by_application", ["applicationId"])
     .index("by_schedule", ["scheduleId"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_date_time", ["scheduledDate", "scheduledTime"])
+    .index("by_checked_in_by", ["checkedInBy", "checkInTime"])
+    .index("by_checked_out_by", ["checkedOutBy", "checkOutTime"]),
+
+  // Migration tracking for orientation schema migration
+  orientationMigrationLog: defineTable({
+    migratedAt: v.float64(),
+    recordType: v.union(
+      v.literal("orientation"),
+      v.literal("orientationSession")
+    ),
+    oldRecordId: v.string(), // String ID from old table
+    newRecordId: v.id("orientationBookings"),
+    status: v.union(
+      v.literal("success"),
+      v.literal("failed"),
+      v.literal("skipped")
+    ),
+    errorMessage: v.optional(v.string()),
+    migrationBatch: v.string(), // UUID to group migrations
+  })
+    .index("by_batch", ["migrationBatch"])
+    .index("by_status", ["status"])
+    .index("by_old_record", ["recordType", "oldRecordId"]),
   paymentLogs: defineTable({
     amount: v.optional(v.float64()),
     currency: v.optional(v.string()),

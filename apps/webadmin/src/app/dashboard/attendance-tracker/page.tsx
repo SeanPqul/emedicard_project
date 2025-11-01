@@ -12,7 +12,7 @@ import React, { useMemo, useState } from 'react';
 type AttendanceStatus = 'Scheduled' | 'Completed' | 'Missed' | 'Excused';
 
 interface Attendee {
-  orientationId: Id<'orientations'>;
+  bookingId: Id<'orientationBookings'>;  // UPDATED: Use orientationBookings table
   applicationId: Id<'applications'>;
   fullname: string;
   gender: string;
@@ -59,7 +59,7 @@ export default function AttendanceTrackerPage() {
   const [searchQuery, setSearchQuery] = useState<{ [key: string]: string }>({});
   const [finalizingSession, setFinalizingSession] = useState<string | null>(null);
   const [editingAttendee, setEditingAttendee] = useState<{
-    orientationId: Id<'orientations'>;
+    bookingId: Id<'orientationBookings'>;  // UPDATED: Use orientationBookings table
     scheduleId: string;
   } | null>(null);
   const [statusUpdateForm, setStatusUpdateForm] = useState<{
@@ -145,7 +145,7 @@ export default function AttendanceTrackerPage() {
 
     try {
       const result = await manuallyUpdateStatus({
-        orientationId: editingAttendee.orientationId,
+        bookingId: editingAttendee.bookingId,  // UPDATED: Use bookingId
         newStatus: statusUpdateForm.status,
         adminNotes: statusUpdateForm.notes || undefined,
       });
@@ -529,7 +529,7 @@ export default function AttendanceTrackerPage() {
                                 <button
                                   onClick={() => {
                                     setEditingAttendee({
-                                      orientationId: attendee.orientationId,
+                                      bookingId: attendee.bookingId,  // UPDATED: Use bookingId
                                       scheduleId: schedule.scheduleId,
                                     });
                                     setStatusUpdateForm({

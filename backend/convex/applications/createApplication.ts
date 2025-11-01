@@ -9,7 +9,10 @@ export const createApplicationMutation = mutation({
     organization: v.string(),
     civilStatus: v.string(),
     firstName: v.optional(v.string()),
+    middleName: v.optional(v.string()),
     lastName: v.optional(v.string()),
+    age: v.optional(v.number()),
+    nationality: v.optional(v.string()),
     gender: v.optional(v.union(v.literal("Male"), v.literal("Female"), v.literal("Other"))),
   },
   handler: async (ctx, args) => {
@@ -35,9 +38,12 @@ export const createApplicationMutation = mutation({
       organization: args.organization,
       civilStatus: args.civilStatus,
       firstName: args.firstName,
+      middleName: args.middleName,
       lastName: args.lastName,
+      age: args.age,
+      nationality: args.nationality,
       gender: args.gender,
-      applicationStatus: "Submitted", // Start as Submitted
+      applicationStatus: "Draft", // Start as Draft until user submits
     });
 
     return applicationId;

@@ -142,6 +142,8 @@ export const updateSchedule = mutation({
 /**
  * Delete an orientation schedule
  * Only allowed if no bookings exist for this schedule
+ *
+ * UPDATED: Uses orientationBookings table
  */
 export const deleteSchedule = mutation({
   args: {
@@ -150,7 +152,7 @@ export const deleteSchedule = mutation({
   handler: async (ctx, { scheduleId }) => {
     // Check if there are any bookings for this schedule
     const bookings = await ctx.db
-      .query("orientationSessions")
+      .query("orientationBookings")
       .withIndex("by_schedule", (q) => q.eq("scheduleId", scheduleId))
       .collect();
 

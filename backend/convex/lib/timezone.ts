@@ -144,3 +144,28 @@ export function formatPhilippineTime(
   
   return new Intl.DateTimeFormat('en-US', options).format(timestamp);
 }
+
+/**
+ * Calculate PHT midnight timestamp for a given date
+ * This is the canonical way to create date timestamps for schedules
+ *
+ * @param year Year (e.g., 2025)
+ * @param month Month (1-12, NOT 0-indexed)
+ * @param day Day of month (1-31)
+ * @returns UTC timestamp representing midnight PHT for that date
+ *
+ * @example
+ * // November 1, 2025 midnight PHT
+ * const midnightPHT = getPHTMidnightForDate(2025, 11, 1);
+ * // Returns: 1761926400000 (Oct 31 16:00 UTC = Nov 1 00:00 PHT)
+ */
+export function getPHTMidnightForDate(year: number, month: number, day: number): number {
+  // Create UTC midnight for the date
+  const utcMidnight = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
+
+  // Adjust for PHT timezone offset (subtract 8 hours)
+  // This gives us the UTC timestamp that represents midnight in PHT
+  const phtMidnightUTC = utcMidnight - (APP_TIMEZONE_OFFSET_HOURS * 60 * 60 * 1000);
+
+  return phtMidnightUTC;
+}

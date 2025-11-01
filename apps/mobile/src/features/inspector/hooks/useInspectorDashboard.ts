@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { useAuth } from '@clerk/clerk-expo';
@@ -14,38 +14,66 @@ import {
   isTimeSlotActive,
   getSessionBounds,
 } from '../lib/utils';
+import { calculateSessionStatus } from '@backend/convex/lib/sessionStatus';
 
 /**
  * Hook for Inspector Dashboard data
  * Fetches orientation schedules for today and calculates statistics
+ * Status (isActive/isPast/isUpcoming) is calculated CLIENT-SIDE for real-time updates
  */
 export function useInspectorDashboard() {
   // Check if user is authenticated
   const { isSignedIn } = useAuth();
-  
+
   // Get current server time (prevents client-side time manipulation)
   const serverTime = useQuery(
-    api.orientations.attendance.getCurrentServerTime,
-    isSignedIn ? {} : "skip"
-  );
-  
-  // Get current date from server (prevents client-side time manipulation)
-  const serverDate = useQuery(
-    api.orientations.attendance.getCurrentPHTDate,
+    api.lib.serverTime.getCurrentServerTime,
     isSignedIn ? {} : "skip"
   );
 
-  // Fetch orientation schedules for today
+  // Get current date from server (prevents client-side time manipulation)
+  const serverDate = useQuery(
+    api.lib.serverTime.getCurrentPHTDate,
+    isSignedIn ? {} : "skip"
+  );
+
+  // Fetch orientation schedules for today (all sessions including active and upcoming)
   const schedules = useQuery(
-    api.orientations.attendance.getOrientationSchedulesForDate,
+    api.orientationSchedules.getSchedulesForDate,
     isSignedIn && serverDate !== undefined ? { selectedDate: serverDate } : "skip"
   );
 
+  // State to force recalculation of status every 10 seconds
+  const [tick, setTick] = useState(0);
+  
+  // Track when server time was fetched to calculate accurate offset
+  const [serverTimeRef, setServerTimeRef] = useState<{serverTime: number, clientTime: number} | null>(null);
+  
+  useEffect(() => {
+    if (serverTime && !serverTimeRef) {
+      // Store both server time and client time when first received
+      setServerTimeRef({ serverTime, clientTime: Date.now() });
+    }
+  }, [serverTime, serverTimeRef]);
+
+  // Auto-refresh timer: recalculate status every 10 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((prev) => prev + 1);
+    }, 10000); // Update every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Calculate dashboard data
   const dashboardData = useMemo<DashboardData | null>(() => {
-    if (!schedules) return null;
+    if (!schedules || !serverTime || !serverTimeRef) return null;
 
-    // Enrich sessions with computed stats and server-provided status
+    // Calculate current server time using the offset from when it was fetched
+    const elapsedTime = Date.now() - serverTimeRef.clientTime;
+    const currentTime = serverTimeRef.serverTime + elapsedTime;
+
+    // Enrich sessions with CLIENT-SIDE calculated status (real-time!)
     const enrichedSessions: SessionWithStats[] = schedules.map((schedule: any) => {
       const baseSession = {
         _id: schedule.scheduleId,
@@ -56,15 +84,25 @@ export function useInspectorDashboard() {
         currentBookings: schedule.attendeeCount,
         attendees: schedule.attendees,
       };
-      
+
       const stats = calculateSessionStats(schedule.attendees);
-      
+
+      // Calculate status client-side using server time for accuracy
+      const status = calculateSessionStatus(
+        {
+          date: schedule.date,
+          startMinutes: schedule.startMinutes ?? 0,
+          endMinutes: schedule.endMinutes ?? 1439,
+        },
+        currentTime
+      );
+
       return {
         ...baseSession,
         stats,
-        isActive: schedule.isActive ?? false,
-        isPast: schedule.isPast ?? false,
-        isFuture: schedule.isUpcoming ?? false,
+        isActive: status.isActive,
+        isPast: status.isPast,
+        isFuture: status.isUpcoming,
       };
     });
 
@@ -85,10 +123,10 @@ export function useInspectorDashboard() {
       stats.completed += session.stats.completed;
     });
 
-    // Find current active session (use server-calculated status)
+    // Find current active session (use client-calculated status)
     let currentSession = enrichedSessions.find((session) => session.isActive);
 
-    // Get upcoming sessions (use server-calculated status)
+    // Get upcoming sessions (use client-calculated status)
     const upcomingSessions = enrichedSessions
       .filter((session) => session.isFuture)
       .slice(0, 5); // Limit to next 5 sessions
@@ -110,7 +148,7 @@ export function useInspectorDashboard() {
       upcomingSessions: filteredUpcoming,
       allSessions: enrichedSessions,
     };
-  }, [schedules]);
+  }, [schedules, serverTime, serverTimeRef, tick]); // Include tick to force recalculation every 10s
 
   return {
     data: dashboardData,

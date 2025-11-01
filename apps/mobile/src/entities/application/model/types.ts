@@ -129,6 +129,12 @@ export interface ApplicationWorkflow {
 export interface ApplicationFormDetails {
   _id: string;
   applicationType: ApplicationType;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  age?: number;
+  nationality?: string;
+  gender?: string;
   position: string;
   organization: string;
   civilStatus: string;

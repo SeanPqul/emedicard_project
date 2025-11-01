@@ -206,6 +206,9 @@ export class ApplicationService {
       position: '',
       organization: '',
       civilStatus: 'Single',
+      middleName: '',
+      age: 0,
+      nationality: '',
     };
   }
 

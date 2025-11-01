@@ -180,6 +180,51 @@ export const styles = StyleSheet.create({
     paddingTop: verticalScale(16),
     paddingBottom: verticalScale(12),
   },
+  collapsibleHeader: {
+    // No padding needed, sectionTitle has its own
+  },
+  expandButton: {
+    position: 'relative',
+    alignItems: 'center',
+    paddingVertical: verticalScale(12),
+    paddingBottom: verticalScale(16),
+    borderBottomLeftRadius: moderateScale(12),
+    borderBottomRightRadius: moderateScale(12),
+  },
+  expandButtonShadow: {
+    position: 'absolute',
+    top: -30,
+    left: 0,
+    right: 0,
+    height: 30,
+    backgroundColor: 'transparent',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+  },
+  collapseButton: {
+    alignItems: 'center',
+    paddingVertical: verticalScale(12),
+    paddingBottom: verticalScale(16),
+    borderBottomLeftRadius: moderateScale(12),
+    borderBottomRightRadius: moderateScale(12),
+    borderTopWidth: moderateScale(1),
+    borderTopColor: '#F0F0F0',
+  },
+  collapseButtonExternal: {
+    alignItems: 'center',
+    paddingVertical: verticalScale(12),
+    marginHorizontal: scale(16),
+    marginTop: verticalScale(-8), // Bring it closer to the card
+    marginBottom: verticalScale(8),
+  },
+  fadedText: {
+    opacity: 0.35,
+  },
+  fadedRow: {
+    opacity: 0.35,
+  },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

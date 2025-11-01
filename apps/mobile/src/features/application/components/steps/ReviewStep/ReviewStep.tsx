@@ -62,8 +62,23 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
       </View>
       
       <View style={styles.detailItem}>
+        <Text style={styles.detailLabel}>Middle Name:</Text>
+        <Text style={styles.detailValue}>{formData.middleName || 'N/A'}</Text>
+      </View>
+      
+      <View style={styles.detailItem}>
         <Text style={styles.detailLabel}>Last Name:</Text>
         <Text style={styles.detailValue}>{formData.lastName}</Text>
+      </View>
+
+      <View style={styles.detailItem}>
+        <Text style={styles.detailLabel}>Age:</Text>
+        <Text style={styles.detailValue}>{formData.age}</Text>
+      </View>
+
+      <View style={styles.detailItem}>
+        <Text style={styles.detailLabel}>Nationality:</Text>
+        <Text style={styles.detailValue}>{formData.nationality}</Text>
       </View>
 
       <View style={styles.detailItem}>

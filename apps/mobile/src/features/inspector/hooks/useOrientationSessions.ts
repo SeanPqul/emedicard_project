@@ -10,7 +10,7 @@ import { getStartOfDay, enrichSessionData } from '../lib/utils';
  */
 export function useOrientationSessions(initialDate?: number) {
   // Get server date (tamper-proof)
-  const serverDate = useQuery(api.orientations.attendance.getCurrentPHTDate);
+  const serverDate = useQuery(api.lib.serverTime.getCurrentPHTDate);
   
   // Use server date as initial date if not provided
   const [selectedDate, setSelectedDate] = useState<number | null>(null);

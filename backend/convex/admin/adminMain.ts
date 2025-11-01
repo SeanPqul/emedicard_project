@@ -190,18 +190,19 @@ export const verifyDocument = mutation({
 // =================================================================
 // == 4. TRACK ORIENTATION ATTENDANCE (FOR ADMIN ACTIONS) ==
 // =================================================================
+// UPDATED: Uses orientationBookings table
 export const trackOrientationAttendance = mutation({
   args: {
-    orientationId: v.id("orientations"),
-    status: v.union(v.literal("Completed"), v.literal("Missed")),
+    bookingId: v.id("orientationBookings"),
+    status: v.union(v.literal("completed"), v.literal("missed")),
   },
-  handler: async (ctx, { orientationId, status }) => {
+  handler: async (ctx, { bookingId, status }) => {
     const adminCheck = await AdminRole(ctx);
     if (!adminCheck.isAdmin) {
       throw new Error("You do not have permission to track attendance.");
     }
 
-    await ctx.db.patch(orientationId, { orientationStatus: status });
+    await ctx.db.patch(bookingId, { status });
     return { success: true };
   },
 });
