@@ -376,13 +376,6 @@ export default defineSchema({
     // Notification Read Tracking (for admins)
     adminReadBy: v.optional(v.array(v.id("users"))), // List of admin IDs who have read this
     
-    // Status tracking
-    status: v.optional(v.union(
-      v.literal("rejected"),
-      v.literal("resubmitted"),
-      v.literal("approved")
-    )),
-    
     // Audit Fields
     ipAddress: v.optional(v.string()),
     userAgent: v.optional(v.string()),
@@ -442,13 +435,6 @@ export default defineSchema({
     
     // Notification Read Tracking (for admins)
     adminReadBy: v.optional(v.array(v.id("users"))), // List of admin IDs who have read this
-    
-    // Status tracking
-    status: v.optional(v.union(
-      v.literal("rejected"),
-      v.literal("resubmitted"),
-      v.literal("approved")
-    )),
     
     // Audit Fields
     ipAddress: v.optional(v.string()),
