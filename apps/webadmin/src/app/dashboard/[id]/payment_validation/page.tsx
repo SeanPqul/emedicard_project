@@ -22,6 +22,21 @@ type ActivityLog = {
   details: string; 
 };
 
+type RejectionHistoryItem = {
+  _id: string;
+  rejectionCategory: string;
+  rejectionReason: string;
+  specificIssues: string[];
+  rejectedAt: number;
+  rejectedBy: string;
+  wasReplaced: boolean;
+  replacedAt?: number;
+  attemptNumber: number;
+  referenceNumber: string;
+  paymentMethod: string;
+  amount: number;
+};
+
 type PaymentData = {
   paymentId: Id<'payments'>;
   applicantName: string;
@@ -30,6 +45,8 @@ type PaymentData = {
   paymentStatus: string;
   receiptUrl: string | null;
   referenceNumber: string;
+  isResubmission?: boolean;
+  rejectionHistory?: RejectionHistoryItem[];
 };
 
 type PageProps = { 
@@ -44,6 +61,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
   // State Management
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isRejectionHistoryOpen, setIsRejectionHistoryOpen] = useState(false);
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
   const [error, setError] = useState<{ title: string; message: string } | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -59,7 +77,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
     applicationId: params.id,
   });
 
-  const rejectPaymentMutation = useMutation(api.admin.payments.rejectPayment);
+  const rejectPaymentMutation = useMutation(api.admin.payments.rejectPayment.rejectPayment);
   const validatePayment = useMutation(api.admin.validatePayment.validate);
 
   // Activity Log Helper
@@ -294,12 +312,46 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                   </svg>
                   Reject Payment
                 </button>
+                
+                {/* Rejection History Button */}
+                {paymentData.rejectionHistory && paymentData.rejectionHistory.length > 0 && (
+                  <button
+                    onClick={() => setIsRejectionHistoryOpen(true)}
+                    className="w-full bg-white text-orange-600 px-6 py-3 rounded-xl font-semibold hover:bg-orange-50 border border-orange-200 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    View Rejection History ({paymentData.rejectionHistory.length})
+                  </button>
+                )}
               </div>
             </div>
           </div>
 
           {/* Right Column: Payment Details */}
           <div className="lg:col-span-2">
+            {/* Resubmission Notice Banner */}
+            {paymentData.isResubmission && (
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-bold text-blue-900 mb-1">
+                      🔄 Payment Resubmitted
+                    </h3>
+                    <p className="text-sm text-blue-800">
+                      The applicant has resubmitted their payment after it was previously rejected. Click "View Rejection History" in the Actions panel to see previous attempts.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
               {/* Card Header */}
               <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
@@ -309,8 +361,15 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-800">Payment Information</h2>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-bold text-gray-800">Payment Information</h2>
+                      {paymentData.isResubmission && (
+                        <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300 shadow-sm">
+                          🔄 Resubmitted
+                        </span>
+                      )}
+                    </div>
                     <p className="text-gray-600 text-sm">Verify all details before approval</p>
                   </div>
                 </div>
@@ -445,6 +504,130 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
             <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
               <button
                 onClick={() => setIsReceiptModalOpen(false)}
+                className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection History Modal */}
+      {isRejectionHistoryOpen && paymentData.rejectionHistory && paymentData.rejectionHistory.length > 0 && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" 
+          onClick={() => setIsRejectionHistoryOpen(false)}
+        >
+          <div 
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-red-50 to-rose-50 px-6 py-5 border-b border-red-200 z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-red-100 p-2.5 rounded-lg">
+                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Rejection History</h3>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      {paymentData.rejectionHistory.length} previous rejection{paymentData.rejectionHistory.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsRejectionHistoryOpen(false)}
+                  className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-180px)]">
+              {paymentData.rejectionHistory.map((rejection, idx) => (
+                <div 
+                  key={rejection._id} 
+                  className={`border rounded-xl p-4 ${
+                    rejection.wasReplaced 
+                      ? 'border-green-200 bg-green-50' 
+                      : 'border-red-200 bg-red-50'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-gray-800 text-white">
+                        Attempt #{rejection.attemptNumber}
+                      </span>
+                      {rejection.wasReplaced && (
+                        <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-green-600 text-white flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Replaced
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {new Date(rejection.rejectedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="font-semibold text-gray-700">Category: </span>
+                      <span className="text-gray-600">
+                        {rejection.rejectionCategory.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-700">Reason: </span>
+                      <span className="text-gray-600">{rejection.rejectionReason}</span>
+                    </div>
+                    {rejection.specificIssues && rejection.specificIssues.length > 0 && (
+                      <div>
+                        <span className="font-semibold text-gray-700">Specific Issues:</span>
+                        <ul className="list-disc list-inside ml-4 mt-1 text-gray-600">
+                          {rejection.specificIssues.map((issue, i) => (
+                            <li key={i}>{issue}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    <div>
+                      <span className="font-semibold text-gray-700">Rejected by: </span>
+                      <span className="text-gray-600">{rejection.rejectedBy}</span>
+                    </div>
+                    <div className="pt-2 border-t border-gray-300 mt-2">
+                      <div className="text-xs text-gray-500 space-y-1">
+                        <div>Reference: {rejection.referenceNumber}</div>
+                        <div>Method: {rejection.paymentMethod}</div>
+                        <div>Amount: ₱{rejection.amount.toFixed(2)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+              <button
+                onClick={() => setIsRejectionHistoryOpen(false)}
                 className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all"
               >
                 Close

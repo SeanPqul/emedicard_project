@@ -150,10 +150,10 @@ export const resubmitDocument = mutation({
           applicationId: args.applicationId,
           jobCategoryId: application.jobCategoryId,
           title: "Document Resubmitted",
-          message: `User ${user.fullname} has resubmitted their ${documentTypeName}. Please review.`,
+          message: `${user.fullname} has resubmitted their ${documentTypeName}. Please review.`,
           notificationType: "DocumentResubmission",
           isRead: false,
-          actionUrl: `/admin/applications/${args.applicationId}/review`,
+          actionUrl: `/dashboard/${args.applicationId}/doc_verif`,
         });
       }
     }

@@ -19,7 +19,7 @@ export default function OrientationSchedulerPage({ params }: PageProps) {
   const [scheduleDate, setScheduleDate] = useState('');
   const [timeSlot, setTimeSlot] = useState('');
   const [venue, setVenue] = useState('');
-  const [inspectorId, setInspectorId] = useState<Id<'users'>>('');
+  const [inspectorId, setInspectorId] = useState<Id<'users'> | ''>('');
 
   const [allowConflict, setAllowConflict] = useState(false);
   const [error, setError] = useState('');
@@ -47,13 +47,16 @@ export default function OrientationSchedulerPage({ params }: PageProps) {
   // Load existing orientation data
   useEffect(() => {
     if (existingOrientation) {
-      if (existingOrientation.orientationDate) {
-        const date = new Date(existingOrientation.orientationDate);
+      if (existingOrientation.scheduledDate) {
+        const date = new Date(existingOrientation.scheduledDate);
         setScheduleDate(date.toISOString().split('T')[0]);
       }
-      if (existingOrientation.timeSlot) setTimeSlot(existingOrientation.timeSlot);
-      if (existingOrientation.orientationVenue) setVenue(existingOrientation.orientationVenue);
-      if (existingOrientation.assignedInspectorId) setInspectorId(existingOrientation.assignedInspectorId);
+      if (existingOrientation.scheduledTime) setTimeSlot(existingOrientation.scheduledTime);
+      if (existingOrientation.venue?.name) setVenue(existingOrientation.venue.name);
+      if (existingOrientation.instructor) {
+        // Note: instructor is an object, not an ID. The old schema might not have this.
+        // This would need backend updates to properly handle inspector assignment
+      }
     }
   }, [existingOrientation]);
 

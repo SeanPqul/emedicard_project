@@ -123,8 +123,9 @@ export const uploadDocumentsMutation = mutation({
         (doc) => doc.reviewStatus === "Pending" || doc.reviewStatus === "Verified"
       );
 
-      // If all documents are now reviewable, update status
-      if (allDocumentsReviewable) {
+      // If all documents are now reviewable, update status ONLY if application is in document verification phase
+      // Don't override payment pending, orientation, or other workflow stages
+      if (allDocumentsReviewable && application.applicationStatus === "For Document Verification") {
         await ctx.db.patch(args.applicationId, {
           applicationStatus: "Under Review",
           updatedAt: Date.now(),

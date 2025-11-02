@@ -677,9 +677,9 @@ export const finalizeSessionAttendance = mutation({
         booking.checkOutTime &&
         booking.status === "completed"
       ) {
-        // Update application status to "Approved" (Ready for Health Card)
+        // Update application status to "For Document Verification" (Next step after orientation)
         await ctx.db.patch(booking.applicationId, {
-          applicationStatus: "Approved",
+          applicationStatus: "For Document Verification",
           orientationCompleted: true,
           updatedAt: Date.now(),
           lastUpdatedBy: adminUser._id,
@@ -691,8 +691,8 @@ export const finalizeSessionAttendance = mutation({
           await ctx.db.insert("notifications", {
             userId: user._id,
             applicationId: booking.applicationId,
-            title: "Application Approved!",
-            message: "Your attendance has been validated. Your application is now approved and your health card will be issued soon.",
+            title: "Orientation Completed!",
+            message: "Your attendance has been validated. Please proceed to document verification.",
             notificationType: "Orientation",
             isRead: false,
           });

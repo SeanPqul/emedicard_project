@@ -40,9 +40,9 @@ export default function AdminNotificationsPage() {
     user ? {} : "skip"
   );
   
-  const markAsRead = useMutation(api.notifications.markNotificationAsRead);
-  const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);
-  const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
+  const markAsRead = useMutation(api.notifications.markNotificationAsRead.markNotificationAsRead);
+  const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead.markRejectionHistoryAsRead);
+  const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead.markAllNotificationsAsRead);
 
   // Combine all notifications
   const allNotifications = [...(adminNotifications || []), ...(rejectionNotifications || [])]
@@ -144,15 +144,16 @@ export default function AdminNotificationsPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto py-8 px-6">
-        <header className="mb-8">
+      <main className="max-w-5xl mx-auto py-6 px-4 sm:px-6">
+        {/* Clean Header */}
+        <header className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Notifications</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-2xl font-semibold text-gray-900">My Notifications</h1>
+              <p className="text-gray-500 text-sm mt-1">
                 Notifications for your managed categories
                 {unreadCount > 0 && (
-                  <span className="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                  <span className="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-red-500 text-white">
                     {unreadCount} unread
                   </span>
                 )}
@@ -160,43 +161,43 @@ export default function AdminNotificationsPage() {
             </div>
             <button
               onClick={() => router.push("/dashboard")}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
             >
               ← Back to Dashboard
             </button>
           </div>
         </header>
 
-        {/* Filters */}
-        <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        {/* Simple Filters */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="flex gap-2">
               <button
                 onClick={() => setFilter("all")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   filter === "all"
                     ? "bg-emerald-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 All ({allNotifications.length})
               </button>
               <button
                 onClick={() => setFilter("unread")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   filter === "unread"
                     ? "bg-emerald-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 Unread ({unreadCount})
               </button>
               <button
                 onClick={() => setFilter("read")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   filter === "read"
                     ? "bg-emerald-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 Read ({allNotifications.length - unreadCount})
@@ -204,7 +205,7 @@ export default function AdminNotificationsPage() {
             </div>
 
             <select
-              className="px-4 py-2 border border-gray-300 text-black rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-3 py-1.5 border border-gray-200 text-sm text-gray-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
             >
@@ -216,22 +217,24 @@ export default function AdminNotificationsPage() {
               ))}
             </select>
 
-            <button
-              onClick={handleMarkAllAsRead}
-              className="ml-auto px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
-            >
-              Mark All as Read
-            </button>
+            {unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllAsRead}
+                className="sm:ml-auto px-3 py-1.5 bg-emerald-600 text-white text-sm rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+              >
+                Mark All as Read
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Notifications List */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        {/* Clean Notifications List */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           {filteredNotifications.length === 0 ? (
             <div className="text-center py-12">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-16 w-16 text-gray-300 mx-auto mb-4"
+                className="h-12 w-12 text-gray-300 mx-auto mb-3"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -243,42 +246,49 @@ export default function AdminNotificationsPage() {
                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                 />
               </svg>
-              <p className="text-gray-500 font-medium">No notifications to display</p>
+              <p className="text-gray-500 text-sm">No notifications to display</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
-              {filteredNotifications.map((notification: Notification) => (
+            <div>
+              {filteredNotifications.map((notification: Notification, index) => (
                 <div
                   key={notification._id}
                   onClick={() => handleNotificationClick(notification)}
                   className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    !notification.isRead ? "bg-emerald-50" : ""
-                  }`}
+                    !notification.isRead ? "bg-emerald-50/50 border-l-4 border-emerald-500" : "border-l-4 border-transparent"
+                  } ${index !== filteredNotifications.length - 1 ? "border-b border-gray-100" : ""}`}
                 >
-                  <div className="flex items-start gap-4">
-                    {getNotificationIcon(notification.notificationType)}
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                      </div>
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <h3
-                          className={`text-sm font-semibold ${
+                        <div>
+                          <h3 className={`text-sm font-medium ${
                             !notification.isRead ? "text-gray-900" : "text-gray-700"
-                          }`}
-                        >
-                          {notification.title}
-                        </h3>
+                          }`}>
+                            {notification.title}
+                          </h3>
+                          <p className="text-sm text-gray-500 mt-1">{notification.message}</p>
+                        </div>
                         {!notification.isRead && (
-                          <span className="flex-shrink-0 w-2 h-2 bg-emerald-600 rounded-full mt-1"></span>
+                          <span className="flex-shrink-0 w-2 h-2 bg-emerald-500 rounded-full mt-1.5"></span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
                       <div className="flex items-center gap-3 mt-2">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-400">
                           {formatDistanceToNow(new Date(notification._creationTime), {
                             addSuffix: true,
                           })}
                         </span>
-                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                          {notification.notificationType}
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-xs text-gray-500">
+                          {notification.notificationType.replace(/([A-Z])/g, ' $1').trim()}
                         </span>
                       </div>
                     </div>

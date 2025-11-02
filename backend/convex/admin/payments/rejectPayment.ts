@@ -2,6 +2,7 @@
 import { v } from "convex/values";
 import { mutation } from "../../_generated/server";
 import { AdminRole } from "../../users/roles";
+import { REJECTION_LIMITS, hasReachedMaxAttempts } from "../../config/rejectionLimits";
 
 /**
  * Reject a payment and add the rejection to the paymentRejectionHistory table
@@ -96,25 +97,112 @@ export const rejectPayment = mutation({
       action: "Payment Rejected",
     });
 
-    // 5. Create notification for applicant
+    // 5. Create notification for applicant with attempt warnings
     const specificIssuesText = args.specificIssues.length > 0 
       ? `\n\nSpecific Issues:\n${args.specificIssues.map(issue => `• ${issue}`).join('\n')}`
       : '';
     
+    // Check if max attempts reached
+    const maxAttemptsReached = hasReachedMaxAttempts(attemptNumber, 'payment');
+    const maxAttempts = REJECTION_LIMITS.PAYMENTS.MAX_ATTEMPTS;
+    
+    let notificationMessage = `Your payment has been rejected.\n\nReason: ${args.rejectionReason}${specificIssuesText}\n\nThis is attempt ${attemptNumber} of ${maxAttempts}.`;
+    let notificationTitle = "Payment Rejected";
+    
+    if (maxAttemptsReached) {
+      // Max attempts reached - lock application and send critical notification
+      notificationTitle = "🚨 Maximum Payment Attempts Reached";
+      notificationMessage = `You have reached the maximum number of payment attempts (${maxAttempts}).\n\nYour application has been locked and will be reviewed by our support team.\n\nLast Rejection Reason: ${args.rejectionReason}${specificIssuesText}\n\nOur team will contact you within 48 hours. You may also contact support for immediate assistance.`;
+      
+      // Lock the application
+      if (REJECTION_LIMITS.BEHAVIOR.AUTO_LOCK_APPLICATION) {
+        await ctx.db.patch(args.applicationId, {
+          applicationStatus: "Locked - Max Attempts",
+          adminRemarks: `Application locked: Maximum payment rejection attempts (${maxAttempts}) reached`,
+          updatedAt: Date.now(),
+        });
+      }
+      
+      // Notify all admins about max attempts
+      const allAdminsForMaxAlert = await ctx.db
+        .query("users")
+        .withIndex("by_role", (q) => q.eq("role", "admin"))
+        .collect();
+      
+      for (const adminUser of allAdminsForMaxAlert) {
+        // Notify all admins who manage this category
+        if (!adminUser.managedCategories || 
+            adminUser.managedCategories.length === 0 || 
+            adminUser.managedCategories.includes(application.jobCategoryId)) {
+          await ctx.db.insert("notifications", {
+            userId: adminUser._id,
+            notificationType: "max_attempts_reached",
+            title: `⚠️ Max Payment Attempts - ${applicant.fullname}`,
+            message: `${applicant.fullname} has reached maximum payment attempts (${maxAttempts}). Application is locked and requires manual review.`,
+            actionUrl: `/dashboard/${args.applicationId}/payment_validation`,
+            applicationId: args.applicationId,
+            jobCategoryId: application.jobCategoryId,
+            isRead: false,
+          });
+        }
+      }
+    } else if (attemptNumber === REJECTION_LIMITS.PAYMENTS.FINAL_ATTEMPT_WARNING) {
+      // Final attempt warning
+      notificationTitle = "⚠️ Final Payment Attempt Warning";
+      notificationMessage = `🚨 FINAL ATTEMPT: This is your last chance to submit payment correctly.\n\nReason for rejection: ${args.rejectionReason}${specificIssuesText}\n\nAttempts: ${attemptNumber} of ${maxAttempts}\n\nPlease review the requirements carefully before resubmitting. If you need help, contact our support team.`;
+    } else if (attemptNumber === REJECTION_LIMITS.PAYMENTS.WARNING_THRESHOLD) {
+      // Warning threshold
+      notificationMessage = `⚠️ Your payment has been rejected.\n\nReason: ${args.rejectionReason}${specificIssuesText}\n\nAttempts: ${attemptNumber} of ${maxAttempts}\n\n⚠️ Warning: You have ${maxAttempts - attemptNumber} attempt(s) remaining. Please review carefully before resubmitting.`;
+    }
+    
     await ctx.db.insert("notifications", {
       userId: application.userId,
       applicationId: args.applicationId,
-      title: "Payment Rejected",
-      message: `Your payment has been rejected.\n\nReason: ${args.rejectionReason}${specificIssuesText}\n\nPlease resubmit your payment to continue with your application. This is attempt ${attemptNumber}.`,
-      notificationType: "payment_rejected",
+      title: notificationTitle,
+      message: notificationMessage,
+      notificationType: maxAttemptsReached ? "payment_max_attempts" : "payment_rejected",
       isRead: false,
       jobCategoryId: application.jobCategoryId,
     });
+
+    // 6. Notify OTHER admins about the rejection (not the one who rejected)
+    const allAdmins = await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "admin"))
+      .collect();
+    
+    // Filter: relevant admins who DIDN'T reject (excluding current admin)
+    const otherRelevantAdmins = allAdmins.filter(admin => 
+      admin._id !== user._id && ( // Exclude the rejecting admin
+        !admin.managedCategories || 
+        admin.managedCategories.length === 0 || 
+        admin.managedCategories.includes(application.jobCategoryId)
+      )
+    );
+
+    console.log('📢 Notifying', otherRelevantAdmins.length, 'other admins about rejection');
+
+    // Notify other admins
+    for (const admin of otherRelevantAdmins) {
+      await ctx.db.insert("notifications", {
+        userId: admin._id,
+        applicationId: args.applicationId,
+        title: "Payment Rejected by Colleague",
+        message: `${user.fullname} rejected payment for ${applicant.fullname}. Reason: ${args.rejectionReason}`,
+        notificationType: "payment_rejection_info",
+        isRead: false,
+        jobCategoryId: application.jobCategoryId,
+        actionUrl: `/dashboard/${args.applicationId}/payment_validation`,
+      });
+    }
 
     return { 
       success: true, 
       message: "Payment rejected and applicant notified.",
       attemptNumber,
+      maxAttemptsReached: maxAttemptsReached,
+      isFinalAttempt: attemptNumber === REJECTION_LIMITS.PAYMENTS.FINAL_ATTEMPT_WARNING,
+      remainingAttempts: Math.max(0, maxAttempts - attemptNumber),
     };
   },
 });

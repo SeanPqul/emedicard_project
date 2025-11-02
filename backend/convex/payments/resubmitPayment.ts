@@ -65,16 +65,32 @@ export const resubmitPayment = mutation({
       updatedAt: now,
     });
 
-    // Create notification for admin
-    await ctx.db.insert("notifications", {
-      userId: user._id,
-      applicationId: args.applicationId,
-      title: "Payment Resubmitted",
-      message: `Payment has been resubmitted for application after rejection. Please review the new payment submission.`,
-      notificationType: "payment_resubmitted",
-      isRead: false,
-      jobCategoryId: application.jobCategoryId,
-    });
+    // Find admins who manage this job category to notify them
+    const allAdmins = await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "admin"))
+      .collect();
+    
+    // Filter admins who manage this category or super admins (no managed categories)
+    const relevantAdmins = allAdmins.filter(admin => 
+      !admin.managedCategories || 
+      admin.managedCategories.length === 0 || 
+      admin.managedCategories.includes(application.jobCategoryId)
+    );
+    
+    // Create notifications for relevant admins
+    for (const admin of relevantAdmins) {
+      await ctx.db.insert("notifications", {
+        userId: admin._id,
+        applicationId: args.applicationId,
+        title: "Payment Resubmitted",
+        message: `${user.fullname} has resubmitted payment for their application after rejection. Please review the new payment submission.`,
+        notificationType: "payment_resubmitted",
+        isRead: false,
+        jobCategoryId: application.jobCategoryId,
+        actionUrl: `/dashboard/${args.applicationId}/payment_validation`,
+      });
+    }
 
     return {
       success: true,

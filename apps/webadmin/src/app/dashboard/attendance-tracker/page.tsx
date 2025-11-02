@@ -9,7 +9,8 @@ import { ArrowLeft, Calendar, CheckCircle, Clock, Edit2, Filter, MapPin, Search,
 import { useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
 
-type AttendanceStatus = 'Scheduled' | 'Completed' | 'Missed' | 'Excused';
+// Database uses lowercase status values
+type AttendanceStatus = 'scheduled' | 'checked-in' | 'completed' | 'missed' | 'excused' | 'cancelled' | 'no-show';
 
 interface Attendee {
   bookingId: Id<'orientationBookings'>;  // UPDATED: Use orientationBookings table
@@ -63,9 +64,9 @@ export default function AttendanceTrackerPage() {
     scheduleId: string;
   } | null>(null);
   const [statusUpdateForm, setStatusUpdateForm] = useState<{
-    status: AttendanceStatus;
+    status: 'completed' | 'missed' | 'excused';
     notes: string;
-  }>({ status: 'Completed', notes: '' });
+  }>({ status: 'completed', notes: '' });
 
   // Convert selected date to timestamp (start of day)
   const selectedTimestamp = selectedDate.getTime();
@@ -153,7 +154,7 @@ export default function AttendanceTrackerPage() {
       if (result.success) {
         alert(`✅ ${result.message}`);
         setEditingAttendee(null);
-        setStatusUpdateForm({ status: 'Completed', notes: '' });
+        setStatusUpdateForm({ status: 'completed', notes: '' });
       }
     } catch (error: any) {
       console.error('Error updating status:', error);
@@ -163,32 +164,47 @@ export default function AttendanceTrackerPage() {
 
   const getStatusBadge = (status: AttendanceStatus) => {
     switch (status) {
-      case 'Completed':
+      case 'completed':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
             <CheckCircle className="w-3 h-3" />
             Completed
           </span>
         );
-      case 'Missed':
+      case 'missed':
+      case 'no-show':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
             <XCircle className="w-3 h-3" />
             Missed
           </span>
         );
-      case 'Excused':
+      case 'excused':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
             <Clock className="w-3 h-3" />
             Excused
           </span>
         );
-      case 'Scheduled':
+      case 'scheduled':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
             <Clock className="w-3 h-3" />
             Scheduled
+          </span>
+        );
+      case 'checked-in':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+            <Clock className="w-3 h-3" />
+            Checked In
+          </span>
+        );
+      case 'cancelled':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            <XCircle className="w-3 h-3" />
+            Cancelled
           </span>
         );
     }
@@ -532,8 +548,15 @@ export default function AttendanceTrackerPage() {
                                       bookingId: attendee.bookingId,  // UPDATED: Use bookingId
                                       scheduleId: schedule.scheduleId,
                                     });
+                                    // Determine initial status for form
+                                    const initialStatus: 'completed' | 'missed' | 'excused' = 
+                                      attendee.orientationStatus === 'scheduled' || attendee.orientationStatus === 'checked-in' 
+                                        ? 'completed' 
+                                        : (attendee.orientationStatus === 'completed' || attendee.orientationStatus === 'missed' || attendee.orientationStatus === 'excused')
+                                          ? attendee.orientationStatus
+                                          : 'completed';
                                     setStatusUpdateForm({
-                                      status: attendee.orientationStatus === 'Scheduled' ? 'Completed' : attendee.orientationStatus,
+                                      status: initialStatus,
                                       notes: attendee.inspectorNotes || '',
                                     });
                                   }}
@@ -602,13 +625,13 @@ export default function AttendanceTrackerPage() {
                     value={statusUpdateForm.status}
                     onChange={(e) => setStatusUpdateForm(prev => ({ 
                       ...prev, 
-                      status: e.target.value as AttendanceStatus 
+                      status: e.target.value as 'completed' | 'missed' | 'excused'
                     }))}
                     className="block w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="Completed">Completed</option>
-                    <option value="Excused">Excused</option>
-                    <option value="Missed">Missed</option>
+                    <option value="completed">Completed</option>
+                    <option value="excused">Excused</option>
+                    <option value="missed">Missed</option>
                   </select>
                 </div>
 

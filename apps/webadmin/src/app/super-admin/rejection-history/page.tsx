@@ -408,7 +408,11 @@ export default function RejectionHistoryPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         {rejection.applicationId && (
                           <Link
-                            href={`/dashboard/${rejection.applicationId}/doc_verif`}
+                            href={
+                              rejection.type === 'payment'
+                                ? `/dashboard/${rejection.applicationId}/payment_validation`
+                                : `/dashboard/${rejection.applicationId}/doc_verif`
+                            }
                             className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-400 to-emerald-500 text-white hover:from-emerald-500 hover:to-emerald-600 px-4 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm hover:shadow-md"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "../../_generated/server";
+import { REJECTION_LIMITS, hasReachedMaxAttempts } from "../../config/rejectionLimits";
 
 export const rejectDocument = mutation({
   args: {
@@ -175,12 +176,90 @@ export const rejectDocument = mutation({
       timestamp: Date.now(),
     });
 
-    // 9. Return success with rejection ID
+    // 9. Send notification to applicant about the rejection
+    const specificIssuesText = args.specificIssues.length > 0 
+      ? `\n\nSpecific Issues:\n${args.specificIssues.map(issue => `• ${issue}`).join('\n')}`
+      : '';
+    
+    // Check if max attempts reached
+    const maxAttemptsReached = hasReachedMaxAttempts(attemptNumber, 'document');
+    const maxAttempts = REJECTION_LIMITS.DOCUMENTS.MAX_ATTEMPTS;
+    
+    let notificationMessage = `Your ${documentType.name} has been rejected.\n\nReason: ${args.rejectionReason}${specificIssuesText}\n\nThis is attempt ${attemptNumber} of ${maxAttempts}.`;
+    let notificationTitle = "Document Rejected";
+    
+    if (maxAttemptsReached) {
+      // Max attempts reached - lock application and send critical notification
+      notificationTitle = "🚨 Maximum Attempts Reached";
+      notificationMessage = `You have reached the maximum number of attempts (${maxAttempts}) for ${documentType.name}.\n\nYour application has been locked and will be reviewed by our support team.\n\nLast Rejection Reason: ${args.rejectionReason}${specificIssuesText}\n\nOur team will contact you within 48 hours. You may also contact support for immediate assistance.`;
+      
+      // Lock the application
+      if (REJECTION_LIMITS.BEHAVIOR.AUTO_LOCK_APPLICATION) {
+        await ctx.db.patch(application._id, {
+          applicationStatus: "Locked - Max Attempts",
+          adminRemarks: `Application locked: Maximum document rejection attempts (${maxAttempts}) reached for ${documentType.name}`,
+          updatedAt: Date.now(),
+        });
+      }
+      
+      // Notify all admins (including super admins) about max attempts
+      const allAdmins = await ctx.db
+        .query("users")
+        .withIndex("by_role", (q) => q.eq("role", "admin"))
+        .collect();
+      
+      for (const adminUser of allAdmins) {
+        // Notify all admins who manage this category
+        if (!adminUser.managedCategories || 
+            adminUser.managedCategories.length === 0 || 
+            adminUser.managedCategories.includes(application.jobCategoryId)) {
+          await ctx.db.insert("notifications", {
+            userId: adminUser._id,
+            notificationType: "max_attempts_reached",
+            title: `⚠️ Max Attempts Reached - ${applicantName}`,
+            message: `${applicantName} has reached maximum attempts (${maxAttempts}) for ${documentType.name}. Application is locked and requires manual review.`,
+            actionUrl: `/dashboard/${application._id}/doc_verif`,
+            applicationId: application._id,
+            jobCategoryId: application.jobCategoryId,
+            isRead: false,
+          });
+        }
+      }
+    } else if (attemptNumber === REJECTION_LIMITS.DOCUMENTS.FINAL_ATTEMPT_WARNING) {
+      // Final attempt warning
+      notificationTitle = "⚠️ Final Attempt Warning";
+      notificationMessage = `🚨 FINAL ATTEMPT: This is your last chance to submit ${documentType.name} correctly.\n\nReason for rejection: ${args.rejectionReason}${specificIssuesText}\n\nAttempts: ${attemptNumber} of ${maxAttempts}\n\nPlease review the requirements carefully before resubmitting. If you need help, contact our support team.`;
+    } else if (attemptNumber === REJECTION_LIMITS.DOCUMENTS.WARNING_THRESHOLD) {
+      // Warning threshold
+      notificationMessage = `⚠️ Your ${documentType.name} has been rejected.\n\nReason: ${args.rejectionReason}${specificIssuesText}\n\nAttempts: ${attemptNumber} of ${maxAttempts}\n\n⚠️ Warning: You have ${maxAttempts - attemptNumber} attempt(s) remaining. Please review carefully before resubmitting.`;
+    }
+    
+    // Send notification to applicant
+    await ctx.db.insert("notifications", {
+      userId: application.userId,
+      applicationId: application._id,
+      title: notificationTitle,
+      message: notificationMessage,
+      notificationType: maxAttemptsReached ? "document_max_attempts" : "document_rejected",
+      isRead: false,
+      jobCategoryId: application.jobCategoryId,
+    });
+    
+    // Update notification tracking in rejection history
+    await ctx.db.patch(rejectionHistoryId, {
+      notificationSent: true,
+      notificationSentAt: Date.now(),
+    });
+
+    // 10. Return success with rejection ID and warning flags
     return {
       success: true,
       rejectionId: rejectionHistoryId,
       message: `Document ${documentType.name} has been rejected successfully`,
       attemptNumber: attemptNumber,
+      maxAttemptsReached: maxAttemptsReached,
+      isFinalAttempt: attemptNumber === REJECTION_LIMITS.DOCUMENTS.FINAL_ATTEMPT_WARNING,
+      remainingAttempts: Math.max(0, maxAttempts - attemptNumber),
     };
     } catch (error) {
       console.error("Error rejecting document:", error);

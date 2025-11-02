@@ -29,8 +29,8 @@ export const createAdmin = action({ // Changed to action
     let clerkUser;
     try {
       const usersResponse = await clerk.users.getUserList({ emailAddress: [args.email] });
-      if (usersResponse && usersResponse.length > 0) {
-        clerkUser = usersResponse[0];
+      if (usersResponse && usersResponse.data && usersResponse.data.length > 0) {
+        clerkUser = usersResponse.data[0];
         // If user exists, update their password if provided (Clerk doesn't allow direct password update via this method easily)
         // For existing users, a password reset flow might be more appropriate or a separate mutation.
         // For this task, we'll assume if a user exists, we're just updating their admin privileges.
