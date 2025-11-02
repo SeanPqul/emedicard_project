@@ -10,8 +10,8 @@ import { enrichAttendeeData, filterAttendeesBySearch, sortAttendees } from '../l
  */
 export function useSessionAttendees(
   orientationDate: number,
-  timeSlot: string,
-  orientationVenue: string
+  scheduledTime: string,
+  venue: string
 ) {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -21,8 +21,8 @@ export function useSessionAttendees(
     api.orientations.attendance.getAttendeesForSession,
     {
       orientationDate,
-      timeSlot,
-      orientationVenue,
+      timeSlot: scheduledTime,
+      orientationVenue: venue,
     }
   );
 

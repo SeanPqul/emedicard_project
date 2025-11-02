@@ -38,7 +38,7 @@ export function useOrientationSessions(initialDate?: number) {
       enrichSessionData({
         _id: schedule.scheduleId,
         date: schedule.date,
-        timeSlot: schedule.time,
+        scheduledTime: schedule.time,
         venue: schedule.venue.name,
         maxCapacity: schedule.totalSlots,
         currentBookings: schedule.attendeeCount,
@@ -58,8 +58,8 @@ export function useOrientationSessions(initialDate?: number) {
       }
       
       // Fallback to parsing time string
-      const parseTime = (timeSlot: string): number => {
-        const match = timeSlot.match(/(\d+):(\d+)\s*(AM|PM)/);
+      const parseTime = (scheduledTime: string): number => {
+        const match = scheduledTime.match(/(\d+):(\d+)\s*(AM|PM)/);
         if (!match) return 0;
         
         let hour = parseInt(match[1] || '0', 10);
@@ -72,8 +72,8 @@ export function useOrientationSessions(initialDate?: number) {
         return hour * 60 + minute;
       };
       
-      const aTime = parseTime(a.timeSlot);
-      const bTime = parseTime(b.timeSlot);
+      const aTime = parseTime(a.scheduledTime);
+      const bTime = parseTime(b.scheduledTime);
       
       return bTime - aTime; // Descending (latest first)
     });

@@ -132,20 +132,20 @@ export const isFuture = (timestamp: number): boolean => {
 };
 
 /**
- * Parse time slot string to get start and end times
+ * Parse scheduled time string to get start and end times
  * @example "9:00 AM - 10:00 AM" => { start: "9:00 AM", end: "10:00 AM" }
  */
-export const parseTimeSlot = (timeSlot: string): { start: string; end: string } => {
-  const [start, end] = timeSlot.split(' - ').map((t: string) => t.trim());
+export const parseTimeSlot = (scheduledTime: string): { start: string; end: string } => {
+  const [start, end] = scheduledTime.split(' - ').map((t: string) => t.trim());
   return { start: start || '', end: end || '' };
 };
 
 /**
- | * Check if current time is within a time slot
- | * @param timeSlot Time slot string (e.g., "9:00 AM - 10:00 AM")
+ | * Check if current time is within a scheduled time
+ | * @param scheduledTime Time string (e.g., "9:00 AM - 10:00 AM")
  | * @param date Session date timestamp (optional, defaults to today)
  | */
-export const isTimeSlotActive = (timeSlot: string, date?: number): boolean => {
+export const isTimeSlotActive = (scheduledTime: string, date?: number): boolean => {
   const now = Date.now();
   const sessionDate = date ? new Date(date) : new Date();
 
@@ -154,16 +154,16 @@ export const isTimeSlotActive = (timeSlot: string, date?: number): boolean => {
     return false;
   }
 
-  const { startTs, endTs } = getSessionBounds(date ?? Date.now(), timeSlot);
+  const { startTs, endTs } = getSessionBounds(date ?? Date.now(), scheduledTime);
   return now >= startTs && now < endTs;
 };
 
 /**
- * Check if a time slot has ended (current time is after the end time)
- * @param timeSlot Time slot string (e.g., "9:00 AM - 10:00 AM")
+ * Check if a scheduled time has ended (current time is after the end time)
+ * @param scheduledTime Time string (e.g., "9:00 AM - 10:00 AM")
  * @param date Session date timestamp (optional, defaults to today)
  */
-export const isTimeSlotEnded = (timeSlot: string, date?: number): boolean => {
+export const isTimeSlotEnded = (scheduledTime: string, date?: number): boolean => {
   const now = Date.now();
   const sessionDate = date ? new Date(date) : new Date();
 
@@ -173,7 +173,7 @@ export const isTimeSlotEnded = (timeSlot: string, date?: number): boolean => {
   if (sessionDayStart < todayStart) return true; // Past day
   if (sessionDayStart > todayStart) return false; // Future day
 
-  const { endTs } = getSessionBounds(date ?? Date.now(), timeSlot);
+  const { endTs } = getSessionBounds(date ?? Date.now(), scheduledTime);
   return now >= endTs;
 };
 
@@ -200,14 +200,14 @@ const parseTimeString = (timeStr: string): number => {
 };
 
 /**
- * Given a date (UTC midnight timestamp) and a time slot string, return
+ * Given a date (UTC midnight timestamp) and a scheduled time string, return
  * local start and end timestamps for that session.
  */
 export const getSessionBounds = (
   date: number,
-  timeSlot: string
+  scheduledTime: string
 ): { startTs: number; endTs: number } => {
-  const { start, end } = parseTimeSlot(timeSlot);
+  const { start, end } = parseTimeSlot(scheduledTime);
   
   // Get the local date from UTC midnight timestamp
   const utcDate = new Date(date);
@@ -249,7 +249,7 @@ export const getAttendeeStatus = (attendee: AttendeeData): AttendeeStatus => {
   if (attendee.checkInTime) {
     return 'checked-in';
   }
-  if (attendee.orientationStatus === 'Missed') {
+  if (attendee.orientationStatus === 'missed') {
     return 'missed';
   }
   return 'pending';
@@ -327,11 +327,11 @@ export const calculateSessionStats = (attendees: AttendeeData[]): SessionStats =
  */
 export const enrichSessionData = (session: OrientationSession): SessionWithStats => {
   const stats = calculateSessionStats(session.attendees);
-  const isActive = isTimeSlotActive(session.timeSlot, session.date);
-  const hasEnded = isTimeSlotEnded(session.timeSlot, session.date);
+  const isActive = isTimeSlotActive(session.scheduledTime, session.date);
+  const hasEnded = isTimeSlotEnded(session.scheduledTime, session.date);
   
   // Determine if session is past or future
-  const { start } = parseTimeSlot(session.timeSlot);
+  const { start } = parseTimeSlot(session.scheduledTime);
   const startTimeMinutes = parseTimeString(start);
   const sessionStartTime = new Date(session.date);
   sessionStartTime.setHours(Math.floor(startTimeMinutes / 60), startTimeMinutes % 60);

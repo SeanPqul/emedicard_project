@@ -19,7 +19,7 @@ export function SessionCard({ session }: SessionCardProps) {
       pathname: '/(screens)/(inspector)/attendees',
       params: {
         date: session.date.toString(),
-        timeSlot: session.timeSlot,
+        scheduledTime: session.scheduledTime,
         venue: session.venue,
       },
     });
@@ -38,7 +38,7 @@ export function SessionCard({ session }: SessionCardProps) {
             size={moderateScale(18)}
             color={theme.colors.text.primary}
           />
-          <Text style={styles.timeText}>{session.timeSlot}</Text>
+          <Text style={styles.timeText}>{session.scheduledTime}</Text>
         </View>
         <Ionicons
           name="chevron-forward"

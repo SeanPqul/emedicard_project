@@ -27,12 +27,12 @@ function parseTimeString(timeStr: string): number | null {
   return hours * 60 + minutes;
 }
 
-// Calculate session timestamps from date and timeslot
+// Calculate session timestamps from date and scheduledTime
 function getSessionTimestamps(
   sessionDate: number,
-  timeSlot: string
+  scheduledTime: string
 ): { startTs: number; endTs: number } | null {
-  const [startTime, endTime] = timeSlot.split(' - ');
+  const [startTime, endTime] = scheduledTime.split(' - ');
   if (!startTime || !endTime) return null;
 
   const startMins = parseTimeString(startTime);
@@ -55,7 +55,7 @@ function getTimeContext(
   session: SessionWithStats,
   currentTime: number
 ): string {
-  const timestamps = getSessionTimestamps(session.date, session.timeSlot);
+  const timestamps = getSessionTimestamps(session.date, session.scheduledTime);
   if (!timestamps) return '';
 
   const { startTs, endTs } = timestamps;
@@ -138,7 +138,7 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
       pathname: '/(screens)/(inspector)/attendees',
       params: {
         date: session.date.toString(),
-        timeSlot: session.timeSlot,
+        scheduledTime: session.scheduledTime,
         venue: session.venue,
       },
     });
@@ -159,7 +159,7 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
               size={moderateScale(20)}
               color={theme.colors.primary[500]}
             />
-            <Text style={styles.cardTimeText}>{session.timeSlot}</Text>
+            <Text style={styles.cardTimeText}>{session.scheduledTime}</Text>
           </View>
           {isLive ? (
             <View style={styles.liveBadge}>

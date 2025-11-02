@@ -82,7 +82,7 @@ export function useScanHistory() {
       timestamp: scan.timestamp,
       applicationId: scan.applicationId,
       attendeeName: scan.attendeeName,
-      sessionTimeSlot: scan.timeSlot,
+      sessionScheduledTime: scan.timeSlot,
       sessionVenue: scan.venue,
       sessionDate: scan.orientationDate,
       inspectorId: scan.inspectorId || ('' as any), // Inspector ID is the current user (not included in response)

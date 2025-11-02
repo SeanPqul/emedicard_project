@@ -78,7 +78,7 @@ export function useInspectorDashboard() {
       const baseSession = {
         _id: schedule.scheduleId,
         date: schedule.date,
-        timeSlot: schedule.time,
+        scheduledTime: schedule.time,
         venue: schedule.venue.name,
         maxCapacity: schedule.totalSlots,
         currentBookings: schedule.attendeeCount,

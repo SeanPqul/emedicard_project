@@ -16,7 +16,7 @@ import type { Id } from '@backend/convex/_generated/dataModel';
 export interface OrientationSession {
   _id: Id<'orientationSchedules'>;
   date: number; // Timestamp (start of day)
-  timeSlot: string; // e.g., "9:00 AM - 10:00 AM"
+  scheduledTime: string; // e.g., "9:00 AM - 10:00 AM" (renamed from timeSlot)
   venue: string; // e.g., "Gaisano Ilustre"
   maxCapacity: number;
   currentBookings: number;
@@ -57,7 +57,7 @@ export interface AttendeeData {
   applicationId: Id<'applications'>;
   userId: Id<'users'>;
   fullname: string;
-  orientationStatus: 'Scheduled' | 'Completed' | 'Missed';
+  orientationStatus: 'scheduled' | 'checked-in' | 'completed' | 'cancelled' | 'missed' | 'excused' | 'no-show';
   checkInTime?: number;
   checkOutTime?: number;
   qrCodeUrl: string;
@@ -94,7 +94,7 @@ export interface ScanHistoryItem {
   timestamp: number;
   applicationId: Id<'applications'>;
   attendeeName: string;
-  sessionTimeSlot: string;
+  sessionScheduledTime: string;
   sessionVenue: string;
   sessionDate: number;
   inspectorId: Id<'users'>;
@@ -218,7 +218,7 @@ export type DateFilterPreset = 'today' | 'last-7-days' | 'last-30-days' | 'custo
  */
 export interface SessionAttendeesParams {
   date: number;
-  timeSlot: string;
+  scheduledTime: string;
   venue: string;
 }
 

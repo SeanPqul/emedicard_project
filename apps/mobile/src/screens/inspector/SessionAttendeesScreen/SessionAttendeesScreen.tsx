@@ -23,12 +23,12 @@ export function SessionAttendeesScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     date: string;
-    timeSlot: string;
+    scheduledTime: string;
     venue: string;
   }>();
 
   const orientationDate = Number(params.date);
-  const timeSlot = params.timeSlot || '';
+  const scheduledTime = params.scheduledTime || '';
   const venue = params.venue || '';
 
   const {
@@ -40,7 +40,7 @@ export function SessionAttendeesScreen() {
     isEmpty,
     refreshing,
     handleRefresh,
-  } = useSessionAttendees(orientationDate, timeSlot, venue);
+  } = useSessionAttendees(orientationDate, scheduledTime, venue);
 
 
   const renderAttendee = ({ item }: { item: AttendeeWithStatus }) => (
@@ -153,7 +153,7 @@ export function SessionAttendeesScreen() {
           <View style={styles.headerTextContainer}>
             <Text style={styles.title}>Session Attendees</Text>
             <Text style={styles.subtitle}>
-              {timeSlot} • {venue}
+              {scheduledTime} • {venue}
             </Text>
           </View>
         </View>

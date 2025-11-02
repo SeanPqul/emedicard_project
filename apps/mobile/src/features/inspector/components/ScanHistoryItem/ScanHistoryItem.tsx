@@ -46,7 +46,7 @@ export function ScanHistoryItem({ scan }: ScanHistoryItemProps) {
             size={moderateScale(14)}
             color={theme.colors.text.tertiary}
           />
-          <Text style={styles.detailsText}>{scan.sessionTimeSlot}</Text>
+          <Text style={styles.detailsText}>{scan.sessionScheduledTime}</Text>
         </View>
 
         <View style={styles.detailsRow}>
