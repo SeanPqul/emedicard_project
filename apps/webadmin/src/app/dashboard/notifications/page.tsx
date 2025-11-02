@@ -14,7 +14,7 @@ import React, { useState } from "react";
 type Notification = {
   _id: Id<"notifications"> | Id<"documentRejectionHistory">;
   _creationTime: number;
-  title: string;
+  title?: string;
   message: string;
   notificationType: string;
   actionUrl?: string;
@@ -28,16 +28,16 @@ export default function AdminNotificationsPage() {
 
   const { isLoaded: isClerkLoaded, user } = useUser();
   const adminPrivileges = useQuery(
-    user ? api.users.roles.getAdminPrivileges : "skip"
+    api.users.roles.getAdminPrivileges
   );
   
   const adminNotifications = useQuery(
-    user ? api.notifications.getAdminNotifications : "skip",
-    user ? { notificationType: undefined } : "skip"
+    api.notifications.getAdminNotifications,
+    { notificationType: undefined }
   );
   const rejectionNotifications = useQuery(
-    user ? api.notifications.getRejectionHistoryNotifications : "skip",
-    user ? {} : "skip"
+    api.notifications.getRejectionHistoryNotifications,
+    {}
   );
   
   const markAsRead = useMutation(api.notifications.markNotificationAsRead.markNotificationAsRead);

@@ -213,7 +213,7 @@ export default function LandingPage() {
               </button>
             </div>
           </div>
-          <div className="flex flex-col items-center lg:items-start justify-center gap-8 lg:gap-10 lg:ml-60">
+          <div className="flex flex-col items-center lg:items-start justify-center gap-8 lg:gap-10 lg:ml-6">
             <img
               src="/images/davao-logo-color.png"
               alt="Davao City Logo"

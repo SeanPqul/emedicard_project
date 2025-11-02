@@ -658,7 +658,7 @@ export default function AttendanceTrackerPage() {
                 <button
                   onClick={() => {
                     setEditingAttendee(null);
-                    setStatusUpdateForm({ status: 'Completed', notes: '' });
+                    setStatusUpdateForm({ status: 'completed', notes: '' });
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors"
                 >

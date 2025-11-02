@@ -10,20 +10,18 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function AdminNotificationBell() {
-  const adminId = useStoreUser();
   const router = useRouter();
-  const { isSignedIn } = useAuth();
 
   const adminPrivileges = useQuery(
-    isSignedIn ? api.users.roles.getAdminPrivileges : "skip"
+    api.users.roles.getAdminPrivileges
   );
   const adminNotifications = useQuery(
-    isSignedIn ? api.notifications.getAdminNotifications : "skip",
-    isSignedIn ? { notificationType: undefined } : "skip"
+    api.notifications.getAdminNotifications,
+    { notificationType: undefined }
   );
   const rejectionHistoryNotifications = useQuery(
-    isSignedIn ? api.notifications.getRejectionHistoryNotifications : "skip",
-    isSignedIn ? {} : "skip"
+    api.notifications.getRejectionHistoryNotifications,
+    {}
   );
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);

@@ -12,7 +12,8 @@ const isDashboardRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth(); // Await the auth function call
   if (userId && isDashboardRoute(req)) {
-    const user = await convex.query(api.superAdmin.queries.getSuperAdminDetails, { clerkId: userId });
+    // Check if user exists (for future middleware logic if needed)
+    await convex.query(api.superAdmin.queries.getSuperAdminDetails, { clerkId: userId });
 
     // Removed the automatic redirect - Super Admins can now access the dashboard
     // This allows super admins to oversee all applications and admin activities

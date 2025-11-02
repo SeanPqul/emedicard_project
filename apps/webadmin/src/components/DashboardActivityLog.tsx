@@ -32,12 +32,11 @@ const timeAgo = (date: number): string => {
 };
 
 export default function DashboardActivityLog() {
-  const { isSignedIn } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   // Use the new query to fetch recent admin activities
   const recentActivities = useQuery(
-    isSignedIn ? api.admin.activityLogs.getRecentAdminActivities : "skip"
+    api.admin.activityLogs.getRecentAdminActivities
   );
 
   // Logic to close dropdown when clicking outside

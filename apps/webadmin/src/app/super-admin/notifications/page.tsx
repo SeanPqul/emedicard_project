@@ -14,7 +14,7 @@ import { useState } from "react";
 type Notification = {
   _id: Id<"notifications"> | Id<"documentRejectionHistory">;
   _creationTime: number;
-  title: string;
+  title?: string;
   message: string;
   notificationType: string;
   actionUrl?: string;

@@ -12,8 +12,6 @@ import { useState } from 'react';
 
 function NotificationManagementPage() {
   const router = useRouter();
-  const { user } = useUser();
-  const adminId = useStoreUser();
 
   const adminNotifications = useQuery(api.notifications.getAdminNotifications, { notificationType: undefined });
   const rejectionHistoryNotifications = useQuery(api.notifications.getRejectionHistoryNotifications, {});
