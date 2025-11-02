@@ -40,7 +40,7 @@ export function OrientationScheduleScreen() {
   const handleCancelBooking = async () => {
     if (!bookedSession) return;
     
-    const result = await cancelBooking(bookedSession._id as Id<"orientationSessions">);
+    const result = await cancelBooking(bookedSession._id);
     
     if (result.success) {
       router.back();

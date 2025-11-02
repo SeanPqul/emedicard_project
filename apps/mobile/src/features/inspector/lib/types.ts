@@ -16,7 +16,7 @@ import type { Id } from '@backend/convex/_generated/dataModel';
 export interface OrientationSession {
   _id: Id<'orientationSchedules'>;
   date: number; // Timestamp (start of day)
-  scheduledTime: string; // e.g., "9:00 AM - 10:00 AM" (renamed from timeSlot)
+  scheduledTime: string; // e.g., "9:00 AM - 10:00 AM"
   venue: string; // e.g., "Gaisano Ilustre"
   maxCapacity: number;
   currentBookings: number;

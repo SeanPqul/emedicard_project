@@ -14,14 +14,36 @@ export function InspectorScannerScreen() {
   const [showSessionPicker, setShowSessionPicker] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
 
-  // Auto-select ONLY active session (or allow override for past/upcoming)
+  // Auto-update when session status changes (upcoming -> active)
   useEffect(() => {
-    if (dashboardData && !selectedSession) {
-      // Only auto-select active session
+    if (dashboardData) {
       const activeSession = dashboardData.allSessions.find(s => s.isActive);
-      setSelectedSession(activeSession || null);
+      
+      // Auto-select active session if none selected
+      if (!selectedSession && activeSession) {
+        setSelectedSession(activeSession);
+        return;
+      }
+      
+      // Update if selected session became active or inactive
+      if (selectedSession) {
+        const updatedSession = dashboardData.allSessions.find(
+          s => s._id === selectedSession._id
+        );
+        
+        if (updatedSession) {
+          // Update session data (status, stats, etc.)
+          setSelectedSession(updatedSession);
+        } else if (activeSession) {
+          // If selected session no longer exists, switch to active one
+          setSelectedSession(activeSession);
+        } else {
+          // No active session available
+          setSelectedSession(null);
+        }
+      }
     }
-  }, [dashboardData, selectedSession]);
+  }, [dashboardData]);
 
   // Categorize sessions by status
   const categorizedSessions = useMemo(() => {
@@ -53,7 +75,7 @@ export function InspectorScannerScreen() {
     // TODO: Call backend mutation to check-in/check-out
     Alert.alert(
       'QR Code Scanned',
-      `Scanned data: ${data}\n\nFor session: ${selectedSession?.timeSlot}\n\nBackend integration pending.`,
+      `Scanned data: ${data}\n\nFor session: ${selectedSession?.scheduledTime}\n\nBackend integration pending.`,
       [{ text: 'OK' }]
     );
   };
@@ -114,7 +136,7 @@ export function InspectorScannerScreen() {
               <View style={styles.sessionInfo}>
                 <View style={styles.sessionTimeRow}>
                   <Ionicons name="time" size={moderateScale(16)} color={theme.colors.primary[600]} />
-                  <Text style={styles.sessionTime}>{selectedSession?.timeSlot || 'No session'}</Text>
+                  <Text style={styles.sessionTime}>{selectedSession?.scheduledTime || 'No session'}</Text>
                   {selectedSession?.isActive && (
                     <View style={styles.liveBadge}>
                       <View style={styles.liveDot} />
@@ -172,7 +194,7 @@ export function InspectorScannerScreen() {
             onClose={() => setShowScanner(false)}
             active={showScanner}
             title="Scan QR Code"
-            subtitle={`Scanning for ${selectedSession.timeSlot}`}
+            subtitle={`Scanning for ${selectedSession.scheduledTime}`}
           />
         </Modal>
       )}
@@ -577,7 +599,7 @@ const SessionOptionCard: React.FC<SessionOptionCardProps> = ({
               styles.sessionOptionTime,
               isDisabled && styles.sessionOptionTimeDisabled,
             ]}>
-              {session.timeSlot}
+              {session.scheduledTime}
             </Text>
             {isActive && (
               <View style={styles.liveBadgeSmall}>

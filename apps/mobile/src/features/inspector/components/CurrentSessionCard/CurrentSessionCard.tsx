@@ -104,6 +104,7 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
 
       return () => clearInterval(timer);
     }
+    return undefined;
   }, [session]);
 
   // Calculate time context during every render (calculation is very cheap)

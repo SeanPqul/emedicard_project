@@ -144,26 +144,28 @@ export function OrientationQRScreen() {
             <View style={styles.detailsContainer}>
               <Text style={styles.detailsTitle}>Session Details</Text>
               
-              {orientation.orientationDate && (
+              {orientation.scheduledDate && (
                 <View style={styles.detailRow}>
                   <Ionicons name="calendar-outline" size={moderateScale(20)} color={theme.colors.text.secondary} />
                   <Text style={styles.detailText}>
-                    {format(new Date(orientation.orientationDate), 'MMMM d, yyyy')}
+                    {format(new Date(orientation.scheduledDate), 'MMMM d, yyyy')}
                   </Text>
                 </View>
               )}
 
-              {orientation.timeSlot && (
+              {orientation.scheduledTime && (
                 <View style={styles.detailRow}>
                   <Ionicons name="time-outline" size={moderateScale(20)} color={theme.colors.text.secondary} />
-                  <Text style={styles.detailText}>{orientation.timeSlot}</Text>
+                  <Text style={styles.detailText}>{orientation.scheduledTime}</Text>
                 </View>
               )}
 
-              {orientation.orientationVenue && (
+              {orientation.venue && (
                 <View style={styles.detailRow}>
                   <Ionicons name="location-outline" size={moderateScale(20)} color={theme.colors.text.secondary} />
-                  <Text style={styles.detailText}>{orientation.orientationVenue}</Text>
+                  <Text style={styles.detailText}>
+                    {typeof orientation.venue === 'string' ? orientation.venue : orientation.venue.name}
+                  </Text>
                 </View>
               )}
 

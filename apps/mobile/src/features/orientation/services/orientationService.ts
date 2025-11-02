@@ -61,14 +61,13 @@ export class OrientationService {
         userId: session.userId,
         applicationId: session.applicationId,
         scheduledDate: new Date(session.scheduledDate).toISOString(),
-        completedDate: session.completedDate 
-          ? new Date(session.completedDate).toISOString()
+        completedDate: session.completedAt 
+          ? new Date(session.completedAt).toISOString()
           : undefined,
         status: session.status,
         venue: session.venue,
         instructor: session.instructor,
         certificateId: session.certificateId,
-        notes: session.notes,
       };
     } catch (error) {
       console.error('Error fetching user session:', error);
