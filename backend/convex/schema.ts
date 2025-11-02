@@ -361,6 +361,14 @@ export default defineSchema({
     replacedAt: v.optional(v.float64()),
     attemptNumber: v.float64(), // 1st, 2nd, 3rd attempt
     
+    // Status Flow Tracking
+    status: v.optional(v.union(
+      v.literal("pending"),      // Waiting for user resubmission
+      v.literal("resubmitted"),  // User has resubmitted
+      v.literal("rejected"),     // Admin rejected the resubmission
+      v.literal("approved")      // Admin approved the resubmission
+    )),
+    
     // Notification Tracking
     notificationSent: v.optional(v.boolean()), // Whether applicant has been notified (default: true for old records)
     notificationSentAt: v.optional(v.float64()), // When notification was sent
@@ -412,6 +420,14 @@ export default defineSchema({
     replacementPaymentId: v.optional(v.id("payments")),
     replacedAt: v.optional(v.float64()),
     attemptNumber: v.float64(), // 1st, 2nd, 3rd attempt
+    
+    // Status Flow Tracking
+    status: v.optional(v.union(
+      v.literal("pending"),      // Waiting for user resubmission
+      v.literal("resubmitted"),  // User has resubmitted
+      v.literal("rejected"),     // Admin rejected the resubmission
+      v.literal("approved")      // Admin approved the resubmission
+    )),
     
     // Notification Tracking
     notificationSent: v.optional(v.boolean()), // Whether applicant has been notified

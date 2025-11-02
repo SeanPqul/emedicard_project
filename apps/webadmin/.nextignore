@@ -1,0 +1,7 @@
+convex_archived/**
+eMediCard_Docs/**
+docs/**
+*.md
+*.pdf
+*.txt
+*.docx

@@ -50,12 +50,13 @@ export const resubmitPayment = mutation({
 
     const now = Date.now();
 
-    // Mark the rejection as replaced if it exists
+    // Mark the rejection as replaced and update status if it exists
     if (rejectionRecord) {
       await ctx.db.patch(rejectionRecord._id, {
         wasReplaced: true,
         replacementPaymentId: args.newPaymentId,
         replacedAt: now,
+        status: "resubmitted",
       });
     }
 

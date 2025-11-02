@@ -61,8 +61,17 @@ export const getUserFriendlyErrorMessage = (error: any): string => {
 /**
  * Logs detailed error information to console for developers
  * This provides comprehensive debugging information without exposing it to users
+ * 
+ * SECURITY NOTE:
+ * - Detailed logs are ONLY visible in development mode
+ * - Production logs should be sent to secure error tracking services
+ * - User-facing errors are sanitized through getUserFriendlyErrorMessage()
  */
 export const logAuthError = (error: any, context: ErrorContext): void => {
+  // Sanitize email for logging - mask partially for security
+  const sanitizedEmail = context.email ? 
+    context.email.replace(/(.{2})(.*)(@.*)/, '$1***$3') : 'N/A';
+
   // Create error context for debugging
   const errorDetails = {
     // Clerk-specific error information
@@ -75,8 +84,11 @@ export const logAuthError = (error: any, context: ErrorContext): void => {
     stack: error?.stack,
     name: error?.name,
     
-    // Request context
-    context,
+    // Request context (with sanitized email)
+    context: {
+      ...context,
+      email: sanitizedEmail,
+    },
     
     // Browser information
     browserInfo: {
@@ -94,18 +106,17 @@ export const logAuthError = (error: any, context: ErrorContext): void => {
     } : null,
   };
 
-  // Only log in development mode
+  // DEVELOPMENT MODE: Detailed logging for developers
   if (process.env.NODE_ENV === 'development') {
-    // Structured console logging for developers
-    console.group(' Authentication Error - Developer Debug Info');
-    console.error(' Error Summary:', {
+    console.group('🔐 Authentication Error - Developer Debug Info');
+    console.error('⚠️ Error Summary:', {
       code: errorDetails.errorCode,
       message: errorDetails.errorMessage,
       timestamp: context.timestamp,
     });
     console.error('🔍 Detailed Error:', errorDetails);
     console.error('👤 User Context:', {
-      email: context.email,
+      email: sanitizedEmail,
       url: context.url,
       timestamp: context.timestamp,
     });
@@ -117,13 +128,34 @@ export const logAuthError = (error: any, context: ErrorContext): void => {
     console.groupEnd();
 
     // Also log a simplified version for quick debugging
-    console.error(`Auth Error [${errorDetails.errorCode}]: ${errorDetails.errorMessage}`);
+    console.error(`🚨 Auth Error [${errorDetails.errorCode}]: ${errorDetails.errorMessage}`);
   }
   
-  // TODO: In production, send to error tracking service (e.g., Sentry)
-  // if (process.env.NODE_ENV === 'production') {
-  //   Sentry.captureException(error, { contexts: { auth: errorDetails } });
-  // }
+  // PRODUCTION MODE: Only log minimal, non-sensitive information
+  // Detailed errors should be sent to secure error tracking service
+  if (process.env.NODE_ENV === 'production') {
+    // Log minimal error info to console (safe for production)
+    console.error('Authentication error occurred:', {
+      code: errorDetails.errorCode,
+      timestamp: context.timestamp,
+    });
+    
+    // TODO: Send to error tracking service (e.g., Sentry, LogRocket, DataDog)
+    // Example:
+    // Sentry.captureException(error, { 
+    //   contexts: { 
+    //     auth: {
+    //       errorCode: errorDetails.errorCode,
+    //       timestamp: context.timestamp,
+    //       sanitizedEmail,
+    //     } 
+    //   },
+    //   tags: {
+    //     errorType: 'authentication',
+    //     errorCode: errorDetails.errorCode,
+    //   }
+    // });
+  }
 };
 
 /**

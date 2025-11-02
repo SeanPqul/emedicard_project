@@ -72,6 +72,7 @@ export const getAllRejections = query({
           attemptNumber: rejection.attemptNumber || 1,
           wasReplaced: rejection.wasReplaced || false,
           replacedAt: rejection.replacedAt,
+          status: rejection.status,
         };
       })
     );
@@ -126,6 +127,7 @@ export const getAllRejections = query({
           attemptNumber: rejection.attemptNumber || 1,
           wasReplaced: rejection.wasReplaced || false,
           replacedAt: rejection.replacedAt,
+          status: rejection.status,
         };
       })
     );

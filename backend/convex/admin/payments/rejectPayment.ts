@@ -67,6 +67,7 @@ export const rejectPayment = mutation({
       rejectedAt: now,
       wasReplaced: false,
       attemptNumber,
+      status: "pending",
       notificationSent: true,
       notificationSentAt: now,
     });

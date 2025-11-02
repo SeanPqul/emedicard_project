@@ -40,6 +40,23 @@ export const review = mutation({
       fileType: args.fileType, // Save file type
     });
 
+    // Update rejection history status if this document was resubmitted
+    const rejectionHistory = await ctx.db
+      .query("documentRejectionHistory")
+      .withIndex("by_document_type", (q) => 
+        q.eq("applicationId", documentUpload.applicationId)
+         .eq("documentTypeId", documentUpload.documentTypeId)
+      )
+      .filter((q) => q.eq(q.field("status"), "resubmitted"))
+      .first();
+
+    if (rejectionHistory) {
+      // Update the status based on approval or rejection
+      await ctx.db.patch(rejectionHistory._id, {
+        status: args.status === "Approved" ? "approved" : "rejected",
+      });
+    }
+
     // Log admin activity
     await ctx.db.insert("adminActivityLogs", {
       adminId: adminUser._id,

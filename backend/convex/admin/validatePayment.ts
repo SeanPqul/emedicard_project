@@ -30,6 +30,22 @@ export const validate = mutation({
       updatedAt: Date.now(),
     });
 
+    // 1.5. Update payment rejection history status if this was a resubmitted payment
+    if (args.newStatus === "Complete") {
+      const rejectionHistory = await ctx.db
+        .query("paymentRejectionHistory")
+        .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
+        .filter((q) => q.eq(q.field("status"), "resubmitted"))
+        .first();
+
+      if (rejectionHistory) {
+        // Mark as approved when payment is validated
+        await ctx.db.patch(rejectionHistory._id, {
+          status: "approved",
+        });
+      }
+    }
+
     // 2. Check if orientation is required for this job category (Yellow Card = Food Handler)
     const jobCategory = await ctx.db.get(application.jobCategoryId);
     const requiresOrientation = jobCategory?.requireOrientation === true || jobCategory?.requireOrientation === "true";
