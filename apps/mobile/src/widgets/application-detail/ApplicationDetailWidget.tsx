@@ -7,7 +7,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ApplicationDetails, PaymentMethod } from '@entities/application';
@@ -178,24 +178,22 @@ export function ApplicationDetailWidget({
           <Text style={styles.detailValue}>{application.form?.firstName}</Text>
         </View>
 
-        {/* Collapsible content with fade effect */}
+        {/* Collapsible content with smooth fade animations */}
         {!isExpanded && (
-          <Animated.View 
-            exiting={FadeOut.duration(150)}
-            style={[styles.detailRow, styles.fadedRow]}
-          >
-            <Text style={styles.detailLabel}>Middle Name</Text>
-            <Text style={styles.detailValue}>{application.form?.middleName || 'N/A'}</Text>
+          <Animated.View exiting={FadeOut.duration(150)}>
+            <View style={[styles.detailRow, styles.fadedRow]}>
+              <Text style={styles.detailLabel}>Middle Name</Text>
+              <Text style={styles.detailValue}>{application.form?.middleName || 'N/A'}</Text>
+            </View>
           </Animated.View>
         )}
 
-        {/* Expanded content with staggered animation */}
+        {/* Expanded content with staggered fade-in (no layout animation to avoid conflicts) */}
         {isExpanded && collapsibleRows.map((row, index) => (
-          <Animated.View 
+          <Animated.View
             key={row.label}
             entering={FadeIn.delay(index * 60).duration(300)} 
             exiting={FadeOut.duration(150)}
-            layout={Layout.springify()}
             style={styles.detailRow}
           >
             <Text style={styles.detailLabel}>{row.label}</Text>
@@ -253,8 +251,22 @@ export function ApplicationDetailWidget({
         </TouchableOpacity>
       </View>
 
-      {/* Orientation Section - Only show if status is 'For Orientation' */}
-      {application.status === 'For Orientation' && (
+      {/* Orientation Section - Show for Food Handlers who need orientation (parallel with doc verification) */}
+      {(() => {
+        // Check if this is a food handler
+        const isFoodHandler = application.jobCategory?.name?.toLowerCase().includes('food');
+        const requiresOrientation = isFoodHandler && (application.jobCategory?.requireOrientation === true || application.jobCategory?.requireOrientation === 'Yes');
+        const orientationCompleted = (application as any)?.orientationCompleted === true;
+        
+        // Show orientation section if:
+        // 1. Job category requires orientation (Food Handler)
+        // 2. Orientation hasn't been completed yet
+        // 3. Status is not Rejected, Cancelled, or Approved
+        const shouldShowOrientation = requiresOrientation && !orientationCompleted && 
+          !['Rejected', 'Cancelled', 'Approved'].includes(application.status);
+        
+        return shouldShowOrientation;
+      })() && (
         <View style={styles.orientationCard}>
           <Text style={styles.sectionTitle}>Orientation Required</Text>
           

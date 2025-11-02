@@ -135,10 +135,10 @@ export function SessionAttendeesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={[]}>
-      {/* Green Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
+    <View style={styles.container}>
+      {/* Inline Header */}
+      <View style={styles.inlineHeaderSection}>
+        <View style={styles.headerRow}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
@@ -146,17 +146,18 @@ export function SessionAttendeesScreen() {
           >
             <Ionicons
               name="arrow-back"
-              size={HEADER_CONSTANTS.ICON_SIZE}
-              color={HEADER_CONSTANTS.WHITE}
+              size={moderateScale(24)}
+              color={theme.colors.text.primary}
             />
           </TouchableOpacity>
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.title}>Session Attendees</Text>
-            <Text style={styles.subtitle}>
-              {scheduledTime} • {venue}
-            </Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.pageTitle}>Session Attendees</Text>
           </View>
+          <View style={styles.headerSpacer} />
         </View>
+        <Text style={styles.subtitle}>
+          {scheduledTime} • {venue}
+        </Text>
       </View>
 
       {/* Attendees List */}
@@ -185,7 +186,7 @@ export function SessionAttendeesScreen() {
         />
       )}
 
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -194,40 +195,43 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
-  header: {
-    backgroundColor: theme.colors.primary[500],
-    borderBottomLeftRadius: moderateScale(HEADER_CONSTANTS.BORDER_RADIUS),
-    borderBottomRightRadius: moderateScale(HEADER_CONSTANTS.BORDER_RADIUS),
-    paddingHorizontal: HEADER_CONSTANTS.HORIZONTAL_PADDING,
-    ...HEADER_CONSTANTS.LAYOUT.FULL,
-    shadowColor: HEADER_CONSTANTS.SHADOW.color,
-    shadowOffset: HEADER_CONSTANTS.SHADOW.offset,
-    shadowOpacity: HEADER_CONSTANTS.SHADOW.opacity,
-    shadowRadius: HEADER_CONSTANTS.SHADOW.radius,
-    elevation: HEADER_CONSTANTS.ELEVATION,
+  inlineHeaderSection: {
+    backgroundColor: theme.colors.background.primary,
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(16),
+    paddingBottom: verticalScale(16),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light,
   },
-  headerContent: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: verticalScale(8),
   },
   backButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: scale(12),
-    padding: moderateScale(4),
   },
-  headerTextContainer: {
+  titleContainer: {
     flex: 1,
   },
-  title: {
-    fontSize: moderateScale(24),
+  headerSpacer: {
+    width: moderateScale(40),
+  },
+  pageTitle: {
+    fontSize: moderateScale(20),
     fontWeight: '700',
-    color: HEADER_CONSTANTS.WHITE,
-    letterSpacing: 0.3,
+    color: theme.colors.text.primary,
+    letterSpacing: -0.3,
   },
   subtitle: {
     fontSize: moderateScale(14),
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginTop: verticalScale(4),
-    fontWeight: '400',
+    color: theme.colors.text.secondary,
+    fontWeight: '500',
+    marginLeft: scale(52), // Align with title (backButton width + margin)
   },
   listContent: {
     paddingHorizontal: scale(16),

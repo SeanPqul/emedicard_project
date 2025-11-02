@@ -111,10 +111,14 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
     });
   });
 
-  // 3. Orientation required (for Yellow card holders) - evaluate across actionable applications only
-  // Note: Food handlers with Pending Payment still need to schedule orientation
+  // 3. Orientation required (for Yellow card holders) - evaluate across all non-rejected/non-approved apps
+  // Food handlers need orientation regardless of current status (unless completed)
   const orientationApps = uniqueApps
-    .filter((app: any) => ACTIONABLE_STATUSES.has(app?.status))
+    .filter((app: any) => {
+      // Include all statuses except Rejected, Cancelled, and Approved
+      const status = app?.status;
+      return status !== 'Rejected' && status !== 'Cancelled' && status !== 'Approved';
+    })
     .filter((app: any) => {
       const name = app?.jobCategory?.name?.toLowerCase?.() || '';
       const isFoodHandler = name.includes('food');
@@ -135,7 +139,7 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
         title: 'Food Safety Orientation Required',
         subtitle: 'Schedule your mandatory orientation',
         urgency: 'medium',
-        onPress: () => router.push(`/(screens)/(shared)/orientation?applicationId=${app._id}`),
+        onPress: () => router.push(`/(screens)/(shared)/orientation/schedule?applicationId=${app._id}`),
       });
     }
   });

@@ -32,7 +32,11 @@ export const PriorityAlerts: React.FC<PriorityAlertsProps> = ({
   };
 
   const handleOrientationPress = () => {
-    router.push('/(screens)/(shared)/orientation');
+    if (currentApplication?._id) {
+      router.push(`/(screens)/(shared)/orientation/schedule?applicationId=${currentApplication._id}`);
+    } else {
+      router.push('/(screens)/(shared)/orientation/schedule');
+    }
   };
 
   return (

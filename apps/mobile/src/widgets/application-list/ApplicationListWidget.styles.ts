@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: verticalScale(20),
+    paddingBottom: verticalScale(100), // Increased to account for bottom tab bar + FAB
   },
   listContainer: {
     paddingTop: verticalScale(theme.spacing.sm),

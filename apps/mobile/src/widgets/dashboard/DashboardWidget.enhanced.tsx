@@ -311,7 +311,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
           {currentApplication?.needsOrientation && (
             <TouchableOpacity 
               style={styles.infoCard}
-              onPress={() => router.push('/(screens)/(shared)/orientation')}
+              onPress={() => router.push(`/(screens)/(shared)/orientation/schedule?applicationId=${currentApplication._id}`)}
             >
               <View
                 style={[styles.infoCardGradient, { backgroundColor: theme.colors.orange[50] }]}

@@ -37,11 +37,7 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
           
           {/* Profile Card */}
           <View style={styles.profileCard}>
-            <TouchableOpacity 
-              style={styles.profileContent}
-              onPress={() => router.push('/profile/edit')}
-              activeOpacity={0.8}
-            >
+            <View style={styles.profileContent}>
               {/* Profile Picture */}
               <View style={styles.profilePictureContainer}>
                 {user.imageUrl ? (
@@ -63,9 +59,7 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
                 {user.email && <Text style={styles.userEmail}>{user.email}</Text>}
                 <Text style={styles.memberSince}>Member since {user.memberSince}</Text>
               </View>
-              
-              <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
 
