@@ -28,15 +28,37 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error details in development
+    // DEVELOPMENT MODE: Detailed logging for developers
     if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error, errorInfo);
+      console.group('🔴 ErrorBoundary - Component Error Detected');
+      console.error('⚠️ Error:', error);
+      console.error('📍 Component Stack:', errorInfo.componentStack);
+      console.error('🔍 Error Details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      });
+      console.groupEnd();
     }
     
-    // TODO: Send to error tracking service in production
-    // if (process.env.NODE_ENV === 'production') {
-    //   Sentry.captureException(error, { extra: errorInfo });
-    // }
+    // PRODUCTION MODE: Log minimal, non-sensitive information
+    if (process.env.NODE_ENV === 'production') {
+      // Log minimal error info to console (safe for production)
+      console.error('Application error occurred:', {
+        errorName: error.name,
+        timestamp: new Date().toISOString(),
+      });
+      
+      // TODO: Send to error tracking service (e.g., Sentry, LogRocket, DataDog)
+      // Example:
+      // Sentry.captureException(error, { 
+      //   contexts: { react: errorInfo },
+      //   tags: {
+      //     errorType: 'react_error_boundary',
+      //     componentStack: errorInfo.componentStack?.split('\n')[1] || 'unknown'
+      //   }
+      // });
+    }
   }
 
   private handleReset = () => {

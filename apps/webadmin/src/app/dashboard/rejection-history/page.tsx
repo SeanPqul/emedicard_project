@@ -14,6 +14,8 @@ import React, { useState } from "react";
 
 type RejectionType = "document" | "payment" | "orientation" | "other";
 
+type RejectionStatus = "pending" | "resubmitted" | "rejected" | "approved";
+
 type Rejection = {
   _id: Id<"documentRejectionHistory"> | Id<"adminActivityLogs">;
   type: RejectionType;
@@ -31,6 +33,7 @@ type Rejection = {
   attemptNumber: number;
   wasReplaced: boolean;
   replacedAt?: number;
+  status?: RejectionStatus;
 };
 
 export default function AdminRejectionHistoryPage() {
@@ -69,19 +72,42 @@ export default function AdminRejectionHistoryPage() {
     }
   };
 
-  const getStatusBadge = (wasReplaced: boolean) => {
-    if (wasReplaced) {
-      return (
-        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-          Resubmitted
-        </span>
-      );
+  const getStatusBadge = (status?: RejectionStatus, wasReplaced?: boolean) => {
+    // Use new status field if available, otherwise fall back to wasReplaced
+    const finalStatus = status || (wasReplaced ? "resubmitted" : "pending");
+    
+    switch (finalStatus) {
+      case "pending":
+        return (
+          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+            Pending
+          </span>
+        );
+      case "resubmitted":
+        return (
+          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+            Resubmitted
+          </span>
+        );
+      case "rejected":
+        return (
+          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+            Rejected
+          </span>
+        );
+      case "approved":
+        return (
+          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+            Approved
+          </span>
+        );
+      default:
+        return (
+          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+            Unknown
+          </span>
+        );
     }
-    return (
-      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-        Pending
-      </span>
-    );
   };
 
   if (!isClerkLoaded || adminPrivileges === undefined) {
@@ -373,7 +399,7 @@ export default function AdminRejectionHistoryPage() {
                         })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(rejection.wasReplaced)}
+                        {getStatusBadge(rejection.status, rejection.wasReplaced)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         {rejection.applicationId && (

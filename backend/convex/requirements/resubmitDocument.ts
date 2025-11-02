@@ -90,11 +90,12 @@ export const resubmitDocument = mutation({
       });
     }
 
-    // 4. Update rejection history to mark as replaced
+    // 4. Update rejection history to mark as replaced and update status
     await ctx.db.patch(rejectionHistory._id, {
       wasReplaced: true,
       replacementUploadId: newUploadId,
       replacedAt: Date.now(),
+      status: "resubmitted",
     });
 
     // 5. Check if all documents are now pending or approved

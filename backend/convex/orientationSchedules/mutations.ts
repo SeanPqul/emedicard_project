@@ -20,12 +20,10 @@ export const createSchedule = mutation({
       capacity: v.float64(),
     }),
     totalSlots: v.float64(),
-    instructor: v.optional(
-      v.object({
-        name: v.string(),
-        designation: v.string(),
-      })
-    ),
+    instructor: v.object({
+      name: v.string(),
+      designation: v.string(),
+    }),
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -171,6 +169,7 @@ export const deleteSchedule = mutation({
 /**
  * Bulk create schedules for multiple dates with same time and venue
  * Useful for creating weekly schedules
+ * Note: Instructor is optional for bulk creation - allows manual assignment per schedule
  */
 export const bulkCreateSchedules = mutation({
   args: {

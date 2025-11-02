@@ -17,7 +17,7 @@ import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { addDays, format, startOfWeek } from "date-fns";
 import { useRouter } from "next/navigation";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 type Schedule = Doc<"orientationSchedules">;
 
@@ -42,7 +42,6 @@ const ScheduleModal = ({
   );
   const [venueName, setVenueName] = useState(schedule?.venue.name || "");
   const [venueAddress, setVenueAddress] = useState(schedule?.venue.address || "");
-  const [capacity, setCapacity] = useState(schedule?.venue.capacity.toString() || "");
   const [totalSlots, setTotalSlots] = useState(schedule?.totalSlots.toString() || "");
   const [selectedInspectorId, setSelectedInspectorId] = useState<Id<'users'> | ''>('' as any);
   const [notes, setNotes] = useState(schedule?.notes || "");
@@ -54,6 +53,19 @@ const ScheduleModal = ({
 
   const createSchedule = useMutation(api.orientationSchedules.mutations.createSchedule) as any;
   const updateSchedule = useMutation(api.orientationSchedules.mutations.updateSchedule) as any;
+
+  // Initialize inspector selection when editing existing schedule
+  useEffect(() => {
+    if (schedule?.instructor && inspectors) {
+      // Find inspector by name match
+      const matchingInspector = inspectors.find(
+        (i: any) => i.fullname === schedule.instructor?.name
+      );
+      if (matchingInspector) {
+        setSelectedInspectorId(matchingInspector._id);
+      }
+    }
+  }, [schedule, inspectors]);
 
   // Live preview and validation
   const timePreview = useMemo(() => formatTimeRange(startTime, endTime), [startTime, endTime]);
@@ -74,13 +86,25 @@ const ScheduleModal = ({
         setIsLoading(false);
         return;
       }
+
+      // Validate inspector is selected
+      if (!selectedInspectorId) {
+        setError("Please select a health inspector");
+        setIsLoading(false);
+        return;
+      }
+
       // Use centralized timezone utility for consistent date handling
       const utcTimestamp = dateStringToPHTMidnight(date);
       
-      // Get selected inspector details if one is selected
-      const selectedInspector = selectedInspectorId && inspectors
-        ? inspectors.find((i: any) => i._id === selectedInspectorId)
-        : null;
+      // Get selected inspector details
+      const selectedInspector = inspectors?.find((i: any) => i._id === selectedInspectorId);
+      
+      if (!selectedInspector) {
+        setError("Selected inspector not found");
+        setIsLoading(false);
+        return;
+      }
 
       const scheduleData = {
         date: utcTimestamp,
@@ -89,10 +113,10 @@ const ScheduleModal = ({
         venue: {
           name: venueName,
           address: venueAddress,
-          capacity: parseFloat(capacity),
+          capacity: parseFloat(totalSlots), // Use totalSlots as capacity
         },
         totalSlots: parseFloat(totalSlots),
-        instructor: selectedInspector ? { name: selectedInspector.fullname, designation: "Health Inspector" } : undefined,
+        instructor: { name: selectedInspector.fullname, designation: "Health Inspector" },
         notes: notes || undefined,
       };
 
@@ -241,54 +265,42 @@ const ScheduleModal = ({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Venue Capacity <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  value={capacity}
-                  onChange={(e) => setCapacity(e.target.value)}
-                  min="1"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Total Slots <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  value={totalSlots}
-                  onChange={(e) => setTotalSlots(e.target.value)}
-                  min="1"
-                  className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Total Slots <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                value={totalSlots}
+                onChange={(e) => setTotalSlots(e.target.value)}
+                min="1"
+                placeholder="Number of available slots"
+                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                required
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Maximum number of applicants that can book this session
+              </p>
             </div>
           </div>
 
-          {/* Inspector Selection */}
-          <div className="space-y-4 p-4 bg-emerald-50 rounded-lg">
-            <h3 className="font-semibold text-gray-900">Assigned Inspector (Optional)</h3>
+          {/* Inspector Selection - REQUIRED */}
+          <div className="space-y-4 p-4 bg-emerald-50 rounded-lg border-2 border-emerald-200">
+            <h3 className="font-semibold text-gray-900">Assigned Inspector <span className="text-red-500">*</span></h3>
             
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Select Health Inspector
+                Select Health Inspector <span className="text-red-500">*</span>
               </label>
               <select
                 value={selectedInspectorId}
                 onChange={(e) => setSelectedInspectorId(e.target.value as Id<'users'>)}
                 className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                 disabled={isLoading || !inspectors}
+                required
               >
-                <option value="">No inspector assigned</option>
+                <option value="">-- Select an Inspector --</option>
                 {inspectors?.map((inspector: any) => (
                   <option key={inspector._id} value={inspector._id}>
                     {inspector.fullname}
@@ -296,7 +308,7 @@ const ScheduleModal = ({
                 ))}
               </select>
               <p className="text-xs text-gray-500 mt-2">
-                Leave empty if instructor will be assigned later
+                An inspector must be assigned to conduct the orientation session
               </p>
             </div>
           </div>
@@ -413,7 +425,6 @@ const BulkCreateModal = ({
   const [endTime, setEndTime] = useState("11:00");
   const [venueName, setVenueName] = useState("");
   const [venueAddress, setVenueAddress] = useState("");
-  const [capacity, setCapacity] = useState("");
   const [totalSlots, setTotalSlots] = useState("");
   const [selectedInspectorId, setSelectedInspectorId] = useState<Id<'users'> | ''>('' as any);
   const [notes, setNotes] = useState("");
@@ -474,7 +485,7 @@ const BulkCreateModal = ({
         venue: {
           name: venueName,
           address: venueAddress,
-          capacity: parseFloat(capacity),
+          capacity: parseFloat(totalSlots), // Use totalSlots as capacity
         },
         totalSlots: parseFloat(totalSlots),
         instructor: selectedInspector ? { name: selectedInspector.fullname, designation: "Health Inspector" } : undefined,
@@ -662,28 +673,19 @@ const BulkCreateModal = ({
                 required
                 disabled={isLoading}
               />
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="number"
-                  value={capacity}
-                  onChange={(e) => setCapacity(e.target.value)}
-                  placeholder="Capacity *"
-                  min="1"
-                  className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                  required
-                  disabled={isLoading}
-                />
-                <input
-                  type="number"
-                  value={totalSlots}
-                  onChange={(e) => setTotalSlots(e.target.value)}
-                  placeholder="Slots *"
-                  min="1"
-                  className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+              <input
+                type="number"
+                value={totalSlots}
+                onChange={(e) => setTotalSlots(e.target.value)}
+                placeholder="Total Slots *"
+                min="1"
+                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                required
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Maximum number of applicants per session
+              </p>
             </div>
           </div>
 

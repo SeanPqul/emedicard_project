@@ -14,10 +14,9 @@ export default clerkMiddleware(async (auth, req) => {
   if (userId && isDashboardRoute(req)) {
     const user = await convex.query(api.superAdmin.queries.getSuperAdminDetails, { clerkId: userId });
 
-    if (user?.isSuperAdmin) {
-      // If Super Admin tries to access dashboard, redirect to super-admin page
-      return NextResponse.redirect(new URL('/super-admin', req.url));
-    }
+    // Removed the automatic redirect - Super Admins can now access the dashboard
+    // This allows super admins to oversee all applications and admin activities
+    // They can navigate between /super-admin and /dashboard as needed
   }
   // Allow the request to continue
   return NextResponse.next();

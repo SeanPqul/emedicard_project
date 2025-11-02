@@ -33,7 +33,7 @@ const DEFAULT_CONFIG = {
   notes: "Please bring valid ID and application reference number. Arrive 15 minutes early.",
   
   // Auto-assign inspectors (set to false to use default instructor)
-  autoAssignInspectors: false, // Set to true to enable round-robin inspector assignment
+  autoAssignInspectors: true, // Set to true to enable round-robin inspector assignment
 };
 
 /**

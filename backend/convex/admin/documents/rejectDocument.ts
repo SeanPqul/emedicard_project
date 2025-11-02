@@ -101,6 +101,9 @@ export const rejectDocument = mutation({
       wasReplaced: false,
       attemptNumber: attemptNumber,
       
+      // Status flow tracking
+      status: "pending",
+      
       // Notification tracking
       notificationSent: false,
       notificationSentAt: undefined,
