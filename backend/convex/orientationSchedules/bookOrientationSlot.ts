@@ -1,5 +1,6 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { calculateSessionBounds } from "../lib/timezone";
 
 /**
  * Book an orientation slot for a user's application
@@ -65,8 +66,23 @@ export const bookOrientationSlotMutation = mutation({
       throw new Error("No available slots for this schedule");
     }
 
-    if (schedule.date < Date.now()) {
-      throw new Error("Cannot book past schedules");
+    // Check if session has already started or passed
+    const now = Date.now();
+    if (schedule.startMinutes !== undefined) {
+      const { sessionStart } = calculateSessionBounds(
+        schedule.date,
+        schedule.startMinutes,
+        schedule.endMinutes || 0
+      );
+      
+      if (now >= sessionStart) {
+        throw new Error("Cannot book sessions that have already started");
+      }
+    } else {
+      // Fallback: check date only if no time specified
+      if (schedule.date < now) {
+        throw new Error("Cannot book past schedules");
+      }
     }
 
     // Generate QR code data for attendance tracking

@@ -63,6 +63,14 @@ export interface OrientationSchedule {
   availableSlots: number;
   totalSlots: number;
   isAvailable: boolean;
+  // Server-side formatted display fields (PHT timezone)
+  displayDate?: {
+    year: number;
+    month: number; // 1-12
+    day: number;
+    weekday: string; // e.g., "Monday"
+    monthName: string; // e.g., "Nov"
+  };
 }
 
 export interface OrientationRequirement {

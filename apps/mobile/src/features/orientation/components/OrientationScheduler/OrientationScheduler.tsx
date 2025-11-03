@@ -9,11 +9,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
 import { styles } from './OrientationScheduler.styles';
 import { OrientationSchedule } from '../../model/types';
+
+// Philippine timezone constant for booked sessions
+const TIMEZONE = 'Asia/Manila';
 
 interface OrientationSchedulerProps {
   schedules: OrientationSchedule[];
@@ -56,7 +60,7 @@ export function OrientationScheduler({
     
     Alert.alert(
       'Confirm Booking',
-      `Are you sure you want to book this orientation session on ${format(new Date(selectedSchedule.date), 'MMM dd, yyyy')} at ${selectedSchedule.time}?`,
+      `Are you sure you want to book this orientation session on ${format(toZonedTime(selectedSchedule.date, TIMEZONE), 'MMM dd, yyyy')} at ${selectedSchedule.time}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -104,7 +108,7 @@ export function OrientationScheduler({
               <View style={styles.bookedInfo}>
                 <Text style={styles.bookedLabel}>Date & Time</Text>
                 <Text style={styles.bookedValue}>
-                  {format(new Date(bookedSession.scheduledDate), 'EEEE, MMMM dd, yyyy')}
+                  {format(toZonedTime(new Date(bookedSession.scheduledDate).getTime(), TIMEZONE), 'EEEE, MMMM dd, yyyy')}
                 </Text>
               </View>
             </View>
@@ -216,19 +220,19 @@ export function OrientationScheduler({
               <View style={styles.scheduleHeader}>
                 <View style={styles.dateContainer}>
                   <Text style={styles.dateMonth}>
-                    {format(new Date(schedule.date), 'MMM')}
+                    {schedule.displayDate?.monthName || format(toZonedTime(schedule.date, TIMEZONE), 'MMM')}
                   </Text>
                   <Text style={styles.dateDay}>
-                    {format(new Date(schedule.date), 'dd')}
+                    {schedule.displayDate?.day.toString().padStart(2, '0') || format(toZonedTime(schedule.date, TIMEZONE), 'dd')}
                   </Text>
                   <Text style={styles.dateYear}>
-                    {format(new Date(schedule.date), 'yyyy')}
+                    {schedule.displayDate?.year || format(toZonedTime(schedule.date, TIMEZONE), 'yyyy')}
                   </Text>
                 </View>
 
                 <View style={styles.scheduleInfo}>
                   <Text style={styles.scheduleDayName}>
-                    {format(new Date(schedule.date), 'EEEE')}
+                    {schedule.displayDate?.weekday || format(toZonedTime(schedule.date, TIMEZONE), 'EEEE')}
                   </Text>
                   <View style={styles.timeRow}>
                     <Ionicons name="time-outline" size={moderateScale(16)} color={theme.colors.text.secondary} />

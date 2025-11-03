@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@shared/styles/theme';
+import { verticalScale } from '@shared/utils/responsive';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
   },
   containerBottom: {
     position: 'absolute',
-    bottom: 0,
+    bottom: verticalScale(80), // Add padding above tab bar
     left: 0,
     right: 0,
     alignItems: 'center',

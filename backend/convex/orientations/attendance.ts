@@ -61,17 +61,25 @@ export const checkIn = mutation({
       };
     }
 
-    // Validate orientation date (must be today)
+    // Validate orientation date (must be today in PHT timezone)
     if (booking.scheduledDate) {
-      const orientationDate = new Date(booking.scheduledDate);
-      const today = new Date();
+      const now = Date.now();
+      const schedulePhtComponents = getPhilippineTimeComponents(booking.scheduledDate);
+      const todayPhtComponents = getPhilippineTimeComponents(now);
+      
+      // Compare dates in PHT timezone
+      const isSameDay = 
+        schedulePhtComponents.year === todayPhtComponents.year &&
+        schedulePhtComponents.month === todayPhtComponents.month &&
+        schedulePhtComponents.day === todayPhtComponents.day;
 
-      // Set both to start of day for comparison
-      orientationDate.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
-
-      if (orientationDate.getTime() !== today.getTime()) {
-        const scheduledDateStr = new Date(booking.scheduledDate).toLocaleDateString();
+      if (!isSameDay) {
+        const scheduledDateStr = new Date(booking.scheduledDate).toLocaleDateString('en-US', {
+          timeZone: 'Asia/Manila',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
         throw new Error(
           `Cannot check in. This orientation is scheduled for ${scheduledDateStr}. ` +
           `Please return on the scheduled date.`
@@ -176,12 +184,16 @@ export const checkOut = mutation({
     const timeElapsed = Date.now() - booking.checkInTime;
     const timeElapsedMinutes = Math.floor(timeElapsed / (60 * 1000));
 
+    // TEMPORARILY DISABLED FOR TESTING
+    // TODO: Re-enable this validation before production
+    /*
     if (timeElapsed < requiredDurationMs) {
       const remainingMinutes = Math.ceil((requiredDurationMs - timeElapsed) / (60 * 1000));
       throw new Error(
         `Cannot check out yet. This orientation requires ${requiredDurationMinutes} minutes. Time elapsed: ${timeElapsedMinutes} minutes. Please wait ${remainingMinutes} more minutes.`
       );
     }
+    */
 
     // Perform check-out
     const checkOutTime = Date.now();

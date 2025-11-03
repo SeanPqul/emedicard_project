@@ -30,6 +30,8 @@ export const getSchedulesForDate = query({
     const schedulesWithAttendees = await Promise.all(
       schedules.map(async (schedule) => {
         // Get all orientation bookings for this schedule
+        // NOTE: This query automatically subscribes to changes in orientationBookings
+        // for this specific scheduleId, ensuring real-time updates
         const bookings = await ctx.db
           .query("orientationBookings")
           .withIndex("by_schedule", (q) => q.eq("scheduleId", schedule._id))

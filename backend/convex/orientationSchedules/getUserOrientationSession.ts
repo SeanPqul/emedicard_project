@@ -17,7 +17,8 @@ export const getUserOrientationSessionQuery = query({
       throw new Error("Unauthorized: User must be authenticated");
     }
 
-    // Get user's ACTIVE booking for this application (only scheduled, not cancelled)
+    // Get user's ACTIVE booking for this application
+    // Include scheduled, checked-in, and completed (not cancelled or missed)
     const booking = await ctx.db
       .query("orientationBookings")
       .withIndex("by_application", (q) =>
@@ -26,7 +27,11 @@ export const getUserOrientationSessionQuery = query({
       .filter((q) =>
         q.and(
           q.eq(q.field("userId"), identity.subject),
-          q.eq(q.field("status"), "scheduled")
+          q.or(
+            q.eq(q.field("status"), "scheduled"),
+            q.eq(q.field("status"), "checked-in"),
+            q.eq(q.field("status"), "completed")
+          )
         )
       )
       .first();

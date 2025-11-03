@@ -1,18 +1,36 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Modal, Alert } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Modal, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useMutation } from 'convex/react';
+import { api } from '@backend/convex/_generated/api';
+import type { Id } from '@backend/convex/_generated/dataModel';
 import { theme } from '@shared/styles/theme';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { useInspectorDashboard } from '@features/inspector/hooks';
 import { SessionWithStats } from '@features/inspector/lib/types';
 import { QRCodeScanner } from '@features/scanner/components/QRCodeScanner/QRCodeScanner';
+import { useToast } from '@shared/components';
 
 export function InspectorScannerScreen() {
   const { data: dashboardData, isLoading } = useInspectorDashboard();
+  const { showToast } = useToast();
   const [selectedSession, setSelectedSession] = useState<SessionWithStats | null>(null);
   const [showSessionPicker, setShowSessionPicker] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [successModal, setSuccessModal] = useState<{
+    visible: boolean;
+    type: 'check-in' | 'check-out' | null;
+    attendeeName?: string;
+    time?: string;
+  }>({ visible: false, type: null });
+  const [lastScannedData, setLastScannedData] = useState<string | null>(null);
+  const [lastScanTime, setLastScanTime] = useState<number>(0);
+
+  // Mutations for check-in/check-out
+  const checkInMutation = useMutation(api.orientations.attendance.checkIn);
+  const checkOutMutation = useMutation(api.orientations.attendance.checkOut);
 
   // Auto-update when session status changes (upcoming -> active)
   useEffect(() => {
@@ -22,7 +40,7 @@ export function InspectorScannerScreen() {
       // Auto-select active session if none selected
       if (!selectedSession && activeSession) {
         setSelectedSession(activeSession);
-        return;
+        // DON'T return early - continue to update logic below
       }
       
       // Update if selected session became active or inactive
@@ -32,7 +50,8 @@ export function InspectorScannerScreen() {
         );
         
         if (updatedSession) {
-          // Update session data (status, stats, etc.)
+          // Always update session data (venue, status, stats, etc.)
+          // This ensures real-time updates when session transitions
           setSelectedSession(updatedSession);
         } else if (activeSession) {
           // If selected session no longer exists, switch to active one
@@ -43,7 +62,7 @@ export function InspectorScannerScreen() {
         }
       }
     }
-  }, [dashboardData]);
+  }, [dashboardData, selectedSession]);
 
   // Categorize sessions by status
   const categorizedSessions = useMemo(() => {
@@ -69,15 +88,124 @@ export function InspectorScannerScreen() {
     }
   };
 
-  const handleScan = (data: string) => {
-    setShowScanner(false);
+  const parseQRData = (data: string): { applicationId: Id<"applications"> } | null => {
+    try {
+      // Format: EMC-ORIENTATION-{applicationId}
+      if (data.startsWith('EMC-ORIENTATION-')) {
+        const applicationId = data.replace('EMC-ORIENTATION-', '');
+        return { applicationId: applicationId as Id<"applications"> };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error parsing QR data:', error);
+      return null;
+    }
+  };
+
+  const handleScan = async (data: string) => {
+    if (isProcessing) return;
+
+    // Prevent duplicate scans within 5 seconds
+    const now = Date.now();
+    const COOLDOWN_MS = 5000; // 5 seconds
     
-    // TODO: Call backend mutation to check-in/check-out
-    Alert.alert(
-      'QR Code Scanned',
-      `Scanned data: ${data}\n\nFor session: ${selectedSession?.scheduledTime}\n\nBackend integration pending.`,
-      [{ text: 'OK' }]
-    );
+    if (data === lastScannedData && (now - lastScanTime) < COOLDOWN_MS) {
+      console.log('[Scanner] Ignoring duplicate scan within cooldown period');
+      return;
+    }
+
+    const parsed = parseQRData(data);
+    
+    if (!parsed) {
+      showToast('Invalid QR code for orientation attendance', 'error', 4000);
+      return;
+    }
+
+    // Update last scan tracking
+    setLastScannedData(data);
+    setLastScanTime(now);
+
+    setIsProcessing(true);
+    // Don't close scanner - keep camera open for next scan
+
+    try {
+      // Try check-in first
+      let checkedIn = false;
+      
+      try {
+        const checkInResult = await checkInMutation({ applicationId: parsed.applicationId });
+        
+        if (checkInResult.success) {
+          // Successful check-in - show modal
+          setSuccessModal({
+            visible: true,
+            type: 'check-in',
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          });
+          checkedIn = true;
+        } else {
+          // Already checked in (returned success: false), try check-out
+          checkedIn = false;
+        }
+      } catch (checkInError) {
+        // Check-in failed - likely already checked in or no booking
+        console.log('[Scanner] Check-in failed:', checkInError);
+        checkedIn = false;
+      }
+      
+      // If check-in didn't succeed, try check-out
+      if (!checkedIn) {
+        try {
+          const checkOutResult = await checkOutMutation({ applicationId: parsed.applicationId });
+          
+          if (checkOutResult.success) {
+            // Successful check-out - show modal
+            setSuccessModal({
+              visible: true,
+              type: 'check-out',
+              time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            });
+          } else {
+            // Already checked out
+            const checkOutTime = new Date(checkOutResult.checkOutTime || 0).toLocaleTimeString();
+            showToast(
+              `⚠️ Already Checked Out\nThis attendee completed orientation at ${checkOutTime}`, 
+              'warning', 
+              4000
+            );
+          }
+        } catch (checkOutError) {
+          // Checkout also failed - likely no booking at all or already completed
+          console.log('[Scanner] Check-out also failed:', checkOutError);
+          const errorMsg = checkOutError instanceof Error ? checkOutError.message : '';
+          
+          if (errorMsg.includes('No checked-in orientation')) {
+            showToast('✅ Already Completed\nThis attendee has already completed orientation.', 'info', 4000);
+          } else {
+            // Re-throw to be handled by outer catch
+            throw checkOutError;
+          }
+        }
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process attendance';
+      
+      // Enhanced error feedback
+      if (errorMessage.includes('scheduled for')) {
+        showToast(`📅 Wrong Date\n${errorMessage}`, 'error', 5000);
+      } else if (errorMessage.includes('requires minimum')) {
+        showToast(`⏱️ Too Early\n${errorMessage}`, 'warning', 5000);
+      } else if (errorMessage.includes('Cannot check out without checking in')) {
+        showToast('⚠️ Not Checked In\nThis attendee must check in first before checking out.', 'error', 4000);
+      } else if (errorMessage.includes('No orientation scheduled') || errorMessage.includes('No checked-in orientation')) {
+        // This happens when trying to scan someone who already completed or has no booking
+        showToast('✅ Already Processed\nThis attendee has already completed orientation or has no active booking.', 'info', 4000);
+      } else {
+        showToast(errorMessage, 'error', 4000);
+      }
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleOpenScanner = () => {
@@ -160,24 +288,31 @@ export function InspectorScannerScreen() {
         </View>
       </View>
 
-      {/* QR Scanner Placeholder */}
+      {/* QR Scanner Placeholder or Processing */}
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.scannerContainer}>
-          <TouchableOpacity 
-            style={styles.scannerPlaceholder}
-            onPress={handleOpenScanner}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="qr-code-outline" size={moderateScale(80)} color={theme.colors.primary[500]} />
-            <Text style={styles.scannerTitle}>Tap to Scan QR Code</Text>
-            <Text style={styles.scannerSubtitle}>
-              Scan attendee QR codes for check-in/check-out
-            </Text>
-          </TouchableOpacity>
+          {isProcessing ? (
+            <View style={styles.processingContainer}>
+              <ActivityIndicator size="large" color={theme.colors.primary[600]} />
+              <Text style={styles.processingText}>Processing attendance...</Text>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={styles.scannerPlaceholder}
+              onPress={handleOpenScanner}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="qr-code-outline" size={moderateScale(80)} color={theme.colors.primary[500]} />
+              <Text style={styles.scannerTitle}>Tap to Scan QR Code</Text>
+              <Text style={styles.scannerSubtitle}>
+                Scan attendee QR codes for check-in/check-out
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
 
@@ -275,6 +410,41 @@ export function InspectorScannerScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Success Modal */}
+      {successModal.visible && successModal.type && (
+        <Modal
+          visible={successModal.visible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSuccessModal({ visible: false, type: null })}
+        >
+          <View style={styles.successModalOverlay}>
+            <View style={styles.successModalContent}>
+              <View style={[
+                styles.successIconContainer,
+                { backgroundColor: successModal.type === 'check-in' ? theme.colors.success[50] : theme.colors.primary[50] }
+              ]}>
+                <Ionicons 
+                  name={successModal.type === 'check-in' ? 'checkmark-circle' : 'exit-outline'} 
+                  size={moderateScale(48)} 
+                  color={successModal.type === 'check-in' ? theme.colors.success[600] : theme.colors.primary[600]} 
+                />
+              </View>
+              <Text style={styles.successTitle}>
+                {successModal.type === 'check-in' ? 'Checked In' : 'Checked Out'}
+              </Text>
+              <Text style={styles.successTime}>{successModal.time}</Text>
+              <TouchableOpacity 
+                style={styles.successButton}
+                onPress={() => setSuccessModal({ visible: false, type: null })}
+              >
+                <Text style={styles.successButtonText}>Continue Scanning</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -400,6 +570,18 @@ const styles = StyleSheet.create({
   scannerContainer: {
     flex: 1,
     padding: scale(16),
+  },
+  processingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: moderateScale(16),
+  },
+  processingText: {
+    fontSize: moderateScale(16),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(16),
   },
   scannerPlaceholder: {
     flex: 1,
@@ -562,6 +744,53 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(9),
     fontWeight: '700',
     color: theme.colors.text.tertiary,
+  },
+  successModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: scale(24),
+  },
+  successModalContent: {
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(32),
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: scale(320),
+  },
+  successIconContainer: {
+    width: moderateScale(96),
+    height: moderateScale(96),
+    borderRadius: moderateScale(48),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: verticalScale(20),
+  },
+  successTitle: {
+    fontSize: moderateScale(24),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(8),
+  },
+  successTime: {
+    fontSize: moderateScale(16),
+    color: theme.colors.text.secondary,
+    marginBottom: verticalScale(24),
+  },
+  successButton: {
+    backgroundColor: theme.colors.primary[600],
+    borderRadius: moderateScale(12),
+    paddingVertical: verticalScale(14),
+    paddingHorizontal: scale(32),
+    width: '100%',
+  },
+  successButtonText: {
+    fontSize: moderateScale(16),
+    fontWeight: '600',
+    color: theme.colors.background.primary,
+    textAlign: 'center',
   },
 });
 
