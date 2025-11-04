@@ -1,5 +1,6 @@
 export * from "./notifications/getAdminNotifications";
 export * from "./notifications/getRejectionHistoryNotifications";
+export * from "./notifications/getPaymentRejectionNotifications";
 export * from "./notifications/getUserNotifications";
 export * from "./notifications/markAllNotificationsAsRead";
 export * from "./notifications/markNotificationAsRead";

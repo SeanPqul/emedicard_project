@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 type Notification = {
-  _id: Id<"notifications"> | Id<"documentRejectionHistory">;
+  _id: Id<"notifications"> | Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory">;
   _creationTime: number;
   title?: string;
   message: string;
@@ -39,14 +39,21 @@ export default function AdminNotificationsPage() {
     api.notifications.getRejectionHistoryNotifications,
     {}
   );
+  const paymentRejectionNotifications = useQuery(
+    api.notifications.getPaymentRejectionNotifications,
+    {}
+  );
   
   const markAsRead = useMutation(api.notifications.markNotificationAsRead.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead.markRejectionHistoryAsRead);
   const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead.markAllNotificationsAsRead);
 
   // Combine all notifications
-  const allNotifications = [...(adminNotifications || []), ...(rejectionNotifications || [])]
-    .sort((a, b) => (b._creationTime || 0) - (a._creationTime || 0));
+  const allNotifications = [
+    ...(adminNotifications || []),
+    ...(rejectionNotifications || []),
+    ...(paymentRejectionNotifications || [])
+  ].sort((a, b) => (b._creationTime || 0) - (a._creationTime || 0));
 
   // Filter notifications
   const filteredNotifications = allNotifications.filter((notif: Notification) => {
@@ -68,7 +75,9 @@ export default function AdminNotificationsPage() {
   const handleNotificationClick = (notification: Notification) => {
     // Mark as read
     if (notification.notificationType === "DocumentResubmission") {
-      markRejectionAsRead({ rejectionId: notification._id as Id<"documentRejectionHistory"> });
+      markRejectionAsRead({ rejectionId: notification._id as Id<"documentRejectionHistory">, rejectionType: "document" });
+    } else if (notification.notificationType === "PaymentResubmission") {
+      markRejectionAsRead({ rejectionId: notification._id as Id<"paymentRejectionHistory">, rejectionType: "payment" });
     } else {
       markAsRead({ notificationId: notification._id as Id<"notifications"> });
     }
@@ -90,6 +99,14 @@ export default function AdminNotificationsPage() {
           <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+        );
+      case "PaymentResubmission":
+        return (
+          <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
         );

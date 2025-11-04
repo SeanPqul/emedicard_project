@@ -23,20 +23,29 @@ export default function AdminNotificationBell() {
     api.notifications.getRejectionHistoryNotifications,
     {}
   );
+  const paymentRejectionNotifications = useQuery(
+    api.notifications.getPaymentRejectionNotifications,
+    {}
+  );
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);
   const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
   const [isOpen, setIsOpen] = useState(false);
 
-  const notifications = [...(adminNotifications || []), ...(rejectionHistoryNotifications || [])]
-    .sort((a, b) => (b._creationTime || 0) - (a._creationTime || 0));
+  const notifications = [
+    ...(adminNotifications || []),
+    ...(rejectionHistoryNotifications || []),
+    ...(paymentRejectionNotifications || [])
+  ].sort((a, b) => (b._creationTime || 0) - (a._creationTime || 0));
 
   const unreadCount = notifications?.filter(n => !n.isRead).length || 0;
 
-  const handleNotificationClick = (notificationId: Id<"notifications"> | Id<"documentRejectionHistory">, notificationType: string) => {
+  const handleNotificationClick = (notificationId: Id<"notifications"> | Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory">, notificationType: string) => {
     // Mark as read based on notification type
     if (notificationType === "DocumentResubmission") {
-      markRejectionAsRead({ rejectionId: notificationId as Id<"documentRejectionHistory"> });
+      markRejectionAsRead({ rejectionId: notificationId as Id<"documentRejectionHistory">, rejectionType: "document" });
+    } else if (notificationType === "PaymentResubmission") {
+      markRejectionAsRead({ rejectionId: notificationId as Id<"paymentRejectionHistory">, rejectionType: "payment" });
     } else {
       markAsRead({ notificationId: notificationId as Id<"notifications"> });
     }

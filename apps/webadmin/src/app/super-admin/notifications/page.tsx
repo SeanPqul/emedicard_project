@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Notification = {
-  _id: Id<"notifications"> | Id<"documentRejectionHistory">;
+  _id: Id<"notifications"> | Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory">;
   _creationTime: number;
   title?: string;
   message: string;
@@ -34,14 +34,18 @@ export default function SuperAdminNotificationsPage() {
     { notificationType: undefined }
   );
   const rejectionNotifications = useQuery(api.notifications.getRejectionHistoryNotifications, {});
+  const paymentRejectionNotifications = useQuery(api.notifications.getPaymentRejectionNotifications, {});
   
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);
   const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
 
   // Combine all notifications
-  const allNotifications = [...(adminNotifications || []), ...(rejectionNotifications || [])]
-    .sort((a, b) => (b._creationTime || 0) - (a._creationTime || 0));
+  const allNotifications = [
+    ...(adminNotifications || []),
+    ...(rejectionNotifications || []),
+    ...(paymentRejectionNotifications || [])
+  ].sort((a, b) => (b._creationTime || 0) - (a._creationTime || 0));
 
   // Filter notifications
   const filteredNotifications = allNotifications.filter((notif: Notification) => {
@@ -63,7 +67,9 @@ export default function SuperAdminNotificationsPage() {
   const handleNotificationClick = (notification: Notification) => {
     // Mark as read
     if (notification.notificationType === "DocumentResubmission") {
-      markRejectionAsRead({ rejectionId: notification._id as Id<"documentRejectionHistory"> });
+      markRejectionAsRead({ rejectionId: notification._id as Id<"documentRejectionHistory">, rejectionType: "document" });
+    } else if (notification.notificationType === "PaymentResubmission") {
+      markRejectionAsRead({ rejectionId: notification._id as Id<"paymentRejectionHistory">, rejectionType: "payment" });
     } else {
       markAsRead({ notificationId: notification._id as Id<"notifications"> });
     }

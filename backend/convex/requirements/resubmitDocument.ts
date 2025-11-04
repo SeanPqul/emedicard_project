@@ -129,35 +129,9 @@ export const resubmitDocument = mutation({
       });
     }
 
-    // 7. Send notification to admin for re-review
-    const admins = await ctx.db
-      .query("users")
-      .withIndex("by_role", (q) => q.eq("role", "admin"))
-      .collect();
-
-    const documentType = await ctx.db.get(args.documentTypeId);
-    const documentTypeName = documentType ? documentType.name : "Document";
-
-    // Notify only admins who manage this health card category
-    for (const admin of admins) {
-      // Check if admin manages this health card category
-      const shouldNotify = !admin.managedCategories ||
-        admin.managedCategories.length === 0 ||
-        admin.managedCategories.includes(application.jobCategoryId);
-
-      if (shouldNotify) {
-        await ctx.db.insert("notifications", {
-          userId: admin._id,
-          applicationId: args.applicationId,
-          jobCategoryId: application.jobCategoryId,
-          title: "Document Resubmitted",
-          message: `${user.fullname} has resubmitted their ${documentTypeName}. Please review.`,
-          notificationType: "DocumentResubmission",
-          isRead: false,
-          actionUrl: `/dashboard/${args.applicationId}/doc_verif`,
-        });
-      }
-    }
+    // 7. Notification handled by getRejectionHistoryNotifications query
+    // No need to create duplicate notifications here since the rejection history
+    // with wasReplaced=true will automatically show up as a notification
 
     // 8. Return success response
     return {
