@@ -60,11 +60,16 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
 
   // State Management
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false); // For payment correction (resubmission)
+  const [isFinalRejectModalOpen, setIsFinalRejectModalOpen] = useState(false); // For permanent rejection
   const [isRejectionHistoryOpen, setIsRejectionHistoryOpen] = useState(false);
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
   const [error, setError] = useState<{ title: string; message: string } | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  
+  // Final rejection form state
+  const [finalRejectionReason, setFinalRejectionReason] = useState('');
+  const [finalRejectionCategory, setFinalRejectionCategory] = useState('does_not_meet_requirements');
   
   // Rejection Form State
   const [rejectionCategory, setRejectionCategory] = useState<string>("");
@@ -79,6 +84,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
 
   const rejectPaymentMutation = useMutation(api.admin.payments.rejectPayment.rejectPayment);
   const validatePayment = useMutation(api.admin.validatePayment.validate);
+  const rejectApplicationFinal = useMutation(api.admin.rejectApplicationFinal.rejectFinal);
 
   // Activity Log Helper
   const addLogEntry = (action: string, details: string) => {
@@ -166,6 +172,33 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
   // Remove issue from list
   const handleRemoveIssue = (issue: string) => {
     setSpecificIssues(specificIssues.filter(i => i !== issue));
+  };
+  
+  // Handler for final rejection
+  const handleConfirmFinalReject = async () => {
+    try {
+      if (!finalRejectionReason.trim()) {
+        setError({ title: 'Validation Error', message: 'Please provide a reason for permanent rejection.' });
+        return;
+      }
+      
+      await rejectApplicationFinal({
+        applicationId: params.id,
+        rejectionReason: finalRejectionReason,
+        rejectionCategory: finalRejectionCategory as any,
+      });
+      
+      addLogEntry('Application Permanently Rejected', finalRejectionReason);
+      setSuccessMessage('Application permanently rejected. Applicant has been notified.');
+      setIsFinalRejectModalOpen(false);
+      
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
+    } catch (err: any) {
+      setError({ title: 'Rejection Failed', message: err.message || 'Failed to permanently reject application.' });
+      setIsFinalRejectModalOpen(false);
+    }
   };
 
   // Format Date
@@ -294,6 +327,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
             <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">Actions</h3>
               <div className="flex flex-col gap-3">
+                {/* Primary Action: Approve Payment */}
                 <button
                   onClick={handleApproveAndProceed}
                   className="w-full bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
@@ -301,23 +335,36 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  Approve Payment
+                  Approve & Complete Payment
                 </button>
+                
+                {/* Secondary Action: Request Payment Correction */}
                 <button
                   onClick={() => setIsRejectModalOpen(true)}
-                  className="w-full bg-white text-red-600 px-6 py-3 rounded-xl font-semibold hover:bg-red-50 border border-red-200 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                  className="w-full bg-orange-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-orange-600 border border-orange-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Request Payment Correction
+                </button>
+                
+                {/* Tertiary Action: Reject Application */}
+                <button
+                  onClick={() => setIsFinalRejectModalOpen(true)}
+                  className="w-full bg-gradient-to-r from-rose-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-rose-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
-                  Reject Payment
+                  Reject Application (Final)
                 </button>
                 
                 {/* Rejection History Button */}
                 {paymentData.rejectionHistory && paymentData.rejectionHistory.length > 0 && (
                   <button
                     onClick={() => setIsRejectionHistoryOpen(true)}
-                    className="w-full bg-white text-orange-600 px-6 py-3 rounded-xl font-semibold hover:bg-orange-50 border border-orange-200 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                    className="w-full bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 border border-blue-200 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -790,6 +837,111 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                 className="px-6 py-3 rounded-lg font-semibold bg-red-600 text-white hover:bg-red-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Confirm Rejection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Final Rejection Modal (same as doc_verif) */}
+      {isFinalRejectModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn overflow-y-auto">
+          <div 
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8 transform transition-all" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-red-50 to-red-100 px-6 py-5 border-b border-red-200 rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-100 p-3 rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900">Permanently Reject Application</h2>
+                  <p className="text-sm text-gray-600">This action cannot be undone - applicant must create new application</p>
+                </div>
+                <button
+                  onClick={() => setIsFinalRejectModalOpen(false)}
+                  className="p-2 hover:bg-red-200 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Warning */}
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div className="text-sm text-red-800">
+                    <p className="font-bold mb-1">⚠️ Warning: Permanent Rejection</p>
+                    <p>
+                      This will <strong>permanently close</strong> this application. The applicant will NOT be able to resubmit payment and must create a completely new application if they wish to continue.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rejection Category */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Rejection Category <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={finalRejectionCategory}
+                  onChange={(e) => setFinalRejectionCategory(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 font-medium transition-all"
+                >
+                  <option value="does_not_meet_requirements">Does Not Meet Requirements</option>
+                  <option value="fraud_suspected">Fraud Suspected</option>
+                  <option value="incomplete_information">Incomplete Information</option>
+                  <option value="duplicate_application">Duplicate Application</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              {/* Rejection Reason */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Reason for Permanent Rejection <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={finalRejectionReason}
+                  onChange={(e) => setFinalRejectionReason(e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 transition-all"
+                  placeholder="Explain why this application must be permanently rejected..."
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 pb-6 flex flex-col sm:flex-row justify-end gap-3">
+              <button
+                onClick={() => {
+                  setIsFinalRejectModalOpen(false);
+                  setFinalRejectionReason('');
+                  setFinalRejectionCategory('does_not_meet_requirements');
+                }}
+                className="px-8 py-3 rounded-lg font-semibold bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmFinalReject}
+                disabled={!finalRejectionReason.trim()}
+                className="px-8 py-3 rounded-lg font-semibold bg-red-600 text-white hover:bg-red-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Permanently Reject Application
               </button>
             </div>
           </div>

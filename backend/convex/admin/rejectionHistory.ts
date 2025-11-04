@@ -185,11 +185,50 @@ export const getAllRejections = query({
       })
     );
 
-    // Combine all rejections (documents, payments, and orientations) and sort by date
+    // Get application rejections from applicationRejectionHistory
+    const applicationRejections = await ctx.db
+      .query("applicationRejectionHistory")
+      .order("desc")
+      .collect();
+
+    // Filter application rejections by managed categories if not super admin
+    let filteredApplicationRejections = applicationRejections;
+    if (!isSuperAdmin) {
+      const managedCategoryIds = user.managedCategories || [];
+      filteredApplicationRejections = applicationRejections.filter(rejection => 
+        managedCategoryIds.includes(rejection.jobCategoryId)
+      );
+    }
+
+    // Enrich application rejection data
+    const enrichedApplicationRejections = filteredApplicationRejections.map((rejection) => ({
+      _id: rejection._id,
+      type: "application" as const,
+      applicationId: rejection.applicationId,
+      applicantName: rejection.applicantName,
+      applicantEmail: rejection.applicantEmail,
+      jobCategory: rejection.jobCategoryName,
+      documentType: "Application (Final Rejection)",
+      rejectionCategory: rejection.rejectionCategory,
+      rejectionReason: rejection.rejectionReason,
+      specificIssues: [],
+      rejectedAt: rejection.rejectedAt,
+      rejectedBy: rejection.rejectedByName,
+      rejectedByEmail: "", // Not stored in application rejection history
+      attemptNumber: 1, // Application rejection is always final
+      wasReplaced: false, // Cannot be replaced
+      replacedAt: undefined,
+      status: "rejected" as const, // Always rejected for application level
+      rejectionType: rejection.rejectionType, // manual or automatic
+      triggerSource: rejection.triggerSource, // where it came from
+    }));
+
+    // Combine all rejections (documents, payments, orientations, and applications) and sort by date
     const allRejections = [
       ...enrichedRejections, 
       ...enrichedPaymentRejections, 
-      ...enrichedLogs
+      ...enrichedLogs,
+      ...enrichedApplicationRejections
     ].sort(
       (a, b) => b.rejectedAt - a.rejectedAt
     );
@@ -226,15 +265,29 @@ export const getRejectionStats = query({
       .query("paymentRejectionHistory")
       .collect();
 
+    // Get all application rejections
+    const allApplicationRejections = await ctx.db
+      .query("applicationRejectionHistory")
+      .collect();
+
     // Combine all rejections
-    const allRejections = [...allDocumentRejections, ...allPaymentRejections];
+    const allRejections = [
+      ...allDocumentRejections, 
+      ...allPaymentRejections, 
+      ...allApplicationRejections
+    ];
 
     // Filter by managed categories if needed
     let filteredRejections = allRejections;
     if (!isSuperAdmin) {
       const managedCategoryIds = user.managedCategories || [];
       
-      // Get all applications and filter by managed categories
+      // For application rejections, we can filter directly by jobCategoryId
+      const filteredAppRejections = allApplicationRejections.filter(rejection =>
+        managedCategoryIds.includes(rejection.jobCategoryId)
+      );
+      
+      // For document and payment rejections, filter by application
       const allApplications = await ctx.db.query("applications").collect();
       const applicationsInManagedCategories = allApplications.filter(app => 
         managedCategoryIds.includes(app.jobCategoryId)
@@ -244,9 +297,14 @@ export const getRejectionStats = query({
         applicationsInManagedCategories.map(app => app._id)
       );
       
-      filteredRejections = allRejections.filter(rejection => 
+      const filteredDocAndPaymentRejections = [
+        ...allDocumentRejections,
+        ...allPaymentRejections
+      ].filter(rejection => 
         managedApplicationIds.has(rejection.applicationId)
       );
+      
+      filteredRejections = [...filteredDocAndPaymentRejections, ...filteredAppRejections];
     }
 
     // Calculate statistics

@@ -385,6 +385,63 @@ export default defineSchema({
     .index("by_admin", ["rejectedBy"])
     .index("by_replacement", ["wasReplaced"]),
 
+  // Application Rejection History (for permanent/final rejections)
+  applicationRejectionHistory: defineTable({
+    // Core References
+    applicationId: v.id("applications"),
+    
+    // Application Info at Time of Rejection
+    applicantName: v.string(),
+    applicantEmail: v.string(),
+    jobCategoryId: v.id("jobCategories"),
+    jobCategoryName: v.string(),
+    applicationType: v.string(), // "New" or "Renew"
+    
+    // Rejection Information
+    rejectionCategory: v.union(
+      v.literal("fraud_suspected"),
+      v.literal("incomplete_information"),
+      v.literal("does_not_meet_requirements"),
+      v.literal("duplicate_application"),
+      v.literal("max_attempts_reached"),
+      v.literal("other")
+    ),
+    rejectionReason: v.string(),
+    rejectionType: v.union(
+      v.literal("manual"),      // Admin manually rejected
+      v.literal("automatic")    // System auto-rejected (max attempts)
+    ),
+    
+    // Context: What triggered the rejection
+    triggerSource: v.optional(v.union(
+      v.literal("document_verification"),
+      v.literal("payment_validation"),
+      v.literal("max_document_attempts"),
+      v.literal("max_payment_attempts")
+    )),
+    
+    // Statistics at Time of Rejection
+    totalDocumentsRejected: v.optional(v.float64()),
+    totalPaymentsRejected: v.optional(v.float64()),
+    
+    // Tracking
+    rejectedBy: v.id("users"),
+    rejectedByName: v.string(),
+    rejectedAt: v.float64(),
+    
+    // Notification Tracking
+    notificationSent: v.boolean(),
+    notificationSentAt: v.optional(v.float64()),
+    
+    // Audit Fields
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+  }).index("by_application", ["applicationId"])
+    .index("by_rejected_at", ["rejectedAt"])
+    .index("by_admin", ["rejectedBy"])
+    .index("by_job_category", ["jobCategoryId", "rejectedAt"])
+    .index("by_rejection_type", ["rejectionType", "rejectedAt"]),
+
   // Payment Rejection History
   paymentRejectionHistory: defineTable({
     // Core References

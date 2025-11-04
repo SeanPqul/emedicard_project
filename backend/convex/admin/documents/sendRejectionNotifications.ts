@@ -55,20 +55,40 @@ export const sendRejectionNotifications = internalMutation({
         };
       }
 
-      // 4. Send individual notification for each rejected document
+      // 4. Send individual notification for each rejected document with attempt warnings
       await Promise.all(
         pendingRejections.map(async (rejection) => {
           const docType = await ctx.db.get(rejection.documentTypeId);
           const documentName = docType?.name || "Unknown Document";
           
-          // Send individual notification for this rejected document
+          // Format specific issues if present
+          const specificIssuesText = rejection.specificIssues && rejection.specificIssues.length > 0 
+            ? `\n\nSpecific Issues:\n${rejection.specificIssues.map(issue => `• ${issue}`).join('\n')}`
+            : '';
+          
+          // Determine notification content based on attempt number
+          let notificationTitle = "Document Rejected";
+          let notificationMessage = `Your ${documentName} has been rejected.\n\nReason: ${rejection.rejectionReason}${specificIssuesText}\n\nThis is attempt ${rejection.attemptNumber} of 3.`;
+          
+          if (rejection.attemptNumber === 2) {
+            // 2nd attempt - Warning
+            notificationTitle = "⚠️ Document Rejected - Warning";
+            notificationMessage = `⚠️ Your ${documentName} has been rejected.\n\nReason: ${rejection.rejectionReason}${specificIssuesText}\n\nThis is attempt ${rejection.attemptNumber} of 3.\n\n⚠️ Warning: You have 1 more attempt remaining. Please review the requirements carefully before resubmitting.`;
+          } else if (rejection.attemptNumber === 3) {
+            // 3rd attempt - FINAL WARNING (should rarely happen here since max attempts should be handled in rejectDocument)
+            notificationTitle = "🚨 Final Attempt - Document Rejected";
+            notificationMessage = `🚨 FINAL ATTEMPT: Your ${documentName} has been rejected.\n\nReason: ${rejection.rejectionReason}${specificIssuesText}\n\nThis is your LAST chance (attempt 3 of 3).\n\n⚠️ If this document is rejected again, your application will be permanently closed and you will need to create a new application.\n\nPlease ensure your document meets all requirements before resubmitting.`;
+          }
+          
+          // Send notification
           await ctx.db.insert("notifications", {
             userId: application.userId,
             applicationId: args.applicationId,
-            title: "Document Rejected",
-            message: `Your ${documentName} has been rejected. Reason: ${rejection.rejectionReason}. Please upload a new document.`,
-            notificationType: "DocumentRejection",
+            title: notificationTitle,
+            message: notificationMessage,
+            notificationType: "document_rejected",
             isRead: false,
+            jobCategoryId: application.jobCategoryId,
             actionUrl: `/applications/${args.applicationId}/resubmit/${rejection.documentTypeId}`,
           });
         })
@@ -91,6 +111,7 @@ export const sendRejectionNotifications = internalMutation({
         activityType: "rejection_notification_sent",
         details: `Sent batch rejection notification for ${pendingRejections.length} document(s) for application ${args.applicationId}`,
         applicationId: args.applicationId,
+        jobCategoryId: application.jobCategoryId,
         timestamp: currentTime,
       });
 
