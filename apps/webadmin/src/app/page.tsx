@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from "react";
 import Footer from '../components/Footer';
 import LoadingScreen from '../components/shared/LoadingScreen';
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 import {
   getUserFriendlyErrorMessage,
@@ -41,6 +43,7 @@ export default function LandingPage() {
   const { signIn, setActive, isLoaded: isSignInLoaded } = useSignIn();
   const { isSignedIn, isLoaded: isUserLoaded } = useUser();
   const router = useRouter();
+  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,10 +53,15 @@ export default function LandingPage() {
   const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
 
   useEffect(() => {
-    if (isUserLoaded && isSignedIn) {
-      router.push('/dashboard');
+    if (isUserLoaded && isSignedIn && adminPrivileges) {
+      // Check if user is super admin and redirect accordingly
+      if (adminPrivileges.managedCategories === "all") {
+        router.push('/super-admin');
+      } else {
+        router.push('/dashboard');
+      }
     }
-  }, [isUserLoaded, isSignedIn, router]);
+  }, [isUserLoaded, isSignedIn, adminPrivileges, router]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -80,7 +88,7 @@ export default function LandingPage() {
 
       if (attempt.status === 'complete') {
         await setActive({ session: attempt.createdSessionId });
-        router.push('/dashboard');
+        // Redirect will be handled by useEffect after adminPrivileges loads
         setShowLoginModal(false);
       } else {
         if (process.env.NODE_ENV === 'development') {
@@ -202,7 +210,7 @@ export default function LandingPage() {
                 onClick={() => setShowLoginModal(true)}
                 aria-label="Apply for eMediCard now"
               >
-                Apply Now
+                Try Now
               </button>
               <button 
                 className="bg-white/10 backdrop-blur-sm text-white border-2 border-white/50 px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-emerald-600 transition-all duration-300 hover:scale-105 transform"

@@ -27,10 +27,22 @@ type ChecklistItem = {
   isResubmission?: boolean; // Track if this document was resubmitted
 };
 
+type ApplicantDetails = {
+  firstName?: string;
+  lastName?: string;
+  middleName?: string;
+  email?: string;
+  gender?: string;
+  nationality?: string;
+  civilStatus?: string;
+  organization?: string;
+};
+
 type ApplicationData = {
   applicantName: string;
   jobCategoryName: string;
   checklist: ChecklistItem[];
+  applicantDetails?: ApplicantDetails;
 };
 
 const createAppError = (message: string, title: string = 'Invalid Input'): AppError => ({ title, message });
@@ -76,6 +88,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [showOcrModal, setShowOcrModal] = useState<boolean>(false); // New state for OCR modal visibility
   const [isRejectConfirmModalOpen, setIsRejectConfirmModalOpen] = useState(false); // New state for rejection confirmation
   const [rejectError, setRejectError] = useState<{[key: number]: string}>({}); // Track reject button errors per document
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // New state for collapsible applicant details
   const router = useRouter();
 
   // --- DATA FETCHING ---
@@ -218,7 +231,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
 
       <main className="max-w-[1600px] mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <header className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <button onClick={() => router.back()} className="p-2.5 rounded-xl hover:bg-white/70 transition-all border border-gray-200 bg-white/50" aria-label="Go back">
+          <button onClick={() => router.push('/dashboard')} className="p-2.5 rounded-xl hover:bg-white/70 transition-all border border-gray-200 bg-white/50" aria-label="Go back">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <div>
@@ -275,6 +288,147 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 </div>
               </div>
             </div>
+            
+            {/* Collapsible Applicant Details Card */}
+            {data.applicantDetails && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  aria-expanded={isDetailsExpanded}
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <h2 className="text-base font-bold text-gray-800">Applicant Details</h2>
+                  </div>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                      isDetailsExpanded ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Collapsible Content */}
+                <div
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    isDetailsExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="px-6 pb-6 pt-2 space-y-3 border-t border-gray-100">
+                    {/* First Name */}
+                    {data.applicantDetails?.firstName && (
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">First Name</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5">{data.applicantDetails.firstName}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Last Name */}
+                    {data.applicantDetails?.lastName && (
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Last Name</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5">{data.applicantDetails.lastName}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Middle Name */}
+                    {data.applicantDetails?.middleName && (
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Middle Name</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5">{data.applicantDetails.middleName}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Gender */}
+                    {data.applicantDetails?.gender && (
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Gender</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5">{data.applicantDetails.gender}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Nationality */}
+                    {data.applicantDetails?.nationality && (
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nationality</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5">{data.applicantDetails.nationality}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Civil Status */}
+                    {data.applicantDetails?.civilStatus && (
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Civil Status</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5">{data.applicantDetails.civilStatus}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Organization */}
+                    {data.applicantDetails?.organization && (
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Organization</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5">{data.applicantDetails.organization}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Email */}
+                    {data.applicantDetails?.email && (
+                      <div className="flex items-start gap-3 p-3 bg-teal-50 rounded-lg border border-teal-100">
+                        <svg className="w-4 h-4 text-teal-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-teal-700 uppercase tracking-wide">Email Address</label>
+                          <p className="text-sm font-medium text-teal-900 mt-0.5 break-all">{data.applicantDetails.email}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Actions Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">

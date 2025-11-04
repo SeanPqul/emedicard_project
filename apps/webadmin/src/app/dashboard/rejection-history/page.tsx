@@ -42,9 +42,18 @@ export default function AdminRejectionHistoryPage() {
   const router = useRouter();
 
   const { isLoaded: isClerkLoaded, user } = useUser();
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
-  const rejections = useQuery(api.admin.rejectionHistory.getAllRejections, {});
-  const stats = useQuery(api.admin.rejectionHistory.getRejectionStats, {});
+  const adminPrivileges = useQuery(
+    api.users.roles.getAdminPrivileges,
+    isClerkLoaded && user ? undefined : "skip"
+  );
+  const rejections = useQuery(
+    api.admin.rejectionHistory.getAllRejections,
+    isClerkLoaded && user ? {} : "skip"
+  );
+  const stats = useQuery(
+    api.admin.rejectionHistory.getRejectionStats,
+    isClerkLoaded && user ? {} : "skip"
+  );
 
   // Filter rejections
   const filteredRejections = (rejections || []).filter((rejection: Rejection) => {

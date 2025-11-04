@@ -18,10 +18,22 @@ type DocumentChecklistItem = {
 // Define the expected structure of a checklist item with classification data
 type ChecklistItemWithClassification = DocumentChecklistItem;
 
+type ApplicantDetails = {
+  firstName?: string;
+  lastName?: string;
+  middleName?: string;
+  email?: string;
+  gender?: string;
+  nationality?: string;
+  civilStatus?: string;
+  organization?: string;
+};
+
 type GetDocumentsResult = {
   applicantName: string;
   jobCategoryName: string;
   checklist: ChecklistItemWithClassification[];
+  applicantDetails?: ApplicantDetails;
 } | null;
 
 export const get = action({
@@ -45,6 +57,7 @@ export const get = action({
         applicantName: applicationData.applicantName,
         jobCategoryName: applicationData.jobCategoryName,
         checklist: checklistWithClassification,
+        applicantDetails: applicationData.applicantDetails,
       };
     },
   });

@@ -102,7 +102,7 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-gray-200 transform transition-all">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-gray-200 transform transition-all max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-6 rounded-t-2xl">
           <div className="flex items-center justify-between">
@@ -249,7 +249,7 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
               </label>
               <select
                 id="managedCategories"
-                className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all appearance-none bg-white"
                 value={selectedCategory || ""}
                 onChange={handleCategoryChange}
                 disabled={isLoading}
@@ -784,51 +784,120 @@ export default function SuperAdminPage() {
               {allAdminActivities.length > 0 ? (
                 allAdminActivities.map((activity: AdminActivityLogWithApplicantName) => {
                   if (!activity) return null;
+                  
+                  // Get action style based on activity type
+                  const getActionStyle = () => {
+                    const action = (activity.details || activity.action || "").toLowerCase();
+                    if (action.includes("approved") || action.includes("approve")) {
+                      return {
+                        icon: (
+                          <svg className="h-4 w-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        ),
+                        iconBg: "bg-emerald-100",
+                        accentBorderClass: "border-l-4 border-emerald-500",
+                      };
+                    }
+                    if (action.includes("rejected") || action.includes("reject")) {
+                      return {
+                        icon: (
+                          <svg className="h-4 w-4 text-rose-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        ),
+                        iconBg: "bg-rose-100",
+                        accentBorderClass: "border-l-4 border-rose-500",
+                      };
+                    }
+                    if (action.includes("finalized")) {
+                      return {
+                        icon: (
+                          <svg className="h-4 w-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        ),
+                        iconBg: "bg-blue-100",
+                        accentBorderClass: "border-l-4 border-blue-500",
+                      };
+                    }
+                    return {
+                      icon: (
+                        <svg className="h-4 w-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                      ),
+                      iconBg: "bg-slate-100",
+                      accentBorderClass: "border-l-4 border-slate-400",
+                    };
+                  };
+                  
+                  const actionStyle = getActionStyle();
+                  
                   return (
                     <div
                       key={activity._id}
-                      className="flex items-start space-x-3 bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-xl border border-purple-100 hover:border-purple-200 transition-all duration-200"
+                      className={`group p-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors ${actionStyle.accentBorderClass}`}
                     >
-                      <div className="flex-shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-md">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                            />
-                          </svg>
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <div className={`w-9 h-9 rounded-full ${actionStyle.iconBg} flex items-center justify-center shadow-sm`}>
+                            {actionStyle.icon}
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-800">
-                          <span className="font-bold">
-                            {activity.admin?.fullname}
-                          </span>{" "}
-                          ({activity.admin?.email}) {(activity.details || activity.action || "performed an action").toLowerCase()}
-                          {activity.applicantName && ` for `}
-                          {activity.applicantName && <span className="font-bold">{activity.applicantName}</span>}.
-                        </p>
-                        {activity.comment && (
-                          <p className="text-xs text-gray-700 bg-gray-50 p-1 rounded mt-1">Comment: {activity.comment}</p>
-                        )}
-                        {activity.applicationId && (
-                          <p className="text-xs text-gray-500 mt-1">Application ID: {activity.applicationId}</p>
-                        )}
-                        <p className="text-xs text-gray-400 mt-1">
-                          {activity.timestamp
-                            ? formatDistanceToNow(new Date(activity.timestamp), {
-                                addSuffix: true,
-                              })
-                            : "N/A"}
-                        </p>
+                        <div className="flex-1 min-w-0">
+                          {/* Admin Information */}
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex-1">
+                              <p className="text-sm font-bold text-gray-900 truncate">
+                                {activity.admin?.fullname || "Unknown Admin"}
+                              </p>
+                              <p className="text-xs text-gray-600 truncate">
+                                {activity.admin?.email || "No email"}
+                              </p>
+                            </div>
+                            <span className="text-xs text-gray-500 whitespace-nowrap">
+                              {activity.timestamp
+                                ? formatDistanceToNow(new Date(activity.timestamp), {
+                                    addSuffix: true,
+                                  })
+                                : "N/A"}
+                            </span>
+                          </div>
+
+                          {/* Action Details */}
+                          <div className="bg-gray-50 border border-gray-100 rounded-lg p-2 mb-2">
+                            <p className="text-sm text-gray-800 leading-relaxed">
+                              <span className="font-semibold">{activity.details || activity.action || "Performed an action"}</span>
+                              {activity.applicantName && (
+                                <span className="text-gray-700">
+                                  {" "}for <span className="font-bold text-gray-900">{activity.applicantName}</span>
+                                </span>
+                              )}
+                            </p>
+                          </div>
+
+                          {/* Comment Section */}
+                          {activity.comment && (
+                            <div className="bg-amber-50 border-l-3 border-amber-400 px-3 py-2 rounded-r mb-2">
+                              <p className="text-xs text-amber-900">
+                                <span className="font-bold">Comment:</span> {activity.comment}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Application ID */}
+                          {activity.applicationId && (
+                            <div className="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-md">
+                              <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                              </svg>
+                              <p className="text-xs font-mono text-gray-700">
+                                {activity.applicationId}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );

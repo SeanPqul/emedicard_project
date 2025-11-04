@@ -82,6 +82,17 @@ export const get = query({
       applicantName: user.fullname,
       jobCategoryName: jobCategory.name,
       checklist: checklist,
+      // Additional applicant details from application table
+      applicantDetails: {
+        firstName: application.firstName,
+        lastName: application.lastName,
+        middleName: application.middleName,
+        email: user.email,
+        gender: application.gender,
+        nationality: application.nationality,
+        civilStatus: application.civilStatus,
+        organization: application.organization,
+      },
     };
   },
 });
