@@ -609,7 +609,7 @@ export const manuallyUpdateAttendanceStatus = mutation({
     // Update application status if marked as Completed
     if (args.newStatus === "completed") {
       await ctx.db.patch(booking.applicationId, {
-        applicationStatus: "Attendance Validation",
+        applicationStatus: "Approved",
         orientationCompleted: true,
         updatedAt: Date.now(),
         lastUpdatedBy: adminUser._id,
@@ -689,26 +689,16 @@ export const finalizeSessionAttendance = mutation({
         booking.checkOutTime &&
         booking.status === "completed"
       ) {
-        // Update application status to "For Document Verification" (Next step after orientation)
+        // Update application status to "Approved" (Yellow Card completed all requirements)
         await ctx.db.patch(booking.applicationId, {
-          applicationStatus: "For Document Verification",
+          applicationStatus: "Approved",
           orientationCompleted: true,
           updatedAt: Date.now(),
           lastUpdatedBy: adminUser._id,
         });
 
-        // Send notification
-        const user = await ctx.db.get(application.userId);
-        if (user) {
-          await ctx.db.insert("notifications", {
-            userId: user._id,
-            applicationId: booking.applicationId,
-            title: "Orientation Completed!",
-            message: "Your attendance has been validated. Please proceed to document verification.",
-            notificationType: "Orientation",
-            isRead: false,
-          });
-        }
+        // TODO: Send notification when health card distribution feature is ready
+        // For now, just update status to Approved without notification
 
         completedCount++;
       } else if (booking.status === "excused") {

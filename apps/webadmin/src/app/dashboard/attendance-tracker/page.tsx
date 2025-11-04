@@ -52,10 +52,28 @@ interface OrientationSchedule {
 export default function AttendanceTrackerPage() {
   const router = useRouter();
   
-  // Set today as default date
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const [selectedDate, setSelectedDate] = useState<Date>(today);
+  // Set today as default date in PHT timezone
+  const getTodayPHTMidnight = () => {
+    const now = new Date();
+    // Get current date in PHT
+    const phtDateStr = now.toLocaleDateString('en-US', {
+      timeZone: 'Asia/Manila',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const [month, day, year] = phtDateStr.split('/').map(Number);
+    
+    // Create UTC midnight for today's PHT date
+    const utcMidnight = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
+    
+    // Convert to PHT midnight by subtracting 8 hours
+    const phtMidnightUTC = utcMidnight - (8 * 60 * 60 * 1000);
+    
+    return new Date(phtMidnightUTC);
+  };
+  
+  const [selectedDate, setSelectedDate] = useState<Date>(getTodayPHTMidnight());
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<{ [key: string]: string }>({});
   const [finalizingSession, setFinalizingSession] = useState<string | null>(null);
@@ -67,6 +85,12 @@ export default function AttendanceTrackerPage() {
     status: 'completed' | 'missed' | 'excused';
     notes: string;
   }>({ status: 'completed', notes: '' });
+  const [successModal, setSuccessModal] = useState<{
+    show: boolean;
+    completedCount: number;
+    missedCount: number;
+    excusedCount: number;
+  } | null>(null);
 
   // Convert selected date to timestamp (start of day)
   const selectedTimestamp = selectedDate.getTime();
@@ -98,13 +122,24 @@ export default function AttendanceTrackerPage() {
   );
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value);
-    date.setHours(0, 0, 0, 0);
+    // Parse the date input value (YYYY-MM-DD format)
+    const [year, month, day] = e.target.value.split('-').map(Number);
+    
+    // Create UTC midnight for the selected date
+    const utcMidnight = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
+    
+    // Convert to PHT midnight by subtracting 8 hours
+    // This gives us the UTC timestamp that represents midnight in PHT
+    const phtMidnightUTC = utcMidnight - (8 * 60 * 60 * 1000);
+    
+    const date = new Date(phtMidnightUTC);
+    
     console.log('🔍 Date Filter Changed:', {
       inputValue: e.target.value,
       dateObject: date,
       timestamp: date.getTime(),
-      formatted: date.toLocaleDateString()
+      phtMidnight: phtMidnightUTC,
+      formatted: date.toLocaleDateString('en-US', { timeZone: 'Asia/Manila' })
     });
     setSelectedDate(date);
     setSelectedTimeSlot('all'); // Reset time slot filter when date changes
@@ -129,9 +164,12 @@ export default function AttendanceTrackerPage() {
       });
 
       if (result.success) {
-        alert(
-          `✅ ${result.message}\n\nCompleted: ${result.completedCount}\nMissed: ${result.missedCount}${result.excusedCount ? `\nExcused: ${result.excusedCount}` : ''}`
-        );
+        setSuccessModal({
+          show: true,
+          completedCount: result.completedCount,
+          missedCount: result.missedCount,
+          excusedCount: result.excusedCount || 0,
+        });
       }
     } catch (error) {
       console.error('Error finalizing session:', error);
@@ -152,7 +190,6 @@ export default function AttendanceTrackerPage() {
       });
 
       if (result.success) {
-        alert(`✅ ${result.message}`);
         setEditingAttendee(null);
         setStatusUpdateForm({ status: 'completed', notes: '' });
       }
@@ -242,7 +279,12 @@ export default function AttendanceTrackerPage() {
   };
 
   const formatDateForInput = (date: Date) => {
-    return date.toISOString().split('T')[0];
+    // Format the date in PHT timezone for the input field
+    const phtDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+    const year = phtDate.getFullYear();
+    const month = String(phtDate.getMonth() + 1).padStart(2, '0');
+    const day = String(phtDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // Get unique time slots from schedules
@@ -351,7 +393,7 @@ export default function AttendanceTrackerPage() {
               No finished orientation sessions
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              There are no finished orientation sessions for {new Date(selectedTimestamp).toLocaleDateString()}.
+              There are no finished orientation sessions for {new Date(selectedTimestamp).toLocaleDateString('en-US', { timeZone: 'Asia/Manila' })}.
               Only sessions that have ended can be finalized.
             </p>
           </div>
@@ -604,6 +646,60 @@ export default function AttendanceTrackerPage() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Success Modal */}
+        {successModal?.show && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all animate-in zoom-in-95 duration-300">
+              {/* Success Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="bg-emerald-100 rounded-full p-3">
+                  <CheckCircle className="w-12 h-12 text-emerald-600" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
+                Session Validated Successfully!
+              </h3>
+              
+              {/* Message */}
+              <p className="text-center text-gray-600 text-sm mb-6">
+                Attendance records have been validated and applicant statuses updated to Approved.
+              </p>
+
+              {/* Stats */}
+              <div className="space-y-3 mb-6">
+                {successModal.completedCount > 0 && (
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <span className="text-sm font-medium text-green-900">Completed</span>
+                    <span className="text-lg font-bold text-green-600">{successModal.completedCount}</span>
+                  </div>
+                )}
+                {successModal.missedCount > 0 && (
+                  <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                    <span className="text-sm font-medium text-red-900">Missed</span>
+                    <span className="text-lg font-bold text-red-600">{successModal.missedCount}</span>
+                  </div>
+                )}
+                {successModal.excusedCount > 0 && (
+                  <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                    <span className="text-sm font-medium text-yellow-900">Excused</span>
+                    <span className="text-lg font-bold text-yellow-600">{successModal.excusedCount}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setSuccessModal(null)}
+                className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              >
+                Continue
+              </button>
+            </div>
           </div>
         )}
 

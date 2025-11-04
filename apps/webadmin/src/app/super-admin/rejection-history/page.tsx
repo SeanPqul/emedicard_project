@@ -12,11 +12,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-type RejectionType = "document" | "payment" | "orientation" | "other";
+type RejectionType = "document" | "payment" | "orientation" | "application" | "other";
 type RejectionStatus = "pending" | "resubmitted" | "rejected" | "approved";
 
 type Rejection = {
-  _id: Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory"> | Id<"adminActivityLogs">;
+  _id: Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory"> | Id<"applicationRejectionHistory"> | Id<"adminActivityLogs">;
   type: RejectionType;
   applicationId: Id<"applications"> | undefined;
   applicantName: string;

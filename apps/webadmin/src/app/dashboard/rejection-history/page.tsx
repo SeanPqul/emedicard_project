@@ -12,12 +12,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
-type RejectionType = "document" | "payment" | "orientation" | "other";
+type RejectionType = "document" | "payment" | "orientation" | "application" | "other";
 
 type RejectionStatus = "pending" | "resubmitted" | "rejected" | "approved";
 
 type Rejection = {
-  _id: Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory"> | Id<"adminActivityLogs">;
+  _id: Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory"> | Id<"applicationRejectionHistory"> | Id<"adminActivityLogs">;
   type: RejectionType;
   applicationId: Id<"applications"> | undefined;
   applicantName: string;
@@ -39,6 +39,7 @@ type Rejection = {
 export default function AdminRejectionHistoryPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<RejectionType | "">("");
+  const [statusFilter, setStatusFilter] = useState<"" | "pending" | "resubmitted" | "permanently_rejected">("");
   const router = useRouter();
 
   const { isLoaded: isClerkLoaded, user } = useUser();
@@ -46,6 +47,7 @@ export default function AdminRejectionHistoryPage() {
     api.users.roles.getAdminPrivileges,
     isClerkLoaded && user ? undefined : "skip"
   );
+  // @ts-ignore - Type instantiation depth issue with Convex
   const rejections = useQuery(
     api.admin.rejectionHistory.getAllRejections,
     isClerkLoaded && user ? {} : "skip"
@@ -65,7 +67,22 @@ export default function AdminRejectionHistoryPage() {
 
     const matchesType = !typeFilter || rejection.type === typeFilter;
 
-    return matchesSearch && matchesType;
+    // Status filter logic
+    let matchesStatus = true;
+    if (statusFilter) {
+      if (statusFilter === "permanently_rejected") {
+        // Application rejections are permanently rejected
+        matchesStatus = rejection.type === "application";
+      } else if (statusFilter === "pending") {
+        // Pending = document/payment rejections not yet resubmitted
+        matchesStatus = rejection.type !== "application" && !rejection.wasReplaced;
+      } else if (statusFilter === "resubmitted") {
+        // Resubmitted = document/payment rejections that were replaced
+        matchesStatus = rejection.type !== "application" && rejection.wasReplaced;
+      }
+    }
+
+    return matchesSearch && matchesType && matchesStatus;
   });
 
   const getTypeBadgeColor = (type: RejectionType) => {
@@ -76,12 +93,23 @@ export default function AdminRejectionHistoryPage() {
         return "bg-purple-100 text-purple-800";
       case "orientation":
         return "bg-indigo-100 text-indigo-800";
+      case "application":
+        return "bg-red-900 text-red-50 font-bold";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getStatusBadge = (status?: RejectionStatus, wasReplaced?: boolean) => {
+  const getStatusBadge = (status?: RejectionStatus, wasReplaced?: boolean, type?: RejectionType) => {
+    // Application rejections are permanently rejected
+    if (type === "application") {
+      return (
+        <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-red-900 text-red-50 flex items-center gap-1.5">
+          ❌ Permanently Rejected
+        </span>
+      );
+    }
+    
     // Use new status field if available, otherwise fall back to wasReplaced
     const finalStatus = status || (wasReplaced ? "resubmitted" : "pending");
     
@@ -306,7 +334,26 @@ export default function AdminRejectionHistoryPage() {
                 <option value="">All Types</option>
                 <option value="document">Document</option>
                 <option value="payment">Payment</option>
+                <option value="application">Application</option>
                 <option value="orientation">Orientation</option>
+              </select>
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Status
+              </label>
+              <select
+                className="w-full md:w-auto px-4 py-3 pr-10 border border-gray-300 text-black rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as "" | "pending" | "resubmitted" | "permanently_rejected")}
+              >
+                <option value="">All Status</option>
+                <option value="pending">Pending Resubmission</option>
+                <option value="resubmitted">Resubmitted</option>
+                <option value="permanently_rejected">Permanently Rejected</option>
               </select>
             </div>
           </div>
@@ -370,7 +417,14 @@ export default function AdminRejectionHistoryPage() {
                 )}
                 {rejections &&
                   filteredRejections.map((rejection: Rejection) => (
-                    <tr key={rejection._id} className="hover:bg-gray-50 transition-colors group">
+                    <tr 
+                      key={rejection._id} 
+                      className={`transition-colors group ${
+                        rejection.type === "application" 
+                          ? "bg-red-50/50 hover:bg-red-50 border-l-4 border-red-900" 
+                          : "hover:bg-gray-50"
+                      }`}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-medium text-gray-900">
                           {rejection.applicantName}
@@ -408,10 +462,17 @@ export default function AdminRejectionHistoryPage() {
                         })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(rejection.status, rejection.wasReplaced)}
+                        {getStatusBadge(rejection.status, rejection.wasReplaced, rejection.type)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        {rejection.applicationId && (
+                        {rejection.type === "application" ? (
+                          <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-500 px-4 py-2 rounded-xl font-semibold text-xs">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
+                            No Action
+                          </div>
+                        ) : rejection.applicationId ? (
                           <Link
                             href={
                               rejection.type === 'payment' 
@@ -426,7 +487,7 @@ export default function AdminRejectionHistoryPage() {
                             </svg>
                             View
                           </Link>
-                        )}
+                        ) : null}
                       </td>
                     </tr>
                   ))}

@@ -309,8 +309,14 @@ export const getRejectionStats = query({
 
     // Calculate statistics
     const totalRejections = filteredRejections.length;
-    const pendingResubmission = filteredRejections.filter(r => !r.wasReplaced).length;
-    const resubmitted = filteredRejections.filter(r => r.wasReplaced).length;
+    
+    // Application rejections can't be resubmitted, so only check doc/payment rejections
+    const docAndPaymentRejections = filteredRejections.filter(r => 
+      'wasReplaced' in r // Only doc/payment have wasReplaced field
+    );
+    
+    const pendingResubmission = docAndPaymentRejections.filter(r => !r.wasReplaced).length;
+    const resubmitted = docAndPaymentRejections.filter(r => r.wasReplaced).length;
     
     // Group by rejection category
     const byCategory: Record<string, number> = {};
