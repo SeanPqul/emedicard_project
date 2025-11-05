@@ -17,7 +17,7 @@ import { scaleFont, scaleSize } from '@shared/utils/responsive';
 const { width, height } = Dimensions.get('window');
 
 interface QRCodeScannerProps {
-  onScan: (data: string) => void;
+  onScan: (data: string) => Promise<void>;
   onClose: () => void;
   active?: boolean;
   title?: string;
@@ -25,6 +25,7 @@ interface QRCodeScannerProps {
   flashEnabled?: boolean;
   onFlashToggle?: () => void;
   accessibilityLabel?: string;
+  resumeScanning?: boolean;
 }
 
 export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
@@ -36,6 +37,7 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   flashEnabled = false,
   onFlashToggle,
   accessibilityLabel = 'QR code scanner',
+  resumeScanning = false,
 }) => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanning, setScanning] = useState(false);
@@ -43,7 +45,7 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   const [opacityAnim] = useState(new Animated.Value(1));
   const [torchOn, setTorchOn] = useState(false);
   const scanLineAnim = useRef(new Animated.Value(0)).current;
-  const lastScanTime = useRef(0);
+  const isScanningRef = useRef(false);
 
   useEffect(() => {
     // Request camera permission
@@ -74,16 +76,22 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     }
   }, [active, hasPermission, scanLineAnim]);
 
-  const handleBarCodeScanned = ({ data }: BarcodeScanningResult) => {
-    // Prevent rapid consecutive scans
-    const now = Date.now();
-    if (now - lastScanTime.current < 2000) {
+  // Resume scanning when parent signals
+  useEffect(() => {
+    if (resumeScanning) {
+      isScanningRef.current = false;
+      setScanning(false);
+    }
+  }, [resumeScanning]);
+
+  const handleBarCodeScanned = async ({ data }: BarcodeScanningResult) => {
+    // Prevent multiple scans while processing - use ref for immediate blocking
+    if (isScanningRef.current || scanning) {
       return;
     }
-    lastScanTime.current = now;
-
-    if (scanning) return;
     
+    // Lock scanning immediately (synchronous)
+    isScanningRef.current = true;
     setScanning(true);
     
     // Animate scanning feedback
@@ -100,11 +108,13 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
       }),
     ]).start();
 
-    // Process the scanned QR code
-    setTimeout(() => {
-      setScanning(false);
-      onScan(data);
-    }, 500);
+    try {
+      // Wait for parent to complete processing
+      await onScan(data);
+    } catch (error) {
+      console.error('[QRScanner] Error processing scan:', error);
+    }
+    // Note: Don't unlock here - parent will control via resumeScanning prop
   };
 
   const handleFlashToggle = () => {
@@ -166,7 +176,7 @@ export const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
         barcodeScannerSettings={{
           barcodeTypes: ['qr'],
         }}
-        onBarcodeScanned={scanning ? undefined : handleBarCodeScanned}
+        onBarcodeScanned={isScanningRef.current ? undefined : handleBarCodeScanned}
       />
       
       {/* Header */}

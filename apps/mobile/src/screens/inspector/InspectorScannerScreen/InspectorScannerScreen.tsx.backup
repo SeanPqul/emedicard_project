@@ -19,7 +19,6 @@ export function InspectorScannerScreen() {
   const [showSessionPicker, setShowSessionPicker] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [loadingModal, setLoadingModal] = useState(false);
   const [verificationModal, setVerificationModal] = useState<{
     visible: boolean;
     applicantName?: string;
@@ -145,7 +144,7 @@ export function InspectorScannerScreen() {
 
   const handleScan = async (data: string): Promise<void> => {
     const parsed = parseQRData(data);
-
+    
     if (!parsed) {
       showToast('Invalid QR code for orientation attendance', 'error', 4000);
       throw new Error('Invalid QR code');
@@ -153,15 +152,9 @@ export function InspectorScannerScreen() {
 
     console.log('[Scanner] Processing QR code for application:', parsed.applicationId);
 
-    // IMPORTANT: Close scanner immediately (Google Lens behavior)
-    setShowScanner(false);
-
-    // Show loading modal while fetching data
-    setLoadingModal(true);
-
     // Trigger the query by setting the scanned application ID
     setScannedApplicationId(parsed.applicationId);
-
+    
     // Return immediately - the useEffect will handle the response
     return Promise.resolve();
   };
@@ -169,22 +162,17 @@ export function InspectorScannerScreen() {
   // Handle applicant info once it's loaded
   useEffect(() => {
     if (!scannedApplicationId) return;
-
-    // Loading state - loadingModal is already visible from handleScan
-    if (applicantInfo === undefined) {
-      // Keep loading modal visible while fetching
-      return;
-    }
-
-    // Hide loading modal once data is loaded (success or error)
-    setLoadingModal(false);
-
+    
+    // Wait for the query to load
+    if (applicantInfo === undefined) return;
+    
     // Query returned null or error
     if (!applicantInfo) {
       console.error('[Scanner] Failed to fetch applicant info');
       showToast('Failed to fetch applicant information', 'error', 4000);
       setScannedApplicationId(null);
-      // Don't resume scanning - user closed scanner already
+      setResumeScanning(true);
+      setTimeout(() => setResumeScanning(false), 100);
       return;
     }
 
@@ -192,16 +180,20 @@ export function InspectorScannerScreen() {
       if (!applicantInfo.hasBooking) {
         showToast('No orientation scheduled for this applicant', 'error', 4000);
         setScannedApplicationId(null);
+        setResumeScanning(true);
+        setTimeout(() => setResumeScanning(false), 100);
         return;
       }
 
       if (applicantInfo.isCompleted) {
         showToast('This applicant has already completed orientation', 'info', 4000);
         setScannedApplicationId(null);
+        setResumeScanning(true);
+        setTimeout(() => setResumeScanning(false), 100);
         return;
       }
 
-      // Show verification modal
+      // Show verification modal - scanner stays paused
       setVerificationModal({
         visible: true,
         applicantName: applicantInfo.name || 'Unknown',
@@ -209,13 +201,15 @@ export function InspectorScannerScreen() {
         applicantId: scannedApplicationId,
         action: applicantInfo.isCheckedIn ? 'check-out' : 'check-in',
       });
-
+      
       // Clear the scanned ID
       setScannedApplicationId(null);
     } catch (error) {
       console.error('[Scanner] Error processing applicant info:', error);
       showToast('Failed to process applicant information', 'error', 4000);
       setScannedApplicationId(null);
+      setResumeScanning(true);
+      setTimeout(() => setResumeScanning(false), 100);
     }
   }, [applicantInfo, scannedApplicationId, showToast]);
 
@@ -280,8 +274,12 @@ export function InspectorScannerScreen() {
       }
     } finally {
       setIsProcessing(false);
-      // Scanner is already closed - will be reopened from success modal
-
+      // Resume scanning after delay
+      setTimeout(() => {
+        setResumeScanning(true);
+        setTimeout(() => setResumeScanning(false), 100);
+      }, 1000);
+      
       // Refresh dashboard data
       if (refetch) {
         setTimeout(() => refetch(), 1000);
@@ -291,7 +289,9 @@ export function InspectorScannerScreen() {
 
   const handleCancelScan = () => {
     setVerificationModal({ visible: false, action: null });
-    // Scanner is already closed, user needs to tap to open again
+    // Resume scanning immediately
+    setResumeScanning(true);
+    setTimeout(() => setResumeScanning(false), 100);
   };
 
   const handleOpenScanner = () => {
@@ -421,23 +421,7 @@ export function InspectorScannerScreen() {
         </Modal>
       )}
 
-      {/* Loading Modal - Shows while fetching applicant info */}
-      <Modal
-        visible={loadingModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {}}
-      >
-        <View style={styles.loadingModalOverlay}>
-          <View style={styles.loadingModalContent}>
-            <ActivityIndicator size="large" color={theme.colors.primary[600]} />
-            <Text style={styles.loadingModalText}>Verifying attendee...</Text>
-            <Text style={styles.loadingModalSubtext}>Please wait</Text>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Verification Modal */}
+      {/* Verification Modal - Shows over camera */}
       <Modal
         visible={verificationModal.visible}
         transparent
@@ -467,21 +451,21 @@ export function InspectorScannerScreen() {
             
             <View style={[
               styles.actionBadge,
-              { backgroundColor: verificationModal.action === 'check-in'
-                ? `${theme.colors.semantic.success}15`
-                : `${theme.colors.primary[500]}15`
+              { backgroundColor: verificationModal.action === 'check-in' 
+                ? `${theme.colors.success[500]}15` 
+                : `${theme.colors.primary[500]}15` 
               }
             ]}>
-              <Ionicons
-                name={verificationModal.action === 'check-in' ? 'log-in' : 'log-out'}
-                size={moderateScale(20)}
-                color={verificationModal.action === 'check-in' ? theme.colors.semantic.success : theme.colors.primary[600]}
+              <Ionicons 
+                name={verificationModal.action === 'check-in' ? 'log-in' : 'log-out'} 
+                size={moderateScale(20)} 
+                color={verificationModal.action === 'check-in' ? theme.colors.success[600] : theme.colors.primary[600]} 
               />
               <Text style={[
                 styles.actionLabel,
-                { color: verificationModal.action === 'check-in'
-                  ? theme.colors.semantic.success
-                  : theme.colors.primary[600]
+                { color: verificationModal.action === 'check-in' 
+                  ? theme.colors.success[600] 
+                  : theme.colors.primary[600] 
                 }
               ]}>
                 {verificationModal.action === 'check-in' ? 'Check In' : 'Check Out'}
@@ -598,12 +582,12 @@ export function InspectorScannerScreen() {
             <View style={styles.successModalContent}>
               <View style={[
                 styles.successIconContainer,
-                { backgroundColor: successModal.type === 'check-in' ? `${theme.colors.semantic.success}15` : theme.colors.primary[50] }
+                { backgroundColor: successModal.type === 'check-in' ? theme.colors.success[50] : theme.colors.primary[50] }
               ]}>
-                <Ionicons
-                  name={successModal.type === 'check-in' ? 'checkmark-circle' : 'exit-outline'}
-                  size={moderateScale(48)}
-                  color={successModal.type === 'check-in' ? theme.colors.semantic.success : theme.colors.primary[600]}
+                <Ionicons 
+                  name={successModal.type === 'check-in' ? 'checkmark-circle' : 'exit-outline'} 
+                  size={moderateScale(48)} 
+                  color={successModal.type === 'check-in' ? theme.colors.success[600] : theme.colors.primary[600]} 
                 />
               </View>
               <Text style={styles.successTitle}>
@@ -613,13 +597,14 @@ export function InspectorScannerScreen() {
                 <Text style={styles.successName}>{successModal.attendeeName}</Text>
               )}
               <Text style={styles.successTime}>{successModal.time}</Text>
-              <TouchableOpacity
+              <TouchableOpacity 
                 style={styles.successButton}
                 onPress={() => {
                   setSuccessModal({ visible: false, type: null });
-                  // Open scanner again for next scan
+                  // Resume scanning after closing success modal
                   setTimeout(() => {
-                    setShowScanner(true);
+                    setResumeScanning(true);
+                    setTimeout(() => setResumeScanning(false), 100);
                   }, 300);
                 }}
               >
@@ -981,34 +966,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: theme.colors.text.primary,
     marginBottom: verticalScale(4),
-  },
-  loadingModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: scale(24),
-  },
-  loadingModalContent: {
-    backgroundColor: theme.colors.background.primary,
-    borderRadius: moderateScale(20),
-    padding: moderateScale(40),
-    alignItems: 'center',
-    width: '80%',
-    maxWidth: scale(300),
-  },
-  loadingModalText: {
-    fontSize: moderateScale(18),
-    fontWeight: '600',
-    color: theme.colors.text.primary,
-    marginTop: verticalScale(20),
-    textAlign: 'center',
-  },
-  loadingModalSubtext: {
-    fontSize: moderateScale(14),
-    color: theme.colors.text.secondary,
-    marginTop: verticalScale(8),
-    textAlign: 'center',
   },
   verificationOverlay: {
     flex: 1,

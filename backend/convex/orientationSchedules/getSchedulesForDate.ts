@@ -49,14 +49,13 @@ export const getSchedulesForDate = query({
             const jobCategory = await ctx.db.get(application.jobCategoryId);
 
             return {
-              bookingId: booking._id,  // UPDATED: Use bookingId
               applicationId: booking.applicationId,
+              userId: user._id,
               fullname: user.fullname,
-              jobCategory: jobCategory?.name || "Unknown",
-              jobCategoryColor: jobCategory?.colorCode || "#gray",
-              applicationStatus: application.applicationStatus,
-              bookingStatus: booking.status,  // UPDATED: Use bookingStatus
-              scheduledDate: booking.scheduledDate,
+              orientationStatus: booking.status,
+              checkInTime: booking.checkInTime,
+              checkOutTime: booking.checkOutTime,
+              qrCodeUrl: booking.qrCodeUrl,
             };
           })
         );

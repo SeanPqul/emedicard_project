@@ -9,7 +9,7 @@ import { styles } from '@shared/styles/screens/shared-qr-scanner';
 export function QrScannerScreen() {
   const [scannerActive, setScannerActive] = useState(true);
 
-  const handleScan = (data: string) => {
+  const handleScan = async (data: string): Promise<void> => {
     const qrData = JSON.parse(data);
     Alert.alert(
       'QR Code Scanned',

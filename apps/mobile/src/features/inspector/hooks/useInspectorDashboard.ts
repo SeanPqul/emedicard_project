@@ -75,17 +75,20 @@ export function useInspectorDashboard() {
 
     // Enrich sessions with CLIENT-SIDE calculated status (real-time!)
     const enrichedSessions: SessionWithStats[] = schedules.map((schedule: any) => {
+      // Ensure attendees is always an array (handle undefined/null)
+      const attendees = schedule.attendees || [];
+
       const baseSession = {
         _id: schedule.scheduleId,
         date: schedule.date,
         scheduledTime: schedule.time,
-        venue: schedule.venue.name,
-        maxCapacity: schedule.totalSlots,
-        currentBookings: schedule.attendeeCount,
-        attendees: schedule.attendees,
+        venue: schedule.venue?.name || 'Unknown Venue',
+        maxCapacity: schedule.totalSlots || 0,
+        currentBookings: schedule.attendeeCount || 0,
+        attendees: attendees,
       };
 
-      const stats = calculateSessionStats(schedule.attendees);
+      const stats = calculateSessionStats(attendees);
 
       // Calculate status client-side using server time for accuracy
       const status = calculateSessionStatus(
@@ -156,7 +159,8 @@ export function useInspectorDashboard() {
     isLoading: serverTime === undefined || serverDate === undefined || schedules === undefined,
     error: null, // Convex doesn't expose errors directly
     refetch: () => {
-      // Convex queries automatically refetch, but we can expose this for manual refresh
+      // Convex queries automatically refetch, but force immediate recalculation
+      setTick((prev) => prev + 1);
     },
   };
 }
