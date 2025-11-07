@@ -73,12 +73,7 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
     if (status === 'Pending Payment') {
       const stepData = getStepLabel('payment', 'current');
       steps.push({ id: 'payment', ...stepData, status: 'current' });
-    } else if (status === 'For Payment Validation' || status === 'Payment Rejected') {
-      // Manual payments waiting for admin validation - still current
-      const stepData = { label: 'Awaiting payment validation', subtitle: 'Admin reviewing your payment' };
-      steps.push({ id: 'payment', ...stepData, status: 'current' });
     } else {
-      // Payment has been validated and approved
       const stepData = getStepLabel('payment', 'completed');
       steps.push({ id: 'payment', ...stepData, status: 'completed' });
     }

@@ -1,0 +1,122 @@
+eMediCard Documentation Update Requirements
+Tech Stack Migration: Firebase/Flutter → React Native/Expo/Clerk/Convex
+========================================================================
+
+REQUIRED DOCUMENTATION UPDATES
+-------------------------------
+
+1. TECHNOLOGIES SECTION
+   CHANGE: "Flutter, Google's UI toolkit"
+   TO: "React Native with Expo framework"
+   ADD: Description - Expo is a framework for building React Native apps with simplified development workflow
+
+2. DEVELOPMENT TOOLS
+   CHANGE: "Visual Studio Code" and "Android Studio"
+   TO: "Visual Studio Code" (keep) and add "Expo Go app for testing"
+   REMOVE: Android Studio mention (unless still needed for specific Android testing)
+
+3. DATABASE METHODOLOGY
+   CHANGE: "Firebase Firestore"
+   TO: "Convex" (real-time database with serverless backend)
+   REMOVE: All mentions of "Firestore Emulator", "Firestore security rules", "Firestore indexing"
+   ADD: Convex schema definitions, Convex functions (queries/mutations/actions)
+
+4. AUTHENTICATION
+   CHANGE: "Firebase Authentication"
+   TO: "Clerk" (authentication and user management)
+   ADD: Description of Clerk features being used (social auth, email/password, session management)
+
+5. STORAGE/FILE UPLOADS
+   CHANGE: "Firebase Storage"
+   TO: Either "Convex File Storage" or specify if using third-party service (e.g., Cloudinary, AWS S3)
+   UPDATE: Document upload methodology accordingly
+
+6. IMPLEMENTATION PHASE
+   REMOVE: "integrate Firebase services"
+   ADD: "integrate Clerk authentication SDK", "implement Convex backend functions", "configure Expo app.json"
+   REMOVE: "security rules for Firestore"
+   ADD: "Convex function permissions and authentication checks"
+
+7. TESTING METHODOLOGY
+   REMOVE: "Firestore Emulator" testing
+   ADD: "Convex development deployment for testing"
+   UPDATE: Testing approach for React Native (Jest, React Native Testing Library)
+
+8. DEPLOYMENT PHASE
+   KEEP: "Android App Bundle (AAB)" via Google Play
+   ADD: "Expo Application Services (EAS) Build for building production apps"
+   REMOVE: "Firebase Crashlytics and Google Analytics"
+   ADD: Alternative monitoring (e.g., "Sentry for error tracking", "Expo Analytics" or specify what you're using)
+
+9. MAINTENANCE PHASE
+   REMOVE: "Firebase Crashlytics and Google Analytics"
+   REMOVE: "updates to Firestore rules or third-party SDKs"
+   ADD: "updates to Convex schema and functions", "Clerk configuration updates", "Expo SDK updates"
+
+10. SOFTWARE STABLE RELEASE VERSIONS
+    REMOVE: "Flutter SDK — 3.29.3"
+    ADD: "React Native — [current version]", "Expo SDK — [current version]"
+    REMOVE: "Firebase (Authentication, Firestore, Storage) — Managed via Firebase Console"
+    ADD: "Clerk — [version/plan]", "Convex — [version/plan]"
+    REMOVE: "Android Emulator (via Android Studio) — 35.5.10"
+    UPDATE TO: "Expo Go app / Android Emulator — [version]"
+
+11. DATA MODEL/ARCHITECTURE
+    CHANGE: All "Firestore collections" references
+    TO: "Convex tables"
+    UPDATE: Collection/document structure terminology to Convex schema (tables, documents, indexes)
+    CHANGE: NoSQL reference from "Firestore" to "Convex (NoSQL/document-based)"
+
+12. CI/CD PIPELINE
+    UPDATE: Continuous integration references
+    ADD: "EAS Build for automated builds", "EAS Submit for store submissions"
+    SPECIFY: Testing framework changes (Flutter tests → Jest/React Native Testing Library)
+
+13. REAL-TIME FEATURES
+    UPDATE: How real-time updates work
+    CHANGE FROM: Firebase real-time listeners
+    TO: Convex reactive queries (explain how Convex automatically updates UI)
+
+14. PUSH NOTIFICATIONS (if documented)
+    REMOVE: Firebase Cloud Messaging (FCM) if mentioned directly
+    ADD: Expo Push Notifications or native FCM integration via React Native
+
+15. QR CODE IMPLEMENTATION
+    UPDATE: Any Flutter-specific QR libraries
+    TO: React Native QR code libraries (e.g., react-native-qrcode-svg, expo-barcode-scanner)
+
+16. DATABASE SCHEMA AND STRUCTURE (Page 46, Figure 33)
+    CHANGE: "Firestore collections (COL), documents (DOC), and subcollections (SUBCOL)"
+    TO: "Convex tables and documents"
+    UPDATE: Schema terminology throughout:
+      - Collections → Tables
+      - Documents → Documents (remains same)
+      - Subcollections → Nested document arrays or separate related tables
+    
+    SPECIFIC COLLECTIONS TO UPDATE:
+    - "user profiles collection" → "users table"
+    - "application records collection" → "applications table"
+    - "document metadata collection" → "documents table"
+    - "payment transactions collection" → "payments table"
+    - "orientation schedules collection" → "schedules table"
+    
+    UPDATE: Schema diagram (Figure 33) to reflect Convex table structure
+    UPDATE: All references to "NoSQL database (Firestore)" to "NoSQL database (Convex)"
+    ADD: Explanation of Convex schema definitions and how relationships work in Convex
+
+========================================================================
+SUMMARY
+-------
+Total Sections to Update: 16 major sections
+Scope: Architecture, implementation, testing, deployment, and maintenance
+Impact: Affects entire technical documentation throughout the document
+
+IMPORTANT NOTES:
+- Pay special attention to Figure 33 (Page 46) - the database schema diagram
+- Update all "COL", "DOC", "SUBCOL" terminology to Convex equivalents
+- Five main collections need renaming: users, applications, documents, 
+  payments, and schedules
+
+Please ensure all Firebase and Flutter references are replaced with the
+corresponding React Native/Expo/Clerk/Convex equivalents.
+========================================================================

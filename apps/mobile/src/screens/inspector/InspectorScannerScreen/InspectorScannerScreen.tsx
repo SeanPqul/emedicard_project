@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Modal, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Modal, Alert, ActivityIndicator, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery as useConvexQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import type { Id } from '@backend/convex/_generated/dataModel';
 import { theme } from '@shared/styles/theme';
@@ -13,56 +13,95 @@ import { QRCodeScanner } from '@features/scanner/components/QRCodeScanner/QRCode
 import { useToast } from '@shared/components';
 
 export function InspectorScannerScreen() {
-  const { data: dashboardData, isLoading } = useInspectorDashboard();
+  const { data: dashboardData, isLoading, refetch } = useInspectorDashboard();
   const { showToast } = useToast();
   const [selectedSession, setSelectedSession] = useState<SessionWithStats | null>(null);
   const [showSessionPicker, setShowSessionPicker] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [loadingModal, setLoadingModal] = useState(false);
+  const [verificationModal, setVerificationModal] = useState<{
+    visible: boolean;
+    applicantName?: string;
+    applicantGender?: string;
+    applicantId?: string;
+    action: 'check-in' | 'check-out' | null;
+  }>({ visible: false, action: null });
   const [successModal, setSuccessModal] = useState<{
     visible: boolean;
     type: 'check-in' | 'check-out' | null;
     attendeeName?: string;
     time?: string;
   }>({ visible: false, type: null });
-  const [lastScannedData, setLastScannedData] = useState<string | null>(null);
-  const [lastScanTime, setLastScanTime] = useState<number>(0);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [scannedApplicationId, setScannedApplicationId] = useState<Id<"applications"> | null>(null);
+  const appState = useRef(AppState.currentState);
+
+  // Query applicant info when an application is scanned
+  const applicantInfo = useConvexQuery(
+    api.orientations.attendance.getApplicantInfo,
+    scannedApplicationId ? { applicationId: scannedApplicationId } : "skip"
+  );
 
   // Mutations for check-in/check-out
   const checkInMutation = useMutation(api.orientations.attendance.checkIn);
   const checkOutMutation = useMutation(api.orientations.attendance.checkOut);
 
+  // Monitor app state changes (background -> foreground)
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      // App came to foreground
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        console.log('[InspectorScanner] App came to foreground - refreshing session data');
+        // Force re-evaluation of active sessions
+        setRefreshTrigger(prev => prev + 1);
+        // Trigger refetch if available
+        if (refetch) refetch();
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [refetch]);
+
   // Auto-update when session status changes (upcoming -> active)
   useEffect(() => {
-    if (dashboardData) {
-      const activeSession = dashboardData.allSessions.find(s => s.isActive);
-      
-      // Auto-select active session if none selected
-      if (!selectedSession && activeSession) {
-        setSelectedSession(activeSession);
-        // DON'T return early - continue to update logic below
-      }
-      
-      // Update if selected session became active or inactive
-      if (selectedSession) {
-        const updatedSession = dashboardData.allSessions.find(
-          s => s._id === selectedSession._id
-        );
-        
-        if (updatedSession) {
-          // Always update session data (venue, status, stats, etc.)
-          // This ensures real-time updates when session transitions
-          setSelectedSession(updatedSession);
-        } else if (activeSession) {
-          // If selected session no longer exists, switch to active one
-          setSelectedSession(activeSession);
-        } else {
-          // No active session available
-          setSelectedSession(null);
+    if (!dashboardData?.allSessions) return;
+
+    const activeSession = dashboardData.allSessions.find(s => s.isActive);
+
+    // Use functional setState to avoid stale closure issues
+    setSelectedSession(prevSelected => {
+      // Priority 1: If there's an active session, always use it
+      if (activeSession) {
+        // Update if different session or session data changed
+        if (!prevSelected || prevSelected._id !== activeSession._id) {
+          console.log('[InspectorScanner] Auto-selecting active session:', activeSession.scheduledTime);
+          return activeSession;
         }
+        // Update existing active session with fresh data (stats, venue, etc.)
+        return activeSession;
       }
-    }
-  }, [dashboardData, selectedSession]);
+
+      // Priority 2: If selected session exists, update with fresh data
+      if (prevSelected) {
+        const updatedSession = dashboardData.allSessions.find(
+          s => s._id === prevSelected._id
+        );
+
+        if (updatedSession) {
+          return updatedSession;
+        }
+        // Selected session no longer exists
+        return null;
+      }
+
+      // Priority 3: No active session and no selection - remain null
+      return prevSelected;
+    });
+  }, [dashboardData, refreshTrigger]);
 
   // Categorize sessions by status
   const categorizedSessions = useMemo(() => {
@@ -102,110 +141,152 @@ export function InspectorScannerScreen() {
     }
   };
 
-  const handleScan = async (data: string) => {
-    if (isProcessing) return;
-
-    // Prevent duplicate scans within 5 seconds
-    const now = Date.now();
-    const COOLDOWN_MS = 5000; // 5 seconds
-    
-    if (data === lastScannedData && (now - lastScanTime) < COOLDOWN_MS) {
-      console.log('[Scanner] Ignoring duplicate scan within cooldown period');
-      return;
-    }
-
+  const handleScan = async (data: string): Promise<void> => {
     const parsed = parseQRData(data);
-    
+
     if (!parsed) {
       showToast('Invalid QR code for orientation attendance', 'error', 4000);
+      throw new Error('Invalid QR code');
+    }
+
+    console.log('[Scanner] Processing QR code for application:', parsed.applicationId);
+
+    // IMPORTANT: Close scanner immediately (Google Lens behavior)
+    setShowScanner(false);
+
+    // Show loading modal while fetching data
+    setLoadingModal(true);
+
+    // Trigger the query by setting the scanned application ID
+    setScannedApplicationId(parsed.applicationId);
+
+    // Return immediately - the useEffect will handle the response
+    return Promise.resolve();
+  };
+
+  // Handle applicant info once it's loaded
+  useEffect(() => {
+    if (!scannedApplicationId) return;
+
+    // Loading state - loadingModal is already visible from handleScan
+    if (applicantInfo === undefined) {
+      // Keep loading modal visible while fetching
       return;
     }
 
-    // Update last scan tracking
-    setLastScannedData(data);
-    setLastScanTime(now);
+    // Hide loading modal once data is loaded (success or error)
+    setLoadingModal(false);
 
-    setIsProcessing(true);
-    // Don't close scanner - keep camera open for next scan
+    // Query returned null or error
+    if (!applicantInfo) {
+      console.error('[Scanner] Failed to fetch applicant info');
+      showToast('Failed to fetch applicant information', 'error', 4000);
+      setScannedApplicationId(null);
+      return;
+    }
 
     try {
-      // Try check-in first
-      let checkedIn = false;
+      if (!applicantInfo.hasBooking) {
+        showToast('No orientation scheduled for this applicant', 'error', 4000);
+        setScannedApplicationId(null);
+        return;
+      }
+
+      if (applicantInfo.isCompleted) {
+        showToast('This applicant has already completed orientation', 'info', 4000);
+        setScannedApplicationId(null);
+        return;
+      }
+
+      // Show verification modal
+      setVerificationModal({
+        visible: true,
+        applicantName: applicantInfo.name || 'Unknown',
+        applicantGender: applicantInfo.gender || 'N/A',
+        applicantId: scannedApplicationId,
+        action: applicantInfo.isCheckedIn ? 'check-out' : 'check-in',
+      });
+
+      // Clear the scanned ID
+      setScannedApplicationId(null);
+    } catch (error) {
+      console.error('[Scanner] Error processing applicant info:', error);
+      showToast('Failed to process applicant information', 'error', 4000);
+      setScannedApplicationId(null);
+    }
+  }, [applicantInfo, scannedApplicationId, showToast]);
+
+  const handleConfirmScan = async () => {
+    if (!verificationModal.applicantId) return;
+
+    // Close verification modal
+    setVerificationModal({ visible: false, action: null });
+    setIsProcessing(true);
+
+    try {
+      const applicationId = verificationModal.applicantId as Id<"applications">;
       
-      try {
-        const checkInResult = await checkInMutation({ applicationId: parsed.applicationId });
+      if (verificationModal.action === 'check-in') {
+        console.log('[Scanner] Attempting check-in for:', applicationId);
+        const checkInResult = await checkInMutation({ applicationId });
+        console.log('[Scanner] Check-in result:', checkInResult);
         
-        if (checkInResult.success) {
-          // Successful check-in - show modal
+        if (checkInResult?.success) {
+          console.log('[Scanner] Check-in successful');
           setSuccessModal({
             visible: true,
             type: 'check-in',
+            attendeeName: verificationModal.applicantName,
             time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
           });
-          checkedIn = true;
         } else {
-          // Already checked in (returned success: false), try check-out
-          checkedIn = false;
+          showToast('Already checked in', 'warning', 3000);
         }
-      } catch (checkInError) {
-        // Check-in failed - likely already checked in or no booking
-        console.log('[Scanner] Check-in failed:', checkInError);
-        checkedIn = false;
-      }
-      
-      // If check-in didn't succeed, try check-out
-      if (!checkedIn) {
-        try {
-          const checkOutResult = await checkOutMutation({ applicationId: parsed.applicationId });
+      } else if (verificationModal.action === 'check-out') {
+        console.log('[Scanner] Attempting check-out for:', applicationId);
+        const checkOutResult = await checkOutMutation({ applicationId });
+        console.log('[Scanner] Check-out result:', checkOutResult);
           
-          if (checkOutResult.success) {
-            // Successful check-out - show modal
-            setSuccessModal({
-              visible: true,
-              type: 'check-out',
-              time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            });
-          } else {
-            // Already checked out
-            const checkOutTime = new Date(checkOutResult.checkOutTime || 0).toLocaleTimeString();
-            showToast(
-              `⚠️ Already Checked Out\nThis attendee completed orientation at ${checkOutTime}`, 
-              'warning', 
-              4000
-            );
-          }
-        } catch (checkOutError) {
-          // Checkout also failed - likely no booking at all or already completed
-          console.log('[Scanner] Check-out also failed:', checkOutError);
-          const errorMsg = checkOutError instanceof Error ? checkOutError.message : '';
-          
-          if (errorMsg.includes('No checked-in orientation')) {
-            showToast('✅ Already Completed\nThis attendee has already completed orientation.', 'info', 4000);
-          } else {
-            // Re-throw to be handled by outer catch
-            throw checkOutError;
-          }
+        if (checkOutResult?.success) {
+          console.log('[Scanner] Check-out successful');
+          setSuccessModal({
+            visible: true,
+            type: 'check-out',
+            attendeeName: verificationModal.applicantName,
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          });
+        } else if (checkOutResult && !checkOutResult.success && checkOutResult.checkOutTime) {
+          const checkOutTime = new Date(checkOutResult.checkOutTime).toLocaleTimeString();
+          showToast(`Already checked out at ${checkOutTime}`, 'warning', 4000);
+        } else {
+          showToast('Already checked out', 'warning', 3000);
         }
       }
     } catch (error) {
+      console.error('[Scanner] Error during check-in/out:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to process attendance';
       
-      // Enhanced error feedback
       if (errorMessage.includes('scheduled for')) {
-        showToast(`📅 Wrong Date\n${errorMessage}`, 'error', 5000);
-      } else if (errorMessage.includes('requires minimum')) {
-        showToast(`⏱️ Too Early\n${errorMessage}`, 'warning', 5000);
+        showToast(`Wrong date: ${errorMessage}`, 'error', 4000);
       } else if (errorMessage.includes('Cannot check out without checking in')) {
-        showToast('⚠️ Not Checked In\nThis attendee must check in first before checking out.', 'error', 4000);
+        showToast('Must check in first before checking out', 'error', 4000);
       } else if (errorMessage.includes('No orientation scheduled') || errorMessage.includes('No checked-in orientation')) {
-        // This happens when trying to scan someone who already completed or has no booking
-        showToast('✅ Already Processed\nThis attendee has already completed orientation or has no active booking.', 'info', 4000);
+        showToast('No active booking found', 'info', 4000);
       } else {
         showToast(errorMessage, 'error', 4000);
       }
     } finally {
       setIsProcessing(false);
+
+      // Refresh dashboard data
+      if (refetch) {
+        setTimeout(() => refetch(), 1000);
+      }
     }
+  };
+
+  const handleCancelScan = () => {
+    setVerificationModal({ visible: false, action: null });
   };
 
   const handleOpenScanner = () => {
@@ -274,9 +355,9 @@ export function InspectorScannerScreen() {
                 </View>
                 <View style={styles.sessionVenueRow}>
                   <Ionicons name="location" size={moderateScale(14)} color={theme.colors.text.secondary} />
-                  <Text style={styles.sessionVenue}>{selectedSession?.venue || 'No venue'}</Text>
+                <Text style={styles.sessionVenue}>{selectedSession?.venue || 'No venue'}</Text>
                 </View>
-                {selectedSession && (
+                {selectedSession?.stats && (
                   <Text style={styles.sessionProgress}>
                     {selectedSession.stats.checkedIn}/{selectedSession.stats.totalAttendees} checked in
                   </Text>
@@ -411,6 +492,94 @@ export function InspectorScannerScreen() {
         </View>
       </Modal>
 
+      {/* Loading Modal - Shows while fetching applicant info */}
+      <Modal
+        visible={loadingModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {}}
+      >
+        <View style={styles.loadingModalOverlay}>
+          <View style={styles.loadingModalContent}>
+            <ActivityIndicator size="large" color={theme.colors.primary[600]} />
+            <Text style={styles.loadingModalText}>Verifying attendee...</Text>
+            <Text style={styles.loadingModalSubtext}>Please wait</Text>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Verification Modal */}
+      <Modal
+        visible={verificationModal.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCancelScan}
+      >
+        <View style={styles.verificationOverlay}>
+          <View style={styles.verificationCard}>
+            <View style={styles.verificationIconContainer}>
+              <Ionicons 
+                name="person-circle" 
+                size={moderateScale(80)} 
+                color={theme.colors.primary[500]} 
+              />
+            </View>
+            
+            <Text style={styles.verificationTitle}>Verify Attendee</Text>
+            
+            <View style={styles.applicantDetails}>
+              <Text style={styles.applicantName}>
+                {verificationModal.applicantName}
+              </Text>
+              <Text style={styles.applicantGender}>
+                {verificationModal.applicantGender}
+              </Text>
+            </View>
+            
+            <View style={[
+              styles.actionBadge,
+              { backgroundColor: verificationModal.action === 'check-in'
+                ? `${theme.colors.semantic.success}15`
+                : `${theme.colors.primary[500]}15`
+              }
+            ]}>
+              <Ionicons
+                name={verificationModal.action === 'check-in' ? 'log-in' : 'log-out'}
+                size={moderateScale(20)}
+                color={verificationModal.action === 'check-in' ? theme.colors.semantic.success : theme.colors.primary[600]}
+              />
+              <Text style={[
+                styles.actionLabel,
+                { color: verificationModal.action === 'check-in'
+                  ? theme.colors.semantic.success
+                  : theme.colors.primary[600]
+                }
+              ]}>
+                {verificationModal.action === 'check-in' ? 'Check In' : 'Check Out'}
+              </Text>
+            </View>
+            
+            <View style={styles.verificationButtons}>
+              <TouchableOpacity 
+                style={styles.cancelButton}
+                onPress={handleCancelScan}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.confirmButton}
+                onPress={handleConfirmScan}
+              >
+                <Text style={styles.confirmButtonText}>
+                  Confirm {verificationModal.action === 'check-in' ? 'Check In' : 'Check Out'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Success Modal */}
       {successModal.visible && successModal.type && (
         <Modal
@@ -423,23 +592,32 @@ export function InspectorScannerScreen() {
             <View style={styles.successModalContent}>
               <View style={[
                 styles.successIconContainer,
-                { backgroundColor: successModal.type === 'check-in' ? theme.colors.success[50] : theme.colors.primary[50] }
+                { backgroundColor: successModal.type === 'check-in' ? `${theme.colors.semantic.success}15` : theme.colors.primary[50] }
               ]}>
-                <Ionicons 
-                  name={successModal.type === 'check-in' ? 'checkmark-circle' : 'exit-outline'} 
-                  size={moderateScale(48)} 
-                  color={successModal.type === 'check-in' ? theme.colors.success[600] : theme.colors.primary[600]} 
+                <Ionicons
+                  name={successModal.type === 'check-in' ? 'checkmark-circle' : 'exit-outline'}
+                  size={moderateScale(48)}
+                  color={successModal.type === 'check-in' ? theme.colors.semantic.success : theme.colors.primary[600]}
                 />
               </View>
               <Text style={styles.successTitle}>
                 {successModal.type === 'check-in' ? 'Checked In' : 'Checked Out'}
               </Text>
+              {successModal.attendeeName && (
+                <Text style={styles.successName}>{successModal.attendeeName}</Text>
+              )}
               <Text style={styles.successTime}>{successModal.time}</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.successButton}
-                onPress={() => setSuccessModal({ visible: false, type: null })}
+                onPress={() => {
+                  setSuccessModal({ visible: false, type: null });
+                  // Open scanner again for next scan
+                  setTimeout(() => {
+                    setShowScanner(true);
+                  }, 300);
+                }}
               >
-                <Text style={styles.successButtonText}>Continue Scanning</Text>
+                <Text style={styles.successButtonText}>Scan Next Attendee</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -787,6 +965,123 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   successButtonText: {
+    fontSize: moderateScale(16),
+    fontWeight: '600',
+    color: theme.colors.background.primary,
+    textAlign: 'center',
+  },
+  successName: {
+    fontSize: moderateScale(18),
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(4),
+  },
+  loadingModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: scale(24),
+  },
+  loadingModalContent: {
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(40),
+    alignItems: 'center',
+    width: '80%',
+    maxWidth: scale(300),
+  },
+  loadingModalText: {
+    fontSize: moderateScale(18),
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+    marginTop: verticalScale(20),
+    textAlign: 'center',
+  },
+  loadingModalSubtext: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(8),
+    textAlign: 'center',
+  },
+  verificationOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: scale(24),
+  },
+  verificationCard: {
+    backgroundColor: theme.colors.background.primary,
+    borderRadius: moderateScale(24),
+    padding: moderateScale(32),
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: scale(360),
+  },
+  verificationIconContainer: {
+    marginBottom: verticalScale(20),
+  },
+  verificationTitle: {
+    fontSize: moderateScale(24),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(20),
+  },
+  applicantDetails: {
+    alignItems: 'center',
+    marginBottom: verticalScale(20),
+  },
+  applicantName: {
+    fontSize: moderateScale(20),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(4),
+    textAlign: 'center',
+  },
+  applicantGender: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+  },
+  actionBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(8),
+    paddingHorizontal: scale(20),
+    paddingVertical: verticalScale(10),
+    borderRadius: moderateScale(12),
+    marginBottom: verticalScale(24),
+  },
+  actionLabel: {
+    fontSize: moderateScale(16),
+    fontWeight: '700',
+  },
+  verificationButtons: {
+    flexDirection: 'row',
+    gap: scale(12),
+    width: '100%',
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: theme.colors.background.secondary,
+    borderRadius: moderateScale(12),
+    paddingVertical: verticalScale(14),
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+  },
+  cancelButtonText: {
+    fontSize: moderateScale(16),
+    fontWeight: '600',
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: theme.colors.primary[600],
+    borderRadius: moderateScale(12),
+    paddingVertical: verticalScale(14),
+  },
+  confirmButtonText: {
     fontSize: moderateScale(16),
     fontWeight: '600',
     color: theme.colors.background.primary,

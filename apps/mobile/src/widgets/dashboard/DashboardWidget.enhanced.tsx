@@ -92,7 +92,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
           <View style={styles.inlineHeader}>
             <Text style={styles.pageTitle}>Overview</Text>
             <Text style={styles.greeting}>
-              {getGreeting()}, {userProfile?.fullname || 'User'}
+              {getGreeting()}, {data.user?.firstName || userProfile?.fullname || 'User'}
             </Text>
           </View>
         </View>

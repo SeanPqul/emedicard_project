@@ -8,7 +8,8 @@ import { Id } from '@backend/convex/_generated/dataModel';
 
 // ===== APPLICATION STATUS TYPES =====
 export type ApplicationStatus = 
-  | 'Pending Payment' 
+  | 'Pending Payment'
+  | 'Payment Rejected' 
   | 'For Payment Validation' 
   | 'For Orientation' 
   | 'Submitted' 

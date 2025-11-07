@@ -143,20 +143,19 @@ export function useApplicationDetail(applicationId: string | undefined) {
     } else if (method === 'Gcash') {
       Alert.alert('Coming Soon', 'GCash payment integration is coming soon!');
     } else if (method === 'BaranggayHall' || method === 'CityHall') {
-      const referenceNumber = `MANUAL-${Date.now()}`;
-      Alert.alert(
-        'Manual Payment',
-        `Please proceed to ${method === 'BaranggayHall' ? 'Barangay Hall' : 'City Hall'} to complete your payment.\n\nYour reference number is: ${referenceNumber}`,
-        [
-          {
-            text: 'Copy Reference',
-            onPress: () => {
-              Alert.alert('Copied', 'Reference number copied to clipboard');
-            },
-          },
-          { text: 'OK' },
-        ]
-      );
+      // Navigate to manual payment upload screen
+      if (!application) {
+        Alert.alert('Error', 'Application not found');
+        return;
+      }
+      const { router } = require('expo-router');
+      router.push({
+        pathname: '/(screens)/(shared)/manual-payment',
+        params: {
+          applicationId: application._id,
+          paymentMethod: method,
+        },
+      });
     }
   };
 

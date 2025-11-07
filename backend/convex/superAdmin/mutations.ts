@@ -1,10 +1,10 @@
 "use node";
-import { clerkClient } from "@clerk/clerk-sdk-node";
+import { createClerkClient } from "@clerk/backend";
 import { v } from "convex/values";
 import { api } from "../_generated/api"; // Import api to call mutations from action
 import { action } from "../_generated/server"; // Changed to action
 
-const clerk = clerkClient;
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 // The secretKey is typically picked up from environment variables automatically by Clerk
 // If not, it would be configured globally or through a specific initialization function.
 // For now, assume it picks it up automatically.

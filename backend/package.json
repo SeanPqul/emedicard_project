@@ -14,7 +14,7 @@
     "clean": "rm -rf .convex dist"
   },
   "dependencies": {
-    "@clerk/clerk-sdk-node": "^5.1.6",
+    "@clerk/backend": "^2.20.0",
     "@google-cloud/vision": "^5.3.3",
     "axios": "^1.12.2",
     "convex": "^1.25.2",

@@ -1,14 +1,20 @@
 // Orientation Schedules Module
-// Handles booking and managing orientation sessions
+// Root-level barrel export for clean API paths: api.orientationSchedules.*
+// Uses explicit named exports to avoid conflicts with direct file exports
 
-export * from "./orientationSchedules/getAvailableSchedules";
-export * from "./orientationSchedules/getUserOrientationSession";
-export * from "./orientationSchedules/bookOrientationSlot";
-export * from "./orientationSchedules/cancelOrientationBooking";
-export * from "./orientationSchedules/seedOrientationSchedules";
-export * from "./orientationSchedules/getSchedulesForDate";
-export * from "./orientationSchedules/queries";
-export * from "./orientationSchedules/mutations";
-export * from "./orientationSchedules/autoCreateSchedulesHandler";
-export * from "./orientationSchedules/fixScheduleDates";
-export * from "./orientationSchedules/migrateTimeFields";
+// Queries
+export { getSchedulesForDate } from "./orientationSchedules/getSchedulesForDate";
+export { getAllSchedules, getScheduleById, getSchedulesByDateRange, getUpcomingSchedules } from "./orientationSchedules/queries";
+
+// Mutations
+export { createSchedule, updateSchedule, deleteSchedule, bulkCreateSchedules, toggleAvailability } from "./orientationSchedules/mutations";
+
+// Booking operations
+export { bookOrientationSlot, bookOrientationSlotMutation } from "./orientationSchedules/bookOrientationSlot";
+export { cancelOrientationBooking, cancelOrientationBookingMutation } from "./orientationSchedules/cancelOrientationBooking";
+
+// User session queries
+export { getUserOrientationSession, getUserOrientationSessionQuery } from "./orientationSchedules/getUserOrientationSession";
+
+// Available schedules
+export { getAvailableSchedules, getAvailableSchedulesQuery } from "./orientationSchedules/getAvailableSchedules";
