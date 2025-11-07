@@ -390,11 +390,11 @@ export default function AttendanceTrackerPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <Calendar className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-semibold text-gray-900">
-              No finished orientation sessions
+              No active or finished orientation sessions
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              There are no finished orientation sessions for {new Date(selectedTimestamp).toLocaleDateString('en-US', { timeZone: 'Asia/Manila' })}.
-              Only sessions that have ended can be finalized.
+              There are no active or finished orientation sessions for {new Date(selectedTimestamp).toLocaleDateString('en-US', { timeZone: 'Asia/Manila' })}.
+              Sessions will appear here once they have started.
             </p>
           </div>
         )}
