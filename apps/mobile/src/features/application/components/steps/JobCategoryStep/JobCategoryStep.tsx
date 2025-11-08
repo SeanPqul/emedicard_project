@@ -179,11 +179,16 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({
               const selectedCategory = jobCategoriesData.find(cat => cat._id === formData.jobCategory);
               const categoryName = selectedCategory?.name?.toLowerCase() || '';
               
-              if (selectedCategory?.requireOrientation === 'Yes' || categoryName.includes('food handler')) {
-                return 'Note: Food handlers must complete a mandatory food safety orientation before card issuance.';
-              } else if (categoryName.includes('non-food worker')) {
+              // Check for non-food first (to avoid matching "non-food" with "food")
+              if (categoryName.includes('non-food') || categoryName.includes('security') || categoryName.includes('guard')) {
                 return 'Note: Additional requirements for security guards: Neuro Exam and Drug Test.';
-              } else if (categoryName.includes('skin-to-skin') || categoryName.includes('contact')) {
+              }
+              // Then check if food-related (including "food handler", "food category", "food service", etc.)
+              else if (categoryName.includes('food')) {
+                return 'Note: Food handlers must complete a mandatory food safety orientation before card issuance.';
+              }
+              // Check for skin contact
+              else if (categoryName.includes('skin') || categoryName.includes('contact') || categoryName.includes('pink')) {
                 return 'Note: Additional requirements for skin-to-skin contact workers: Hepatitis B Antibody Test.';
               }
               return null;

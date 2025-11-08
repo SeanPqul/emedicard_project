@@ -36,7 +36,7 @@ export default function ApplicantTabBar({ state, descriptors, navigation }: Bott
   const insets = useSafeAreaInsets();
   
   // Get unread notifications count
-  const unreadCount = useQuery(api.notifications.getUnreadCount.getUnreadCountQuery) || 0;
+  const unreadCount = useQuery(api.notifications.getUnreadCount, {}) || 0;
 
   return (
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom || moderateScale(8) }]}>

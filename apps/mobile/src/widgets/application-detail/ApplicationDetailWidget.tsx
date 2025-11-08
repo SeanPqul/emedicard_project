@@ -363,8 +363,8 @@ export function ApplicationDetailWidget({
         </View>
       )}
 
-      {/* Payment Section - Show for pending payment OR rejected manual payments */}
-      {(application.status === 'Pending Payment' ||
+      {/* Payment Section - Show for pending payment OR rejected manual payments OR submitted applications */}
+      {(application.status === 'Pending Payment' || application.status === 'Submitted' ||
        (application.status === 'Payment Rejected' && isManualPayment)) && (
         <View style={styles.paymentCard}>
           {/* Resubmit Warning for Payment Rejected status */}

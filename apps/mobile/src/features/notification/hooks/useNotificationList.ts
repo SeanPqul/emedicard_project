@@ -78,10 +78,10 @@ export function useNotificationList() {
 
     switch (filterCategory) {
       case 'Unread':
-        filtered = filtered.filter(n => !n.read);
+        filtered = filtered.filter((n: NotificationItem) => !n.read);
         break;
       case 'Applications':
-        filtered = filtered.filter(n => 
+        filtered = filtered.filter((n: NotificationItem) => 
           n.type === 'MissingDoc' || 
           n.type === 'FormApproved' || 
           n.type === 'DocumentRejection' ||
@@ -91,27 +91,27 @@ export function useNotificationList() {
         );
         break;
       case 'Payments':
-        filtered = filtered.filter(n => 
+        filtered = filtered.filter((n: NotificationItem) => 
           n.type === 'PaymentReceived' || 
           n.type === 'Payment'
         );
         break;
       case 'Orientations':
-        filtered = filtered.filter(n => n.type === 'OrientationScheduled');
+        filtered = filtered.filter((n: NotificationItem) => n.type === 'OrientationScheduled');
         break;
       default:
         // All notifications
         break;
     }
 
-    return filtered.sort((a, b) => b._creationTime - a._creationTime);
+    return filtered.sort((a: NotificationItem, b: NotificationItem) => b._creationTime - a._creationTime);
   };
 
   const getNotificationsByDate = () => {
     const filtered = getFilteredNotifications();
     const grouped: { [key: string]: NotificationItem[] } = {};
 
-    filtered.forEach(notification => {
+    filtered.forEach((notification: NotificationItem) => {
       const date = new Date(notification._creationTime).toDateString();
       if (!grouped[date]) {
         grouped[date] = [];
@@ -160,7 +160,7 @@ export function useNotificationList() {
     }
   };
 
-  const unreadCount = notificationsData?.filter(n => !n.read).length || 0;
+  const unreadCount = notificationsData?.filter((n: NotificationItem) => !n.read).length || 0;
   const notificationsByDate = getNotificationsByDate();
 
   return {

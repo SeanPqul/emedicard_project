@@ -22,7 +22,7 @@ const crons = cronJobs();
  * - Skips dates that already have schedules
  * 
  * To customize the schedule settings, edit:
- * backend/convex/orientationSchedules/autoCreateSchedulesHandler.ts
+ * backend/convex/_orientationSchedules/autoCreateSchedulesHandler.ts
  */
 crons.weekly(
   "auto-create-weekly-orientation-schedules",
@@ -32,7 +32,7 @@ crons.weekly(
     dayOfWeek: "sunday" as const  // Every Sunday
   },
   // @ts-ignore - Deep type instantiation limitation
-  internal.orientationSchedules.autoCreateSchedulesHandler.createNextWeekSchedules
+  internal._orientationSchedules.autoCreateSchedulesHandler.createNextWeekSchedules
 );
 
 /**

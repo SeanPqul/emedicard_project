@@ -13,7 +13,7 @@ export function useProfile() {
     lastName: user?.lastName,
     username: user?.username,
     email: user?.primaryEmailAddress?.emailAddress,
-    fullname: userProfile?.fullname, // From database
+    fullName: userProfile?.fullname, // From database
   });
 
   const email = user?.primaryEmailAddress?.emailAddress || userProfile?.email;

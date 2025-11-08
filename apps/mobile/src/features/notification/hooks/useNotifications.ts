@@ -3,12 +3,12 @@ import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 
 export function useNotifications() {
-  const userNotifications = useQuery(api.notifications.getUserNotifications.getUserNotificationsQuery, {});
-  const unreadCount = useQuery(api.notifications.getUnreadCount.getUnreadCountQuery, {});
+  const userNotifications = useQuery(api.notifications.getUserNotifications, {});
+  const unreadCount = useQuery(api.notifications.getUnreadCount, {});
 
-  const createNotificationMutation = useMutation(api.notifications.createNotification.createNotificationMutation);
-  const markAsReadMutation = useMutation(api.notifications.markAsRead.markAsReadMutation);
-  const markAllAsReadMutation = useMutation(api.notifications.markAllAsRead.markAllAsReadMutation);
+  const createNotificationMutation = useMutation(api.notifications.createNotification);
+  const markAsReadMutation = useMutation(api.notifications.markAsRead);
+  const markAllAsReadMutation = useMutation(api.notifications.markAllAsRead);
 
   const createNotification = async (input: {
     title: string;
