@@ -101,13 +101,14 @@ const issueCategories = [
 const StatusBadge = ({ status }: { status: string }) => {
   const statusStyles: Record<string, string> = {
     'Approved': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-    'Rejected': 'bg-blue-50 text-blue-700 border border-blue-200', // "Referred" status (internally still "Rejected")
+    'Rejected': 'bg-blue-50 text-blue-700 border border-blue-200', // "Referred" status (medical referral)
+    'NeedsRevision': 'bg-orange-50 text-orange-700 border border-orange-200', // Document flagged for revision
     'Pending': 'bg-amber-50 text-amber-700 border border-amber-200',
     'Missing': 'bg-gray-50 text-gray-600 border border-gray-200',
   };
   
-  // Display "Referred" label for Rejected status (NO REJECTION terminology per doctor's requirement)
-  const displayLabel = status === 'Rejected' ? 'Referred' : status;
+  // Display user-friendly labels
+  const displayLabel = status === 'Rejected' ? 'Referred' : status === 'NeedsRevision' ? 'Needs Revision' : status;
   
   return (
     <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-medium rounded-lg ${statusStyles[status] || 'bg-gray-50 text-gray-700 border border-gray-200'}`}>
@@ -125,6 +126,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [error, setError] = useState<AppError | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [openReferralIndex, setOpenReferralIndex] = useState<number | null>(null);
+  const [modalType, setModalType] = useState<'flag_revision' | 'refer_doctor' | null>(null); // Track which modal is open
   const [referralReason, setReferralReason] = useState<string>('');
   const [issueCategory, setIssueCategory] = useState('other');
   const [specificIssues, setSpecificIssues] = useState('');
@@ -133,7 +135,35 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [isReferralConfirmModalOpen, setIsReferralConfirmModalOpen] = useState(false); // Confirmation modal for sending referrals
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // New state for collapsible applicant details
   const [isPaymentDetailsExpanded, setIsPaymentDetailsExpanded] = useState(false); // New state for collapsible payment details
+  
+  // Pending actions state - stores actions before database save
+  const [pendingActions, setPendingActions] = useState<{
+    uploadId: Id<"documentUploads">;
+    actionType: 'flag_revision' | 'refer_doctor';
+    category: string;
+    reason: string;
+    notes: string;
+    doctorName?: string;
+    documentName: string;
+  }[]>([]);
+  
   const router = useRouter();
+
+  // --- HELPER FUNCTIONS ---
+  // Helper function to check if document has pending action
+  const getPendingAction = (uploadId: Id<"documentUploads"> | null | undefined) => {
+    if (!uploadId) return null;
+    return pendingActions.find(action => action.uploadId === uploadId);
+  };
+  
+  // Helper function to get effective status (pending action or actual status)
+  const getEffectiveStatus = (item: ChecklistItem) => {
+    const pending = getPendingAction(item.uploadId);
+    if (pending) {
+      return pending.actionType === 'refer_doctor' ? 'Rejected' : 'NeedsRevision';
+    }
+    return item.status;
+  };
 
   // --- DATA FETCHING ---
   // @ts-ignore - Type instantiation is excessively deep
@@ -161,7 +191,28 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
 
   useEffect(() => {
     loadData();
+    
+    // Load pending actions from localStorage
+    const storageKey = `pendingActions_${params.id}`;
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        setPendingActions(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load pending actions:', e);
+      }
+    }
   }, [getDocumentsWithClassification, params.id]);
+
+  // Save pending actions to localStorage whenever they change
+  useEffect(() => {
+    const storageKey = `pendingActions_${params.id}`;
+    if (pendingActions.length > 0) {
+      localStorage.setItem(storageKey, JSON.stringify(pendingActions));
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  }, [pendingActions, params.id]);
 
   // Add polling for live updates
   useEffect(() => {
@@ -195,13 +246,16 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
         throw new Error("Please review and assign a status (Approve or Reject) to all documents before proceeding.");
       }
       
-      // Prevent approval if any documents are referred
-      if (newStatus === 'Approved' && rejectedDocs.length > 0) {
-        throw new Error(`Cannot approve application. ${rejectedDocs.length} document(s) are referred to doctor. Please use 'Send Referral Notification' button instead.`);
+      // Prevent approval if any documents are referred or need revision
+      const needsRevisionDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'NeedsRevision') || [];
+      const totalPendingDocs = rejectedDocs.length + needsRevisionDocs.length;
+      
+      if (newStatus === 'Approved' && totalPendingDocs > 0) {
+        throw new Error(`Cannot approve application. ${totalPendingDocs} document(s) require applicant action. Please use 'Send Applicant Notifications' button instead.`);
       }
       
-      if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Rejected')) {
-        throw new Error("To send referral notifications, at least one document must be flagged or referred for medical management.");
+      if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Rejected' || doc.status === 'NeedsRevision')) {
+        throw new Error("To send notifications, at least one document must be flagged for revision or referred for medical management.");
       }
 
       await finalizeApplication({ applicationId: params.id, newStatus });
@@ -239,9 +293,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
 
   // Handler to open referral confirmation modal
   const handleSendReferralClick = async () => {
-    const referredCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected').length || 0;
-    if (referredCount === 0) {
-      setError({ title: "Validation Failed", message: "To send referral notifications, at least one medical document must be referred to a doctor." });
+    if (pendingActions.length === 0) {
+      setError({ title: "Validation Failed", message: "No pending actions to send. Please flag documents for revision or refer to doctor first." });
       return;
     }
     
@@ -252,7 +305,34 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   // Handler to confirm sending referral notifications
   const handleConfirmSendReferral = async () => {
     setIsReferralConfirmModalOpen(false);
-    await handleFinalize('Rejected'); // This will trigger sendReferralNotifications
+    setError(null);
+    
+    try {
+      // Save all pending actions to database
+      for (const action of pendingActions) {
+        await referDocumentMutation({
+          documentUploadId: action.uploadId,
+          rejectionCategory: action.category as any,
+          rejectionReason: action.reason,
+          specificIssues: action.notes.split(',').map(s => s.trim()).filter(s => s),
+          doctorName: action.doctorName, // Will be undefined for flag_revision, defined for refer_doctor
+        });
+      }
+      
+      // Clear pending actions after successful save
+      setPendingActions([]);
+      
+      // Reload data to show updated statuses
+      await loadData();
+      
+      // Call finalizeApplication to send notifications
+      await handleFinalize('Rejected');
+      
+      setSuccessMessage(`Successfully sent ${pendingActions.length} notification(s) to applicant.`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (e: any) {
+      setError(createAppError(e.message, 'Failed to send notifications'));
+    }
   };
 
   // --- RENDER ---
@@ -609,12 +689,15 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 </div>
               )}
               {(() => {
-                const referredCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected').length || 0;
+                // Count pending actions from local state
+                const referredCount = pendingActions.filter(action => action.actionType === 'refer_doctor').length;
+                const needsRevisionCount = pendingActions.filter(action => action.actionType === 'flag_revision').length;
+                const totalPending = pendingActions.length;
                 const totalDocs = data?.checklist.length || 0;
                 
-                if (referredCount > 0) {
-                  // Show appropriate warning based on referred count
-                  const warningLevel = referredCount > 3 ? 'severe' : referredCount >= 2 ? 'warning' : 'info';
+                if (totalPending > 0) {
+                  // Show appropriate warning based on pending count
+                  const warningLevel = totalPending > 3 ? 'severe' : totalPending >= 2 ? 'warning' : 'info';
                   const bgColor = warningLevel === 'severe' ? 'bg-red-50 border-red-300' : warningLevel === 'warning' ? 'bg-orange-50 border-orange-200' : 'bg-blue-50 border-blue-200';
                   const textColor = warningLevel === 'severe' ? 'text-red-800' : warningLevel === 'warning' ? 'text-orange-800' : 'text-blue-800';
                   const iconColor = warningLevel === 'severe' ? 'text-red-600' : warningLevel === 'warning' ? 'text-orange-600' : 'text-blue-600';
@@ -627,15 +710,22 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         </svg>
                         <div className={`text-sm ${textColor}`}>
                           <p className="font-semibold mb-1">
-                            {warningLevel === 'severe' ? '⚠️ High Referral Rate' : 'Pending Referral Notifications'} ({referredCount} of {totalDocs})
+                            {warningLevel === 'severe' ? '⚠️ High Issue Rate' : 'Pending Applicant Notifications'} ({totalPending} of {totalDocs})
                           </p>
                           <p className={warningLevel === 'severe' ? 'text-red-700' : warningLevel === 'warning' ? 'text-orange-700' : 'text-blue-700'}>
-                            {referredCount > 3 
-                              ? `More than 3 medical documents referred (${referredCount}/${totalDocs}). Please review before sending notifications to applicant.`
-                              : referredCount === 1
-                              ? '1 pending referral notification to be sent to applicant. Click "Send Referral Notification" below to proceed.'
-                              : `${referredCount} pending referral notification(s) to be sent to applicant. Click "Send Referral Notification" below to proceed.`
+                            {warningLevel === 'severe'
+                              ? `More than 3 documents require attention (${totalPending}/${totalDocs}). Please review before sending notifications.`
+                              : totalPending === 1
+                              ? '1 document requires applicant action. Click "Send Applicant Notifications" to proceed.'
+                              : `${totalPending} document(s) require applicant action`
                             }
+                            {(referredCount > 0 || needsRevisionCount > 0) && totalPending > 1 && (
+                              <span className="block mt-1 text-xs">
+                                {referredCount > 0 && `🏥 ${referredCount} Medical Referral${referredCount > 1 ? 's' : ''}`}
+                                {referredCount > 0 && needsRevisionCount > 0 && ' • '}
+                                {needsRevisionCount > 0 && `📄 ${needsRevisionCount} Document Revision${needsRevisionCount > 1 ? 's' : ''}`}
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -669,7 +759,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  Send Referral Notification
+                  Send Applicant Notifications
                 </button>
               </div>
             </div>
@@ -710,24 +800,44 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     <div className="flex-1 mb-3 sm:mb-0">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-2">
-                          {item.status === 'Approved' && (
-                            <div className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
-                              <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                          )}
-                          {item.status === 'Rejected' && (
-                            <div className="w-6 h-6 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center">
-                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                              </svg>
-                            </div>
-                          )}
+                          {(() => {
+                            const effectiveStatus = getEffectiveStatus(item);
+                            const pendingAction = getPendingAction(item.uploadId);
+                            
+                            if (effectiveStatus === 'Approved') {
+                              return (
+                                <div className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              );
+                            } else if (effectiveStatus === 'Rejected') {
+                              return (
+                                <div className="w-6 h-6 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                  </svg>
+                                </div>
+                              );
+                            } else if (effectiveStatus === 'NeedsRevision') {
+                              return (
+                                <div className="w-6 h-6 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                  </svg>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
                           <h3 className="font-bold text-gray-800 text-base">{item.requirementName}{item.isRequired && <span className="text-rose-500 ml-1">*</span>}</h3>
+                          {getPendingAction(item.uploadId) && (
+                            <span className="text-xs font-medium text-gray-500 ml-2">⏳ Pending</span>
+                          )}
                         </div>
                       </div>
-                      <StatusBadge status={item.status} />
+                      <StatusBadge status={getEffectiveStatus(item)} />
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {item.fileUrl ? (
@@ -781,24 +891,17 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       ) : (
                         <span className="text-sm text-gray-400 px-4 py-2 italic">Not Submitted</span>
                       )}
-                      <button onClick={() => {
-                        setOpenReferralIndex(openReferralIndex === idx ? null : idx);
-                        // Reset form when opening
-                        if (openReferralIndex !== idx) {
-                          setReferralReason('');
-                        }
-                      }} disabled={!item.uploadId} className="p-2.5 rounded-xl hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-transparent hover:border-blue-100" aria-label="Add referral/remark">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>
-                      </button>
                     </div>
                   </div>
                   
                   {openReferralIndex === idx && (
                     <div className="mt-4 pt-4 border-t border-gray-200 bg-blue-50 -m-4 p-4 rounded-b-xl">
-                      <h4 className="font-semibold text-gray-800 mb-2">{isMedicalDocument(item.fieldIdentifier) ? '🏥 Refer to Doctor' : '📄 Add Remark'} for "{item.requirementName}"</h4>
+                      <h4 className="font-semibold text-gray-800 mb-2">
+                        {modalType === 'refer_doctor' ? '🏥 Refer to Doctor' : '📄 Flag for Revision'} for "{item.requirementName}"
+                      </h4>
                       <div className="space-y-4">
-                        {/* Doctor Name Field - Only for medical documents (Read-only, fixed doctor) */}
-                        {isMedicalDocument(item.fieldIdentifier) && (
+                        {/* Doctor Name Field - Only when referring to doctor */}
+                        {modalType === 'refer_doctor' && (
                           <div>
                             <label htmlFor={`doctor-name-${idx}`} className="block text-sm font-medium text-gray-700">
                               Referring Doctor <span className="text-blue-600 text-xs"></span>
@@ -815,7 +918,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         )}
                         
         <div>
-          <label htmlFor={`issue-category-${idx}`} className="block text-sm font-medium text-gray-700">{isMedicalDocument(item.fieldIdentifier) ? 'Referral Category' : 'Issue Category'}</label>
+          <label htmlFor={`issue-category-${idx}`} className="block text-sm font-medium text-gray-700">Issue Category</label>
           <select
             id={`issue-category-${idx}`}
             name={`issue-category-${idx}`}
@@ -830,10 +933,10 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
         </div>
         <div>
           <label htmlFor={`remark-${idx}`} className="block text-sm font-medium text-gray-700">
-            {isMedicalDocument(item.fieldIdentifier) ? 'Medical Referral Reason' : 'Document Issue Reason'} <span className="text-red-500">*</span>
+            {modalType === 'refer_doctor' ? 'Medical Referral Reason' : 'Document Issue Reason'} <span className="text-red-500">*</span>
           </label>
           <div className="mt-1 space-y-2">
-            {(isMedicalDocument(item.fieldIdentifier) ? medicalReferralReasons : nonMedicalIssueOptions).map(option => (
+            {(modalType === 'refer_doctor' ? medicalReferralReasons : nonMedicalIssueOptions).map(option => (
               <label key={option} className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer">
                 <input type="radio" name={`remark-${idx}`} value={option} checked={referralReason === option} onChange={(e) => setReferralReason(e.target.value)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" />
                 <span className="ml-3 text-sm text-gray-700">{option}</span>
@@ -843,7 +946,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
         </div>
                         <div>
                           <label htmlFor={`specific-issues-${idx}`} className="block text-sm font-medium text-gray-700">
-                            {isMedicalDocument(item.fieldIdentifier) ? 'Additional Notes (Optional)' : 'Additional Details (Optional)'}
+                            Additional Details (Optional)
                           </label>
                           <textarea
                             id={`specific-issues-${idx}`}
@@ -852,66 +955,89 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             value={specificIssues}
                             onChange={(e) => setSpecificIssues(e.target.value)}
                             className="mt-1 text-black block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                            placeholder={isMedicalDocument(item.fieldIdentifier) 
+                            placeholder={modalType === 'refer_doctor'
                               ? "Auto-filled referral message. You may add additional notes here." 
-                              : "e.g., ID is blurry, Signature does not match"}
+                              : "e.g., Photo is blurry, Document is expired, Signature does not match"}
                           />
                         </div>
                       </div>
-                      <div className="flex justify-end gap-3 mt-4">
+                      <div className="flex justify-between items-center gap-3 mt-4">
+                        {/* Remove button - only show if there's a pending action */}
+                        {getPendingAction(item.uploadId) && (
+                          <button onClick={() => {
+                            // Remove pending action
+                            setPendingActions(pendingActions.filter(action => action.uploadId !== item.uploadId));
+                            setOpenReferralIndex(null);
+                            setModalType(null);
+                            setReferralReason('');
+                            setSpecificIssues('');
+                            setSuccessMessage('Pending action removed.');
+                            setTimeout(() => setSuccessMessage(null), 2000);
+                          }} className="bg-red-100 text-red-700 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-red-200 flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Remove
+                          </button>
+                        )}
+                        <div className="flex gap-3 ml-auto">
+                          <button onClick={() => {
+                            setOpenReferralIndex(null);
+                            setModalType(null);
+                            setReferralReason('');
+                            setSpecificIssues('');
+                          }} className="bg-gray-200 text-gray-800 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-300">Cancel</button>
                         <button onClick={() => {
-                          setOpenReferralIndex(null);
-                          setReferralReason('');
-                        }} className="bg-gray-200 text-gray-800 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-300">Cancel</button>
-                        <button onClick={async () => {
                           try {
                             // Validate referral reason
-                            if (!referralReason) throw new Error('Please select a referral reason before saving.');
+                            if (!referralReason) throw new Error('Please select a reason before saving.');
 
-                            // For medical docs, treat as medical referral
-                            if (isMedicalDocument(item.fieldIdentifier)) {
-                              await referDocumentMutation({
-                                documentUploadId: item.uploadId!,
-                                rejectionCategory: issueCategory as any,
-                                rejectionReason: referralReason,
-                                specificIssues: specificIssues.split(',').map(s => s.trim()).filter(s => s),
-                                doctorName: FIXED_DOCTOR_NAME, // Use fixed doctor name
-                              });
-                            } else {
-                              // Non-medical: save remark only (do not change status)
-                              // Just update the adminRemarks field without changing review status
-                              // Only update if status is already Approved or Rejected
-                              if (item.status === 'Approved' || item.status === 'Rejected') {
-                                await reviewDocument({
-                                  documentUploadId: item.uploadId!,
-                                  status: item.status as 'Approved' | 'Rejected',
-                                  remarks: specificIssues || referralReason,
-                                  extractedText: item.extractedText || undefined,
-                                  fileType: item.fileUrl?.split('.').pop() || undefined,
-                                });
-                              } else {
-                                // For pending docs, we can't save issues without changing status
-                                // This scenario should prompt the user to approve/flag first
-                                throw new Error('Please approve or flag the document before adding remarks.');
-                              }
-                            }
-
-                            await loadData();
+                            // Remove existing pending action for this document if any
+                            const updatedPending = pendingActions.filter(action => action.uploadId !== item.uploadId);
+                            
+                            // Add new pending action
+                            const newAction = {
+                              uploadId: item.uploadId!,
+                              actionType: modalType!,
+                              category: issueCategory,
+                              reason: referralReason,
+                              notes: specificIssues,
+                              doctorName: modalType === 'refer_doctor' ? FIXED_DOCTOR_NAME : undefined,
+                              documentName: item.requirementName,
+                            };
+                            
+                            setPendingActions([...updatedPending, newAction]);
+                            
+                            // Close modal and reset form
                             setOpenReferralIndex(null);
+                            setModalType(null);
                             setReferralReason('');
                             setIssueCategory('other');
                             setSpecificIssues('');
                             setError(null);
+                            
+                            // Show success message
+                            setSuccessMessage(
+                              modalType === 'refer_doctor' 
+                                ? `Referral to doctor added to queue. Click "Send Applicant Notifications" to finalize.`
+                                : `Document flagged for revision. Click "Send Applicant Notifications" to finalize.`
+                            );
+                            setTimeout(() => setSuccessMessage(null), 3000);
                           } catch (e: any) {
                             setError(createAppError(e.message, 'Validation Error'));
                           }
-                        }} className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700">{isMedicalDocument(item.fieldIdentifier) ? 'Save Referral' : 'Save Remark'}</button>
+                        }} className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700">
+                          {modalType === 'refer_doctor' ? 'Save Referral' : 'Save & Flag for Revision'}
+                        </button>
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Always show 2 buttons for medical docs, 1 for non-medical */}
-                  <div className={`mt-4 pt-4 border-t border-gray-100 ${isMedicalDocument(item.fieldIdentifier) ? 'grid grid-cols-1 sm:grid-cols-2 gap-2' : 'flex'}`}>
+                  {/* Medical docs: 3 buttons (Approve + Flag for Revision + Refer to Doctor) */}
+                  {/* Non-medical docs: 2 buttons (Approve + Flag for Revision) */}
+                  <div className={`mt-4 pt-4 border-t border-gray-100 ${isMedicalDocument(item.fieldIdentifier) ? 'grid grid-cols-1 sm:grid-cols-3 gap-2' : 'grid grid-cols-1 sm:grid-cols-2 gap-2'}`}>
+                    {/* Approve Button - Always show */}
                     <button 
                       onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} 
                       disabled={!item.uploadId || item.status === 'Approved'} 
@@ -922,17 +1048,46 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       </svg>
                       Approve
                     </button>
-                    {/* Always show for medical docs (even if approved) for demo/testing visibility */}
+                    
+                    {/* Flag for Revision Button - Always show for all documents */}
+                    <button
+                      onClick={() => {
+                        const pending = getPendingAction(item.uploadId);
+                        if (pending) {
+                          // Load existing pending action for editing
+                          setModalType(pending.actionType);
+                          setIssueCategory(pending.category);
+                          setReferralReason(pending.reason);
+                          setSpecificIssues(pending.notes);
+                        } else {
+                          // New action
+                          setModalType('flag_revision');
+                          setIssueCategory('other');
+                          setReferralReason('');
+                          setSpecificIssues('');
+                        }
+                        setOpenReferralIndex(idx);
+                      }}
+                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Rejected' || item.status === 'NeedsRevision'}
+                      className="w-full bg-orange-50 text-orange-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-orange-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-orange-100 disabled:border-gray-200 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      Flag for Revision
+                    </button>
+                    
+                    {/* Refer to Doctor Button - Only for medical documents */}
                     {isMedicalDocument(item.fieldIdentifier) && (
                       <button
                         onClick={() => {
                           setOpenReferralIndex(idx);
-                          // Prefill referral defaults for medical docs
+                          setModalType('refer_doctor');
                           setIssueCategory('other');
-                          setReferralReason('Other medical concern'); // Default to first option
+                          setReferralReason('Other medical concern');
                           setSpecificIssues(`Failed Medical Result (${item.requirementName}) - Please refer to ${FIXED_DOCTOR_NAME} at Door 7, Magsaysay Complex, Magsaysay Park, Davao City.`);
                         }}
-                        disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Rejected'}
+                        disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Rejected' || item.status === 'NeedsRevision'}
                         className="w-full bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-blue-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1055,24 +1210,34 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
             </div>
 
             {/* Modal Content */}
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Send Referral Notifications?</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Send Applicant Notifications?</h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              The applicant will be notified about medical document referrals.
+              The applicant will be notified about document issues that require their action.
             </p>
             
             {(() => {
-              const referredCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected').length || 0;
+              const referredCount = pendingActions.filter(action => action.actionType === 'refer_doctor').length;
+              const needsRevisionCount = pendingActions.filter(action => action.actionType === 'flag_revision').length;
+              const totalPending = pendingActions.length;
+              
               return (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-blue-800 font-medium">
-                    📧 {referredCount === 1 
-                      ? '1 referral notification will be sent to the applicant.'
-                      : `${referredCount} referral notifications will be sent (one per document referred).`
+                  <p className="text-sm text-blue-800 font-medium mb-2">
+                    📧 {totalPending === 1 
+                      ? '1 notification will be sent to the applicant.'
+                      : `${totalPending} notifications will be sent to the applicant.`
                     }
                   </p>
-                  <p className="text-xs text-blue-700 mt-2">
-                    🏥 The applicant will be advised to consult with the doctor at Magsaysay for document verification.
-                  </p>
+                  {referredCount > 0 && (
+                    <p className="text-xs text-blue-700 mt-1">
+                      🏥 {referredCount} Medical Referral{referredCount > 1 ? 's' : ''}: Applicant will consult with doctor
+                    </p>
+                  )}
+                  {needsRevisionCount > 0 && (
+                    <p className="text-xs text-orange-700 mt-1">
+                      📄 {needsRevisionCount} Document Revision{needsRevisionCount > 1 ? 's' : ''}: Applicant will resubmit corrected documents
+                    </p>
+                  )}
                 </div>
               );
             })()}
