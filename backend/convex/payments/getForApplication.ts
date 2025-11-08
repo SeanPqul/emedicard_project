@@ -72,6 +72,7 @@ export const get = query({
       checkoutUrl: payment.checkoutUrl,
       mayaCheckoutId: payment.mayaCheckoutId,
       referenceNumber: payment.referenceNumber,
+      amount: payment.amount,
       isResubmission: isResubmission,
       rejectionHistory: enrichedRejectionHistory,
     };

@@ -35,6 +35,11 @@ const nextConfig: NextConfig = {
         hostname: "img.clerk.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.convex.cloud",
+        pathname: "/api/storage/**",
+      },
     ],
   },
 

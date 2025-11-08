@@ -16,7 +16,7 @@ export default function Navbar({ children }: NavbarProps) {
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo Section */}
-          <div className="flex items-center flex-shrink-0">
+          <div className="flex items-center shrink-0">
             <button 
               onClick={() => router.push('/dashboard')} 
               className="flex items-center gap-3 group transition-all duration-200 hover:opacity-80"

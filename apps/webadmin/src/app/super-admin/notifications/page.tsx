@@ -268,7 +268,7 @@ export default function SuperAdminNotificationsPage() {
                           {notification.title}
                         </h3>
                         {!notification.isRead && (
-                          <span className="flex-shrink-0 w-2 h-2 bg-emerald-600 rounded-full mt-1"></span>
+                          <span className="shrink-0 w-2 h-2 bg-emerald-600 rounded-full mt-1"></span>
                         )}
                       </div>
                       <p className="text-sm text-gray-600 mt-1">{notification.message}</p>

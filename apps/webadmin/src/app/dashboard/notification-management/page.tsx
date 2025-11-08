@@ -49,7 +49,7 @@ function NotificationManagementPage() {
                     <option value="read">Read</option>
                     <option value="unread">Unread</option>
                 </select>
-                <button onClick={handleMarkAllAsRead} className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium text-sm hover:bg-emerald-700 flex-shrink-0">Mark all as read</button>
+                <button onClick={handleMarkAllAsRead} className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium text-sm hover:bg-emerald-700 shrink-0">Mark all as read</button>
             </div>
         </div>
 

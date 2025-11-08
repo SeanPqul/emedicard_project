@@ -56,7 +56,7 @@ export default function AdminActivityPage() {
   const getActionColor = (action: string) => {
     const colorMap: Record<string, string> = {
       "Approved": "bg-green-100 text-green-800 border-green-200",
-      "Rejected": "bg-red-100 text-red-800 border-red-200",
+      "Referred": "bg-amber-100 text-amber-800 border-amber-200",
       "Updated": "bg-blue-100 text-blue-800 border-blue-200",
       "Verified": "bg-emerald-100 text-emerald-800 border-emerald-200",
       "Created": "bg-purple-100 text-purple-800 border-purple-200",
@@ -201,7 +201,7 @@ export default function AdminActivityPage() {
                     className="bg-gradient-to-r from-purple-50 to-purple-100 p-5 rounded-xl border border-purple-100 hover:border-purple-200 transition-all duration-200 hover:shadow-md"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-md">
                           <svg
                             className="h-6 w-6 text-white"

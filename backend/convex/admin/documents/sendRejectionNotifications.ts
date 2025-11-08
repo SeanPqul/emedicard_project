@@ -2,8 +2,8 @@ import { v } from "convex/values";
 import { internalMutation } from "../../_generated/server";
 
 /**
- * Sends a batch notification to the applicant for all rejected documents
- * that haven't been notified yet. Called when "Reject Application" is clicked.
+ * Sends a batch notification to the applicant for all referred documents
+ * that haven't been notified yet. Called when documents are referred to doctor.
  */
 export const sendRejectionNotifications = internalMutation({
   args: {
@@ -36,7 +36,7 @@ export const sendRejectionNotifications = internalMutation({
         throw new Error("Application not found");
       }
 
-      // 3. Get all rejection history records that haven't been notified yet
+      // 3. Get all referral history records that haven't been notified yet
       // For backward compatibility: undefined = already notified (old records), false = pending notification
       const allRejections = await ctx.db
         .query("documentRejectionHistory")
@@ -50,12 +50,12 @@ export const sendRejectionNotifications = internalMutation({
       if (pendingRejections.length === 0) {
         return {
           success: true,
-          message: "No pending rejections to notify",
+          message: "No pending referrals to notify",
           notificationsSent: 0,
         };
       }
 
-      // 4. Send individual notification for each rejected document with attempt warnings
+      // 4. Send individual notification for each referred document with attempt warnings
       await Promise.all(
         pendingRejections.map(async (rejection) => {
           const docType = await ctx.db.get(rejection.documentTypeId);
@@ -66,18 +66,23 @@ export const sendRejectionNotifications = internalMutation({
             ? `\n\nSpecific Issues:\n${rejection.specificIssues.map(issue => `• ${issue}`).join('\n')}`
             : '';
           
+          // Doctor referral information
+          const doctorReferralText = rejection.doctorName 
+            ? `\n\nPlease refer to Dr. ${rejection.doctorName} at Magsaysay for document verification.`
+            : `\n\nPlease refer to a doctor at Magsaysay for document verification.`;
+          
           // Determine notification content based on attempt number
-          let notificationTitle = "Document Rejected";
-          let notificationMessage = `Your ${documentName} has been rejected.\n\nReason: ${rejection.rejectionReason}${specificIssuesText}\n\nThis is attempt ${rejection.attemptNumber} of 3.`;
+          let notificationTitle = "Document Referred for Review";
+          let notificationMessage = `Your ${documentName} has been referred to a doctor for further verification.\n\nReason: ${rejection.rejectionReason}${specificIssuesText}${doctorReferralText}\n\nThis is attempt ${rejection.attemptNumber} of 3.`;
           
           if (rejection.attemptNumber === 2) {
             // 2nd attempt - Warning
-            notificationTitle = "⚠️ Document Rejected - Warning";
-            notificationMessage = `⚠️ Your ${documentName} has been rejected.\n\nReason: ${rejection.rejectionReason}${specificIssuesText}\n\nThis is attempt ${rejection.attemptNumber} of 3.\n\n⚠️ Warning: You have 1 more attempt remaining. Please review the requirements carefully before resubmitting.`;
+            notificationTitle = "⚠️ Document Referred - Warning";
+            notificationMessage = `⚠️ Your ${documentName} has been referred to a doctor for verification.\n\nReason: ${rejection.rejectionReason}${specificIssuesText}${doctorReferralText}\n\nThis is attempt ${rejection.attemptNumber} of 3.\n\n⚠️ Warning: You have 1 more attempt remaining. Please consult with the doctor and ensure your document meets all requirements.`;
           } else if (rejection.attemptNumber === 3) {
             // 3rd attempt - FINAL WARNING (should rarely happen here since max attempts should be handled in rejectDocument)
-            notificationTitle = "🚨 Final Attempt - Document Rejected";
-            notificationMessage = `🚨 FINAL ATTEMPT: Your ${documentName} has been rejected.\n\nReason: ${rejection.rejectionReason}${specificIssuesText}\n\nThis is your LAST chance (attempt 3 of 3).\n\n⚠️ If this document is rejected again, your application will be permanently closed and you will need to create a new application.\n\nPlease ensure your document meets all requirements before resubmitting.`;
+            notificationTitle = "🚨 Final Attempt - Document Referred";
+            notificationMessage = `🚨 FINAL ATTEMPT: Your ${documentName} has been referred to a doctor.\n\nReason: ${rejection.rejectionReason}${specificIssuesText}${doctorReferralText}\n\nThis is your LAST chance (attempt 3 of 3).\n\n⚠️ If this document fails verification again, your application will be permanently closed and you will need to create a new application.\n\nPlease consult with the doctor and ensure your document meets all requirements.`;
           }
           
           // Send notification
@@ -94,7 +99,7 @@ export const sendRejectionNotifications = internalMutation({
         })
       );
 
-      // 7. Mark all rejections as notified
+      // 7. Mark all referrals as notified
       const currentTime = Date.now();
       await Promise.all(
         pendingRejections.map((rejection) =>
@@ -108,8 +113,8 @@ export const sendRejectionNotifications = internalMutation({
       // 8. Log activity
       await ctx.db.insert("adminActivityLogs", {
         adminId: admin._id,
-        activityType: "rejection_notification_sent",
-        details: `Sent batch rejection notification for ${pendingRejections.length} document(s) for application ${args.applicationId}`,
+        activityType: "referral_notification_sent",
+        details: `Sent batch referral notification for ${pendingRejections.length} document(s) for application ${args.applicationId}`,
         applicationId: args.applicationId,
         jobCategoryId: application.jobCategoryId,
         timestamp: currentTime,
@@ -117,7 +122,7 @@ export const sendRejectionNotifications = internalMutation({
 
       return {
         success: true,
-        message: `Successfully sent notification for ${pendingRejections.length} rejected document(s)`,
+        message: `Successfully sent notification for ${pendingRejections.length} referred document(s)`,
         notificationsSent: pendingRejections.length,
       };
     } catch (error) {

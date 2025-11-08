@@ -276,7 +276,7 @@ export default function AdminNotificationsPage() {
                   } ${index !== filteredNotifications.length - 1 ? "border-b border-gray-100" : ""}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 mt-0.5">
+                    <div className="shrink-0 mt-0.5">
                       <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -294,7 +294,7 @@ export default function AdminNotificationsPage() {
                           <p className="text-sm text-gray-500 mt-1">{notification.message}</p>
                         </div>
                         {!notification.isRead && (
-                          <span className="flex-shrink-0 w-2 h-2 bg-emerald-500 rounded-full mt-1.5"></span>
+                          <span className="shrink-0 w-2 h-2 bg-emerald-500 rounded-full mt-1.5"></span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-2">

@@ -48,16 +48,16 @@ const getActionStyle = (action: string) => {
     };
   }
   
-  if (lowerAction.includes('rejected') || lowerAction.includes('reject')) {
+  if (lowerAction.includes('referred') || lowerAction.includes('refer')) {
     return { 
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12M8 12h12m-12 5h12M4 7h.01M4 12h.01M4 17h.01" />
         </svg>
       ),
-      bgColor: 'bg-red-50',
-      iconColor: 'text-red-600',
-      borderColor: 'border-red-200'
+      bgColor: 'bg-amber-50',
+      iconColor: 'text-amber-600',
+      borderColor: 'border-amber-200'
     };
   }
   
@@ -90,7 +90,9 @@ const getActionStyle = (action: string) => {
 export default function DashboardActivityLog() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  // @ts-ignore - Type instantiation is excessively deep
   const recentActivities = useQuery(
+    // @ts-ignore
     api.admin.activityLogs.getRecentAdminActivities
   );
 
@@ -189,7 +191,7 @@ export default function DashboardActivityLog() {
                 >
                   <div className="flex gap-2.5">
                     {/* Icon */}
-                    <div className={`flex-shrink-0 w-7 h-7 rounded-lg ${actionStyle.bgColor} ${actionStyle.iconColor} border ${actionStyle.borderColor} flex items-center justify-center mt-0.5`}>
+                    <div className={`shrink-0 w-7 h-7 rounded-lg ${actionStyle.bgColor} ${actionStyle.iconColor} border ${actionStyle.borderColor} flex items-center justify-center mt-0.5`}>
                       {actionStyle.icon}
                     </div>
                     

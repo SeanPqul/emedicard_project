@@ -8,7 +8,7 @@ import Navbar from '@/components/shared/Navbar';
 import SuccessMessage from '@/components/SuccessMessage';
 import { api } from '@/convex/_generated/api'; // Moved to top
 import { Id } from '@/convex/_generated/dataModel';
-import { useAction, useMutation } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -132,6 +132,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [showOcrModal, setShowOcrModal] = useState<boolean>(false); // New state for OCR modal visibility
   const [isReferralConfirmModalOpen, setIsReferralConfirmModalOpen] = useState(false); // Confirmation modal for sending referrals
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // New state for collapsible applicant details
+  const [isPaymentDetailsExpanded, setIsPaymentDetailsExpanded] = useState(false); // New state for collapsible payment details
   const router = useRouter();
 
   // --- DATA FETCHING ---
@@ -142,6 +143,9 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
   const rejectDocumentMutation = useMutation(api.admin.documents.rejectDocument.rejectDocument);
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
+  
+  // Fetch payment data
+  const paymentData = useQuery(api.payments.getForApplication.get, { applicationId: params.id });
 
   const loadData = async () => {
     try {
@@ -185,15 +189,15 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     try {
       setError(null);
       const pendingDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Missing' || doc.status === 'Pending');
-      const rejectedDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected') || [];
+      const referredDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected') || [];
       
       if (pendingDocs && pendingDocs.length > 0) {
-        throw new Error("Please review and assign a status (Approve or Reject) to all documents before proceeding.");
+        throw new Error("Please review and assign a status (Approve or Refer) to all documents before proceeding.");
       }
       
       // Prevent approval if any documents are referred
-      if (newStatus === 'Approved' && rejectedDocs.length > 0) {
-        throw new Error(`Cannot approve application. ${rejectedDocs.length} document(s) are referred to doctor. Please use 'Send Referral Notification' button instead.`);
+      if (newStatus === 'Approved' && referredDocs.length > 0) {
+        throw new Error(`Cannot approve application. ${referredDocs.length} document(s) are referred to doctor. Please use 'Send Referral Notification' button instead.`);
       }
       
       if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Rejected')) {
@@ -202,17 +206,28 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
 
       await finalizeApplication({ applicationId: params.id, newStatus });
       
-      // Different success messages based on status
+      // Check if payment is manual (BaranggayHall or CityHall) or 3rd party (Maya/Gcash)
+      const isManualPayment = paymentData?.paymentMethod === 'BaranggayHall' || paymentData?.paymentMethod === 'CityHall';
+      
+      // Different success messages and redirects based on status and payment method
       if (newStatus === 'Approved') {
-        setSuccessMessage('Application approved! Redirecting to payment validation...');
+        if (isManualPayment) {
+          // Manual payment: go to payment validation page
+          setSuccessMessage('Application approved! Redirecting to payment validation...');
+        } else {
+          // 3rd party payment: everything validated here, go to dashboard
+          setSuccessMessage('Application and payment approved! Redirecting to dashboard...');
+        }
       } else {
         setSuccessMessage('Application rejected. Applicant has been notified.');
       }
 
       setTimeout(() => {
-        if (newStatus === 'Approved') {
+        if (newStatus === 'Approved' && isManualPayment) {
+          // Manual payment: continue to payment validation page
           router.push(`/dashboard/${params.id}/payment_validation`);
         } else {
+          // 3rd party or rejected: go to dashboard
           router.push('/dashboard');
         }
       }, 2000);
@@ -264,7 +279,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-gray-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
       <Navbar>
         <ApplicantActivityLog applicantName={data.applicantName} applicationId={params.id} />
       </Navbar>
@@ -285,7 +300,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
           <div className="lg:col-span-1 space-y-4 sm:space-y-6 lg:sticky lg:top-20">
             {/* Applicant Card with Avatar */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-linear-to-br from-teal-400 to-emerald-500 px-6 py-5">
+              <div className="bg-gradient-to-br from-teal-400 to-emerald-500 px-6 py-5">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-white/95 flex items-center justify-center shadow-md">
                     <span className="text-2xl font-bold text-teal-600">{data.applicantName.charAt(0).toUpperCase()}</span>
@@ -365,7 +380,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* First Name */}
                     {data.applicantDetails?.firstName && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         <div className="flex-1">
@@ -378,7 +393,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Last Name */}
                     {data.applicantDetails?.lastName && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         <div className="flex-1">
@@ -391,7 +406,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Middle Name */}
                     {data.applicantDetails?.middleName && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         <div className="flex-1">
@@ -404,7 +419,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Gender */}
                     {data.applicantDetails?.gender && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         <div className="flex-1">
@@ -417,7 +432,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Nationality */}
                     {data.applicantDetails?.nationality && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                         </svg>
                         <div className="flex-1">
@@ -430,7 +445,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Civil Status */}
                     {data.applicantDetails?.civilStatus && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <div className="flex-1">
@@ -443,7 +458,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Organization */}
                     {data.applicantDetails?.organization && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                         <div className="flex-1">
@@ -456,12 +471,117 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Email */}
                     {data.applicantDetails?.email && (
                       <div className="flex items-start gap-3 p-3 bg-teal-50 rounded-lg border border-teal-100">
-                        <svg className="w-4 h-4 text-teal-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         <div className="flex-1">
                           <label className="text-xs font-semibold text-teal-700 uppercase tracking-wide">Email Address</label>
                           <p className="text-sm font-medium text-teal-900 mt-0.5 break-all">{data.applicantDetails.email}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Collapsible Payment Details Card - Only show for 3rd party payments (Maya, Gcash) */}
+            {paymentData && (paymentData.paymentMethod === 'Maya' || paymentData.paymentMethod === 'Gcash') && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => setIsPaymentDetailsExpanded(!isPaymentDetailsExpanded)}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  aria-expanded={isPaymentDetailsExpanded}
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <h2 className="text-base font-bold text-gray-800">Payment Details</h2>
+                  </div>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                      isPaymentDetailsExpanded ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Collapsible Content */}
+                <div
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    isPaymentDetailsExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="px-6 pb-6 pt-2 space-y-3 border-t border-gray-100">
+                    {/* Amount */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">₱{(paymentData.amount ?? 0).toFixed(2)}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Payment Method */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment Method</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">{paymentData.paymentMethod}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Transaction Date */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Transaction Date</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">{new Date(paymentData.submissionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Payment Status */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">{paymentData.paymentStatus}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Reference Number */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Reference Number</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5 font-mono">{paymentData.referenceNumber}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Maya Checkout ID - Only show if payment method is Maya */}
+                    {paymentData.paymentMethod === 'Maya' && paymentData.mayaCheckoutId && (
+                      <div className="flex items-start gap-3 p-3 bg-teal-50 rounded-lg border border-teal-100">
+                        <svg className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-teal-700 uppercase tracking-wide">Maya Checkout ID</label>
+                          <p className="text-sm font-medium text-teal-900 mt-0.5 font-mono break-all">{paymentData.mayaCheckoutId}</p>
                         </div>
                       </div>
                     )}
@@ -489,12 +609,12 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 </div>
               )}
               {(() => {
-                const rejectedCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected').length || 0;
+                const referredCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected').length || 0;
                 const totalDocs = data?.checklist.length || 0;
                 
-                if (rejectedCount > 0) {
-                  // Show appropriate warning based on rejected count
-                  const warningLevel = rejectedCount > 3 ? 'severe' : rejectedCount >= 2 ? 'warning' : 'info';
+                if (referredCount > 0) {
+                  // Show appropriate warning based on referred count
+                  const warningLevel = referredCount > 3 ? 'severe' : referredCount >= 2 ? 'warning' : 'info';
                   const bgColor = warningLevel === 'severe' ? 'bg-red-50 border-red-300' : warningLevel === 'warning' ? 'bg-orange-50 border-orange-200' : 'bg-blue-50 border-blue-200';
                   const textColor = warningLevel === 'severe' ? 'text-red-800' : warningLevel === 'warning' ? 'text-orange-800' : 'text-blue-800';
                   const iconColor = warningLevel === 'severe' ? 'text-red-600' : warningLevel === 'warning' ? 'text-orange-600' : 'text-blue-600';
@@ -502,19 +622,19 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   return (
                     <div className={`mb-4 ${bgColor} border rounded-lg p-3`}>
                       <div className="flex items-start gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${iconColor} mt-0.5 flex-shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${iconColor} mt-0.5 shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div className={`text-sm ${textColor}`}>
                           <p className="font-semibold mb-1">
-                            {warningLevel === 'severe' ? '⚠️ High Referral Rate' : 'Pending Referral/Management Notifications'} ({rejectedCount} of {totalDocs})
+                            {warningLevel === 'severe' ? '⚠️ High Referral Rate' : 'Pending Referral Notifications'} ({referredCount} of {totalDocs})
                           </p>
                           <p className={warningLevel === 'severe' ? 'text-red-700' : warningLevel === 'warning' ? 'text-orange-700' : 'text-blue-700'}>
-                            {rejectedCount > 3 
-                              ? `More than 3 medical documents referred (${rejectedCount}/${totalDocs}). Please review before sending notifications to applicant.`
-                              : rejectedCount === 1
-                              ? '1 pending referral/management notification to be sent to applicant. Click "Send Referral Notification" below to proceed.'
-                              : `${rejectedCount} pending referral/management notification(s) to be sent to applicant. Click "Send Referral Notification" below to proceed.`
+                            {referredCount > 3 
+                              ? `More than 3 medical documents referred (${referredCount}/${totalDocs}). Please review before sending notifications to applicant.`
+                              : referredCount === 1
+                              ? '1 pending referral notification to be sent to applicant. Click "Send Referral Notification" below to proceed.'
+                              : `${referredCount} pending referral notification(s) to be sent to applicant. Click "Send Referral Notification" below to proceed.`
                             }
                           </p>
                         </div>
@@ -533,7 +653,12 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Approve & Continue to Payment
+                  {/* Manual payment (BaranggayHall/CityHall): Continue to Payment Validation */}
+                  {/* 3rd party (Maya/Gcash): Approve everything here */}
+                  {paymentData && (paymentData.paymentMethod === 'BaranggayHall' || paymentData.paymentMethod === 'CityHall') 
+                    ? 'Approve & Continue to Payment' 
+                    : 'Approve Documents & Payments'
+                  }
                 </button>
                 
                 {/* Secondary Action: Send Referral Notification */}
@@ -604,7 +729,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       </div>
                       <StatusBadge status={item.status} />
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       {item.fileUrl ? (
                         <>
                           <button onClick={() => setViewModalDocUrl(item.fileUrl)} className="text-sm bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-medium hover:bg-slate-200 transition-all border border-slate-200 flex items-center gap-2">
@@ -942,11 +1067,11 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   <p className="text-sm text-blue-800 font-medium">
                     📧 {referredCount === 1 
                       ? '1 referral notification will be sent to the applicant.'
-                      : `${referredCount} referral notifications will be sent (one per medical document referred).`
+                      : `${referredCount} referral notifications will be sent (one per document referred).`
                     }
                   </p>
                   <p className="text-xs text-blue-700 mt-2">
-                    🏯 The applicant will be advised to see the referred doctor(s) for medical requirements.
+                    🏥 The applicant will be advised to consult with the doctor at Magsaysay for document verification.
                   </p>
                 </div>
               );

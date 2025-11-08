@@ -134,7 +134,7 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
           {/* Success Message */}
           {successMessage && (
             <div className="bg-green-50 border-l-4 border-green-500 text-green-700 px-6 py-4 rounded-xl mb-6 flex items-center gap-3 animate-fadeIn">
-              <svg className="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="font-medium">{successMessage}</span>
@@ -144,7 +144,7 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
           {/* Error Message */}
           {error && !error.includes("Password") && (
             <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-6 py-4 rounded-xl mb-6 flex items-center gap-3 animate-fadeIn">
-              <svg className="w-6 h-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="font-medium">{error}</span>
@@ -840,7 +840,7 @@ export default function SuperAdminPage() {
                       className={`group p-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors ${actionStyle.accentBorderClass}`}
                     >
                       <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           <div className={`w-9 h-9 rounded-full ${actionStyle.iconBg} flex items-center justify-center shadow-sm`}>
                             {actionStyle.icon}
                           </div>

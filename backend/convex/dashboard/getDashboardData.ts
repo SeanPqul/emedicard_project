@@ -4,15 +4,16 @@ import { Doc, Id } from "../_generated/dataModel";
 export const getDashboardDataQuery = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-    
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
+    try {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) return null;
       
-    if (!user) return null;
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+        .unique();
+        
+      if (!user) return null;
     
     // First, get applications and notifications in parallel
     const [applications, notifications]: [Doc<"applications">[], Doc<"notifications">[]] = await Promise.all([
@@ -27,14 +28,15 @@ export const getDashboardDataQuery = query({
         .take(10), // Limit to recent notifications
     ]);
 
-    // Then get health cards using the applications data
+    // Then get health cards using the applications data (optimized)
+    const applicationIds = new Set(applications.map(app => app._id));
     const allHealthCards = await ctx.db.query("healthCards").collect();
-    const healthCards = allHealthCards.filter(card => {
-      // Find matching application to check if it's user's card
-      return applications.some((application: Doc<"applications">) => application._id === card.applicationId);
-    });
+    const healthCards = allHealthCards.filter(card => 
+      applicationIds.has(card.applicationId)
+    );
 
     // Get payments for user's applications (fetch most recent payment per application)
+    // Optimized: batch payment queries to reduce round trips
     const payments = await Promise.all(
       applications.map(async (application) => {
         const payment = await ctx.db
@@ -44,7 +46,7 @@ export const getDashboardDataQuery = query({
           .first();
         return payment;
       })
-    ).then(results => results.filter(Boolean));
+    ).then(results => results.filter((p): p is NonNullable<typeof p> => p !== null));
 
     // Aggregate all data with minimal payloads
     const aggregatedApplications = await Promise.all(
@@ -170,5 +172,10 @@ export const getDashboardDataQuery = query({
           verificationToken: card.verificationToken,
         })),
     };
+    } catch (error) {
+      console.error("Error in getDashboardDataQuery:", error);
+      // Return null to trigger error handling in frontend
+      return null;
+    }
   },
 });

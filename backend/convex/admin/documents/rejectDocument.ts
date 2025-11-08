@@ -61,9 +61,9 @@ export const rejectDocument = mutation({
       throw new Error("File not found in storage");
     }
 
-    // Check if document is already rejected
+    // Check if document is already referred
     if (documentUpload.reviewStatus === "Rejected") {
-      throw new Error("Document is already rejected");
+      throw new Error("Document is already referred for review");
     }
 
     // 3. Count previous rejection attempts for this document
@@ -162,12 +162,13 @@ export const rejectDocument = mutation({
     const applicantName = applicant?.fullname || "Unknown Applicant";
 
     // Send notification to each relevant admin
+    const doctorReferralInfo = args.doctorName ? ` to Dr. ${args.doctorName}` : '';
     for (const targetAdmin of relevantAdmins) {
       await ctx.db.insert("notifications", {
         userId: targetAdmin._id,
-        notificationType: "document_rejection",
-        title: "Document Rejected",
-        message: `${admin.fullname || admin.email} has rejected ${documentType.name} for ${applicantName}'s application. Reason: ${args.rejectionReason}`,
+        notificationType: "document_referral",
+        title: "Document Referred for Review",
+        message: `${admin.fullname || admin.email} has referred ${documentType.name} for ${applicantName}'s application${doctorReferralInfo}. Reason: ${args.rejectionReason}`,
         actionUrl: `/dashboard/${application._id}/doc_verif`,
         applicationId: application._id,
         jobCategoryId: application.jobCategoryId,
@@ -176,11 +177,13 @@ export const rejectDocument = mutation({
     }
 
     // 8. Create admin activity log
+    const doctorInfo = args.doctorName ? ` to Dr. ${args.doctorName}` : '';
     await ctx.db.insert("adminActivityLogs", {
       adminId: admin._id,
-      activityType: "document_rejection",
+      activityType: "document_referral",
+      action: "Referred",
       // Truncate if necessary
-      details: `Rejected ${documentType.name} for application ${application._id}. Reason: ${args.rejectionReason}`.substring(0, 500),
+      details: `Referred ${documentType.name} for application ${application._id}${doctorInfo}. Reason: ${args.rejectionReason}`.substring(0, 500),
       applicationId: application._id,
       jobCategoryId: application.jobCategoryId, // Add jobCategoryId for filtering
       timestamp: Date.now(),
@@ -191,20 +194,24 @@ export const rejectDocument = mutation({
     const maxAttempts = REJECTION_LIMITS.DOCUMENTS.MAX_ATTEMPTS;
     
     if (maxAttemptsReached) {
-      // Max attempts reached (3rd attempt) - PERMANENTLY REJECT application
+      // Max attempts reached (3rd attempt) - PERMANENTLY CLOSE application
       const specificIssuesText = args.specificIssues.length > 0 
         ? `\n\nSpecific Issues:\n${args.specificIssues.map(issue => `• ${issue}`).join('\n')}`
         : '';
       
-      const notificationTitle = "🚨 Application Rejected - Maximum Attempts Reached";
-      const notificationMessage = `Your application has been permanently rejected due to reaching the maximum number of attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Rejection Reason: ${args.rejectionReason}${specificIssuesText}\n\n❌ This application can no longer be continued.\n\n✅ If you wish to obtain a Health Card, please create a new application and ensure all documents meet the requirements.\n\nFor assistance with document requirements, please contact our support team.`;
+      const doctorReferralText = args.doctorName 
+        ? `\n\nLast Referral: Dr. ${args.doctorName} at Magsaysay`
+        : '';
+      
+      const notificationTitle = "🚨 Application Closed - Maximum Attempts Reached";
+      const notificationMessage = `Your application has been permanently closed due to reaching the maximum number of verification attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Referral Reason: ${args.rejectionReason}${specificIssuesText}${doctorReferralText}\n\n❌ This application can no longer be continued.\n\n✅ If you wish to obtain a Health Card, please create a new application and ensure all documents meet the requirements by consulting with the designated doctor.\n\nFor assistance with document requirements, please contact our support team.`;
       
       const now = Date.now();
       
-      // Permanently reject the application (not locked, but rejected)
+      // Permanently close the application (not locked, but rejected)
       await ctx.db.patch(application._id, {
         applicationStatus: "Rejected",
-        adminRemarks: `Application permanently rejected: Maximum document rejection attempts (${maxAttempts}) reached for ${documentType.name}. Applicant must create new application.`,
+        adminRemarks: `Application permanently closed: Maximum document referral attempts (${maxAttempts}) reached for ${documentType.name}. Applicant must create new application and consult with doctor at Magsaysay.`,
         updatedAt: now,
       });
       
@@ -222,7 +229,7 @@ export const rejectDocument = mutation({
         .withIndex("by_application", (q) => q.eq("applicationId", application._id))
         .collect();
       
-      // Create application rejection history record (automatic rejection)
+      // Create application rejection history record (automatic closure)
       await ctx.db.insert("applicationRejectionHistory", {
         applicationId: application._id,
         applicantName: applicant?.fullname || "Unknown",
@@ -231,7 +238,7 @@ export const rejectDocument = mutation({
         jobCategoryName: jobCategory?.name || "Unknown",
         applicationType: application.applicationType,
         rejectionCategory: "max_attempts_reached",
-        rejectionReason: `Maximum document rejection attempts (${maxAttempts}) reached for ${documentType.name}`,
+        rejectionReason: `Maximum document referral attempts (${maxAttempts}) reached for ${documentType.name}. Applicant must consult with doctor at Magsaysay.`,
         rejectionType: "automatic",
         triggerSource: "max_document_attempts",
         totalDocumentsRejected: allRejectedDocs.length,
@@ -260,7 +267,7 @@ export const rejectDocument = mutation({
         notificationSentAt: Date.now(),
       });
       
-      // Notify all admins about permanent rejection
+      // Notify all admins about permanent closure
       const allAdminsForMaxAlert = await ctx.db
         .query("users")
         .withIndex("by_role", (q) => q.eq("role", "admin"))
@@ -272,9 +279,9 @@ export const rejectDocument = mutation({
             adminUser.managedCategories.includes(application.jobCategoryId)) {
           await ctx.db.insert("notifications", {
             userId: adminUser._id,
-            notificationType: "application_permanently_rejected",
-            title: `🚨 Application Permanently Rejected - ${applicantName}`,
-            message: `${applicantName}'s application has been permanently rejected after ${maxAttempts} failed attempts for ${documentType.name}. Applicant must create a new application.`,
+            notificationType: "application_permanently_closed",
+            title: `🚨 Application Permanently Closed - ${applicantName}`,
+            message: `${applicantName}'s application has been permanently closed after ${maxAttempts} referral attempts for ${documentType.name}. Applicant must create a new application and consult with doctor.`,
             actionUrl: `/dashboard/${application._id}/doc_verif`,
             applicationId: application._id,
             jobCategoryId: application.jobCategoryId,
@@ -284,27 +291,27 @@ export const rejectDocument = mutation({
       }
     }
     
-    // NOTE: For normal rejections (attempts 1-2), notifications will be queued and sent later
+    // NOTE: For normal referrals (attempts 1-2), notifications will be queued and sent later
     // when admin clicks "Request Document Resubmission" button. This allows batching multiple
-    // document rejections into one notification session.
+    // document referrals into one notification session.
 
-    // 10. Return success with rejection ID and warning flags
+    // 10. Return success with referral ID and warning flags
     return {
       success: true,
       rejectionId: rejectionHistoryId,
-      message: `Document ${documentType.name} has been rejected successfully`,
+      message: `Document ${documentType.name} has been referred successfully`,
       attemptNumber: attemptNumber,
       maxAttemptsReached: maxAttemptsReached,
       isFinalAttempt: attemptNumber === REJECTION_LIMITS.DOCUMENTS.FINAL_ATTEMPT_WARNING,
       remainingAttempts: Math.max(0, maxAttempts - attemptNumber),
     };
     } catch (error) {
-      console.error("Error rejecting document:", error);
+      console.error("Error referring document:", error);
       // Provide a more specific error message if possible
       const message = error instanceof Error ? error.message : "An unknown error occurred";
       return {
         success: false,
-        message: `Failed to reject document: ${message}`,
+        message: `Failed to refer document: ${message}`,
       };
     }
   },

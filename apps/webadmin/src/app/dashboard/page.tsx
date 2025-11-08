@@ -43,9 +43,9 @@ export default function DashboardPage() {
     "Submitted": { bg: "bg-yellow-100", text: "text-yellow-800" },
     "For Orientation": { bg: "bg-indigo-100", text: "text-indigo-800" },
     "For Document Verification": { bg: "bg-cyan-100", text: "text-cyan-800" },
-    "Payment Validation": { bg: "bg-purple-100", text: "text-purple-800" },
+    "For Payment Validation": { bg: "bg-purple-100", text: "text-purple-800" },
     "Scheduled": { bg: "bg-blue-100", text: "text-blue-800" },
-    "Attendance Validation": { bg: "bg-orange-100", text: "text-orange-800" },
+    "For Attendance Validation": { bg: "bg-orange-100", text: "text-orange-800" },
     "Under Review": { bg: "bg-yellow-100", text: "text-yellow-800" },
     "Approved": { bg: "bg-green-100", text: "text-green-800" },
     "Rejected": { bg: "bg-red-100", text: "text-red-800" },
@@ -54,6 +54,7 @@ export default function DashboardPage() {
 
   // --- 2. DATA FETCHING ---
   const { isLoaded: isClerkLoaded, user } = useUser();
+  // @ts-ignore - Type instantiation is excessively deep
   const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges); 
   const managedJobCategories: Doc<"jobCategories">[] | undefined = useQuery(api.jobCategories.getManaged.get);
 
@@ -81,19 +82,32 @@ export default function DashboardPage() {
     )
     .sort((a, b) => b._creationTime - a._creationTime); // Sort by latest first
   
+  // Get pending referrals count
+  const pendingReferralsCount = useQuery(
+    api.documents.getReferralCount.getPendingReferralsCount,
+    adminPrivileges && adminPrivileges.isAdmin
+      ? { 
+          managedCategories: adminPrivileges.managedCategories === "all" 
+            ? "all" as const
+            : adminPrivileges.managedCategories as Id<"jobCategories">[]
+        }
+      : "skip"
+  );
+
   const totalPending = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Submitted').length;
   const totalApproved = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Approved').length;
   const totalRejected = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Rejected').length;
   const totalForDocVerification = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Document Verification').length;
-  const totalForPaymentValidation = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'Payment Validation').length;
+  const totalForPaymentValidation = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Payment Validation').length;
   const totalForOrientation = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Orientation').length;
+  const totalReferrals = pendingReferralsCount ?? 0;
 
   const handleViewApplication = (app: ApplicationWithDetails) => {
     // Smart routing based on application status
     let targetRoute = `/dashboard/${app._id}/doc_verif`; // Default
     
     switch (app.applicationStatus) {
-      case "Payment Validation":
+      case "For Payment Validation":
         targetRoute = `/dashboard/${app._id}/payment_validation`;
         break;
       case "For Document Verification":
@@ -102,7 +116,7 @@ export default function DashboardPage() {
       case "Submitted":
       case "For Orientation":
       case "Scheduled":
-      case "Attendance Validation":
+      case "For Attendance Validation":
       case "Approved":
       case "Rejected":
       default:
@@ -172,13 +186,14 @@ export default function DashboardPage() {
         </header>
 
         {/* Stats Grid - Improved Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 lg:gap-5 mb-8">
           <StatCard title="Submitted" value={totalPending} icon={<StatIcon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />} colorClass="bg-gradient-to-br from-yellow-400 to-yellow-500" />
           <StatCard title="Doc Verification" value={totalForDocVerification} icon={<StatIcon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />} colorClass="bg-gradient-to-br from-cyan-400 to-cyan-500" />
+          <StatCard title="Referred to Doctor" value={totalReferrals} icon={<StatIcon d="M8 7h12M8 12h12m-12 5h12M4 7h.01M4 12h.01M4 17h.01" />} colorClass="bg-gradient-to-br from-amber-400 to-amber-500" />
           <StatCard title="Payment Validation" value={totalForPaymentValidation} icon={<StatIcon d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z" />} colorClass="bg-gradient-to-br from-purple-500 to-purple-600" />
           <StatCard title="For Orientation" value={totalForOrientation} icon={<StatIcon d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />} colorClass="bg-gradient-to-br from-indigo-400 to-indigo-500" />
           <StatCard title="Approved" value={totalApproved} icon={<StatIcon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-emerald-400 to-emerald-500" />
-          <StatCard title="Rejected" value={totalRejected} icon={<StatIcon d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-red-400 to-red-500" />
+          <StatCard title="Rejected (Payment)" value={totalRejected} icon={<StatIcon d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-red-400 to-red-500" />
         </div>
 
         {/* Controls Panel - Improved Layout */}
@@ -234,19 +249,19 @@ export default function DashboardPage() {
                     <option value="Submitted">Submitted</option>
                     <option value="For Orientation">For Orientation</option>
                     <option value="For Document Verification">For Document Verification</option>
-                    <option value="Payment Validation">Payment Validation</option>
+                    <option value="For Payment Validation">For Payment Validation</option>
                     <option value="Scheduled">Scheduled</option>
-                    <option value="Attendance Validation">Attendance Validation</option>
+                    <option value="For Attendance Validation">For Attendance Validation</option>
                     <option value="Under Review">Under Review</option>
                     <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
+                    <option value="Rejected">Referred</option>
                     <option value="Expired">Expired</option>
                   </select>
                 </div>
               </div>
               
               {/* Search Input */}
-              <div className="relative flex-shrink-0">
+              <div className="relative shrink-0">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Search
                 </label>
@@ -283,12 +298,12 @@ export default function DashboardPage() {
               )}
               <Link 
                 href="/dashboard/rejection-history" 
-                className="inline-flex items-center gap-2 bg-red-50 text-red-700 px-4 py-2 rounded-xl font-medium hover:bg-red-100 border border-red-200 transition-all shadow-sm hover:shadow"
+                className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-xl font-medium hover:bg-orange-100 border border-orange-200 transition-all shadow-sm hover:shadow"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
-                Rejection History
+                Referral/Management
               </Link>
               {(managedJobCategories?.some(cat => cat.name === "Food Category") || adminPrivileges.managedCategories === "all") && (
                 <Link 
