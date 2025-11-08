@@ -88,7 +88,7 @@ export default function AdminNotificationBell() {
                 </Link>
               ))}
               {notifications?.length === 0 && (
-                <p className="px-4 py-3 text-sm text-gray-500">No new notifications.</p>
+                <p className="px-4 py-3 text-sm text-gray-500">No new notifications</p>
               )}
             </div>
             <div className="border-t border-gray-200 px-4 py-2">

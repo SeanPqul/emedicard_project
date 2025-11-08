@@ -151,7 +151,7 @@ export default function SuperAdminNotificationsPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">System Notifications</h1>
               <p className="text-gray-600 mt-1">
-                All notifications across the entire system
+                All system-wide notifications
                 {unreadCount > 0 && (
                   <span className="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
                     {unreadCount} unread
