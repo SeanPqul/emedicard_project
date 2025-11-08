@@ -16,6 +16,7 @@ export const rejectDocument = mutation({
     ),
     rejectionReason: v.string(),
     specificIssues: v.array(v.string()),
+    doctorName: v.optional(v.string()), // Doctor name for medical document referrals
   },
   handler: async (ctx, args) => {
     try {
@@ -92,6 +93,7 @@ export const rejectDocument = mutation({
       rejectionCategory: args.rejectionCategory,
       rejectionReason: args.rejectionReason,
       specificIssues: args.specificIssues,
+      doctorName: args.doctorName, // Doctor name for medical referrals
       
       // Tracking
       rejectedBy: admin._id,
@@ -114,9 +116,14 @@ export const rejectDocument = mutation({
     });
 
     // 5. Update document status
+    // Format admin remarks with doctor referral if applicable
+    const adminRemarksText = args.doctorName 
+      ? `Please refer to Dr. ${args.doctorName}` 
+      : args.rejectionReason;
+    
     await ctx.db.patch(args.documentUploadId, {
       reviewStatus: "Rejected",
-      adminRemarks: args.rejectionReason,
+      adminRemarks: adminRemarksText,
       reviewedBy: admin._id,
       reviewedAt: Date.now(),
     });

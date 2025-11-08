@@ -423,22 +423,23 @@ export const getOrientationSchedulesForDate = query({
       .withIndex("by_date", (q) => q.eq("date", args.selectedDate))
       .collect();
 
-    // Filter to only show finished/past sessions that can be finalized
+    // Filter to show sessions that have started (so check-ins can be tracked)
+    // We'll show any session that has begun, even if it hasn't ended yet
     const now = Date.now();
-    const pastSchedules = allSchedules.filter((schedule) => {
+    const activeOrPastSchedules = allSchedules.filter((schedule) => {
       const startMinutes = schedule.startMinutes ?? 0;
       const endMinutes = schedule.endMinutes ?? 1439;
-      const { sessionEnd } = calculateSessionBounds(
+      const { sessionStart } = calculateSessionBounds(
         schedule.date,
         startMinutes,
         endMinutes
       );
-      return now > sessionEnd; // Only show sessions that have ended
+      return now >= sessionStart; // Show sessions that have started (active or past)
     });
 
     // For each schedule, get the attendees and their attendance status
     const schedulesWithAttendees = await Promise.all(
-      pastSchedules.map(async (schedule) => {
+      activeOrPastSchedules.map(async (schedule) => {
         // Get all bookings matching this schedule
         const allBookings = await ctx.db
           .query("orientationBookings")

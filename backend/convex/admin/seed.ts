@@ -9,9 +9,9 @@ export const seedJobCategoriesAndRequirements = mutation({
 
     //Insert job categories
     const jobCategories = [
-      { name: "Food Handler", colorCode: "#FFD700", requireOrientation: "Yes" },
-      { name: "Non-Food Worker", colorCode: "#00FF00", requireOrientation: "No" },
-      { name: "Skin-to-Skin Contact Worker", colorCode: "#FF69B4", requireOrientation: "No" },
+      { name: "Food Category", colorCode: "#FFD700", requireOrientation: "Yes" },
+      { name: "Non-Food Category", colorCode: "#00FF00", requireOrientation: "No" },
+      { name: "Skin-to-Skin Category", colorCode: "#FF69B4", requireOrientation: "No" },
     ];
 
     const jobCategoryIds: Record<string, Id<"jobCategories">> = {};
@@ -59,7 +59,7 @@ export const seedJobCategoriesAndRequirements = mutation({
 
     //Link documents to categories
     const categoryRequirementMap: Record<string, { name: string; required: boolean }[]> = {
-      "Food Handler": [
+      "Food Category": [
         { name: "Valid Government ID", required: true },
         { name: "2x2 ID Picture", required: true },
         { name: "Chest X-ray", required: true },
@@ -67,7 +67,7 @@ export const seedJobCategoriesAndRequirements = mutation({
         { name: "Stool Examination", required: true },
         { name: "Cedula", required: true },
       ],
-      "Non-Food Worker": [
+      "Non-Food Category": [
         { name: "Valid Government ID", required: true },
         { name: "2x2 ID Picture", required: true },
         { name: "Chest X-ray", required: true },
@@ -77,7 +77,7 @@ export const seedJobCategoriesAndRequirements = mutation({
         { name: "Drug Test", required: false },
         { name: "Neuropsychiatric Test", required: false },
       ],
-      "Skin-to-Skin Contact Worker": [
+      "Skin-to-Skin Category": [
         { name: "Valid Government ID", required: true },
         { name: "2x2 ID Picture", required: true },
         { name: "Chest X-ray", required: true },

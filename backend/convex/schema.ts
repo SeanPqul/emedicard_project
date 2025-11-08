@@ -325,7 +325,7 @@ export default defineSchema({
     .index("by_applicationId", ["applicationId", "timestamp"])
     .index("by_timestamp", ["timestamp"]),
 
-  // Document Rejection History
+  // Document Referral/Management History
   documentRejectionHistory: defineTable({
     // Core References
     applicationId: v.id("applications"),
@@ -350,6 +350,7 @@ export default defineSchema({
     ),
     rejectionReason: v.string(), // Detailed explanation
     specificIssues: v.array(v.string()), // Bullet points
+    doctorName: v.optional(v.string()), // Doctor name for medical referrals
     
     // Tracking
     rejectedBy: v.id("users"), // Admin who rejected
