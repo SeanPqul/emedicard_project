@@ -20,31 +20,29 @@ export const getAllRejections = query({
     // Determine if user is super admin
     const isSuperAdmin = !user.managedCategories || user.managedCategories.length === 0;
 
-    // Get all document rejections from documentRejectionHistory
+    // If not super admin, get managed application IDs once
+    let managedApplicationIds: Set<any> | null = null;
+    if (!isSuperAdmin) {
+      const managedCategoryIds = user.managedCategories || [];
+      const allApplications = await ctx.db.query("applications").collect();
+      const applicationsInManagedCategories = allApplications.filter(app => 
+        managedCategoryIds.includes(app.jobCategoryId)
+      );
+      managedApplicationIds = new Set(
+        applicationsInManagedCategories.map(app => app._id)
+      );
+    }
+
+    // Get all document rejections from OLD documentRejectionHistory table
     const documentRejections = await ctx.db
       .query("documentRejectionHistory")
       .order("desc")
       .collect();
 
-    // Filter by managed categories if not super admin
-    let filteredRejections = documentRejections;
-    if (!isSuperAdmin) {
-      const managedCategoryIds = user.managedCategories || [];
-      
-      // Get all applications and filter by managed categories
-      const allApplications = await ctx.db.query("applications").collect();
-      const applicationsInManagedCategories = allApplications.filter(app => 
-        managedCategoryIds.includes(app.jobCategoryId)
-      );
-      
-      const managedApplicationIds = new Set(
-        applicationsInManagedCategories.map(app => app._id)
-      );
-      
-      filteredRejections = documentRejections.filter(rejection => 
-        managedApplicationIds.has(rejection.applicationId)
-      );
-    }
+    // Filter rejections by managed categories if not super admin
+    const filteredRejections = managedApplicationIds
+      ? documentRejections.filter(rejection => managedApplicationIds.has(rejection.applicationId))
+      : documentRejections;
 
     // Enrich rejection data with related information
     const enrichedRejections = await Promise.all(
@@ -77,6 +75,51 @@ export const getAllRejections = query({
       })
     );
 
+    // Get all document referrals from NEW documentReferralHistory table
+    const documentReferrals = await ctx.db
+      .query("documentReferralHistory")
+      .order("desc")
+      .collect();
+
+    // Filter referrals by managed categories if not super admin
+    const filteredReferrals = managedApplicationIds
+      ? documentReferrals.filter(referral => managedApplicationIds.has(referral.applicationId))
+      : documentReferrals;
+
+    // Enrich referral data from NEW table
+    const enrichedReferrals = await Promise.all(
+      filteredReferrals.map(async (referral) => {
+        const application = await ctx.db.get(referral.applicationId);
+        const applicant = application ? await ctx.db.get(application.userId) : null;
+        const jobCategory = application ? await ctx.db.get(application.jobCategoryId) : null;
+        const documentType = await ctx.db.get(referral.documentTypeId);
+        const referredBy = await ctx.db.get(referral.referredBy);
+        
+        return {
+          _id: referral._id,
+          type: "document" as const,
+          applicationId: referral.applicationId,
+          applicantName: applicant?.fullname || "Unknown",
+          applicantEmail: applicant?.email || "N/A",
+          jobCategory: jobCategory?.name || "Unknown",
+          documentType: documentType?.name || "Unknown Document",
+          rejectionCategory: referral.issueType === "medical_referral" 
+            ? (referral.medicalReferralCategory || "other") 
+            : (referral.documentIssueCategory || "other"),
+          rejectionReason: referral.referralReason,
+          specificIssues: referral.specificIssues || [],
+          rejectedAt: referral.referredAt,
+          rejectedBy: referredBy?.fullname || "Admin",
+          rejectedByEmail: referredBy?.email || "N/A",
+          attemptNumber: referral.attemptNumber || 1,
+          wasReplaced: referral.wasReplaced || false,
+          replacedAt: referral.replacedAt,
+          status: referral.status,
+          issueType: referral.issueType, // medical_referral or document_issue
+        };
+      })
+    );
+
     // Get payment rejections from paymentRejectionHistory
     const paymentRejections = await ctx.db
       .query("paymentRejectionHistory")
@@ -84,23 +127,9 @@ export const getAllRejections = query({
       .collect();
 
     // Filter payment rejections by managed categories if not super admin
-    let filteredPaymentRejections = paymentRejections;
-    if (!isSuperAdmin) {
-      const managedCategoryIds = user.managedCategories || [];
-      
-      const allApplications = await ctx.db.query("applications").collect();
-      const applicationsInManagedCategories = allApplications.filter(app => 
-        managedCategoryIds.includes(app.jobCategoryId)
-      );
-      
-      const managedApplicationIds = new Set(
-        applicationsInManagedCategories.map(app => app._id)
-      );
-      
-      filteredPaymentRejections = paymentRejections.filter(rejection => 
-        managedApplicationIds.has(rejection.applicationId)
-      );
-    }
+    const filteredPaymentRejections = managedApplicationIds
+      ? paymentRejections.filter(rejection => managedApplicationIds.has(rejection.applicationId))
+      : paymentRejections;
 
     // Enrich payment rejection data
     const enrichedPaymentRejections = await Promise.all(
@@ -223,9 +252,10 @@ export const getAllRejections = query({
       triggerSource: rejection.triggerSource, // where it came from
     }));
 
-    // Combine all rejections (documents, payments, orientations, and applications) and sort by date
+    // Combine all rejections (OLD rejections, NEW referrals, payments, orientations, and applications) and sort by date
     const allRejections = [
-      ...enrichedRejections, 
+      ...enrichedRejections, // OLD: documentRejectionHistory (backward compatible)
+      ...enrichedReferrals,  // NEW: documentReferralHistory
       ...enrichedPaymentRejections, 
       ...enrichedLogs,
       ...enrichedApplicationRejections
@@ -255,9 +285,12 @@ export const getRejectionStats = query({
 
     const isSuperAdmin = !user.managedCategories || user.managedCategories.length === 0;
 
-    // Get all document rejections
+    // Get all document rejections (OLD) and referrals (NEW)
     const allDocumentRejections = await ctx.db
       .query("documentRejectionHistory")
+      .collect();
+    const allDocumentReferrals = await ctx.db
+      .query("documentReferralHistory")
       .collect();
 
     // Get all payment rejections
@@ -270,9 +303,10 @@ export const getRejectionStats = query({
       .query("applicationRejectionHistory")
       .collect();
 
-    // Combine all rejections
+    // Combine all issues: OLD rejections + NEW referrals
     const allRejections = [
-      ...allDocumentRejections, 
+      ...allDocumentRejections,
+      ...allDocumentReferrals,
       ...allPaymentRejections, 
       ...allApplicationRejections
     ];
@@ -299,6 +333,7 @@ export const getRejectionStats = query({
       
       const filteredDocAndPaymentRejections = [
         ...allDocumentRejections,
+        ...allDocumentReferrals,
         ...allPaymentRejections
       ].filter(rejection => 
         managedApplicationIds.has(rejection.applicationId)
@@ -310,7 +345,7 @@ export const getRejectionStats = query({
     // Calculate statistics
     const totalRejections = filteredRejections.length;
     
-    // Application rejections can't be resubmitted, so only check doc/payment rejections
+    // Application rejections can't be resubmitted, so only check doc/payment referrals/rejections
     const docAndPaymentRejections = filteredRejections.filter(r => 
       'wasReplaced' in r // Only doc/payment have wasReplaced field
     );
@@ -320,15 +355,39 @@ export const getRejectionStats = query({
     
     // Group by rejection category
     const byCategory: Record<string, number> = {};
-    filteredRejections.forEach(rejection => {
-      const category = rejection.rejectionCategory || "other";
+    filteredRejections.forEach((rejection: any) => {
+      let category = "other";
+      
+      // Handle different table structures
+      if (rejection.rejectionCategory) {
+        // Old tables: documentRejectionHistory, paymentRejectionHistory, applicationRejectionHistory
+        category = rejection.rejectionCategory;
+      } else if (rejection.issueType) {
+        // New table: documentReferralHistory
+        if (rejection.issueType === 'medical_referral') {
+          category = rejection.medicalReferralCategory || "medical_referral";
+        } else {
+          category = rejection.documentIssueCategory || "document_issue";
+        }
+      }
+      
       byCategory[category] = (byCategory[category] || 0) + 1;
     });
 
     // Top rejection reasons
     const reasonCounts: Record<string, number> = {};
-    filteredRejections.forEach(rejection => {
-      const reason = rejection.rejectionReason || "No reason provided";
+    filteredRejections.forEach((rejection: any) => {
+      let reason = "No reason provided";
+      
+      // Handle different table structures
+      if (rejection.rejectionReason) {
+        // Old tables
+        reason = rejection.rejectionReason;
+      } else if (rejection.referralReason) {
+        // New table: documentReferralHistory
+        reason = rejection.referralReason;
+      }
+      
       reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
     });
     
