@@ -205,45 +205,92 @@ export const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     color: theme.colors.text.tertiary,
   },
-  
-  // Phase 4 Migration: Doctor Section (for medical referrals)
-  doctorSection: {
+
+  // Medical Referral Specific Styles
+  medicalInfoSection: {
     backgroundColor: '#EFF6FF', // Light blue background
     borderRadius: theme.borderRadius.md,
     padding: moderateScale(14),
-    marginBottom: verticalScale(16),
+    marginBottom: verticalScale(12),
     borderWidth: 1,
-    borderColor: '#3B82F6' + '20',
+    borderColor: '#DBEAFE',
   },
-  doctorHeader: {
+  medicalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: verticalScale(8),
+    marginBottom: verticalScale(10),
   },
-  doctorTitle: {
-    fontSize: moderateScale(13),
+  medicalHeaderText: {
+    fontSize: moderateScale(15),
     fontWeight: '600' as const,
-    color: '#3B82F6',
+    color: '#1E40AF',
     marginLeft: scale(8),
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
-  doctorName: {
-    fontSize: moderateScale(16),
-    fontWeight: '600' as const,
-    color: theme.colors.text.primary,
-    marginBottom: verticalScale(6),
+  doctorInfo: {
+    gap: verticalScale(6),
   },
-  clinicInfo: {
+  doctorRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: verticalScale(4),
+    alignItems: 'center',
+    gap: scale(6),
   },
-  clinicAddress: {
-    flex: 1,
+  doctorLabel: {
     fontSize: moderateScale(13),
     color: theme.colors.text.secondary,
+  },
+  doctorName: {
+    fontSize: moderateScale(13),
+    fontWeight: '600' as const,
+    color: theme.colors.text.primary,
+    flex: 1,
+  },
+  clinicRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: scale(6),
+  },
+  clinicLabel: {
+    fontSize: moderateScale(13),
+    color: theme.colors.text.secondary,
+  },
+  clinicAddress: {
+    fontSize: moderateScale(13),
+    color: theme.colors.text.primary,
+    flex: 1,
+  },
+
+  // Next Steps Section (Medical)
+  nextStepsSection: {
+    backgroundColor: '#F0F9FF',
+    borderRadius: theme.borderRadius.md,
+    padding: moderateScale(14),
+    marginTop: verticalScale(12),
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+  },
+  nextStepsTitle: {
+    fontSize: moderateScale(15),
+    fontWeight: '600' as const,
+    color: '#1E40AF',
+    marginBottom: verticalScale(8),
+  },
+  nextStepsText: {
+    fontSize: moderateScale(13),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(20),
+  },
+  importantNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: verticalScale(10),
+    backgroundColor: '#DBEAFE',
+    padding: moderateScale(10),
+    borderRadius: theme.borderRadius.sm,
+  },
+  importantNoteText: {
+    fontSize: moderateScale(12),
+    color: '#1E40AF',
     marginLeft: scale(6),
-    lineHeight: moderateScale(18),
+    flex: 1,
   },
 });

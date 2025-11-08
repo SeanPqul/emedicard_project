@@ -1,0 +1,1 @@
+export { DocumentReferralWidget } from './DocumentReferralWidget';

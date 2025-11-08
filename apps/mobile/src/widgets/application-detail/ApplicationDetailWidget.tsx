@@ -20,7 +20,7 @@ import MayaLogo from '@/assets/svgs/maya-logo-brandlogos.net_gpvn1r359.svg';
 import GCashLogo from '@/assets/svgs/gcash-logo-brandlogos.net_arv9ck6s2.svg';
 import { usePaymentRejectionHistory } from '@features/payment';
 
-// UI constants for status colors
+// UI constants for status colors (Phase 4 Migration: Added new statuses)
 const STATUS_COLORS = {
   'Pending Payment': '#FFA500',
   'Payment Rejected': '#DC2626',
@@ -29,7 +29,10 @@ const STATUS_COLORS = {
   'Submitted': '#2E86AB',
   'Under Review': '#F18F01',
   'Approved': '#28A745',
-  'Rejected': '#DC3545',
+  'Rejected': '#DC3545', // DEPRECATED
+  // NEW - Phase 4 Migration
+  'Documents Need Revision': '#F59E0B', // Orange - document issues
+  'Referred for Medical Management': '#3B82F6', // Blue - medical referrals
 } as const;
 
 interface ApplicationDetailWidgetProps {
@@ -315,7 +318,19 @@ export function ApplicationDetailWidget({
             {application.status === 'Approved' && (
               <Text style={[styles.documentsStatusText, { color: theme.colors.accent.safetyGreen }]}>All documents approved</Text>
             )}
-            {rejectedDocumentsCount > 0 && (
+            {/* Phase 4 Migration: Show appropriate message based on status */}
+            {application.status === 'Referred for Medical Management' && (
+              <Text style={[styles.documentsStatusText, { color: '#3B82F6' }]}>
+                📋 Medical referral - see doctor for clearance
+              </Text>
+            )}
+            {application.status === 'Documents Need Revision' && rejectedDocumentsCount > 0 && (
+              <Text style={[styles.documentsStatusText, { color: '#F59E0B' }]}>
+                {rejectedDocumentsCount} document{rejectedDocumentsCount !== 1 ? 's' : ''} need correction
+              </Text>
+            )}
+            {/* DEPRECATED: Legacy rejection message (backward compatibility) */}
+            {rejectedDocumentsCount > 0 && application.status !== 'Referred for Medical Management' && application.status !== 'Documents Need Revision' && (
               <Text style={[styles.documentsStatusText, { color: theme.colors.semantic.error }]}>
                 {rejectedDocumentsCount} document{rejectedDocumentsCount !== 1 ? 's' : ''} need revision
               </Text>
@@ -338,7 +353,7 @@ export function ApplicationDetailWidget({
         // 3. Payment has been validated (NOT waiting for validation)
         // 4. Status is not Rejected, Cancelled, or Approved
         const shouldShowOrientation = requiresOrientation && !orientationCompleted &&
-          !['Pending Payment', 'For Payment Validation', 'Payment Rejected', 'Rejected', 'Cancelled', 'Approved'].includes(application.status);
+          !['Pending Payment', 'For Payment Validation', 'Payment Rejected', 'Rejected', 'Cancelled', 'Approved', 'Referred for Medical Management', 'Documents Need Revision'].includes(application.status);
 
         return shouldShowOrientation;
       })() && (

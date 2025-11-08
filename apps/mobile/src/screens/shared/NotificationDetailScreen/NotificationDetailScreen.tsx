@@ -59,10 +59,39 @@ const NOTIFICATION_CONFIG = {
     actionText: 'View Health Card',
     actionIcon: 'card-outline',
   },
-  DocumentRejection: {
+  DocumentRejection: { // DEPRECATED - backward compatibility
     icon: 'close-circle',
     color: theme.colors.semantic.error,
     gradient: [theme.colors.semantic.error, '#DC2626'],
+    actionText: 'Resubmit Document',
+    actionIcon: 'cloud-upload-outline',
+  },
+  // Phase 4 Migration: New notification types
+  DocumentReferredMedical: {
+    icon: 'medkit',
+    color: '#3B82F6', // Blue for medical referral
+    gradient: ['#3B82F6', '#2563EB'],
+    actionText: 'View Doctor Information',
+    actionIcon: 'medkit-outline',
+  },
+  DocumentIssueFlagged: {
+    icon: 'document-text',
+    color: '#F59E0B', // Orange for document issue
+    gradient: ['#F59E0B', '#F97316'],
+    actionText: 'Fix Document',
+    actionIcon: 'document-text-outline',
+  },
+  MedicalReferralResubmission: {
+    icon: 'medkit-outline',
+    color: '#3B82F6',
+    gradient: ['#3B82F6', '#2563EB'],
+    actionText: 'Submit Medical Clearance',
+    actionIcon: 'cloud-upload-outline',
+  },
+  DocumentResubmission: {
+    icon: 'document-text-outline',
+    color: '#F59E0B',
+    gradient: ['#F59E0B', '#F97316'],
     actionText: 'Resubmit Document',
     actionIcon: 'cloud-upload-outline',
   },
@@ -166,7 +195,11 @@ export function NotificationDetailScreen() {
       case 'CardIssue':
         router.push('/(screens)/(shared)/health-cards');
         break;
-      case 'DocumentRejection':
+      case 'DocumentRejection': // DEPRECATED - backward compatibility
+      case 'DocumentReferredMedical': // Phase 4: Medical referral
+      case 'DocumentIssueFlagged': // Phase 4: Document issue
+      case 'MedicalReferralResubmission': // Phase 4: Medical resubmission
+      case 'DocumentResubmission': // Phase 4: Document resubmission
         // Use actionUrl from backend if available, or navigate to documents view
         if (notification.actionUrl) {
           // actionUrl format: /applications/{appId}/resubmit/{docTypeId}

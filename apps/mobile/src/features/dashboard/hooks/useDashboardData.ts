@@ -32,13 +32,16 @@ export function useDashboardData() {
 
     // Priority order: show applications being actively processed first
     const statusPriority: Record<string, number> = {
-      'Under Review': 1,        // Highest priority - actively being reviewed
-      'For Orientation': 2,     // Ready for orientation
-      'For Payment Validation': 3, // Payment being validated
-      'Submitted': 4,           // Just submitted
-      'Approved': 5,            // Completed
-      'Pending Payment': 6,     // Waiting for user payment
-      'Rejected': 7,            // Lowest priority
+      // NEW - Phase 4 Migration: Action-required statuses get high priority
+      'Referred for Medical Management': 1, // Medical referral - needs doctor visit
+      'Documents Need Revision': 2,         // Document issues - needs resubmission
+      'Under Review': 3,        // Actively being reviewed
+      'For Orientation': 4,     // Ready for orientation
+      'For Payment Validation': 5, // Payment being validated
+      'Submitted': 6,           // Just submitted
+      'Approved': 7,            // Completed
+      'Pending Payment': 8,     // Waiting for user payment
+      'Rejected': 9,            // DEPRECATED - Lowest priority
     };
 
     return apps.reduce((best, app) => {

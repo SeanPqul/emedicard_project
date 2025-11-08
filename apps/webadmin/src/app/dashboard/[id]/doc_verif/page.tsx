@@ -78,8 +78,8 @@ const medicalReferralReasons = [
   'Other medical concern',
 ];
 
-// Non-medical requirement remark options
-const nonMedicalRemarkOptions = [
+// Non-medical requirement issue options (for flagging document problems)
+const nonMedicalIssueOptions = [
   'Invalid Government-issued ID',
   'Expired ID',
   'Blurry or unclear photo',
@@ -87,7 +87,7 @@ const nonMedicalRemarkOptions = [
   'Missing required information',
   'Others'
 ];
-const rejectionCategories = [
+const issueCategories = [
   { value: 'quality_issue', label: 'Quality Issue' },
   { value: 'wrong_document', label: 'Wrong Document' },
   { value: 'expired_document', label: 'Expired Document' },
@@ -126,7 +126,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [openReferralIndex, setOpenReferralIndex] = useState<number | null>(null);
   const [referralReason, setReferralReason] = useState<string>('');
-  const [rejectionCategory, setRejectionCategory] = useState('other');
+  const [issueCategory, setIssueCategory] = useState('other');
   const [specificIssues, setSpecificIssues] = useState('');
   const [extractedText, setExtractedText] = useState<string[] | null>(null); // New state for extracted text
   const [showOcrModal, setShowOcrModal] = useState<boolean>(false); // New state for OCR modal visibility
@@ -140,7 +140,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [data, setData] = useState<ApplicationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
-  const rejectDocumentMutation = useMutation(api.admin.documents.rejectDocument.rejectDocument);
+  const referDocumentMutation = useMutation(api.admin.documents.rejectDocument.rejectDocument); // Actually refers documents
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
 
   const loadData = async () => {
@@ -185,19 +185,19 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     try {
       setError(null);
       const pendingDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Missing' || doc.status === 'Pending');
-      const rejectedDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected') || [];
+      const referredDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected') || []; // "Rejected" status = referred/flagged
       
       if (pendingDocs && pendingDocs.length > 0) {
-        throw new Error("Please review and assign a status (Approve or Reject) to all documents before proceeding.");
+        throw new Error("Please review and assign a status (Approve or Flag/Refer) to all documents before proceeding.");
       }
       
-      // Prevent approval if any documents are referred
-      if (newStatus === 'Approved' && rejectedDocs.length > 0) {
-        throw new Error(`Cannot approve application. ${rejectedDocs.length} document(s) are referred to doctor. Please use 'Send Referral Notification' button instead.`);
+      // Prevent approval if any documents are referred/flagged
+      if (newStatus === 'Approved' && referredDocs.length > 0) {
+        throw new Error(`Cannot approve application. ${referredDocs.length} document(s) flagged or referred for medical management. Please use 'Send Referral Notification' button instead.`);
       }
       
       if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Rejected')) {
-        throw new Error("To send referrals, at least one medical document must be referred to a doctor.");
+        throw new Error("To send referral notifications, at least one document must be flagged or referred for medical management.");
       }
 
       await finalizeApplication({ applicationId: params.id, newStatus });
@@ -689,33 +689,33 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           </div>
                         )}
                         
-                        <div>
-                          <label htmlFor={`rejection-category-${idx}`} className="block text-sm font-medium text-gray-700">Referral Category</label>
-                          <select
-                            id={`rejection-category-${idx}`}
-                            name={`rejection-category-${idx}`}
-                            value={rejectionCategory}
-                            onChange={(e) => setRejectionCategory(e.target.value)}
-                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base text-gray-700 border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                          >
-                            {rejectionCategories.map(cat => (
-                              <option key={cat.value} value={cat.value}>{cat.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor={`remark-${idx}`} className="block text-sm font-medium text-gray-700">
-                            {isMedicalDocument(item.fieldIdentifier) ? 'Medical Referral Reason' : 'Remark Reason'} <span className="text-red-500">*</span>
-                          </label>
-                          <div className="mt-1 space-y-2">
-                            {(isMedicalDocument(item.fieldIdentifier) ? medicalReferralReasons : nonMedicalRemarkOptions).map(option => (
-                              <label key={option} className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer">
-                                <input type="radio" name={`remark-${idx}`} value={option} checked={referralReason === option} onChange={(e) => setReferralReason(e.target.value)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" />
-                                <span className="ml-3 text-sm text-gray-700">{option}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
+        <div>
+          <label htmlFor={`issue-category-${idx}`} className="block text-sm font-medium text-gray-700">{isMedicalDocument(item.fieldIdentifier) ? 'Referral Category' : 'Issue Category'}</label>
+          <select
+            id={`issue-category-${idx}`}
+            name={`issue-category-${idx}`}
+            value={issueCategory}
+            onChange={(e) => setIssueCategory(e.target.value)}
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base text-gray-700 border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+          >
+            {issueCategories.map(cat => (
+              <option key={cat.value} value={cat.value}>{cat.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor={`remark-${idx}`} className="block text-sm font-medium text-gray-700">
+            {isMedicalDocument(item.fieldIdentifier) ? 'Medical Referral Reason' : 'Document Issue Reason'} <span className="text-red-500">*</span>
+          </label>
+          <div className="mt-1 space-y-2">
+            {(isMedicalDocument(item.fieldIdentifier) ? medicalReferralReasons : nonMedicalIssueOptions).map(option => (
+              <label key={option} className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer">
+                <input type="radio" name={`remark-${idx}`} value={option} checked={referralReason === option} onChange={(e) => setReferralReason(e.target.value)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" />
+                <span className="ml-3 text-sm text-gray-700">{option}</span>
+              </label>
+            ))}
+          </div>
+        </div>
                         <div>
                           <label htmlFor={`specific-issues-${idx}`} className="block text-sm font-medium text-gray-700">
                             {isMedicalDocument(item.fieldIdentifier) ? 'Additional Notes (Optional)' : 'Additional Details (Optional)'}
@@ -743,11 +743,11 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             // Validate referral reason
                             if (!referralReason) throw new Error('Please select a referral reason before saving.');
 
-                            // For medical docs, treat as referral (Rejected internally)
+                            // For medical docs, treat as medical referral
                             if (isMedicalDocument(item.fieldIdentifier)) {
-                              await rejectDocumentMutation({
+                              await referDocumentMutation({
                                 documentUploadId: item.uploadId!,
-                                rejectionCategory: rejectionCategory as any,
+                                rejectionCategory: issueCategory as any,
                                 rejectionReason: referralReason,
                                 specificIssues: specificIssues.split(',').map(s => s.trim()).filter(s => s),
                                 doctorName: FIXED_DOCTOR_NAME, // Use fixed doctor name
@@ -765,16 +765,16 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                                   fileType: item.fileUrl?.split('.').pop() || undefined,
                                 });
                               } else {
-                                // For pending docs, we can't save remarks without changing status
-                                // This scenario should prompt the user to approve/reject first
-                                throw new Error('Please approve or reject the document before adding remarks.');
+                                // For pending docs, we can't save issues without changing status
+                                // This scenario should prompt the user to approve/flag first
+                                throw new Error('Please approve or flag the document before adding remarks.');
                               }
                             }
 
                             await loadData();
                             setOpenReferralIndex(null);
                             setReferralReason('');
-                            setRejectionCategory('other');
+                            setIssueCategory('other');
                             setSpecificIssues('');
                             setError(null);
                           } catch (e: any) {
@@ -803,7 +803,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         onClick={() => {
                           setOpenReferralIndex(idx);
                           // Prefill referral defaults for medical docs
-                          setRejectionCategory('other');
+                          setIssueCategory('other');
                           setReferralReason('Other medical concern'); // Default to first option
                           setSpecificIssues(`Failed Medical Result (${item.requirementName}) - Please refer to ${FIXED_DOCTOR_NAME} at Door 7, Magsaysay Complex, Magsaysay Park, Davao City.`);
                         }}

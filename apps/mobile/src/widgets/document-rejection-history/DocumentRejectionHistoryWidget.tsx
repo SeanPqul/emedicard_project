@@ -13,6 +13,7 @@ import { DocumentRejectionWidget } from '@widgets/document-rejection';
 import { styles } from './DocumentRejectionHistoryWidget.styles';
 import { moderateScale } from '@shared/utils/responsive';
 import { EnrichedRejection, RejectionCategory } from '@entities/document/model/rejection-types';
+import { EnrichedReferral } from '@entities/document/model/referral-types';
 import { getRejectionCategoryLabel } from '@entities/document/model/rejection-constants';
 
 // Filter categories
@@ -25,15 +26,15 @@ const FILTER_CATEGORIES: Array<{ key: RejectionCategory | 'all'; label: string; 
 ];
 
 interface DocumentRejectionHistoryWidgetProps {
-  rejections: EnrichedRejection[];
+  rejections: (EnrichedRejection | EnrichedReferral)[]; // Phase 4: Support both types
   documentTypes: Record<string, string>; // Map of documentTypeId to name
   selectedFilter: RejectionCategory | 'all';
   isLoading: boolean;
   isRefreshing: boolean;
   onFilterChange: (filter: RejectionCategory | 'all') => void;
   onRefresh: () => void;
-  onResubmit: (rejection: EnrichedRejection) => void;
-  onViewDetails: (rejection: EnrichedRejection) => void;
+  onResubmit: (rejection: EnrichedRejection | EnrichedReferral) => void;
+  onViewDetails: (rejection: EnrichedRejection | EnrichedReferral) => void;
 }
 
 export function DocumentRejectionHistoryWidget({
@@ -49,15 +50,25 @@ export function DocumentRejectionHistoryWidget({
 }: DocumentRejectionHistoryWidgetProps) {
   
   // Group rejections by date
+  // Phase 4: Handle both old and new types
   const groupedRejections = React.useMemo(() => {
-    const groups: Record<string, EnrichedRejection[]> = {};
+    const groups: Record<string, (EnrichedRejection | EnrichedReferral)[]> = {};
     
     const filteredRejections = selectedFilter === 'all' 
       ? rejections 
-      : rejections.filter(r => r.rejectionCategory === selectedFilter);
+      : rejections.filter(r => {
+          // Check if it's old rejection type
+          if ('rejectionCategory' in r) {
+            return r.rejectionCategory === selectedFilter;
+          }
+          // New referral type - no filtering by category yet
+          return false;
+        });
     
     filteredRejections.forEach(rejection => {
-      const date = new Date(rejection.rejectedAt);
+      // Phase 4: Get date from either rejectedAt or referredAt
+      const timestamp = 'rejectedAt' in rejection ? rejection.rejectedAt : rejection.referredAt;
+      const date = new Date(timestamp);
       const dateKey = date.toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric', 

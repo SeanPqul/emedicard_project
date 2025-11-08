@@ -15,7 +15,10 @@ export type ApplicationStatus =
   | 'Submitted' 
   | 'Under Review' 
   | 'Approved' 
-  | 'Rejected';
+  | 'Rejected' // DEPRECATED - Only for permanent rejection
+  // NEW - Phase 4 Migration: Proper medical terminology
+  | 'Documents Need Revision' // Non-medical document issues
+  | 'Referred for Medical Management'; // Medical findings requiring doctor consultation
 export type ApplicationType = 'New' | 'Renew';
 export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
 export type PaymentMethod = 'Maya' | 'Gcash' | 'BaranggayHall' | 'CityHall';

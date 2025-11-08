@@ -79,7 +79,15 @@ function NotificationManagementPage() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <Link href={notification.actionUrl || '#'} onClick={() => {
-                                  if (notification.notificationType !== "DocumentResubmission") { // Only mark regular notifications as read
+                                  // Don't mark resubmission/referral notifications as read via regular markAsRead
+                                  const isReferralType = 
+                                    notification.notificationType === "DocumentResubmission" ||
+                                    notification.notificationType === "DocumentReferredMedical" ||
+                                    notification.notificationType === "DocumentIssueFlagged" ||
+                                    notification.notificationType === "MedicalReferralResubmission" ||
+                                    notification.notificationType === "DocumentResubmission";
+                                  
+                                  if (!isReferralType) {
                                     markAsRead({ notificationId: notification._id as Id<"notifications"> });
                                   }
                                 }} className="text-emerald-600 hover:text-emerald-900">View</Link>

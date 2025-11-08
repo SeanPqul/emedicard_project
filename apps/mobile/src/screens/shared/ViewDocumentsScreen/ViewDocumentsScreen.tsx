@@ -76,8 +76,13 @@ export function ViewDocumentsScreen() {
     switch (status) {
       case 'Approved':
         return getColor('accent.safetyGreen');
-      case 'Rejected':
+      case 'Rejected': // DEPRECATED - backward compatibility
         return getColor('semantic.error');
+      // Phase 4 Migration: New statuses
+      case 'Referred': // Medical referral
+        return '#3B82F6'; // Blue
+      case 'NeedsRevision': // Document issue
+        return '#F59E0B'; // Orange
       case 'Pending':
       default:
         return getColor('accent.warningOrange');
@@ -88,8 +93,13 @@ export function ViewDocumentsScreen() {
     switch (status) {
       case 'Approved':
         return 'checkmark-circle';
-      case 'Rejected':
+      case 'Rejected': // DEPRECATED - backward compatibility
         return 'close-circle';
+      // Phase 4 Migration: New statuses
+      case 'Referred': // Medical referral
+        return 'medkit-outline';
+      case 'NeedsRevision': // Document issue
+        return 'document-text-outline';
       case 'Pending':
       default:
         return 'time-outline';
@@ -256,7 +266,11 @@ export function ViewDocumentsScreen() {
                 ? 'Your documents are waiting for verification by our team.'
                 : application.applicationStatus === 'Under Review'
                 ? 'Your documents are currently being verified.'
-                : application.applicationStatus === 'Rejected' && activeRejections.length > 0
+                : application.applicationStatus === 'Referred for Medical Management'
+                ? 'Medical consultation required. Please see doctor information for details.'
+                : application.applicationStatus === 'Documents Need Revision'
+                ? `${activeRejections.length} document${activeRejections.length > 1 ? 's need' : ' needs'} to be corrected and resubmitted.`
+                : application.applicationStatus === 'Rejected' && activeRejections.length > 0 // DEPRECATED - backward compatibility
                 ? `${activeRejections.length} document${activeRejections.length > 1 ? 's need' : ' needs'} to be revised and resubmitted.`
                 : 'You can view all your uploaded documents below.'}
             </Text>
@@ -321,7 +335,8 @@ export function ViewDocumentsScreen() {
                   <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
                 </TouchableOpacity>
 
-                {doc.reviewStatus === 'Rejected' && (
+                {/* Phase 4 Migration: Handle all issue types */}
+                {(doc.reviewStatus === 'Rejected' || doc.reviewStatus === 'Referred' || doc.reviewStatus === 'NeedsRevision') && (
                   <TouchableOpacity 
                     style={[styles.documentHeader, styles.documentSubItem]}
                     onPress={() => {
@@ -334,11 +349,21 @@ export function ViewDocumentsScreen() {
                     }}
                   >
                     <View style={styles.documentIconContainer}>
-                      <Ionicons name="refresh-outline" size={moderateScale(20)} color={getColor('semantic.error')} />
+                      <Ionicons 
+                        name={doc.reviewStatus === 'Referred' ? 'medkit-outline' : 'refresh-outline'} 
+                        size={moderateScale(20)} 
+                        color={doc.reviewStatus === 'Referred' ? '#3B82F6' : getColor('semantic.error')} 
+                      />
                     </View>
                     <View style={styles.documentInfo}>
-                      <Text style={styles.documentSubItemText}>Replace rejected document</Text>
-                      <Text style={styles.rejectionReason}>{doc.adminRemarks || 'Document needs revision'}</Text>
+                      <Text style={styles.documentSubItemText}>
+                        {doc.reviewStatus === 'Referred' 
+                          ? 'Medical consultation required'
+                          : doc.reviewStatus === 'NeedsRevision'
+                          ? 'Replace document with corrections'
+                          : 'Replace rejected document' /* DEPRECATED - backward compatibility */}
+                      </Text>
+                      <Text style={styles.rejectionReason}>{doc.adminRemarks || 'Document needs attention'}</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
                   </TouchableOpacity>

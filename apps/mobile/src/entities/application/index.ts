@@ -25,5 +25,8 @@ export type {
 // Re-export JobCategory from its proper location
 export type { JobCategory } from '@entities/jobCategory';
 
+// Export constants (NEW - Phase 4 Migration)
+export * from './model/constants';
+
 // Export lib utilities directly from source file for EAS build compatibility
 export * from './lib/requirementsMapper';

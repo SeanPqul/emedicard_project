@@ -44,13 +44,21 @@ export function useApplicationDetail(applicationId: string | undefined) {
     return { ...applicationRaw, payment: mappedPayment } as ApplicationDetails;
   }, [applicationRaw, latestPayment]);
   
-  // Query rejected documents count
+  // Phase 4 Migration: Query both old rejections and new referrals
   const rejectionHistory = useQuery(
     api.documents.rejectionQueries.getRejectionHistory,
     applicationId ? { applicationId: applicationId as Id<"applications"> } : "skip"
   );
+
+  const referralHistory = useQuery(
+    api.documents.referralQueries?.getReferralHistory,
+    applicationId ? { applicationId: applicationId as Id<"applications"> } : "skip"
+  );
   
-  const rejectedDocumentsCount = rejectionHistory?.filter(r => !r.wasReplaced).length || 0;
+  // Combine counts from both sources
+  const oldRejectedCount = rejectionHistory?.filter(r => !r.wasReplaced).length || 0;
+  const newReferralCount = referralHistory?.filter((r: any) => !r.wasReplaced).length || 0;
+  const rejectedDocumentsCount = oldRejectedCount + newReferralCount;
 
   // Handle abandoned payments
   const {
@@ -100,8 +108,13 @@ export function useApplicationDetail(applicationId: string | undefined) {
         return 'eye';
       case 'Approved':
         return 'checkmark-circle';
-      case 'Rejected':
+      case 'Rejected': // DEPRECATED - backward compatibility
         return 'close-circle';
+      // Phase 4 Migration: New statuses
+      case 'Referred for Medical Management':
+        return 'medkit-outline';
+      case 'Documents Need Revision':
+        return 'document-text-outline';
       default:
         return 'document';
     }

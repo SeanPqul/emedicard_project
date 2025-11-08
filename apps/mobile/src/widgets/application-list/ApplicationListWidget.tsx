@@ -15,19 +15,32 @@ import { moderateScale } from '@/src/shared/utils/responsive';
 import { theme } from '@/src/shared/styles/theme';
 import { styles } from './ApplicationListWidget.styles';
 
-// UI constants
+// UI constants (Phase 4 Migration: Added new statuses)
 const STATUS_COLORS = {
   'Pending Payment': '#FFA500',
   'Submitted': '#2E86AB',
   'Under Review': '#F18F01',
   'Approved': '#28A745',
-  'Rejected': '#DC3545',
+  'Rejected': '#DC3545', // DEPRECATED
+  // NEW - Phase 4 Migration
+  'Documents Need Revision': '#F59E0B', // Orange - document issues
+  'Referred for Medical Management': '#3B82F6', // Blue - medical referrals
 } as const;
 
 // Business constants
 const DEFAULT_TOTAL_AMOUNT = 60; // ₱50 application + ₱10 service by default
 
-const FILTER_OPTIONS: FilterStatus[] = ['All', 'Pending Payment', 'Submitted', 'Under Review', 'Approved', 'Rejected'];
+// Phase 4 Migration: Added new filter options
+const FILTER_OPTIONS: FilterStatus[] = [
+  'All',
+  'Pending Payment',
+  'Submitted',
+  'Under Review',
+  'Approved',
+  'Rejected', // DEPRECATED
+  'Documents Need Revision', // NEW
+  'Referred for Medical Management' // NEW
+];
 const SORT_OPTIONS: SortOption[] = ['Date', 'Status', 'Category'];
 
 interface ApplicationListWidgetProps {
@@ -165,7 +178,24 @@ export function ApplicationListWidget({
             showPaymentBadge: false,
             isUrgent: false
           };
-        case 'Rejected':
+        // Phase 4 Migration: New statuses
+        case 'Referred for Medical Management':
+          return {
+            mainText: 'Medical Referral',
+            subText: 'Doctor consultation required',
+            icon: 'medkit',
+            showPaymentBadge: false,
+            isUrgent: true
+          };
+        case 'Documents Need Revision':
+          return {
+            mainText: 'Document Issues',
+            subText: 'Corrections needed',
+            icon: 'document-text',
+            showPaymentBadge: false,
+            isUrgent: true
+          };
+        case 'Rejected': // DEPRECATED
           // Check if this is a document revision case
           const isDocumentRevision = application.remarks?.toLowerCase().includes('document') || 
                                      application.remarks?.toLowerCase().includes('revision');
@@ -199,7 +229,12 @@ export function ApplicationListWidget({
           }
         case 'Approved':
           return { text: 'Download Card', icon: 'download-outline' };
-        case 'Rejected':
+        // Phase 4 Migration: New status actions
+        case 'Referred for Medical Management':
+          return { text: 'View Doctor Info', icon: 'medkit-outline' };
+        case 'Documents Need Revision':
+          return { text: 'Fix Documents', icon: 'document-text-outline' };
+        case 'Rejected': // DEPRECATED
           // Check if this is a document revision case
           const isDocumentRevision = application.remarks?.toLowerCase().includes('document') || 
                                      application.remarks?.toLowerCase().includes('revision');

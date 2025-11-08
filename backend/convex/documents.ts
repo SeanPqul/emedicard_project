@@ -43,17 +43,30 @@ export const resubmitDocument = mutation({
       throw new Error("Original document upload not found");
     }
 
-    // 2. Find the corresponding rejection history
-    const rejectionHistory = await ctx.db
-      .query("documentRejectionHistory")
+    // 2. DUAL-READ: Find the corresponding referral/rejection history from both tables
+    // Try new table first
+    let referralHistory = await ctx.db
+      .query("documentReferralHistory")
       .withIndex("by_document_type", (q) =>
         q.eq("applicationId", args.applicationId).eq("documentTypeId", args.documentTypeId)
       )
       .order("desc")
       .first();
 
-    if (!rejectionHistory) {
-      throw new Error("Rejection history not found");
+    // If not found, try old table
+    let rejectionHistory = null;
+    if (!referralHistory) {
+      rejectionHistory = await ctx.db
+        .query("documentRejectionHistory")
+        .withIndex("by_document_type", (q) =>
+          q.eq("applicationId", args.applicationId).eq("documentTypeId", args.documentTypeId)
+        )
+        .order("desc")
+        .first();
+    }
+
+    if (!referralHistory && !rejectionHistory) {
+      throw new Error("Referral/rejection history not found");
     }
 
     // 3. Create a new document upload record
@@ -67,12 +80,41 @@ export const resubmitDocument = mutation({
       fileType: getFileTypeFromFileName(args.originalFileName), // Added fileType
     });
 
-    // 4. Update the rejection history
-    await ctx.db.patch(rejectionHistory._id, {
-      wasReplaced: true,
-      replacementUploadId: newDocumentUploadId,
-      replacedAt: Date.now(),
-    });
+    // 4. DUAL-WRITE: Update history in BOTH tables (whichever exists)
+    const replacedAt = Date.now();
+
+    if (referralHistory) {
+      // Update new table
+      await ctx.db.patch(referralHistory._id, {
+        wasReplaced: true,
+        replacementUploadId: newDocumentUploadId,
+        replacedAt: replacedAt,
+      });
+
+      // Also update corresponding old table record if it exists
+      const oldRecord = await ctx.db
+        .query("documentRejectionHistory")
+        .withIndex("by_document_type", (q) =>
+          q.eq("applicationId", args.applicationId).eq("documentTypeId", args.documentTypeId)
+        )
+        .order("desc")
+        .first();
+
+      if (oldRecord) {
+        await ctx.db.patch(oldRecord._id, {
+          wasReplaced: true,
+          replacementUploadId: newDocumentUploadId,
+          replacedAt: replacedAt,
+        });
+      }
+    } else if (rejectionHistory) {
+      // Update old table
+      await ctx.db.patch(rejectionHistory._id, {
+        wasReplaced: true,
+        replacementUploadId: newDocumentUploadId,
+        replacedAt: replacedAt,
+      });
+    }
 
     // 5. Update the application status to Under Review (document resubmitted)
     await ctx.db.patch(args.applicationId, {

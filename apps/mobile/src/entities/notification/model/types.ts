@@ -22,9 +22,14 @@ export type NotificationType =
   | 'CardIssue'
   | 'ApplicationSubmitted'
   | 'DocumentApproved'
-  | 'DocumentRejected'
+  | 'DocumentRejected' // DEPRECATED - Legacy rejection
   | 'PaymentConfirmed'
-  | 'SystemMaintenance';
+  | 'SystemMaintenance'
+  // NEW - Proper medical terminology (Phase 4 Migration)
+  | 'DocumentReferredMedical' // Medical finding requiring consultation
+  | 'DocumentIssueFlagged' // Non-medical document issue
+  | 'MedicalReferralResubmission' // After doctor consultation
+  | 'DocumentResubmission'; // After fixing document issues
 
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
 

@@ -84,10 +84,15 @@ export function useNotificationList() {
         filtered = filtered.filter((n: NotificationItem) => 
           n.type === 'MissingDoc' || 
           n.type === 'FormApproved' || 
-          n.type === 'DocumentRejection' ||
+          n.type === 'DocumentRejection' || // DEPRECATED
           n.type === 'ApplicationSubmitted' ||
           n.type === 'ApplicationApproved' ||
-          n.type === 'DocumentApproved'
+          n.type === 'DocumentApproved' ||
+          // NEW - Medical referral types
+          n.type === 'DocumentReferredMedical' ||
+          n.type === 'DocumentIssueFlagged' ||
+          n.type === 'MedicalReferralResubmission' ||
+          n.type === 'DocumentResubmission'
         );
         break;
       case 'Payments':

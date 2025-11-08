@@ -4,7 +4,16 @@ import { api } from '@backend/convex/_generated/api';
 import { ApplicationWithDetails } from '@/src/entities/application';
 
 // Feature-specific types
-export type FilterStatus = 'All' | 'Pending Payment' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
+// Phase 4 Migration: Added new statuses
+export type FilterStatus = 
+  | 'All' 
+  | 'Pending Payment' 
+  | 'Submitted' 
+  | 'Under Review' 
+  | 'Approved' 
+  | 'Rejected' // DEPRECATED - backward compatibility
+  | 'Documents Need Revision' // NEW
+  | 'Referred for Medical Management'; // NEW
 export type SortOption = 'Date' | 'Status' | 'Category';
 
 export function useApplicationList() {
@@ -73,8 +82,13 @@ export function useApplicationList() {
         return 'eye';
       case 'Approved':
         return 'checkmark-circle';
-      case 'Rejected':
+      case 'Rejected': // DEPRECATED
         return 'close-circle';
+      // Phase 4 Migration: New statuses
+      case 'Documents Need Revision':
+        return 'document-text-outline';
+      case 'Referred for Medical Management':
+        return 'medkit-outline';
       default:
         return 'document';
     }
@@ -90,8 +104,13 @@ export function useApplicationList() {
         return 'Application is being reviewed by our team';
       case 'Approved':
         return 'Application approved! Health card will be issued';
-      case 'Rejected':
+      case 'Rejected': // DEPRECATED
         return 'Application rejected. Please check remarks';
+      // Phase 4 Migration: New statuses
+      case 'Documents Need Revision':
+        return 'Some documents need to be corrected and resubmitted';
+      case 'Referred for Medical Management':
+        return 'Medical consultation required before proceeding';
       default:
         return 'Status unknown';
     }
@@ -103,7 +122,10 @@ export function useApplicationList() {
       case 'Submitted': return 25;
       case 'Under Review': return 50;
       case 'Approved': return 100;
-      case 'Rejected': return 100;
+      case 'Rejected': return 100; // DEPRECATED
+      // Phase 4 Migration: New statuses
+      case 'Documents Need Revision': return 40; // Needs action
+      case 'Referred for Medical Management': return 40; // Needs action
       default: return 0;
     }
   };
@@ -114,7 +136,10 @@ export function useApplicationList() {
       case 'Submitted': return 'Application received';
       case 'Under Review': return 'Being reviewed';
       case 'Approved': return 'Approved - Card ready';
-      case 'Rejected': return 'Application rejected';
+      case 'Rejected': return 'Application rejected'; // DEPRECATED
+      // Phase 4 Migration: New statuses
+      case 'Documents Need Revision': return 'Action required - Documents';
+      case 'Referred for Medical Management': return 'Action required - Medical';
       default: return 'Unknown status';
     }
   };
