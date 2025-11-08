@@ -66,6 +66,7 @@ export const get = query({
           _id: req._id, // Add the requirement's ID
           requirementName: documentType?.name ?? "Unknown Requirement",
           isRequired: req.isRequired,
+          fieldIdentifier: documentType?.fieldIdentifier, // Add fieldIdentifier for medical document detection
           // --- Data from the user's upload ---
           status: userUpload?.reviewStatus ?? "Missing", // Default to "Missing" if not uploaded
           fileUrl: fileUrl,

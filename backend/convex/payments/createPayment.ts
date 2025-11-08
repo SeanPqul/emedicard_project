@@ -163,7 +163,3 @@ export const createPaymentMutation = mutation({
     }
   },
 });
-
-
-// @deprecated - Use createPaymentMutation instead. This alias will be removed in a future release.
-export const createPayment = createPaymentMutation;
