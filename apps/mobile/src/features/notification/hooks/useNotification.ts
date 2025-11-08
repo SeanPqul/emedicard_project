@@ -4,8 +4,8 @@ import { Id } from '@backend/convex/_generated/dataModel';
 
 export function useNotification(notificationId: string | undefined) {
   // Fetch all notifications and find the specific one
-  const notifications = useQuery(api.notifications.getUserNotifications.getUserNotificationsQuery);
-  const notification = notifications?.find(n => n._id === notificationId);
+  const notifications = useQuery(api.notifications.getUserNotifications, {});
+  const notification = notifications?.find((n: { _id: string }) => n._id === notificationId);
 
   // Fetch related application if it exists
   const application = useQuery(
@@ -14,7 +14,7 @@ export function useNotification(notificationId: string | undefined) {
   );
 
   // Mark as read mutation
-  const markAsReadMutation = useMutation(api.notifications.markAsRead.markAsReadMutation);
+  const markAsReadMutation = useMutation(api.notifications.markAsRead);
 
   const markAsRead = async () => {
     if (!notificationId) return;

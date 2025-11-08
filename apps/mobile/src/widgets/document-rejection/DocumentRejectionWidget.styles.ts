@@ -205,4 +205,45 @@ export const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     color: theme.colors.text.tertiary,
   },
+  
+  // Phase 4 Migration: Doctor Section (for medical referrals)
+  doctorSection: {
+    backgroundColor: '#EFF6FF', // Light blue background
+    borderRadius: theme.borderRadius.md,
+    padding: moderateScale(14),
+    marginBottom: verticalScale(16),
+    borderWidth: 1,
+    borderColor: '#3B82F6' + '20',
+  },
+  doctorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: verticalScale(8),
+  },
+  doctorTitle: {
+    fontSize: moderateScale(13),
+    fontWeight: '600' as const,
+    color: '#3B82F6',
+    marginLeft: scale(8),
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  doctorName: {
+    fontSize: moderateScale(16),
+    fontWeight: '600' as const,
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(6),
+  },
+  clinicInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: verticalScale(4),
+  },
+  clinicAddress: {
+    flex: 1,
+    fontSize: moderateScale(13),
+    color: theme.colors.text.secondary,
+    marginLeft: scale(6),
+    lineHeight: moderateScale(18),
+  },
 });

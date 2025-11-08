@@ -42,11 +42,12 @@ export default function AdminNotificationBell() {
 
   const handleNotificationClick = (notificationId: Id<"notifications"> | Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory">, notificationType: string) => {
     // Mark as read based on notification type
-    if (notificationType === "DocumentResubmission") {
+    if (notificationType === "DocumentResubmission" || notificationType === "MedicalReferralResubmission" || notificationType === "DocumentResubmission") {
       markRejectionAsRead({ rejectionId: notificationId as Id<"documentRejectionHistory">, rejectionType: "document" });
     } else if (notificationType === "PaymentResubmission") {
       markRejectionAsRead({ rejectionId: notificationId as Id<"paymentRejectionHistory">, rejectionType: "payment" });
     } else {
+      // Handle regular notifications and new Phase 4 types (DocumentReferredMedical, DocumentIssueFlagged)
       markAsRead({ notificationId: notificationId as Id<"notifications"> });
     }
     setIsOpen(false);

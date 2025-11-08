@@ -59,7 +59,10 @@ export const APP_CONSTANTS = {
     SUBMITTED: 'Submitted',
     UNDER_REVIEW: 'Under Review',
     APPROVED: 'Approved',
-    REJECTED: 'Rejected',
+    REJECTED: 'Rejected', // DEPRECATED - Use new statuses below
+    // Phase 4 Migration: New statuses
+    DOCUMENTS_NEED_REVISION: 'Documents Need Revision',
+    REFERRED_FOR_MEDICAL_MANAGEMENT: 'Referred for Medical Management',
   } as const,
 } as const;
 

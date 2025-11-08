@@ -137,7 +137,12 @@ export const createPaymentMutation = mutation({
           updatedAt: Date.now(),
         });
       } else {
-        // For first-time payment, notify the applicant
+        // For first-time payment, update application status and notify the applicant
+        await ctx.db.patch(args.applicationId, {
+          applicationStatus: "For Payment Validation",
+          updatedAt: Date.now(),
+        });
+        
         const user = await ctx.db.get(application.userId);
         if (user) {
           await ctx.db.insert("notifications", {

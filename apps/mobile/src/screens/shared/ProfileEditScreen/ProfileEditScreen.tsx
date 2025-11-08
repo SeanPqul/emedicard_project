@@ -52,35 +52,16 @@ export function ProfileEditScreen() {
 
     setIsSaving(true);
     try {
-      // Step 1: Update Clerk user profile (only for email/password users, not OAuth)
-      // OAuth users' names are managed by their OAuth provider (Google, etc.)
-      if (clerkUser) {
-        const hasPassword = clerkUser.passwordEnabled;
-        if (hasPassword) {
-          try {
-            await clerkUser.update({
-              firstName: firstName.trim(),
-              lastName: lastName.trim(),
-            });
-          } catch (clerkError) {
-            console.warn('Could not update Clerk profile (may be OAuth user):', clerkError);
-            // Continue with Convex update even if Clerk update fails
-          }
-        }
-      }
-
-      // Step 2: Update Convex database with full name
-      const fullNameParts = [firstName.trim()];
-      if (middleName.trim()) {
-        fullNameParts.push(middleName.trim());
-      }
-      fullNameParts.push(lastName.trim());
-      const fullName = fullNameParts.join(' ');
-      
+      // Update via backend - this syncs with both Clerk and database
       await mutations.updateUser({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
       });
+
+      // Reload Clerk user to reflect changes immediately in UI
+      if (clerkUser) {
+        await clerkUser.reload();
+      }
 
       Alert.alert('Success', 'Your profile has been updated successfully.', [
         { text: 'OK', onPress: () => router.push('/(tabs)/profile') }
@@ -181,7 +162,7 @@ export function ProfileEditScreen() {
               <Text style={styles.label}>Email Address</Text>
               <View style={[styles.input, styles.disabledInput]}>
                 <Text style={styles.disabledText}>
-                  {clerkUser?.primaryEmailAddress?.emailAddress || currentUser?.email || 'Not available'}
+                  {clerkUser?.primaryEmailAddress?.emailAddress || 'Not available'}
                 </Text>
               </View>
             </View>

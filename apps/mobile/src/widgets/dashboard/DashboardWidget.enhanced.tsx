@@ -11,7 +11,8 @@ import { HealthCardPreview } from '@features/dashboard/components/HealthCardPrev
 import { PresetStatCards } from '@features/dashboard/components/StatCard/StatCard.enhanced';
 import { QuickActionsCarousel } from '@features/dashboard/components/QuickActionsCarousel/QuickActionsCarousel';
 import { router } from 'expo-router';
-import { useRejectedDocumentsCount } from '@features/document-rejection/hooks/useRejectedDocumentsCount';
+// Phase 4 Migration: Use new referral hooks for proper medical terminology
+import { useReferredDocumentsCount } from '@features/document-rejection/hooks';
 import { styles } from './DashboardWidget.enhanced.styles';
 import { theme } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
@@ -54,8 +55,9 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
   
   const { onRefresh, getGreeting } = handlers;
 
-  // Rejected documents count (for ActionCenter visibility)
-  const { count: rejectedDocumentsCount } = useRejectedDocumentsCount(data?.userProfile?._id);
+  // Phase 4 Migration: Use referral counts (medical vs document issues)
+  const referralCounts = useReferredDocumentsCount(data?.userProfile?._id);
+  const { totalIssues, medicalReferrals, documentIssues } = referralCounts;
 
   // Mock health card data for demo - replace with actual data
   const mockHealthCard = healthCard || (dashboardStats?.validHealthCards > 0 ? {
@@ -92,7 +94,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
           <View style={styles.inlineHeader}>
             <Text style={styles.pageTitle}>Overview</Text>
             <Text style={styles.greeting}>
-              {getGreeting()}, {userProfile?.fullname || 'User'}
+              {getGreeting()}, {data.user?.firstName || userProfile?.fullname || 'User'}
             </Text>
           </View>
         </View>
@@ -105,7 +107,9 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
           currentApplication={currentApplication}
           dashboardStats={dashboardStats}
           userApplications={userApplications}
-          rejectedDocumentsCount={rejectedDocumentsCount}
+          rejectedDocumentsCount={totalIssues} // Legacy prop for backward compatibility
+          medicalReferralsCount={medicalReferrals} // NEW - Medical referrals
+          documentIssuesCount={documentIssues} // NEW - Document issues
         />
         
         {/* Health Card Preview or Application Status */}
@@ -147,8 +151,12 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
               
               if (status === 'Pending Payment') {
                 statusBadge = { text: 'Payment Due', color: '#DC2626' }; // Clean red
+              } else if (status === 'Referred for Medical Management') {
+                statusBadge = { text: 'Medical Referral', color: '#3B82F6' }; // Blue - medical
+              } else if (status === 'Documents Need Revision') {
+                statusBadge = { text: 'Docs Needed', color: '#F59E0B' }; // Orange - doc issues
               } else if (status === 'Rejected') {
-                statusBadge = { text: 'Action Needed', color: '#DC2626' }; // Clean red
+                statusBadge = { text: 'Action Needed', color: '#DC2626' }; // DEPRECATED
               } else if (status === 'Approved' || status === 'Completed') {
                 statusBadge = { text: 'Approved', color: '#059669' }; // Clean green
               } else if (status === 'Under Review' || status === 'Submitted') {

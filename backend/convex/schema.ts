@@ -29,6 +29,15 @@ export default defineSchema({
 
   applications: defineTable({
     adminRemarks: v.optional(v.string()),
+    // applicationStatus values:
+    // - "Submitted" - Application submitted, awaiting review
+    // - "For Document Verification" - Documents being verified by admin
+    // - "For Payment Validation" - Payment being validated
+    // - "For Orientation" - Awaiting orientation attendance
+    // - "Approved" - Application fully approved, health card issued
+    // - "Rejected" - PERMANENT rejection only (fraud, max attempts, etc.)
+    // - "Documents Need Revision" - NEW - Documents need resubmission (non-medical issues)
+    // - "Referred for Medical Management" - NEW - Medical findings, needs doctor consultation
     applicationStatus: v.string(), // Keep as string for backward compatibility with existing data
     applicationType: v.union(
       v.literal("New"),
@@ -69,6 +78,12 @@ export default defineSchema({
     applicationId: v.id("applications"),
     documentTypeId: v.id("documentTypes"),
     originalFileName: v.string(),
+    // reviewStatus values:
+    // - "Pending" - Awaiting admin review
+    // - "Approved" - Document approved
+    // - "Rejected" - DEPRECATED - use "Referred" for medical or "NeedsRevision" for non-medical
+    // - "Referred" - NEW - Medical document with findings, needs doctor consultation
+    // - "NeedsRevision" - NEW - Non-medical document issue, needs resubmission
     reviewStatus: v.string(),
     reviewedAt: v.optional(v.float64()),
     reviewedBy: v.optional(v.id("users")),
@@ -82,7 +97,8 @@ export default defineSchema({
     .index("by_application_document", [
       "applicationId",
       "documentTypeId",
-    ]),
+    ])
+    .index("by_review_status", ["reviewStatus", "reviewedAt"]),
   healthCards: defineTable({
     applicationId: v.id("applications"),
     cardUrl: v.string(),
@@ -325,19 +341,114 @@ export default defineSchema({
     .index("by_applicationId", ["applicationId", "timestamp"])
     .index("by_timestamp", ["timestamp"]),
 
-  // Document Referral/Management History
+  // Document Referral/Management History (NEW - Replaces "rejection" terminology)
+  // This table uses proper medical terminology: "referral" for medical findings, not "rejection"
+  documentReferralHistory: defineTable({
+    // Core References
+    applicationId: v.id("applications"),
+    documentTypeId: v.id("documentTypes"),
+    documentUploadId: v.id("documentUploads"), // Original upload
+
+    // Preserved File Data
+    referredFileId: v.id("_storage"), // Never delete this - preserved for audit
+    originalFileName: v.string(),
+    fileSize: v.float64(),
+    fileType: v.string(),
+
+    // Document Issue Type (Medical vs Non-Medical)
+    issueType: v.union(
+      v.literal("medical_referral"),    // Medical finding - needs doctor consultation
+      v.literal("document_issue")       // Non-medical - needs document resubmission
+    ),
+
+    // Medical Referral Category (for medical documents)
+    medicalReferralCategory: v.optional(v.union(
+      v.literal("abnormal_xray"),           // Abnormal chest X-ray result
+      v.literal("elevated_urinalysis"),     // Elevated urinalysis values
+      v.literal("positive_stool"),          // Positive stool examination
+      v.literal("positive_drug_test"),      // Positive drug test result
+      v.literal("neuro_exam_failed"),       // Failed neuropsychiatric evaluation
+      v.literal("hepatitis_consultation"),  // Hepatitis B antibody - requires consultation
+      v.literal("other_medical_concern")    // Other medical concern
+    )),
+
+    // Document Issue Category (for non-medical documents)
+    documentIssueCategory: v.optional(v.union(
+      v.literal("invalid_id"),          // Invalid Government-issued ID
+      v.literal("expired_id"),          // Expired ID
+      v.literal("blurry_photo"),        // Blurry or unclear photo
+      v.literal("wrong_format"),        // Wrong ID picture format/size
+      v.literal("missing_info"),        // Missing required information
+      v.literal("quality_issue"),       // Blurry, dark, unreadable
+      v.literal("wrong_document"),      // Incorrect document type
+      v.literal("expired_document"),    // Document past validity
+      v.literal("incomplete_document"), // Missing pages/information
+      v.literal("invalid_document"),    // Fake or tampered
+      v.literal("format_issue"),        // Wrong format/size
+      v.literal("other")                // Other reasons
+    )),
+
+    // Referral/Issue Information
+    referralReason: v.string(), // Detailed explanation (user-friendly message)
+    specificIssues: v.array(v.string()), // Bullet points of specific issues
+    doctorName: v.optional(v.string()), // Doctor name for medical referrals (e.g., "Dr. Juan Dela Cruz")
+    clinicAddress: v.optional(v.string()), // Clinic/venue address for medical referrals
+
+    // Tracking
+    referredBy: v.id("users"), // Admin who created this referral/issue
+    referredAt: v.float64(),
+
+    // Resubmission Tracking
+    wasReplaced: v.boolean(),
+    replacementUploadId: v.optional(v.id("documentUploads")),
+    replacedAt: v.optional(v.float64()),
+    attemptNumber: v.float64(), // 1st, 2nd, 3rd attempt
+
+    // Status Flow Tracking
+    status: v.optional(v.union(
+      v.literal("pending"),           // Waiting for user action (treatment or resubmission)
+      v.literal("in_progress"),       // User is addressing the issue (e.g., undergoing treatment)
+      v.literal("resubmitted"),       // User has resubmitted/returned for re-check
+      v.literal("cleared"),           // Issue resolved, user can proceed
+      v.literal("flagged_again")      // Issue persists, flagged again
+    )),
+
+    // Notification Tracking
+    notificationSent: v.optional(v.boolean()), // Whether applicant has been notified
+    notificationSentAt: v.optional(v.float64()), // When notification was sent
+
+    // Notification Read Tracking (for admins)
+    adminReadBy: v.optional(v.array(v.id("users"))), // List of admin IDs who have read this
+
+    // Migration Tracking (links to old documentRejectionHistory record)
+    migratedFromRejectionId: v.optional(v.id("documentRejectionHistory")),
+
+    // Audit Fields
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+  }).index("by_application", ["applicationId"])
+    .index("by_document_type", ["applicationId", "documentTypeId"])
+    .index("by_referred_at", ["referredAt"])
+    .index("by_admin", ["referredBy"])
+    .index("by_replacement", ["wasReplaced"])
+    .index("by_issue_type", ["issueType", "referredAt"])
+    .index("by_status", ["status", "referredAt"]),
+
+  // Document Rejection History (DEPRECATED - kept for backward compatibility during migration)
+  // ⚠️ DO NOT USE FOR NEW CODE - Use documentReferralHistory instead
+  // This table will be removed after migration is complete
   documentRejectionHistory: defineTable({
     // Core References
     applicationId: v.id("applications"),
     documentTypeId: v.id("documentTypes"),
     documentUploadId: v.id("documentUploads"), // Original upload
-    
+
     // Preserved File Data
     rejectedFileId: v.id("_storage"), // Never delete this
     originalFileName: v.string(),
     fileSize: v.float64(),
     fileType: v.string(),
-    
+
     // Rejection Information
     rejectionCategory: v.union(
       v.literal("quality_issue"),      // Blurry, dark, unreadable
@@ -351,17 +462,17 @@ export default defineSchema({
     rejectionReason: v.string(), // Detailed explanation
     specificIssues: v.array(v.string()), // Bullet points
     doctorName: v.optional(v.string()), // Doctor name for medical referrals
-    
+
     // Tracking
     rejectedBy: v.id("users"), // Admin who rejected
     rejectedAt: v.float64(),
-    
+
     // Resubmission Tracking
     wasReplaced: v.boolean(),
     replacementUploadId: v.optional(v.id("documentUploads")),
     replacedAt: v.optional(v.float64()),
     attemptNumber: v.float64(), // 1st, 2nd, 3rd attempt
-    
+
     // Status Flow Tracking
     status: v.optional(v.union(
       v.literal("pending"),      // Waiting for user resubmission
@@ -369,14 +480,14 @@ export default defineSchema({
       v.literal("rejected"),     // Admin rejected the resubmission
       v.literal("approved")      // Admin approved the resubmission
     )),
-    
+
     // Notification Tracking
     notificationSent: v.optional(v.boolean()), // Whether applicant has been notified (default: true for old records)
     notificationSentAt: v.optional(v.float64()), // When notification was sent
-    
+
     // Notification Read Tracking (for admins)
     adminReadBy: v.optional(v.array(v.id("users"))), // List of admin IDs who have read this
-    
+
     // Audit Fields
     ipAddress: v.optional(v.string()),
     userAgent: v.optional(v.string()),

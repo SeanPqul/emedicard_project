@@ -5,13 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { theme } from '@shared/styles/theme';
 import { useRouter } from 'expo-router';
-import { useUsers } from '@features/profile';
+import { useProfile } from '@/src/features/profile/hooks/useProfile';
 import { SignOutButton } from '@features/auth/components';
 import { HEADER_CONSTANTS } from '@shared/constants/header.constants';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 
 export function InspectorSettingsScreen() {
-  const { data: { currentUser: userProfile } } = useUsers();
+  const { user: profile } = useProfile(); // Reuse existing hook - Clerk-first pattern
   const router = useRouter();
   const appVersion = Constants.expoConfig?.version || '1.0.0';
 
@@ -39,8 +39,8 @@ export function InspectorSettingsScreen() {
             </View>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{userProfile?.fullname || 'Inspector'}</Text>
-            <Text style={styles.profileEmail}>{userProfile?.email || 'inspector@emedicard.com'}</Text>
+            <Text style={styles.profileName}>{profile.displayName}</Text>
+            <Text style={styles.profileEmail}>{profile.email || 'inspector@emedicard.com'}</Text>
             <View style={styles.roleBadge}>
               <Ionicons
                 name="shield-checkmark"

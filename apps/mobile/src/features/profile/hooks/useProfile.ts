@@ -7,7 +7,15 @@ export function useProfile() {
   const { data, isLoading } = useUsers();
   const userProfile = data?.currentUser ?? null;
 
-  const displayName = getUserDisplayName(user, userProfile);
+  // Use Clerk user properties directly with DB fallback
+  const displayName = getUserDisplayName({
+    firstName: user?.firstName,
+    lastName: user?.lastName,
+    username: user?.username,
+    email: user?.primaryEmailAddress?.emailAddress,
+    fullName: userProfile?.fullname, // From database
+  });
+
   const email = user?.primaryEmailAddress?.emailAddress || userProfile?.email;
   const memberSince = new Date(user?.createdAt || Date.now()).getFullYear();
   const imageUrl = user?.imageUrl || userProfile?.image || null;

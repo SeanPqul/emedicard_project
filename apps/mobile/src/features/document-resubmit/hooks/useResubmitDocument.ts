@@ -5,6 +5,7 @@ import { ApiResponse } from '../../../types/utility';
 
 /**
  * Mutation to resubmit a document
+ * Phase 4 Migration: Updated terminology to support both referrals and document issues
  */
 export function useResubmitDocument() {
   const mutation = useMutation(api.requirements.resubmitDocument.resubmitDocument);
@@ -12,8 +13,9 @@ export function useResubmitDocument() {
   const friendlyMessage = (err: unknown): string => {
     const raw = err instanceof Error ? err.message : String(err ?? '');
     const m = raw.toLowerCase();
-    if (m.includes('no rejection found')) {
-      return 'This document isn’t marked for resubmission yet. Please refresh and try again once it shows as rejected.';
+    // Phase 4 Migration: Updated error messages
+    if (m.includes('no rejection found') || m.includes('no referral found') || m.includes('no issue found')) {
+      return "This document isn't marked for resubmission yet. Please refresh and try again.";
     }
     if (m.includes('not authenticated')) {
       return 'Your session expired. Please sign in again and retry.';

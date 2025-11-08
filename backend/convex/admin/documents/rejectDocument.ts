@@ -77,40 +77,87 @@ export const rejectDocument = mutation({
 
     const attemptNumber = previousRejections.length + 1;
 
-    // 4. Create rejection history record
+    // 4a. DUAL-WRITE: Create record in OLD table (documentRejectionHistory) - DEPRECATED
+    // This table is kept for backward compatibility during migration
     const rejectionHistoryId = await ctx.db.insert("documentRejectionHistory", {
       applicationId: documentUpload.applicationId,
       documentTypeId: documentUpload.documentTypeId,
       documentUploadId: args.documentUploadId,
-      
+
       // Preserve file data
       rejectedFileId: documentUpload.storageFileId,
       originalFileName: documentUpload.originalFileName,
       fileSize: file.size,
       fileType: file.contentType || "application/octet-stream", // Provide a default if null
-      
+
       // Rejection information
       rejectionCategory: args.rejectionCategory,
       rejectionReason: args.rejectionReason,
       specificIssues: args.specificIssues,
       doctorName: args.doctorName, // Doctor name for medical referrals
-      
+
       // Tracking
       rejectedBy: admin._id,
       rejectedAt: Date.now(),
-      
+
       // Resubmission tracking
       wasReplaced: false,
       attemptNumber: attemptNumber,
-      
+
       // Status flow tracking
       status: "pending",
-      
+
       // Notification tracking
       notificationSent: false,
       notificationSentAt: undefined,
-      
+
       // Audit fields (can be enhanced later)
+      ipAddress: undefined,
+      userAgent: undefined,
+    });
+
+    // 4b. DUAL-WRITE: Also create record in NEW table (documentReferralHistory)
+    // This ensures data is available in new table for gradual migration
+    const issueType = args.doctorName ? "medical_referral" : "document_issue";
+
+    const referralHistoryId = await ctx.db.insert("documentReferralHistory", {
+      applicationId: documentUpload.applicationId,
+      documentTypeId: documentUpload.documentTypeId,
+      documentUploadId: args.documentUploadId,
+
+      // Preserved file data
+      referredFileId: documentUpload.storageFileId,
+      originalFileName: documentUpload.originalFileName,
+      fileSize: file.size,
+      fileType: file.contentType || "application/octet-stream",
+
+      // Issue type and categories (map from old categories)
+      issueType: issueType,
+      medicalReferralCategory: args.doctorName ? "other_medical_concern" : undefined,
+      documentIssueCategory: !args.doctorName ? args.rejectionCategory : undefined,
+
+      // Referral/issue information
+      referralReason: args.rejectionReason,
+      specificIssues: args.specificIssues,
+      doctorName: args.doctorName,
+      clinicAddress: args.doctorName ? "Door 7, Magsaysay Complex, Magsaysay Park, Davao City" : undefined,
+
+      // Tracking
+      referredBy: admin._id,
+      referredAt: Date.now(),
+
+      // Resubmission tracking
+      wasReplaced: false,
+      attemptNumber: attemptNumber,
+
+      // Status flow tracking
+      status: "pending",
+
+      // Notification tracking
+      notificationSent: false,
+      notificationSentAt: undefined,
+
+      // Audit fields
       ipAddress: undefined,
       userAgent: undefined,
     });

@@ -2,21 +2,25 @@ import { getColor } from '@shared/styles/theme';
 
 export const getJobCategoryColor = (category: string): string => {
   const normalizedCategory = category?.toLowerCase().trim();
+  
+  // Check if category contains food-related keywords
+  if (normalizedCategory?.includes('food')) {
+    return getColor('jobCategories.foodHandler');
+  }
+  
+  // Check for security-related keywords
+  if (normalizedCategory?.includes('security') || normalizedCategory?.includes('guard')) {
+    return getColor('jobCategories.securityGuard');
+  }
+  
+  // Check for skin contact keywords
+  if (normalizedCategory?.includes('pink') || 
+      normalizedCategory?.includes('skin') || 
+      normalizedCategory?.includes('contact')) {
+    return getColor('jobCategories.pink');
+  }
+  
   switch (normalizedCategory) {
-    case 'food handler':
-    case 'food':
-    case 'food service':
-    case 'food safety':
-      return getColor('jobCategories.foodHandler');
-    case 'security guard':
-    case 'security':
-    case 'security officer':
-      return getColor('jobCategories.securityGuard');
-    case 'pink':
-    case 'skin contact':
-    case 'pink collar':
-    case 'skin-to-skin contact':
-      return getColor('jobCategories.pink');
     case 'unknown category':
     case '':
     case undefined:
@@ -29,21 +33,25 @@ export const getJobCategoryColor = (category: string): string => {
 
 export const getJobCategoryIcon = (category: string): string => {
   const normalizedCategory = category?.toLowerCase().trim();
+  
+  // Check if category contains food-related keywords
+  if (normalizedCategory?.includes('food')) {
+    return 'restaurant-outline';
+  }
+  
+  // Check for security-related keywords
+  if (normalizedCategory?.includes('security') || normalizedCategory?.includes('guard')) {
+    return 'shield-outline';
+  }
+  
+  // Check for skin contact keywords
+  if (normalizedCategory?.includes('pink') || 
+      normalizedCategory?.includes('skin') || 
+      normalizedCategory?.includes('contact')) {
+    return 'hand-left-outline';
+  }
+  
   switch (normalizedCategory) {
-    case 'food handler':
-    case 'food':
-    case 'food service':
-    case 'food safety':
-      return 'restaurant-outline';
-    case 'security guard':
-    case 'security':
-    case 'security officer':
-      return 'shield-outline';
-    case 'pink':
-    case 'skin contact':
-    case 'pink collar':
-    case 'skin-to-skin contact':
-      return 'hand-left-outline';
     case 'unknown category':
     case '':
     case undefined:

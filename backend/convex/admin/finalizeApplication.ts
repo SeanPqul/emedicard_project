@@ -14,7 +14,7 @@ export const finalize = mutation({
 
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Authentication failed.");
-    
+
     const adminUser = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
@@ -28,11 +28,21 @@ export const finalize = mutation({
       .collect();
 
     // 2. Perform validation on the backend for security.
+    // Check for any documents still pending review
     if (uploadedDocs.some(doc => doc.reviewStatus === "Pending")) {
-      throw new Error("Please review and assign a status (Approve or Reject) to all documents before proceeding.");
+      throw new Error("Please review and assign a status (Approve, Refer, or Flag) to all documents before proceeding.");
     }
-    if (args.newStatus === "Rejected" && !uploadedDocs.some(doc => doc.reviewStatus === "Rejected")) {
-      throw new Error("To reject the application, at least one document must be marked as 'Rejected'.");
+
+    // Check for documents that need referral/resubmission
+    // "Rejected" (old), "Referred" (medical), "NeedsRevision" (document issue)
+    const hasReferralsOrIssues = uploadedDocs.some(doc =>
+      doc.reviewStatus === "Rejected" ||
+      doc.reviewStatus === "Referred" ||
+      doc.reviewStatus === "NeedsRevision"
+    );
+
+    if (args.newStatus === "Rejected" && !hasReferralsOrIssues) {
+      throw new Error("To send referral notifications, at least one document must be referred or flagged.");
     }
 
     // Get application and applicant details for logging
@@ -54,20 +64,25 @@ export const finalize = mutation({
       // We only set `approvedAt` at the very end of the whole process.
     });
 
-    // 4.5. If rejecting, schedule batch notification for all rejected documents
+    // 4.5. If sending referral/issue notifications, schedule batch notification
     if (args.newStatus === "Rejected") {
-      // Schedule notifications for all pending rejections
+      // Schedule notifications for all pending referrals/issues
+      // This will send proper medical terminology messages
       // @ts-ignore - Deep type instantiation limitation
-      await ctx.scheduler.runAfter(0, internal.admin.documents.sendRejectionNotifications.sendRejectionNotifications, {
+      await ctx.scheduler.runAfter(0, internal.admin.documents.sendReferralNotifications.sendReferralNotifications, {
         applicationId: args.applicationId,
       });
     }
 
-    // 5. Log admin activity
+    // 5. Log admin activity with updated terminology
+    const activityDetails = args.newStatus === "Approved"
+      ? `Finalized document verification for ${applicant.fullname} - Approved and moved to ${nextApplicationStatus}`
+      : `Sent referral/issue notifications for ${applicant.fullname}`;
+
     await ctx.db.insert("adminActivityLogs", {
       adminId: adminUser._id,
-      activityType: "application_finalization",
-      details: `Finalized document verification for ${applicant.fullname} with status: ${nextApplicationStatus}`,
+      activityType: args.newStatus === "Approved" ? "application_finalization" : "referral_notifications_sent",
+      details: activityDetails,
       timestamp: Date.now(),
       applicationId: args.applicationId,
       jobCategoryId: application.jobCategoryId,

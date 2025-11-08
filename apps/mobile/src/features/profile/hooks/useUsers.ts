@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 
@@ -10,7 +10,7 @@ export function useUsers(role?: "applicant" | "inspector" | "admin") {
   );
 
   const createUserMutation = useMutation(api.users.createUser.createUserMutation);
-  const updateUserMutation = useMutation(api.users.updateUser.updateUserMutation);
+  const updateUserAction = useAction(api.users.updateUser.updateUserMutation);
   const updateRoleMutation = useMutation(api.users.updateRole.updateRoleMutation);
 
   const createUser = async (input: {
@@ -59,7 +59,7 @@ export function useUsers(role?: "applicant" | "inspector" | "admin") {
     profileImage?: string;
     metadata?: Record<string, any>;
   }) => {
-    return updateUserMutation(updates);
+    return updateUserAction(updates);
   };
 
   const updateUserRole = async (

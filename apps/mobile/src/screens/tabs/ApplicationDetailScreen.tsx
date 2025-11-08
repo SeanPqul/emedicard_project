@@ -9,12 +9,12 @@ import { theme } from '@shared/styles/theme';
 
 /**
  * ApplicationDetailScreen - Thin orchestrator following FSD pattern
- * 
+ *
  * This screen only handles:
  * - Loading states
- * - Error boundaries  
+ * - Error boundaries
  * - Delegating to ApplicationDetailWidget
- * 
+ *
  * Following the same pattern as DashboardScreen
  */
 interface ApplicationDetailScreenProps {
@@ -24,7 +24,7 @@ interface ApplicationDetailScreenProps {
 
 export function ApplicationDetailScreen({ navigation, route }: ApplicationDetailScreenProps) {
   const { id } = useLocalSearchParams<{ id: string }>();
-  
+
   // Use the custom hook for all business logic
   const {
     application,
@@ -79,6 +79,7 @@ export function ApplicationDetailScreen({ navigation, route }: ApplicationDetail
         getStatusIcon={getStatusIcon}
         getUrgencyColor={getUrgencyColor}
         rejectedDocumentsCount={rejectedDocumentsCount}
+        applicationId={id || ''}
       />
     </BaseScreen>
   );

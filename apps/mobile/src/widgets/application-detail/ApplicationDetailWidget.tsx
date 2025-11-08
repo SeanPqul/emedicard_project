@@ -6,26 +6,33 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  Modal,
+  Pressable,
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ApplicationDetails, PaymentMethod } from '@entities/application';
-import { moderateScale } from '@shared/utils/responsive';
+import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 import { styles } from './ApplicationDetailWidget.styles';
 import { theme } from '@shared/styles/theme';
 import MayaLogo from '@/assets/svgs/maya-logo-brandlogos.net_gpvn1r359.svg';
 import GCashLogo from '@/assets/svgs/gcash-logo-brandlogos.net_arv9ck6s2.svg';
+import { usePaymentRejectionHistory } from '@features/payment';
 
-// UI constants for status colors
+// UI constants for status colors (Phase 4 Migration: Added new statuses)
 const STATUS_COLORS = {
   'Pending Payment': '#FFA500',
+  'Payment Rejected': '#DC2626',
   'For Payment Validation': '#F5A623',
   'For Orientation': theme.colors.accent.warningOrange,
   'Submitted': '#2E86AB',
   'Under Review': '#F18F01',
   'Approved': '#28A745',
-  'Rejected': '#DC3545',
+  'Rejected': '#DC3545', // DEPRECATED
+  // NEW - Phase 4 Migration
+  'Documents Need Revision': '#F59E0B', // Orange - document issues
+  'Referred for Medical Management': '#3B82F6', // Blue - medical referrals
 } as const;
 
 interface ApplicationDetailWidgetProps {
@@ -38,6 +45,7 @@ interface ApplicationDetailWidgetProps {
   getStatusIcon: (status: string) => string;
   getUrgencyColor: (daysLeft: number | null) => string;
   rejectedDocumentsCount?: number;
+  applicationId: string;
 }
 
 export function ApplicationDetailWidget({
@@ -50,13 +58,28 @@ export function ApplicationDetailWidget({
   getStatusIcon,
   getUrgencyColor,
   rejectedDocumentsCount = 0,
+  applicationId,
 }: ApplicationDetailWidgetProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+  const [isRejectionHistoryModalOpen, setIsRejectionHistoryModalOpen] = useState(false);
+
+  // Payment rejection history hook
+  const {
+    latestRejection,
+    rejectionHistory,
+    rejectionCount,
+    hasRejections,
+    isLoading: isLoadingRejections,
+  } = usePaymentRejectionHistory(applicationId);
+
+  // Determine if current payment is manual (only manual payments can be rejected)
+  const isManualPayment = application.payment?.method === 'BaranggayHall' ||
+                          application.payment?.method === 'CityHall';
+
   const toggleExpanded = () => {
     setIsExpanded(prev => !prev);
   };
-  
+
   // Define collapsible rows data
   const collapsibleRows = [
     { label: 'Middle Name', value: application.form?.middleName || 'N/A' },
@@ -68,9 +91,9 @@ export function ApplicationDetailWidget({
     { label: 'Organization', value: application.form?.organization },
     { label: 'Civil Status', value: application.form?.civilStatus },
   ];
-  
+
   const statusColor = STATUS_COLORS[application.status as keyof typeof STATUS_COLORS] ?? theme.colors.primary[500];
-  
+
   const getDaysUntilDeadline = (deadline?: number) => {
     if (!deadline) return null;
     const now = Date.now();
@@ -78,7 +101,7 @@ export function ApplicationDetailWidget({
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     return days;
   };
-  
+
   const daysUntilDeadline = getDaysUntilDeadline(application.paymentDeadline);
 
   return (
@@ -94,19 +117,19 @@ export function ApplicationDetailWidget({
         {/* Minimal Header with Back Button */}
         <View style={styles.inlineHeaderSection}>
           <View style={styles.headerRow}>
-            <TouchableOpacity 
-              onPress={() => router.replace('/(tabs)/application')} 
+            <TouchableOpacity
+              onPress={() => router.replace('/(tabs)/application')}
               style={styles.backButton}
               activeOpacity={0.7}
             >
               <Ionicons name="arrow-back" size={moderateScale(24)} color={theme.colors.text.primary} />
             </TouchableOpacity>
-            
+
             <View style={styles.titleContainer}>
               <Text style={styles.pageTitle}>Application Details</Text>
               <Text style={styles.applicationIdSubtitle}>#{application._id.slice(-8).toUpperCase()}</Text>
             </View>
-            
+
             <View style={styles.headerSpacer} />
           </View>
         </View>
@@ -122,7 +145,7 @@ export function ApplicationDetailWidget({
           </View>
           <Text style={styles.applicationId}>#{application._id.slice(-8)}</Text>
         </View>
-        
+
         <View style={styles.statusInfo}>
           <Text style={styles.statusLabel}>Application Date</Text>
           <Text style={styles.statusValue}>
@@ -132,10 +155,10 @@ export function ApplicationDetailWidget({
 
         {application.status === 'Pending Payment' && daysUntilDeadline !== null && (
           <View style={styles.deadlineContainer}>
-            <Ionicons 
-              name="time-outline" 
-              size={moderateScale(16)} 
-              color={getUrgencyColor(daysUntilDeadline)} 
+            <Ionicons
+              name="time-outline"
+              size={moderateScale(16)}
+              color={getUrgencyColor(daysUntilDeadline)}
             />
             <Text style={[styles.deadlineText, { color: getUrgencyColor(daysUntilDeadline) }]}>
               {daysUntilDeadline <= 0
@@ -148,12 +171,66 @@ export function ApplicationDetailWidget({
         )}
       </View>
 
+      {/* Payment Rejection Banner - ONLY for manual payments */}
+      {application.status === 'Payment Rejected' && isManualPayment && latestRejection && (
+        <View style={styles.paymentRejectionBanner}>
+          <View style={styles.rejectionBannerHeader}>
+            <View style={styles.rejectionIconContainer}>
+              <Ionicons name="alert-circle" size={moderateScale(24)} color="#FFFFFF" />
+            </View>
+            <View style={styles.rejectionHeaderContent}>
+              <Text style={styles.rejectionTitle}>Payment Rejected</Text>
+              <View style={styles.rejectionAttemptBadge}>
+                <Text style={styles.rejectionAttemptText}>
+                  Attempt {latestRejection.attemptNumber} of 3
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.rejectionCategoryTag}>
+            <Text style={styles.rejectionCategoryText}>
+              {latestRejection.rejectionCategory.replace(/_/g, ' ')}
+            </Text>
+          </View>
+
+          <View style={styles.rejectionReasonContainer}>
+            <Text style={styles.rejectionReasonLabel}>Reason:</Text>
+            <Text style={styles.rejectionReasonText}>{latestRejection.rejectionReason}</Text>
+          </View>
+
+          {latestRejection.specificIssues && latestRejection.specificIssues.length > 0 && (
+            <View style={styles.rejectionIssuesList}>
+              {latestRejection.specificIssues.map((issue, index) => (
+                <View key={index} style={styles.rejectionIssueItem}>
+                  <View style={styles.rejectionIssueBullet} />
+                  <Text style={styles.rejectionIssueText}>{issue}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {rejectionCount > 1 && (
+            <TouchableOpacity
+              style={styles.viewHistoryButton}
+              onPress={() => setIsRejectionHistoryModalOpen(true)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="time-outline" size={moderateScale(16)} color="#DC2626" />
+              <Text style={styles.viewHistoryButtonText}>
+                View History ({rejectionCount} attempts)
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
       {/* Application Details - Collapsible */}
       <View style={styles.detailsCard}>
         <View style={styles.collapsibleHeader}>
           <Text style={styles.sectionTitle}>Application Information</Text>
         </View>
-        
+
         {/* Always visible items */}
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Type</Text>
@@ -163,7 +240,7 @@ export function ApplicationDetailWidget({
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Job Category</Text>
           <View style={styles.categoryContainer}>
-            <View 
+            <View
               style={[
                 styles.categoryIndicator,
                 { backgroundColor: application.jobCategory?.colorCode }
@@ -192,7 +269,7 @@ export function ApplicationDetailWidget({
         {isExpanded && collapsibleRows.map((row, index) => (
           <Animated.View
             key={row.label}
-            entering={FadeIn.delay(index * 60).duration(300)} 
+            entering={FadeIn.delay(index * 60).duration(300)}
             exiting={FadeOut.duration(150)}
             style={styles.detailRow}
           >
@@ -200,17 +277,17 @@ export function ApplicationDetailWidget({
             <Text style={styles.detailValue}>{row.value}</Text>
           </Animated.View>
         ))}
-        
+
         {/* Bottom toggle button */}
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={toggleExpanded}
           activeOpacity={0.7}
           style={isExpanded ? styles.collapseButton : styles.expandButton}
         >
           {!isExpanded && <View style={styles.expandButtonShadow} />}
-          <Ionicons 
+          <Ionicons
             name={isExpanded ? "chevron-up" : "chevron-down"}
-            size={moderateScale(24)} 
+            size={moderateScale(24)}
             color={theme.colors.text.secondary}
           />
         </TouchableOpacity>
@@ -219,8 +296,8 @@ export function ApplicationDetailWidget({
       {/* Documents Section */}
       <View style={styles.documentsCard}>
         <Text style={styles.sectionTitle}>Submitted Documents</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.viewDocumentsButton}
           onPress={() => router.push(`/(screens)/(shared)/documents/view-document?formId=${application._id}`)}
         >
@@ -241,7 +318,19 @@ export function ApplicationDetailWidget({
             {application.status === 'Approved' && (
               <Text style={[styles.documentsStatusText, { color: theme.colors.accent.safetyGreen }]}>All documents approved</Text>
             )}
-            {rejectedDocumentsCount > 0 && (
+            {/* Phase 4 Migration: Show appropriate message based on status */}
+            {application.status === 'Referred for Medical Management' && (
+              <Text style={[styles.documentsStatusText, { color: '#3B82F6' }]}>
+                📋 Medical referral - see doctor for clearance
+              </Text>
+            )}
+            {application.status === 'Documents Need Revision' && rejectedDocumentsCount > 0 && (
+              <Text style={[styles.documentsStatusText, { color: '#F59E0B' }]}>
+                {rejectedDocumentsCount} document{rejectedDocumentsCount !== 1 ? 's' : ''} need correction
+              </Text>
+            )}
+            {/* DEPRECATED: Legacy rejection message (backward compatibility) */}
+            {rejectedDocumentsCount > 0 && application.status !== 'Referred for Medical Management' && application.status !== 'Documents Need Revision' && (
               <Text style={[styles.documentsStatusText, { color: theme.colors.semantic.error }]}>
                 {rejectedDocumentsCount} document{rejectedDocumentsCount !== 1 ? 's' : ''} need revision
               </Text>
@@ -257,20 +346,21 @@ export function ApplicationDetailWidget({
         const isFoodHandler = application.jobCategory?.name?.toLowerCase().includes('food');
         const requiresOrientation = isFoodHandler && (application.jobCategory?.requireOrientation === true || application.jobCategory?.requireOrientation === 'Yes');
         const orientationCompleted = (application as any)?.orientationCompleted === true;
-        
+
         // Show orientation section if:
         // 1. Job category requires orientation (Food Handler)
         // 2. Orientation hasn't been completed yet
-        // 3. Status is not Rejected, Cancelled, or Approved
-        const shouldShowOrientation = requiresOrientation && !orientationCompleted && 
-          !['Rejected', 'Cancelled', 'Approved'].includes(application.status);
-        
+        // 3. Payment has been validated (NOT waiting for validation)
+        // 4. Status is not Rejected, Cancelled, or Approved
+        const shouldShowOrientation = requiresOrientation && !orientationCompleted &&
+          !['Pending Payment', 'For Payment Validation', 'Payment Rejected', 'Rejected', 'Cancelled', 'Approved', 'Referred for Medical Management', 'Documents Need Revision'].includes(application.status);
+
         return shouldShowOrientation;
       })() && (
         <View style={styles.orientationCard}>
           <Text style={styles.sectionTitle}>Orientation Required</Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.viewDocumentsButton}
             onPress={() => router.push(`/(screens)/(shared)/orientation/schedule?applicationId=${application._id}`)}
           >
@@ -288,11 +378,23 @@ export function ApplicationDetailWidget({
         </View>
       )}
 
-      {/* Payment Section - Only show if pending payment */}
-      {application.status === 'Pending Payment' && (
+      {/* Payment Section - Show for pending payment OR rejected manual payments OR submitted applications */}
+      {(application.status === 'Pending Payment' || application.status === 'Submitted' ||
+       (application.status === 'Payment Rejected' && isManualPayment)) && (
         <View style={styles.paymentCard}>
-          <Text style={styles.sectionTitle}>Payment Required</Text>
-          
+          {/* Resubmit Warning for Payment Rejected status */}
+          {application.status === 'Payment Rejected' && (
+            <View style={styles.resubmitWarningBanner}>
+              <Text style={styles.resubmitWarningText}>
+                ⚠️ Your previous payment was rejected. Please correct the issues above and resubmit with a clearer receipt.
+              </Text>
+            </View>
+          )}
+
+          <Text style={styles.sectionTitle}>
+            {application.status === 'Payment Rejected' ? 'Resubmit Payment' : 'Payment Required'}
+          </Text>
+
           <Text style={styles.paymentDescription}>
             Complete your payment to proceed with your health card application
           </Text>
@@ -316,7 +418,7 @@ export function ApplicationDetailWidget({
           {/* Payment Methods */}
           <Text style={styles.paymentMethodsTitle}>Select Payment Method</Text>
           <Text style={styles.paymentMethodsSubtitle}>Choose how you want to pay</Text>
-          
+
           <View style={styles.paymentMethods}>
             <TouchableOpacity
               style={[styles.paymentMethodCard, isPaymentProcessing && styles.paymentMethodCardDisabled]}
@@ -390,7 +492,7 @@ export function ApplicationDetailWidget({
       {application.payment && (
         <View style={styles.paymentHistoryCard}>
           <Text style={styles.sectionTitle}>Payment Information</Text>
-          
+
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Payment Method</Text>
             <Text style={styles.detailValue}>{application.payment.method}</Text>
@@ -439,6 +541,152 @@ export function ApplicationDetailWidget({
         </View>
       )}
     </ScrollView>
+
+    {/* Payment Rejection History Modal */}
+    <Modal
+      visible={isRejectionHistoryModalOpen}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setIsRejectionHistoryModalOpen(false)}
+    >
+      <Pressable
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          justifyContent: 'flex-end',
+        }}
+        onPress={() => setIsRejectionHistoryModalOpen(false)}
+      >
+        <Pressable
+          style={{
+            backgroundColor: theme.colors.background.primary,
+            borderTopLeftRadius: moderateScale(20),
+            borderTopRightRadius: moderateScale(20),
+            paddingTop: verticalScale(20),
+            maxHeight: '80%',
+          }}
+          onPress={(e) => e.stopPropagation()}
+        >
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: scale(20),
+            paddingBottom: verticalScale(16),
+            borderBottomWidth: 1,
+            borderBottomColor: '#E5E5E5',
+          }}>
+            <Text style={{
+              fontSize: moderateScale(18),
+              fontWeight: '600',
+              color: theme.colors.text.primary,
+            }}>
+              Rejection History
+            </Text>
+            <TouchableOpacity onPress={() => setIsRejectionHistoryModalOpen(false)}>
+              <Ionicons name="close" size={moderateScale(24)} color={theme.colors.text.secondary} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={{ maxHeight: '80%' }}>
+            {rejectionHistory.map((rejection, index) => (
+              <View
+                key={rejection._id}
+                style={{
+                  padding: moderateScale(16),
+                  borderBottomWidth: 1,
+                  borderBottomColor: '#F0F0F0',
+                  backgroundColor: rejection.wasReplaced ? '#F0FDF4' : '#FEF2F2',
+                }}
+              >
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: verticalScale(8) }}>
+                  <View style={{
+                    backgroundColor: '#DC2626',
+                    paddingHorizontal: scale(10),
+                    paddingVertical: verticalScale(4),
+                    borderRadius: theme.borderRadius.full,
+                  }}>
+                    <Text style={{
+                      fontSize: moderateScale(11),
+                      fontWeight: '600',
+                      color: '#FFFFFF',
+                    }}>
+                      Attempt #{rejection.attemptNumber}
+                    </Text>
+                  </View>
+                  {rejection.wasReplaced && (
+                    <View style={{
+                      backgroundColor: '#10B981',
+                      paddingHorizontal: scale(10),
+                      paddingVertical: verticalScale(4),
+                      borderRadius: theme.borderRadius.full,
+                    }}>
+                      <Text style={{
+                        fontSize: moderateScale(11),
+                        fontWeight: '600',
+                        color: '#FFFFFF',
+                      }}>
+                        ✓ Replaced
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                <Text style={{
+                  fontSize: moderateScale(12),
+                  color: theme.colors.text.secondary,
+                  marginBottom: verticalScale(8),
+                }}>
+                  {new Date(rejection.rejectedAt).toLocaleString()}
+                </Text>
+
+                <Text style={{
+                  fontSize: moderateScale(13),
+                  fontWeight: '600',
+                  color: theme.colors.text.primary,
+                  marginBottom: verticalScale(4),
+                }}>
+                  {rejection.rejectionCategory.replace(/_/g, ' ').toUpperCase()}
+                </Text>
+
+                <Text style={{
+                  fontSize: moderateScale(14),
+                  color: theme.colors.text.primary,
+                  marginBottom: verticalScale(8),
+                }}>
+                  {rejection.rejectionReason}
+                </Text>
+
+                {rejection.specificIssues && rejection.specificIssues.length > 0 && (
+                  <View>
+                    {rejection.specificIssues.map((issue, i) => (
+                      <Text
+                        key={i}
+                        style={{
+                          fontSize: moderateScale(13),
+                          color: theme.colors.text.secondary,
+                          marginLeft: scale(8),
+                        }}
+                      >
+                        • {issue}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+
+                <Text style={{
+                  fontSize: moderateScale(12),
+                  color: theme.colors.text.secondary,
+                  marginTop: verticalScale(8),
+                }}>
+                  Rejected by: {rejection.rejectedByName}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        </Pressable>
+      </Pressable>
+    </Modal>
     </View>
   );
 }

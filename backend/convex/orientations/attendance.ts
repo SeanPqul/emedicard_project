@@ -11,6 +11,65 @@ import { AdminRole } from "../users/roles";
 const DEFAULT_MINIMUM_DURATION_MINUTES = 20; // Default: 20 minutes
 
 /**
+ * Get applicant information for QR scan verification
+ * Used to show applicant details before confirming check-in/check-out
+ */
+export const getApplicantInfo = query({
+  args: {
+    applicationId: v.id("applications"),
+  },
+  handler: async (ctx, args) => {
+    // Get current user
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required");
+    }
+
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
+
+    // Verify admin/inspector role
+    if (currentUser.role !== "admin" && currentUser.role !== "inspector") {
+      throw new Error("Only inspectors can access applicant information");
+    }
+
+    // Get application
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) {
+      throw new Error("Application not found");
+    }
+
+    // Get user details
+    const user = await ctx.db.get(application.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Get orientation booking to determine check-in/out status
+    const booking = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
+      .filter((q) => q.neq(q.field("status"), "missed"))
+      .first();
+
+    return {
+      applicationId: args.applicationId,
+      name: user.fullname,
+      gender: user.gender || application.gender || "N/A",
+      isCheckedIn: booking?.checkInTime != null && booking?.checkOutTime == null,
+      isCompleted: booking?.status === "completed",
+      hasBooking: booking != null,
+    };
+  },
+});
+
+/**
  * Check-in attendee via QR code scan
  * Inspector scans user's QR code when they arrive
  *

@@ -16,16 +16,23 @@ export const DashboardHeaderEnhanced: React.FC<DashboardHeaderProps> = ({
   unreadNotificationsCount,
 }) => {
   const { user } = useUser();
+  
+  // Use Clerk as source of truth for profile data
   const profileImageUrl = user?.imageUrl || userProfile?.image;
+  
+  // Get display name from Clerk with DB fallback
+  const displayName = user?.firstName && user?.lastName
+    ? `${user.firstName} ${user.lastName}`
+    : userProfile?.fullname || 'User';
 
   const getProfileInitials = () => {
-    if (!userProfile?.fullname) return 'U';
-    const names = userProfile.fullname.split(' ');
-    return names
-      .map((name: string) => name[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+    // Use Clerk firstName/lastName first
+    const firstName = user?.firstName || userProfile?.fullname?.split(' ')[0];
+    const lastName = user?.lastName || userProfile?.fullname?.split(' ').slice(-1)[0];
+    
+    if (!firstName) return 'U';
+    const initials = (firstName[0] || '') + (lastName?.[0] || '');
+    return initials.toUpperCase();
   };
 
   const getTimeOfDayEmoji = () => {
@@ -106,7 +113,7 @@ export const DashboardHeaderEnhanced: React.FC<DashboardHeaderProps> = ({
               </Text>
             </View>
             <Text style={styles.userName} numberOfLines={1}>
-              {userProfile?.fullname || 'User'}
+              {displayName}
             </Text>
             <Text style={styles.welcomeMessage}>
               Ready to manage your health cards?

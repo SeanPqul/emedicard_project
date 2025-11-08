@@ -39,6 +39,7 @@ export default function RejectionHistoryPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<RejectionType | "">("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [issueTypeTab, setIssueTypeTab] = useState<'all' | 'medical' | 'document'>('all'); // NEW: Tab filter for issue types
   const router = useRouter();
 
   const { isLoaded: isClerkLoaded, user } = useUser();
@@ -57,7 +58,30 @@ export default function RejectionHistoryPage() {
     const matchesType = !typeFilter || rejection.type === typeFilter;
     const matchesCategory = !categoryFilter || rejection.jobCategory === categoryFilter;
 
-    return matchesSearch && matchesType && matchesCategory;
+    // Issue Type Tab Filter (Medical vs Document)
+    // NOTE: This will be fully functional when backend migrates to documentReferralHistory table
+    // For now, uses heuristics based on rejection reason text
+    let matchesIssueType = true;
+    if (issueTypeTab !== 'all' && rejection.type === 'document') {
+      const reasonLower = rejection.rejectionReason.toLowerCase();
+      const isMedical = 
+        reasonLower.includes('medical') ||
+        reasonLower.includes('doctor') ||
+        reasonLower.includes('x-ray') ||
+        reasonLower.includes('urinalysis') ||
+        reasonLower.includes('stool') ||
+        reasonLower.includes('drug test') ||
+        reasonLower.includes('neuro') ||
+        reasonLower.includes('hepatitis');
+      
+      if (issueTypeTab === 'medical') {
+        matchesIssueType = isMedical;
+      } else if (issueTypeTab === 'document') {
+        matchesIssueType = !isMedical;
+      }
+    }
+
+    return matchesSearch && matchesType && matchesCategory && matchesIssueType;
   });
 
   // Get unique job categories
@@ -157,13 +181,66 @@ export default function RejectionHistoryPage() {
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Rejection History</h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Referral & Issue History</h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1">
-                Complete history of all rejected documents, payments, and orientations
+                Complete history of all medical referrals, document issues, and other flagged items across all categories
               </p>
             </div>
           </div>
         </header>
+
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 mb-6">
+          <div className="p-2">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIssueTypeTab('all')}
+                className={`flex-1 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                  issueTypeTab === 'all'
+                    ? 'bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-md'
+                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                  All
+                </span>
+              </button>
+              <button
+                onClick={() => setIssueTypeTab('medical')}
+                className={`flex-1 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                  issueTypeTab === 'medical'
+                    ? 'bg-gradient-to-r from-blue-400 to-blue-500 text-white shadow-md'
+                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Medical Referrals
+                </span>
+              </button>
+              <button
+                onClick={() => setIssueTypeTab('document')}
+                className={`flex-1 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                  issueTypeTab === 'document'
+                    ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-md'
+                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Document Issues
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* Enhanced Statistics Cards */}
         {stats && (
@@ -353,8 +430,8 @@ export default function RejectionHistoryPage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Rejection Records</h2>
-                <p className="text-xs text-gray-600 mt-0.5">Detailed view of all rejected submissions</p>
+                <h2 className="text-xl font-bold text-gray-900">{issueTypeTab === 'all' ? 'All Records' : issueTypeTab === 'medical' ? 'Medical Referrals' : 'Document Issues'}</h2>
+                <p className="text-xs text-gray-600 mt-0.5">Detailed view of {issueTypeTab === 'all' ? 'all' : issueTypeTab === 'medical' ? 'medical referral' : 'document issue'} records</p>
               </div>
             </div>
           </div>

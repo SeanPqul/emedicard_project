@@ -5,9 +5,12 @@ import { moderateScale } from '@shared/utils/responsive';
 import { styles } from './DocumentRejectionWidget.styles';
 import { EnrichedRejection } from '@entities/document/model/rejection-types';
 import { getRejectionCategoryLabel } from '@entities/document/model/rejection-constants';
+// Phase 4 Migration: Support new referral types
+import { IssueType } from '@entities/document/model/referral-types';
+import type { EnrichedReferral } from '@entities/document/model/referral-types';
 
 interface DocumentRejectionWidgetProps {
-  rejection: EnrichedRejection;
+  rejection: EnrichedRejection | EnrichedReferral; // Support both old and new types
   documentName: string;
   onResubmit: () => void;
   onViewDetails: () => void;
@@ -26,11 +29,20 @@ export function DocumentRejectionWidget({
   isLoading = false,
 }: DocumentRejectionWidgetProps) {
   
+  // Phase 4 Migration: Check if this is a new referral type
+  const isReferralType = 'issueType' in rejection;
+  const isMedicalReferral = isReferralType && (rejection as EnrichedReferral).issueType === IssueType.MEDICAL_REFERRAL;
+  
+  // Dynamic colors based on type
+  const primaryColor = isMedicalReferral ? '#3B82F6' : isReferralType ? '#F59E0B' : '#EF4444';
+  const iconName = isMedicalReferral ? 'medkit' : isReferralType ? 'document-text' : 'close-circle';
+  const headerTitle = isMedicalReferral ? 'Medical Referral' : isReferralType ? 'Document Needs Revision' : 'Document Rejected';
+  
   if (isLoading) {
     return (
       <View style={[styles.container, containerStyle]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#EF4444" />
+          <ActivityIndicator size="large" color={primaryColor} />
         </View>
       </View>
     );
@@ -46,18 +58,18 @@ export function DocumentRejectionWidget({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {/* Header */}
+      {/* Header - Phase 4 Migration: Dynamic based on type */}
       <View style={styles.header}>
         <View style={styles.headerIcon}>
           <Ionicons 
-            name="close-circle" 
+            name={iconName as any}
             size={moderateScale(40)} 
-            color="#EF4444" 
+            color={primaryColor}
           />
         </View>
         
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Document Rejected</Text>
+          <Text style={[styles.headerTitle, { color: primaryColor }]}>{headerTitle}</Text>
           <Text style={styles.documentName}>{documentName}</Text>
         </View>
         
@@ -68,24 +80,48 @@ export function DocumentRejectionWidget({
         </View>
       </View>
 
-      {/* Rejection Reason */}
+      {/* Reason - Phase 4 Migration: Dynamic label */}
       <View style={styles.reasonSection}>
-        <Text style={styles.reasonLabel}>Rejection Reason</Text>
-        <Text style={styles.reasonText}>{rejection.rejectionReason}</Text>
+        <Text style={styles.reasonLabel}>
+          {isMedicalReferral ? 'Medical Finding' : isReferralType ? 'Issue Description' : 'Rejection Reason'}
+        </Text>
+        <Text style={styles.reasonText}>
+          {isReferralType ? (rejection as EnrichedReferral).reason : (rejection as EnrichedRejection).rejectionReason}
+        </Text>
         
-        {/* Category Badge */}
+        {/* Category Badge - Phase 4 Migration: Show category for all types */}
         <View style={styles.categoryBadge}>
           <Ionicons 
             name="pricetag" 
             size={moderateScale(14)} 
-            color="#F59E0B"
+            color={primaryColor}
             style={styles.categoryIcon}
           />
           <Text style={styles.categoryText}>
-            {getRejectionCategoryLabel(rejection.rejectionCategory)}
+            {isReferralType 
+              ? String((rejection as EnrichedReferral).category).replace(/_/g, ' ')
+              : getRejectionCategoryLabel((rejection as EnrichedRejection).rejectionCategory)
+            }
           </Text>
         </View>
       </View>
+
+      {/* Doctor Info - Phase 4 Migration: Show for medical referrals */}
+      {isMedicalReferral && (rejection as EnrichedReferral).doctorName && (
+        <View style={styles.doctorSection}>
+          <View style={styles.doctorHeader}>
+            <Ionicons name="person-circle-outline" size={moderateScale(20)} color="#3B82F6" />
+            <Text style={styles.doctorTitle}>Consulting Doctor</Text>
+          </View>
+          <Text style={styles.doctorName}>{(rejection as EnrichedReferral).doctorName}</Text>
+          {(rejection as EnrichedReferral).clinicAddress && (
+            <View style={styles.clinicInfo}>
+              <Ionicons name="location-outline" size={moderateScale(14)} color="#6B7280" />
+              <Text style={styles.clinicAddress}>{(rejection as EnrichedReferral).clinicAddress}</Text>
+            </View>
+          )}
+        </View>
+      )}
 
       {/* Specific Issues */}
       {rejection.specificIssues && rejection.specificIssues.length > 0 && (
@@ -107,7 +143,7 @@ export function DocumentRejectionWidget({
         </View>
       )}
 
-      {/* Rejection Date */}
+      {/* Date - Phase 4 Migration: Dynamic text */}
       <View style={styles.dateSection}>
         <Ionicons 
           name="calendar-outline" 
@@ -116,7 +152,9 @@ export function DocumentRejectionWidget({
           style={styles.dateIcon}
         />
         <Text style={styles.dateText}>
-          Rejected on {formatDate(rejection.rejectedAt)}
+          {isMedicalReferral ? 'Referred on' : isReferralType ? 'Flagged on' : 'Rejected on'} {formatDate(
+            isReferralType ? (rejection as EnrichedReferral).referredAt : (rejection as EnrichedRejection).rejectedAt
+          )}
         </Text>
       </View>
 
