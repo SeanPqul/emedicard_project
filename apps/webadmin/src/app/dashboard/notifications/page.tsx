@@ -166,7 +166,7 @@ export default function AdminNotificationsPage() {
         <header className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">My Notifications</h1>
+              <h1 className="text-2xl font-semibold text-gray-900">Notifications</h1>
               <p className="text-gray-500 text-sm mt-1">
                 Notifications for your managed categories
                 {unreadCount > 0 && (
