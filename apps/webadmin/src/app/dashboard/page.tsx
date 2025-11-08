@@ -290,7 +290,7 @@ export default function DashboardPage() {
                 </svg>
                 Rejection History
               </Link>
-              {managedJobCategories?.some(cat => cat.name === "Food Handler") && (
+              {(managedJobCategories?.some(cat => cat.name === "Food Category") || adminPrivileges.managedCategories === "all") && (
                 <Link 
                   href="/dashboard/attendance-tracker" 
                   className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl font-medium hover:bg-emerald-100 border border-emerald-200 transition-all shadow-sm hover:shadow"

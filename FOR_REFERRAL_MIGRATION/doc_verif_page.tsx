@@ -125,6 +125,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [error, setError] = useState<AppError | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [openReferralIndex, setOpenReferralIndex] = useState<number | null>(null);
+  const [doctorName, setDoctorName] = useState<string>('');
   const [referralReason, setReferralReason] = useState<string>('');
   const [rejectionCategory, setRejectionCategory] = useState('other');
   const [specificIssues, setSpecificIssues] = useState('');
@@ -135,7 +136,6 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const router = useRouter();
 
   // --- DATA FETCHING ---
-  // @ts-ignore - Type instantiation is excessively deep
   const getDocumentsWithClassification = useAction(api.applications.getDocumentsWithClassification.get);
   const [data, setData] = useState<ApplicationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -805,6 +805,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           // Prefill referral defaults for medical docs
                           setRejectionCategory('other');
                           setReferralReason('Other medical concern'); // Default to first option
+                          setDoctorName(FIXED_DOCTOR_NAME); // Set fixed doctor name
                           setSpecificIssues(`Failed Medical Result (${item.requirementName}) - Please refer to ${FIXED_DOCTOR_NAME} at Door 7, Magsaysay Complex, Magsaysay Park, Davao City.`);
                         }}
                         disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Rejected'}
