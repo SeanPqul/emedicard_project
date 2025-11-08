@@ -14,48 +14,18 @@ export const getReferralHistory = query({
     applicationId: v.id("applications"),
   },
   handler: async (ctx, args) => {
-    // DUAL-READ: Get from BOTH tables
-    const oldRejections = await ctx.db
-      .query("documentRejectionHistory")
-      .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
-      .order("desc")
-      .collect();
-
-    const newReferrals = await ctx.db
+    // Read only from new referralHistory table
+    const referrals = await ctx.db
       .query("documentReferralHistory")
       .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
       .order("desc")
       .collect();
 
-    // Merge and deduplicate (prefer new table)
-    const documentTypeMap = new Map();
-
-    // Add new referrals first (preferred)
-    for (const referral of newReferrals) {
-      const key = `${referral.documentTypeId}_${referral.attemptNumber}`;
-      if (!documentTypeMap.has(key)) {
-        documentTypeMap.set(key, { source: 'new', data: referral });
-      }
-    }
-
-    // Add old rejections only if not in new table
-    for (const rejection of oldRejections) {
-      const key = `${rejection.documentTypeId}_${rejection.attemptNumber}`;
-      if (!documentTypeMap.has(key)) {
-        documentTypeMap.set(key, { source: 'old', data: rejection });
-      }
-    }
-
     // Enrich with document type and admin information
     const enrichedItems = await Promise.all(
-      Array.from(documentTypeMap.values()).map(async (item) => {
-        const data = item.data;
+      referrals.map(async (data) => {
         const documentType = await ctx.db.get(data.documentTypeId);
-
-        // Handle different field names
-        const referredBy = item.source === 'new'
-          ? await ctx.db.get((data as any).referredBy)
-          : await ctx.db.get((data as any).rejectedBy);
+        const referredBy = await ctx.db.get(data.referredBy);
 
         // Get replacement document info if exists
         let replacementInfo = null;
@@ -71,14 +41,7 @@ export const getReferralHistory = query({
           }
         }
 
-        // Determine issue type
-        let issueType: "medical_referral" | "document_issue";
-        if (item.source === 'new') {
-          issueType = (data as any).issueType;
-        } else {
-          // Infer from old data
-          issueType = (data as any).doctorName ? "medical_referral" : "document_issue";
-        }
+        const issueType = data.issueType;
 
         return {
           _id: data._id,
@@ -87,22 +50,19 @@ export const getReferralHistory = query({
           documentTypeName: (documentType as any)?.name || "Unknown Document",
           documentTypeIcon: (documentType as any)?.icon,
           issueType: issueType,
-          category: item.source === 'new'
-            ? (issueType === "medical_referral"
-              ? (data as any).medicalReferralCategory
-              : (data as any).documentIssueCategory)
-            : (data as any).rejectionCategory,
-          reason: item.source === 'new' ? (data as any).referralReason : (data as any).rejectionReason,
+          category: issueType === "medical_referral"
+            ? data.medicalReferralCategory
+            : data.documentIssueCategory,
+          reason: data.referralReason,
           specificIssues: data.specificIssues,
-          doctorName: item.source === 'new' ? (data as any).doctorName : (data as any).doctorName,
-          clinicAddress: item.source === 'new' ? (data as any).clinicAddress : undefined,
-          referredAt: item.source === 'new' ? (data as any).referredAt : (data as any).rejectedAt,
+          doctorName: data.doctorName,
+          clinicAddress: data.clinicAddress,
+          referredAt: data.referredAt,
           referredByName: (referredBy as any)?.fullname || "Admin",
           attemptNumber: data.attemptNumber,
           wasReplaced: data.wasReplaced,
           replacedAt: data.replacedAt,
           replacementInfo,
-          source: item.source, // For debugging
         };
       })
     );

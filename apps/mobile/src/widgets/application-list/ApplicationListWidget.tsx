@@ -37,9 +37,8 @@ const FILTER_OPTIONS: FilterStatus[] = [
   'Submitted',
   'Under Review',
   'Approved',
-  'Rejected', // DEPRECATED
-  'Documents Need Revision', // NEW
-  'Referred for Medical Management' // NEW
+  'Documents Need Revision',
+  'Referred for Medical Management'
 ];
 const SORT_OPTIONS: SortOption[] = ['Date', 'Status', 'Category'];
 
@@ -195,17 +194,6 @@ export function ApplicationListWidget({
             showPaymentBadge: false,
             isUrgent: true
           };
-        case 'Rejected': // DEPRECATED
-          // Check if this is a document revision case
-          const isDocumentRevision = application.remarks?.toLowerCase().includes('document') || 
-                                     application.remarks?.toLowerCase().includes('revision');
-          return {
-            mainText: isDocumentRevision ? 'Documents Rejected' : 'Application Rejected',
-            subText: isDocumentRevision ? 'Resubmission required' : (application.remarks || 'View details for more info'),
-            icon: 'close-circle',
-            showPaymentBadge: false,
-            isUrgent: true
-          };
         default:
           return {
             mainText: application.status,
@@ -234,13 +222,6 @@ export function ApplicationListWidget({
           return { text: 'View Doctor Info', icon: 'medkit-outline' };
         case 'Documents Need Revision':
           return { text: 'Fix Documents', icon: 'document-text-outline' };
-        case 'Rejected': // DEPRECATED
-          // Check if this is a document revision case
-          const isDocumentRevision = application.remarks?.toLowerCase().includes('document') || 
-                                     application.remarks?.toLowerCase().includes('revision');
-          return isDocumentRevision 
-            ? { text: 'Fix Documents', icon: 'document-text-outline' }
-            : { text: 'View Details', icon: 'eye-outline' };
         default:
           return null;
       }

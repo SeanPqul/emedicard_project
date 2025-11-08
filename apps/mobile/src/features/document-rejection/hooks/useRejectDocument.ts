@@ -15,7 +15,7 @@ export function useRejectDocument() {
     rejectionCategory: RejectionCategory;
     rejectionReason: string;
     specificIssues: string[];
-  }): Promise<ApiResponse<{ rejectionId: Id<"documentRejectionHistory"> }>> => {
+  }): Promise<ApiResponse<{ rejectionId: Id<"documentReferralHistory"> }>> => {
     try {
       const result = await mutation(params);
       if (!result || !result.rejectionId) {

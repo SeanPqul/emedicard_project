@@ -121,16 +121,8 @@ export const referDocument = mutation({
         throw new Error("Document is already referred or flagged");
       }
 
-      // 5. Count previous attempts for this document (check BOTH tables during migration)
-      const previousRejectionsOld = await ctx.db
-        .query("documentRejectionHistory")
-        .withIndex("by_document_type", (q) =>
-          q.eq("applicationId", documentUpload.applicationId)
-           .eq("documentTypeId", documentUpload.documentTypeId)
-        )
-        .collect();
-
-      const previousReferralsNew = await ctx.db
+      // 5. Count previous attempts for this document
+      const previousReferrals = await ctx.db
         .query("documentReferralHistory")
         .withIndex("by_document_type", (q) =>
           q.eq("applicationId", documentUpload.applicationId)
@@ -138,13 +130,9 @@ export const referDocument = mutation({
         )
         .collect();
 
-      // Use the maximum to avoid counting issues
-      const attemptNumber = Math.max(
-        previousRejectionsOld.length,
-        previousReferralsNew.length
-      ) + 1;
+      const attemptNumber = previousReferrals.length + 1;
 
-      // 6. DUAL-WRITE: Create record in NEW table (documentReferralHistory)
+      // 6. Create referral/issue record
       const referralHistoryId = await ctx.db.insert("documentReferralHistory", {
         applicationId: documentUpload.applicationId,
         documentTypeId: documentUpload.documentTypeId,
@@ -187,42 +175,8 @@ export const referDocument = mutation({
         userAgent: undefined,
       });
 
-      // 7. DUAL-WRITE: Also write to OLD table for backward compatibility
-      const oldRejectionCategory = args.issueType === "medical_referral"
-        ? "other" // Map medical to "other" in old system
-        : (args.documentIssueCategory || "other");
 
-      await ctx.db.insert("documentRejectionHistory", {
-        applicationId: documentUpload.applicationId,
-        documentTypeId: documentUpload.documentTypeId,
-        documentUploadId: args.documentUploadId,
-
-        rejectedFileId: documentUpload.storageFileId,
-        originalFileName: documentUpload.originalFileName,
-        fileSize: file.size,
-        fileType: file.contentType || "application/octet-stream",
-
-        rejectionCategory: oldRejectionCategory as any,
-        rejectionReason: args.referralReason,
-        specificIssues: args.specificIssues,
-        doctorName: args.doctorName,
-
-        rejectedBy: admin._id,
-        rejectedAt: Date.now(),
-
-        wasReplaced: false,
-        attemptNumber: attemptNumber,
-
-        status: "pending",
-
-        notificationSent: false,
-        notificationSentAt: undefined,
-
-        ipAddress: undefined,
-        userAgent: undefined,
-      });
-
-      // 8. Update document status with new terminology
+      // 7. Update document status with new terminology
       const newReviewStatus = args.issueType === "medical_referral"
         ? "Referred"           // Medical finding
         : "NeedsRevision";     // Document issue
@@ -238,7 +192,7 @@ export const referDocument = mutation({
         reviewedAt: Date.now(),
       });
 
-      // 9. Update application status with new terminology
+      // 8. Update application status with new terminology
       const newApplicationStatus = args.issueType === "medical_referral"
         ? "Referred for Medical Management"
         : "Documents Need Revision";
@@ -248,7 +202,7 @@ export const referDocument = mutation({
         updatedAt: Date.now(),
       });
 
-      // 10. Send admin notification with new terminology
+      // 9. Send admin notification with new terminology
       const allAdmins = await ctx.db
         .query("users")
         .withIndex("by_role", (q) => q.eq("role", "admin"))

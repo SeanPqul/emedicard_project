@@ -76,9 +76,6 @@ export function ViewDocumentsScreen() {
     switch (status) {
       case 'Approved':
         return getColor('accent.safetyGreen');
-      case 'Rejected': // DEPRECATED - backward compatibility
-        return getColor('semantic.error');
-      // Phase 4 Migration: New statuses
       case 'Referred': // Medical referral
         return '#3B82F6'; // Blue
       case 'NeedsRevision': // Document issue
@@ -93,9 +90,6 @@ export function ViewDocumentsScreen() {
     switch (status) {
       case 'Approved':
         return 'checkmark-circle';
-      case 'Rejected': // DEPRECATED - backward compatibility
-        return 'close-circle';
-      // Phase 4 Migration: New statuses
       case 'Referred': // Medical referral
         return 'medkit-outline';
       case 'NeedsRevision': // Document issue
@@ -103,6 +97,21 @@ export function ViewDocumentsScreen() {
       case 'Pending':
       default:
         return 'time-outline';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'Approved':
+        return 'Approved';
+      case 'Referred': // Medical referral
+        return 'Medical Referral';
+      case 'NeedsRevision': // Document issue
+        return 'Needs Revision';
+      case 'Pending':
+        return 'Pending';
+      default:
+        return status;
     }
   };
 
@@ -270,8 +279,6 @@ export function ViewDocumentsScreen() {
                 ? 'Medical consultation required. Please see doctor information for details.'
                 : application.applicationStatus === 'Documents Need Revision'
                 ? `${activeRejections.length} document${activeRejections.length > 1 ? 's need' : ' needs'} to be corrected and resubmitted.`
-                : application.applicationStatus === 'Rejected' && activeRejections.length > 0 // DEPRECATED - backward compatibility
-                ? `${activeRejections.length} document${activeRejections.length > 1 ? 's need' : ' needs'} to be revised and resubmitted.`
                 : 'You can view all your uploaded documents below.'}
             </Text>
           </View>
@@ -328,15 +335,38 @@ export function ViewDocumentsScreen() {
                         color={getStatusColor(doc.reviewStatus)} 
                       />
                       <Text style={[styles.statusText, { color: getStatusColor(doc.reviewStatus) }]}>
-                        {doc.reviewStatus}
+                        {getStatusLabel(doc.reviewStatus)}
                       </Text>
                     </View>
                   </View>
                   <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
                 </TouchableOpacity>
 
-                {/* Phase 4 Migration: Handle all issue types */}
-                {(doc.reviewStatus === 'Rejected' || doc.reviewStatus === 'Referred' || doc.reviewStatus === 'NeedsRevision') && (
+                {/* Medical Referral - Tap to view full details in history */}
+                {doc.reviewStatus === 'Referred' && (
+                  <TouchableOpacity 
+                    style={[styles.documentHeader, styles.documentSubItem]}
+                    onPress={() => router.push(`/(screens)/(shared)/documents/rejection-history?formId=${formId}`)}
+                  >
+                    <View style={styles.documentIconContainer}>
+                      <Ionicons 
+                        name="information-circle-outline" 
+                        size={moderateScale(20)} 
+                        color="#3B82F6" 
+                      />
+                    </View>
+                    <View style={styles.documentInfo}>
+                      <Text style={styles.documentSubItemText}>
+                        View doctor information
+                      </Text>
+                      <Text style={styles.rejectionReason}>Tap to see consultation details</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
+                  </TouchableOpacity>
+                )}
+
+                {/* Document Issue - Show resubmit button */}
+                {doc.reviewStatus === 'NeedsRevision' && (
                   <TouchableOpacity 
                     style={[styles.documentHeader, styles.documentSubItem]}
                     onPress={() => {
@@ -350,18 +380,14 @@ export function ViewDocumentsScreen() {
                   >
                     <View style={styles.documentIconContainer}>
                       <Ionicons 
-                        name={doc.reviewStatus === 'Referred' ? 'medkit-outline' : 'refresh-outline'} 
+                        name="refresh-outline" 
                         size={moderateScale(20)} 
-                        color={doc.reviewStatus === 'Referred' ? '#3B82F6' : getColor('semantic.error')} 
+                        color="#F59E0B" 
                       />
                     </View>
                     <View style={styles.documentInfo}>
                       <Text style={styles.documentSubItemText}>
-                        {doc.reviewStatus === 'Referred' 
-                          ? 'Medical consultation required'
-                          : doc.reviewStatus === 'NeedsRevision'
-                          ? 'Replace document with corrections'
-                          : 'Replace rejected document' /* DEPRECATED - backward compatibility */}
+                        Replace document with corrections
                       </Text>
                       <Text style={styles.rejectionReason}>{doc.adminRemarks || 'Document needs attention'}</Text>
                     </View>

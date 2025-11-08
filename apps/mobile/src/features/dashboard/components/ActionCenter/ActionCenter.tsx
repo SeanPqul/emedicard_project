@@ -15,8 +15,6 @@ export interface ActionCenterProps {
   };
   currentApplication: any;
   userApplications?: any[];
-  rejectedDocumentsCount?: number; // DEPRECATED - Use medicalReferralsCount + documentIssuesCount
-  // NEW - Phase 4 Migration
   medicalReferralsCount?: number;
   documentIssuesCount?: number;
 }
@@ -35,7 +33,6 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
   dashboardStats,
   currentApplication,
   userApplications = [],
-  rejectedDocumentsCount = 0, // DEPRECATED
   medicalReferralsCount = 0,
   documentIssuesCount = 0,
 }) => {
@@ -49,13 +46,12 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
   });
   const uniqueApps = Array.from(uniqueAppsMap.values());
 
-  // Phase 4 Migration: New action-required statuses
   const ACTIONABLE_STATUSES = new Set([
     'Pending Payment',
     'Submitted',
     'Under Review',
-    'Referred for Medical Management', // NEW - Medical referral
-    'Documents Need Revision', // NEW - Document issues
+    'Referred for Medical Management',
+    'Documents Need Revision',
   ]);
 
   // 1. Payment due (highest priority if overdue) - evaluate across all applications
@@ -102,17 +98,17 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
     });
   });
 
-  // 2. Phase 4 Migration: Medical Referrals (separate from document issues)
+  // Medical Referrals (doctor consultation required)
   const medicalReferralApps = uniqueApps.filter((app: any) => 
     app?.status === 'Referred for Medical Management'
   );
   
   medicalReferralApps.forEach((app: any) => {
-    const count = medicalReferralsCount || 1; // Use passed count or default to 1
+    const count = medicalReferralsCount || 1;
     actions.push({
       id: `medical-referral-${app._id}`,
-      icon: 'medkit-outline', // Medical icon
-      iconColor: theme.colors.blue[600], // Blue for medical
+      icon: 'medkit-outline',
+      iconColor: theme.colors.blue[600],
       title: 'Medical Consultation Required',
       subtitle: 'See doctor for medical clearance',
       urgency: 'high',
@@ -120,7 +116,7 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
     });
   });
 
-  // 3. Phase 4 Migration: Document Issues (non-medical)
+  // Document Issues (corrections needed)
   const documentIssueApps = uniqueApps.filter((app: any) => 
     app?.status === 'Documents Need Revision'
   );
@@ -129,8 +125,8 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
     const count = documentIssuesCount || 1;
     actions.push({
       id: `document-issue-${app._id}`,
-      icon: 'document-text-outline', // Document icon
-      iconColor: theme.colors.orange[600], // Orange for doc issues
+      icon: 'document-text-outline',
+      iconColor: theme.colors.orange[600],
       title: `${count} Document${count !== 1 ? 's' : ''} Need Revision`,
       subtitle: 'Review feedback and resubmit',
       urgency: 'high',
@@ -138,34 +134,12 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
     });
   });
 
-  // DEPRECATED: Legacy rejected documents (backward compatibility)
-  const rejectedApps = uniqueApps.filter((app: any) => {
-    const count = (app as any)?.rejectedDocumentsCount ?? (app as any)?.rejectionCount ?? 0;
-    const hasFlag = (app as any)?.hasRejectedDocuments === true;
-    const isNewStatus = app?.status === 'Referred for Medical Management' || app?.status === 'Documents Need Revision';
-    return ((count > 0) || hasFlag) && !isNewStatus; // Exclude if using new statuses
-  });
 
-  rejectedApps.forEach((app: any) => {
-    const countForThisApp = (app as any)?.rejectedDocumentsCount ?? (app as any)?.rejectionCount ?? (currentApplication?._id === app._id ? rejectedDocumentsCount : 0);
-    actions.push({
-      id: `rejected-${app._id}`,
-      icon: 'alert-circle-outline',
-      iconColor: theme.colors.semantic.error,
-      title: `${countForThisApp} Rejected Document${countForThisApp !== 1 ? 's' : ''}`,
-      subtitle: 'Review remarks and resubmit',
-      urgency: 'high',
-      onPress: () => router.push(`/(screens)/(shared)/documents/view-document?formId=${app._id}&openRejected=true`),
-    });
-  });
-
-  // 4. Orientation required (for Yellow card holders) - evaluate across all non-rejected/non-approved apps
-  // Food handlers need orientation regardless of current status (unless completed)
+  // Orientation required (for Yellow card holders)
   const orientationApps = uniqueApps
     .filter((app: any) => {
-      // Include all statuses except Rejected, Cancelled, and Approved
       const status = app?.status;
-      return status !== 'Rejected' && status !== 'Cancelled' && status !== 'Approved';
+      return status !== 'Cancelled' && status !== 'Approved';
     })
     .filter((app: any) => {
       const name = app?.jobCategory?.name?.toLowerCase?.() || '';

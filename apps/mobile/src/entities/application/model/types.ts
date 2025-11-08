@@ -15,8 +15,6 @@ export type ApplicationStatus =
   | 'Submitted' 
   | 'Under Review' 
   | 'Approved' 
-  | 'Rejected' // DEPRECATED - Only for permanent rejection
-  // NEW - Phase 4 Migration: Proper medical terminology
   | 'Documents Need Revision' // Non-medical document issues
   | 'Referred for Medical Management'; // Medical findings requiring doctor consultation
 export type ApplicationType = 'New' | 'Renew';
@@ -156,6 +154,8 @@ export interface JobCategoryDetails {
 export interface PaymentDetails {
   _id: string;
   amount: number;
+  serviceFee: number;
+  netAmount: number;
   method: string;
   status: string;
   referenceNumber?: string;

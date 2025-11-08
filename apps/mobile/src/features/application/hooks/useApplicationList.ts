@@ -11,9 +11,8 @@ export type FilterStatus =
   | 'Submitted' 
   | 'Under Review' 
   | 'Approved' 
-  | 'Rejected' // DEPRECATED - backward compatibility
-  | 'Documents Need Revision' // NEW
-  | 'Referred for Medical Management'; // NEW
+  | 'Documents Need Revision'
+  | 'Referred for Medical Management';
 export type SortOption = 'Date' | 'Status' | 'Category';
 
 export function useApplicationList() {
@@ -82,9 +81,6 @@ export function useApplicationList() {
         return 'eye';
       case 'Approved':
         return 'checkmark-circle';
-      case 'Rejected': // DEPRECATED
-        return 'close-circle';
-      // Phase 4 Migration: New statuses
       case 'Documents Need Revision':
         return 'document-text-outline';
       case 'Referred for Medical Management':
@@ -104,9 +100,6 @@ export function useApplicationList() {
         return 'Application is being reviewed by our team';
       case 'Approved':
         return 'Application approved! Health card will be issued';
-      case 'Rejected': // DEPRECATED
-        return 'Application rejected. Please check remarks';
-      // Phase 4 Migration: New statuses
       case 'Documents Need Revision':
         return 'Some documents need to be corrected and resubmitted';
       case 'Referred for Medical Management':
@@ -122,10 +115,8 @@ export function useApplicationList() {
       case 'Submitted': return 25;
       case 'Under Review': return 50;
       case 'Approved': return 100;
-      case 'Rejected': return 100; // DEPRECATED
-      // Phase 4 Migration: New statuses
-      case 'Documents Need Revision': return 40; // Needs action
-      case 'Referred for Medical Management': return 40; // Needs action
+      case 'Documents Need Revision': return 40;
+      case 'Referred for Medical Management': return 40;
       default: return 0;
     }
   };
@@ -136,8 +127,6 @@ export function useApplicationList() {
       case 'Submitted': return 'Application received';
       case 'Under Review': return 'Being reviewed';
       case 'Approved': return 'Approved - Card ready';
-      case 'Rejected': return 'Application rejected'; // DEPRECATED
-      // Phase 4 Migration: New statuses
       case 'Documents Need Revision': return 'Action required - Documents';
       case 'Referred for Medical Management': return 'Action required - Medical';
       default: return 'Unknown status';

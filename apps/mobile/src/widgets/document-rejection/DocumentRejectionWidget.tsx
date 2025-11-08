@@ -123,17 +123,19 @@ export function DocumentRejectionWidget({
         </View>
       )}
 
-      {/* Specific Issues */}
+      {/* Specific Issues - Different labels for medical vs document */}
       {rejection.specificIssues && rejection.specificIssues.length > 0 && (
         <View style={styles.issuesSection}>
-          <Text style={styles.issuesTitle}>Issues to Address:</Text>
+          <Text style={styles.issuesTitle}>
+            {isMedicalReferral ? 'Consultation Details:' : 'Issues to Address:'}
+          </Text>
           <View style={styles.issuesList}>
             {rejection.specificIssues.map((issue: string, index: number) => (
               <View key={index} style={styles.issueItem}>
                 <Ionicons 
-                  name="alert-circle" 
+                  name={isMedicalReferral ? 'information-circle' : 'alert-circle'} 
                   size={moderateScale(16)} 
-                  color="#F59E0B"
+                  color={isMedicalReferral ? '#3B82F6' : '#F59E0B'}
                   style={styles.issueIcon}
                 />
                 <Text style={styles.issueText}>{issue}</Text>
@@ -175,10 +177,10 @@ export function DocumentRejectionWidget({
         </View>
       )}
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Medical referrals don't show Resubmit */}
       {showActions && (
         <View style={styles.actionSection}>
-          {!rejection.wasReplaced && (
+          {!rejection.wasReplaced && !isMedicalReferral && (
             <TouchableOpacity 
               style={[styles.actionButton, styles.primaryButton]}
               onPress={onResubmit}

@@ -87,7 +87,7 @@ export function DocumentRejectionHistoryWidget({
   const renderHeader = () => {
     return (
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Rejection History</Text>
+        <Text style={styles.headerTitle}>Referral History</Text>
         
         <View style={styles.filterContainer}>
           <ScrollView 

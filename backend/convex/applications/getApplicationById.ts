@@ -52,6 +52,8 @@ export const getApplicationByIdQuery = query({
       payment: payment ? {
         _id: payment._id,
         amount: payment.amount,
+        serviceFee: payment.serviceFee,
+        netAmount: payment.netAmount,
         method: payment.paymentMethod,
         status: payment.paymentStatus,
         referenceNumber: payment.referenceNumber,

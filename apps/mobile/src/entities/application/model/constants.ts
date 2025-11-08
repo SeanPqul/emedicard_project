@@ -16,8 +16,6 @@ export const ApplicationStatusLabels: Record<ApplicationStatus, string> = {
   'Submitted': 'Submitted',
   'Under Review': 'Under Review',
   'Approved': 'Approved',
-  'Rejected': 'Rejected', // DEPRECATED - Permanent rejection only
-  // NEW - Phase 4 Migration
   'Documents Need Revision': 'Documents Need Revision',
   'Referred for Medical Management': 'Medical Referral Required',
 };
@@ -31,8 +29,6 @@ export const ApplicationStatusColors: Record<ApplicationStatus, string> = {
   'Submitted': '#10B981', // Green
   'Under Review': '#3B82F6', // Blue
   'Approved': '#10B981', // Green
-  'Rejected': '#EF4444', // Red - DEPRECATED
-  // NEW - Phase 4 Migration
   'Documents Need Revision': '#F59E0B', // Orange - for document issues
   'Referred for Medical Management': '#3B82F6', // Blue - for medical referrals
 };
@@ -47,8 +43,6 @@ export const ApplicationStatusIcons: Record<ApplicationStatus, string> = {
   'Submitted': 'checkmark-circle-outline',
   'Under Review': 'eye-outline',
   'Approved': 'checkmark-done-outline',
-  'Rejected': 'close-circle-outline', // DEPRECATED
-  // NEW - Phase 4 Migration
   'Documents Need Revision': 'document-text-outline', // Orange theme for doc issues
   'Referred for Medical Management': 'medkit-outline', // Blue theme for medical
 };
@@ -62,8 +56,6 @@ export const ApplicationStatusDescriptions: Record<ApplicationStatus, string> = 
   'Submitted': 'Application has been submitted',
   'Under Review': 'Application is being reviewed',
   'Approved': 'Application has been approved',
-  'Rejected': 'Application has been rejected', // DEPRECATED
-  // NEW - Phase 4 Migration
   'Documents Need Revision': 'Some documents need to be corrected and resubmitted',
   'Referred for Medical Management': 'Medical findings require doctor consultation before proceeding',
 };
@@ -85,8 +77,6 @@ export const ApplicationStatusCategoryMap: Record<ApplicationStatus, Application
   'Submitted': ApplicationStatusCategory.IN_PROGRESS,
   'Under Review': ApplicationStatusCategory.IN_PROGRESS,
   'Approved': ApplicationStatusCategory.COMPLETED,
-  'Rejected': ApplicationStatusCategory.REJECTED, // DEPRECATED
-  // NEW - Phase 4 Migration
   'Documents Need Revision': ApplicationStatusCategory.NEEDS_ACTION,
   'Referred for Medical Management': ApplicationStatusCategory.NEEDS_ACTION,
 };

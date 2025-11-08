@@ -24,7 +24,7 @@ export function PaymentList({ payments, hasFilter, refreshing, onRefresh }: Paym
       keyExtractor={(item) => item._id}
       renderItem={({ item }) => (
         <PaymentCard
-          amount={item.amount}
+          amount={item.netAmount}
           status={item.status}
           paymentMethod={item.paymentMethod}
           date={item._creationTime}

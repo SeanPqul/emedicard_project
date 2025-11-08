@@ -92,9 +92,6 @@ export function getStatusDescription(status: ApplicationStatus): string {
       return 'Your application is being reviewed';
     case 'Approved':
       return 'Application approved! Your health card is ready';
-    case 'Rejected': // DEPRECATED
-      return 'Application was rejected. Please check remarks';
-    // Phase 4 Migration: New statuses
     case 'Documents Need Revision':
       return 'Some documents need to be corrected and resubmitted';
     case 'Referred for Medical Management':
@@ -138,7 +135,6 @@ export function getStatusPriority(status: ApplicationStatus): number {
     case 'For Payment Validation': return 7;
     case 'Submitted': return 8;
     case 'Approved': return 9;
-    case 'Rejected': return 10; // DEPRECATED
     default: return 99;
   }
 }

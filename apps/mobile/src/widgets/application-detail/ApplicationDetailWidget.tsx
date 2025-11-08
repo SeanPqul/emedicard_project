@@ -500,7 +500,7 @@ export function ApplicationDetailWidget({
 
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Amount Paid</Text>
-            <Text style={styles.detailValue}>₱{application.payment.amount}</Text>
+            <Text style={styles.detailValue}>₱{application.payment.netAmount}</Text>
           </View>
 
           {application.payment.referenceNumber && (
@@ -581,7 +581,7 @@ export function ApplicationDetailWidget({
               fontWeight: '600',
               color: theme.colors.text.primary,
             }}>
-              Rejection History
+              Payment History
             </Text>
             <TouchableOpacity onPress={() => setIsRejectionHistoryModalOpen(false)}>
               <Ionicons name="close" size={moderateScale(24)} color={theme.colors.text.secondary} />

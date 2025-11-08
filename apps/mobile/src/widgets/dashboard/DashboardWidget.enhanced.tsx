@@ -55,7 +55,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
   
   const { onRefresh, getGreeting } = handlers;
 
-  // Phase 4 Migration: Use referral counts (medical vs document issues)
+  // Use referral counts (medical vs document issues)
   const referralCounts = useReferredDocumentsCount(data?.userProfile?._id);
   const { totalIssues, medicalReferrals, documentIssues } = referralCounts;
 
@@ -107,9 +107,8 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
           currentApplication={currentApplication}
           dashboardStats={dashboardStats}
           userApplications={userApplications}
-          rejectedDocumentsCount={totalIssues} // Legacy prop for backward compatibility
-          medicalReferralsCount={medicalReferrals} // NEW - Medical referrals
-          documentIssuesCount={documentIssues} // NEW - Document issues
+          medicalReferralsCount={medicalReferrals}
+          documentIssuesCount={documentIssues}
         />
         
         {/* Health Card Preview or Application Status */}
@@ -154,9 +153,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
               } else if (status === 'Referred for Medical Management') {
                 statusBadge = { text: 'Medical Referral', color: '#3B82F6' }; // Blue - medical
               } else if (status === 'Documents Need Revision') {
-                statusBadge = { text: 'Docs Needed', color: '#F59E0B' }; // Orange - doc issues
-              } else if (status === 'Rejected') {
-                statusBadge = { text: 'Action Needed', color: '#DC2626' }; // DEPRECATED
+                statusBadge = { text: 'Docs Needed', color: '#F59E0B' };
               } else if (status === 'Approved' || status === 'Completed') {
                 statusBadge = { text: 'Approved', color: '#059669' }; // Clean green
               } else if (status === 'Under Review' || status === 'Submitted') {
