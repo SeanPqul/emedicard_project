@@ -101,13 +101,22 @@ const issueCategories = [
 const StatusBadge = ({ status }: { status: string }) => {
   const statusStyles: Record<string, string> = {
     'Approved': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+<<<<<<< HEAD
     'Referred': 'bg-blue-50 text-blue-700 border border-blue-200', // Medical referral (needs doctor)
     'NeedsRevision': 'bg-orange-50 text-orange-700 border border-orange-200', // Document quality issue (needs resubmission)
+=======
+    'Referred': 'bg-blue-50 text-blue-700 border border-blue-200', // Medical referral
+    'NeedsRevision': 'bg-orange-50 text-orange-700 border border-orange-200', // Document quality issue
+>>>>>>> b819a25 (refactor(doc-verification): Clarify document referral status and API)
     'Pending': 'bg-amber-50 text-amber-700 border border-amber-200',
     'Missing': 'bg-gray-50 text-gray-600 border border-gray-200',
   };
   
+<<<<<<< HEAD
   // Display user-friendly labels (no "Rejected" terminology)
+=======
+  // Display user-friendly labels
+>>>>>>> b819a25 (refactor(doc-verification): Clarify document referral status and API)
   const displayLabel = status === 'NeedsRevision' ? 'Needs Revision' : status;
   
   return (
@@ -135,13 +144,31 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // New state for collapsible applicant details
   const router = useRouter();
 
+<<<<<<< HEAD
+=======
+  // --- HELPER FUNCTIONS ---
+  // Helper function to check if document has pending action
+  const getPendingAction = (uploadId: Id<"documentUploads"> | null | undefined) => {
+    if (!uploadId) return null;
+    return pendingActions.find(action => action.uploadId === uploadId);
+  };
+  
+  // Helper function to get effective status (pending action or actual status)
+  const getEffectiveStatus = (item: ChecklistItem) => {
+    const pending = getPendingAction(item.uploadId);
+    if (pending) {
+      return pending.actionType === 'refer_doctor' ? 'Referred' : 'NeedsRevision';
+    }
+    return item.status;
+  };
+
   // --- DATA FETCHING ---
   // @ts-ignore - Type instantiation is excessively deep
   const getDocumentsWithClassification = useAction(api.applications.getDocumentsWithClassification.get);
   const [data, setData] = useState<ApplicationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
-  const referDocumentMutation = useMutation(api.admin.documents.referDocument.referDocument);
+  const referDocumentMutation = useMutation(api.admin.documents.referDocument.referDocument); // New referral mutation
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
 
   const loadData = async () => {
@@ -186,20 +213,21 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     try {
       setError(null);
       const pendingDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Missing' || doc.status === 'Pending');
-      const referredDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Referred') || []; // Medical referrals
-      const needsRevisionDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'NeedsRevision') || []; // Document quality issues
-      const totalIssues = referredDocs.length + needsRevisionDocs.length;
+      const referredDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Referred') || [];
+      const needsRevisionDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'NeedsRevision') || [];
       
       if (pendingDocs && pendingDocs.length > 0) {
         throw new Error("Please review and assign a status (Approve or Flag/Refer) to all documents before proceeding.");
       }
       
-      // Prevent approval if any documents are referred/flagged
-      if (newStatus === 'Approved' && totalIssues > 0) {
-        throw new Error(`Cannot approve application. ${totalIssues} document(s) require applicant action. Please use 'Send Referral Notification' button instead.`);
+      // Prevent approval if any documents are referred or need revision
+      const totalPendingDocs = referredDocs.length + needsRevisionDocs.length;
+      
+      if (newStatus === 'Approved' && totalPendingDocs > 0) {
+        throw new Error(`Cannot approve application. ${totalPendingDocs} document(s) require applicant action. Please use 'Send Applicant Notifications' button instead.`);
       }
       
-      if (newStatus === 'Rejected' && totalIssues === 0) {
+      if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Referred' || doc.status === 'NeedsRevision')) {
         throw new Error("To send notifications, at least one document must be flagged for revision or referred for medical management.");
       }
 
@@ -243,7 +271,48 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   // Handler to confirm sending referral notifications
   const handleConfirmSendReferral = async () => {
     setIsReferralConfirmModalOpen(false);
-    await handleFinalize('Rejected'); // This will trigger sendReferralNotifications
+    setError(null);
+    
+    try {
+      // Save all pending actions to database
+      for (const action of pendingActions) {
+        if (action.actionType === 'refer_doctor') {
+          // Medical referral
+          await referDocumentMutation({
+            documentUploadId: action.uploadId,
+            issueType: "medical_referral",
+            medicalReferralCategory: "other_medical_concern",
+            referralReason: action.reason,
+            specificIssues: action.notes.split(',').map(s => s.trim()).filter(s => s),
+            doctorName: action.doctorName || "Dr. TBD",
+            clinicAddress: "Door 7, Magsaysay Complex, Magsaysay Park, Davao City",
+          });
+        } else {
+          // Document quality issue
+          await referDocumentMutation({
+            documentUploadId: action.uploadId,
+            issueType: "document_issue",
+            documentIssueCategory: action.category as any,
+            referralReason: action.reason,
+            specificIssues: action.notes.split(',').map(s => s.trim()).filter(s => s),
+          });
+        }
+      }
+      
+      // Clear pending actions after successful save
+      setPendingActions([]);
+      
+      // Reload data to show updated statuses
+      await loadData();
+      
+      // Call finalizeApplication to send notifications
+      await handleFinalize('Rejected');
+      
+      setSuccessMessage(`Successfully sent ${pendingActions.length} notification(s) to applicant.`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (e: any) {
+      setError(createAppError(e.message, 'Failed to send notifications'));
+    }
   };
 
   // --- RENDER ---
@@ -600,12 +669,49 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     <div className="flex-1 mb-3 sm:mb-0">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-2">
+<<<<<<< HEAD
                           {item.status === 'Approved' && (
                             <div className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
                               <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                             </div>
+=======
+                          {(() => {
+                            const effectiveStatus = getEffectiveStatus(item);
+                            const pendingAction = getPendingAction(item.uploadId);
+                            
+                            if (effectiveStatus === 'Approved') {
+                              return (
+                                <div className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              );
+                            } else if (effectiveStatus === 'Referred') {
+                              return (
+                                <div className="w-6 h-6 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                  </svg>
+                                </div>
+                              );
+                            } else if (effectiveStatus === 'NeedsRevision') {
+                              return (
+                                <div className="w-6 h-6 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                  </svg>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                          <h3 className="font-bold text-gray-800 text-base">{item.requirementName}{item.isRequired && <span className="text-rose-500 ml-1">*</span>}</h3>
+                          {getPendingAction(item.uploadId) && (
+                            <span className="text-xs font-medium text-gray-500 ml-2">⏳ Pending</span>
+>>>>>>> b819a25 (refactor(doc-verification): Clarify document referral status and API)
                           )}
                           {item.status === 'Referred' && (
                             <div className="w-6 h-6 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center">
@@ -817,7 +923,41 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       </svg>
                       Approve
                     </button>
+<<<<<<< HEAD
                     {isMedicalDocument(item.fieldIdentifier) ? (
+=======
+                    
+                    {/* Flag for Revision Button - Always show for all documents */}
+                    <button
+                      onClick={() => {
+                        const pending = getPendingAction(item.uploadId);
+                        if (pending) {
+                          // Load existing pending action for editing
+                          setModalType(pending.actionType);
+                          setIssueCategory(pending.category);
+                          setReferralReason(pending.reason);
+                          setSpecificIssues(pending.notes);
+                        } else {
+                          // New action
+                          setModalType('flag_revision');
+                          setIssueCategory('other');
+                          setReferralReason('');
+                          setSpecificIssues('');
+                        }
+                        setOpenReferralIndex(idx);
+                      }}
+                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision'}
+                      className="w-full bg-orange-50 text-orange-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-orange-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-orange-100 disabled:border-gray-200 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      Flag for Revision
+                    </button>
+                    
+                    {/* Refer to Doctor Button - Only for medical documents */}
+                    {isMedicalDocument(item.fieldIdentifier) && (
+>>>>>>> b819a25 (refactor(doc-verification): Clarify document referral status and API)
                       <button
                         onClick={() => {
                           setOpenReferralIndex(idx);
