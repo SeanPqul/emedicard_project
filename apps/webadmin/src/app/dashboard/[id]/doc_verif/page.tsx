@@ -101,14 +101,14 @@ const issueCategories = [
 const StatusBadge = ({ status }: { status: string }) => {
   const statusStyles: Record<string, string> = {
     'Approved': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-    'Rejected': 'bg-blue-50 text-blue-700 border border-blue-200', // "Referred" status (medical referral)
+    'Referred': 'bg-blue-50 text-blue-700 border border-blue-200', // Medical referral
     'NeedsRevision': 'bg-orange-50 text-orange-700 border border-orange-200', // Document flagged for revision
     'Pending': 'bg-amber-50 text-amber-700 border border-amber-200',
     'Missing': 'bg-gray-50 text-gray-600 border border-gray-200',
   };
   
   // Display user-friendly labels
-  const displayLabel = status === 'Rejected' ? 'Referred' : status === 'NeedsRevision' ? 'Needs Revision' : status;
+  const displayLabel = status === 'NeedsRevision' ? 'Needs Revision' : status;
   
   return (
     <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-medium rounded-lg ${statusStyles[status] || 'bg-gray-50 text-gray-700 border border-gray-200'}`}>
@@ -160,7 +160,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const getEffectiveStatus = (item: ChecklistItem) => {
     const pending = getPendingAction(item.uploadId);
     if (pending) {
-      return pending.actionType === 'refer_doctor' ? 'Rejected' : 'NeedsRevision';
+      return pending.actionType === 'refer_doctor' ? 'Referred' : 'NeedsRevision';
     }
     return item.status;
   };
@@ -171,7 +171,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [data, setData] = useState<ApplicationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
-  const referDocumentMutation = useMutation(api.admin.documents.rejectDocument.rejectDocument); // Actually refers documents
+  const referDocumentMutation = useMutation(api.admin.documents.referDocument.referDocument); // Actually refers documents
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
   
   // Fetch payment data
@@ -240,7 +240,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     try {
       setError(null);
       const pendingDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Missing' || doc.status === 'Pending');
-      const rejectedDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Rejected') || [];
+      const referredDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Referred') || [];
       
       if (pendingDocs && pendingDocs.length > 0) {
         throw new Error("Please review and assign a status (Approve or Reject) to all documents before proceeding.");
@@ -248,13 +248,13 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
       
       // Prevent approval if any documents are referred or need revision
       const needsRevisionDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'NeedsRevision') || [];
-      const totalPendingDocs = rejectedDocs.length + needsRevisionDocs.length;
+      const totalPendingDocs = referredDocs.length + needsRevisionDocs.length;
       
       if (newStatus === 'Approved' && totalPendingDocs > 0) {
         throw new Error(`Cannot approve application. ${totalPendingDocs} document(s) require applicant action. Please use 'Send Applicant Notifications' button instead.`);
       }
       
-      if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Rejected' || doc.status === 'NeedsRevision')) {
+      if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Referred' || doc.status === 'NeedsRevision')) {
         throw new Error("To send notifications, at least one document must be flagged for revision or referred for medical management.");
       }
 
@@ -310,13 +310,27 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     try {
       // Save all pending actions to database
       for (const action of pendingActions) {
-        await referDocumentMutation({
-          documentUploadId: action.uploadId,
-          rejectionCategory: action.category as any,
-          rejectionReason: action.reason,
-          specificIssues: action.notes.split(',').map(s => s.trim()).filter(s => s),
-          doctorName: action.doctorName, // Will be undefined for flag_revision, defined for refer_doctor
-        });
+        if (action.actionType === 'refer_doctor') {
+          // Medical referral
+          await referDocumentMutation({
+            documentUploadId: action.uploadId,
+            issueType: "medical_referral",
+            medicalReferralCategory: "other_medical_concern",
+            referralReason: action.reason,
+            specificIssues: action.notes.split(',').map(s => s.trim()).filter(s => s),
+            doctorName: action.doctorName || "Dr. TBD",
+            clinicAddress: "Door 7, Magsaysay Complex, Magsaysay Park, Davao City",
+          });
+        } else {
+          // Document quality issue
+          await referDocumentMutation({
+            documentUploadId: action.uploadId,
+            issueType: "document_issue",
+            documentIssueCategory: action.category as any,
+            referralReason: action.reason,
+            specificIssues: action.notes.split(',').map(s => s.trim()).filter(s => s),
+          });
+        }
       }
       
       // Clear pending actions after successful save
@@ -812,7 +826,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                                   </svg>
                                 </div>
                               );
-                            } else if (effectiveStatus === 'Rejected') {
+                            } else if (effectiveStatus === 'Referred') {
                               return (
                                 <div className="w-6 h-6 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center">
                                   <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1068,7 +1082,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         }
                         setOpenReferralIndex(idx);
                       }}
-                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Rejected' || item.status === 'NeedsRevision'}
+                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision'}
                       className="w-full bg-orange-50 text-orange-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-orange-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-orange-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1087,7 +1101,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           setReferralReason('Other medical concern');
                           setSpecificIssues(`Failed Medical Result (${item.requirementName}) - Please refer to ${FIXED_DOCTOR_NAME} at Door 7, Magsaysay Complex, Magsaysay Park, Davao City.`);
                         }}
-                        disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Rejected' || item.status === 'NeedsRevision'}
+                        disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision'}
                         className="w-full bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-blue-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
