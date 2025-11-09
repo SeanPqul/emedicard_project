@@ -35,6 +35,7 @@ interface DocumentRejectionHistoryWidgetProps {
   onRefresh: () => void;
   onResubmit: (rejection: EnrichedRejection | EnrichedReferral) => void;
   onViewDetails: (rejection: EnrichedRejection | EnrichedReferral) => void;
+  onBack?: () => void; // Optional back button handler
 }
 
 export function DocumentRejectionHistoryWidget({
@@ -47,6 +48,7 @@ export function DocumentRejectionHistoryWidget({
   onRefresh,
   onResubmit,
   onViewDetails,
+  onBack,
 }: DocumentRejectionHistoryWidgetProps) {
   
   // Group rejections by date
@@ -87,30 +89,18 @@ export function DocumentRejectionHistoryWidget({
   const renderHeader = () => {
     return (
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Referral History</Text>
-        
-        <View style={styles.filterContainer}>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            style={styles.filterScroll}
+        {onBack && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onBack}
+            activeOpacity={0.7}
           >
-            {FILTER_CATEGORIES.map((category) => {
-              const isActive = selectedFilter === category.key;
-              return (
-                <TouchableOpacity
-                  key={category.key}
-                  style={[styles.filterPill, isActive && styles.filterPillActive]}
-                  onPress={() => onFilterChange(category.key)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.filterPillText, isActive && styles.filterPillTextActive]}>
-                    {category.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+            <Ionicons name="arrow-back" size={moderateScale(24)} color="#1F2937" />
+          </TouchableOpacity>
+        )}
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerTitle}>Document Issues</Text>
+          <Text style={styles.headerSubtitle}>Review flagged documents and medical referrals</Text>
         </View>
       </View>
     );

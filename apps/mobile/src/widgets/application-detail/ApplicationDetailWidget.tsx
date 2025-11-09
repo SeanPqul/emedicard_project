@@ -136,15 +136,35 @@ export function ApplicationDetailWidget({
 
       {/* Status Card */}
       <View style={styles.statusCard}>
-        <View style={styles.statusHeader}>
-          <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
-            <Ionicons name={getStatusIcon(application.status) as any} size={moderateScale(20)} color={statusColor} />
-            <Text style={[styles.statusText, { color: statusColor }]}>
-              {application.status}
-            </Text>
+        {/* Dynamic layout: show ID on same row for short statuses, separate row for long ones */}
+        {application.status.length > 20 ? (
+          // Long status - ID below
+          <>
+            <View style={styles.statusHeader}>
+              <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
+                <Ionicons name={getStatusIcon(application.status) as any} size={moderateScale(18)} color={statusColor} />
+                <Text style={[styles.statusText, { color: statusColor }]} numberOfLines={1}>
+                  {application.status}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.statusInfo}>
+              <Text style={styles.statusLabel}>Application ID</Text>
+              <Text style={styles.statusValue}>#{application._id.slice(-8).toUpperCase()}</Text>
+            </View>
+          </>
+        ) : (
+          // Short status - ID on same row
+          <View style={styles.statusHeaderWithId}>
+            <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
+              <Ionicons name={getStatusIcon(application.status) as any} size={moderateScale(18)} color={statusColor} />
+              <Text style={[styles.statusText, { color: statusColor }]}>
+                {application.status}
+              </Text>
+            </View>
+            <Text style={styles.applicationId}>#{application._id.slice(-8).toUpperCase()}</Text>
           </View>
-          <Text style={styles.applicationId}>#{application._id.slice(-8)}</Text>
-        </View>
+        )}
 
         <View style={styles.statusInfo}>
           <Text style={styles.statusLabel}>Application Date</Text>
@@ -318,10 +338,10 @@ export function ApplicationDetailWidget({
             {application.status === 'Approved' && (
               <Text style={[styles.documentsStatusText, { color: theme.colors.accent.safetyGreen }]}>All documents approved</Text>
             )}
-            {/* Phase 4 Migration: Show appropriate message based on status */}
+            {/* Show appropriate message based on status */}
             {application.status === 'Referred for Medical Management' && (
               <Text style={[styles.documentsStatusText, { color: '#3B82F6' }]}>
-                📋 Medical referral - see doctor for clearance
+                Medical referral - see doctor for clearance
               </Text>
             )}
             {application.status === 'Documents Need Revision' && rejectedDocumentsCount > 0 && (

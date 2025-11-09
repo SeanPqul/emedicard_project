@@ -228,40 +228,25 @@ export function DocumentReferralWidget({
       )}
 
       {/* Action Buttons */}
-      {showActions && (
+      {showActions && !referral.wasReplaced && (
         <View style={styles.actionSection}>
-          {!referral.wasReplaced && (
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                styles.primaryButton,
-                { backgroundColor: isMedical ? "#3B82F6" : "#EF4444" }
-              ]}
-              onPress={onAction}
-              activeOpacity={0.8}
-            >
-              <Ionicons
-                name={isMedical ? "medkit" : "cloud-upload-outline"}
-                size={moderateScale(18)}
-                color="white"
-              />
-              <Text style={styles.primaryButtonText}>
-                {isMedical ? "View Doctor Info" : "Resubmit Document"}
-              </Text>
-            </TouchableOpacity>
-          )}
-
           <TouchableOpacity
-            style={[styles.actionButton, styles.secondaryButton]}
-            onPress={onViewDetails}
+            style={[
+              styles.actionButton,
+              styles.primaryButton,
+              { backgroundColor: isMedical ? "#3B82F6" : "#EF4444" }
+            ]}
+            onPress={onAction}
             activeOpacity={0.8}
           >
             <Ionicons
-              name="information-circle-outline"
+              name={isMedical ? "medkit" : "cloud-upload-outline"}
               size={moderateScale(18)}
-              color="#1F2937"
+              color="white"
             />
-            <Text style={styles.secondaryButtonText}>More Info</Text>
+            <Text style={styles.primaryButtonText}>
+              {isMedical ? "View Doctor Info" : "Resubmit Document"}
+            </Text>
           </TouchableOpacity>
         </View>
       )}

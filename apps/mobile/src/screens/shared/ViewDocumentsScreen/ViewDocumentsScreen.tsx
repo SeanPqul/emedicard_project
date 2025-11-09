@@ -63,11 +63,24 @@ export function ViewDocumentsScreen() {
     formId ? { applicationId: formId } : 'skip'
   );
   
-  const isLoading = documentsData === undefined || rejectionHistory === undefined;
+  // Fetch referral history (medical referrals + document issues)
+  const referralHistory = useQuery(
+    api.documents.referralQueries.getReferralHistory,
+    formId ? { applicationId: formId } : 'skip'
+  );
+  
+  const isLoading = documentsData === undefined || rejectionHistory === undefined || referralHistory === undefined;
   const uploadedDocuments = documentsData?.uploadedDocuments || [];
   const requiredDocuments = documentsData?.requiredDocuments || [];
   const application = documentsData?.application;
-  const rejections = rejectionHistory || [];
+  
+  // Combine both rejection and referral history
+  const rejections = React.useMemo(() => {
+    const combined: any[] = [];
+    if (rejectionHistory) combined.push(...rejectionHistory);
+    if (referralHistory) combined.push(...referralHistory);
+    return combined;
+  }, [rejectionHistory, referralHistory]);
   
   // Get active rejections (not replaced)
   const activeRejections = rejections.filter(r => !r.wasReplaced);
@@ -357,9 +370,9 @@ export function ViewDocumentsScreen() {
                     </View>
                     <View style={styles.documentInfo}>
                       <Text style={styles.documentSubItemText}>
-                        View doctor information
+                        Consultation Required
                       </Text>
-                      <Text style={styles.rejectionReason}>Tap to see consultation details</Text>
+                      <Text style={styles.rejectionReason}>View doctor details and next steps</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
                   </TouchableOpacity>

@@ -8,20 +8,37 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.secondary,
   },
   
-  // Header
+  // Header (Inline style matching HelpCenter)
   header: {
-    backgroundColor: theme.colors.background.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: scale(16),
-    paddingVertical: verticalScale(12),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border.light,
-    ...theme.shadows.small,
+    paddingTop: verticalScale(4),
+    paddingBottom: verticalScale(16),
+    backgroundColor: theme.colors.background.secondary,
+  },
+  backButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: scale(-8),
+    marginRight: scale(8),
+  },
+  headerTextContainer: {
+    flex: 1,
   },
   headerTitle: {
-    fontSize: moderateScale(20),
-    fontWeight: '700' as const,
+    fontSize: moderateScale(24),
+    fontWeight: '600' as const,
     color: theme.colors.text.primary,
-    marginBottom: verticalScale(8),
+    letterSpacing: -0.4,
+    marginBottom: verticalScale(4),
+  },
+  headerSubtitle: {
+    fontSize: moderateScale(15),
+    fontWeight: '400' as const,
+    color: theme.colors.text.secondary,
   },
   
   // Filter Pills
