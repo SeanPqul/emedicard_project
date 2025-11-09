@@ -63,11 +63,24 @@ export function ViewDocumentsScreen() {
     formId ? { applicationId: formId } : 'skip'
   );
   
-  const isLoading = documentsData === undefined || rejectionHistory === undefined;
+  // Fetch referral history (medical referrals + document issues)
+  const referralHistory = useQuery(
+    api.documents.referralQueries.getReferralHistory,
+    formId ? { applicationId: formId } : 'skip'
+  );
+  
+  const isLoading = documentsData === undefined || rejectionHistory === undefined || referralHistory === undefined;
   const uploadedDocuments = documentsData?.uploadedDocuments || [];
   const requiredDocuments = documentsData?.requiredDocuments || [];
   const application = documentsData?.application;
-  const rejections = rejectionHistory || [];
+  
+  // Combine both rejection and referral history
+  const rejections = React.useMemo(() => {
+    const combined: any[] = [];
+    if (rejectionHistory) combined.push(...rejectionHistory);
+    if (referralHistory) combined.push(...referralHistory);
+    return combined;
+  }, [rejectionHistory, referralHistory]);
   
   // Get active rejections (not replaced)
   const activeRejections = rejections.filter(r => !r.wasReplaced);
@@ -80,6 +93,8 @@ export function ViewDocumentsScreen() {
         return '#3B82F6'; // Blue
       case 'NeedsRevision': // Document issue
         return '#F59E0B'; // Orange
+      case 'ManualReviewRequired': // Max attempts reached
+        return '#DC2626'; // Red
       case 'Pending':
       default:
         return getColor('accent.warningOrange');
@@ -94,6 +109,8 @@ export function ViewDocumentsScreen() {
         return 'medkit-outline';
       case 'NeedsRevision': // Document issue
         return 'document-text-outline';
+      case 'ManualReviewRequired': // Max attempts reached
+        return 'alert-circle';
       case 'Pending':
       default:
         return 'time-outline';
@@ -108,6 +125,8 @@ export function ViewDocumentsScreen() {
         return 'Medical Referral';
       case 'NeedsRevision': // Document issue
         return 'Needs Revision';
+      case 'ManualReviewRequired': // Max attempts reached
+        return 'Manual Review Required';
       case 'Pending':
         return 'Pending';
       default:
@@ -279,6 +298,8 @@ export function ViewDocumentsScreen() {
                 ? 'Medical consultation required. Please see doctor information for details.'
                 : application.applicationStatus === 'Documents Need Revision'
                 ? `${activeRejections.length} document${activeRejections.length > 1 ? 's need' : ' needs'} to be corrected and resubmitted.`
+                : application.applicationStatus === 'Manual Review Required'
+                ? 'Please visit our office with your original documents for in-person verification. Check Help Center for venue details.'
                 : 'You can view all your uploaded documents below.'}
             </Text>
           </View>
@@ -357,9 +378,9 @@ export function ViewDocumentsScreen() {
                     </View>
                     <View style={styles.documentInfo}>
                       <Text style={styles.documentSubItemText}>
-                        View doctor information
+                        Consultation Required
                       </Text>
-                      <Text style={styles.rejectionReason}>Tap to see consultation details</Text>
+                      <Text style={styles.rejectionReason}>View doctor details and next steps</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
                   </TouchableOpacity>
@@ -393,6 +414,27 @@ export function ViewDocumentsScreen() {
                     </View>
                     <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
                   </TouchableOpacity>
+                )}
+
+                {/* Manual Review Required - Direct to venue */}
+                {doc.reviewStatus === 'ManualReviewRequired' && (
+                  <View style={[styles.documentHeader, styles.documentSubItem, { backgroundColor: '#FEE2E2' }]}>
+                    <View style={styles.documentIconContainer}>
+                      <Ionicons 
+                        name="home-outline" 
+                        size={moderateScale(20)} 
+                        color="#DC2626" 
+                      />
+                    </View>
+                    <View style={styles.documentInfo}>
+                      <Text style={[styles.documentSubItemText, { color: '#DC2626' }]}>
+                        Visit Office for Verification
+                      </Text>
+                      <Text style={styles.rejectionReason}>
+                        Max attempts reached. Please visit our office with your original documents. Check Help Center for venue location.
+                      </Text>
+                    </View>
+                  </View>
                 )}
               </View>
             ))

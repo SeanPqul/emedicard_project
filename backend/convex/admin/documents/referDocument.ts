@@ -122,58 +122,129 @@ export const referDocument = mutation({
       }
 
       // 5. Count previous attempts for this document
-      const previousReferrals = await ctx.db
-        .query("documentReferralHistory")
-        .withIndex("by_document_type", (q) =>
-          q.eq("applicationId", documentUpload.applicationId)
-           .eq("documentTypeId", documentUpload.documentTypeId)
-        )
-        .collect();
+      // Check appropriate history table based on issue type
+      let attemptNumber = 1;
+      let historyId: any;
+      
+      if (args.issueType === "medical_referral") {
+        // Medical referrals go to documentReferralHistory
+        const previousReferrals = await ctx.db
+          .query("documentReferralHistory")
+          .withIndex("by_document_type", (q) =>
+            q.eq("applicationId", documentUpload.applicationId)
+             .eq("documentTypeId", documentUpload.documentTypeId)
+          )
+          .collect();
+        
+        attemptNumber = previousReferrals.length + 1;
+        
+        // 6a. Create medical referral record
+        historyId = await ctx.db.insert("documentReferralHistory", {
+          applicationId: documentUpload.applicationId,
+          documentTypeId: documentUpload.documentTypeId,
+          documentUploadId: args.documentUploadId,
 
-      const attemptNumber = previousReferrals.length + 1;
+          // Preserved file data
+          referredFileId: documentUpload.storageFileId,
+          originalFileName: documentUpload.originalFileName,
+          fileSize: file.size,
+          fileType: file.contentType || "application/octet-stream",
 
-      // 6. Create referral/issue record
-      const referralHistoryId = await ctx.db.insert("documentReferralHistory", {
-        applicationId: documentUpload.applicationId,
-        documentTypeId: documentUpload.documentTypeId,
-        documentUploadId: args.documentUploadId,
+          // Medical referral specific
+          issueType: args.issueType,
+          medicalReferralCategory: args.medicalReferralCategory,
+          documentIssueCategory: undefined,
 
-        // Preserved file data
-        referredFileId: documentUpload.storageFileId,
-        originalFileName: documentUpload.originalFileName,
-        fileSize: file.size,
-        fileType: file.contentType || "application/octet-stream",
+          // Referral information
+          referralReason: args.referralReason,
+          specificIssues: args.specificIssues,
+          doctorName: args.doctorName,
+          clinicAddress: args.clinicAddress,
 
-        // Issue type and categories
-        issueType: args.issueType,
-        medicalReferralCategory: args.medicalReferralCategory,
-        documentIssueCategory: args.documentIssueCategory,
+          // Tracking
+          referredBy: admin._id,
+          referredAt: Date.now(),
 
-        // Referral/issue information
-        referralReason: args.referralReason,
-        specificIssues: args.specificIssues,
-        doctorName: args.doctorName,
-        clinicAddress: args.clinicAddress,
+          // Resubmission tracking
+          wasReplaced: false,
+          attemptNumber: attemptNumber,
 
-        // Tracking
-        referredBy: admin._id,
-        referredAt: Date.now(),
+          // Status flow tracking
+          status: "pending",
 
-        // Resubmission tracking
-        wasReplaced: false,
-        attemptNumber: attemptNumber,
+          // Notification tracking
+          notificationSent: false,
+          notificationSentAt: undefined,
 
-        // Status flow tracking
-        status: "pending",
+          // Audit fields
+          ipAddress: undefined,
+          userAgent: undefined,
+        });
+      } else {
+        // Document issues go to documentRejectionHistory
+        const previousRejections = await ctx.db
+          .query("documentRejectionHistory")
+          .withIndex("by_document_type", (q) =>
+            q.eq("applicationId", documentUpload.applicationId)
+             .eq("documentTypeId", documentUpload.documentTypeId)
+          )
+          .collect();
+        
+        attemptNumber = previousRejections.length + 1;
+        
+        // 6b. Create document rejection record
+        // Map extended documentIssueCategory to basic rejectionCategory
+        const categoryMap: Record<string, "quality_issue" | "wrong_document" | "expired_document" | "incomplete_document" | "invalid_document" | "format_issue" | "other"> = {
+          "invalid_id": "invalid_document",
+          "expired_id": "expired_document",
+          "blurry_photo": "quality_issue",
+          "wrong_format": "format_issue",
+          "missing_info": "incomplete_document",
+          "quality_issue": "quality_issue",
+          "wrong_document": "wrong_document",
+          "expired_document": "expired_document",
+          "incomplete_document": "incomplete_document",
+          "invalid_document": "invalid_document",
+          "format_issue": "format_issue",
+          "other": "other"
+        };
+        
+        historyId = await ctx.db.insert("documentRejectionHistory", {
+          applicationId: documentUpload.applicationId,
+          documentTypeId: documentUpload.documentTypeId,
+          documentUploadId: args.documentUploadId,
 
-        // Notification tracking
-        notificationSent: false,
-        notificationSentAt: undefined,
+          // Preserved file data
+          rejectedFileId: documentUpload.storageFileId,
+          originalFileName: documentUpload.originalFileName,
+          fileSize: file.size,
+          fileType: file.contentType || "application/octet-stream",
 
-        // Audit fields
-        ipAddress: undefined,
-        userAgent: undefined,
-      });
+          // Document issue specific - map to basic category
+          rejectionCategory: categoryMap[args.documentIssueCategory!] || "other",
+          rejectionReason: args.referralReason,
+          specificIssues: args.specificIssues,
+
+          // Tracking
+          rejectedBy: admin._id,
+          rejectedAt: Date.now(),
+
+          // Resubmission tracking
+          wasReplaced: false,
+          attemptNumber: attemptNumber,
+
+          // Status tracking
+          status: "pending",
+
+          // Notification tracking
+          notificationSent: false,
+          notificationSentAt: undefined,
+
+          // Audit fields
+          ipAddress: undefined,
+          userAgent: undefined,
+        });
+      }
 
 
       // 7. Update document status with new terminology
@@ -267,37 +338,38 @@ export const referDocument = mutation({
       const maxAttempts = REJECTION_LIMITS.DOCUMENTS.MAX_ATTEMPTS;
 
       if (maxAttemptsReached) {
-        // Max attempts reached - PERMANENTLY REJECT application
+        // Max attempts reached - MANUAL REVIEW REQUIRED (Hybrid Approach)
         const specificIssuesText = args.specificIssues.length > 0
           ? `\n\nSpecific Issues:\n${args.specificIssues.map(issue => `• ${issue}`).join('\n')}`
           : '';
 
-        const notificationTitle = "🚨 Application Rejected - Maximum Attempts Reached";
+        const notificationTitle = "⚠️ Manual Verification Required - Maximum Attempts Reached";
         const notificationMessage = args.issueType === "medical_referral"
-          ? `Your application has been permanently rejected due to reaching the maximum number of referral attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Finding: ${args.referralReason}${specificIssuesText}\n\n❌ This application can no longer be continued.\n\n✅ If you wish to obtain a Health Card, please complete your medical treatment and create a new application.\n\nFor assistance, please contact our support team.`
-          : `Your application has been permanently rejected due to reaching the maximum number of resubmission attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Issue: ${args.referralReason}${specificIssuesText}\n\n❌ This application can no longer be continued.\n\n✅ If you wish to obtain a Health Card, please create a new application and ensure all documents meet the requirements.\n\nFor assistance with document requirements, please contact our support team.`;
+          ? `You have reached the maximum number of referral attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Finding: ${args.referralReason}${specificIssuesText}\n\n📍 Please visit our office for in-person verification:\n\n📋 Bring: Original ${documentType.name}\n\n💡 Our staff will verify your documents in person and may approve your application on the spot if everything is in order.\n\n📌 For venue location and office hours, please check the Help Center in the app.\n\nFor questions, contact City Health Office at 0926-686-1531.`
+          : `You have reached the maximum number of resubmission attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Issue: ${args.referralReason}${specificIssuesText}\n\n📍 Please visit our office for in-person verification:\n\n📋 Bring: Original ${documentType.name}\n\n💡 Our staff will verify your documents in person and may approve your application on the spot if everything is in order.\n\n📌 For venue location and office hours, please check the Help Center in the app.\n\nFor questions, contact City Health Office at 0926-686-1531.`;
 
         const now = Date.now();
 
         await ctx.db.patch(application._id, {
-          applicationStatus: "Rejected",
-          adminRemarks: `Application permanently rejected: Maximum attempts (${maxAttempts}) reached for ${documentType.name}. Applicant must create new application.`,
+          applicationStatus: "Manual Review Required",
+          adminRemarks: `Maximum attempts (${maxAttempts}) reached for ${documentType.name}. Applicant must visit venue for in-person verification.`,
           updatedAt: now,
         });
 
         const jobCategory = await ctx.db.get(application.jobCategoryId);
 
-        const allReferralsNew = await ctx.db
+        const allReferrals = await ctx.db
           .query("documentReferralHistory")
           .withIndex("by_application", (q) => q.eq("applicationId", application._id))
           .collect();
 
-        const allRejectionsOld = await ctx.db
+        const allRejections = await ctx.db
           .query("documentRejectionHistory")
           .withIndex("by_application", (q) => q.eq("applicationId", application._id))
           .collect();
 
-        const totalDocumentIssues = Math.max(allReferralsNew.length, allRejectionsOld.length);
+        // Add both counts (referrals + rejections)
+        const totalDocumentIssues = allReferrals.length + allRejections.length;
 
         const allRejectedPayments = await ctx.db
           .query("paymentRejectionHistory")
@@ -329,12 +401,12 @@ export const referDocument = mutation({
           applicationId: application._id,
           title: notificationTitle,
           message: notificationMessage,
-          notificationType: "application_rejected_max_attempts",
+          notificationType: "application_manual_review_required",
           isRead: false,
           jobCategoryId: application.jobCategoryId,
         });
 
-        await ctx.db.patch(referralHistoryId, {
+        await ctx.db.patch(historyId, {
           notificationSent: true,
           notificationSentAt: Date.now(),
         });
@@ -350,9 +422,9 @@ export const referDocument = mutation({
               adminUser.managedCategories.includes(application.jobCategoryId)) {
             await ctx.db.insert("notifications", {
               userId: adminUser._id,
-              notificationType: "application_permanently_rejected",
-              title: `🚨 Application Permanently Rejected - ${applicantName}`,
-              message: `${applicantName}'s application has been permanently rejected after ${maxAttempts} failed attempts for ${documentType.name}. Applicant must create a new application.`,
+              notificationType: "application_manual_review_required_admin",
+              title: `⚠️ Manual Review Required - ${applicantName}`,
+              message: `${applicantName}'s application requires in-person verification after ${maxAttempts} failed attempts for ${documentType.name}. Applicant has been directed to visit the venue.`,
               actionUrl: `/dashboard/${application._id}/doc_verif`,
               applicationId: application._id,
               jobCategoryId: application.jobCategoryId,
@@ -369,7 +441,7 @@ export const referDocument = mutation({
 
       return {
         success: true,
-        referralId: referralHistoryId,
+        referralId: historyId,
         message: successMessage,
         attemptNumber: attemptNumber,
         maxAttemptsReached: maxAttemptsReached,

@@ -45,6 +45,13 @@ export const styles = StyleSheet.create({
   statusHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingTop: verticalScale(16),
+    paddingBottom: verticalScale(8),
+  },
+  statusHeaderWithId: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: scale(16),
     paddingTop: verticalScale(16),
@@ -57,6 +64,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: scale(theme.spacing.sm),
     borderRadius: theme.borderRadius.full,
     gap: scale(theme.spacing.xs),
+    maxWidth: '100%',
+    flexShrink: 1,
   },
   statusInfo: {
     paddingHorizontal: scale(16),
@@ -73,8 +82,9 @@ export const styles = StyleSheet.create({
     fontWeight: '500' as const,
   },
   statusText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(13),
     fontWeight: '600' as const,
+    flexShrink: 1,
   },
   applicationId: {
     fontSize: moderateScale(12),

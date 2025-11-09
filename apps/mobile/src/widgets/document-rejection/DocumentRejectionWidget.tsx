@@ -178,36 +178,19 @@ export function DocumentRejectionWidget({
       )}
 
       {/* Action Buttons - Medical referrals don't show Resubmit */}
-      {showActions && (
-        <View style={styles.actionSection}>
-          {!rejection.wasReplaced && !isMedicalReferral && (
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.primaryButton]}
-              onPress={onResubmit}
-              activeOpacity={0.8}
-            >
-              <Ionicons 
-                name="cloud-upload-outline" 
-                size={moderateScale(18)} 
-                color="white"
-              />
-              <Text style={styles.primaryButtonText}>Resubmit</Text>
-            </TouchableOpacity>
-          )}
-          
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.secondaryButton]}
-            onPress={onViewDetails}
-            activeOpacity={0.8}
-          >
-            <Ionicons 
-              name="information-circle-outline" 
-              size={moderateScale(18)} 
-              color="#1F2937"
-            />
-            <Text style={styles.secondaryButtonText}>More Info</Text>
-          </TouchableOpacity>
-        </View>
+      {showActions && !rejection.wasReplaced && !isMedicalReferral && (
+        <TouchableOpacity 
+          style={[styles.actionButton, styles.primaryButton]}
+          onPress={onResubmit}
+          activeOpacity={0.8}
+        >
+          <Ionicons 
+            name="cloud-upload-outline" 
+            size={moderateScale(18)} 
+            color="white"
+          />
+          <Text style={styles.primaryButtonText}>Resubmit</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
