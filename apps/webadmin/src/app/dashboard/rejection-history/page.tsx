@@ -34,12 +34,13 @@ type Rejection = {
   wasReplaced: boolean;
   replacedAt?: number;
   status?: RejectionStatus;
+  issueType?: "medical_referral" | "document_issue"; // NEW: from documentReferralHistory table
 };
 
 export default function AdminRejectionHistoryPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<RejectionType | "">("");
-  const [statusFilter, setStatusFilter] = useState<"" | "pending" | "resubmitted" | "permanently_rejected">("");
+  const [statusFilter, setStatusFilter] = useState<"" | "pending" | "resubmitted" | "permanently_rejected" | "referred">("");
   const [issueTypeTab, setIssueTypeTab] = useState<'all' | 'medical' | 'document'>('all'); // NEW: Tab filter for issue types
   const router = useRouter();
 
@@ -76,33 +77,45 @@ export default function AdminRejectionHistoryPage() {
         matchesStatus = rejection.type === "application";
       } else if (statusFilter === "pending") {
         // Pending = document/payment rejections not yet resubmitted
-        matchesStatus = rejection.type !== "application" && !rejection.wasReplaced;
+        matchesStatus = rejection.type !== "application" && !rejection.wasReplaced && !rejection.issueType;
       } else if (statusFilter === "resubmitted") {
         // Resubmitted = document/payment rejections that were replaced
         matchesStatus = rejection.type !== "application" && rejection.wasReplaced;
+      } else if (statusFilter === "referred") {
+        // Referred = medical referrals or document issues (from documentReferralHistory)
+        matchesStatus = !!rejection.issueType; // Has issueType means it's from referral table
       }
     }
 
     // Issue Type Tab Filter (Medical vs Document)
-    // NOTE: This will be fully functional when backend migrates to documentReferralHistory table
-    // For now, uses heuristics based on rejection reason text
+    // Uses backend's issueType field from documentReferralHistory table
     let matchesIssueType = true;
     if (issueTypeTab !== 'all' && rejection.type === 'document') {
-      const reasonLower = rejection.rejectionReason.toLowerCase();
-      const isMedical = 
-        reasonLower.includes('medical') ||
-        reasonLower.includes('doctor') ||
-        reasonLower.includes('x-ray') ||
-        reasonLower.includes('urinalysis') ||
-        reasonLower.includes('stool') ||
-        reasonLower.includes('drug test') ||
-        reasonLower.includes('neuro') ||
-        reasonLower.includes('hepatitis');
-      
-      if (issueTypeTab === 'medical') {
-        matchesIssueType = isMedical;
-      } else if (issueTypeTab === 'document') {
-        matchesIssueType = !isMedical;
+      if (rejection.issueType) {
+        // NEW: Use backend's issueType field (from documentReferralHistory)
+        if (issueTypeTab === 'medical') {
+          matchesIssueType = rejection.issueType === 'medical_referral';
+        } else if (issueTypeTab === 'document') {
+          matchesIssueType = rejection.issueType === 'document_issue';
+        }
+      } else {
+        // FALLBACK: For OLD records without issueType, use heuristics
+        const reasonLower = rejection.rejectionReason.toLowerCase();
+        const isMedical = 
+          reasonLower.includes('medical') ||
+          reasonLower.includes('doctor') ||
+          reasonLower.includes('x-ray') ||
+          reasonLower.includes('urinalysis') ||
+          reasonLower.includes('stool') ||
+          reasonLower.includes('drug test') ||
+          reasonLower.includes('neuro') ||
+          reasonLower.includes('hepatitis');
+        
+        if (issueTypeTab === 'medical') {
+          matchesIssueType = isMedical;
+        } else if (issueTypeTab === 'document') {
+          matchesIssueType = !isMedical;
+        }
       }
     }
 
@@ -267,9 +280,51 @@ export default function AdminRejectionHistoryPage() {
           </div>
         </div>
 
-        {/* Enhanced Statistics Cards */}
+        {/* Compact Statistics Cards - Like Dashboard */}
         {stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+            {/* Calculate live stats for Medical Referrals and Document Issues */}
+            {(() => {
+              const documentRecords = (rejections || []).filter((r: Rejection) => r.type === 'document');
+              const medicalReferrals = documentRecords.filter((r: Rejection) => 
+                r.issueType === 'medical_referral' || 
+                r.rejectionReason?.toLowerCase().includes('medical')
+              ).length;
+              const documentIssues = documentRecords.filter((r: Rejection) => 
+                r.issueType === 'document_issue' || 
+                (!r.issueType && !r.rejectionReason?.toLowerCase().includes('medical'))
+              ).length;
+              
+              return (
+                <>
+                  {/* Medical Referrals - Compact */}
+                  <div className="bg-white rounded-xl p-4 shadow border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-100">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{medicalReferrals}</div>
+                    <div className="text-xs text-gray-600 mt-1">Medical Referrals</div>
+                  </div>
+
+                  {/* Document Issues - Compact */}
+                  <div className="bg-white rounded-xl p-4 shadow border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-orange-100">
+                        <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{documentIssues}</div>
+                    <div className="text-xs text-gray-600 mt-1">Document Issues</div>
+                  </div>
+                </>
+              );
+            })()}
             <div className="group bg-white border-2 border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-xl hover:border-red-300 transition-all">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 shadow-md group-hover:scale-110 transition-transform">
@@ -425,9 +480,10 @@ export default function AdminRejectionHistoryPage() {
               <select
                 className="w-full md:w-auto px-4 py-3 pr-10 border border-gray-300 text-black rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as "" | "pending" | "resubmitted" | "permanently_rejected")}
+                onChange={(e) => setStatusFilter(e.target.value as "" | "pending" | "resubmitted" | "permanently_rejected" | "referred")}
               >
                 <option value="">All Status</option>
+                <option value="referred">Referred</option>
                 <option value="pending">Pending Resubmission</option>
                 <option value="resubmitted">Resubmitted</option>
                 <option value="permanently_rejected">Permanently Rejected</option>

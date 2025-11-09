@@ -43,6 +43,21 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // Add caching headers for static assets
+  async headers() {
+    return [
+      {
+        source: '/:all*(svg|jpg|png|webp|avif|woff|woff2)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
+
   experimental: {
     // allow imports from outside of webadmin/
     externalDir: true,

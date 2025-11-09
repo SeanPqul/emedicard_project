@@ -16,7 +16,7 @@ type RejectionType = "document" | "payment" | "orientation" | "application" | "o
 type RejectionStatus = "pending" | "resubmitted" | "rejected" | "approved";
 
 type Rejection = {
-  _id: Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory"> | Id<"applicationRejectionHistory"> | Id<"adminActivityLogs">;
+  _id: Id<"documentRejectionHistory"> | Id<"documentReferralHistory"> | Id<"paymentRejectionHistory"> | Id<"applicationRejectionHistory"> | Id<"adminActivityLogs">;
   type: RejectionType;
   applicationId: Id<"applications"> | undefined;
   applicantName: string;
@@ -33,12 +33,14 @@ type Rejection = {
   wasReplaced: boolean;
   replacedAt?: number;
   status?: RejectionStatus;
+  issueType?: "medical_referral" | "document_issue"; // NEW: from documentReferralHistory table
 };
 
 export default function RejectionHistoryPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<RejectionType | "">("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"" | "pending" | "resubmitted" | "permanently_rejected" | "referred">("");
   const [issueTypeTab, setIssueTypeTab] = useState<'all' | 'medical' | 'document'>('all'); // NEW: Tab filter for issue types
   const router = useRouter();
 
@@ -57,6 +59,20 @@ export default function RejectionHistoryPage() {
 
     const matchesType = !typeFilter || rejection.type === typeFilter;
     const matchesCategory = !categoryFilter || rejection.jobCategory === categoryFilter;
+
+    // Status filter logic
+    let matchesStatus = true;
+    if (statusFilter) {
+      if (statusFilter === "permanently_rejected") {
+        matchesStatus = rejection.type === "application";
+      } else if (statusFilter === "pending") {
+        matchesStatus = rejection.type !== "application" && !rejection.wasReplaced;
+      } else if (statusFilter === "resubmitted") {
+        matchesStatus = rejection.type !== "application" && rejection.wasReplaced;
+      } else if (statusFilter === "referred") {
+        matchesStatus = rejection.type === "document";
+      }
+    }
 
     // Issue Type Tab Filter (Medical vs Document)
     // NOTE: This will be fully functional when backend migrates to documentReferralHistory table
@@ -81,7 +97,7 @@ export default function RejectionHistoryPage() {
       }
     }
 
-    return matchesSearch && matchesType && matchesCategory && matchesIssueType;
+    return matchesSearch && matchesType && matchesCategory && matchesStatus && matchesIssueType;
   });
 
   // Get unique job categories
@@ -102,7 +118,16 @@ export default function RejectionHistoryPage() {
     }
   };
 
-  const getStatusBadge = (status?: RejectionStatus, wasReplaced?: boolean) => {
+  const getStatusBadge = (status?: RejectionStatus, wasReplaced?: boolean, type?: RejectionType) => {
+    // Application rejections are permanently rejected
+    if (type === "application") {
+      return (
+        <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-red-900 text-red-50 flex items-center gap-1.5">
+          ❌ Permanently Rejected
+        </span>
+      );
+    }
+    
     // Use new status field if available, otherwise fall back to wasReplaced
     const finalStatus = status || (wasReplaced ? "resubmitted" : "pending");
     
@@ -242,15 +267,57 @@ export default function RejectionHistoryPage() {
           </div>
         </div>
 
-        {/* Enhanced Statistics Cards */}
+        {/* Compact Statistics Cards - Like Admin Dashboard */}
         {stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 mb-8">
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-red-300 to-red-400 shadow-lg">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+            {/* Calculate live stats for Medical Referrals and Document Issues */}
+            {(() => {
+              const documentRecords = (rejections || []).filter((r: Rejection) => r.type === 'document');
+              const medicalReferrals = documentRecords.filter((r: Rejection) => 
+                r.issueType === 'medical_referral' || 
+                r.rejectionReason?.toLowerCase().includes('medical')
+              ).length;
+              const documentIssues = documentRecords.filter((r: Rejection) => 
+                r.issueType === 'document_issue' || 
+                (!r.issueType && !r.rejectionReason?.toLowerCase().includes('medical'))
+              ).length;
+              
+              return (
+                <>
+                  {/* Medical Referrals - Compact */}
+                  <div className="bg-white rounded-xl p-4 shadow border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-100">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{medicalReferrals}</div>
+                    <div className="text-xs text-gray-600 mt-1">Medical Referrals</div>
+                  </div>
+
+                  {/* Document Issues - Compact */}
+                  <div className="bg-white rounded-xl p-4 shadow border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-orange-100">
+                        <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{documentIssues}</div>
+                    <div className="text-xs text-gray-600 mt-1">Document Issues</div>
+                  </div>
+                </>
+              );
+            })()}
+            <div className="group bg-white border-2 border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-xl hover:border-red-300 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 shadow-md group-hover:scale-110 transition-transform">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-7 w-7 text-white"
+                    className="h-5 w-5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -267,17 +334,17 @@ export default function RejectionHistoryPage() {
                   <div className="text-3xl font-bold text-gray-900">
                     {stats.totalRejections}
                   </div>
-                  <div className="text-sm font-medium text-gray-600">Total Rejections</div>
+                  <div className="text-xs font-medium text-gray-600 mt-1">Total Rejections</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-yellow-300 to-yellow-400 shadow-lg">
+            <div className="group bg-white border-2 border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-xl hover:border-yellow-300 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-md group-hover:scale-110 transition-transform">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-7 w-7 text-white"
+                    className="h-5 w-5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -294,17 +361,17 @@ export default function RejectionHistoryPage() {
                   <div className="text-3xl font-bold text-gray-900">
                     {stats.pendingResubmission}
                   </div>
-                  <div className="text-sm font-medium text-gray-600">Pending Resubmission</div>
+                  <div className="text-xs font-medium text-gray-600 mt-1">Pending Resubmission</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-green-300 to-green-400 shadow-lg">
+            <div className="group bg-white border-2 border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-xl hover:border-green-300 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-green-500 to-green-600 shadow-md group-hover:scale-110 transition-transform">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-7 w-7 text-white"
+                    className="h-5 w-5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -319,17 +386,17 @@ export default function RejectionHistoryPage() {
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-gray-900">{stats.resubmitted}</div>
-                  <div className="text-sm font-medium text-gray-600">Resubmitted</div>
+                  <div className="text-xs font-medium text-gray-600 mt-1">Resubmitted</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-300 to-blue-400 shadow-lg">
+            <div className="group bg-white border-2 border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-xl hover:border-blue-300 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 shadow-md group-hover:scale-110 transition-transform">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-7 w-7 text-white"
+                    className="h-5 w-5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -346,26 +413,19 @@ export default function RejectionHistoryPage() {
                   <div className="text-3xl font-bold text-gray-900">
                     {Object.keys(stats.byCategory).length}
                   </div>
-                  <div className="text-sm font-medium text-gray-600">Categories</div>
+                  <div className="text-xs font-medium text-gray-600 mt-1">Categories</div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Enhanced Filters Panel */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-md mb-8">
-          <div className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              <h3 className="text-lg font-bold text-gray-900">Filters</h3>
-            </div>
-            <div className="flex flex-col md:flex-row md:items-end gap-4">
+        {/* Enhanced Filters */}
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
+          <div className="flex flex-col md:flex-row md:items-end gap-4">
               <div className="flex-1">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                  <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   Search
@@ -373,51 +433,50 @@ export default function RejectionHistoryPage() {
                 <input
                   type="text"
                   placeholder="Search by applicant, email, or reason..."
-                  className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 text-black rounded-xl shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                  <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Status
+                </label>
+                <select
+                  className="w-full md:w-auto px-4 py-3 pr-10 border border-gray-300 text-black rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+                >
+                  <option value="">All Status</option>
+                  <option value="referred">Referred</option>
+                  <option value="pending">Pending Resubmission</option>
+                  <option value="resubmitted">Resubmitted</option>
+                  <option value="permanently_rejected">Permanently Rejected</option>
+                </select>
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                   </svg>
                   Type
                 </label>
                 <select
-                  className="w-full md:w-auto px-4 py-2.5 pr-10 border border-gray-300 text-gray-700 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+                  className="w-full md:w-auto px-4 py-3 pr-10 border border-gray-300 text-black rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value as RejectionType | "")}
                 >
                   <option value="">All Types</option>
                   <option value="document">Document</option>
                   <option value="payment">Payment</option>
+                  <option value="application">Application</option>
                   <option value="orientation">Orientation</option>
                 </select>
               </div>
-              <div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                  <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  Job Category
-                </label>
-                <select
-                  className="w-full md:w-auto px-4 py-2.5 pr-10 border border-gray-300 text-gray-700 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                >
-                  <option value="">All Categories</option>
-                  {jobCategories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
-          </div>
         </div>
 
         {/* Enhanced Rejections Table */}
@@ -505,7 +564,7 @@ export default function RejectionHistoryPage() {
                         })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(rejection.status, rejection.wasReplaced)}
+                        {getStatusBadge(rejection.status, rejection.wasReplaced, rejection.type)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         {rejection.applicationId && (

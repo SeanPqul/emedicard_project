@@ -3,13 +3,14 @@
 import ErrorMessage from "@/components/ErrorMessage";
 import LoadingScreen from "@/components/shared/LoadingScreen";
 import Navbar from "@/components/shared/Navbar";
+import { NotificationCard } from "@/components/notifications";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
-import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { getNotificationTypeLabel, getGroupedNotificationTypes } from "@/lib/notificationTypes";
 
 type Notification = {
   _id: Id<"notifications"> | Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory">;
@@ -39,6 +40,7 @@ export default function SuperAdminNotificationsPage() {
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);
   const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
+  const clearReadNotifications = useMutation(api.notifications.clearReadNotifications);
 
   // Combine all notifications
   const allNotifications = [
@@ -64,6 +66,12 @@ export default function SuperAdminNotificationsPage() {
     new Set(allNotifications.map((n: Notification) => n.notificationType))
   ).sort();
 
+  // Group notification types for better dropdown organization
+  const groupedTypes = useMemo(
+    () => getGroupedNotificationTypes(notificationTypes),
+    [notificationTypes]
+  );
+
   const handleNotificationClick = (notification: Notification) => {
     // Mark as read
     if (notification.notificationType === "DocumentResubmission") {
@@ -82,6 +90,23 @@ export default function SuperAdminNotificationsPage() {
 
   const handleMarkAllAsRead = () => {
     markAllAsRead();
+  };
+
+  const handleClearRead = async () => {
+    const readCount = allNotifications.filter(n => n.isRead).length;
+    if (readCount === 0) {
+      alert('No read notifications to clear.');
+      return;
+    }
+    
+    if (confirm(`Are you sure you want to clear ${readCount} read notification(s)? This action cannot be undone.`)) {
+      try {
+        await clearReadNotifications();
+      } catch (error) {
+        console.error('Error clearing notifications:', error);
+        alert('Failed to clear notifications. Please try again.');
+      }
+    }
   };
 
   const getNotificationIcon = (type: string) => {
@@ -210,19 +235,35 @@ export default function SuperAdminNotificationsPage() {
               onChange={(e) => setTypeFilter(e.target.value)}
             >
               <option value="">All Types</option>
-              {notificationTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
+              {groupedTypes.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.types.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
 
-            <button
-              onClick={handleMarkAllAsRead}
-              className="ml-auto px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
-            >
-              Mark All as Read
-            </button>
+            <div className="ml-auto flex gap-2">
+              {unreadCount > 0 && (
+                <button
+                  onClick={handleMarkAllAsRead}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+                >
+                  Mark All as Read
+                </button>
+              )}
+              {allNotifications.filter(n => n.isRead).length > 0 && (
+                <button
+                  onClick={handleClearRead}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                >
+                  Clear Read
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -247,44 +288,14 @@ export default function SuperAdminNotificationsPage() {
               <p className="text-gray-500 font-medium">No notifications to display</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
-              {filteredNotifications.map((notification: Notification) => (
-                <div
+            <div>
+              {filteredNotifications.map((notification: Notification, index) => (
+                <NotificationCard
                   key={notification._id}
+                  notification={notification}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    !notification.isRead ? "bg-emerald-50" : ""
-                  }`}
-                >
-                  <div className="flex items-start gap-4">
-                    {getNotificationIcon(notification.notificationType)}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3
-                          className={`text-sm font-semibold ${
-                            !notification.isRead ? "text-gray-900" : "text-gray-700"
-                          }`}
-                        >
-                          {notification.title}
-                        </h3>
-                        {!notification.isRead && (
-                          <span className="shrink-0 w-2 h-2 bg-emerald-600 rounded-full mt-1"></span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="text-xs text-gray-500">
-                          {formatDistanceToNow(new Date(notification._creationTime), {
-                            addSuffix: true,
-                          })}
-                        </span>
-                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                          {notification.notificationType}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  showBorder={index !== filteredNotifications.length - 1}
+                />
               ))}
             </div>
           )}

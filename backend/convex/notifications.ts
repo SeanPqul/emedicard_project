@@ -22,3 +22,8 @@ export { markAllAsReadMutation as markAllAsRead } from "./_notifications/markAll
 export { createNotificationMutation as createNotification } from "./_notifications/createNotification";
 export { sendAdminNotification } from "./_notifications/sendAdminNotification";
 
+// Clear/Delete notification functions (Option A implementation)
+export { clearReadNotificationsMutation as clearReadNotifications } from "./_notifications/clearReadNotifications";
+export { deleteNotificationMutation as deleteNotification } from "./_notifications/clearReadNotifications";
+export { archiveOldNotificationsMutation as archiveOldNotifications } from "./_notifications/clearReadNotifications";
+

@@ -48,7 +48,7 @@ export default function DashboardPage() {
     "For Attendance Validation": { bg: "bg-orange-100", text: "text-orange-800" },
     "Under Review": { bg: "bg-yellow-100", text: "text-yellow-800" },
     "Approved": { bg: "bg-green-100", text: "text-green-800" },
-    "Rejected": { bg: "bg-red-100", text: "text-red-800" },
+    "Rejected": { bg: "bg-orange-100", text: "text-orange-800" },
     "Expired": { bg: "bg-gray-100", text: "text-gray-800" },
   };
 
@@ -101,6 +101,20 @@ export default function DashboardPage() {
   const totalForPaymentValidation = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Payment Validation').length;
   const totalForOrientation = filteredApplications.filter((a: ApplicationWithDetails) => a.applicationStatus === 'For Orientation').length;
   const totalReferrals = pendingReferralsCount ?? 0;
+
+  // Get rejection/revision stats and all rejections from history
+  const rejectionStats = useQuery(
+    api.admin.rejectionHistory.getRejectionStats,
+    adminPrivileges && adminPrivileges.isAdmin ? {} : "skip"
+  );
+  
+  const allRejections = useQuery(
+    api.admin.rejectionHistory.getAllRejections,
+    adminPrivileges && adminPrivileges.isAdmin ? {} : "skip"
+  );
+  
+  const totalPendingRevisions = rejectionStats?.pendingResubmission ?? 0;
+  const totalPermanentlyRejected = (allRejections || []).filter((r: any) => r.type === 'application').length;
 
   const handleViewApplication = (app: ApplicationWithDetails) => {
     // Smart routing based on application status
@@ -185,15 +199,17 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Stats Grid - Improved Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 lg:gap-5 mb-8">
+        {/* Stats Grid - Improved Layout with 9 cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-9 gap-3 lg:gap-4 mb-8">
           <StatCard title="Submitted" value={totalPending} icon={<StatIcon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />} colorClass="bg-gradient-to-br from-yellow-400 to-yellow-500" />
           <StatCard title="Doc Verification" value={totalForDocVerification} icon={<StatIcon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />} colorClass="bg-gradient-to-br from-cyan-400 to-cyan-500" />
           <StatCard title="Referred to Doctor" value={totalReferrals} icon={<StatIcon d="M8 7h12M8 12h12m-12 5h12M4 7h.01M4 12h.01M4 17h.01" />} colorClass="bg-gradient-to-br from-amber-400 to-amber-500" />
           <StatCard title="Payment Validation" value={totalForPaymentValidation} icon={<StatIcon d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z" />} colorClass="bg-gradient-to-br from-purple-500 to-purple-600" />
           <StatCard title="For Orientation" value={totalForOrientation} icon={<StatIcon d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />} colorClass="bg-gradient-to-br from-indigo-400 to-indigo-500" />
+          <StatCard title="Pending Revisions" value={totalPendingRevisions} icon={<StatIcon d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />} colorClass="bg-gradient-to-br from-orange-400 to-orange-500" />
           <StatCard title="Approved" value={totalApproved} icon={<StatIcon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-emerald-400 to-emerald-500" />
-          <StatCard title="Rejected (Payment)" value={totalRejected} icon={<StatIcon d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-red-400 to-red-500" />
+          <StatCard title="Payment Rejected" value={totalRejected} icon={<StatIcon d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-orange-400 to-orange-500" />
+          <StatCard title="Permanently Rejected" value={totalPermanentlyRejected} icon={<StatIcon d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />} colorClass="bg-gradient-to-br from-gray-600 to-gray-700" />
         </div>
 
         {/* Controls Panel - Improved Layout */}
@@ -254,7 +270,7 @@ export default function DashboardPage() {
                     <option value="For Attendance Validation">For Attendance Validation</option>
                     <option value="Under Review">Under Review</option>
                     <option value="Approved">Approved</option>
-                    <option value="Rejected">Referred</option>
+                    <option value="Rejected">Payment Rejected (Can Resubmit)</option>
                     <option value="Expired">Expired</option>
                   </select>
                 </div>

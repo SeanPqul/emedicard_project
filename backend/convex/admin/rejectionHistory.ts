@@ -17,8 +17,8 @@ export const getAllRejections = query({
       throw new Error("Insufficient permissions");
     }
 
-    // Determine if user is super admin
-    const isSuperAdmin = !user.managedCategories || user.managedCategories.length === 0;
+    // Determine if user is super admin (managedCategories is null/undefined for super admin)
+    const isSuperAdmin = !user.managedCategories;
 
     // If not super admin, get managed application IDs once
     let managedApplicationIds: Set<any> | null = null;
@@ -283,7 +283,8 @@ export const getRejectionStats = query({
       throw new Error("Insufficient permissions");
     }
 
-    const isSuperAdmin = !user.managedCategories || user.managedCategories.length === 0;
+    // Determine if user is super admin (managedCategories is null/undefined for super admin)
+    const isSuperAdmin = !user.managedCategories;
 
     // Get all document rejections (OLD) and referrals (NEW)
     const allDocumentRejections = await ctx.db

@@ -3,13 +3,14 @@
 import ErrorMessage from "@/components/ErrorMessage";
 import LoadingScreen from "@/components/shared/LoadingScreen";
 import Navbar from "@/components/shared/Navbar";
+import { NotificationCard } from "@/components/notifications";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
-import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { getNotificationTypeLabel, getGroupedNotificationTypes } from "@/lib/notificationTypes";
 
 type Notification = {
   _id: Id<"notifications"> | Id<"documentRejectionHistory"> | Id<"paymentRejectionHistory">;
@@ -47,6 +48,7 @@ export default function AdminNotificationsPage() {
   const markAsRead = useMutation(api.notifications.markNotificationAsRead.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead.markRejectionHistoryAsRead);
   const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead.markAllNotificationsAsRead);
+  const clearReadNotifications = useMutation(api.notifications.clearReadNotifications);
 
   // Combine all notifications
   const allNotifications = [
@@ -72,6 +74,12 @@ export default function AdminNotificationsPage() {
     new Set(allNotifications.map((n: Notification) => n.notificationType))
   ).sort();
 
+  // Group notification types for better dropdown organization
+  const groupedTypes = useMemo(
+    () => getGroupedNotificationTypes(notificationTypes),
+    [notificationTypes]
+  );
+
   const handleNotificationClick = (notification: Notification) => {
     // Mark as read
     if (notification.notificationType === "DocumentResubmission") {
@@ -92,48 +100,20 @@ export default function AdminNotificationsPage() {
     markAllAsRead();
   };
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "DocumentResubmission":
-        return (
-          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-        );
-      case "PaymentResubmission":
-        return (
-          <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </div>
-        );
-      case "PaymentReceived":
-        return (
-          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
-      case "ApplicationStatusChange":
-        return (
-          <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-        );
-      default:
-        return (
-          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </div>
-        );
+  const handleClearRead = async () => {
+    const readCount = allNotifications.filter(n => n.isRead).length;
+    if (readCount === 0) {
+      alert('No read notifications to clear.');
+      return;
+    }
+    
+    if (confirm(`Are you sure you want to clear ${readCount} read notification(s)? This action cannot be undone.`)) {
+      try {
+        await clearReadNotifications();
+      } catch (error) {
+        console.error('Error clearing notifications:', error);
+        alert('Failed to clear notifications. Please try again.');
+      }
     }
   };
 
@@ -227,21 +207,35 @@ export default function AdminNotificationsPage() {
               onChange={(e) => setTypeFilter(e.target.value)}
             >
               <option value="">All Types</option>
-              {notificationTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
+              {groupedTypes.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.types.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
 
-            {unreadCount > 0 && (
-              <button
-                onClick={handleMarkAllAsRead}
-                className="sm:ml-auto px-3 py-1.5 bg-emerald-600 text-white text-sm rounded-lg font-medium hover:bg-emerald-700 transition-colors"
-              >
-                Mark All as Read
-              </button>
-            )}
+            <div className="sm:ml-auto flex gap-2">
+              {unreadCount > 0 && (
+                <button
+                  onClick={handleMarkAllAsRead}
+                  className="px-3 py-1.5 bg-emerald-600 text-white text-sm rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+                >
+                  Mark All as Read
+                </button>
+              )}
+              {allNotifications.filter(n => n.isRead).length > 0 && (
+                <button
+                  onClick={handleClearRead}
+                  className="px-3 py-1.5 bg-gray-600 text-white text-sm rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                >
+                  Clear Read
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -268,49 +262,12 @@ export default function AdminNotificationsPage() {
           ) : (
             <div>
               {filteredNotifications.map((notification: Notification, index) => (
-                <div
+                <NotificationCard
                   key={notification._id}
+                  notification={notification}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    !notification.isRead ? "bg-emerald-50/50 border-l-4 border-emerald-500" : "border-l-4 border-transparent"
-                  } ${index !== filteredNotifications.length - 1 ? "border-b border-gray-100" : ""}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="shrink-0 mt-0.5">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h3 className={`text-sm font-medium ${
-                            !notification.isRead ? "text-gray-900" : "text-gray-700"
-                          }`}>
-                            {notification.title}
-                          </h3>
-                          <p className="text-sm text-gray-500 mt-1">{notification.message}</p>
-                        </div>
-                        {!notification.isRead && (
-                          <span className="shrink-0 w-2 h-2 bg-emerald-500 rounded-full mt-1.5"></span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="text-xs text-gray-400">
-                          {formatDistanceToNow(new Date(notification._creationTime), {
-                            addSuffix: true,
-                          })}
-                        </span>
-                        <span className="text-xs text-gray-400">•</span>
-                        <span className="text-xs text-gray-500">
-                          {notification.notificationType.replace(/([A-Z])/g, ' $1').trim()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  showBorder={index !== filteredNotifications.length - 1}
+                />
               ))}
             </div>
           )}

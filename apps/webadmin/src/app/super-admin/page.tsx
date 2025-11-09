@@ -640,9 +640,9 @@ export default function SuperAdminPage() {
               className="inline-flex items-center gap-2 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 px-4 py-2 rounded-xl font-semibold transition-all shadow-sm hover:shadow"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              Rejection History
+              Referral/Management History
             </button>
             <button
               onClick={() => router.push("/super-admin/orientation-schedules")}
@@ -678,7 +678,7 @@ export default function SuperAdminPage() {
         </div>
 
         {/* Enhanced Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-5 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5 mb-8">
           <StatCard
             title="Total Applications"
             value={totalApplications}
@@ -694,6 +694,22 @@ export default function SuperAdminPage() {
               <StatIcon d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             }
             colorClass="bg-purple-500"
+          />
+          <StatCard
+            title="Scheduled for Orientation"
+            value={applicationsByStatus["Scheduled"] || 0}
+            icon={
+              <StatIcon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            }
+            colorClass="bg-indigo-600"
+          />
+          <StatCard
+            title="Referred to Doctor"
+            value={applicationsByStatus["Under Review"] || 0}
+            icon={
+              <StatIcon d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            }
+            colorClass="bg-blue-600"
           />
           {Object.keys(statusIconAndColorClasses)
             .filter(
@@ -837,68 +853,38 @@ export default function SuperAdminPage() {
                   return (
                     <div
                       key={activity._id}
-                      className={`group p-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors ${actionStyle.accentBorderClass}`}
+                      className="p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
                     >
-                      <div className="flex items-start space-x-3">
-                        <div className="shrink-0">
-                          <div className={`w-9 h-9 rounded-full ${actionStyle.iconBg} flex items-center justify-center shadow-sm`}>
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div className={`w-7 h-7 rounded-full ${actionStyle.iconBg} flex items-center justify-center shrink-0`}>
                             {actionStyle.icon}
                           </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          {/* Admin Information */}
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div className="flex-1">
-                              <p className="text-sm font-bold text-gray-900 truncate">
-                                {activity.admin?.fullname || "Unknown Admin"}
-                              </p>
-                              <p className="text-xs text-gray-600 truncate">
-                                {activity.admin?.email || "No email"}
-                              </p>
-                            </div>
-                            <span className="text-xs text-gray-500 whitespace-nowrap">
-                              {activity.timestamp
-                                ? formatDistanceToNow(new Date(activity.timestamp), {
-                                    addSuffix: true,
-                                  })
-                                : "N/A"}
-                            </span>
-                          </div>
-
-                          {/* Action Details */}
-                          <div className="bg-gray-50 border border-gray-100 rounded-lg p-2 mb-2">
-                            <p className="text-sm text-gray-800 leading-relaxed">
-                              <span className="font-semibold">{activity.details || activity.action || "Performed an action"}</span>
-                              {activity.applicantName && (
-                                <span className="text-gray-700">
-                                  {" "}for <span className="font-bold text-gray-900">{activity.applicantName}</span>
-                                </span>
-                              )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {activity.admin?.fullname || "Admin"}
                             </p>
                           </div>
-
-                          {/* Comment Section */}
-                          {activity.comment && (
-                            <div className="bg-amber-50 border-l-3 border-amber-400 px-3 py-2 rounded-r mb-2">
-                              <p className="text-xs text-amber-900">
-                                <span className="font-bold">Comment:</span> {activity.comment}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Application ID */}
-                          {activity.applicationId && (
-                            <div className="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-md">
-                              <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                              </svg>
-                              <p className="text-xs font-mono text-gray-700">
-                                {activity.applicationId}
-                              </p>
-                            </div>
-                          )}
                         </div>
+                        <span className="text-xs text-gray-500 shrink-0">
+                          {activity.timestamp
+                            ? formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })
+                            : ""}
+                        </span>
                       </div>
+                      
+                      <p className="text-sm text-gray-700 mb-1 ml-9">
+                        {activity.details || activity.action || "Performed action"}
+                        {activity.applicantName && (
+                          <span className="font-medium text-gray-900"> • {activity.applicantName}</span>
+                        )}
+                      </p>
+                      
+                      {activity.comment && (
+                        <p className="text-xs text-gray-600 italic ml-9 mt-1">
+                          "{activity.comment}"
+                        </p>
+                      )}
                     </div>
                   );
                 })
