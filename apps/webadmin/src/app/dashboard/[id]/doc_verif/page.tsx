@@ -8,7 +8,7 @@ import Navbar from '@/components/shared/Navbar';
 import SuccessMessage from '@/components/SuccessMessage';
 import { api } from '@/convex/_generated/api'; // Moved to top
 import { Id } from '@/convex/_generated/dataModel';
-import { useAction, useMutation } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -101,13 +101,13 @@ const issueCategories = [
 const StatusBadge = ({ status }: { status: string }) => {
   const statusStyles: Record<string, string> = {
     'Approved': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-    'Referred': 'bg-blue-50 text-blue-700 border border-blue-200', // Medical referral (needs doctor)
-    'NeedsRevision': 'bg-orange-50 text-orange-700 border border-orange-200', // Document quality issue (needs resubmission)
+    'Referred': 'bg-blue-50 text-blue-700 border border-blue-200', // Medical referral
+    'NeedsRevision': 'bg-orange-50 text-orange-700 border border-orange-200', // Document flagged for revision
     'Pending': 'bg-amber-50 text-amber-700 border border-amber-200',
     'Missing': 'bg-gray-50 text-gray-600 border border-gray-200',
   };
   
-  // Display user-friendly labels (no "Rejected" terminology)
+  // Display user-friendly labels
   const displayLabel = status === 'NeedsRevision' ? 'Needs Revision' : status;
   
   return (
@@ -126,6 +126,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [error, setError] = useState<AppError | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [openReferralIndex, setOpenReferralIndex] = useState<number | null>(null);
+  const [modalType, setModalType] = useState<'flag_revision' | 'refer_doctor' | null>(null); // Track which modal is open
   const [referralReason, setReferralReason] = useState<string>('');
   const [issueCategory, setIssueCategory] = useState('other');
   const [specificIssues, setSpecificIssues] = useState('');
@@ -133,7 +134,36 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [showOcrModal, setShowOcrModal] = useState<boolean>(false); // New state for OCR modal visibility
   const [isReferralConfirmModalOpen, setIsReferralConfirmModalOpen] = useState(false); // Confirmation modal for sending referrals
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // New state for collapsible applicant details
+  const [isPaymentDetailsExpanded, setIsPaymentDetailsExpanded] = useState(false); // New state for collapsible payment details
+  
+  // Pending actions state - stores actions before database save
+  const [pendingActions, setPendingActions] = useState<{
+    uploadId: Id<"documentUploads">;
+    actionType: 'flag_revision' | 'refer_doctor';
+    category: string;
+    reason: string;
+    notes: string;
+    doctorName?: string;
+    documentName: string;
+  }[]>([]);
+  
   const router = useRouter();
+
+  // --- HELPER FUNCTIONS ---
+  // Helper function to check if document has pending action
+  const getPendingAction = (uploadId: Id<"documentUploads"> | null | undefined) => {
+    if (!uploadId) return null;
+    return pendingActions.find(action => action.uploadId === uploadId);
+  };
+  
+  // Helper function to get effective status (pending action or actual status)
+  const getEffectiveStatus = (item: ChecklistItem) => {
+    const pending = getPendingAction(item.uploadId);
+    if (pending) {
+      return pending.actionType === 'refer_doctor' ? 'Referred' : 'NeedsRevision';
+    }
+    return item.status;
+  };
 
   // --- DATA FETCHING ---
   // @ts-ignore - Type instantiation is excessively deep
@@ -141,8 +171,11 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [data, setData] = useState<ApplicationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
-  const referDocumentMutation = useMutation(api.admin.documents.referDocument.referDocument);
+  const referDocumentMutation = useMutation(api.admin.documents.referDocument.referDocument); // Actually refers documents
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
+  
+  // Fetch payment data
+  const paymentData = useQuery(api.payments.getForApplication.get, { applicationId: params.id });
 
   const loadData = async () => {
     try {
@@ -158,7 +191,28 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
 
   useEffect(() => {
     loadData();
+    
+    // Load pending actions from localStorage
+    const storageKey = `pendingActions_${params.id}`;
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        setPendingActions(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load pending actions:', e);
+      }
+    }
   }, [getDocumentsWithClassification, params.id]);
+
+  // Save pending actions to localStorage whenever they change
+  useEffect(() => {
+    const storageKey = `pendingActions_${params.id}`;
+    if (pendingActions.length > 0) {
+      localStorage.setItem(storageKey, JSON.stringify(pendingActions));
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  }, [pendingActions, params.id]);
 
   // Add polling for live updates
   useEffect(() => {
@@ -186,36 +240,48 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     try {
       setError(null);
       const pendingDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Missing' || doc.status === 'Pending');
-      const referredDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Referred') || []; // Medical referrals
-      const needsRevisionDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'NeedsRevision') || []; // Document quality issues
-      const totalIssues = referredDocs.length + needsRevisionDocs.length;
+      const referredDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Referred') || [];
       
       if (pendingDocs && pendingDocs.length > 0) {
-        throw new Error("Please review and assign a status (Approve or Flag/Refer) to all documents before proceeding.");
+        throw new Error("Please review and assign a status (Approve or Reject) to all documents before proceeding.");
       }
       
-      // Prevent approval if any documents are referred/flagged
-      if (newStatus === 'Approved' && totalIssues > 0) {
-        throw new Error(`Cannot approve application. ${totalIssues} document(s) require applicant action. Please use 'Send Referral Notification' button instead.`);
+      // Prevent approval if any documents are referred or need revision
+      const needsRevisionDocs = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'NeedsRevision') || [];
+      const totalPendingDocs = referredDocs.length + needsRevisionDocs.length;
+      
+      if (newStatus === 'Approved' && totalPendingDocs > 0) {
+        throw new Error(`Cannot approve application. ${totalPendingDocs} document(s) require applicant action. Please use 'Send Applicant Notifications' button instead.`);
       }
       
-      if (newStatus === 'Rejected' && totalIssues === 0) {
+      if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Referred' || doc.status === 'NeedsRevision')) {
         throw new Error("To send notifications, at least one document must be flagged for revision or referred for medical management.");
       }
 
       await finalizeApplication({ applicationId: params.id, newStatus });
       
-      // Different success messages based on status
+      // Check if payment is manual (BaranggayHall or CityHall) or 3rd party (Maya/Gcash)
+      const isManualPayment = paymentData?.paymentMethod === 'BaranggayHall' || paymentData?.paymentMethod === 'CityHall';
+      
+      // Different success messages and redirects based on status and payment method
       if (newStatus === 'Approved') {
-        setSuccessMessage('Application approved! Redirecting to payment validation...');
+        if (isManualPayment) {
+          // Manual payment: go to payment validation page
+          setSuccessMessage('Application approved! Redirecting to payment validation...');
+        } else {
+          // 3rd party payment: everything validated here, go to dashboard
+          setSuccessMessage('Application and payment approved! Redirecting to dashboard...');
+        }
       } else {
         setSuccessMessage('Application rejected. Applicant has been notified.');
       }
 
       setTimeout(() => {
-        if (newStatus === 'Approved') {
+        if (newStatus === 'Approved' && isManualPayment) {
+          // Manual payment: continue to payment validation page
           router.push(`/dashboard/${params.id}/payment_validation`);
         } else {
+          // 3rd party or rejected: go to dashboard
           router.push('/dashboard');
         }
       }, 2000);
@@ -227,12 +293,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
 
   // Handler to open referral confirmation modal
   const handleSendReferralClick = async () => {
-    const referredCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Referred').length || 0;
-    const needsRevisionCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'NeedsRevision').length || 0;
-    const totalIssues = referredCount + needsRevisionCount;
-    
-    if (totalIssues === 0) {
-      setError({ title: "Validation Failed", message: "To send notifications, at least one document must be flagged or referred." });
+    if (pendingActions.length === 0) {
+      setError({ title: "Validation Failed", message: "No pending actions to send. Please flag documents for revision or refer to doctor first." });
       return;
     }
     
@@ -243,7 +305,48 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   // Handler to confirm sending referral notifications
   const handleConfirmSendReferral = async () => {
     setIsReferralConfirmModalOpen(false);
-    await handleFinalize('Rejected'); // This will trigger sendReferralNotifications
+    setError(null);
+    
+    try {
+      // Save all pending actions to database
+      for (const action of pendingActions) {
+        if (action.actionType === 'refer_doctor') {
+          // Medical referral
+          await referDocumentMutation({
+            documentUploadId: action.uploadId,
+            issueType: "medical_referral",
+            medicalReferralCategory: "other_medical_concern",
+            referralReason: action.reason,
+            specificIssues: action.notes.split(',').map(s => s.trim()).filter(s => s),
+            doctorName: action.doctorName || "Dr. TBD",
+            clinicAddress: "Door 7, Magsaysay Complex, Magsaysay Park, Davao City",
+          });
+        } else {
+          // Document quality issue
+          await referDocumentMutation({
+            documentUploadId: action.uploadId,
+            issueType: "document_issue",
+            documentIssueCategory: action.category as any,
+            referralReason: action.reason,
+            specificIssues: action.notes.split(',').map(s => s.trim()).filter(s => s),
+          });
+        }
+      }
+      
+      // Clear pending actions after successful save
+      setPendingActions([]);
+      
+      // Reload data to show updated statuses
+      await loadData();
+      
+      // Call finalizeApplication to send notifications
+      await handleFinalize('Rejected');
+      
+      setSuccessMessage(`Successfully sent ${pendingActions.length} notification(s) to applicant.`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (e: any) {
+      setError(createAppError(e.message, 'Failed to send notifications'));
+    }
   };
 
   // --- RENDER ---
@@ -270,7 +373,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-gray-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
       <Navbar>
         <ApplicantActivityLog applicantName={data.applicantName} applicationId={params.id} />
       </Navbar>
@@ -291,7 +394,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
           <div className="lg:col-span-1 space-y-4 sm:space-y-6 lg:sticky lg:top-20">
             {/* Applicant Card with Avatar */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-linear-to-br from-teal-400 to-emerald-500 px-6 py-5">
+              <div className="bg-gradient-to-br from-teal-400 to-emerald-500 px-6 py-5">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-white/95 flex items-center justify-center shadow-md">
                     <span className="text-2xl font-bold text-teal-600">{data.applicantName.charAt(0).toUpperCase()}</span>
@@ -371,7 +474,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* First Name */}
                     {data.applicantDetails?.firstName && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         <div className="flex-1">
@@ -384,7 +487,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Last Name */}
                     {data.applicantDetails?.lastName && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         <div className="flex-1">
@@ -397,7 +500,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Middle Name */}
                     {data.applicantDetails?.middleName && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         <div className="flex-1">
@@ -410,7 +513,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Gender */}
                     {data.applicantDetails?.gender && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         <div className="flex-1">
@@ -423,7 +526,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Nationality */}
                     {data.applicantDetails?.nationality && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                         </svg>
                         <div className="flex-1">
@@ -436,7 +539,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Civil Status */}
                     {data.applicantDetails?.civilStatus && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <div className="flex-1">
@@ -449,7 +552,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Organization */}
                     {data.applicantDetails?.organization && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                         <div className="flex-1">
@@ -462,12 +565,117 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Email */}
                     {data.applicantDetails?.email && (
                       <div className="flex items-start gap-3 p-3 bg-teal-50 rounded-lg border border-teal-100">
-                        <svg className="w-4 h-4 text-teal-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         <div className="flex-1">
                           <label className="text-xs font-semibold text-teal-700 uppercase tracking-wide">Email Address</label>
                           <p className="text-sm font-medium text-teal-900 mt-0.5 break-all">{data.applicantDetails.email}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Collapsible Payment Details Card - Only show for 3rd party payments (Maya, Gcash) */}
+            {paymentData && (paymentData.paymentMethod === 'Maya' || paymentData.paymentMethod === 'Gcash') && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => setIsPaymentDetailsExpanded(!isPaymentDetailsExpanded)}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  aria-expanded={isPaymentDetailsExpanded}
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <h2 className="text-base font-bold text-gray-800">Payment Details</h2>
+                  </div>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                      isPaymentDetailsExpanded ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Collapsible Content */}
+                <div
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    isPaymentDetailsExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="px-6 pb-6 pt-2 space-y-3 border-t border-gray-100">
+                    {/* Amount */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">₱{(paymentData.amount ?? 0).toFixed(2)}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Payment Method */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment Method</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">{paymentData.paymentMethod}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Transaction Date */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Transaction Date</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">{new Date(paymentData.submissionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Payment Status */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">{paymentData.paymentStatus}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Reference Number */}
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Reference Number</label>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5 font-mono">{paymentData.referenceNumber}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Maya Checkout ID - Only show if payment method is Maya */}
+                    {paymentData.paymentMethod === 'Maya' && paymentData.mayaCheckoutId && (
+                      <div className="flex items-start gap-3 p-3 bg-teal-50 rounded-lg border border-teal-100">
+                        <svg className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-teal-700 uppercase tracking-wide">Maya Checkout ID</label>
+                          <p className="text-sm font-medium text-teal-900 mt-0.5 font-mono break-all">{paymentData.mayaCheckoutId}</p>
                         </div>
                       </div>
                     )}
@@ -495,14 +703,15 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 </div>
               )}
               {(() => {
-                const referredCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Referred').length || 0;
-                const needsRevisionCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'NeedsRevision').length || 0;
-                const totalIssues = referredCount + needsRevisionCount;
+                // Count pending actions from local state
+                const referredCount = pendingActions.filter(action => action.actionType === 'refer_doctor').length;
+                const needsRevisionCount = pendingActions.filter(action => action.actionType === 'flag_revision').length;
+                const totalPending = pendingActions.length;
                 const totalDocs = data?.checklist.length || 0;
                 
-                if (totalIssues > 0) {
-                  // Show appropriate warning based on issue count
-                  const warningLevel = totalIssues > 3 ? 'severe' : totalIssues >= 2 ? 'warning' : 'info';
+                if (totalPending > 0) {
+                  // Show appropriate warning based on pending count
+                  const warningLevel = totalPending > 3 ? 'severe' : totalPending >= 2 ? 'warning' : 'info';
                   const bgColor = warningLevel === 'severe' ? 'bg-red-50 border-red-300' : warningLevel === 'warning' ? 'bg-orange-50 border-orange-200' : 'bg-blue-50 border-blue-200';
                   const textColor = warningLevel === 'severe' ? 'text-red-800' : warningLevel === 'warning' ? 'text-orange-800' : 'text-blue-800';
                   const iconColor = warningLevel === 'severe' ? 'text-red-600' : warningLevel === 'warning' ? 'text-orange-600' : 'text-blue-600';
@@ -510,21 +719,21 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   return (
                     <div className={`mb-4 ${bgColor} border rounded-lg p-3`}>
                       <div className="flex items-start gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${iconColor} mt-0.5 flex-shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${iconColor} mt-0.5 shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div className={`text-sm ${textColor}`}>
                           <p className="font-semibold mb-1">
-                            {warningLevel === 'severe' ? '⚠️ High Issue Rate' : 'Pending Applicant Notifications'} ({totalIssues} of {totalDocs})
+                            {warningLevel === 'severe' ? '⚠️ High Issue Rate' : 'Pending Applicant Notifications'} ({totalPending} of {totalDocs})
                           </p>
                           <p className={warningLevel === 'severe' ? 'text-red-700' : warningLevel === 'warning' ? 'text-orange-700' : 'text-blue-700'}>
                             {warningLevel === 'severe'
-                              ? `More than 3 documents require attention (${totalIssues}/${totalDocs}). Please review before sending notifications.`
-                              : totalIssues === 1
+                              ? `More than 3 documents require attention (${totalPending}/${totalDocs}). Please review before sending notifications.`
+                              : totalPending === 1
                               ? '1 document requires applicant action. Click "Send Applicant Notifications" to proceed.'
-                              : `${totalIssues} document(s) require applicant action`
+                              : `${totalPending} document(s) require applicant action`
                             }
-                            {(referredCount > 0 || needsRevisionCount > 0) && totalIssues > 1 && (
+                            {(referredCount > 0 || needsRevisionCount > 0) && totalPending > 1 && (
                               <span className="block mt-1 text-xs">
                                 {referredCount > 0 && `🏥 ${referredCount} Medical Referral${referredCount > 1 ? 's' : ''}`}
                                 {referredCount > 0 && needsRevisionCount > 0 && ' • '}
@@ -548,10 +757,15 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Approve & Continue to Payment
+                  {/* Manual payment (BaranggayHall/CityHall): Continue to Payment Validation */}
+                  {/* 3rd party (Maya/Gcash): Approve everything here */}
+                  {paymentData && (paymentData.paymentMethod === 'BaranggayHall' || paymentData.paymentMethod === 'CityHall') 
+                    ? 'Approve & Continue to Payment' 
+                    : 'Approve Documents & Payments'
+                  }
                 </button>
                 
-                {/* Secondary Action: Send Applicant Notifications */}
+                {/* Secondary Action: Send Referral Notification */}
                 <button 
                   onClick={handleSendReferralClick} 
                   className="group w-full bg-gradient-to-r from-blue-400 to-indigo-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-blue-500 hover:to-indigo-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
@@ -600,33 +814,46 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     <div className="flex-1 mb-3 sm:mb-0">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-2">
-                          {item.status === 'Approved' && (
-                            <div className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
-                              <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                          )}
-                          {item.status === 'Referred' && (
-                            <div className="w-6 h-6 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center">
-                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                              </svg>
-                            </div>
-                          )}
-                          {item.status === 'NeedsRevision' && (
-                            <div className="w-6 h-6 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center">
-                              <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                              </svg>
-                            </div>
-                          )}
+                          {(() => {
+                            const effectiveStatus = getEffectiveStatus(item);
+                            const pendingAction = getPendingAction(item.uploadId);
+                            
+                            if (effectiveStatus === 'Approved') {
+                              return (
+                                <div className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              );
+                            } else if (effectiveStatus === 'Referred') {
+                              return (
+                                <div className="w-6 h-6 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                  </svg>
+                                </div>
+                              );
+                            } else if (effectiveStatus === 'NeedsRevision') {
+                              return (
+                                <div className="w-6 h-6 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                  </svg>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
                           <h3 className="font-bold text-gray-800 text-base">{item.requirementName}{item.isRequired && <span className="text-rose-500 ml-1">*</span>}</h3>
+                          {getPendingAction(item.uploadId) && (
+                            <span className="text-xs font-medium text-gray-500 ml-2">⏳ Pending</span>
+                          )}
                         </div>
                       </div>
-                      <StatusBadge status={item.status} />
+                      <StatusBadge status={getEffectiveStatus(item)} />
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       {item.fileUrl ? (
                         <>
                           <button onClick={() => setViewModalDocUrl(item.fileUrl)} className="text-sm bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-medium hover:bg-slate-200 transition-all border border-slate-200 flex items-center gap-2">
@@ -678,26 +905,17 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       ) : (
                         <span className="text-sm text-gray-400 px-4 py-2 italic">Not Submitted</span>
                       )}
-                      <button onClick={() => {
-                        setOpenReferralIndex(openReferralIndex === idx ? null : idx);
-                        // Reset form when opening
-                        if (openReferralIndex !== idx) {
-                          setReferralReason('');
-                        }
-                      }} disabled={!item.uploadId} className="p-2.5 rounded-xl hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-transparent hover:border-blue-100" aria-label="Add referral/remark">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>
-                      </button>
                     </div>
                   </div>
                   
                   {openReferralIndex === idx && (
                     <div className="mt-4 pt-4 border-t border-gray-200 bg-blue-50 -m-4 p-4 rounded-b-xl">
                       <h4 className="font-semibold text-gray-800 mb-2">
-                        {isMedicalDocument(item.fieldIdentifier) ? '🏥 Refer to Doctor' : '📄 Flag for Revision'} for "{item.requirementName}"
+                        {modalType === 'refer_doctor' ? '🏥 Refer to Doctor' : '📄 Flag for Revision'} for "{item.requirementName}"
                       </h4>
                       <div className="space-y-4">
-                        {/* Doctor Name Field - Only for medical documents (Read-only, fixed doctor) */}
-                        {isMedicalDocument(item.fieldIdentifier) && (
+                        {/* Doctor Name Field - Only when referring to doctor */}
+                        {modalType === 'refer_doctor' && (
                           <div>
                             <label htmlFor={`doctor-name-${idx}`} className="block text-sm font-medium text-gray-700">
                               Referring Doctor <span className="text-blue-600 text-xs"></span>
@@ -714,7 +932,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         )}
                         
         <div>
-          <label htmlFor={`issue-category-${idx}`} className="block text-sm font-medium text-gray-700">{isMedicalDocument(item.fieldIdentifier) ? 'Referral Category' : 'Issue Category'}</label>
+          <label htmlFor={`issue-category-${idx}`} className="block text-sm font-medium text-gray-700">Issue Category</label>
           <select
             id={`issue-category-${idx}`}
             name={`issue-category-${idx}`}
@@ -729,10 +947,10 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
         </div>
         <div>
           <label htmlFor={`remark-${idx}`} className="block text-sm font-medium text-gray-700">
-            {isMedicalDocument(item.fieldIdentifier) ? 'Medical Referral Reason' : 'Document Issue Reason'} <span className="text-red-500">*</span>
+            {modalType === 'refer_doctor' ? 'Medical Referral Reason' : 'Document Issue Reason'} <span className="text-red-500">*</span>
           </label>
           <div className="mt-1 space-y-2">
-            {(isMedicalDocument(item.fieldIdentifier) ? medicalReferralReasons : nonMedicalIssueOptions).map(option => (
+            {(modalType === 'refer_doctor' ? medicalReferralReasons : nonMedicalIssueOptions).map(option => (
               <label key={option} className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer">
                 <input type="radio" name={`remark-${idx}`} value={option} checked={referralReason === option} onChange={(e) => setReferralReason(e.target.value)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" />
                 <span className="ml-3 text-sm text-gray-700">{option}</span>
@@ -742,7 +960,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
         </div>
                         <div>
                           <label htmlFor={`specific-issues-${idx}`} className="block text-sm font-medium text-gray-700">
-                            {isMedicalDocument(item.fieldIdentifier) ? 'Additional Notes (Optional)' : 'Additional Details (Optional)'}
+                            Additional Details (Optional)
                           </label>
                           <textarea
                             id={`specific-issues-${idx}`}
@@ -751,62 +969,89 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             value={specificIssues}
                             onChange={(e) => setSpecificIssues(e.target.value)}
                             className="mt-1 text-black block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                            placeholder={isMedicalDocument(item.fieldIdentifier) 
+                            placeholder={modalType === 'refer_doctor'
                               ? "Auto-filled referral message. You may add additional notes here." 
-                              : "e.g., ID is blurry, Signature does not match"}
+                              : "e.g., Photo is blurry, Document is expired, Signature does not match"}
                           />
                         </div>
                       </div>
-                      <div className="flex justify-end gap-3 mt-4">
+                      <div className="flex justify-between items-center gap-3 mt-4">
+                        {/* Remove button - only show if there's a pending action */}
+                        {getPendingAction(item.uploadId) && (
+                          <button onClick={() => {
+                            // Remove pending action
+                            setPendingActions(pendingActions.filter(action => action.uploadId !== item.uploadId));
+                            setOpenReferralIndex(null);
+                            setModalType(null);
+                            setReferralReason('');
+                            setSpecificIssues('');
+                            setSuccessMessage('Pending action removed.');
+                            setTimeout(() => setSuccessMessage(null), 2000);
+                          }} className="bg-red-100 text-red-700 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-red-200 flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Remove
+                          </button>
+                        )}
+                        <div className="flex gap-3 ml-auto">
+                          <button onClick={() => {
+                            setOpenReferralIndex(null);
+                            setModalType(null);
+                            setReferralReason('');
+                            setSpecificIssues('');
+                          }} className="bg-gray-200 text-gray-800 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-300">Cancel</button>
                         <button onClick={() => {
-                          setOpenReferralIndex(null);
-                          setReferralReason('');
-                        }} className="bg-gray-200 text-gray-800 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-300">Cancel</button>
-                        <button onClick={async () => {
                           try {
                             // Validate referral reason
                             if (!referralReason) throw new Error('Please select a reason before saving.');
 
-                            // For medical docs, treat as medical referral
-                            if (isMedicalDocument(item.fieldIdentifier)) {
-                              await referDocumentMutation({
-                                documentUploadId: item.uploadId!,
-                                issueType: "medical_referral",
-                                medicalReferralCategory: "other_medical_concern",
-                                referralReason: referralReason,
-                                specificIssues: specificIssues.split(',').map(s => s.trim()).filter(s => s),
-                                doctorName: FIXED_DOCTOR_NAME,
-                                clinicAddress: "Door 7, Magsaysay Complex, Magsaysay Park, Davao City",
-                              });
-                            } else {
-                              // Non-medical: flag for revision (document quality issue)
-                              await referDocumentMutation({
-                                documentUploadId: item.uploadId!,
-                                issueType: "document_issue",
-                                documentIssueCategory: issueCategory as any,
-                                referralReason: referralReason,
-                                specificIssues: specificIssues.split(',').map(s => s.trim()).filter(s => s),
-                              });
-                            }
-
-                            await loadData();
+                            // Remove existing pending action for this document if any
+                            const updatedPending = pendingActions.filter(action => action.uploadId !== item.uploadId);
+                            
+                            // Add new pending action
+                            const newAction = {
+                              uploadId: item.uploadId!,
+                              actionType: modalType!,
+                              category: issueCategory,
+                              reason: referralReason,
+                              notes: specificIssues,
+                              doctorName: modalType === 'refer_doctor' ? FIXED_DOCTOR_NAME : undefined,
+                              documentName: item.requirementName,
+                            };
+                            
+                            setPendingActions([...updatedPending, newAction]);
+                            
+                            // Close modal and reset form
                             setOpenReferralIndex(null);
+                            setModalType(null);
                             setReferralReason('');
                             setIssueCategory('other');
                             setSpecificIssues('');
                             setError(null);
+                            
+                            // Show success message
+                            setSuccessMessage(
+                              modalType === 'refer_doctor' 
+                                ? `Referral to doctor added to queue. Click "Send Applicant Notifications" to finalize.`
+                                : `Document flagged for revision. Click "Send Applicant Notifications" to finalize.`
+                            );
+                            setTimeout(() => setSuccessMessage(null), 3000);
                           } catch (e: any) {
                             setError(createAppError(e.message, 'Validation Error'));
                           }
                         }} className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700">
-                          {isMedicalDocument(item.fieldIdentifier) ? 'Save Referral' : 'Save & Flag for Revision'}
+                          {modalType === 'refer_doctor' ? 'Save Referral' : 'Save & Flag for Revision'}
                         </button>
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Medical docs: 2 buttons (Approve + Refer to Doctor), Non-medical: 2 buttons (Approve + Flag for Revision) */}
-                  <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* Medical docs: 3 buttons (Approve + Flag for Revision + Refer to Doctor) */}
+                  {/* Non-medical docs: 2 buttons (Approve + Flag for Revision) */}
+                  <div className={`mt-4 pt-4 border-t border-gray-100 ${isMedicalDocument(item.fieldIdentifier) ? 'grid grid-cols-1 sm:grid-cols-3 gap-2' : 'grid grid-cols-1 sm:grid-cols-2 gap-2'}`}>
+                    {/* Approve Button - Always show */}
                     <button 
                       onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} 
                       disabled={!item.uploadId || item.status === 'Approved'} 
@@ -817,11 +1062,41 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       </svg>
                       Approve
                     </button>
-                    {isMedicalDocument(item.fieldIdentifier) ? (
+                    
+                    {/* Flag for Revision Button - Always show for all documents */}
+                    <button
+                      onClick={() => {
+                        const pending = getPendingAction(item.uploadId);
+                        if (pending) {
+                          // Load existing pending action for editing
+                          setModalType(pending.actionType);
+                          setIssueCategory(pending.category);
+                          setReferralReason(pending.reason);
+                          setSpecificIssues(pending.notes);
+                        } else {
+                          // New action
+                          setModalType('flag_revision');
+                          setIssueCategory('other');
+                          setReferralReason('');
+                          setSpecificIssues('');
+                        }
+                        setOpenReferralIndex(idx);
+                      }}
+                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision'}
+                      className="w-full bg-orange-50 text-orange-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-orange-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-orange-100 disabled:border-gray-200 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      Flag for Revision
+                    </button>
+                    
+                    {/* Refer to Doctor Button - Only for medical documents */}
+                    {isMedicalDocument(item.fieldIdentifier) && (
                       <button
                         onClick={() => {
                           setOpenReferralIndex(idx);
-                          // Prefill referral defaults for medical docs
+                          setModalType('refer_doctor');
                           setIssueCategory('other');
                           setReferralReason('Other medical concern');
                           setSpecificIssues(`Failed Medical Result (${item.requirementName}) - Please refer to ${FIXED_DOCTOR_NAME} at Door 7, Magsaysay Complex, Magsaysay Park, Davao City.`);
@@ -833,23 +1108,6 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         Refer to Doctor
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setOpenReferralIndex(idx);
-                          // Prefill defaults for non-medical docs
-                          setIssueCategory('quality_issue');
-                          setReferralReason('');
-                          setSpecificIssues('');
-                        }}
-                        disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision'}
-                        className="w-full bg-orange-50 text-orange-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-orange-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-orange-100 disabled:border-gray-200 flex items-center justify-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        Flag for Revision
                       </button>
                     )}
                   </div>
@@ -972,16 +1230,16 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
             </p>
             
             {(() => {
-              const referredCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'Referred').length || 0;
-              const needsRevisionCount = data?.checklist.filter((doc: ChecklistItem) => doc.status === 'NeedsRevision').length || 0;
-              const totalIssues = referredCount + needsRevisionCount;
+              const referredCount = pendingActions.filter(action => action.actionType === 'refer_doctor').length;
+              const needsRevisionCount = pendingActions.filter(action => action.actionType === 'flag_revision').length;
+              const totalPending = pendingActions.length;
               
               return (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                   <p className="text-sm text-blue-800 font-medium mb-2">
-                    📧 {totalIssues === 1 
+                    📧 {totalPending === 1 
                       ? '1 notification will be sent to the applicant.'
-                      : `${totalIssues} notifications will be sent to the applicant.`
+                      : `${totalPending} notifications will be sent to the applicant.`
                     }
                   </p>
                   {referredCount > 0 && (

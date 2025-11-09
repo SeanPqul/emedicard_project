@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
+import { REJECTION_LIMITS, hasReachedMaxAttempts } from "../config/rejectionLimits";
 
 export const resubmitDocument = mutation({
   args: {
@@ -36,7 +37,8 @@ export const resubmitDocument = mutation({
       throw new Error("You can only resubmit documents for your own applications");
     }
 
-    // 2. Find the most recent rejection for this document
+    // 2. Find the most recent rejection/referral for this document
+    // Check documentRejectionHistory for document issues
     const rejectionHistory = await ctx.db
       .query("documentRejectionHistory")
       .withIndex("by_document_type", (q) => 
@@ -45,13 +47,50 @@ export const resubmitDocument = mutation({
       )
       .order("desc")
       .first();
+    
+    // Check documentReferralHistory for medical referrals (should not be resubmittable)
+    const referralHistory = await ctx.db
+      .query("documentReferralHistory")
+      .withIndex("by_document_type", (q) => 
+        q.eq("applicationId", args.applicationId)
+         .eq("documentTypeId", args.documentTypeId)
+      )
+      .order("desc")
+      .first();
 
-    if (!rejectionHistory) {
+    // Determine which history to use
+    const historyEntry = rejectionHistory || referralHistory;
+    const isRejection = !!rejectionHistory;
+
+    if (!historyEntry) {
       throw new Error("No rejection found for this document");
     }
 
-    if (rejectionHistory.wasReplaced) {
+    if (historyEntry.wasReplaced) {
       throw new Error("This rejection has already been addressed with a new document");
+    }
+
+    // Only allow resubmission for document issues (from documentRejectionHistory), not medical referrals
+    if (!isRejection && referralHistory?.issueType === "medical_referral") {
+      throw new Error("Medical referrals cannot be resubmitted. Please consult with the designated doctor first.");
+    }
+
+    // 2.5. Check max attempts limit
+    // Count all previous rejections for this document type
+    const allRejections = await ctx.db
+      .query("documentRejectionHistory")
+      .withIndex("by_document_type", (q) =>
+        q.eq("applicationId", args.applicationId)
+         .eq("documentTypeId", args.documentTypeId)
+      )
+      .collect();
+    
+    const nextAttemptNumber = allRejections.length + 1;
+    const maxAttempts = REJECTION_LIMITS.DOCUMENTS.MAX_ATTEMPTS;
+    
+    // Block if already reached max attempts - direct to venue
+    if (hasReachedMaxAttempts(nextAttemptNumber, 'document')) {
+      throw new Error(`You have reached the maximum number of resubmission attempts (${maxAttempts}). Please visit our office with your original documents for in-person verification. Check the Help Center in the app for venue location and office hours.`);
     }
 
     // 3. Find and update the existing document upload record (if exists)
@@ -90,8 +129,8 @@ export const resubmitDocument = mutation({
       });
     }
 
-    // 4. Update rejection history to mark as replaced and update status
-    await ctx.db.patch(rejectionHistory._id, {
+    // 4. Update rejection/referral history to mark as replaced and update status
+    await ctx.db.patch(historyEntry._id, {
       wasReplaced: true,
       replacementUploadId: newUploadId,
       replacedAt: Date.now(),
@@ -104,8 +143,9 @@ export const resubmitDocument = mutation({
       .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
       .collect();
 
+    // Check for documents that need revision (new terminology) or are rejected (old terminology)
     const hasRejectedDocuments = allDocumentUploads.some(
-      doc => doc.reviewStatus === "Rejected"
+      doc => doc.reviewStatus === "Rejected" || doc.reviewStatus === "NeedsRevision"
     );
 
     // 6. Update application status if no more rejected documents
