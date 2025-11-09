@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type RejectionType = "document" | "payment" | "orientation" | "application" | "other";
-type RejectionStatus = "pending" | "resubmitted" | "rejected" | "approved";
+type RejectionStatus = "pending" | "in_progress" | "resubmitted" | "cleared" | "flagged_again" | "rejected" | "approved";
 
 type Rejection = {
   _id: Id<"documentRejectionHistory"> | Id<"documentReferralHistory"> | Id<"paymentRejectionHistory"> | Id<"applicationRejectionHistory"> | Id<"adminActivityLogs">;
@@ -39,7 +39,6 @@ type Rejection = {
 export default function RejectionHistoryPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<RejectionType | "">("");
-  const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<"" | "pending" | "resubmitted" | "permanently_rejected" | "referred">("");
   const [issueTypeTab, setIssueTypeTab] = useState<'all' | 'medical' | 'document'>('all'); // NEW: Tab filter for issue types
   const router = useRouter();
@@ -58,7 +57,7 @@ export default function RejectionHistoryPage() {
       rejection.rejectionReason.toLowerCase().includes(search.toLowerCase());
 
     const matchesType = !typeFilter || rejection.type === typeFilter;
-    const matchesCategory = !categoryFilter || rejection.jobCategory === categoryFilter;
+    const matchesCategory = true; // Category filter removed
 
     // Status filter logic
     let matchesStatus = true;
@@ -100,11 +99,6 @@ export default function RejectionHistoryPage() {
     return matchesSearch && matchesType && matchesCategory && matchesStatus && matchesIssueType;
   });
 
-  // Get unique job categories
-  const jobCategories = Array.from(
-    new Set((rejections || []).map((r: Rejection) => r.jobCategory))
-  ).sort();
-
   const getTypeBadgeColor = (type: RejectionType) => {
     switch (type) {
       case "document":
@@ -138,10 +132,28 @@ export default function RejectionHistoryPage() {
             Pending
           </span>
         );
-      case "resubmitted":
+      case "in_progress":
         return (
           <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+            In Progress
+          </span>
+        );
+      case "resubmitted":
+        return (
+          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
             Resubmitted
+          </span>
+        );
+      case "cleared":
+        return (
+          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+            Cleared
+          </span>
+        );
+      case "flagged_again":
+        return (
+          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">
+            Flagged Again
           </span>
         );
       case "rejected":
@@ -152,7 +164,7 @@ export default function RejectionHistoryPage() {
         );
       case "approved":
         return (
-          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
             Approved
           </span>
         );

@@ -51,8 +51,8 @@ const ScheduleModal = ({
   // Get all inspectors
   const inspectors = useQuery(api.admin.orientation.getInspectors);
 
-  const createSchedule = useMutation(api.orientationSchedules.mutations.createSchedule) as any;
-  const updateSchedule = useMutation(api.orientationSchedules.mutations.updateSchedule) as any;
+  const createSchedule = useMutation(api.orientationSchedules.createSchedule) as any;
+  const updateSchedule = useMutation(api.orientationSchedules.updateSchedule) as any;
 
   // Initialize inspector selection when editing existing schedule
   useEffect(() => {
@@ -768,11 +768,11 @@ export default function OrientationSchedulesPage() {
   const { isLoaded: isClerkLoaded, user } = useUser();
   
   const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
-  const allSchedules = useQuery(api.orientationSchedules.queries.getAllSchedules);
-  const upcomingSchedules = useQuery(api.orientationSchedules.queries.getUpcomingSchedules);
+  const allSchedules = useQuery(api.orientationSchedules.getAllSchedules);
+  const upcomingSchedules = useQuery(api.orientationSchedules.getUpcomingSchedules);
   
-  const deleteSchedule = useMutation(api.orientationSchedules.mutations.deleteSchedule);
-  const toggleAvailability = useMutation(api.orientationSchedules.mutations.toggleAvailability);
+  const deleteSchedule = useMutation(api.orientationSchedules.deleteSchedule);
+  const toggleAvailability = useMutation(api.orientationSchedules.toggleAvailability);
 
   const schedules = viewMode === "upcoming" ? upcomingSchedules : allSchedules;
 
