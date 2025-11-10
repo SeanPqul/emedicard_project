@@ -21,9 +21,9 @@ export const styles = StyleSheet.create({
     color: getColor('text.primary'),
   },
   content: {
-    flex: 1,
     paddingHorizontal: getSpacing('lg'),
     paddingTop: getSpacing('xxxl') + 16,
+    paddingBottom: getSpacing('xxxl'),
     alignItems: 'center',
   },
   qrContainer: {
