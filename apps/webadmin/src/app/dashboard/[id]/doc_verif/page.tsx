@@ -1092,7 +1092,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         </button>
                       </div>
                     </div>
-                  ) : applicationStatus?.applicationStatus === 'Approved' ? (
+                  ) : applicationStatus?.applicationStatus === 'Approved' && applicationStatus?.approvedAt ? (
                     <div className="text-center py-8">
                       <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                         <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1183,8 +1183,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 return null;
               })()}
               <div className="flex flex-col gap-3">
-                {/* Primary Action: Approve - Only show if not already complete */}
-                {applicationStatus?.applicationStatus !== 'Complete' && (
+                {/* Primary Action: Approve - Only show if not already approved */}
+                {applicationStatus?.applicationStatus !== 'Approved' && applicationStatus?.applicationStatus !== 'Complete' ? (
                   <button 
                     onClick={() => handleFinalize('Approved')} 
                     className="group w-full bg-gradient-to-r from-teal-400 to-emerald-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-teal-500 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
@@ -1196,10 +1196,25 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* This is the final step - approving documents completes the application */}
                     Approve Application
                   </button>
+                ) : null}
+                
+                {/* Show approved status */}
+                {(applicationStatus?.applicationStatus === 'Approved' || applicationStatus?.applicationStatus === 'Complete') && (
+                  <div className="w-full bg-emerald-50 border-2 border-emerald-200 px-6 py-4 rounded-xl flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 border-2 border-emerald-300 flex items-center justify-center shrink-0">
+                      <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-emerald-900 text-sm">Application Approved</p>
+                      <p className="text-emerald-700 text-xs mt-0.5">This application has been approved and the health card has been issued</p>
+                    </div>
+                  </div>
                 )}
                 
-                {/* Show completion status if already complete */}
-                {applicationStatus?.applicationStatus === 'Complete' && (
+                {/* Show completion status if already complete - REMOVED, merged above */}
+                {false && applicationStatus?.applicationStatus === 'Complete' && (
                   <div className="w-full bg-emerald-50 border-2 border-emerald-200 px-6 py-4 rounded-xl flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-emerald-100 border-2 border-emerald-300 flex items-center justify-center shrink-0">
                       <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

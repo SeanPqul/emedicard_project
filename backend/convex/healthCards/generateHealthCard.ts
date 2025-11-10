@@ -31,13 +31,13 @@ function generateHealthCardHTML(data: {
   <title>Health Certificate - ${data.registrationNumber}</title>
   <style>
     @page {
-      size: 140mm 90mm;
+      size: 280mm 90mm;
       margin: 0;
     }
     
     @media print {
       body { margin: 0; padding: 0; }
-      .health-card { box-shadow: none; page-break-after: avoid; }
+      .fold-container { box-shadow: none; page-break-after: avoid; }
     }
     
     * {
@@ -56,6 +56,12 @@ function generateHealthCardHTML(data: {
       padding: 20px;
     }
     
+    /* Fold Container - Side by Side */
+    .fold-container {
+      display: flex;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    
     /* Health Certificate Card */
     .health-card {
       width: 320px;
@@ -63,9 +69,8 @@ function generateHealthCardHTML(data: {
       aspect-ratio: 2.5 / 3.5;
       background: hsl(40, 30%, 94%);
       border: 2px solid hsl(0, 0%, 20%);
+      border-right: 1px solid hsl(0, 0%, 20%);
       padding: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-      margin: 0 auto;
     }
     
     .certificate-container {
@@ -84,8 +89,22 @@ function generateHealthCardHTML(data: {
     }
     
     .header {
+      position: relative;
       text-align: center;
       margin-bottom: 8px;
+    }
+    
+    .header-qr {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 50px;
+      height: 50px;
+    }
+    
+    .header-qr img {
+      width: 100%;
+      height: 100%;
     }
     
     .header-line1 {
@@ -237,8 +256,6 @@ function generateHealthCardHTML(data: {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      font-family: cursive;
     }
     
     .signature-label {
@@ -278,15 +295,146 @@ function generateHealthCardHTML(data: {
     .bottom-official-title {
       font-size: 10px;
     }
+    
+    /* Back of Card Styles */
+    .card-back {
+      width: 320px;
+      max-width: 320px;
+      aspect-ratio: 2.5 / 3.5;
+      background: hsl(40, 30%, 94%);
+      border: 2px solid hsl(0, 0%, 20%);
+      border-left: 1px solid hsl(0, 0%, 20%);
+      padding: 16px;
+    }
+    
+    .back-container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      color: hsl(0, 0%, 10%);
+    }
+    
+    .important-header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .important-title {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    
+    .important-text {
+      font-size: 9px;
+      line-height: 1.4;
+      text-align: center;
+    }
+    
+    .important-text p {
+      margin-bottom: 3px;
+    }
+    
+    .dates-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 8px 0 10px;
+    }
+    
+    .date-box {
+      text-align: center;
+      border: 1px solid hsl(0, 0%, 20%);
+      padding: 6px 4px;
+    }
+    
+    .date-value {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    
+    .date-label {
+      font-size: 9px;
+    }
+    
+    .test-section {
+      margin-bottom: 6px;
+    }
+    
+    .test-title {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    
+    .test-table {
+      border: 1px solid hsl(0, 0%, 20%);
+    }
+    
+    .table-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-bottom: 1px solid hsl(0, 0%, 20%);
+      background: hsl(40, 30%, 94%);
+    }
+    
+    .table-header-cell {
+      font-size: 9px;
+      font-weight: 600;
+      text-align: center;
+      padding: 3px;
+      border-right: 1px solid hsl(0, 0%, 20%);
+    }
+    
+    .table-header-cell:last-child {
+      border-right: none;
+    }
+    
+    .table-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-bottom: 1px solid hsl(0, 0%, 20%);
+    }
+    
+    .table-row:last-child {
+      border-bottom: none;
+    }
+    
+    .table-cell {
+      font-size: 9px;
+      text-align: center;
+      padding: 4px 2px;
+      border-right: 1px solid hsl(0, 0%, 20%);
+      min-height: 20px;
+    }
+    
+    .table-cell:last-child {
+      border-right: none;
+    }
+    
+    .serial-number {
+      margin-top: auto;
+      padding-top: 8px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-  <div class="health-card">
+  <div class="fold-container">
+    <!-- Front of Certificate -->
+    <div class="health-card">
     <div class="certificate-container">
       <!-- Header -->
       <div class="form-number">EHS Form No. 102-A</div>
       
       <div class="header">
+        <div class="header-qr">
+          <img src="${data.qrCodeDataUrl}" alt="QR Code" />
+        </div>
         <div class="header-line1">REPUBLIC of the PHILIPPINES</div>
         <div class="header-line2">CITY HEALTH OFFICE</div>
         <div class="header-line3">Davao City</div>
@@ -351,7 +499,7 @@ function generateHealthCardHTML(data: {
         <!-- Signature Area -->
         <div class="signature-area">
           <div class="signature-box">
-            <div class="signature-placeholder">A.S.</div>
+            <div class="signature-placeholder"></div>
             <div class="signature-label">Signature</div>
           </div>
           
@@ -367,6 +515,103 @@ function generateHealthCardHTML(data: {
         <div class="bottom-official-name">Dr. Marjorie D. Culas</div>
         <div class="bottom-official-title">City Health Officer</div>
       </div>
+    </div>
+    </div>
+    
+    <!-- Back of Certificate -->
+    <div class="card-back">
+    <div class="back-container">
+      <!-- Important Header -->
+      <div class="important-header">
+        <h2 class="important-title">IMPORTANT</h2>
+        <div class="important-text">
+          <p>This HEALTH CERTIFICATE is non-transferable.</p>
+          <p>Always wear your certificate in the upper left side front portion of your garment while working.</p>
+          <p>Valid only until the next date of examination as indicated below.</p>
+        </div>
+      </div>
+      
+      <!-- Dates Section -->
+      <div class="dates-section">
+        <div class="date-box">
+          <div class="date-value">${data.issuedDate}</div>
+          <div class="date-label">Date of Issuance</div>
+        </div>
+        <div class="date-box">
+          <div class="date-value">${data.expiryDate}</div>
+          <div class="date-label">Date of Expiration</div>
+        </div>
+      </div>
+      
+      <!-- URINALYSIS Section -->
+      <div class="test-section">
+        <div class="test-title">URINALYSIS</div>
+        <div class="test-table">
+          <div class="table-header">
+            <div class="table-header-cell">Date</div>
+            <div class="table-header-cell">Kind</div>
+            <div class="table-header-cell">Exp Date</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- X-RAY / SPUTUM Section -->
+      <div class="test-section">
+        <div class="test-title">X-RAY / SPUTUM</div>
+        <div class="test-table">
+          <div class="table-header">
+            <div class="table-header-cell">Date</div>
+            <div class="table-header-cell">Kind</div>
+            <div class="table-header-cell">Exp Date</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- STOOL Section -->
+      <div class="test-section">
+        <div class="test-title">STOOL</div>
+        <div class="test-table">
+          <div class="table-header">
+            <div class="table-header-cell">Date</div>
+            <div class="table-header-cell">Kind</div>
+            <div class="table-header-cell">Exp Date</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+            <div class="table-cell"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Serial Number -->
+      <div class="serial-number">${data.registrationNumber}</div>
+    </div>
     </div>
   </div>
 </body>
