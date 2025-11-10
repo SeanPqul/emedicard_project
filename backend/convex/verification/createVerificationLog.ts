@@ -17,7 +17,7 @@ export const createVerificationLogMutation = mutation({
 
       // Check if card is still valid
       const currentTime = Date.now();
-      if (healthCard.expiresAt < currentTime) {
+      if (healthCard.expiryDate < currentTime) {
         throw new Error("Health card has expired");
       }
 

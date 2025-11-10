@@ -40,7 +40,7 @@ export function HealthCardsScreen() {
       const status = getCardStatus(card);
       
       const result = await Share.share({
-        message: `Health Card Verification\n\nCard ID: ${card.verificationToken}\nStatus: ${status}\nExpiry: ${formatDate(card.expiresAt)}\n\nVerify at: ${verificationUrl}`,
+        message: `Health Card Verification\n\nCard ID: ${card.registrationNumber}\nStatus: ${status}\nExpiry: ${formatDate(card.expiryDate)}\n\nVerify at: ${verificationUrl}`,
         url: verificationUrl,
       });
       
@@ -148,12 +148,12 @@ export function HealthCardsScreen() {
 
                 <View style={styles.cardContent}>
                   <View style={styles.cardInfo}>
-                    <Text style={styles.cardId}>Card ID: {card.verificationToken}</Text>
+                    <Text style={styles.cardId}>Card ID: {card.registrationNumber || (card as any).verificationToken}</Text>
                     <Text style={styles.cardDates}>
-                      Issued: {formatDate(card.issuedAt)}
+                      Issued: {formatDate(card.issuedDate || (card as any).issuedAt)}
                     </Text>
                     <Text style={styles.cardDates}>
-                      Expires: {formatDate(card.expiresAt)}
+                      Expires: {formatDate(card.expiryDate || (card as any).expiresAt)}
                     </Text>
                   </View>
 

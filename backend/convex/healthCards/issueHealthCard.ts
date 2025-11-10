@@ -4,18 +4,20 @@ import { mutation } from "../_generated/server";
 export const issueHealthCardMutation = mutation({
   args: {
     applicationId: v.id("applications"),
-    cardUrl: v.string(),
-    issuedAt: v.number(),
-    expiresAt: v.number(),
-    verificationToken: v.string(),
+    registrationNumber: v.string(),
+    htmlContent: v.string(),
+    issuedDate: v.number(),
+    expiryDate: v.number(),
   },
   handler: async (ctx, args) => {
     const healthCardId = await ctx.db.insert("healthCards", {
       applicationId: args.applicationId,
-      cardUrl: args.cardUrl,
-      issuedAt: args.issuedAt,
-      expiresAt: args.expiresAt,
-      verificationToken: args.verificationToken,
+      registrationNumber: args.registrationNumber,
+      htmlContent: args.htmlContent,
+      issuedDate: args.issuedDate,
+      expiryDate: args.expiryDate,
+      status: "active",
+      createdAt: Date.now(),
     });
 
     return healthCardId;

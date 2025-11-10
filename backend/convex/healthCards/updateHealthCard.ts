@@ -4,9 +4,10 @@ import { mutation } from "../_generated/server";
 export const updateHealthCardMutation = mutation({
   args: {
     healthCardId: v.id("healthCards"),
-    cardUrl: v.optional(v.string()),
-    expiresAt: v.optional(v.number()),
-    verificationToken: v.optional(v.string()),
+    status: v.optional(v.union(v.literal("active"), v.literal("revoked"), v.literal("expired"))),
+    expiryDate: v.optional(v.number()),
+    revokedAt: v.optional(v.number()),
+    revokedReason: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { healthCardId, ...updates } = args;

@@ -63,6 +63,10 @@ export default defineSchema({
     userId: v.id("users"),
     lastUpdatedBy: v.optional(v.id("users")), // New field to track which admin last updated the application
     orientationCompleted: v.optional(v.boolean()), // Track if user completed check-in/check-out for orientation
+    // Health Card fields
+    healthCardId: v.optional(v.id("healthCards")),
+    healthCardRegistrationNumber: v.optional(v.string()),
+    healthCardIssuedAt: v.optional(v.float64()),
   }).index("by_user", ["userId"]),
   
   documentTypes: defineTable({
@@ -101,13 +105,18 @@ export default defineSchema({
     .index("by_review_status", ["reviewStatus", "reviewedAt"]),
   healthCards: defineTable({
     applicationId: v.id("applications"),
-    cardUrl: v.string(),
-    expiresAt: v.float64(),
-    issuedAt: v.float64(),
-    verificationToken: v.string(),
+    registrationNumber: v.string(),
+    htmlContent: v.string(), // Full HTML of the health card
+    issuedDate: v.float64(),
+    expiryDate: v.float64(),
+    status: v.union(v.literal("active"), v.literal("revoked"), v.literal("expired")),
+    createdAt: v.float64(),
+    revokedAt: v.optional(v.float64()),
+    revokedReason: v.optional(v.string()),
   })
     .index("by_application", ["applicationId"])
-    .index("by_verification_token", ["verificationToken"]),
+    .index("by_registration", ["registrationNumber"])
+    .index("by_status", ["status"]),
   jobCategories: defineTable({
     colorCode: v.string(),
     name: v.string(),

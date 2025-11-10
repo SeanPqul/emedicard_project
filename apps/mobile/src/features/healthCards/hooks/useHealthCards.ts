@@ -2,15 +2,19 @@ import { useMutation, useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 
-// Backend health card data structure
+// Backend health card data structure (updated to match new schema)
 export interface BackendHealthCard {
   _id: Id<"healthCards">;
   _creationTime: number;
   applicationId: Id<"applications">;
-  cardUrl: string;
-  issuedAt: number;
-  expiresAt: number;
-  verificationToken: string;
+  registrationNumber: string;
+  htmlContent: string;
+  issuedDate: number;
+  expiryDate: number;
+  status: "active" | "revoked" | "expired";
+  createdAt: number;
+  revokedAt?: number;
+  revokedReason?: string;
   application?: {
     _id: Id<"applications">;
     _creationTime: number;
@@ -47,10 +51,10 @@ export function useHealthCards() {
 
   const issueHealthCard = async (input: {
     applicationId: Id<'applications'>;
-    cardUrl: string;
-    issuedAt: number;
-    expiresAt: number;
-    verificationToken: string;
+    registrationNumber: string;
+    htmlContent: string;
+    issuedDate: number;
+    expiryDate: number;
   }) => {
     return issueHealthCardMutation(input);
   };

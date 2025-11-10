@@ -16,8 +16,8 @@ export const logVerificationAttemptMutation = mutation({
         // If successful, create regular verification log
         const healthCard = await ctx.db
           .query("healthCards")
-          .withIndex("by_verification_token", (q) => q.eq("verificationToken", args.verificationToken))
-          .unique();
+          .withIndex("by_registration", (q) => q.eq("registrationNumber", args.verificationToken))
+          .first();
 
         if (healthCard) {
           return await ctx.db.insert("verificationLogs", {

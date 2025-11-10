@@ -75,53 +75,73 @@ export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
         styles.container,
         pressed && { opacity: 0.8 }
       ]}
-      onPress={() => router.push('/(screens)/(shared)/health-card-details')}
+      onPress={() => router.push('/(screens)/(shared)/health-cards')}
     >
-      <LinearGradient
-        colors={[getCardColor(), getCardColor() + 'DD']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradientBackground}
-      >
-        {/* Card Header */}
-        <View style={styles.cardHeader}>
-          <View>
-            <Text style={styles.cardTitle}>eMediCard</Text>
-            <Text style={styles.cardType}>{healthCard.type}</Text>
+      {/* Official CHO Davao Style Health Card */}
+      <View style={{
+        backgroundColor: '#FFFFFF',
+        borderRadius: moderateScale(16),
+        borderWidth: 2,
+        borderColor: '#E0E0E0',
+        padding: moderateScale(16),
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+      }}>
+        {/* Header - CHO Davao */}
+        <View style={{ alignItems: 'center', marginBottom: moderateScale(12), borderBottomWidth: 1, borderBottomColor: '#E0E0E0', paddingBottom: moderateScale(10) }}>
+          <Text style={{ fontSize: moderateScale(10), color: '#666', fontWeight: '600' }}>EHS Form No. 102-A</Text>
+          <Text style={{ fontSize: moderateScale(9), color: '#888', marginTop: moderateScale(2) }}>REPUBLIC of the PHILIPPINES</Text>
+          <Text style={{ fontSize: moderateScale(13), color: '#DC2626', fontWeight: '800', marginTop: moderateScale(4) }}>CITY HEALTH OFFICE</Text>
+          <Text style={{ fontSize: moderateScale(11), color: '#444', fontWeight: '600' }}>Davao City</Text>
+        </View>
+
+        {/* Registration Number */}
+        <View style={{ alignItems: 'center', marginBottom: moderateScale(8) }}>
+          <Text style={{ fontSize: moderateScale(10), color: '#666', fontWeight: '600' }}>Reg. No. {healthCard.cardNumber}</Text>
+        </View>
+
+        {/* Certificate Title */}
+        <View style={{ alignItems: 'center', marginBottom: moderateScale(10) }}>
+          <Text style={{ fontSize: moderateScale(16), color: '#DC2626', fontWeight: '800', letterSpacing: 1 }}>HEALTH CERTIFICATE</Text>
+          <Text style={{ fontSize: moderateScale(8), color: '#666', marginTop: moderateScale(4), textAlign: 'center' }}>Pursuant to P.D. 522, P.D. 856, and City Ord. No. 078 s. 2000</Text>
+        </View>
+
+        {/* Card Body - Key Info */}
+        <View style={{ marginBottom: moderateScale(12) }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: moderateScale(6) }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: moderateScale(9), color: '#666', marginBottom: moderateScale(2) }}>Name:</Text>
+              <Text style={{ fontSize: moderateScale(11), color: '#1F2937', fontWeight: '700' }} numberOfLines={1}>{healthCard.fullName}</Text>
+            </View>
+            <View style={{ width: moderateScale(50), height: moderateScale(50), backgroundColor: '#F3F4F6', borderRadius: moderateScale(8), borderWidth: 1, borderColor: '#D1D5DB', alignItems: 'center', justifyContent: 'center', marginLeft: moderateScale(8) }}>
+              <Ionicons name="person" size={moderateScale(24)} color="#9CA3AF" />
+            </View>
           </View>
-          <View style={styles.qrContainer}>
-            <QRCode
-              value={healthCard.qrCodeData}
-              size={moderateScale(50)}
-              color="white"
-              backgroundColor="transparent"
-            />
+          
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: moderateScale(4) }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: moderateScale(9), color: '#666' }}>Occupation:</Text>
+              <Text style={{ fontSize: moderateScale(10), color: '#374151', fontWeight: '600' }} numberOfLines={1}>{healthCard.type}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Card Body */}
-        <View style={styles.cardBody}>
-          <Text style={styles.cardNumber}>{healthCard.cardNumber}</Text>
-          <Text style={styles.holderName}>{healthCard.fullName}</Text>
-        </View>
-
-        {/* Card Footer */}
-        <View style={styles.cardFooter}>
+        {/* Footer - Validity & Status */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: moderateScale(10), borderTopWidth: 1, borderTopColor: '#E0E0E0' }}>
           <View>
-            <Text style={styles.labelText}>Valid Until</Text>
-            <Text style={styles.dateText}>
+            <Text style={{ fontSize: moderateScale(8), color: '#888' }}>Valid Until</Text>
+            <Text style={{ fontSize: moderateScale(11), color: '#1F2937', fontWeight: '700', marginTop: moderateScale(2) }}>
               {format(new Date(healthCard.expiryDate), 'MMM yyyy')}
             </Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
-            <Text style={styles.statusText}>{getStatusText()}</Text>
+          <View style={[{ paddingHorizontal: moderateScale(12), paddingVertical: moderateScale(6), borderRadius: moderateScale(12) }, { backgroundColor: getStatusColor() }]}>
+            <Text style={{ fontSize: moderateScale(10), color: '#FFFFFF', fontWeight: '700' }}>{getStatusText()}</Text>
           </View>
         </View>
-
-        {/* Decorative Elements */}
-        <View style={styles.decorativeCircle1} />
-        <View style={styles.decorativeCircle2} />
-      </LinearGradient>
+      </View>
 
       {/* View Details Button */}
       <View style={styles.actionRow}>

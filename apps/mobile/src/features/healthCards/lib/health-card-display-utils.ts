@@ -38,12 +38,19 @@ export const getCardColor = (jobCategory: any): string => {
 /**
  * Determines the status of a health card based on expiry date
  */
-export const getCardStatus = (card: HealthCardData | BackendHealthCard): 'active' | 'expired' => {
+export const getCardStatus = (card: HealthCardData | BackendHealthCard): 'active' | 'expired' | 'revoked' => {
+  // New schema: check status field directly
+  if ('status' in card && card.status) {
+    return card.status as 'active' | 'expired' | 'revoked';
+  }
+  
+  // Fallback for old schema
   const now = Date.now();
-  if (!card.expiresAt) {
+  const expiryDate = 'expiryDate' in card ? card.expiryDate : (card as any).expiresAt;
+  if (!expiryDate) {
     return 'active'; // Default to active if no expiry date
   }
-  if (card.expiresAt < now) {
+  if (expiryDate < now) {
     return 'expired';
   }
   return 'active';
@@ -69,7 +76,9 @@ export const getStatusColor = (status: string): string => {
  * Generates a verification URL for a health card
  */
 export const generateVerificationUrl = (card: HealthCardData | BackendHealthCard): string => {
-  return `https://yourdomain.com/verify/${card.verificationToken}`;
+  // New schema uses registrationNumber, old schema uses verificationToken
+  const token = 'registrationNumber' in card ? card.registrationNumber : (card as any).verificationToken;
+  return `https://yourdomain.com/verify/${token}`;
 };
 
 /**
@@ -88,11 +97,22 @@ export const formatDate = (timestamp?: number): string => {
 
 /**
  * Generates HTML content for printable health card
+ * For new schema cards, return the stored htmlContent directly
+ * For old schema cards, generate simple HTML on the fly
  */
 export const generateCardHtml = (card: HealthCardData | BackendHealthCard & { jobCategory?: any }): string => {
+  // New schema: use stored htmlContent
+  if ('htmlContent' in card && card.htmlContent) {
+    return card.htmlContent;
+  }
+  
+  // Fallback for old schema: generate simple HTML
   const status = getCardStatus(card);
   const verificationUrl = generateVerificationUrl(card);
   const jobCategory = 'jobCategory' in card ? card.jobCategory : undefined;
+  const issuedDate = 'issuedDate' in card ? card.issuedDate : (card as any).issuedAt;
+  const expiryDate = 'expiryDate' in card ? card.expiryDate : (card as any).expiresAt;
+  const token = 'registrationNumber' in card ? card.registrationNumber : (card as any).verificationToken;
   
   return `
     <html>
@@ -132,9 +152,9 @@ export const generateCardHtml = (card: HealthCardData | BackendHealthCard & { jo
         <div class="card">
           <div class="status">${status.toUpperCase()}</div>
           <div class="card-header">${jobCategory?.name || 'Health Card'}</div>
-          <div class="card-id">ID: ${card.verificationToken}</div>
-          <div class="card-dates">Issued: ${formatDate(card.issuedAt)}</div>
-          <div class="card-dates">Expires: ${formatDate(card.expiresAt)}</div>
+          <div class="card-id">ID: ${token}</div>
+          <div class="card-dates">Issued: ${formatDate(issuedDate)}</div>
+          <div class="card-dates">Expires: ${formatDate(expiryDate)}</div>
           <div class="verification-url">Verify: ${verificationUrl}</div>
         </div>
       </body>

@@ -59,17 +59,19 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
   const referralCounts = useReferredDocumentsCount(data?.userProfile?._id);
   const { totalIssues, medicalReferrals, documentIssues } = referralCounts;
 
-  // Mock health card data for demo - replace with actual data
-  const mockHealthCard = healthCard || (dashboardStats?.validHealthCards > 0 ? {
-    id: '1',
-    cardNumber: 'HC-2025-001234',
-    issueDate: '2025-01-01',
-    expiryDate: '2026-01-01',
-    status: 'active',
-    type: 'Medical Health Card',
-    fullName: userProfile?.fullName || 'John Doe',
-    qrCodeData: 'HC-2025-001234|MEDICAL|2026-01-01',
-  } : null);
+  // Use real health card data from backend (no more mock data)
+  const realHealthCard = healthCard ? {
+    id: healthCard._id,
+    cardNumber: healthCard.registrationNumber || (healthCard as any).verificationToken || 'N/A',
+    issueDate: new Date(healthCard.issuedDate || (healthCard as any).issuedAt || Date.now()).toISOString(),
+    expiryDate: new Date(healthCard.expiryDate || (healthCard as any).expiresAt || Date.now()).toISOString(),
+    status: (healthCard.status === 'active' || healthCard.status === 'expired' || healthCard.status === 'revoked') ? healthCard.status : 'active' as 'active' | 'expired' | 'pending',
+    type: healthCard.jobCategory?.name || 'Health Card',
+    fullName: healthCard.application?.firstName && healthCard.application?.lastName
+      ? `${healthCard.application.firstName} ${healthCard.application.middleName || ''} ${healthCard.application.lastName}`.trim()
+      : userProfile?.fullname || 'User',
+    qrCodeData: `https://emedicard.davao.gov.ph/verify/${healthCard.registrationNumber || (healthCard as any).verificationToken}`,
+  } : undefined;
 
   return (
     <View style={styles.container}>
@@ -113,7 +115,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
         
         {/* Health Card Preview or Application Status */}
         <HealthCardPreview
-          healthCard={mockHealthCard}
+          healthCard={realHealthCard}
           currentApplication={currentApplication}
           userProfile={userProfile}
           isNewUser={isNewUser}
@@ -233,7 +235,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
             {(() => {
               // Health Card Comprehensive Logic (Possession + Validity)
               const hasValidCard = dashboardStats?.validHealthCards > 0;
-              const cardExpiryDate = mockHealthCard?.expiryDate || healthCard?.expiryDate;
+              const cardExpiryDate = realHealthCard?.expiryDate || healthCard?.expiryDate;
               
               if (!hasValidCard || !cardExpiryDate) {
                 // No active card

@@ -207,6 +207,12 @@ export const useOptimizedDashboard = () => {
     return jobCategories.find((cat: any) => cat._id === id) as JobCategory | undefined;
   }, [jobCategories]);
 
+  // Get health card (first valid one)
+  const healthCard = useMemo(() => {
+    const healthCards = effectiveDashboardData?.healthCards;
+    return healthCards && healthCards.length > 0 ? healthCards[0] : null;
+  }, [effectiveDashboardData?.healthCards]);
+
   return {
     // Data (optimized payloads)
     user,
@@ -217,6 +223,7 @@ export const useOptimizedDashboard = () => {
     currentTime,
     unreadNotificationsCount: effectiveDashboardData?.stats?.unreadNotifications || 0,
     jobCategories,
+    healthCard, // Add health card data
     
     // Network status
     isConnected,

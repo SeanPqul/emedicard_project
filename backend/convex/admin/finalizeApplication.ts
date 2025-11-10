@@ -94,7 +94,21 @@ export const finalize = mutation({
     
     await ctx.db.patch(args.applicationId, updateData);
 
-    // 4.5. Send notification to applicant when application is approved
+    // 4.5. Generate health card automatically when approved
+    if (nextApplicationStatus === "Approved") {
+      try {
+        // Schedule health card generation (runs immediately but asynchronously)
+        await ctx.scheduler.runAfter(0, internal.healthCards.generateHealthCard.generateHealthCard, {
+          applicationId: args.applicationId,
+        });
+      } catch (error) {
+        console.error("Error scheduling health card generation:", error);
+        // Don't fail the approval if health card generation scheduling fails
+        // Admin can manually regenerate it later
+      }
+    }
+
+    // 4.6. Send notification to applicant when application is approved
     if (nextApplicationStatus === "Approved") {
       await ctx.db.insert("notifications", {
         userId: applicant._id,

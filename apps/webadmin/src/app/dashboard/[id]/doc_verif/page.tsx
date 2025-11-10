@@ -140,6 +140,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // New state for collapsible applicant details
   const [isPaymentDetailsExpanded, setIsPaymentDetailsExpanded] = useState(false); // New state for collapsible payment details
   const [isOrientationDetailsExpanded, setIsOrientationDetailsExpanded] = useState(false); // New state for collapsible orientation details
+  const [isHealthCardExpanded, setIsHealthCardExpanded] = useState(false); // New state for collapsible health card details
   
   // Pending actions state - stores actions before database save
   const [pendingActions, setPendingActions] = useState<{
@@ -185,6 +186,11 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   
   // Fetch orientation details for Food Handlers (Yellow Card)
   const orientationDetails = useQuery(api.admin.orientation.getOrientationByApplicationId, { 
+    applicationId: params.id 
+  });
+  
+  // Fetch health card details
+  const healthCardDetails = useQuery(api.healthCards.getHealthCard.getByApplication, { 
     applicationId: params.id 
   });
 
@@ -929,6 +935,186 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 </div>
               </div>
             )}
+            
+            {/* Health Card Section - Show for all approved applications */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setIsHealthCardExpanded(!isHealthCardExpanded)}
+                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                aria-expanded={isHealthCardExpanded}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <h2 className="text-base font-bold text-gray-800">Health Card</h2>
+                  {healthCardDetails && (
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      healthCardDetails.status === 'active' 
+                        ? 'bg-green-100 text-green-700'
+                        : healthCardDetails.status === 'expired'
+                        ? 'bg-gray-100 text-gray-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {healthCardDetails.status === 'active' ? '✅ Issued' :
+                       healthCardDetails.status === 'expired' ? '⏰ Expired' :
+                       '🚫 Revoked'}
+                    </span>
+                  )}
+                  {!healthCardDetails && applicationStatus?.applicationStatus === 'Approved' && (
+                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">
+                      🔄 Generating...
+                    </span>
+                  )}
+                </div>
+                <svg
+                  className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                    isHealthCardExpanded ? 'rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Collapsible Content */}
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                  isHealthCardExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="px-6 pb-6 pt-2 border-t border-gray-100">
+                  {healthCardDetails ? (
+                    <div className="space-y-3">
+                      {/* Registration Number */}
+                      <div className="flex items-start gap-3 p-3 bg-teal-50 rounded-lg border border-teal-200">
+                        <svg className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-teal-700 uppercase tracking-wide">Registration Number</label>
+                          <p className="text-sm font-bold text-teal-900 mt-0.5 font-mono">{healthCardDetails.registrationNumber}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Issue Date */}
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Issue Date</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5">
+                            {new Date(healthCardDetails.issuedDate).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric',
+                              timeZone: 'Asia/Manila'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Expiry Date */}
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Expiry Date</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5">
+                            {new Date(healthCardDetails.expiryDate).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric',
+                              timeZone: 'Asia/Manila'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Status */}
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</label>
+                          <p className="text-sm font-medium text-gray-900 mt-0.5 capitalize">{healthCardDetails.status}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Revoked Information */}
+                      {healthCardDetails.status === 'revoked' && healthCardDetails.revokedReason && (
+                        <div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                          <svg className="w-4 h-4 text-red-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-red-700 uppercase tracking-wide">Revocation Reason</label>
+                            <p className="text-sm font-medium text-red-900 mt-0.5">{healthCardDetails.revokedReason}</p>
+                            {healthCardDetails.revokedAt && (
+                              <p className="text-xs text-red-600 mt-1">
+                                Revoked on {new Date(healthCardDetails.revokedAt).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric',
+                                  timeZone: 'Asia/Manila'
+                                })}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* View Health Card Button */}
+                      <div className="pt-3">
+                        <button
+                          onClick={() => {
+                            // Open health card in new tab
+                            const blob = new Blob([healthCardDetails.htmlContent], { type: 'text/html' });
+                            const url = URL.createObjectURL(blob);
+                            window.open(url, '_blank');
+                            // Clean up the URL after a short delay
+                            setTimeout(() => URL.revokeObjectURL(url), 1000);
+                          }}
+                          className="w-full bg-gradient-to-r from-teal-400 to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-teal-500 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          View Health Card
+                        </button>
+                      </div>
+                    </div>
+                  ) : applicationStatus?.applicationStatus === 'Approved' ? (
+                    <div className="text-center py-8">
+                      <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </div>
+                      <p className="text-blue-700 text-sm font-medium mb-2">Generating Health Card...</p>
+                      <p className="text-gray-500 text-xs">The health card is being generated automatically.</p>
+                      <p className="text-gray-500 text-xs mt-1">This should only take a few seconds. Please refresh if it takes longer.</p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-500 text-sm font-medium mb-2">No Health Card Yet</p>
+                      <p className="text-gray-400 text-xs">The health card will be generated automatically when the application is approved.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             
             {/* Actions Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">

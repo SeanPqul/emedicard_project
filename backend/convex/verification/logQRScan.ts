@@ -21,11 +21,11 @@ export const logQRScanMutation = mutation({
   },
   handler: async (ctx, args) => {
     try {
-      // Find health card by verification token
+      // Find health card by registration number (new schema uses registrationNumber instead of verificationToken)
       const healthCard = await ctx.db
         .query("healthCards")
-        .withIndex("by_verification_token", (q) => q.eq("verificationToken", args.verificationToken))
-        .unique();
+        .withIndex("by_registration", (q) => q.eq("registrationNumber", args.verificationToken))
+        .first();
 
       if (!healthCard) {
         throw new Error("Invalid verification token");
@@ -33,7 +33,7 @@ export const logQRScanMutation = mutation({
 
       // Check if card is still valid
       const currentTime = Date.now();
-      if (healthCard.expiresAt < currentTime) {
+      if (healthCard.expiryDate < currentTime) {
         throw new Error("Health card has expired");
       }
 

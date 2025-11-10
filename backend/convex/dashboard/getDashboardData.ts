@@ -104,7 +104,7 @@ export const getDashboardDataQuery = query({
       .reduce((sum, payment) => sum + (payment?.netAmount || 0), 0);
 
     const validHealthCards = healthCards.filter(card =>
-      card.expiresAt > Date.now()
+      card.expiryDate > Date.now()
     ).length;
 
     const unreadNotifications = notifications.filter(n => !n.isRead).length;
@@ -161,16 +161,38 @@ export const getDashboardDataQuery = query({
         };
       }).filter(Boolean),
 
-      // Valid health cards
-      healthCards: healthCards
-        .filter(card => card.expiresAt > Date.now())
-        .map(card => ({
-          _id: card._id,
-          applicationId: card.applicationId,
-          issuedAt: card.issuedAt,
-          expiresAt: card.expiresAt,
-          verificationToken: card.verificationToken,
-        })),
+      // Valid health cards with full details
+      healthCards: await Promise.all(
+        healthCards
+          .filter(card => card.expiryDate > Date.now())
+          .map(async (card) => {
+            const application = applications.find(app => app._id === card.applicationId);
+            const jobCategory = application ? await ctx.db.get(application.jobCategoryId) : null;
+            
+            return {
+              _id: card._id,
+              applicationId: card.applicationId,
+              registrationNumber: card.registrationNumber,
+              issuedDate: card.issuedDate,
+              expiryDate: card.expiryDate,
+              status: card.status,
+              createdAt: card.createdAt,
+              application: application ? {
+                _id: application._id,
+                firstName: application.firstName,
+                middleName: application.middleName,
+                lastName: application.lastName,
+                position: application.position,
+                organization: application.organization,
+              } : null,
+              jobCategory: jobCategory ? {
+                _id: jobCategory._id,
+                name: jobCategory.name,
+                colorCode: jobCategory.colorCode,
+              } : null,
+            };
+          })
+      ),
     };
     } catch (error) {
       console.error("Error in getDashboardDataQuery:", error);
