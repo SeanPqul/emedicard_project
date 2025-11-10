@@ -21,6 +21,7 @@ export function SessionCard({ session }: SessionCardProps) {
         date: session.date.toString(),
         scheduledTime: session.scheduledTime,
         venue: session.venue,
+        returnTo: 'sessions', // Indicate we came from sessions list
       },
     });
   };
@@ -79,7 +80,7 @@ export function SessionCard({ session }: SessionCardProps) {
           </View>
           <View style={styles.statusItem}>
             <View style={[styles.statusDot, { backgroundColor: theme.colors.semantic.warning }]} />
-            <Text style={styles.statusText}>{session.stats.checkedIn} ongoing</Text>
+            <Text style={styles.statusText}>{session.stats.checkedIn - session.stats.completed} ongoing</Text>
           </View>
           <View style={styles.statusItem}>
             <View style={[styles.statusDot, { backgroundColor: theme.colors.text.tertiary }]} />

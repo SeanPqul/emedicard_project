@@ -51,6 +51,7 @@ export const validate = mutation({
     const requiresOrientation = jobCategory?.requireOrientation === true || jobCategory?.requireOrientation === "true";
 
     // 3. Update the overall application status to move it to the next step
+    // After payment validation, move to orientation (if required) or document verification
     let nextApplicationStatus: "For Orientation" | "For Document Verification" | "Rejected";
     if (args.newStatus === "Complete") {
       // If payment is complete, check if orientation is required

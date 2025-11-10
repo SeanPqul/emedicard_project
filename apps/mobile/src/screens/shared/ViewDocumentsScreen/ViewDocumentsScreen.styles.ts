@@ -530,5 +530,36 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
   },
+  
+  // Manual Review Summary (Simplified)
+  manualReviewSummary: {
+    backgroundColor: '#FEE2E2',
+    borderRadius: moderateScale(10),
+    borderWidth: 1,
+    borderColor: '#DC2626' + '30',
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  manualReviewSummaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(12),
+    gap: scale(12),
+  },
+  manualReviewSummaryTextContainer: {
+    flex: 1,
+  },
+  manualReviewSummaryTitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '600' as const,
+    color: '#DC2626',
+    marginBottom: verticalScale(2),
+  },
+  manualReviewSummaryText: {
+    fontSize: moderateScale(12),
+    color: '#7F1D1D',
+    lineHeight: moderateScale(16),
+  },
 });
 

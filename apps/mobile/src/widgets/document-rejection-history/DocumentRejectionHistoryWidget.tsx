@@ -165,16 +165,22 @@ export function DocumentRejectionHistoryWidget({
           dateKeys.map((dateKey) => (
             <View key={dateKey} style={styles.dateSection}>
               <Text style={styles.dateHeader}>{dateKey}</Text>
-              {groupedRejections[dateKey]?.map((rejection) => (
-                <View key={rejection._id} style={styles.rejectionItemContainer}>
-                  <DocumentRejectionWidget
-                    rejection={rejection}
-                    documentName={rejection.documentTypeName || 'Unknown Document'}
-                    onResubmit={() => onResubmit(rejection)}
-                    onViewDetails={() => onViewDetails(rejection)}
-                  />
-                </View>
-              ))}
+              {groupedRejections[dateKey]?.map((rejection) => {
+                // Check if manual review is required (attempt 4+)
+                const isManualReviewRequired = rejection.attemptNumber >= 4;
+                
+                return (
+                  <View key={rejection._id} style={styles.rejectionItemContainer}>
+                    <DocumentRejectionWidget
+                      rejection={rejection}
+                      documentName={rejection.documentTypeName || 'Unknown Document'}
+                      onResubmit={() => onResubmit(rejection)}
+                      onViewDetails={() => onViewDetails(rejection)}
+                      isManualReviewRequired={isManualReviewRequired}
+                    />
+                  </View>
+                );
+              })}
             </View>
           ))
         )}

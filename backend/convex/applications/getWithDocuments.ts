@@ -46,7 +46,35 @@ export const get = query({
 
         // Check if this document was previously rejected and resubmitted
         let isResubmission = false;
+        let attemptNumber = 0;
+        let maxAttemptsReached = false;
+        let remainingAttempts = 3;
+        
         if (userUpload) {
+          // Count all rejections for this document type
+          const allRejections = await ctx.db
+            .query("documentRejectionHistory")
+            .withIndex("by_document_type", (q) => 
+              q.eq("applicationId", application._id)
+               .eq("documentTypeId", req.documentTypeId)
+            )
+            .collect();
+          
+          // Count all referrals for this document type
+          const allReferrals = await ctx.db
+            .query("documentReferralHistory")
+            .withIndex("by_document_type", (q) => 
+              q.eq("applicationId", application._id)
+               .eq("documentTypeId", req.documentTypeId)
+            )
+            .collect();
+          
+          // Total attempt number is sum of both rejection and referral counts
+          attemptNumber = allRejections.length + allReferrals.length;
+          maxAttemptsReached = attemptNumber >= 4; // Block at 4th attempt
+          remainingAttempts = Math.max(0, 3 - attemptNumber);
+          
+          // Check if this is a resubmission
           const rejectionHistory = await ctx.db
             .query("documentRejectionHistory")
             .withIndex("by_document_type", (q) => 
@@ -74,6 +102,10 @@ export const get = query({
           remarks: userUpload?.adminRemarks,
           extractedText: userUpload?.extractedText, // Include extractedText
           isResubmission: isResubmission, // Track if this is a resubmission
+          // --- Attempt tracking fields ---
+          attemptNumber: attemptNumber, // Current attempt count (0-4+)
+          maxAttemptsReached: maxAttemptsReached, // True if >= 4 attempts
+          remainingAttempts: remainingAttempts, // Remaining attempts (0-3)
         };
       })
     );

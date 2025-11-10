@@ -264,23 +264,23 @@ export const checkOut = mutation({
       updatedAt: checkOutTime,
     });
 
-    // Update application status to "Attendance Validation" after check-out
+    // Update application status to "For Document Verification" after check-out
     const application = await ctx.db.get(args.applicationId);
     if (application) {
-      // After inspector completes check-in + check-out, set status to "Attendance Validation"
-      // The Yellow Card Admin will then finalize attendance validation
+      // Inspector's validation is authoritative
+      // Check-in + Check-out = Orientation complete → Move to document verification
       await ctx.db.patch(args.applicationId, {
-        applicationStatus: "Attendance Validation",
+        applicationStatus: "For Document Verification",
         orientationCompleted: true,
         updatedAt: Date.now(),
       });
 
-      // Notify user that orientation is completed and awaiting validation
+      // Notify user that orientation is completed
       await ctx.db.insert("notifications", {
         userId: application.userId,
         applicationId: args.applicationId,
         title: "Orientation Completed!",
-        message: "You have successfully completed your food safety orientation. Your attendance is now being validated by the admin.",
+        message: "You have successfully completed your food safety orientation. Please proceed to upload your required documents for verification.",
         notificationType: "Orientation",
         isRead: false,
       });
@@ -749,9 +749,10 @@ export const finalizeSessionAttendance = mutation({
         booking.checkOutTime &&
         booking.status === "completed"
       ) {
-        // Update application status to "Approved" (Yellow Card completed all requirements)
+        // Update application status to "For Document Verification"
+        // Orientation is done, now admin needs to verify documents
         await ctx.db.patch(booking.applicationId, {
-          applicationStatus: "Approved",
+          applicationStatus: "For Document Verification",
           orientationCompleted: true,
           updatedAt: Date.now(),
           lastUpdatedBy: adminUser._id,

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
-import { isSameDay, isBefore } from 'date-fns';
+import { isSameDay } from 'date-fns';
 import { theme } from '@shared/styles/theme';
 import { scale, verticalScale, moderateScale } from '@shared/utils/responsive';
 import { SessionWithStats } from '../../lib/types';
@@ -63,8 +63,11 @@ function getTimeContext(
   const nowPHT = toZonedTime(now, PHT_TZ);
   const startPHT = toZonedTime(startTs, PHT_TZ);
 
-  // Trust backend isActive flag for LIVE status
-  if (session.isActive) {
+  // Check if session is currently running (by time, not just flag)
+  const isRunningByTime = now >= startTs && now < endTs;
+  
+  // Trust backend isActive flag for LIVE status OR if time is within session bounds
+  if (session.isActive || isRunningByTime) {
     const minsLeft = Math.max(0, Math.ceil((endTs - now) / 60000));
     if (minsLeft < 15) return `⚠️ Ending in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}`;
     if (minsLeft < 60) return `Ends in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}`;
@@ -73,12 +76,14 @@ function getTimeContext(
     return `Ends in ${hoursLeft}h ${remainingMins}m`;
   }
 
-  // For upcoming sessions
-  if (isBefore(nowPHT, startPHT)) {
+  // For upcoming sessions (before start time)
+  if (now < startTs) {
     const minsUntil = Math.max(0, Math.ceil((startTs - now) / 60000));
     const todayInPHT = isSameDay(nowPHT, startPHT);
 
     if (todayInPHT) {
+      // Show immediate transition when very close to start
+      if (minsUntil === 0) return 'Starting now...';
       if (minsUntil < 60) return `Starts in ${minsUntil} minute${minsUntil !== 1 ? 's' : ''}`;
       const hoursUntil = Math.floor(minsUntil / 60);
       const remainingMins = minsUntil % 60;
@@ -88,19 +93,25 @@ function getTimeContext(
     return `Starts ${formatInTimeZone(startTs, PHT_TZ, "EEE, MMM d 'at' h:mm a")}`;
   }
 
-  return 'Session ended';
+  // Only show "Session ended" if we're actually past the end time
+  if (now >= endTs) {
+    return 'Session ended';
+  }
+  
+  // Fallback (should rarely happen)
+  return '';
 }
 
 export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardProps) {
   const router = useRouter();
   const [, forceUpdate] = React.useReducer(x => x + 1, 0);
 
-  // Update timer every second for live countdown
+  // Update timer every second for live countdown (both upcoming and active sessions)
   React.useEffect(() => {
-    if (session && !session.isActive) {
+    if (session) {
       const timer = setInterval(() => {
         forceUpdate();
-      }, 1000); // Update every second for smooth countdown
+      }, 1000); // Update every second for smooth countdown and instant status changes
 
       return () => clearInterval(timer);
     }
@@ -141,6 +152,7 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
         date: session.date.toString(),
         scheduledTime: session.scheduledTime,
         venue: session.venue,
+        returnTo: 'dashboard', // Indicate we came from dashboard
       },
     });
   };

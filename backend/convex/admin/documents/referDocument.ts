@@ -247,12 +247,20 @@ export const referDocument = mutation({
       }
 
 
-      // 7. Update document status with new terminology
-      const newReviewStatus = args.issueType === "medical_referral"
-        ? "Referred"           // Medical finding
-        : "NeedsRevision";     // Document issue
+      // 7. Check if max attempts reached BEFORE updating status
+      const maxAttemptsReached = hasReachedMaxAttempts(attemptNumber, 'document');
+      const maxAttempts = REJECTION_LIMITS.DOCUMENTS.MAX_ATTEMPTS;
+      
+      // 8. Update document status with new terminology
+      const newReviewStatus = maxAttemptsReached
+        ? "ManualReviewRequired"  // Max attempts - needs in-person verification
+        : args.issueType === "medical_referral"
+        ? "Referred"              // Medical finding
+        : "NeedsRevision";        // Document issue
 
-      const adminRemarksText = args.issueType === "medical_referral"
+      const adminRemarksText = maxAttemptsReached
+        ? `Maximum attempts (${maxAttempts}) reached. Please visit our office with your original documents for in-person verification.`
+        : args.issueType === "medical_referral"
         ? `Medical Finding Detected - Please see ${args.doctorName} at ${args.clinicAddress || 'the designated clinic'}`
         : args.referralReason;
 
@@ -263,8 +271,10 @@ export const referDocument = mutation({
         reviewedAt: Date.now(),
       });
 
-      // 8. Update application status with new terminology
-      const newApplicationStatus = args.issueType === "medical_referral"
+      // 9. Update application status with new terminology
+      const newApplicationStatus = maxAttemptsReached
+        ? "Manual Review Required"
+        : args.issueType === "medical_referral"
         ? "Referred for Medical Management"
         : "Documents Need Revision";
 
@@ -273,7 +283,7 @@ export const referDocument = mutation({
         updatedAt: Date.now(),
       });
 
-      // 9. Send admin notification with new terminology
+      // 10. Send admin notification with new terminology
       const allAdmins = await ctx.db
         .query("users")
         .withIndex("by_role", (q) => q.eq("role", "admin"))
@@ -333,10 +343,7 @@ export const referDocument = mutation({
         timestamp: Date.now(),
       });
 
-      // 12. Check if max attempts reached
-      const maxAttemptsReached = hasReachedMaxAttempts(attemptNumber, 'document');
-      const maxAttempts = REJECTION_LIMITS.DOCUMENTS.MAX_ATTEMPTS;
-
+      // 12. Send notifications if max attempts reached
       if (maxAttemptsReached) {
         // Max attempts reached - MANUAL REVIEW REQUIRED (Hybrid Approach)
         const specificIssuesText = args.specificIssues.length > 0
@@ -349,12 +356,6 @@ export const referDocument = mutation({
           : `You have reached the maximum number of resubmission attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Issue: ${args.referralReason}${specificIssuesText}\n\n📍 Please visit our office for in-person verification:\n\n📋 Bring: Original ${documentType.name}\n\n💡 Our staff will verify your documents in person and may approve your application on the spot if everything is in order.\n\n📌 For venue location and office hours, please check the Help Center in the app.\n\nFor questions, contact City Health Office at 0926-686-1531.`;
 
         const now = Date.now();
-
-        await ctx.db.patch(application._id, {
-          applicationStatus: "Manual Review Required",
-          adminRemarks: `Maximum attempts (${maxAttempts}) reached for ${documentType.name}. Applicant must visit venue for in-person verification.`,
-          updatedAt: now,
-        });
 
         const jobCategory = await ctx.db.get(application.jobCategoryId);
 

@@ -52,19 +52,61 @@ export const finalize = mutation({
     const applicant = await ctx.db.get(application.userId);
     if (!applicant) throw new Error("Applicant not found.");
 
-    // 3. THIS IS THE FIX: Determine the next status in the workflow.
+    // 2.5. CRITICAL: Check orientation requirement for Food Handlers
+    // Note: Document verification can happen in parallel with orientation
+    // Admin can review documents while applicant attends/books orientation
+    // BUT final approval requires BOTH documents approved AND orientation completed
+    if (args.newStatus === "Approved") {
+      const jobCategory = await ctx.db.get(application.jobCategoryId);
+      const requiresOrientation = 
+        jobCategory?.requireOrientation === true || 
+        jobCategory?.requireOrientation === "true" ||
+        jobCategory?.requireOrientation === "Yes";
+      
+      if (requiresOrientation && !application.orientationCompleted) {
+        throw new Error(
+          "Cannot approve Food Handler application. Applicant must complete mandatory Food Safety Orientation first. " +
+          "Current orientation status: " + (application.orientationCompleted ? "Completed" : "Not completed") + ". " +
+          "Please ensure the applicant has checked-in and checked-out from their scheduled orientation session before final approval. " +
+          "You may continue reviewing documents while the applicant attends orientation."
+        );
+      }
+    }
+
+    // 3. Determine the next status in the workflow.
+    // When documents are approved, the application is complete (not moving to payment validation)
+    // Payment validation should have already happened BEFORE document verification
     const nextApplicationStatus = args.newStatus === "Approved" 
-      ? "Payment Validation" // If approved, move to payment validation.
-      : "Rejected";           // If rejected, the process stops here.
+      ? "Approved"  // Documents approved = application complete and ready for health card
+      : "Rejected";  // If rejected, the process stops here.
 
     // 4. Update the application's overall status.
-    await ctx.db.patch(args.applicationId, {
+    const updateData: any = {
       applicationStatus: nextApplicationStatus,
       updatedAt: Date.now(),
-      // We only set `approvedAt` at the very end of the whole process.
-    });
+      lastUpdatedBy: adminUser._id,
+    };
+    
+    // Set approvedAt timestamp when application is approved
+    if (nextApplicationStatus === "Approved") {
+      updateData.approvedAt = Date.now();
+    }
+    
+    await ctx.db.patch(args.applicationId, updateData);
 
-    // 4.5. If sending referral/issue notifications, schedule batch notification
+    // 4.5. Send notification to applicant when application is approved
+    if (nextApplicationStatus === "Approved") {
+      await ctx.db.insert("notifications", {
+        userId: applicant._id,
+        applicationId: args.applicationId,
+        title: "Application Approved!",
+        message: `Congratulations! Your ${(await ctx.db.get(application.jobCategoryId))?.name || 'health card'} application has been approved. Your documents have been verified and your application is now complete.`,
+        notificationType: "ApplicationApproved",
+        isRead: false,
+      });
+    }
+
+    // 4.6. If sending referral/issue notifications, schedule batch notification
     if (args.newStatus === "Rejected") {
       // Schedule notifications for all pending referrals/issues
       // This will send proper medical terminology messages

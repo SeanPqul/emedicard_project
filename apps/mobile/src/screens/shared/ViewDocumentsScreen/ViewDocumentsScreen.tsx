@@ -416,25 +416,30 @@ export function ViewDocumentsScreen() {
                   </TouchableOpacity>
                 )}
 
-                {/* Manual Review Required - Direct to venue */}
+                {/* Manual Review Required - Summary with link to history */}
                 {doc.reviewStatus === 'ManualReviewRequired' && (
-                  <View style={[styles.documentHeader, styles.documentSubItem, { backgroundColor: '#FEE2E2' }]}>
-                    <View style={styles.documentIconContainer}>
+                  <TouchableOpacity 
+                    style={styles.manualReviewSummary}
+                    onPress={() => router.push(`/(screens)/(shared)/documents/rejection-history?formId=${formId}`)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.manualReviewSummaryHeader}>
                       <Ionicons 
-                        name="home-outline" 
+                        name="warning" 
                         size={moderateScale(20)} 
                         color="#DC2626" 
                       />
+                      <View style={styles.manualReviewSummaryTextContainer}>
+                        <Text style={styles.manualReviewSummaryTitle}>
+                          Visit Office for Verification
+                        </Text>
+                        <Text style={styles.manualReviewSummaryText}>
+                          Max attempts reached. Tap for venue details and contact info.
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={moderateScale(20)} color="#DC2626" />
                     </View>
-                    <View style={styles.documentInfo}>
-                      <Text style={[styles.documentSubItemText, { color: '#DC2626' }]}>
-                        Visit Office for Verification
-                      </Text>
-                      <Text style={styles.rejectionReason}>
-                        Max attempts reached. Please visit our office with your original documents. Check Help Center for venue location.
-                      </Text>
-                    </View>
-                  </View>
+                  </TouchableOpacity>
                 )}
               </View>
             ))

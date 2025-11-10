@@ -8,11 +8,7 @@ import {
   SessionWithStats,
 } from '../lib/types';
 import {
-  getStartOfDay,
   calculateSessionStats,
-  enrichSessionData,
-  isTimeSlotActive,
-  getSessionBounds,
 } from '../lib/utils';
 import { calculateSessionStatus } from '@backend/convex/lib/sessionStatus';
 
@@ -43,7 +39,7 @@ export function useInspectorDashboard() {
     isSignedIn && serverDate !== undefined ? { selectedDate: serverDate } : "skip"
   );
 
-  // State to force recalculation of status every 10 seconds
+  // State to force recalculation of status frequently for real-time updates
   const [tick, setTick] = useState(0);
   
   // Track when server time was fetched to calculate accurate offset
@@ -56,11 +52,12 @@ export function useInspectorDashboard() {
     }
   }, [serverTime, serverTimeRef]);
 
-  // Auto-refresh timer: recalculate status every 10 seconds for real-time updates
+  // Auto-refresh timer: recalculate status every 1 second for immediate session transitions
+  // This ensures sessions become active/inactive instantly when time boundaries are crossed
   useEffect(() => {
     const interval = setInterval(() => {
       setTick((prev) => prev + 1);
-    }, 10000); // Update every 10 seconds
+    }, 1000); // Update every 1 second for real-time accuracy
 
     return () => clearInterval(interval);
   }, []);

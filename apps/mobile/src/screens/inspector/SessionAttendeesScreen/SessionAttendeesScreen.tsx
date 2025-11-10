@@ -25,6 +25,7 @@ export function SessionAttendeesScreen() {
     date: string;
     scheduledTime: string;
     venue: string;
+    returnTo?: string;
   }>();
 
   const orientationDate = Number(params.date);
@@ -71,7 +72,7 @@ export function SessionAttendeesScreen() {
       <View style={styles.statsContainer}>
         <View style={styles.statRow}>
           <Text style={styles.statText}>
-            <Text style={styles.statValue}>{stats.checkedIn + stats.completed}</Text>
+            <Text style={styles.statValue}>{stats.totalCheckedIn}</Text>
             {' of '}
             <Text style={styles.statValue}>{stats.total}</Text>
             {' attendees checked in'}
@@ -141,7 +142,14 @@ export function SessionAttendeesScreen() {
         <View style={styles.headerRow}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => {
+              // Navigate to specific screen based on where we came from
+              if (params.returnTo === 'sessions') {
+                router.push('/(inspector-tabs)/sessions');
+              } else {
+                router.push('/(inspector-tabs)/dashboard');
+              }
+            }}
             activeOpacity={0.7}
           >
             <Ionicons

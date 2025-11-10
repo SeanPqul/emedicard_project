@@ -17,6 +17,7 @@ interface DocumentRejectionWidgetProps {
   containerStyle?: any;
   showActions?: boolean;
   isLoading?: boolean;
+  isManualReviewRequired?: boolean; // New: flag for max attempts reached
 }
 
 export function DocumentRejectionWidget({
@@ -27,16 +28,17 @@ export function DocumentRejectionWidget({
   containerStyle,
   showActions = true,
   isLoading = false,
+  isManualReviewRequired = false,
 }: DocumentRejectionWidgetProps) {
   
   // Phase 4 Migration: Check if this is a new referral type
   const isReferralType = 'issueType' in rejection;
   const isMedicalReferral = isReferralType && (rejection as EnrichedReferral).issueType === IssueType.MEDICAL_REFERRAL;
   
-  // Dynamic colors based on type
-  const primaryColor = isMedicalReferral ? '#3B82F6' : isReferralType ? '#F59E0B' : '#EF4444';
-  const iconName = isMedicalReferral ? 'medkit' : isReferralType ? 'document-text' : 'close-circle';
-  const headerTitle = isMedicalReferral ? 'Medical Referral' : isReferralType ? 'Document Needs Revision' : 'Document Rejected';
+  // Dynamic colors based on type (Manual Review = Red)
+  const primaryColor = isManualReviewRequired ? '#DC2626' : isMedicalReferral ? '#3B82F6' : isReferralType ? '#F59E0B' : '#EF4444';
+  const iconName = isManualReviewRequired ? 'home' : isMedicalReferral ? 'medkit' : isReferralType ? 'document-text' : 'close-circle';
+  const headerTitle = isManualReviewRequired ? 'Manual Review Required' : isMedicalReferral ? 'Medical Referral' : isReferralType ? 'Document Needs Revision' : 'Document Rejected';
   
   if (isLoading) {
     return (
@@ -177,8 +179,47 @@ export function DocumentRejectionWidget({
         </View>
       )}
 
-      {/* Action Buttons - Medical referrals don't show Resubmit */}
-      {showActions && !rejection.wasReplaced && !isMedicalReferral && (
+      {/* Manual Review Required - Show venue information */}
+      {isManualReviewRequired && (
+        <View style={styles.manualReviewSection}>
+          <View style={styles.manualReviewHeader}>
+            <Ionicons name="warning" size={moderateScale(24)} color="#DC2626" />
+            <Text style={styles.manualReviewTitle}>Visit Office for Verification</Text>
+          </View>
+          <Text style={styles.manualReviewText}>
+            Maximum attempts reached ({rejection.attemptNumber} attempts). Please visit our office with your original documents for in-person verification.
+          </Text>
+          
+          <View style={styles.venueInfo}>
+            <View style={styles.venueItem}>
+              <Ionicons name="location" size={moderateScale(18)} color="#DC2626" />
+              <View style={styles.venueTextContainer}>
+                <Text style={styles.venueLabel}>Venue:</Text>
+                <Text style={styles.venueText}>City Health Office, Magsaysay Park Complex, Door 7</Text>
+              </View>
+            </View>
+            
+            <View style={styles.venueItem}>
+              <Ionicons name="time" size={moderateScale(18)} color="#DC2626" />
+              <View style={styles.venueTextContainer}>
+                <Text style={styles.venueLabel}>Hours:</Text>
+                <Text style={styles.venueText}>Monday-Friday, 8:00 AM–5:00 PM</Text>
+              </View>
+            </View>
+            
+            <View style={styles.venueItem}>
+              <Ionicons name="call" size={moderateScale(18)} color="#DC2626" />
+              <View style={styles.venueTextContainer}>
+                <Text style={styles.venueLabel}>Contact:</Text>
+                <Text style={styles.venueText}>0926-686-1531</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Action Buttons - Medical referrals and manual review don't show Resubmit */}
+      {showActions && !rejection.wasReplaced && !isMedicalReferral && !isManualReviewRequired && (
         <TouchableOpacity 
           style={[styles.actionButton, styles.primaryButton]}
           onPress={onResubmit}

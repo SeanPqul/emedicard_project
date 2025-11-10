@@ -67,10 +67,20 @@ export function InspectorScannerScreen() {
   }, [refetch]);
 
   // Auto-update when session status changes (upcoming -> active)
+  // This effect runs every time dashboardData updates (now every 1 second from the hook)
   useEffect(() => {
     if (!dashboardData?.allSessions) return;
 
     const activeSession = dashboardData.allSessions.find(s => s.isActive);
+    const upcomingSessions = dashboardData.allSessions.filter(s => s.isFuture);
+    
+    console.log('[InspectorScanner] Session status check:', {
+      totalSessions: dashboardData.allSessions.length,
+      activeSessions: activeSession ? 1 : 0,
+      upcomingSessions: upcomingSessions.length,
+      activeSessionTime: activeSession?.scheduledTime,
+      currentTime: new Date().toLocaleTimeString('en-US', { hour12: true })
+    });
 
     // Use functional setState to avoid stale closure issues
     setSelectedSession(prevSelected => {
@@ -78,7 +88,11 @@ export function InspectorScannerScreen() {
       if (activeSession) {
         // Update if different session or session data changed
         if (!prevSelected || prevSelected._id !== activeSession._id) {
-          console.log('[InspectorScanner] Auto-selecting active session:', activeSession.scheduledTime);
+          console.log('[InspectorScanner] ✅ Auto-selecting ACTIVE session:', activeSession.scheduledTime);
+          // Show toast notification when session becomes active
+          if (prevSelected && prevSelected._id !== activeSession._id) {
+            showToast(`Session ${activeSession.scheduledTime} is now LIVE!`, 'success', 3000);
+          }
           return activeSession;
         }
         // Update existing active session with fresh data (stats, venue, etc.)
@@ -92,16 +106,22 @@ export function InspectorScannerScreen() {
         );
 
         if (updatedSession) {
+          // Check if session just ended
+          if (prevSelected.isActive && !updatedSession.isActive) {
+            console.log('[InspectorScanner] ⚠️ Selected session has ended:', updatedSession.scheduledTime);
+            showToast(`Session ${updatedSession.scheduledTime} has ended`, 'info', 3000);
+          }
           return updatedSession;
         }
         // Selected session no longer exists
+        console.log('[InspectorScanner] ⚠️ Selected session no longer exists');
         return null;
       }
 
       // Priority 3: No active session and no selection - remain null
       return prevSelected;
     });
-  }, [dashboardData, refreshTrigger]);
+  }, [dashboardData, refreshTrigger, showToast]);
 
   // Categorize sessions by status
   const categorizedSessions = useMemo(() => {

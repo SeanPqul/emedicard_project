@@ -67,22 +67,32 @@ export function useSessionAttendees(
         total: 0,
         completed: 0,
         checkedIn: 0,
+        totalCheckedIn: 0, // Total who checked in (including completed)
         pending: 0,
         missed: 0,
       };
     }
 
-    return enrichedAttendees.reduce(
+    const result = enrichedAttendees.reduce(
       (acc, attendee) => {
         acc.total++;
-        if (attendee.status === 'completed') acc.completed++;
-        else if (attendee.status === 'checked-in') acc.checkedIn++;
-        else if (attendee.status === 'pending') acc.pending++;
-        else if (attendee.status === 'missed') acc.missed++;
+        if (attendee.status === 'completed') {
+          acc.completed++;
+          acc.totalCheckedIn++; // Completed attendees also checked in
+        } else if (attendee.status === 'checked-in') {
+          acc.checkedIn++;
+          acc.totalCheckedIn++; // Currently checked in (not yet checked out)
+        } else if (attendee.status === 'pending') {
+          acc.pending++;
+        } else if (attendee.status === 'missed') {
+          acc.missed++;
+        }
         return acc;
       },
-      { total: 0, completed: 0, checkedIn: 0, pending: 0, missed: 0 }
+      { total: 0, completed: 0, checkedIn: 0, totalCheckedIn: 0, pending: 0, missed: 0 }
     );
+    
+    return result;
   }, [enrichedAttendees]);
 
   // Manual refresh handler

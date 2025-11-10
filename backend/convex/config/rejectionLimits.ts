@@ -52,7 +52,7 @@ export const hasReachedMaxAttempts = (
     ? REJECTION_LIMITS.DOCUMENTS.MAX_ATTEMPTS 
     : REJECTION_LIMITS.PAYMENTS.MAX_ATTEMPTS;
   
-  return attemptNumber >= maxAttempts;
+  return attemptNumber > maxAttempts;
 };
 
 // Helper function to get warning message

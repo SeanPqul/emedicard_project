@@ -76,7 +76,7 @@ export default function AttendanceTrackerPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(getTodayPHTMidnight());
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<{ [key: string]: string }>({});
-  const [finalizingSession, setFinalizingSession] = useState<string | null>(null);
+  // Finalization now handled by inspector QR code check-out, no longer needed here
   const [editingAttendee, setEditingAttendee] = useState<{
     bookingId: Id<'orientationBookings'>;  // UPDATED: Use orientationBookings table
     scheduleId: string;
@@ -114,9 +114,7 @@ export default function AttendanceTrackerPage() {
   }, [schedules, selectedDate, selectedTimestamp]);
 
   // Mutations
-  const finalizeAttendance = useMutation(
-    api.orientations.attendance.finalizeSessionAttendance
-  );
+  // Note: finalizeAttendance removed - inspectors handle via QR check-in/out
   const manuallyUpdateStatus = useMutation(
     api.orientations.attendance.manuallyUpdateAttendanceStatus
   );
@@ -153,31 +151,7 @@ export default function AttendanceTrackerPage() {
     setSearchQuery(prev => ({ ...prev, [scheduleId]: query }));
   };
 
-  const handleFinalizeSession = async (schedule: OrientationSchedule) => {
-    try {
-      setFinalizingSession(schedule.scheduleId);
-      const result = await finalizeAttendance({
-        scheduleId: schedule.scheduleId,
-        selectedDate: schedule.date,
-        timeSlot: schedule.time,
-        venue: schedule.venue.name,
-      });
-
-      if (result.success) {
-        setSuccessModal({
-          show: true,
-          completedCount: result.completedCount,
-          missedCount: result.missedCount,
-          excusedCount: result.excusedCount || 0,
-        });
-      }
-    } catch (error) {
-      console.error('Error finalizing session:', error);
-      alert('❌ Failed to finalize session. Please try again.');
-    } finally {
-      setFinalizingSession(null);
-    }
-  };
+  // Finalize session functionality removed - handled by inspector QR code system
 
   const handleManualStatusUpdate = async () => {
     if (!editingAttendee) return;
@@ -333,7 +307,7 @@ export default function AttendanceTrackerPage() {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Attendance Tracker</h1>
               <p className="mt-1 text-xs sm:text-sm text-gray-600">
-                Track and finalize orientation attendance for food safety sessions
+                Track orientation attendance for food safety sessions
               </p>
             </div>
           </div>
@@ -617,30 +591,17 @@ export default function AttendanceTrackerPage() {
                   )}
                 </div>
 
-                {/* Finalize Button */}
+                {/* Inspector Note - Finalization handled by QR code check-in/out */}
                 {schedule.attendees.length > 0 && (
-                  <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-600">
-                        Finalize this session to validate attendance and update applicant statuses.
+                  <div className="bg-blue-50 px-6 py-4 border-t border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-sm text-blue-700">
+                        <span className="font-semibold">Note:</span> Attendance is automatically validated when inspectors check out attendees via QR code scanning.
+                        Sessions are finalized when all attendees have been checked out.
                       </p>
-                      <button
-                        onClick={() => handleFinalizeSession(schedule)}
-                        disabled={finalizingSession === schedule.scheduleId}
-                        className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
-                      >
-                        {finalizingSession === schedule.scheduleId ? (
-                          <span className="flex items-center gap-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            Finalizing...
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4" />
-                            Finalize Session
-                          </span>
-                        )}
-                      </button>
                     </div>
                   </div>
                 )}

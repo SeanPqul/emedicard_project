@@ -57,6 +57,10 @@ export const getSchedulesForDate = query({
               applicationStatus: application.applicationStatus,
               bookingStatus: booking.status,  // UPDATED: Use bookingStatus
               scheduledDate: booking.scheduledDate,
+              // Attendance tracking - CRITICAL for stats calculation
+              checkInTime: booking.checkInTime,
+              checkOutTime: booking.checkOutTime,
+              orientationStatus: booking.status, // For compatibility with frontend stats
             };
           })
         );

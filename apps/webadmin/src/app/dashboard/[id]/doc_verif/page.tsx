@@ -26,6 +26,10 @@ type ChecklistItem = {
   extractedText: string | null | undefined;
   isResubmission?: boolean; // Track if this document was resubmitted
   fieldIdentifier?: string; // Field identifier from documentTypes (e.g., 'chestXrayId', 'validId')
+  // Attempt tracking fields
+  attemptNumber?: number; // Current attempt count (0-4+)
+  maxAttemptsReached?: boolean; // True if >= 4 attempts
+  remainingAttempts?: number; // Remaining attempts (0-3)
 };
 
 type ApplicantDetails = {
@@ -135,6 +139,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [isReferralConfirmModalOpen, setIsReferralConfirmModalOpen] = useState(false); // Confirmation modal for sending referrals
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // New state for collapsible applicant details
   const [isPaymentDetailsExpanded, setIsPaymentDetailsExpanded] = useState(false); // New state for collapsible payment details
+  const [isOrientationDetailsExpanded, setIsOrientationDetailsExpanded] = useState(false); // New state for collapsible orientation details
   
   // Pending actions state - stores actions before database save
   const [pendingActions, setPendingActions] = useState<{
@@ -174,8 +179,14 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const referDocumentMutation = useMutation(api.admin.documents.referDocument.referDocument); // Actually refers documents
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
   
-  // Fetch payment data
+  // Fetch payment data and application status
   const paymentData = useQuery(api.payments.getForApplication.get, { applicationId: params.id });
+  const applicationStatus = useQuery(api.applications.getApplicationById.getApplicationByIdQuery, { applicationId: params.id });
+  
+  // Fetch orientation details for Food Handlers (Yellow Card)
+  const orientationDetails = useQuery(api.admin.orientation.getOrientationByApplicationId, { 
+    applicationId: params.id 
+  });
 
   const loadData = async () => {
     try {
@@ -254,40 +265,52 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
         throw new Error(`Cannot approve application. ${totalPendingDocs} document(s) require applicant action. Please use 'Send Applicant Notifications' button instead.`);
       }
       
+      // Check if orientation is required and completed for Food Handlers (Yellow Card)
+      const jobCategoryName = data?.jobCategoryName?.toLowerCase();
+      const requiresOrientation = jobCategoryName?.includes('yellow card') || jobCategoryName?.includes('food');
+      
+      if (newStatus === 'Approved' && requiresOrientation) {
+        if (!orientationDetails) {
+          throw new Error("This application requires orientation attendance. Please schedule an orientation first.");
+        }
+        if (orientationDetails.status !== 'completed') {
+          const statusMessage = orientationDetails.status === 'scheduled' ? 
+            'Orientation is scheduled but not yet completed.' :
+            orientationDetails.status === 'checked-in' ?
+            'Applicant is currently in orientation session.' :
+            'Orientation status is pending.';
+          throw new Error(`Cannot approve application. ${statusMessage} The applicant must complete the orientation before approval.`);
+        }
+      }
+      
       if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Referred' || doc.status === 'NeedsRevision')) {
         throw new Error("To send notifications, at least one document must be flagged for revision or referred for medical management.");
       }
 
       await finalizeApplication({ applicationId: params.id, newStatus });
       
-      // Check if payment is manual (BaranggayHall or CityHall) or 3rd party (Maya/Gcash)
-      const isManualPayment = paymentData?.paymentMethod === 'BaranggayHall' || paymentData?.paymentMethod === 'CityHall';
-      
-      // Different success messages and redirects based on status and payment method
+      // After document verification, application is complete
+      // Payment should have already been validated before reaching this stage
       if (newStatus === 'Approved') {
-        if (isManualPayment) {
-          // Manual payment: go to payment validation page
-          setSuccessMessage('Application approved! Redirecting to payment validation...');
-        } else {
-          // 3rd party payment: everything validated here, go to dashboard
-          setSuccessMessage('Application and payment approved! Redirecting to dashboard...');
-        }
+        setSuccessMessage('Application approved and completed! Redirecting to dashboard...');
       } else {
         setSuccessMessage('Application rejected. Applicant has been notified.');
       }
 
       setTimeout(() => {
-        if (newStatus === 'Approved' && isManualPayment) {
-          // Manual payment: continue to payment validation page
-          router.push(`/dashboard/${params.id}/payment_validation`);
-        } else {
-          // 3rd party or rejected: go to dashboard
-          router.push('/dashboard');
-        }
+        router.push('/dashboard');
       }, 2000);
 
     } catch (e: any) {
-      setError({ title: "Validation Failed", message: e.message });
+      // Clean up error message by removing Convex technical details
+      let cleanMessage = e.message || 'An unexpected error occurred';
+      
+      // Remove Convex error prefix if present
+      cleanMessage = cleanMessage.replace(/^\[CONVEX [^\]]+\]\s*/, '');
+      cleanMessage = cleanMessage.replace(/Server Error\s+/, '');
+      cleanMessage = cleanMessage.replace(/Uncaught Error:\s*/, '');
+      
+      setError({ title: "Orientation Required", message: cleanMessage });
     }
   };
 
@@ -471,6 +494,18 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   }`}
                 >
                   <div className="px-6 pb-6 pt-2 space-y-3 border-t border-gray-100">
+                    {/* Application ID - Prominent display for venue staff */}
+                    <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-teal-50 to-emerald-50 rounded-lg border-2 border-teal-200">
+                      <svg className="w-5 h-5 text-teal-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                      </svg>
+                      <div className="flex-1">
+                        <label className="text-xs font-bold text-teal-700 uppercase tracking-wide mb-1 block">🎫 Application ID</label>
+                        <p className="text-lg font-mono font-bold text-gray-900 tracking-wide mb-1">#{params.id.slice(-8).toUpperCase()}</p>
+                        <p className="text-xs text-teal-700 italic">Have applicant show this ID at venue for in-person verification</p>
+                      </div>
+                    </div>
+                    
                     {/* First Name */}
                     {data.applicantDetails?.firstName && (
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
@@ -684,6 +719,217 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
               </div>
             )}
             
+            {/* Collapsible Orientation Details Card - Only show for Food Handlers (Yellow Card) */}
+            {(data.jobCategoryName?.toLowerCase().includes('yellow card') || data.jobCategoryName?.toLowerCase().includes('food')) && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => setIsOrientationDetailsExpanded(!isOrientationDetailsExpanded)}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  aria-expanded={isOrientationDetailsExpanded}
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <h2 className="text-base font-bold text-gray-800">Orientation Details</h2>
+                    {orientationDetails && (
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        orientationDetails.status === 'completed' 
+                          ? 'bg-green-100 text-green-700'
+                          : orientationDetails.status === 'scheduled'
+                          ? 'bg-blue-100 text-blue-700'
+                          : orientationDetails.status === 'checked-in'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {orientationDetails.status === 'completed' ? '✅ Completed' :
+                         orientationDetails.status === 'scheduled' ? '📅 Scheduled' :
+                         orientationDetails.status === 'checked-in' ? '🏃 In Progress' :
+                         orientationDetails.status === 'missed' ? '❌ Missed' :
+                         'Not Scheduled'}
+                      </span>
+                    )}
+                  </div>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                      isOrientationDetailsExpanded ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Collapsible Content */}
+                <div
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    isOrientationDetailsExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="px-6 pb-6 pt-2 border-t border-gray-100">
+                    {orientationDetails ? (
+                      <div className="space-y-3">
+                        {/* Status Badge */}
+                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                          <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</label>
+                            <p className="text-sm font-medium text-gray-900 mt-0.5 capitalize">
+                              {orientationDetails.status === 'checked-in' ? 'In Progress' : orientationDetails.status}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Scheduled Date */}
+                        {orientationDetails.scheduledDate && (
+                          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                            <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <div className="flex-1">
+                              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Scheduled Date</label>
+                              <p className="text-sm font-medium text-gray-900 mt-0.5">
+                                {new Date(orientationDetails.scheduledDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric',
+                                  timeZone: 'Asia/Manila'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Time Slot */}
+                        {orientationDetails.scheduledTime && (
+                          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                            <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div className="flex-1">
+                              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Time Slot</label>
+                              <p className="text-sm font-medium text-gray-900 mt-0.5">{orientationDetails.scheduledTime}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Venue */}
+                        {orientationDetails.venue && (
+                          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                            <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <div className="flex-1">
+                              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Venue</label>
+                              <p className="text-sm font-medium text-gray-900 mt-0.5">
+                                {orientationDetails.venue.name}
+                                {orientationDetails.venue.address && (
+                                  <span className="block text-xs text-gray-500 mt-1">{orientationDetails.venue.address}</span>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Instructor */}
+                        {orientationDetails.instructor && (
+                          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                            <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <div className="flex-1">
+                              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Instructor</label>
+                              <p className="text-sm font-medium text-gray-900 mt-0.5">
+                                {orientationDetails.instructor.name}
+                                {orientationDetails.instructor.designation && (
+                                  <span className="text-xs text-gray-500 ml-2">({orientationDetails.instructor.designation})</span>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Check-in Time */}
+                        {orientationDetails.checkInTime && (
+                          <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                            <svg className="w-4 h-4 text-green-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                            </svg>
+                            <div className="flex-1">
+                              <label className="text-xs font-semibold text-green-700 uppercase tracking-wide">Check-in Time</label>
+                              <p className="text-sm font-medium text-green-900 mt-0.5">
+                                {new Date(orientationDetails.checkInTime).toLocaleString('en-US', { 
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  timeZone: 'Asia/Manila'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Check-out Time */}
+                        {orientationDetails.checkOutTime && (
+                          <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                            <svg className="w-4 h-4 text-green-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <div className="flex-1">
+                              <label className="text-xs font-semibold text-green-700 uppercase tracking-wide">Check-out Time</label>
+                              <p className="text-sm font-medium text-green-900 mt-0.5">
+                                {new Date(orientationDetails.checkOutTime).toLocaleString('en-US', { 
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  timeZone: 'Asia/Manila'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Duration (if completed) */}
+                        {orientationDetails.checkInTime && orientationDetails.checkOutTime && (
+                          <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <svg className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div className="flex-1">
+                              <label className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Duration</label>
+                              <p className="text-sm font-medium text-blue-900 mt-0.5">
+                                {Math.round((orientationDetails.checkOutTime - orientationDetails.checkInTime) / 60000)} minutes
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <p className="text-gray-500 text-sm font-medium mb-2">No Orientation Scheduled</p>
+                        <p className="text-gray-400 text-xs">This Food Handler application requires orientation attendance.</p>
+                        <p className="text-gray-400 text-xs mt-1">The applicant needs to schedule an orientation session.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Actions Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
@@ -749,21 +995,35 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 return null;
               })()}
               <div className="flex flex-col gap-3">
-                {/* Primary Action: Approve */}
-                <button 
-                  onClick={() => handleFinalize('Approved')} 
-                  className="group w-full bg-gradient-to-r from-teal-400 to-emerald-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-teal-500 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {/* Manual payment (BaranggayHall/CityHall): Continue to Payment Validation */}
-                  {/* 3rd party (Maya/Gcash): Approve everything here */}
-                  {paymentData && (paymentData.paymentMethod === 'BaranggayHall' || paymentData.paymentMethod === 'CityHall') 
-                    ? 'Approve & Continue to Payment' 
-                    : 'Approve Documents & Payments'
-                  }
-                </button>
+                {/* Primary Action: Approve - Only show if not already complete */}
+                {applicationStatus?.applicationStatus !== 'Complete' && (
+                  <button 
+                    onClick={() => handleFinalize('Approved')} 
+                    className="group w-full bg-gradient-to-r from-teal-400 to-emerald-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-teal-500 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {/* Payment should already be validated before reaching this page */}
+                    {/* This is the final step - approving documents completes the application */}
+                    Approve Application
+                  </button>
+                )}
+                
+                {/* Show completion status if already complete */}
+                {applicationStatus?.applicationStatus === 'Complete' && (
+                  <div className="w-full bg-emerald-50 border-2 border-emerald-200 px-6 py-4 rounded-xl flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 border-2 border-emerald-300 flex items-center justify-center shrink-0">
+                      <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-emerald-900 text-sm">Application Complete</p>
+                      <p className="text-emerald-700 text-xs mt-0.5">This application has been fully approved</p>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Secondary Action: Send Referral Notification */}
                 <button 
@@ -845,7 +1105,25 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             }
                             return null;
                           })()}
-                          <h3 className="font-bold text-gray-800 text-base">{item.requirementName}{item.isRequired && <span className="text-rose-500 ml-1">*</span>}</h3>
+                          <h3 className="font-bold text-gray-800 text-base">
+                            {item.requirementName}
+                            {item.isRequired && <span className="text-rose-500 ml-1">*</span>}
+                            
+                            {/* ATTEMPT COUNTER BADGE - Only show if there have been rejections */}
+                            {(item.attemptNumber ?? 0) > 0 && (
+                              <span className={`ml-2 px-2 py-0.5 text-xs font-semibold rounded-md ${
+                                item.attemptNumber === 1 ? 'bg-gray-100 text-gray-600' :
+                                item.attemptNumber === 2 ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' :
+                                item.attemptNumber === 3 ? 'bg-orange-100 text-orange-700 border border-orange-400' :
+                                'bg-red-100 text-red-700 border border-red-400'
+                              }`}>
+                                {item.maxAttemptsReached ? '🔒 Manual Review Required' : 
+                                 item.attemptNumber === 3 ? `⚠️ Attempt #${item.attemptNumber} (FINAL)` :
+                                 item.attemptNumber === 2 ? `⚠️ Attempt #${item.attemptNumber}` :
+                                 `Attempt #${item.attemptNumber}`}
+                              </span>
+                            )}
+                          </h3>
                           {getPendingAction(item.uploadId) && (
                             <span className="text-xs font-medium text-gray-500 ml-2">⏳ Pending</span>
                           )}
@@ -1048,13 +1326,56 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     </div>
                   )}
 
-                  {/* Medical docs: 3 buttons (Approve + Flag for Revision + Refer to Doctor) */}
-                  {/* Non-medical docs: 2 buttons (Approve + Flag for Revision) */}
-                  <div className={`mt-4 pt-4 border-t border-gray-100 ${isMedicalDocument(item.fieldIdentifier) ? 'grid grid-cols-1 sm:grid-cols-3 gap-2' : 'grid grid-cols-1 sm:grid-cols-2 gap-2'}`}>
-                    {/* Approve Button - Always show */}
-                    <button 
+                  {/* Manual Review Required State - Show when max attempts reached */}
+                  {item.maxAttemptsReached ? (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-start gap-3 text-red-700">
+                          <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 0h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                          </svg>
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm">🔒 Manual Review Required</p>
+                            <p className="text-red-600 text-xs mt-1">
+                              Max attempts reached ({item.attemptNumber} attempts). Applicant must visit venue for in-person verification.
+                            </p>
+                            <div className="mt-2 pt-2 border-t border-red-200 text-xs space-y-1">
+                              <p>🏛️ <span className="font-medium">Venue:</span> City Health Office, Magsaysay Park Complex, Door 7</p>
+                              <p>⏰ <span className="font-medium">Hours:</span> Monday-Friday, 8:00 AM–5:00 PM</p>
+                              <p>☎️ <span className="font-medium">Contact:</span> 0926-686-1531</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Approve Button - Only show Approve for manual review */}
+                      <div className="mt-3">
+                        <button 
+                          onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} 
+                          disabled={!item.uploadId || item.status === 'Approved'} 
+                          className="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          {item.status === 'Approved' ? 'Already Approved' : 'Approve After In-Person Verification'}
+                        </button>
+                        {item.status !== 'Approved' && (
+                          <p className="text-xs text-gray-500 mt-2 text-center">
+                            ✓ Verify applicant brought original documents to venue before approving
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    /* Normal State - Show flag/refer buttons */
+                    /* Medical docs: 3 buttons (Approve + Flag for Revision + Refer to Doctor) */
+                    /* Non-medical docs: 2 buttons (Approve + Flag for Revision) */
+                    <div className={`mt-4 pt-4 border-t border-gray-100 ${isMedicalDocument(item.fieldIdentifier) ? 'grid grid-cols-1 sm:grid-cols-3 gap-2' : 'grid grid-cols-1 sm:grid-cols-2 gap-2'}`}>
+                      {/* Approve Button - Disabled when waiting for resubmission or doctor clearance */}
+                      <button 
                       onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} 
-                      disabled={!item.uploadId || item.status === 'Approved'} 
+                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'NeedsRevision' || item.status === 'Referred'} 
                       className="w-full bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-emerald-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1110,7 +1431,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         Refer to Doctor
                       </button>
                     )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -246,4 +246,59 @@ export const styles = StyleSheet.create({
     marginLeft: scale(6),
     lineHeight: moderateScale(18),
   },
+  
+  // Manual Review Section
+  manualReviewSection: {
+    backgroundColor: '#FEE2E2', // Light red background
+    borderRadius: theme.borderRadius.md,
+    padding: moderateScale(16),
+    marginTop: verticalScale(16),
+    borderWidth: 1,
+    borderColor: '#DC2626' + '30',
+  },
+  manualReviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: verticalScale(12),
+  },
+  manualReviewTitle: {
+    fontSize: moderateScale(16),
+    fontWeight: '700' as const,
+    color: '#DC2626',
+    marginLeft: scale(10),
+    flex: 1,
+  },
+  manualReviewText: {
+    fontSize: moderateScale(14),
+    color: '#7F1D1D',
+    lineHeight: moderateScale(20),
+    marginBottom: verticalScale(16),
+  },
+  venueInfo: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: theme.borderRadius.md,
+    padding: moderateScale(14),
+    gap: verticalScale(14),
+  },
+  venueItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  venueTextContainer: {
+    flex: 1,
+    marginLeft: scale(12),
+  },
+  venueLabel: {
+    fontSize: moderateScale(12),
+    fontWeight: '600' as const,
+    color: '#7F1D1D',
+    marginBottom: verticalScale(2),
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  venueText: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.primary,
+    lineHeight: moderateScale(20),
+  },
 });

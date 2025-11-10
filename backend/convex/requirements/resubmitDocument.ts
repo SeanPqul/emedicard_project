@@ -85,11 +85,15 @@ export const resubmitDocument = mutation({
       )
       .collect();
     
-    const nextAttemptNumber = allRejections.length + 1;
     const maxAttempts = REJECTION_LIMITS.DOCUMENTS.MAX_ATTEMPTS;
     
-    // Block if already reached max attempts - direct to venue
-    if (hasReachedMaxAttempts(nextAttemptNumber, 'document')) {
+    // Block if user has already been rejected more than MAX_ATTEMPTS times
+    // With MAX_ATTEMPTS = 3:
+    // - After 1st rejection (length=1): Can resubmit ✅ (Attempt #1)
+    // - After 2nd rejection (length=2): Can resubmit ✅ (Attempt #2)
+    // - After 3rd rejection (length=3): Can resubmit ✅ (Attempt #3 - FINAL)
+    // - After 4th rejection (length=4): BLOCKED ❌ (Manual Review Required)
+    if (allRejections.length > maxAttempts) {
       throw new Error(`You have reached the maximum number of resubmission attempts (${maxAttempts}). Please visit our office with your original documents for in-person verification. Check the Help Center in the app for venue location and office hours.`);
     }
 

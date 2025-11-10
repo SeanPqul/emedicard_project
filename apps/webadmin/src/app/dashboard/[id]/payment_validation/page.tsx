@@ -110,10 +110,10 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
         newStatus: 'Complete',
       });
       
-      setSuccessMessage('Payment approved successfully! Redirecting to dashboard...');
+      setSuccessMessage('Payment approved! Redirecting to document verification...');
       
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push(`/dashboard/${params.id}/doc_verif`);
       }, 1500);
     } catch (err: any) {
       setError({ title: 'Approval Failed', message: err.message || 'Failed to approve payment.' });
@@ -252,9 +252,9 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
         {/* Header */}
         <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <button 
-            onClick={() => router.push(`/dashboard/${params.id}/doc_verif`)} 
+            onClick={() => router.push('/dashboard')} 
             className="p-2 rounded-lg hover:bg-white/80 transition-all shadow-sm" 
-            aria-label="Back to document verification"
+            aria-label="Back to dashboard"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -262,7 +262,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
           </button>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Payment Validation</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">Review and validate the applicant's payment submission.</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Step 1: Review and validate payment before proceeding to document verification.</p>
           </div>
         </div>
 
@@ -337,7 +337,7 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  Approve & Complete Payment
+                  Approve Payment & Continue to Documents
                 </button>
                 
                 {/* Secondary Action: Request Payment Correction */}

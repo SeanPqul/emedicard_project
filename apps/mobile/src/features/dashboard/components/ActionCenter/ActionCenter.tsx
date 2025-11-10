@@ -112,7 +112,7 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
       title: 'Medical Consultation Required',
       subtitle: 'See doctor for medical clearance',
       urgency: 'high',
-      onPress: () => router.push(`/(screens)/(shared)/documents/referral-history?formId=${app._id}&type=medical`),
+      onPress: () => router.push(`/(screens)/(shared)/documents/view-document?formId=${app._id}`),
     });
   });
 
@@ -130,7 +130,7 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
       title: `${count} Document${count !== 1 ? 's' : ''} Need Revision`,
       subtitle: 'Review feedback and resubmit',
       urgency: 'high',
-      onPress: () => router.push(`/(screens)/(shared)/documents/referral-history?formId=${app._id}&type=document`),
+      onPress: () => router.push(`/(screens)/(shared)/documents/view-document?formId=${app._id}`),
     });
   });
 
