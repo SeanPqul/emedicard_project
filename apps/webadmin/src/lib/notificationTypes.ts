@@ -31,14 +31,14 @@ export function getNotificationTypeLabel(type: string): string {
     // Document related
     "DocumentResubmission": "Document Resubmitted",
     "document_issue_flagged": "Document Issue Flagged",
-    "document_referral_medical": "Medical Referral",
-    "document_rejection": "Document Rejected",
+    "document_referral_medical": "Medical Referral Required",
+    "document_rejection": "Document Issue Flagged",
     "DocumentApproved": "Document Approved",
-    "DocumentIssue": "Document Issue",
+    "DocumentIssue": "Document Issue Flagged",
     "MissingDoc": "Missing Document",
     
     // Medical Referral
-    "MedicalReferralResubmission": "Medical Referral Resubmitted",
+    "MedicalReferralResubmission": "Medical Results Resubmitted",
     
     // Payment related
     "PaymentResubmission": "Payment Resubmitted",
@@ -48,7 +48,7 @@ export function getNotificationTypeLabel(type: string): string {
     "ApplicationStatusChange": "Application Status Update",
     "ApplicationApproved": "Application Approved",
     "ApplicationRejected": "Application Rejected",
-    "application_permanently_rejected": "Application Permanently Rejected",
+    "application_permanently_rejected": "Application Rejected (Final)",
     "status_update": "Status Update",
     
     // Orientation

@@ -159,6 +159,9 @@ export default defineSchema({
     availableSlots: v.float64(),
     totalSlots: v.float64(),
     isAvailable: v.boolean(),
+    isFinalized: v.optional(v.boolean()), // Whether admin has finalized attendance for this session
+    finalizedAt: v.optional(v.float64()), // Timestamp when session was finalized
+    finalizedBy: v.optional(v.id("users")), // Admin who finalized the session
     instructor: v.optional(v.object({
       name: v.string(),
       designation: v.string(),

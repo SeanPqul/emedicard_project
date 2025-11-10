@@ -75,17 +75,17 @@ const getActionStyle = (action: string) => {
     };
   }
   
-  // Legacy rejected (red) - for payment/application rejections
+  // Application rejection (red) - for final application rejections
   if (lowerAction.includes('rejected') || lowerAction.includes('reject')) {
     return { 
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12M8 12h12m-12 5h12M4 7h.01M4 12h.01M4 17h.01" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      bgColor: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-      borderColor: 'border-amber-200'
+      bgColor: 'bg-red-50',
+      iconColor: 'text-red-600',
+      borderColor: 'border-red-200'
     };
   }
   
@@ -201,8 +201,8 @@ export default function DashboardActivityLog() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                     </svg>
                   </div>
-                  <p className="text-xs font-medium text-gray-600">No recent activity</p>
-                  <p className="text-xs text-gray-400">Activities will appear here</p>
+                  <p className="text-xs font-medium text-gray-600">No Recent Activity</p>
+                  <p className="text-xs text-gray-400">Admin actions will appear here</p>
                 </div>
               </div>
             )}

@@ -138,11 +138,11 @@ export default function AdminRejectionHistoryPage() {
   };
 
   const getStatusBadge = (status?: RejectionStatus, wasReplaced?: boolean, type?: RejectionType) => {
-    // Application rejections are permanently rejected
+    // Application rejections are final decisions
     if (type === "application") {
       return (
         <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-red-900 text-red-50 flex items-center gap-1.5">
-          ❌ Permanently Rejected
+          ❌ Application Rejected
         </span>
       );
     }
@@ -154,7 +154,7 @@ export default function AdminRejectionHistoryPage() {
       case "pending":
         return (
           <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-            Pending
+            Pending Resubmission
           </span>
         );
       case "resubmitted":
@@ -483,7 +483,7 @@ export default function AdminRejectionHistoryPage() {
                 onChange={(e) => setStatusFilter(e.target.value as "" | "pending" | "resubmitted" | "permanently_rejected" | "referred")}
               >
                 <option value="">All Status</option>
-                <option value="referred">Referred</option>
+                <option value="referred">Referred/Flagged</option>
                 <option value="pending">Pending Resubmission</option>
                 <option value="resubmitted">Resubmitted</option>
                 <option value="permanently_rejected">Permanently Rejected</option>

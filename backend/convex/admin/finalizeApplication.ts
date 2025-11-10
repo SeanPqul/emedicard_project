@@ -65,10 +65,9 @@ export const finalize = mutation({
       
       if (requiresOrientation && !application.orientationCompleted) {
         throw new Error(
-          "Cannot approve Food Handler application. Applicant must complete mandatory Food Safety Orientation first. " +
-          "Current orientation status: " + (application.orientationCompleted ? "Completed" : "Not completed") + ". " +
-          "Please ensure the applicant has checked-in and checked-out from their scheduled orientation session before final approval. " +
-          "You may continue reviewing documents while the applicant attends orientation."
+          "Cannot approve application. This applicant must complete the mandatory Food Safety Orientation before final approval. " +
+          "Please verify that the applicant has both checked in and checked out from their scheduled orientation session. " +
+          "Note: You can continue reviewing documents while waiting for the applicant to attend orientation."
         );
       }
     }

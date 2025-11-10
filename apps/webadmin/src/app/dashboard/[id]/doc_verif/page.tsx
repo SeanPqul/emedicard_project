@@ -136,6 +136,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [specificIssues, setSpecificIssues] = useState('');
   const [extractedText, setExtractedText] = useState<string[] | null>(null); // New state for extracted text
   const [showOcrModal, setShowOcrModal] = useState<boolean>(false); // New state for OCR modal visibility
+  const [ocrLoading, setOcrLoading] = useState<boolean>(false); // Loading state for OCR extraction
+  const [copySuccess, setCopySuccess] = useState<boolean>(false); // Copy feedback
   const [isReferralConfirmModalOpen, setIsReferralConfirmModalOpen] = useState(false); // Confirmation modal for sending referrals
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // New state for collapsible applicant details
   const [isPaymentDetailsExpanded, setIsPaymentDetailsExpanded] = useState(false); // New state for collapsible payment details
@@ -277,15 +279,15 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
       
       if (newStatus === 'Approved' && requiresOrientation) {
         if (!orientationDetails) {
-          throw new Error("This application requires orientation attendance. Please schedule an orientation first.");
+          throw new Error("Food Safety Orientation is required for this application. The applicant must schedule and complete an orientation session before approval.");
         }
         if (orientationDetails.status !== 'completed') {
           const statusMessage = orientationDetails.status === 'scheduled' ? 
-            'Orientation is scheduled but not yet completed.' :
+            'The orientation is scheduled but the applicant has not yet attended. Please wait for the applicant to check in and check out.' :
             orientationDetails.status === 'checked-in' ?
-            'Applicant is currently in orientation session.' :
-            'Orientation status is pending.';
-          throw new Error(`Cannot approve application. ${statusMessage} The applicant must complete the orientation before approval.`);
+            'The applicant is currently attending the orientation session. Please wait for them to check out.' :
+            'The applicant has not scheduled an orientation. They must book and attend an orientation before approval.';
+          throw new Error(`Cannot approve application yet. ${statusMessage}`);
         }
       }
       
@@ -1303,7 +1305,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                                 item.attemptNumber === 3 ? 'bg-orange-100 text-orange-700 border border-orange-400' :
                                 'bg-red-100 text-red-700 border border-red-400'
                               }`}>
-                                {item.maxAttemptsReached ? '🔒 Manual Review Required' : 
+                                {item.maxAttemptsReached ? '⚠️ Onsite Verification Required' : 
                                  item.attemptNumber === 3 ? `⚠️ Attempt #${item.attemptNumber} (FINAL)` :
                                  item.attemptNumber === 2 ? `⚠️ Attempt #${item.attemptNumber}` :
                                  `Attempt #${item.attemptNumber}`}
@@ -1330,6 +1332,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           <button
                             onClick={async () => {
                               if (item.fileUrl) {
+                                setOcrLoading(true);
+                                setError(null);
                                 try {
                                   const response = await fetch(item.fileUrl);
                                   const blob = await response.blob();
@@ -1354,16 +1358,24 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                                 } catch (error: any) {
                                   console.error("OCR Error:", error);
                                   setError({ title: "OCR Failed", message: error.message || "Could not extract text from the document." });
+                                } finally {
+                                  setOcrLoading(false);
                                 }
                               }
                             }}
-                            disabled={!item.fileUrl}
+                            disabled={!item.fileUrl || ocrLoading}
                             className="text-sm bg-sky-50 text-sky-700 px-4 py-2 rounded-xl font-medium hover:bg-sky-100 disabled:opacity-40 disabled:cursor-not-allowed border border-sky-100 flex items-center gap-2"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Extract
+                            {ocrLoading ? (
+                              <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                            ) : (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            )}
+                            {ocrLoading ? 'Extracting...' : 'Extract'}
                           </button>
                         </>
                       ) : (
@@ -1644,71 +1656,133 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
         </div>
       )}
 
-      {/* OCR Extracted Text Modal */}
+      {/* OCR Extracted Text Modal - Enhanced */}
       {showOcrModal && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setShowOcrModal(false)}>
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowOcrModal(false)}>
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-slideUp" onClick={(e) => e.stopPropagation()}>
+            {/* Header - Enhanced */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-sky-50 to-blue-50">
               <div className="flex items-center gap-3">
-                <div className="bg-blue-100 rounded-lg p-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="bg-sky-500 rounded-xl p-2.5 shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">Extracted Text (OCR)</h3>
-                  <p className="text-sm text-gray-500">Optical Character Recognition Results</p>
+                  <h3 className="text-xl font-bold text-gray-900">📄 Extracted Document Text</h3>
+                  <p className="text-sm text-gray-600 flex items-center gap-1.5 mt-0.5">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    OCR processed - Text extracted for easy reading
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setShowOcrModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <button 
+                onClick={() => {
+                  setShowOcrModal(false);
+                  setCopySuccess(false);
+                }} 
+                className="p-2.5 hover:bg-white/80 rounded-xl transition-all text-gray-600 hover:text-gray-800 hover:shadow-sm" 
+                aria-label="Close"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
             
-            {/* Content */}
-            <div className="flex-1 overflow-auto p-6">
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-inner">
+            {/* Content - Enhanced with better readability */}
+            <div className="flex-1 overflow-auto p-6 bg-gray-50">
+              <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-sm">
                 {extractedText && extractedText.length > 0 ? (
-                  <div className="space-y-2 font-mono text-sm text-gray-800 leading-relaxed">
-                    {extractedText.map((line, i) => (
-                      <p key={i} className={`${line.trim() ? 'text-gray-900' : 'text-gray-400'} transition-colors hover:bg-white/50 px-2 py-1 rounded`}>
-                        {line || '\u00A0'}
-                      </p>
-                    ))}
-                  </div>
+                  <>
+                    {/* Character count badge */}
+                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="bg-sky-100 text-sky-700 px-3 py-1.5 rounded-lg font-medium">
+                          {extractedText.join('\n').length} characters
+                        </span>
+                        <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg font-medium">
+                          {extractedText.filter(line => line.trim()).length} lines
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        Enhanced for readability
+                      </div>
+                    </div>
+                    
+                    {/* Extracted text with enhanced formatting */}
+                    <div className="space-y-1 font-mono text-sm leading-relaxed max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                      {extractedText.map((line, i) => (
+                        <div 
+                          key={i} 
+                          className={`group relative ${
+                            line.trim().startsWith('━━━') 
+                              ? 'text-sky-600 font-bold py-2 my-1'
+                              : line.trim() 
+                              ? 'text-gray-800 hover:bg-sky-50' 
+                              : 'text-gray-300'
+                          } px-3 py-1.5 rounded-lg transition-colors`}
+                        >
+                          <span className="block">{line || '\u00A0'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="bg-yellow-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="text-center py-16">
+                    <div className="bg-yellow-100 rounded-full p-5 w-20 h-20 mx-auto mb-5 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
                     </div>
-                    <p className="text-gray-600 font-medium">No text extracted or document is empty.</p>
+                    <p className="text-gray-600 font-semibold text-lg mb-2">No Text Detected</p>
+                    <p className="text-gray-500 text-sm">The document may be empty or the image quality is too low for OCR.</p>
                   </div>
                 )}
               </div>
             </div>
             
-            {/* Footer */}
-            <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+            {/* Footer - Enhanced with better UX */}
+            <div className="p-6 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 rounded-b-2xl">
               <div className="flex gap-3">
                 <button 
                   onClick={() => {
                     const text = extractedText?.join('\n') || '';
                     navigator.clipboard.writeText(text);
-                    alert('Text copied to clipboard!');
+                    setCopySuccess(true);
+                    setTimeout(() => setCopySuccess(false), 2000);
                   }}
-                  className="flex-1 bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 relative overflow-hidden group"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  Copy Text
+                  {copySuccess ? (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy to Clipboard
+                    </>
+                  )}
                 </button>
-                <button onClick={() => setShowOcrModal(false)} className="flex-1 bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all">
+                <button 
+                  onClick={() => {
+                    setShowOcrModal(false);
+                    setCopySuccess(false);
+                  }} 
+                  className="px-8 py-3.5 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm"
+                >
                   Close
                 </button>
               </div>

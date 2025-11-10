@@ -521,6 +521,9 @@ export const getOrientationSchedulesForDate = query({
           isActive,
           isPast,
           isUpcoming,
+          isFinalized: schedule.isFinalized || false,
+          finalizedAt: schedule.finalizedAt,
+          finalizedBy: schedule.finalizedBy,
         };
       })
     );
@@ -803,12 +806,21 @@ export const finalizeSessionAttendance = mutation({
       }
     }
 
+    // Mark the schedule as finalized
+    const now = Date.now();
+    await ctx.db.patch(args.scheduleId, {
+      isFinalized: true,
+      finalizedAt: now,
+      finalizedBy: adminUser._id,
+      updatedAt: now,
+    });
+
     // Log admin activity
     await ctx.db.insert("adminActivityLogs", {
       adminId: adminUser._id,
       activityType: "orientation_finalization",
       details: `Finalized orientation session on ${new Date(args.selectedDate).toLocaleDateString()} at ${args.timeSlot} (${args.venue}). Completed: ${completedCount}, Missed: ${missedCount}, Excused: ${excusedCount}`,
-      timestamp: Date.now(),
+      timestamp: now,
     });
 
     return {

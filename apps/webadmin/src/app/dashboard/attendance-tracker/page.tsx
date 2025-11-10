@@ -5,7 +5,7 @@ import Navbar from '@/components/shared/Navbar';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { ArrowLeft, Calendar, CheckCircle, Clock, Edit2, Filter, MapPin, Search, User, Users, XCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, CheckCircle, Clock, Edit2, Filter, MapPin, Search, User, Users, XCircle, Lock, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
 
@@ -47,6 +47,12 @@ interface OrientationSchedule {
   attendeeCount: number;
   completedCount: number;
   checkedInCount: number;
+  isActive: boolean;
+  isPast: boolean;
+  isUpcoming: boolean;
+  isFinalized: boolean;
+  finalizedAt?: number;
+  finalizedBy?: Id<'users'>;
 }
 
 export default function AttendanceTrackerPage() {
@@ -91,6 +97,10 @@ export default function AttendanceTrackerPage() {
     missedCount: number;
     excusedCount: number;
   } | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    show: boolean;
+    schedule: OrientationSchedule | null;
+  }>({ show: false, schedule: null });
 
   // Convert selected date to timestamp (start of day)
   const selectedTimestamp = selectedDate.getTime();
@@ -114,9 +124,11 @@ export default function AttendanceTrackerPage() {
   }, [schedules, selectedDate, selectedTimestamp]);
 
   // Mutations
-  // Note: finalizeAttendance removed - inspectors handle via QR check-in/out
   const manuallyUpdateStatus = useMutation(
     api.orientations.attendance.manuallyUpdateAttendanceStatus
+  );
+  const finalizeSession = useMutation(
+    api.orientations.attendance.finalizeSessionAttendance
   );
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,7 +163,38 @@ export default function AttendanceTrackerPage() {
     setSearchQuery(prev => ({ ...prev, [scheduleId]: query }));
   };
 
-  // Finalize session functionality removed - handled by inspector QR code system
+  const handleFinalizeSession = async (schedule: OrientationSchedule) => {
+    // Show confirmation modal
+    setConfirmModal({ show: true, schedule });
+  };
+
+  const confirmFinalization = async () => {
+    if (!confirmModal.schedule) return;
+
+    const schedule = confirmModal.schedule;
+    setConfirmModal({ show: false, schedule: null });
+
+    try {
+      const result = await finalizeSession({
+        scheduleId: schedule.scheduleId,
+        selectedDate: schedule.date,
+        timeSlot: schedule.time,
+        venue: schedule.venue.name,
+      });
+
+      if (result.success) {
+        setSuccessModal({
+          show: true,
+          completedCount: result.completedCount,
+          missedCount: result.missedCount,
+          excusedCount: result.excusedCount,
+        });
+      }
+    } catch (error: any) {
+      console.error('Error finalizing session:', error);
+      alert(`❌ ${error.message || 'Failed to finalize session. Please try again.'}`);
+    }
+  };
 
   const handleManualStatusUpdate = async () => {
     if (!editingAttendee) return;
@@ -171,6 +214,32 @@ export default function AttendanceTrackerPage() {
       console.error('Error updating status:', error);
       alert(`❌ ${error.message || 'Failed to update status. Please try again.'}`);
     }
+  };
+
+  const getSessionStatusBadge = (schedule: OrientationSchedule) => {
+    if (schedule.isFinalized) {
+      return (
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-gray-700 to-gray-800 text-white shadow-lg border-2 border-gray-600">
+          <Lock className="w-4 h-4" />
+          <span className="font-semibold text-sm">Finalized</span>
+        </div>
+      );
+    } else if (schedule.isActive) {
+      return (
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg animate-pulse border-2 border-emerald-400">
+          <div className="w-2 h-2 rounded-full bg-white animate-ping" />
+          <span className="font-semibold text-sm">Active Now</span>
+        </div>
+      );
+    } else if (schedule.isPast) {
+      return (
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg border-2 border-blue-400">
+          <CheckCircle className="w-4 h-4" />
+          <span className="font-semibold text-sm">Completed</span>
+        </div>
+      );
+    }
+    return null;
   };
 
   const getStatusBadge = (status: AttendanceStatus) => {
@@ -392,86 +461,141 @@ export default function AttendanceTrackerPage() {
             {filteredSchedules.map((schedule) => (
               <div
                 key={schedule.scheduleId}
-                className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden hover:border-emerald-300 transition-all"
+                className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all ${
+                  schedule.isFinalized 
+                    ? 'border-2 border-gray-400 opacity-95' 
+                    : 'border-2 border-gray-200 hover:border-emerald-300'
+                }`}
               >
                 {/* Enhanced Session Header */}
-                <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 px-6 py-5 text-white">
-                  <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className={`px-6 py-5 text-white relative overflow-hidden ${
+                  schedule.isFinalized
+                    ? 'bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800'
+                    : schedule.isActive
+                    ? 'bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700'
+                    : 'bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800'
+                }`}>
+                  {/* Background Pattern */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm shadow-lg">
+                          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                           </svg>
                         </div>
-                        <h2 className="text-xl font-bold">
-                          Food Safety Orientation
-                        </h2>
+                        <div>
+                          <h2 className="text-xl font-bold">
+                            Food Safety Orientation
+                          </h2>
+                          <p className="text-xs text-white/80 mt-0.5">{schedule.venue.address}</p>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-4 text-sm">
-                        <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg backdrop-blur-sm">
-                          <Clock className="w-4 h-4" />
-                          {schedule.time}
-                        </span>
-                        <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg backdrop-blur-sm">
-                          <MapPin className="w-4 h-4" />
-                          {schedule.venue.name}
-                        </span>
-                        {schedule.instructor && (
-                          <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg backdrop-blur-sm">
-                            <User className="w-4 h-4" />
-                            {schedule.instructor.name}
-                          </span>
-                        )}
-                      </div>
+                      {getSessionStatusBadge(schedule)}
                     </div>
-                    <div className="text-right bg-white/10 px-6 py-3 rounded-xl backdrop-blur-sm">
-                      <div className="text-3xl font-bold">
-                        {schedule.attendeeCount}/{schedule.totalSlots}
+                    
+                    <div className="flex flex-wrap gap-3 text-sm">
+                      <div className="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-lg backdrop-blur-sm border border-white/20">
+                        <Clock className="w-4 h-4" />
+                        <span className="font-medium">{schedule.time}</span>
                       </div>
-                      <div className="text-xs opacity-90 mt-1">Registered</div>
+                      <div className="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-lg backdrop-blur-sm border border-white/20">
+                        <MapPin className="w-4 h-4" />
+                        <span className="font-medium">{schedule.venue.name}</span>
+                      </div>
+                      {schedule.instructor && (
+                        <div className="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-lg backdrop-blur-sm border border-white/20">
+                          <User className="w-4 h-4" />
+                          <span className="font-medium">{schedule.instructor.name}</span>
+                          {schedule.instructor.designation && (
+                            <span className="text-xs text-white/70">• {schedule.instructor.designation}</span>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-lg backdrop-blur-sm border border-white/20">
+                        <Users className="w-4 h-4" />
+                        <span className="font-bold text-lg">{schedule.attendeeCount}</span>
+                        <span className="text-white/80">/ {schedule.totalSlots} slots</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Enhanced Session Stats */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-                  <div className="flex flex-wrap gap-6 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                        </svg>
+                <div className={`px-6 py-4 border-b border-gray-200 ${
+                  schedule.isFinalized 
+                    ? 'bg-gradient-to-r from-gray-100 to-gray-200' 
+                    : 'bg-gradient-to-r from-gray-50 to-gray-100'
+                }`}>
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-6 text-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shadow-sm">
+                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                          </svg>
+                        </div>
+                        <div>
+                          <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide">Checked In</span>
+                          <span className="text-2xl font-bold text-blue-600">
+                            {schedule.checkedInCount}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="block text-xs text-gray-500">Checked In</span>
-                        <span className="text-lg font-bold text-blue-600">
-                          {schedule.checkedInCount}
-                        </span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center shadow-sm">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide">Completed</span>
+                          <span className="text-2xl font-bold text-green-600">
+                            {schedule.completedCount}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shadow-sm">
+                          <Clock className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide">Pending</span>
+                          <span className="text-2xl font-bold text-orange-600">
+                            {schedule.attendeeCount - schedule.completedCount}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-                        <CheckCircle className="w-4 h-4 text-green-600" />
+                    
+                    {/* Finalize Button or Finalized Info */}
+                    {schedule.isFinalized ? (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-xl">
+                        <Lock className="w-4 h-4" />
+                        <div className="text-left">
+                          <p className="text-xs font-medium">Finalized</p>
+                          <p className="text-xs text-gray-300">
+                            {schedule.finalizedAt && new Date(schedule.finalizedAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <span className="block text-xs text-gray-500">Completed</span>
-                        <span className="text-lg font-bold text-green-600">
-                          {schedule.completedCount}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                        <Clock className="w-4 h-4 text-gray-600" />
-                      </div>
-                      <div>
-                        <span className="block text-xs text-gray-500">Pending</span>
-                        <span className="text-lg font-bold text-gray-600">
-                          {schedule.attendeeCount - schedule.completedCount}
-                        </span>
-                      </div>
-                    </div>
+                    ) : schedule.isPast && schedule.attendees.length > 0 ? (
+                      <button
+                        onClick={() => handleFinalizeSession(schedule)}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-lg hover:shadow-xl font-semibold text-sm"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Finalize Session
+                      </button>
+                    ) : null}
                   </div>
                 </div>
 
@@ -498,51 +622,51 @@ export default function AttendanceTrackerPage() {
                         </div>
                       </div>
 
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto rounded-lg border border-gray-200">
                         <table className="min-w-full divide-y divide-gray-200">
                           <thead>
-                            <tr className="bg-gray-50">
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <tr className="bg-gradient-to-r from-gray-100 to-gray-50">
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                 Applicant Name
                               </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                 Gender
                               </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                 Job Category
                               </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                 Status
                               </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                 Attendance
                               </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                 Actions
                               </th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
                             {getFilteredAttendees(schedule.scheduleId, schedule.attendees).map((attendee) => (
-                            <tr key={attendee.applicationId} className="hover:bg-gray-50">
-                              <td className="px-4 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">
+                            <tr key={attendee.applicationId} className={`hover:bg-gray-50 transition-colors ${schedule.isFinalized ? 'opacity-90' : ''}`}>
+                              <td className="px-6 py-4">
+                                <div className="text-sm font-semibold text-gray-900">
                                   {attendee.fullname}
                                 </div>
                                 {attendee.inspectorNotes && (
-                                  <div className="text-xs text-gray-500 mt-1 italic">
-                                    Note: {attendee.inspectorNotes}
+                                  <div className="text-xs text-gray-500 mt-1 italic flex items-start gap-1">
+                                    <span className="font-medium">Note:</span> {attendee.inspectorNotes}
                                   </div>
                                 )}
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap">
+                              <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-700">
                                   {attendee.gender}
                                 </div>
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap">
+                              <td className="px-6 py-4 whitespace-nowrap">
                                 <span
-                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
                                   style={{
                                     backgroundColor: attendee.jobCategoryColor + '20',
                                     color: attendee.jobCategoryColor,
@@ -551,36 +675,42 @@ export default function AttendanceTrackerPage() {
                                   {attendee.jobCategory}
                                 </span>
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap">
+                              <td className="px-6 py-4 whitespace-nowrap">
                                 {getStatusBadge(attendee.orientationStatus)}
                               </td>
-                              <td className="px-4 py-4">
+                              <td className="px-6 py-4">
                                 {getAttendanceStatus(attendee)}
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap">
-                                <button
-                                  onClick={() => {
-                                    setEditingAttendee({
-                                      bookingId: attendee.bookingId,  // UPDATED: Use bookingId
-                                      scheduleId: schedule.scheduleId,
-                                    });
-                                    // Determine initial status for form
-                                    const initialStatus: 'completed' | 'missed' | 'excused' = 
-                                      attendee.orientationStatus === 'scheduled' || attendee.orientationStatus === 'checked-in' 
-                                        ? 'completed' 
-                                        : (attendee.orientationStatus === 'completed' || attendee.orientationStatus === 'missed' || attendee.orientationStatus === 'excused')
-                                          ? attendee.orientationStatus
-                                          : 'completed';
-                                    setStatusUpdateForm({
-                                      status: initialStatus,
-                                      notes: attendee.inspectorNotes || '',
-                                    });
-                                  }}
-                                  className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
-                                >
-                                  <Edit2 className="w-3 h-3" />
-                                  Edit Status
-                                </button>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {schedule.isFinalized ? (
+                                  <div className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
+                                    <Lock className="w-3 h-3" />
+                                    Locked
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      setEditingAttendee({
+                                        bookingId: attendee.bookingId,
+                                        scheduleId: schedule.scheduleId,
+                                      });
+                                      const initialStatus: 'completed' | 'missed' | 'excused' = 
+                                        attendee.orientationStatus === 'scheduled' || attendee.orientationStatus === 'checked-in' 
+                                          ? 'completed' 
+                                          : (attendee.orientationStatus === 'completed' || attendee.orientationStatus === 'missed' || attendee.orientationStatus === 'excused')
+                                            ? attendee.orientationStatus
+                                            : 'completed';
+                                      setStatusUpdateForm({
+                                        status: initialStatus,
+                                        notes: attendee.inspectorNotes || '',
+                                      });
+                                    }}
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors border border-blue-200 hover:border-blue-300"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                    Edit Status
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           ))}
@@ -591,22 +721,127 @@ export default function AttendanceTrackerPage() {
                   )}
                 </div>
 
-                {/* Inspector Note - Finalization handled by QR code check-in/out */}
+                {/* Session Status Note */}
                 {schedule.attendees.length > 0 && (
-                  <div className="bg-blue-50 px-6 py-4 border-t border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p className="text-sm text-blue-700">
-                        <span className="font-semibold">Note:</span> Attendance is automatically validated when inspectors check out attendees via QR code scanning.
-                        Sessions are finalized when all attendees have been checked out.
-                      </p>
-                    </div>
+                  <div className={`px-6 py-4 border-t border-gray-200 ${
+                    schedule.isFinalized 
+                      ? 'bg-gray-100' 
+                      : schedule.isActive
+                      ? 'bg-emerald-50'
+                      : 'bg-blue-50'
+                  }`}>
+                    {schedule.isFinalized ? (
+                      <div className="flex items-center gap-3">
+                        <Lock className="w-5 h-5 text-gray-700 shrink-0" />
+                        <p className="text-sm text-gray-700">
+                          <span className="font-semibold">Session Finalized:</span> This orientation session has been finalized. All attendance records have been processed and applicant statuses have been updated. No further changes can be made.
+                        </p>
+                      </div>
+                    ) : schedule.isPast ? (
+                      <div className="flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
+                        <p className="text-sm text-blue-700">
+                          <span className="font-semibold">Action Required:</span> This session has ended. Please review the attendance records and click "Finalize Session" to process all attendance and update applicant statuses.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-sm text-blue-700">
+                          <span className="font-semibold">Note:</span> Attendance is automatically tracked when inspectors check in/out attendees via QR code scanning. You can finalize the session after it ends to process all records.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Confirmation Modal */}
+        {confirmModal.show && confirmModal.schedule && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 transform transition-all animate-in zoom-in-95 duration-300">
+              {/* Warning Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="bg-orange-100 rounded-full p-3">
+                  <AlertCircle className="w-12 h-12 text-orange-600" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-2xl font-bold text-center text-gray-900 mb-2">
+                Finalize Session?
+              </h3>
+              
+              {/* Warning Message */}
+              <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4 mb-4">
+                <p className="text-sm text-orange-800 font-medium mb-2">
+                  ⚠️ This action cannot be undone!
+                </p>
+                <p className="text-sm text-gray-700">
+                  Finalizing this session will:
+                </p>
+                <ul className="mt-2 space-y-1 text-sm text-gray-700 list-disc list-inside">
+                  <li>Lock all attendance records</li>
+                  <li>Update applicant statuses automatically</li>
+                  <li>Prevent any further edits to this session</li>
+                  <li>Send notifications to affected applicants</li>
+                </ul>
+              </div>
+
+              {/* Session Info */}
+              <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">Session Details:</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-700">
+                      {new Date(confirmModal.schedule.date).toLocaleDateString('en-US', {
+                        timeZone: 'Asia/Manila',
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-700">{confirmModal.schedule.time}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-700">{confirmModal.schedule.venue.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-700">
+                      {confirmModal.schedule.attendeeCount} attendees ({confirmModal.schedule.completedCount} completed)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmModal({ show: false, schedule: null })}
+                  className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmFinalization}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 font-semibold transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                >
+                  Yes, Finalize Session
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
