@@ -392,6 +392,18 @@ export default function SuperAdminPage() {
     isClerkLoaded && user ? {} : "skip"
   ) || 0;
 
+  // NEW: Fetch rejection and referral statistics
+  const rejectionStats = useQuery(
+    api.superAdmin.queries.getRejectionAndReferralStats,
+    isClerkLoaded && user ? { startDate, endDate } : "skip"
+  );
+
+  // NEW: Fetch system health metrics
+  const systemHealthMetrics = useQuery(
+    api.superAdmin.queries.getSystemHealthMetrics,
+    isClerkLoaded && user ? {} : "skip"
+  );
+
   const currentYear = new Date().getFullYear();
   const applicantsOverTime = useQuery(
     api.superAdmin.queries.getApplicantsOverTime,
@@ -677,63 +689,114 @@ export default function SuperAdminPage() {
           </div>
         </div>
 
-        {/* Enhanced Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5 mb-8">
-          <StatCard
-            title="Total Applications"
-            value={totalApplications}
-            icon={statusIconAndColorClasses["Total Applications"].icon}
-            colorClass={
-              statusIconAndColorClasses["Total Applications"].colorClass
-            }
-          />
-          <StatCard
-            title="Registered Admins"
-            value={totalRegisteredAdmins}
-            icon={
-              <StatIcon d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            }
-            colorClass="bg-purple-500"
-          />
-          <StatCard
-            title="Scheduled for Orientation"
-            value={applicationsByStatus["Scheduled"] || 0}
-            icon={
-              <StatIcon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            }
-            colorClass="bg-indigo-600"
-          />
-          <StatCard
-            title="Referred to Doctor"
-            value={applicationsByStatus["Under Review"] || 0}
-            icon={
-              <StatIcon d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            }
-            colorClass="bg-blue-600"
-          />
-          {Object.keys(statusIconAndColorClasses)
-            .filter(
-              (status) =>
-                status !== "Total Applications" && status !== "Registered Admins",
-            )
-            .map((status) => {
-              const count = applicationsByStatus[status] || 0;
-              const { icon, colorClass } = statusIconAndColorClasses[status] || {
-                icon: (
-                  <StatIcon d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                ),
-                colorClass: "bg-gray-500",
-              };
-              return (
-                <StatCard
-                  key={status}
-                  title={status}
-                  value={count}
-                  icon={icon}
-                  colorClass={colorClass}
-                />
-              );
-            })}
+        {/* Enhanced Stats Grid - Main Overview Metrics */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
+            <h2 className="text-xl font-bold text-gray-900">Overview Metrics</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3 lg:gap-4">
+            <StatCard
+              title="Total Applications"
+              value={totalApplications}
+              icon={statusIconAndColorClasses["Total Applications"].icon}
+              colorClass={
+                statusIconAndColorClasses["Total Applications"].colorClass
+              }
+            />
+            <StatCard
+              title="Registered Admins"
+              value={totalRegisteredAdmins}
+              icon={
+                <StatIcon d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              }
+              colorClass="bg-gradient-to-br from-purple-500 to-purple-600"
+            />
+            <StatCard
+              title="Scheduled for Orientation"
+              value={applicationsByStatus["Scheduled"] || 0}
+              icon={
+                <StatIcon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              }
+              colorClass="bg-gradient-to-br from-indigo-400 to-indigo-500"
+            />
+            <StatCard
+              title="Referred to Doctor"
+              value={rejectionStats?.documentReferrals.pending || 0}
+              icon={
+                <StatIcon d="M8 7h12M8 12h12m-12 5h12M4 7h.01M4 12h.01M4 17h.01" />
+              }
+              colorClass="bg-gradient-to-br from-blue-400 to-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Application Status Breakdown */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-emerald-600 rounded-full"></div>
+            <h2 className="text-xl font-bold text-gray-900">Application Status Breakdown</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
+            <StatCard
+              title="Submitted"
+              value={applicationsByStatus["Submitted"] || 0}
+              icon={statusIconAndColorClasses["Submitted"].icon}
+              colorClass={statusIconAndColorClasses["Submitted"].colorClass}
+            />
+            <StatCard
+              title="For Document Verification"
+              value={applicationsByStatus["For Document Verification"] || 0}
+              icon={statusIconAndColorClasses["For Document Verification"].icon}
+              colorClass={statusIconAndColorClasses["For Document Verification"].colorClass}
+            />
+            <StatCard
+              title="For Payment Validation"
+              value={applicationsByStatus["For Payment Validation"] || 0}
+              icon={statusIconAndColorClasses["For Payment Validation"].icon}
+              colorClass={statusIconAndColorClasses["For Payment Validation"].colorClass}
+            />
+            <StatCard
+              title="For Orientation"
+              value={applicationsByStatus["For Orientation"] || 0}
+              icon={statusIconAndColorClasses["For Orientation"].icon}
+              colorClass={statusIconAndColorClasses["For Orientation"].colorClass}
+            />
+            <StatCard
+              title="Approved"
+              value={applicationsByStatus["Approved"] || 0}
+              icon={statusIconAndColorClasses["Approved"].icon}
+              colorClass={statusIconAndColorClasses["Approved"].colorClass}
+            />
+          </div>
+        </div>
+
+        {/* NEW: Rejection & Referral Metrics */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-orange-500 to-red-600 rounded-full"></div>
+            <h2 className="text-xl font-bold text-gray-900">Rejection & Referral Metrics</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 lg:gap-4">
+            <StatCard
+              title="Payment Rejected"
+              value={rejectionStats?.paymentRejections.pending || 0}
+              icon={<StatIcon d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />}
+              colorClass="bg-gradient-to-br from-orange-400 to-orange-500"
+            />
+            <StatCard
+              title="Permanently Rejected"
+              value={rejectionStats?.permanentRejections.total || 0}
+              icon={<StatIcon d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />}
+              colorClass="bg-gradient-to-br from-red-600 to-red-700"
+            />
+            <StatCard
+              title="Total Referred to Doctor"
+              value={rejectionStats?.documentReferrals.total || 0}
+              icon={<StatIcon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />}
+              colorClass="bg-gradient-to-br from-amber-400 to-amber-500"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8">
@@ -915,17 +978,31 @@ export default function SuperAdminPage() {
         {showQuickMetricsDetails && (
           <div className="mb-8 animate-fadeIn">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden mb-8">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  <h2 className="text-2xl font-bold text-white">Detailed Metrics & Analytics</h2>
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white/20 p-2 rounded-lg">
+                      <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">Detailed Metrics & Analytics</h2>
+                      <p className="text-indigo-100 text-sm mt-0.5">Deep dive into system performance and trends</p>
+                    </div>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span className="text-white text-sm font-semibold">Live Data</span>
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* First Row: Performance, Health, Rejection Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               {/* Application Performance & Trends */}
               <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md hover:shadow-lg transition-all">
                 <div className="flex items-center gap-3 mb-4">
@@ -974,6 +1051,217 @@ export default function SuperAdminPage() {
                 </div>
               </div>
 
+              {/* NEW: System Health & Performance */}
+              <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-cyan-100 p-2 rounded-lg">
+                    <svg className="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    System Health & Performance
+                  </h2>
+                </div>
+                <div className="space-y-4">
+                  {/* Processing Bottlenecks */}
+                  <div className="bg-gradient-to-r from-cyan-50 to-cyan-100 p-4 rounded-xl border border-cyan-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Processing Bottlenecks (Avg Time)
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Document Verification</span>
+                        <span className="text-sm font-bold text-cyan-700">{systemHealthMetrics?.processingBottlenecks.documentVerification.toFixed(1) || 0} hrs</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Payment Validation</span>
+                        <span className="text-sm font-bold text-cyan-700">{systemHealthMetrics?.processingBottlenecks.paymentValidation.toFixed(1) || 0} hrs</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Orientation Scheduling</span>
+                        <span className="text-sm font-bold text-cyan-700">{systemHealthMetrics?.processingBottlenecks.orientationScheduling.toFixed(1) || 0} hrs</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stage Completion Rates */}
+                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      Stage Completion Rates
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Submitted → Doc Verified</span>
+                        <span className="text-sm font-bold text-blue-700">{systemHealthMetrics?.stageCompletionRates.submittedToDocVerified || 0}%</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Doc Verified → Payment</span>
+                        <span className="text-sm font-bold text-blue-700">{systemHealthMetrics?.stageCompletionRates.docVerifiedToPayment || 0}%</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Payment → Approved</span>
+                        <span className="text-sm font-bold text-blue-700">{systemHealthMetrics?.stageCompletionRates.paymentToApproved || 0}%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Attention Needed */}
+                  <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      Attention Needed
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700 flex items-center gap-1">
+                          Docs pending >24hrs
+                          {(systemHealthMetrics?.attentionNeeded.docsPendingOver24h || 0) > 10 && <span className="text-red-600">🔴</span>}
+                          {(systemHealthMetrics?.attentionNeeded.docsPendingOver24h || 0) > 5 && (systemHealthMetrics?.attentionNeeded.docsPendingOver24h || 0) <= 10 && <span className="text-amber-600">🟡</span>}
+                        </span>
+                        <span className="text-sm font-bold text-amber-700">{systemHealthMetrics?.attentionNeeded.docsPendingOver24h || 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700 flex items-center gap-1">
+                          Payments pending >48hrs
+                          {(systemHealthMetrics?.attentionNeeded.paymentsPendingOver48h || 0) > 5 && <span className="text-red-600">🔴</span>}
+                          {(systemHealthMetrics?.attentionNeeded.paymentsPendingOver48h || 0) > 2 && (systemHealthMetrics?.attentionNeeded.paymentsPendingOver48h || 0) <= 5 && <span className="text-amber-600">🟡</span>}
+                        </span>
+                        <span className="text-sm font-bold text-amber-700">{systemHealthMetrics?.attentionNeeded.paymentsPendingOver48h || 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700 flex items-center gap-1">
+                          Orientations not scheduled
+                          {(systemHealthMetrics?.attentionNeeded.orientationsNotScheduled || 0) > 10 && <span className="text-orange-600">🟠</span>}
+                        </span>
+                        <span className="text-sm font-bold text-amber-700">{systemHealthMetrics?.attentionNeeded.orientationsNotScheduled || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* System Efficiency */}
+                  <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 rounded-xl border border-emerald-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      System Efficiency
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Overall Success Rate</span>
+                        <span className="text-sm font-bold text-emerald-700">{systemHealthMetrics?.systemEfficiency.overallSuccessRate || 0}%</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Avg Application Lifespan</span>
+                        <span className="text-sm font-bold text-emerald-700">{systemHealthMetrics?.systemEfficiency.avgApplicationLifespanDays || 0} days</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Peak Processing Hour</span>
+                        <span className="text-xs font-bold text-emerald-700">{systemHealthMetrics?.systemEfficiency.peakProcessingHour || "N/A"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rejection & Referral Analytics */}
+              <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-red-100 p-2 rounded-lg">
+                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Rejection & Referral Analytics
+                  </h2>
+                </div>
+                <div className="space-y-4">
+                  {/* Payment Rejection Stats */}
+                  <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-xl border border-orange-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      Payment Rejections
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Total Rejected</span>
+                        <span className="text-lg font-bold text-orange-700">{rejectionStats?.paymentRejections.total || 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Pending Resubmission</span>
+                        <span className="text-lg font-bold text-orange-600">{rejectionStats?.paymentRejections.pending || 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Already Resubmitted</span>
+                        <span className="text-lg font-bold text-emerald-600">
+                          {(rejectionStats?.paymentRejections.total || 0) - (rejectionStats?.paymentRejections.pending || 0)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Document Referral Stats */}
+                  <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Document Referrals to Doctor
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Total Referred</span>
+                        <span className="text-lg font-bold text-amber-700">{rejectionStats?.documentReferrals.total || 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Pending Resolution</span>
+                        <span className="text-lg font-bold text-amber-600">{rejectionStats?.documentReferrals.pending || 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Resolved</span>
+                        <span className="text-lg font-bold text-emerald-600">
+                          {(rejectionStats?.documentReferrals.total || 0) - (rejectionStats?.documentReferrals.pending || 0)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Permanent Rejection Stats */}
+                  <div className="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-xl border border-red-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                      Permanent Application Rejections
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Total Permanently Rejected</span>
+                        <span className="text-lg font-bold text-red-700">{rejectionStats?.permanentRejections.total || 0}</span>
+                      </div>
+                      <p className="text-xs text-gray-600 italic mt-2">
+                        These applications cannot be resubmitted and require a new application.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Admin Assignments Row - Full Width */}
+            <div className="mb-8">
               {/* Detailed Admin Assignments */}
               <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md hover:shadow-lg transition-all">
                 <div className="flex items-center gap-3 mb-4">
@@ -984,9 +1272,9 @@ export default function SuperAdminPage() {
                   </div>
                   <h2 className="text-xl font-bold text-gray-900">Detailed Admin Assignments</h2>
                 </div>
-                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(adminsByHealthCardType).map(([categoryName, admins]: [string, string[]]) => (
-                    <div key={categoryName} className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 rounded-xl border border-emerald-100">
+                    <div key={categoryName} className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 rounded-xl border border-emerald-100 hover:shadow-md transition-all">
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-bold text-gray-900">{categoryName}</h3>
                         <span className="px-3 py-1 bg-emerald-600 text-white text-xs font-bold rounded-full">{admins.length} admins</span>

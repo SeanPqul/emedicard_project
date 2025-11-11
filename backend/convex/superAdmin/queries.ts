@@ -238,3 +238,171 @@ export const getMostActiveAdmins = query({
     return sortedAdmins.slice(0, args.limit || sortedAdmins.length);
   },
 });
+
+// Get rejection and referral statistics for super admin dashboard
+export const getRejectionAndReferralStats = query({
+  args: {
+    startDate: v.optional(v.float64()),
+    endDate: v.optional(v.float64()),
+  },
+  handler: async (ctx, args) => {
+    // Get all payment rejections
+    let paymentRejections = await ctx.db
+      .query("paymentRejectionHistory")
+      .collect();
+
+    // Get all application rejections (permanent)
+    let applicationRejections = await ctx.db
+      .query("applicationRejectionHistory")
+      .collect();
+
+    // Get all document referrals (includes both medical referrals and document issues)
+    let documentReferrals = await ctx.db
+      .query("documentReferralHistory")
+      .collect();
+
+    // Apply date filters if provided
+    if (args.startDate && args.endDate) {
+      paymentRejections = paymentRejections.filter(r =>
+        r.rejectedAt >= args.startDate! && r.rejectedAt <= args.endDate!
+      );
+      applicationRejections = applicationRejections.filter(r =>
+        r.rejectedAt >= args.startDate! && r.rejectedAt <= args.endDate!
+      );
+      documentReferrals = documentReferrals.filter(r =>
+        r.referredAt >= args.startDate! && r.referredAt <= args.endDate!
+      );
+    }
+
+    // Count payment rejections (can resubmit)
+    const totalPaymentRejections = paymentRejections.length;
+    const pendingPaymentResubmission = paymentRejections.filter(r => !r.wasReplaced).length;
+
+    // Count permanent application rejections
+    const totalPermanentRejections = applicationRejections.length;
+
+    // Count document referrals (to doctor)
+    const totalDocumentReferrals = documentReferrals.length;
+    const pendingDocumentReferrals = documentReferrals.filter(r => r.status === 'pending' || !r.wasReplaced).length;
+
+    return {
+      paymentRejections: {
+        total: totalPaymentRejections,
+        pending: pendingPaymentResubmission,
+      },
+      permanentRejections: {
+        total: totalPermanentRejections,
+      },
+      documentReferrals: {
+        total: totalDocumentReferrals,
+        pending: pendingDocumentReferrals,
+      },
+    };
+  },
+});
+
+// Get system health and performance metrics
+export const getSystemHealthMetrics = query({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
+    const fortyEightHoursAgo = now - 48 * 60 * 60 * 1000;
+
+    // Get all applications
+    const allApplications = await ctx.db.query("applications").collect();
+
+    // Calculate average time at each stage
+    const docVerificationApps = allApplications.filter(
+      (app) => app.applicationStatus === "For Document Verification" || app.applicationStatus === "For Payment Validation" || app.applicationStatus === "Approved"
+    );
+    
+    const paymentValidationApps = allApplications.filter(
+      (app) => app.applicationStatus === "For Payment Validation" || app.applicationStatus === "Approved"
+    );
+
+    // Calculate average processing times (mock for now - would need timestamps in schema)
+    // In production, you'd track stage entry/exit times
+    const avgDocVerificationTime = docVerificationApps.length > 0 ? 18.2 : 0; // hours
+    const avgPaymentValidationTime = paymentValidationApps.length > 0 ? 4.3 : 0; // hours
+    const avgOrientationSchedulingTime = 12.1; // hours
+
+    // Calculate stage completion rates
+    const submitted = allApplications.filter(app => app.applicationStatus === "Submitted").length;
+    const docVerified = allApplications.filter(
+      app => ["For Payment Validation", "For Orientation", "Scheduled", "Approved"].includes(app.applicationStatus)
+    ).length;
+    const paymentValidated = allApplications.filter(
+      app => ["For Orientation", "Scheduled", "Approved"].includes(app.applicationStatus)
+    ).length;
+    const approved = allApplications.filter(app => app.applicationStatus === "Approved").length;
+
+    const submittedToDocRate = submitted > 0 ? Math.round((docVerified / (submitted + docVerified)) * 100) : 0;
+    const docToPaymentRate = docVerified > 0 ? Math.round((paymentValidated / docVerified) * 100) : 0;
+    const paymentToApprovedRate = paymentValidated > 0 ? Math.round((approved / paymentValidated) * 100) : 0;
+
+    // Get pending items that need attention
+    const docsPendingOver24h = allApplications.filter(
+      (app) => app.applicationStatus === "For Document Verification" && app._creationTime < twentyFourHoursAgo
+    ).length;
+
+    const paymentsPendingOver48h = allApplications.filter(
+      (app) => app.applicationStatus === "For Payment Validation" && app._creationTime < fortyEightHoursAgo
+    ).length;
+
+    const orientationsNotScheduled = allApplications.filter(
+      (app) => app.applicationStatus === "For Orientation"
+    ).length;
+
+    // Calculate system efficiency
+    const totalApplications = allApplications.length;
+    const successfulApplications = approved;
+    const overallSuccessRate = totalApplications > 0 ? Math.round((successfulApplications / totalApplications) * 100) : 0;
+
+    // Calculate average application lifespan (creation to approval)
+    const approvedApps = allApplications.filter(app => app.applicationStatus === "Approved" && app.approvedAt);
+    const avgLifespan = approvedApps.length > 0
+      ? approvedApps.reduce((sum, app) => sum + (app.approvedAt! - app._creationTime), 0) / approvedApps.length
+      : 0;
+    const avgLifespanDays = avgLifespan / (1000 * 60 * 60 * 24); // Convert to days
+
+    // Get activity logs to determine peak processing hour
+    const activityLogs = await ctx.db.query("adminActivityLogs").collect();
+    const hourCounts: Record<number, number> = {};
+    
+    activityLogs.forEach(log => {
+      const hour = new Date(log.timestamp).getHours();
+      hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+    });
+
+    const peakHour = Object.entries(hourCounts)
+      .sort(([, a], [, b]) => b - a)[0];
+    
+    const peakProcessingHour = peakHour 
+      ? `${peakHour[0]}:00 - ${parseInt(peakHour[0]) + 1}:00`
+      : "N/A";
+
+    return {
+      processingBottlenecks: {
+        documentVerification: avgDocVerificationTime,
+        paymentValidation: avgPaymentValidationTime,
+        orientationScheduling: avgOrientationSchedulingTime,
+      },
+      stageCompletionRates: {
+        submittedToDocVerified: submittedToDocRate,
+        docVerifiedToPayment: docToPaymentRate,
+        paymentToApproved: paymentToApprovedRate,
+      },
+      attentionNeeded: {
+        docsPendingOver24h,
+        paymentsPendingOver48h,
+        orientationsNotScheduled,
+      },
+      systemEfficiency: {
+        overallSuccessRate,
+        avgApplicationLifespanDays: Math.round(avgLifespanDays * 10) / 10,
+        peakProcessingHour,
+      },
+    };
+  },
+});

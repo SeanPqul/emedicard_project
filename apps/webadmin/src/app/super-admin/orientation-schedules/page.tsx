@@ -13,6 +13,7 @@ import {
   validateTimeRange,
 } from "@/lib/timeUtils";
 import { dateStringToPHTMidnight, dateToPHTMidnight } from "@/lib/dateUtils";
+import { DEFAULT_VENUE, DEFAULT_SCHEDULE_NOTES, CAPACITY_GUIDANCE } from "@/config/venueConfig";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { addDays, format, startOfWeek } from "date-fns";
@@ -40,11 +41,11 @@ const ScheduleModal = ({
   const [endTime, setEndTime] = useState(
     schedule?.endMinutes !== undefined ? minutesToTime(schedule.endMinutes) : "11:00"
   );
-  const [venueName, setVenueName] = useState(schedule?.venue.name || "");
-  const [venueAddress, setVenueAddress] = useState(schedule?.venue.address || "");
-  const [totalSlots, setTotalSlots] = useState(schedule?.totalSlots.toString() || "");
+  const [venueName, setVenueName] = useState(schedule?.venue.name || DEFAULT_VENUE.name);
+  const [venueAddress, setVenueAddress] = useState(schedule?.venue.address || DEFAULT_VENUE.address);
+  const [totalSlots, setTotalSlots] = useState(schedule?.totalSlots.toString() || DEFAULT_VENUE.defaultSlots.toString());
   const [selectedInspectorId, setSelectedInspectorId] = useState<Id<'users'> | ''>('' as any);
-  const [notes, setNotes] = useState(schedule?.notes || "");
+  const [notes, setNotes] = useState(schedule?.notes || DEFAULT_SCHEDULE_NOTES);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -233,7 +234,21 @@ const ScheduleModal = ({
 
           {/* Venue Section */}
           <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold text-gray-900">Venue Information</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">Venue Information</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setVenueName(DEFAULT_VENUE.name);
+                  setVenueAddress(DEFAULT_VENUE.address);
+                  setTotalSlots(DEFAULT_VENUE.defaultSlots.toString());
+                  setNotes(DEFAULT_SCHEDULE_NOTES);
+                }}
+                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium hover:underline"
+              >
+                Reset to Defaults
+              </button>
+            </div>
             
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -279,9 +294,19 @@ const ScheduleModal = ({
                 required
                 disabled={isLoading}
               />
-              <p className="text-xs text-gray-500 mt-2">
-                Maximum number of applicants that can book this session
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+                <div className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-xs font-medium text-blue-900">Capacity Guidance</p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      {CAPACITY_GUIDANCE.guidanceMessage}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -423,11 +448,11 @@ const BulkCreateModal = ({
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([1]); // Monday by default
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("11:00");
-  const [venueName, setVenueName] = useState("");
-  const [venueAddress, setVenueAddress] = useState("");
-  const [totalSlots, setTotalSlots] = useState("");
+  const [venueName, setVenueName] = useState(DEFAULT_VENUE.name);
+  const [venueAddress, setVenueAddress] = useState(DEFAULT_VENUE.address);
+  const [totalSlots, setTotalSlots] = useState(DEFAULT_VENUE.defaultSlots.toString());
   const [selectedInspectorId, setSelectedInspectorId] = useState<Id<'users'> | ''>('' as any);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(DEFAULT_SCHEDULE_NOTES);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -652,7 +677,21 @@ const BulkCreateModal = ({
 
           {/* Venue Info */}
           <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold text-gray-900">Venue Information</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">Venue Information</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setVenueName(DEFAULT_VENUE.name);
+                  setVenueAddress(DEFAULT_VENUE.address);
+                  setTotalSlots(DEFAULT_VENUE.defaultSlots.toString());
+                  setNotes(DEFAULT_SCHEDULE_NOTES);
+                }}
+                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium hover:underline"
+              >
+                Reset to Defaults
+              </button>
+            </div>
             
             <div className="grid grid-cols-1 gap-4">
               <input
@@ -683,9 +722,19 @@ const BulkCreateModal = ({
                 required
                 disabled={isLoading}
               />
-              <p className="text-xs text-gray-500 mt-2">
-                Maximum number of applicants per session
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+                <div className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-xs font-medium text-blue-900">Capacity Guidance</p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      {CAPACITY_GUIDANCE.guidanceMessage}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

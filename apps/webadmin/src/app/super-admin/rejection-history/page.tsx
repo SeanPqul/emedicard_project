@@ -296,30 +296,34 @@ export default function RejectionHistoryPage() {
               
               return (
                 <>
-                  {/* Medical Referrals - Compact */}
-                  <div className="bg-white rounded-xl p-4 shadow border border-gray-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-100">
-                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Medical Referrals */}
+                  <div className="group bg-white border-2 border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-xl hover:border-blue-300 transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 shadow-md group-hover:scale-110 transition-transform">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                       </div>
+                      <div>
+                        <div className="text-3xl font-bold text-gray-900">{medicalReferrals}</div>
+                        <div className="text-xs font-medium text-gray-600 mt-1">Medical Referrals</div>
+                      </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{medicalReferrals}</div>
-                    <div className="text-xs text-gray-600 mt-1">Medical Referrals</div>
                   </div>
 
-                  {/* Document Issues - Compact */}
-                  <div className="bg-white rounded-xl p-4 shadow border border-gray-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-orange-100">
-                        <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Document Issues */}
+                  <div className="group bg-white border-2 border-gray-200 rounded-2xl p-5 shadow-md hover:shadow-xl hover:border-orange-300 transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-orange-500 to-orange-600 shadow-md group-hover:scale-110 transition-transform">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
+                      <div>
+                        <div className="text-3xl font-bold text-gray-900">{documentIssues}</div>
+                        <div className="text-xs font-medium text-gray-600 mt-1">Document Issues</div>
+                      </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{documentIssues}</div>
-                    <div className="text-xs text-gray-600 mt-1">Document Issues</div>
                   </div>
                 </>
               );
@@ -453,25 +457,6 @@ export default function RejectionHistoryPage() {
               <div>
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                   <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Status
-                </label>
-                <select
-                  className="w-full md:w-auto px-4 py-3 pr-10 border border-gray-300 text-black rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-                >
-                  <option value="">All Status</option>
-                  <option value="referred">Referred</option>
-                  <option value="pending">Pending Resubmission</option>
-                  <option value="resubmitted">Resubmitted</option>
-                  <option value="permanently_rejected">Permanently Rejected</option>
-                </select>
-              </div>
-              <div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                  <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                   </svg>
                   Type
@@ -486,6 +471,25 @@ export default function RejectionHistoryPage() {
                   <option value="payment">Payment</option>
                   <option value="application">Application</option>
                   <option value="orientation">Orientation</option>
+                </select>
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Status
+                </label>
+                <select
+                  className="w-full md:w-auto px-4 py-3 pr-10 border border-gray-300 text-black rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+                >
+                  <option value="">All Status</option>
+                  <option value="referred">Referred</option>
+                  <option value="pending">Pending Resubmission</option>
+                  <option value="resubmitted">Resubmitted</option>
+                  <option value="permanently_rejected">Permanently Rejected</option>
                 </select>
               </div>
             </div>

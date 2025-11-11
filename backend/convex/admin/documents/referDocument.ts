@@ -259,7 +259,7 @@ export const referDocument = mutation({
         : "NeedsRevision";        // Document issue
 
       const adminRemarksText = maxAttemptsReached
-        ? `Maximum attempts (${maxAttempts}) reached. Please visit our office with your original documents for in-person verification.`
+        ? `Maximum resubmission attempts reached (${maxAttempts} attempts). In-person verification is now required. Please visit the City Health Office, Magsaysay Park Complex, Door 7, Davao City, with your original ${documentType.name}. Office hours: Monday-Friday, 8:00 AM - 5:00 PM. For appointment scheduling, contact us at 0926-686-1531.`
         : args.issueType === "medical_referral"
         ? `Medical Finding Detected - Please see ${args.doctorName} at ${args.clinicAddress || 'the designated clinic'}`
         : args.referralReason;
@@ -273,7 +273,7 @@ export const referDocument = mutation({
 
       // 9. Update application status with new terminology
       const newApplicationStatus = maxAttemptsReached
-        ? "Manual Review Required"
+        ? "Onsite Verification Required"
         : args.issueType === "medical_referral"
         ? "Referred for Medical Management"
         : "Documents Need Revision";
@@ -345,15 +345,15 @@ export const referDocument = mutation({
 
       // 12. Send notifications if max attempts reached
       if (maxAttemptsReached) {
-        // Max attempts reached - MANUAL REVIEW REQUIRED (Hybrid Approach)
+        // Max attempts reached - ONSITE VERIFICATION REQUIRED (Hybrid Approach)
         const specificIssuesText = args.specificIssues.length > 0
           ? `\n\nSpecific Issues:\n${args.specificIssues.map(issue => `• ${issue}`).join('\n')}`
           : '';
 
-        const notificationTitle = "⚠️ Manual Verification Required - Maximum Attempts Reached";
+        const notificationTitle = "⚠️ Onsite Verification Required - Maximum Attempts Reached";
         const notificationMessage = args.issueType === "medical_referral"
-          ? `You have reached the maximum number of referral attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Finding: ${args.referralReason}${specificIssuesText}\n\n📍 Please visit our office for in-person verification:\n\n📋 Bring: Original ${documentType.name}\n\n💡 Our staff will verify your documents in person and may approve your application on the spot if everything is in order.\n\n📌 For venue location and office hours, please check the Help Center in the app.\n\nFor questions, contact City Health Office at 0926-686-1531.`
-          : `You have reached the maximum number of resubmission attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Issue: ${args.referralReason}${specificIssuesText}\n\n📍 Please visit our office for in-person verification:\n\n📋 Bring: Original ${documentType.name}\n\n💡 Our staff will verify your documents in person and may approve your application on the spot if everything is in order.\n\n📌 For venue location and office hours, please check the Help Center in the app.\n\nFor questions, contact City Health Office at 0926-686-1531.`;
+          ? `Your ${documentType.name} requires in-person verification after ${maxAttempts} unsuccessful attempts.\n\nLast Finding: ${args.referralReason}${specificIssuesText}\n\n📍 Please visit the City Health Office for in-person verification:\n\n🏥 Venue: City Health Office, Magsaysay Park Complex, Door 7, Davao City\n🕐 Office Hours: Monday-Friday, 8:00 AM - 5:00 PM\n\n📋 What to Bring: Original ${documentType.name}\n\n💡 Our staff will verify your documents in person and may approve your application on the spot if everything is in order.\n\nFor appointment scheduling, contact: 0926-686-1531`
+          : `Your ${documentType.name} requires in-person verification after ${maxAttempts} unsuccessful resubmissions.\n\nLast Issue: ${args.referralReason}${specificIssuesText}\n\n📍 Please visit the City Health Office for in-person verification:\n\n🏥 Venue: City Health Office, Magsaysay Park Complex, Door 7, Davao City\n🕐 Office Hours: Monday-Friday, 8:00 AM - 5:00 PM\n\n📋 What to Bring: Original ${documentType.name}\n\n💡 Our staff will verify your documents in person and may approve your application on the spot if everything is in order.\n\nFor appointment scheduling, contact: 0926-686-1531`;
 
         const now = Date.now();
 

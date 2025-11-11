@@ -56,10 +56,12 @@ export default function AdminActivityPage() {
   const getActionColor = (action: string) => {
     const colorMap: Record<string, string> = {
       "Approved": "bg-green-100 text-green-800 border-green-200",
-      "Referred": "bg-amber-100 text-amber-800 border-amber-200",
-      "Updated": "bg-blue-100 text-blue-800 border-blue-200",
+      "Referred": "bg-blue-100 text-blue-800 border-blue-200",
+      "Flagged": "bg-orange-100 text-orange-800 border-orange-200",
+      "Updated": "bg-purple-100 text-purple-800 border-purple-200",
       "Verified": "bg-emerald-100 text-emerald-800 border-emerald-200",
-      "Created": "bg-purple-100 text-purple-800 border-purple-200",
+      "Created": "bg-indigo-100 text-indigo-800 border-indigo-200",
+      "Rejected": "bg-red-100 text-red-800 border-red-200",
     };
     return colorMap[action] || "bg-gray-100 text-gray-800 border-gray-200";
   };

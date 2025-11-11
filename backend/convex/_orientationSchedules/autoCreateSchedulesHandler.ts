@@ -5,6 +5,8 @@ import { formatTimeRange, calculateDuration, validateTimeRange } from "./timeUti
 /**
  * DEFAULT SCHEDULE CONFIGURATION
  * Customize these values based on your organization's needs
+ * 
+ * @updated 2025-11-10 - Configured for Davao City office (primary application venue)
  */
 const DEFAULT_CONFIG = {
   // Time slots for each weekday (using structured time: minutes since midnight)
@@ -13,19 +15,19 @@ const DEFAULT_CONFIG = {
     { startMinutes: 840, endMinutes: 960 }, // 2:00 PM - 4:00 PM
   ],
   
-  // Venue information
+  // Venue information - Davao City Office
   venue: {
-    name: "City Health Office",
-    address: "123 Health St., Downtown, Metro Manila",
-    capacity: 30,
+    name: "Magsaysay Complex - Door 7",
+    address: "Door 7, Magsaysay Complex, Magsaysay Park, Davao City",
+    capacity: 50, // Room's maximum safe capacity
   },
   
-  // Slots configuration
-  totalSlots: 25,
+  // Slots configuration - Conservative limit for comfortable spacing
+  totalSlots: 30,
   
   // Instructor information (optional - used if no inspector assigned)
   instructor: {
-    name: "Dr. Maria Santos",
+    name: "Health Inspector",
     designation: "Health Inspector",
   },
   
