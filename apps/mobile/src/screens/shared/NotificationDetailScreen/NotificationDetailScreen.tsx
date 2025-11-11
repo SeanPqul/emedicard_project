@@ -122,6 +122,7 @@ export function NotificationDetailScreen() {
     }
   }, [notification?.isRead]);
 
+  // Show loading only for the initial notification fetch
   if (isLoading) {
     return (
       <BaseScreen>
@@ -232,35 +233,24 @@ export function NotificationDetailScreen() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header with solid color background */}
-        <View
-          style={[styles.header, { backgroundColor: config?.color || theme.colors.primary[500] }]}
-        >
-          <TouchableOpacity 
-            style={styles.headerBackButton} 
+        {/* Inline Title with Back Button */}
+        <View style={styles.titleSection}>
+          <TouchableOpacity
+            style={styles.inlineBackButton}
             onPress={() => router.push('/(tabs)/notification')}
+            activeOpacity={0.7}
           >
-            <Ionicons name="arrow-back" size={moderateScale(24)} color="white" />
+            <Ionicons
+              name="arrow-back"
+              size={moderateScale(24)}
+              color={theme.colors.text.primary}
+            />
           </TouchableOpacity>
           
-          <View style={styles.iconContainer}>
-            <View style={styles.iconBackground}>
-              <Ionicons 
-                name={config?.icon || 'notifications'} 
-                size={moderateScale(36)} 
-                color={config?.color || theme.colors.primary[500]}
-              />
-            </View>
-          </View>
-        </View>
-
-        {/* Notification Content */}
-        <View style={styles.content}>
-          {/* Title and Time */}
-          <View style={styles.titleSection}>
+          <View style={styles.titleContent}>
             <Text style={styles.title}>{notification.title || 'Notification'}</Text>
             <View style={styles.timeContainer}>
-              <Ionicons name="time-outline" size={moderateScale(16)} color={theme.colors.text.secondary} />
+              <Ionicons name="time-outline" size={moderateScale(14)} color={theme.colors.text.secondary} />
               <Text style={styles.time}>
                 {notificationDate.toLocaleDateString('en-US', { 
                   weekday: 'short',
@@ -275,13 +265,17 @@ export function NotificationDetailScreen() {
               </Text>
             </View>
           </View>
+        </View>
+
+        {/* Notification Content */}
+        <View style={styles.content}>
 
           {/* Message */}
           <View style={styles.messageCard}>
             <Text style={styles.message}>{notification.message}</Text>
           </View>
 
-          {/* Application Info (if available) */}
+          {/* Application Info - Now loads instantly with notification */}
           {application && (
             <View style={styles.applicationCard}>
               <Text style={styles.sectionTitle}>Related Application</Text>
@@ -336,21 +330,14 @@ export function NotificationDetailScreen() {
             </View>
           )}
 
-          {/* Action Buttons */}
+          {/* Action Button */}
           <View style={styles.actionSection}>
             <TouchableOpacity 
-              style={[styles.primaryButton, { backgroundColor: config?.color || theme.colors.accent.safetyGreen }]}
+              style={styles.primaryButton}
               onPress={handlePrimaryAction}
             >
               <Ionicons name={config?.actionIcon || 'arrow-forward'} size={moderateScale(20)} color="white" />
               <Text style={styles.primaryButtonText}>{config?.actionText || 'View Details'}</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.secondaryButton}
-              onPress={() => router.push('/(tabs)/notification')}
-            >
-              <Text style={styles.secondaryButtonText}>Back to Notifications</Text>
             </TouchableOpacity>
           </View>
         </View>

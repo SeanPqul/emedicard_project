@@ -49,7 +49,7 @@ export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
 
   const getCardColor = (): string => {
     if (healthCard.type.toLowerCase().includes('food')) {
-      return theme.colors.orange[500];
+      return theme.colors.jobCategories.foodHandler; // Yellow/Gold (#FFD700)
     }
     if (healthCard.type.toLowerCase().includes('dental')) {
       return theme.colors.blue[500];
@@ -69,88 +69,113 @@ export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
     return 'Active';
   };
 
+  const cardColor = getCardColor();
+
   return (
     <Pressable
       style={({ pressed }) => [
         styles.container,
-        pressed && { opacity: 0.8 }
+        pressed && { opacity: 0.95, transform: [{ scale: 0.98 }] }
       ]}
       onPress={() => router.push('/(screens)/(shared)/health-cards')}
     >
-      {/* Official CHO Davao Style Health Card */}
+      {/* Modern Card with Gradient Header */}
+      <LinearGradient
+        colors={[cardColor, cardColor + 'DD']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{
+          borderRadius: moderateScale(16),
+          padding: moderateScale(16),
+          shadowColor: cardColor,
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+          elevation: 8,
+        }}
+      >
+        {/* Header with Icon and Status Badge */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: moderateScale(16) }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: moderateScale(10) }}>
+            <View style={{ 
+              width: moderateScale(40), 
+              height: moderateScale(40), 
+              backgroundColor: 'rgba(255,255,255,0.2)', 
+              borderRadius: moderateScale(12),
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Ionicons name="shield-checkmark" size={moderateScale(24)} color="#FFFFFF" />
+            </View>
+            <View>
+              <Text style={{ fontSize: moderateScale(10), color: 'rgba(255,255,255,0.8)', fontWeight: '500' }}>Health Certificate</Text>
+              <Text style={{ fontSize: moderateScale(13), color: '#FFFFFF', fontWeight: '700', marginTop: moderateScale(2) }}>{healthCard.type}</Text>
+            </View>
+          </View>
+          <View style={{
+            paddingHorizontal: moderateScale(12),
+            paddingVertical: moderateScale(6),
+            borderRadius: moderateScale(20),
+            backgroundColor: isExpired ? theme.colors.semantic.error : isExpiringSoon ? theme.colors.semantic.warning : theme.colors.semantic.success
+          }}>
+            <Text style={{ fontSize: moderateScale(10), color: '#FFFFFF', fontWeight: '700', textTransform: 'uppercase' }}>{getStatusText()}</Text>
+          </View>
+        </View>
+      </LinearGradient>
+
+      {/* Card Details Section */}
       <View style={{
         backgroundColor: '#FFFFFF',
+        marginTop: moderateScale(-8),
         borderRadius: moderateScale(16),
-        borderWidth: 2,
-        borderColor: '#E0E0E0',
         padding: moderateScale(16),
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
         shadowRadius: 8,
-        elevation: 4,
+        elevation: 3,
       }}>
-        {/* Header - CHO Davao */}
-        <View style={{ alignItems: 'center', marginBottom: moderateScale(12), borderBottomWidth: 1, borderBottomColor: '#E0E0E0', paddingBottom: moderateScale(10) }}>
-          <Text style={{ fontSize: moderateScale(10), color: '#666', fontWeight: '600' }}>EHS Form No. 102-A</Text>
-          <Text style={{ fontSize: moderateScale(9), color: '#888', marginTop: moderateScale(2) }}>REPUBLIC of the PHILIPPINES</Text>
-          <Text style={{ fontSize: moderateScale(13), color: '#DC2626', fontWeight: '800', marginTop: moderateScale(4) }}>CITY HEALTH OFFICE</Text>
-          <Text style={{ fontSize: moderateScale(11), color: '#444', fontWeight: '600' }}>Davao City</Text>
-        </View>
-
-        {/* Registration Number */}
-        <View style={{ alignItems: 'center', marginBottom: moderateScale(8) }}>
-          <Text style={{ fontSize: moderateScale(10), color: '#666', fontWeight: '600' }}>Reg. No. {healthCard.cardNumber}</Text>
-        </View>
-
-        {/* Certificate Title */}
-        <View style={{ alignItems: 'center', marginBottom: moderateScale(10) }}>
-          <Text style={{ fontSize: moderateScale(16), color: '#DC2626', fontWeight: '800', letterSpacing: 1 }}>HEALTH CERTIFICATE</Text>
-          <Text style={{ fontSize: moderateScale(8), color: '#666', marginTop: moderateScale(4), textAlign: 'center' }}>Pursuant to P.D. 522, P.D. 856, and City Ord. No. 078 s. 2000</Text>
-        </View>
-
-        {/* Card Body - Key Info */}
+        {/* Card ID */}
         <View style={{ marginBottom: moderateScale(12) }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: moderateScale(6) }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: moderateScale(9), color: '#666', marginBottom: moderateScale(2) }}>Name:</Text>
-              <Text style={{ fontSize: moderateScale(11), color: '#1F2937', fontWeight: '700' }} numberOfLines={1}>{healthCard.fullName}</Text>
-            </View>
-            <View style={{ width: moderateScale(50), height: moderateScale(50), backgroundColor: '#F3F4F6', borderRadius: moderateScale(8), borderWidth: 1, borderColor: '#D1D5DB', alignItems: 'center', justifyContent: 'center', marginLeft: moderateScale(8) }}>
-              <Ionicons name="person" size={moderateScale(24)} color="#9CA3AF" />
-            </View>
-          </View>
-          
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: moderateScale(4) }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: moderateScale(9), color: '#666' }}>Occupation:</Text>
-              <Text style={{ fontSize: moderateScale(10), color: '#374151', fontWeight: '600' }} numberOfLines={1}>{healthCard.type}</Text>
-            </View>
-          </View>
+          <Text style={{ fontSize: moderateScale(11), color: theme.colors.text.secondary, fontWeight: '500', marginBottom: moderateScale(4) }}>Card ID</Text>
+          <Text style={{ fontSize: moderateScale(16), color: theme.colors.text.primary, fontWeight: '700', letterSpacing: 0.5 }}>{healthCard.cardNumber}</Text>
         </View>
 
-        {/* Footer - Validity & Status */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: moderateScale(10), borderTopWidth: 1, borderTopColor: '#E0E0E0' }}>
-          <View>
-            <Text style={{ fontSize: moderateScale(8), color: '#888' }}>Valid Until</Text>
-            <Text style={{ fontSize: moderateScale(11), color: '#1F2937', fontWeight: '700', marginTop: moderateScale(2) }}>
-              {format(new Date(healthCard.expiryDate), 'MMM yyyy')}
-            </Text>
-          </View>
-          <View style={[{ paddingHorizontal: moderateScale(12), paddingVertical: moderateScale(6), borderRadius: moderateScale(12) }, { backgroundColor: getStatusColor() }]}>
-            <Text style={{ fontSize: moderateScale(10), color: '#FFFFFF', fontWeight: '700' }}>{getStatusText()}</Text>
-          </View>
+        {/* Holder Name */}
+        <View style={{ marginBottom: moderateScale(12) }}>
+          <Text style={{ fontSize: moderateScale(11), color: theme.colors.text.secondary, fontWeight: '500', marginBottom: moderateScale(4) }}>Holder</Text>
+          <Text style={{ fontSize: moderateScale(14), color: theme.colors.text.primary, fontWeight: '600' }} numberOfLines={1}>{healthCard.fullName}</Text>
         </View>
-      </View>
 
-      {/* View Details Button */}
-      <View style={styles.actionRow}>
-        <Text style={styles.actionText}>Tap to view details</Text>
-        <Ionicons 
-          name="chevron-forward" 
-          size={moderateScale(20)} 
-          color={theme.colors.text.secondary}
-        />
+        {/* Expiry Info */}
+        <View style={{
+          flexDirection: 'row',
+          backgroundColor: isExpired ? theme.colors.red[50] : isExpiringSoon ? theme.colors.orange[50] : theme.colors.green[50],
+          borderRadius: moderateScale(12),
+          padding: moderateScale(12),
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: moderateScale(8) }}>
+            <Ionicons 
+              name={isExpired ? 'alert-circle' : isExpiringSoon ? 'time' : 'checkmark-circle'} 
+              size={moderateScale(20)} 
+              color={isExpired ? theme.colors.red[600] : isExpiringSoon ? theme.colors.orange[600] : theme.colors.green[600]} 
+            />
+            <View>
+              <Text style={{ fontSize: moderateScale(10), color: theme.colors.text.secondary, fontWeight: '500' }}>Valid Until</Text>
+              <Text style={{ 
+                fontSize: moderateScale(13), 
+                color: isExpired ? theme.colors.red[700] : isExpiringSoon ? theme.colors.orange[700] : theme.colors.green[700], 
+                fontWeight: '700',
+                marginTop: moderateScale(2)
+              }}>
+                {format(new Date(healthCard.expiryDate), 'MMM dd, yyyy')}
+              </Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={moderateScale(18)} color={theme.colors.text.tertiary} />
+        </View>
       </View>
     </Pressable>
   );

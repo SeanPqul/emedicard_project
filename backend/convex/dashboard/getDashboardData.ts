@@ -161,10 +161,9 @@ export const getDashboardDataQuery = query({
         };
       }).filter(Boolean),
 
-      // Valid health cards with full details
+      // All health cards with full details (including expired ones)
       healthCards: await Promise.all(
         healthCards
-          .filter(card => card.expiryDate > Date.now())
           .map(async (card) => {
             const application = applications.find(app => app._id === card.applicationId);
             const jobCategory = application ? await ctx.db.get(application.jobCategoryId) : null;

@@ -171,8 +171,8 @@ export function ApplicationListWidget({
           };
         case 'Approved':
           return {
-            mainText: 'Health Card Ready',
-            subText: 'Download available',
+            mainText: 'Application Approved',
+            subText: 'Health card issued',
             icon: 'checkmark-circle',
             showPaymentBadge: false,
             isUrgent: false
@@ -215,8 +215,7 @@ export function ApplicationListWidget({
             const amount = (application as any)?.payment?.netAmount ?? DEFAULT_TOTAL_AMOUNT;
             return { text: `Pay ₱${Number(amount).toFixed(2)}`, icon: 'card-outline' };
           }
-        case 'Approved':
-          return { text: 'Download Card', icon: 'download-outline' };
+        // Removed 'Approved' case - users can access health card from Dashboard or Health Cards tab
         // Phase 4 Migration: New status actions
         case 'Referred for Medical Management':
           return { text: 'View Doctor Info', icon: 'medkit-outline' };

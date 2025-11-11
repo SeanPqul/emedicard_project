@@ -187,9 +187,10 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                 );
               }
               
-              // Get document counts from current application
+              // Get document counts and application status
               const totalDocs = currentApplication?.documentCount || 0;
               const allVerified = currentApplication?.documentsVerified || false;
+              const status = currentApplication?.status || '';
               
               if (totalDocs === 0) {
                 // Documents not uploaded yet (edge case)
@@ -209,10 +210,11 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
               let statusBadge: { text: string; color: string } | undefined;
               let cardGradient: [string, string] | undefined;
               
-              if (allVerified) {
+              // Check if application is approved - documents are automatically verified
+              if (status === 'Approved' || allVerified) {
                 // All documents verified
                 statusValue = '✓';
-                statusText = 'All documents verified';
+                statusText = 'All documents approved';
                 cardGradient = [theme.colors.primary[500], theme.colors.primary[600]];
               } else {
                 // Documents pending verification
@@ -243,7 +245,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                   <PresetStatCards.HealthCard
                     value="-"
                     subtitle={isNewUser ? "Apply for your card" : "No active card"}
-                    onPress={() => {}}
+                    onPress={() => isNewUser ? router.push('/(tabs)/apply') : router.push('/(tabs)/application')}
                   />
                 );
               }
@@ -294,7 +296,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                 <PresetStatCards.HealthCard
                   value={statusValue}
                   subtitle={statusText}
-                  onPress={() => {}}
+                  onPress={() => router.push('/(screens)/(shared)/health-cards')}
                   badge={statusBadge}
                   gradient={cardGradient}
                 />

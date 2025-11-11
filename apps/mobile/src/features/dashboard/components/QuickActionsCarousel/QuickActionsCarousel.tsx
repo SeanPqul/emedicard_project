@@ -37,7 +37,6 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
     const actions: QuickActionItem[] = [];
     
     const isNewUser = (!userApplications || userApplications.length === 0) && dashboardStats?.validHealthCards === 0;
-    const hasActiveCard = dashboardStats?.validHealthCards > 0;
     const isFoodHandler = ((currentApplication?.jobCategory?.name ?? '').toLowerCase()).includes('food');
     
     // Primary action based on user state (payments handled by ActionCenter now)
@@ -50,16 +49,8 @@ export const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({
         route: '/(tabs)/apply',
         gradient: [theme.colors.primary[500], theme.colors.primary[600]],
       });
-    } else if (hasActiveCard) {
-      actions.push({
-        id: 'view-card',
-        icon: 'qr-code',
-        title: 'View Health Card',
-        description: 'Show your digital health card QR code',
-        route: '/(screens)/(shared)/qr-code',
-        gradient: [theme.colors.semantic.success, theme.colors.green[600]],
-      });
     }
+    // Removed 'View Health Card' - redundant with Dashboard preview, Quick Stats, and Health Cards tab
     
     // Helpful actions
     

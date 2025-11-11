@@ -38,6 +38,7 @@ export function DashboardScreen() {
           refreshing: dashboardData.refreshing,
           currentApplication: dashboardData.currentApplication,
           isNewUser: dashboardData.isNewUser,
+          healthCard: dashboardData.healthCard,
         }}
         handlers={{
           onRefresh: dashboardData.onRefresh,

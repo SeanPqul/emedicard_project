@@ -26,13 +26,16 @@ export const getCardColor = (jobCategory: any): string => {
   if (jobCategory?.colorCode) {
     return jobCategory.colorCode;
   }
-  // Fallback colors
+  // Fallback colors - must match theme.colors.jobCategories
   if (jobCategory?.name.toLowerCase().includes('food')) {
-    return '#FFD700';
+    return '#FFD700'; // theme.colors.jobCategories.foodHandler
   } else if (jobCategory?.name.toLowerCase().includes('security')) {
-    return '#4169E1';
+    return '#4169E1'; // theme.colors.jobCategories.securityGuard
+  } else if (jobCategory?.name.toLowerCase().includes('pink') || 
+             jobCategory?.name.toLowerCase().includes('skin')) {
+    return '#FF69B4'; // theme.colors.jobCategories.pink
   }
-  return '#6B46C1';
+  return '#6B46C1'; // theme.colors.jobCategories.others
 };
 
 /**
@@ -101,9 +104,63 @@ export const formatDate = (timestamp?: number): string => {
  * For old schema cards, generate simple HTML on the fly
  */
 export const generateCardHtml = (card: HealthCardData | BackendHealthCard & { jobCategory?: any }): string => {
-  // New schema: use stored htmlContent
+  // New schema: use stored htmlContent with proper page size
   if ('htmlContent' in card && card.htmlContent) {
-    return card.htmlContent;
+    // Wrap the HTML content with proper page size settings for PDF generation
+    // Override the page size to match exact fold-container dimensions (640px x 448px)
+    const wrappedHtml = card.htmlContent.replace(
+      '@page {',
+      `@page {
+        /* Match exact fold-container dimensions: 640px width x 448px height */`
+    ).replace(
+      'size: 280mm 90mm;',
+      'size: 640px 448px;'
+    ).replace(
+      '</style>',
+      `
+      /* Critical: Force everything on ONE page at exact dimensions */
+      * {
+        page-break-inside: avoid !important;
+        page-break-before: avoid !important;
+        page-break-after: avoid !important;
+        break-inside: avoid !important;
+      }
+      
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 640px !important;
+        height: 448px !important;
+        overflow: hidden !important;
+        background: #e8e8e8;
+      }
+      
+      body {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+      }
+      
+      .fold-container {
+        page-break-inside: avoid !important;
+        box-shadow: none !important;
+        display: flex !important;
+        width: 640px !important;
+        height: 448px !important;
+      }
+      
+      .health-card, .card-back {
+        page-break-inside: avoid !important;
+        flex-shrink: 0 !important;
+      }
+      
+      @media print {
+        body { padding: 0 !important; background: #e8e8e8; }
+        .fold-container { box-shadow: none !important; }
+      }
+    </style>`
+    );
+    return wrappedHtml;
   }
   
   // Fallback for old schema: generate simple HTML

@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Share, Alert } from 'react-native';
-import { BaseScreenLayout } from '@/src/shared/components/layout/BaseScreenLayout';
+import { View, Text, ScrollView, TouchableOpacity, Share, Alert, ActivityIndicator, StyleSheet } from 'react-native';
+import { BaseScreen } from '@/src/shared/components/core';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { EmptyState } from '@shared/components';
 import QRCode from 'react-native-qrcode-svg';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import * as MediaLibrary from 'expo-media-library';
 import { useHealthCards, BackendHealthCard } from '@features/healthCards';
 import { Id } from '@backend/convex/_generated/dataModel';
-import { getColor } from '@shared/styles/theme';
-import { styles } from '@shared/styles/screens/shared-health-cards';
+import { theme } from '@shared/styles/theme';
+import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 import { 
   getCardColor, 
   getCardStatus, 
@@ -20,12 +19,10 @@ import {
   formatDate, 
   generateCardHtml
 } from '@features/healthCards';
-import { HealthCardsHeader } from './HealthCardsHeader';
 
 
 export function HealthCardsScreen() {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
-  const [downloadingCard, setDownloadingCard] = useState<string | null>(null);
   const [printingCard, setPrintingCard] = useState<string | null>(null);
   const [sharingCard, setSharingCard] = useState<string | null>(null);
 
@@ -60,39 +57,19 @@ export function HealthCardsScreen() {
     }
   };
 
-  const handleDownloadCard = async (card: BackendHealthCard) => {
-    try {
-      setDownloadingCard(card._id);
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Permission to access media library is required to download cards.');
-        return;
-      }
-
-      // Generate card as image using view-shot
-      const cardHtml = generateCardHtml(card);
-      const { uri } = await Print.printToFileAsync({ html: cardHtml });
-      
-      const asset = await MediaLibrary.createAssetAsync(uri);
-      await MediaLibrary.createAlbumAsync('Health Cards', asset, false);
-      
-      Alert.alert('Success', 'Health card downloaded to your gallery!');
-    } catch (error) {
-      console.error('Error downloading card:', error);
-      Alert.alert('Error', 'Failed to download card. Please try again.');
-    } finally {
-      setDownloadingCard(null);
-    }
-  };
-
   const handlePrintCard = async (card: BackendHealthCard) => {
     try {
       setPrintingCard(card._id);
       
       const cardHtml = generateCardHtml(card);
       
-      const { uri } = await Print.printToFileAsync({ html: cardHtml });
+      // Generate PDF with proper landscape dimensions for ID card (11" x 3.5" landscape)
+      const { uri } = await Print.printToFileAsync({ 
+        html: cardHtml,
+        // Exact fold-container dimensions in pixels
+        width: 640,
+        height: 448,
+      });
       
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri);
@@ -111,34 +88,58 @@ export function HealthCardsScreen() {
   // Show loading state
   if (isLoading) {
     return (
-      <BaseScreenLayout>
-        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-          <Text>Loading health cards...</Text>
+      <BaseScreen safeArea={false}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
+              <Ionicons name="arrow-back" size={moderateScale(24)} color={theme.colors.text.primary} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Health Cards</Text>
+            <View style={styles.backButton} />
+          </View>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+            <Text style={styles.loadingText}>Loading health cards...</Text>
+          </View>
         </View>
-      </BaseScreenLayout>
+      </BaseScreen>
     );
   }
 
   return (
-    <BaseScreenLayout>
-      {/* Green Branded Header */}
-      <HealthCardsHeader
-        cardCount={userHealthCards?.length || 0}
-      />
+    <BaseScreen safeArea={false}>
+      <View style={styles.container}>
+        {/* Modern Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
+            <Ionicons name="arrow-back" size={moderateScale(24)} color={theme.colors.text.primary} />
+          </TouchableOpacity>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>Health Cards</Text>
+            <Text style={styles.headerSubtitle}>
+              {userHealthCards?.length || 0} {userHealthCards?.length === 1 ? 'card' : 'cards'} available
+            </Text>
+          </View>
+          <View style={styles.backButton} />
+        </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {userHealthCards && userHealthCards.length > 0 ? (
-          userHealthCards.map((card) => {
-            const status = getCardStatus(card);
-            const cardColor = getCardColor(card.jobCategory);
-            const verificationUrl = generateVerificationUrl(card);
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          {userHealthCards && userHealthCards.length > 0 ? (
+            userHealthCards.map((card) => {
+              const status = getCardStatus(card);
+              const cardColor = getCardColor(card.jobCategory);
+              const verificationUrl = generateVerificationUrl(card);
             
             return (
               <View key={card._id} style={styles.cardContainer}>
+                {/* Card Header with Category and Status */}
                 <View style={[styles.cardHeader, { backgroundColor: cardColor }]}>
-                  <Text style={styles.cardType}>
-                    {card.jobCategory?.name || 'Health Card'}
-                  </Text>
+                  <View style={styles.cardHeaderLeft}>
+                    <Ionicons name="shield-checkmark" size={moderateScale(24)} color="#FFFFFF" />
+                    <Text style={styles.cardType}>
+                      {card.jobCategory?.name || 'Health Card'}
+                    </Text>
+                  </View>
                   <View style={[styles.statusBadge, { backgroundColor: getStatusColor(status) }]}>
                     <Text style={styles.statusText}>
                       {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -146,59 +147,71 @@ export function HealthCardsScreen() {
                   </View>
                 </View>
 
-                <View style={styles.cardContent}>
-                  <View style={styles.cardInfo}>
-                    <Text style={styles.cardId}>Card ID: {card.registrationNumber || (card as any).verificationToken}</Text>
-                    <Text style={styles.cardDates}>
-                      Issued: {formatDate(card.issuedDate || (card as any).issuedAt)}
-                    </Text>
-                    <Text style={styles.cardDates}>
-                      Expires: {formatDate(card.expiryDate || (card as any).expiresAt)}
-                    </Text>
+                {/* Card Body */}
+                <View style={styles.cardBody}>
+                  {/* Card ID Section */}
+                  <View style={styles.infoSection}>
+                    <Text style={styles.sectionLabel}>Card ID</Text>
+                    <Text style={styles.cardId}>{card.registrationNumber || (card as any).verificationToken}</Text>
                   </View>
 
+                  {/* Dates Section */}
+                  <View style={styles.datesRow}>
+                    <View style={styles.dateItem}>
+                      <Text style={styles.dateLabel}>Issued</Text>
+                      <Text style={styles.dateValue}>{formatDate(card.issuedDate || (card as any).issuedAt)}</Text>
+                    </View>
+                    <View style={styles.dateDivider} />
+                    <View style={styles.dateItem}>
+                      <Text style={styles.dateLabel}>Expires</Text>
+                      <Text style={styles.dateValue}>{formatDate(card.expiryDate || (card as any).expiresAt)}</Text>
+                    </View>
+                  </View>
+
+                  {/* QR Code Section */}
                   <TouchableOpacity
-                    style={styles.qrCodeContainer}
+                    style={styles.qrCodeSection}
                     onPress={() => setSelectedCard(selectedCard === card._id ? null : card._id)}
+                    activeOpacity={0.7}
                   >
                     {selectedCard === card._id ? (
-                      <View style={styles.qrCodeWrapper}>
-                        <QRCode
-                          value={verificationUrl}
-                          size={120}
-                          color="#000000"
-                          backgroundColor="#FFFFFF"
-                        />
+                      <View style={styles.qrCodeActive}>
+                        <View style={styles.qrCodeWrapper}>
+                          <QRCode
+                            value={verificationUrl}
+                            size={moderateScale(160)}
+                            color="#000000"
+                            backgroundColor="#FFFFFF"
+                          />
+                        </View>
+                        <Text style={styles.qrCodeActiveText}>Scan this code for verification</Text>
                       </View>
                     ) : (
                       <View style={styles.qrCodePlaceholder}>
-                        <Ionicons name="qr-code-outline" size={48} color={getColor('text.secondary')} />
-                        <Text style={styles.qrCodeText}>Tap to view QR</Text>
+                        <View style={styles.qrIconContainer}>
+                          <Ionicons name="qr-code-outline" size={moderateScale(48)} color={theme.colors.primary[500]} />
+                        </View>
+                        <Text style={styles.qrPlaceholderText}>Tap to view QR</Text>
                       </View>
                     )}
                   </TouchableOpacity>
                 </View>
 
+                {/* Action Buttons */}
                 <View style={styles.cardActions}>
                   <TouchableOpacity
                     style={styles.actionButton}
                     onPress={() => handleShareCard(card)}
                     disabled={sharingCard === card._id}
+                    activeOpacity={0.7}
                   >
-                    <Ionicons name="share-outline" size={20} color={getColor('primary.main')} />
+                    {sharingCard === card._id ? (
+                      <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+                    ) : (
+                      <Ionicons name="share-social-outline" size={moderateScale(20)} color={theme.colors.primary[500]} />
+                    )}
                     <Text style={styles.actionButtonText}>
                       {sharingCard === card._id ? 'Sharing...' : 'Share'}
-                    </Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => handleDownloadCard(card)}
-                    disabled={downloadingCard === card._id}
-                  >
-                    <Ionicons name="download-outline" size={20} color={getColor('primary.main')} />
-                    <Text style={styles.actionButtonText}>
-                      {downloadingCard === card._id ? 'Downloading...' : 'Download'}
                     </Text>
                   </TouchableOpacity>
 
@@ -206,23 +219,30 @@ export function HealthCardsScreen() {
                     style={styles.actionButton}
                     onPress={() => handlePrintCard(card)}
                     disabled={printingCard === card._id}
+                    activeOpacity={0.7}
                   >
-                    <Ionicons name="print-outline" size={20} color={getColor('primary.main')} />
+                    {printingCard === card._id ? (
+                      <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+                    ) : (
+                      <Ionicons name="print-outline" size={moderateScale(20)} color={theme.colors.primary[500]} />
+                    )}
                     <Text style={styles.actionButtonText}>
                       {printingCard === card._id ? 'Printing...' : 'Print'}
                     </Text>
                   </TouchableOpacity>
-
-                  {status === 'expired' && (
-                    <TouchableOpacity
-                      style={[styles.actionButton, styles.renewButton]}
-                      onPress={() => router.push('/(tabs)/apply')}
-                    >
-                      <Ionicons name="refresh-outline" size={20} color={getColor('text.white')} />
-                      <Text style={[styles.actionButtonText, styles.renewButtonText]}>Renew</Text>
-                    </TouchableOpacity>
-                  )}
                 </View>
+
+                {/* Renew Button for Expired Cards */}
+                {status === 'expired' && (
+                  <TouchableOpacity
+                    style={styles.renewButton}
+                    onPress={() => router.push('/(tabs)/apply')}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="refresh" size={moderateScale(20)} color="#FFFFFF" />
+                    <Text style={styles.renewButtonText}>Renew Health Card</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             );
           })
@@ -235,7 +255,229 @@ export function HealthCardsScreen() {
             onActionPress={() => router.push('/(tabs)/apply')}
           />
         )}
+        
+        <View style={styles.bottomSpacer} />
       </ScrollView>
-    </BaseScreenLayout>
+      </View>
+    </BaseScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background.secondary,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(12),
+    backgroundColor: theme.colors.ui.white,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.gray[200],
+  },
+  backButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitleContainer: {
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: moderateScale(18),
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+  },
+  headerSubtitle: {
+    fontSize: moderateScale(12),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(2),
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: scale(16),
+    paddingTop: verticalScale(16),
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: moderateScale(14),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(12),
+  },
+  cardContainer: {
+    backgroundColor: theme.colors.ui.white,
+    borderRadius: moderateScale(16),
+    marginBottom: verticalScale(16),
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(16),
+  },
+  cardHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(10),
+  },
+  cardType: {
+    fontSize: moderateScale(16),
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  statusBadge: {
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(6),
+    borderRadius: moderateScale(20),
+  },
+  statusText: {
+    fontSize: moderateScale(11),
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
+  },
+  cardBody: {
+    paddingHorizontal: scale(16),
+    paddingTop: verticalScale(16),
+    paddingBottom: verticalScale(20),
+  },
+  infoSection: {
+    marginBottom: verticalScale(16),
+  },
+  sectionLabel: {
+    fontSize: moderateScale(11),
+    fontWeight: '600',
+    color: theme.colors.text.secondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: verticalScale(6),
+  },
+  cardId: {
+    fontSize: moderateScale(18),
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+  },
+  datesRow: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.gray[50],
+    borderRadius: moderateScale(12),
+    padding: scale(16),
+    marginBottom: verticalScale(16),
+  },
+  dateItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  dateDivider: {
+    width: 1,
+    backgroundColor: theme.colors.gray[200],
+    marginHorizontal: scale(16),
+  },
+  dateLabel: {
+    fontSize: moderateScale(11),
+    fontWeight: '500',
+    color: theme.colors.text.secondary,
+    marginBottom: verticalScale(4),
+  },
+  dateValue: {
+    fontSize: moderateScale(13),
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+  },
+  qrCodeSection: {
+    alignItems: 'center',
+    paddingVertical: verticalScale(20),
+  },
+  qrCodeActive: {
+    alignItems: 'center',
+  },
+  qrCodeWrapper: {
+    padding: scale(16),
+    backgroundColor: '#FFFFFF',
+    borderRadius: moderateScale(16),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  qrCodeActiveText: {
+    fontSize: moderateScale(12),
+    color: theme.colors.text.secondary,
+    marginTop: verticalScale(12),
+  },
+  qrCodePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: verticalScale(32),
+  },
+  qrIconContainer: {
+    width: moderateScale(80),
+    height: moderateScale(80),
+    borderRadius: moderateScale(40),
+    backgroundColor: theme.colors.primary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: verticalScale(12),
+  },
+  qrPlaceholderText: {
+    fontSize: moderateScale(14),
+    fontWeight: '500',
+    color: theme.colors.primary[500],
+  },
+  cardActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(16),
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.gray[100],
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(10),
+    gap: scale(6),
+  },
+  actionButtonText: {
+    fontSize: moderateScale(13),
+    fontWeight: '600',
+    color: theme.colors.primary[500],
+  },
+  renewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.primary[500],
+    paddingVertical: verticalScale(14),
+    marginHorizontal: scale(16),
+    marginTop: verticalScale(8),
+    marginBottom: verticalScale(16),
+    borderRadius: moderateScale(12),
+    gap: scale(8),
+  },
+  renewButtonText: {
+    fontSize: moderateScale(15),
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  bottomSpacer: {
+    height: verticalScale(20),
+  },
+});

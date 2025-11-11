@@ -349,8 +349,8 @@ export function ApplicationDetailWidget({
                 {rejectedDocumentsCount} document{rejectedDocumentsCount !== 1 ? 's' : ''} need correction
               </Text>
             )}
-            {/* DEPRECATED: Legacy rejection message (backward compatibility) */}
-            {rejectedDocumentsCount > 0 && application.status !== 'Referred for Medical Management' && application.status !== 'Documents Need Revision' && (
+            {/* DEPRECATED: Legacy rejection message (backward compatibility) - Don't show if Approved */}
+            {rejectedDocumentsCount > 0 && application.status !== 'Referred for Medical Management' && application.status !== 'Documents Need Revision' && application.status !== 'Approved' && (
               <Text style={[styles.documentsStatusText, { color: theme.colors.semantic.error }]}>
                 {rejectedDocumentsCount} document{rejectedDocumentsCount !== 1 ? 's' : ''} need revision
               </Text>

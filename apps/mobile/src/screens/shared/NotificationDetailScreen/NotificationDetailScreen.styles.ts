@@ -47,55 +47,33 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Header Section
-  header: {
-    paddingTop: verticalScale(50),
-    paddingBottom: verticalScale(24),
+  // Title Section (Inline Header)
+  titleSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: scale(20),
-    borderBottomLeftRadius: moderateScale(24),
-    borderBottomRightRadius: moderateScale(24),
+    paddingVertical: verticalScale(16),
+    backgroundColor: theme.colors.background.primary,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light,
   },
-  headerBackButton: {
-    position: 'absolute',
-    top: verticalScale(50),
-    left: scale(20),
+  inlineBackButton: {
     width: moderateScale(40),
     height: moderateScale(40),
-    borderRadius: moderateScale(20),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: scale(-8),
+    marginRight: scale(12),
   },
-  iconContainer: {
-    alignItems: 'center',
-    marginTop: verticalScale(12),
-  },
-  iconBackground: {
-    width: moderateScale(70),
-    height: moderateScale(70),
-    borderRadius: moderateScale(35),
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-
-  // Content Section
-  content: {
-    padding: scale(20),
-  },
-  titleSection: {
-    marginBottom: verticalScale(24),
+  titleContent: {
+    flex: 1,
   },
   title: {
-    fontSize: moderateScale(24),
-    fontWeight: 'bold',
+    fontSize: moderateScale(20),
+    fontWeight: '700',
     color: theme.colors.text.primary,
-    marginBottom: verticalScale(8),
+    letterSpacing: -0.3,
+    marginBottom: verticalScale(4),
   },
   timeContainer: {
     flexDirection: 'row',
@@ -103,21 +81,29 @@ export const styles = StyleSheet.create({
     gap: scale(6),
   },
   time: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(13),
     color: theme.colors.text.secondary,
+  },
+
+  // Content Section
+  content: {
+    padding: scale(20),
   },
 
   // Message Card
   messageCard: {
     backgroundColor: 'white',
     padding: moderateScale(20),
-    borderRadius: moderateScale(12),
+    borderRadius: moderateScale(16),
     marginBottom: verticalScale(20),
-    borderWidth: 1,
-    borderColor: theme.colors.border.light,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   message: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(15),
     color: theme.colors.text.primary,
     lineHeight: moderateScale(24),
   },
@@ -126,24 +112,29 @@ export const styles = StyleSheet.create({
   applicationCard: {
     backgroundColor: 'white',
     padding: moderateScale(20),
-    borderRadius: moderateScale(12),
+    borderRadius: moderateScale(16),
     marginBottom: verticalScale(20),
-    borderWidth: 1,
-    borderColor: theme.colors.border.light,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   sectionTitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(16),
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: verticalScale(16),
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: verticalScale(10),
+    paddingVertical: verticalScale(12),
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border.light,
+    borderBottomColor: theme.colors.gray[100],
   },
   infoLabel: {
     fontSize: moderateScale(14),
@@ -166,12 +157,14 @@ export const styles = StyleSheet.create({
   },
   statusBadge: {
     paddingHorizontal: scale(12),
-    paddingVertical: verticalScale(4),
-    borderRadius: moderateScale(12),
+    paddingVertical: verticalScale(6),
+    borderRadius: moderateScale(20),
   },
   statusText: {
-    fontSize: moderateScale(12),
-    fontWeight: '600',
+    fontSize: moderateScale(11),
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 
   // Stats Container
@@ -184,10 +177,13 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     padding: moderateScale(16),
-    borderRadius: moderateScale(12),
+    borderRadius: moderateScale(16),
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.border.light,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   statValue: {
     fontSize: moderateScale(20),
@@ -205,7 +201,6 @@ export const styles = StyleSheet.create({
   actionSection: {
     marginTop: verticalScale(20),
     paddingBottom: verticalScale(40),
-    gap: verticalScale(12),
   },
   primaryButton: {
     flexDirection: 'row',
@@ -213,24 +208,17 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: scale(8),
     paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(12),
+    borderRadius: moderateScale(16),
+    backgroundColor: theme.colors.primary[500],
+    shadowColor: theme.colors.primary[500],
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   primaryButtonText: {
     fontSize: moderateScale(16),
     fontWeight: '700',
     color: 'white',
-  },
-  secondaryButton: {
-    alignItems: 'center',
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(12),
-    borderWidth: 1,
-    borderColor: theme.colors.border.medium,
-    backgroundColor: 'white',
-  },
-  secondaryButtonText: {
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-    color: theme.colors.text.secondary,
   },
 });

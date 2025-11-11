@@ -7,6 +7,8 @@
 
 export { getAdminNotifications } from "./_notifications/getAdminNotifications";
 export { getUserNotifications } from "./_notifications/getUserNotifications";
+export { getNotificationById } from "./_notifications/getNotificationById";
+export { getNotificationWithDetails } from "./_notifications/getNotificationWithDetails";
 export { getRejectionHistoryNotifications } from "./_notifications/getRejectionHistoryNotifications";
 export { getPaymentRejectionNotifications } from "./_notifications/getPaymentRejectionNotifications";
 // Alias the underlying export name to a stable public name

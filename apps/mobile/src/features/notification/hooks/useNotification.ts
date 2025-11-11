@@ -3,14 +3,10 @@ import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 
 export function useNotification(notificationId: string | undefined) {
-  // Fetch all notifications and find the specific one
-  const notifications = useQuery(api.notifications.getUserNotifications, {});
-  const notification = notifications?.find((n: { _id: string }) => n._id === notificationId);
-
-  // Fetch related application if it exists
-  const application = useQuery(
-    api.applications.getApplicationById.getApplicationByIdQuery,
-    notification?.applicationId ? { applicationId: notification.applicationId } : 'skip'
+  // Use combined query to fetch notification and application in single request
+  const data = useQuery(
+    api.notifications.getNotificationWithDetails,
+    notificationId ? { notificationId: notificationId as Id<'notifications'> } : 'skip'
   );
 
   // Mark as read mutation
@@ -27,9 +23,9 @@ export function useNotification(notificationId: string | undefined) {
   };
 
   return {
-    notification,
-    application,
-    isLoading: notifications === undefined,
+    notification: data?.notification,
+    application: data?.application,
+    isLoading: notificationId ? data === undefined : false,
     markAsRead,
   };
 }
