@@ -3,7 +3,7 @@
 import DashboardActivityLog from '@/components/DashboardActivityLog';
 import ErrorMessage from '@/components/ErrorMessage';
 import Navbar from '@/components/shared/Navbar';
-import { api } from '@/convex/_generated/api';
+import { api } from 'backend/convex/_generated/api';
 import { useUser } from '@clerk/nextjs';
 import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';

@@ -2,8 +2,8 @@
 
 import { useStoreUser } from '@/app/hooks/useStoreUser';
 import Navbar from '@/components/shared/Navbar';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
+import { api } from 'backend/convex/_generated/api';
+import { Id } from 'backend/convex/_generated/dataModel';
 import { useUser } from '@clerk/nextjs';
 import { useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';

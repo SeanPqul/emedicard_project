@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { NotificationIcon, getNotificationTypeLabel } from './NotificationIcon';
-import type { Id } from '@/convex/_generated/dataModel';
+import type { Id } from 'backend/convex/_generated/dataModel';
 
 export interface NotificationCardProps {
   notification: {

@@ -1,7 +1,7 @@
 // src/components/ApplicantActivityLog.tsx
 
-import { api } from '@/convex/_generated/api'; // Use consolidated backend
-import { Doc, Id } from '@/convex/_generated/dataModel'; // Added Doc import
+import { api } from 'backend/convex/_generated/api'; // Use consolidated backend
+import { Doc, Id } from 'backend/convex/_generated/dataModel'; // Added Doc import
 import { useQuery } from 'convex/react';
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';

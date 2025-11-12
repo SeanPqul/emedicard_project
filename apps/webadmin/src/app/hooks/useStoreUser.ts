@@ -1,7 +1,7 @@
 // src/app/hooks/useStoreUser.ts
 
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel"; // Import the Id type
+import { api } from 'backend/convex/_generated/api';
+import { Id } from 'backend/convex/_generated/dataModel'; // Import the Id type
 import { useUser } from "@clerk/nextjs";
 import { useConvexAuth, useMutation } from "convex/react";
 import { useEffect, useState } from "react";
