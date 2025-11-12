@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/create-convex-stubs.js && pnpm exec turbo run build --filter=webadmin",
+  "buildCommand": "pnpm exec turbo run build --filter=webadmin",
   "installCommand": "pnpm install",
   "framework": "nextjs",
   "outputDirectory": "apps/webadmin/.next"
