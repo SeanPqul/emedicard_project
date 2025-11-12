@@ -22,6 +22,7 @@
     "@emedicard/utils": "workspace:*",
     "@emedicard/validation": "workspace:*",
     "@radix-ui/react-icons": "^1.3.2",
+    "backend": "workspace:*",
     "clsx": "^2.1.1",
     "convex": "^1.25.4",
     "date-fns": "^4.1.0",
@@ -32,7 +33,8 @@
     "recharts": "^3.2.1",
     "sonner": "^2.0.7",
     "svix": "^1.69.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

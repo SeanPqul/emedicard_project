@@ -3,7 +3,9 @@
 import { api } from '@/convex/_generated/api'; // Use consolidated backend
 import { Doc, Id } from '@/convex/_generated/dataModel'; // Added Doc import
 import { useQuery } from 'convex/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { isLoggingOut } from '@/utils/convexErrorHandler';
 
 // Define the type for an activity log entry with applicant name
 type AdminActivityLogWithApplicantName = Doc<"adminActivityLogs"> & {
@@ -21,11 +23,18 @@ interface ApplicantActivityLogProps {
 
 const ApplicantActivityLog: React.FC<ApplicantActivityLogProps> = ({ applicationId, applicantName }) => {
   const [showLog, setShowLog] = useState(false);
+  const { isSignedIn } = useUser();
+  const [shouldSkipQueries, setShouldSkipQueries] = useState(false);
+
+  // Check if we should skip queries (not authenticated or logging out)
+  useEffect(() => {
+    setShouldSkipQueries(!isSignedIn || isLoggingOut());
+  }, [isSignedIn]);
 
   // Use the new query to fetch application-specific admin activities
   const activityLogs: AdminActivityLogWithApplicantName[] | undefined = useQuery(
     api.admin.activityLogs.getApplicationActivityLogs,
-    { applicationId }
+    shouldSkipQueries ? "skip" : { applicationId }
   );
 
   return (

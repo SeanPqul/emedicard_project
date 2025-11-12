@@ -4,6 +4,8 @@ import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { useEffect, useRef, useState } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { isLoggingOut } from '@/utils/convexErrorHandler';
 
 // Define the type for an activity log entry
 type AdminActivityLog = Doc<"adminActivityLogs"> & {
@@ -118,10 +120,19 @@ const getActionStyle = (action: string) => {
 export default function DashboardActivityLog() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isSignedIn } = useUser();
+  const [shouldSkipQueries, setShouldSkipQueries] = useState(false);
+
+  // Check if we should skip queries (not authenticated or logging out)
+  useEffect(() => {
+    setShouldSkipQueries(!isSignedIn || isLoggingOut());
+  }, [isSignedIn]);
+
   // @ts-ignore - Type instantiation is excessively deep
   const recentActivities = useQuery(
     // @ts-ignore
-    api.admin.activityLogs.getRecentAdminActivities
+    api.admin.activityLogs.getRecentAdminActivities,
+    shouldSkipQueries ? "skip" : undefined
   );
 
   // Logic to close dropdown when clicking outside

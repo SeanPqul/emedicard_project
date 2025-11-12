@@ -32,7 +32,14 @@ ios
 apps/mobile
 
 # Backend services (not needed for webadmin)
-backend
+# BUT we need backend/convex for the generated API files
+backend/node_modules
+backend/ocr-service
+backend/docs
+backend/*.md
+!backend/convex
+!backend/package.json
+!backend/tsconfig.json
 
 # Documentation
 docs

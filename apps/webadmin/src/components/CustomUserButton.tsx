@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import Image from 'next/image';
+import { setLoggingOut } from '@/utils/convexErrorHandler';
 
 export default function CustomUserButton() {
   const { user } = useUser();
@@ -24,6 +25,20 @@ export default function CustomUserButton() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
+
+  const handleSignOut = async () => {
+    // Set logging out flag to prevent auth error displays
+    setLoggingOut(true);
+    
+    // Close the dropdown
+    setIsOpen(false);
+    
+    // Small delay to allow state updates
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Sign out and redirect
+    await signOut({ redirectUrl: '/' });
+  };
 
   if (!user) {
     return null;
@@ -69,7 +84,7 @@ export default function CustomUserButton() {
             </div>
             <div className="py-1 border-t border-gray-100">
               <button
-                onClick={() => signOut({ redirectUrl: '/' })}
+                onClick={handleSignOut}
                 className="w-full text-left block px-4 py-2 text-sm text-red-600 font-medium hover:bg-red-50 hover:text-red-700"
                 role="menuitem"
               >
