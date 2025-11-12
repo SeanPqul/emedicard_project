@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd backend && npx convex codegen && cd .. && pnpm exec turbo run build --filter=webadmin",
+  "buildCommand": "node scripts/generate-convex.js && pnpm exec turbo run build --filter=webadmin",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "outputDirectory": "apps/webadmin/.next"
