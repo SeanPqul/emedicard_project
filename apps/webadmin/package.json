@@ -21,6 +21,7 @@
     "@emedicard/types": "workspace:*",
     "@emedicard/utils": "workspace:*",
     "@emedicard/validation": "workspace:*",
+    "backend": "workspace:*",
     "@radix-ui/react-icons": "^1.3.2",
     "clsx": "^2.1.1",
     "convex": "^1.25.4",
