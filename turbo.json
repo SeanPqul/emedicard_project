@@ -19,7 +19,7 @@
         "expo-env.d.ts",
         "convex/_generated/**"
       ],
-      "env": ["NODE_ENV", "EXPO_PUBLIC_*", "CONVEX_*", "CLERK_*"]
+      "env": ["NODE_ENV", "EXPO_PUBLIC_*", "CONVEX_*", "CLERK_*", "NEXT_PUBLIC_*", "VERCEL_*"]
     },
     "dev": {
       "cache": false,
