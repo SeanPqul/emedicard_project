@@ -1,0 +1,55 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+.next
+.turbo
+dist
+build
+out
+
+# Cache directories
+.cache
+.eslintcache
+
+# Test files
+coverage
+test-results
+**/__tests__
+**/*.test.*
+**/*.spec.*
+
+# Development
+.vscode
+.idea
+*.log
+*.logs
+
+# Mobile app (not needed for webadmin deployment)
+android
+ios
+apps/mobile
+
+# Backend services (not needed for webadmin)
+backend
+
+# Documentation
+docs
+*.md
+!README.md
+
+# Git
+.git
+.github
+
+# Environment files (Vercel manages these)
+.env*
+!.env.example
+
+# Misc
+.DS_Store
+*.swp
+*.swo
+*~
+.vercel
