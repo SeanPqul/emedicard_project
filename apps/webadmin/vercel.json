@@ -1,9 +1,9 @@
 {
-  "buildCommand": "cd ../.. && pnpm install --frozen-lockfile && pnpm run build --filter=webadmin",
-  "outputDirectory": "apps/webadmin/.next",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- apps/webadmin backend packages",
+  "installCommand": "cd ../.. && pnpm install && cd apps/webadmin",
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- .",
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1",

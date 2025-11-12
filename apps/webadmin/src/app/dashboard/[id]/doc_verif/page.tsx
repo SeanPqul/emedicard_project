@@ -1349,29 +1349,40 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               if (item.fileUrl) {
                                 setOcrLoading(true);
                                 setError(null);
+                                console.log("Starting OCR extraction for:", item.fileUrl);
                                 try {
                                   const response = await fetch(item.fileUrl);
+                                  if (!response.ok) {
+                                    throw new Error(`Failed to fetch document: ${response.statusText}`);
+                                  }
                                   const blob = await response.blob();
+                                  console.log("Downloaded document blob:", blob.type, blob.size);
                                   const file = new File([blob], "document", { type: blob.type });
 
                                   const formData = new FormData();
                                   formData.append("file", file);
 
+                                  console.log("Sending to OCR API...");
                                   const ocrResponse = await fetch("/api/ocr", {
                                     method: "POST",
                                     body: formData,
                                   });
 
+                                  console.log("OCR API response status:", ocrResponse.status);
                                   if (!ocrResponse.ok) {
-                                    const errorData = await ocrResponse.json();
-                                    throw new Error(errorData.error || "Failed to extract text.");
+                                    const errorData = await ocrResponse.json().catch(() => ({}));
+                                    console.error("OCR API error:", errorData);
+                                    throw new Error(errorData.error || `API returned ${ocrResponse.status}`);
                                   }
 
                                   const result = await ocrResponse.json();
-                                  setExtractedText(result.text ? result.text.split('\n') : ["No text found."]);
+                                  console.log("OCR result:", result);
+                                  const textLines = result.text ? result.text.split('\n') : ["No text found."];
+                                  setExtractedText(textLines);
                                   setShowOcrModal(true);
+                                  console.log("OCR modal should now be visible");
                                 } catch (error: any) {
-                                  console.error("OCR Error:", error);
+                                  console.error("OCR Error Details:", error);
                                   setError({ title: "OCR Failed", message: error.message || "Could not extract text from the document." });
                                 } finally {
                                   setOcrLoading(false);
