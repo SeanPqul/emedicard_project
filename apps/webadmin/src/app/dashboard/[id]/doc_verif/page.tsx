@@ -1377,10 +1377,21 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
 
                                   const result = await ocrResponse.json();
                                   console.log("OCR result:", result);
-                                  const textLines = result.text ? result.text.split('\n') : ["No text found."];
-                                  setExtractedText(textLines);
-                                  setShowOcrModal(true);
-                                  console.log("OCR modal should now be visible");
+                                  
+                                  // Handle both success and timeout cases
+                                  if (result.text) {
+                                    const textLines = result.text.split('\n');
+                                    setExtractedText(textLines.length > 0 ? textLines : ["No text found."]);
+                                    setShowOcrModal(true);
+                                    console.log("OCR modal opened with text");
+                                  } else if (result.error) {
+                                    // Show error but still open modal with message
+                                    setExtractedText([`⚠️ ${result.message || result.error}`]);
+                                    setShowOcrModal(true);
+                                  } else {
+                                    setExtractedText(["No text found in document."]);
+                                    setShowOcrModal(true);
+                                  }
                                 } catch (error: any) {
                                   console.error("OCR Error Details:", error);
                                   setError({ title: "OCR Failed", message: error.message || "Could not extract text from the document." });
