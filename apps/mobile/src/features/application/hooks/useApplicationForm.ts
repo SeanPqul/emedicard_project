@@ -39,7 +39,7 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
       return { 
         uploading: false, 
         progress: 0, 
-        error: null, 
+        error: null,
         success: false,
         queued: false
       };

@@ -1,11 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
+import NetInfo from '@react-native-community/netinfo';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { formStorage } from '../services/formStorage';
 import { DocumentRequirement } from '@/src/entities/application/model/types';
 import { JobCategory } from '@/src/entities/jobCategory/model/types';
 import { ApplicationFormData } from '../lib/validation';
+import { ErrorLogger } from '@/src/shared/utils/errorLogger';
 
 interface UseSubmissionProps {
   formData: ApplicationFormData;
@@ -31,6 +33,31 @@ export const useSubmission = ({
   resetForm,
 }: UseSubmissionProps) => {
   const [loading, setLoading] = useState(false);
+  const submissionLockRef = useRef(false); // Prevents double-submit race condition
+
+  /**
+   * Determines if an error is transient (network-related) and should be retried
+   */
+  const isTransientError = (error: unknown): boolean => {
+    if (!(error instanceof Error)) return false;
+    const message = error.message.toLowerCase();
+    const transientKeywords = [
+      'timeout',
+      'network',
+      'connection',
+      'fetch',
+      'abort',
+      'econnreset',
+      'enotfound',
+      'etimedout',
+    ];
+    return transientKeywords.some(keyword => message.includes(keyword));
+  };
+
+  /**
+   * Sleep utility for retry delays
+   */
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const ensureDraftApplication = useCallback(async (): Promise<string> => {
     const existingAppId = formStorage.getApplicationId();
@@ -69,7 +96,17 @@ export const useSubmission = ({
     return applicationId;
   }, [applications, formData]);
 
+  /**
+   * Uploads documents with retry logic for transient failures.
+   * Returns uploaded documents with storageIds.
+   */
   const uploadDocuments = useCallback(async (queueId: string) => {
+    // Check network connection first
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      throw new Error('No internet connection. Please check your connection and try again.');
+    }
+
     const queue = formStorage.getDeferredQueue(queueId);
     if (!queue) throw new Error('Document queue not found');
 
@@ -79,6 +116,7 @@ export const useSubmission = ({
     if (operations.length === 0) return uploadedDocuments;
 
     let failureCount = 0;
+    const maxRetries = 3;
 
     for (const operation of operations) {
       if (operation.status === 'completed' && operation.uploadResult) {
@@ -86,13 +124,41 @@ export const useSubmission = ({
         continue;
       }
 
-      try {
+      let lastError: Error | null = null;
+
+      // Retry loop with exponential backoff
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const isRetry = attempt > 1;
+          if (isRetry) {
+            // Exponential backoff: 1s, 2s, 4s
+            const delay = Math.pow(2, attempt - 1) * 1000;
+            await sleep(delay);
+            
+            // Re-check network before retry
+            const netState = await NetInfo.fetch();
+            if (!netState.isConnected) {
+              throw new Error('No internet connection. Please check your connection and try again.');
+            }
+          }
         formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 10);
 
+        // Check file accessibility with timeout
         try {
-          const response = await fetch(operation.file.uri, { method: 'HEAD' });
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+          
+          const response = await fetch(operation.file.uri, { 
+            method: 'HEAD',
+            signal: controller.signal 
+          });
+          clearTimeout(timeoutId);
+          
           if (!response.ok) throw new Error(`File no longer accessible: ${response.status}`);
-        } catch {
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') {
+            throw new Error('File check timeout. Please check your connection.');
+          }
           throw new Error(`Document file is no longer available: ${operation.file.name}`);
         }
 
@@ -100,8 +166,15 @@ export const useSubmission = ({
 
         let fileResponse: Response;
         try {
-          fileResponse = await fetch(operation.file.uri);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+          
+          fileResponse = await fetch(operation.file.uri, { signal: controller.signal });
+          clearTimeout(timeoutId);
         } catch (fetchError) {
+          if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+            throw new Error('File fetch timeout. Please check your connection.');
+          }
           throw new Error(`Failed to fetch file: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`);
         }
         if (!fileResponse.ok) {
@@ -140,12 +213,20 @@ export const useSubmission = ({
 
         let uploadResponse: Response;
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s upload timeout
+          
           uploadResponse = await fetch(uploadUrl, {
             method: 'POST',
             body: fileBlob,
             headers: { 'Content-Type': contentType },
+            signal: controller.signal,
           });
+          clearTimeout(timeoutId);
         } catch (uploadError) {
+          if (uploadError instanceof Error && uploadError.name === 'AbortError') {
+            throw new Error('Upload timeout. Please check your connection and try again.');
+          }
           throw new Error(`Upload request failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
         }
         if (!uploadResponse.ok) {
@@ -165,12 +246,32 @@ export const useSubmission = ({
         uploadedDocuments[operation.documentId] = uploadData;
 
         formStorage.updateOperationStatus(queueId, operation.id, 'completed', 100, undefined, uploadData);
+        
+        // Success - break retry loop
+        lastError = null;
+        break;
       } catch (error) {
-        failureCount++;
+        lastError = error as Error;
         const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+        
+        // Check if error is retryable
+        if (isTransientError(error) && attempt < maxRetries) {
+          // Will retry on next iteration
+          formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 10);
+          continue;
+        }
+        
+        // Non-retryable error or max retries reached
         formStorage.updateOperationStatus(queueId, operation.id, 'failed', 0, errorMessage);
+        break;
       }
     }
+
+    // If all retries failed, increment failure count
+    if (lastError) {
+      failureCount++;
+    }
+  }
 
     if (failureCount > 0) {
       throw new Error(`Failed to upload ${failureCount} document(s). Please check your internet connection and try again.`);
@@ -202,6 +303,12 @@ export const useSubmission = ({
 
   const handleSubmit = useCallback(async () => {
     if (!validateCurrentStep()) return;
+
+    // Prevent double-submit (race condition protection)
+    if (submissionLockRef.current) {
+      Alert.alert('Please Wait', 'Your application is already being submitted. Please wait...');
+      return;
+    }
 
     const tempApp = formStorage.getTempApplication();
     if (!tempApp?.queueId) {
@@ -240,11 +347,15 @@ export const useSubmission = ({
     }
 
     setLoading(true);
+    submissionLockRef.current = true; // Acquire lock
+    
     try {
       await submitApplicationWithoutPayment();
     } catch {
       Alert.alert('Error', 'Failed to submit application. Please try again.');
       setLoading(false);
+    } finally {
+      submissionLockRef.current = false; // Always release lock
     }
   }, [validateCurrentStep, requirementsByJobCategory, formData]);
 
@@ -255,6 +366,10 @@ export const useSubmission = ({
       setLoading(false);
       return;
     }
+
+    // Track resources for rollback
+    const uploadedStorageIds: string[] = [];
+    let createdApplicationId: string | null = null;
 
     try {
       if (!jobCategoriesData || jobCategoriesData.length === 0) {
@@ -276,14 +391,31 @@ export const useSubmission = ({
         throw new Error(`Invalid job category selected. Selected: ${formData.jobCategory}, Available: ${jobCategoriesData?.length || 0} categories`);
       }
 
-      const applicationId = await ensureDraftApplication();
+      // ========================================
+      // PHASE 1: Upload documents first (with retry logic)
+      // ========================================
+      const uploadedDocuments = await uploadDocuments(tempApp.queueId);
+      
+      // Track uploaded storage IDs for potential rollback
+      uploadedStorageIds.push(...Object.values(uploadedDocuments).map(doc => doc.storageId));
 
+      // ========================================
+      // PHASE 2: Create application (only if uploads succeeded)
+      // ========================================
+      const applicationId = await ensureDraftApplication();
+      createdApplicationId = applicationId;
+
+      // Save progress after application is created
       formStorage.saveApplicationProgress(formData, tempApp.selectedDocuments, tempApp.currentStep, applicationId);
 
-      const uploadedDocuments = await uploadDocuments(tempApp.queueId);
-
+      // ========================================
+      // PHASE 3: Link uploaded documents to application
+      // ========================================
       await linkDocuments(applicationId, uploadedDocuments);
 
+      // ========================================
+      // PHASE 4: Submit application (changes status from Draft to Submitted)
+      // ========================================
       const result = await applications.mutations.submitApplicationForm(applicationId, null, null);
 
       if (result.success) {
@@ -313,12 +445,56 @@ export const useSubmission = ({
             },
           ]
         );
+
+        // Clear tracking since submission succeeded
+        uploadedStorageIds.length = 0;
+        createdApplicationId = null;
       } else {
         throw new Error('Submission failed');
       }
     } catch (error) {
+      // ========================================
+      // ROLLBACK: Clean up resources on failure
+      // ========================================
+      
+      // Log submission failure
+      ErrorLogger.logCritical('Application submission failed', error, {
+        queueId: tempApp?.queueId,
+        applicationId: createdApplicationId,
+        uploadedFilesCount: uploadedStorageIds.length,
+        jobCategory: formData.jobCategory,
+      });
+      
       if (tempApp?.queueId) {
         formStorage.updateQueueStatus(tempApp.queueId, 'failed');
+      }
+
+      // Delete created application if it exists
+      if (createdApplicationId) {
+        try {
+          await applications.mutations.deleteApplication(createdApplicationId);
+          // Local storage will be cleared when clearTempApplication() is called
+        } catch (deleteError) {
+          ErrorLogger.logRollbackFailure('application_deletion', deleteError, {
+            applicationId: createdApplicationId,
+            queueId: tempApp.queueId,
+          });
+          // Continue with storage file cleanup even if app deletion fails
+        }
+      }
+
+      // Delete uploaded storage files
+      for (const storageId of uploadedStorageIds) {
+        try {
+          await requirements.mutations.deleteStorageFile(storageId);
+        } catch (deleteError) {
+          ErrorLogger.logRollbackFailure('storage_deletion', deleteError, {
+            storageId,
+            applicationId: createdApplicationId,
+            queueId: tempApp.queueId,
+          });
+          // Continue cleaning up other files
+        }
       }
 
       Alert.alert('Submission Error', error instanceof Error ? error.message : 'Failed to submit application. Please try again.');
