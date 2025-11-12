@@ -29,6 +29,8 @@ interface OtpInputUIProps {
   onSubmit: () => void;
   onResend: () => void;
   onBack: () => void;
+  hideActionButton?: boolean;
+  children?: React.ReactNode;
 }
 
 export const OtpInputUI: React.FC<OtpInputUIProps> = ({
@@ -47,6 +49,8 @@ export const OtpInputUI: React.FC<OtpInputUIProps> = ({
   onSubmit,
   onResend,
   onBack,
+  hideActionButton = false,
+  children,
 }) => {
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
@@ -121,21 +125,27 @@ export const OtpInputUI: React.FC<OtpInputUIProps> = ({
               {error ? <Text style={styles.errorText}>{error}</Text> : null}
             </View>
 
-            <TouchableOpacity
-              style={[
-                styles.verifyButton,
-                (!isCodeComplete || isLoading) && styles.buttonDisabled,
-              ]}
-              onPress={onSubmit}
-              disabled={isLoading || !isCodeComplete}
-            >
-              <Text style={[
-                styles.verifyButtonText,
-                (!isCodeComplete || isLoading) && styles.buttonTextDisabled,
-              ]}>
-                {isLoading ? "Verifying..." : buttonText}
-              </Text>
-            </TouchableOpacity>
+            {/* Action button (optional) */}
+            {!hideActionButton && (
+              <TouchableOpacity
+                style={[
+                  styles.verifyButton,
+                  (!isCodeComplete || isLoading) && styles.buttonDisabled,
+                ]}
+                onPress={onSubmit}
+                disabled={isLoading || !isCodeComplete}
+              >
+                <Text style={[
+                  styles.verifyButtonText,
+                  (!isCodeComplete || isLoading) && styles.buttonTextDisabled,
+                ]}>
+                  {isLoading ? "Verifying..." : buttonText}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Custom content slot for additional UI (e.g., password fields) */}
+            {children}
 
             <View style={styles.resendContainer}>
               <Text style={styles.resendText}>Didn't receive the code?</Text>

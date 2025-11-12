@@ -1,102 +1,167 @@
 import { StyleSheet } from 'react-native';
-import { theme } from '@shared/styles/theme';
-import { moderateScale, verticalScale, scale } from '@/src/shared/utils/responsive';
+import { FONT_SIZES, FONT_WEIGHTS, moderateScale, verticalScale } from '@shared/utils/responsive';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from '@shared/utils/responsive';
+import { getColor, getBorderRadius, getShadow } from '@shared/styles/theme';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: scale(24),
-    paddingTop: verticalScale(24),
-    backgroundColor: theme.colors.background.primary,
+    backgroundColor: getColor('background.primary'),
+    justifyContent: 'center',
+    paddingHorizontal: wp('5%'),
+    paddingBottom: hp('4%'),
+    paddingTop: hp('4%'),
   },
+
+  orgLogosContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: hp('3%'),
+  },
+  orgLogo: {
+    alignItems: 'center',
+  },
+  logoImage: {
+    width: moderateScale(100),       
+    height: moderateScale(100),
+    marginBottom: verticalScale(8),
+  },
+  orgText: {
+    fontSize: FONT_SIZES.caption,  
+    color: getColor('text.secondary'),
+    fontWeight: FONT_WEIGHTS.bold,
+    textAlign: 'center',
+  },
+
   iconContainer: {
     alignItems: 'center',
-    marginBottom: verticalScale(24),
+    marginBottom: hp('2%'),
   },
   iconCircle: {
-    width: moderateScale(80),
-    height: moderateScale(80),
-    borderRadius: moderateScale(40),
-    backgroundColor: '#EBF5FF',
+    width: moderateScale(100),
+    height: moderateScale(100),
+    borderRadius: moderateScale(50),
+    backgroundColor: '#E8F5E8',
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   title: {
-    fontSize: theme.typography.h2.fontSize,
-    fontWeight: theme.typography.h2.fontWeight,
-    color: theme.colors.text.primary,
+    fontSize: FONT_SIZES.headline,
+    fontWeight: 'bold',
+    color: getColor('text.primary'),
     textAlign: 'center',
-    marginBottom: verticalScale(8),
+    marginBottom: verticalScale(12),
   },
   subtitle: {
-    fontSize: theme.typography.bodySmall.fontSize,
-    color: theme.colors.text.secondary,
+    fontSize: FONT_SIZES.body,
+    color: getColor('text.secondary'),
     textAlign: 'center',
-    marginBottom: verticalScale(32),
-    lineHeight: moderateScale(20),
+    lineHeight: moderateScale(18),
+    marginBottom: verticalScale(20),
   },
+
   formContainer: {
-    width: '100%',
+    width: wp('90%'),
+    alignSelf: 'center',
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background.secondary,
-    borderRadius: theme.borderRadius.md,
-    borderWidth: moderateScale(1),
-    borderColor: theme.colors.border.light,
-    marginBottom: verticalScale(16),
-    paddingHorizontal: scale(16),
-    height: verticalScale(56),
-  },
+
   inputIcon: {
-    marginRight: scale(12),
+    marginRight: moderateScale(12),
   },
+
   inputWithIcon: {
     flex: 1,
-    fontSize: theme.typography.body.fontSize,
-    color: theme.colors.text.primary,
+    fontSize: FONT_SIZES.body,
+    color: getColor('text.primary'),
   },
+
+  input: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: getColor('background.tertiary'),
+    borderColor: getColor('border.light'),
+    borderRadius: getBorderRadius('lg'),
+    paddingHorizontal: moderateScale(13),
+    paddingVertical: verticalScale(8),
+    marginBottom: verticalScale(13),
+    fontSize: FONT_SIZES.body,
+    ...getShadow('small'),
+  },
+
   eyeIcon: {
-    padding: moderateScale(8),
+    position: 'absolute',
+    right: moderateScale(13),
   },
+
   errorContainer: {
-    minHeight: verticalScale(24),
-    marginBottom: verticalScale(8),
+    minHeight: verticalScale(16),
+    marginTop: verticalScale(-8),
   },
   errorText: {
-    fontSize: theme.typography.bodySmall.fontSize,
-    color: theme.colors.status.error,
-    textAlign: 'center',
+    color: getColor('semantic.error'),
+    fontSize: FONT_SIZES.caption,
+    fontWeight: '500',
   },
+
   passwordRequirements: {
-    marginBottom: verticalScale(24),
-  },
-  primaryButton: {
-    backgroundColor: theme.colors.blue[500],
-    borderRadius: theme.borderRadius.md,
-    paddingVertical: verticalScale(16),
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: verticalScale(16),
   },
-  buttonDisabled: {
-    opacity: 0.6,
+  requirementsTitle: {
+    fontSize: FONT_SIZES.micro,
+    color: getColor('text.secondary'),
+    fontWeight: FONT_WEIGHTS.medium,
+    marginBottom: verticalScale(4),
   },
-  primaryButtonText: {
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: '600' as const,
-    color: theme.colors.text.inverse,
+  requirementItem: {
+    fontSize: FONT_SIZES.micro,
+    color: getColor('text.tertiary'),
+    lineHeight: moderateScale(16),
   },
+  requirementMet: {
+    color: getColor('accent.primaryGreen'),
+    fontWeight: FONT_WEIGHTS.medium,
+  },
+
+  sendCodeButton: {
+    backgroundColor: getColor('semanticUI.primaryButton'),
+    borderRadius: getBorderRadius('lg'),
+    height: hp('6.5%'), 
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: verticalScale(12),
+    ...getShadow('medium'),
+  },
+  sendCodeButtonText: {
+    color: getColor('text.inverse'),
+    fontSize: FONT_SIZES.body,
+    fontWeight: FONT_WEIGHTS.bold,
+  },
+
+  resetPasswordButton: {
+    backgroundColor: getColor('semanticUI.primaryButton'),
+    borderRadius: getBorderRadius('lg'),
+    height: hp('6.5%'), 
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: verticalScale(12),
+    ...getShadow('medium'),
+  },
+  resetPasswordButtonText: {
+    color: getColor('text.inverse'),
+    fontSize: FONT_SIZES.body,
+    fontWeight: FONT_WEIGHTS.bold,
+  },
+
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: verticalScale(12),
   },
-  backButtonText: {
-    fontSize: theme.typography.bodySmall.fontSize,
-    color: theme.colors.text.secondary,
-    marginLeft: scale(8),
+  backText: {
+    color: getColor('text.secondary'),
+    fontSize: FONT_SIZES.caption,
+    marginLeft: moderateScale(8),
   },
 });
