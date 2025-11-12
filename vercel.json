@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm exec turbo run build --filter=webadmin",
+  "buildCommand": "pnpm exec turbo run build --filter=backend --filter=webadmin",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "outputDirectory": "apps/webadmin/.next"
