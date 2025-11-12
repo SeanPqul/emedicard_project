@@ -20,6 +20,10 @@ export function useProfile() {
   const memberSince = new Date(user?.createdAt || Date.now()).getFullYear();
   const imageUrl = user?.imageUrl || userProfile?.image || null;
 
+  // Check if user has password authentication enabled
+  // If user only has OAuth (like Google), passwordEnabled will be false
+  const hasPassword = user?.passwordEnabled ?? false;
+
   return {
     isLoading,
     user: {
@@ -27,6 +31,7 @@ export function useProfile() {
       email,
       memberSince,
       imageUrl,
+      hasPassword,
     },
   };
 }

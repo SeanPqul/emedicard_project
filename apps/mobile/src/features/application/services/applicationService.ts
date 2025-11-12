@@ -10,7 +10,7 @@ import { SelectedDocuments, DocumentFile } from '@shared/types';
 import { formStorage } from './formStorage';
 import { validateApplicationStep, ApplicationFormData as BaseApplicationFormData, ApplicationType, CivilStatus } from '../lib/validation';
 
-export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
+export type PaymentMethod = 'Maya' | 'BaranggayHall' | 'CityHall';
 
 // Note: ApplicationType and CivilStatus are re-exported from types.ts
 // Don't re-export here to avoid duplicate export errors
@@ -315,7 +315,7 @@ export class ApplicationService {
    * Validates payment reference for digital payment methods
    */
   static validatePaymentReference(paymentMethod: PaymentMethod, reference?: string): boolean {
-    if (paymentMethod === 'Gcash' || paymentMethod === 'Maya') {
+    if (paymentMethod === 'Maya') {
       return !!(reference && reference.trim().length >= 6);
     }
     // Manual payments don't require user-provided references
@@ -334,14 +334,12 @@ export class ApplicationService {
    */
   static formatPaymentMethodName(method: PaymentMethod): string {
     switch (method) {
-      case 'Gcash':
-        return 'GCash';
       case 'Maya':
         return 'Maya';
       case 'BaranggayHall':
         return 'Barangay Hall';
       case 'CityHall':
-        return 'City Hall';
+        return 'Sangunian Hall';
       default:
         return method;
     }

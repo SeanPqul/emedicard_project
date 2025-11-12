@@ -1,10 +1,14 @@
 import { StyleSheet } from 'react-native';
 import { getBorderRadius, getColor, getShadow, getSpacing, getTypography } from '@shared/styles/theme';
+import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: getColor('background.secondary'),
+  },
+  scrollView: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -23,7 +27,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   headerSpacer: {
-    width: 40,
+    width: moderateScale(40),
   },
   infoCard: {
     backgroundColor: getColor('background.primary'),
@@ -34,9 +38,9 @@ export const styles = StyleSheet.create({
     ...getShadow('small'),
   },
   iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: moderateScale(64),
+    height: moderateScale(64),
+    borderRadius: moderateScale(32),
     backgroundColor: getColor('primary.light') + '20',
     justifyContent: 'center',
     alignItems: 'center',
@@ -83,7 +87,7 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
   },
   totalRow: {
-    borderTopWidth: 1,
+    borderTopWidth: scale(1),
     borderTopColor: getColor('border.light'),
     paddingTop: getSpacing('sm'),
     marginTop: getSpacing('xs'),
@@ -104,7 +108,7 @@ export const styles = StyleSheet.create({
     marginBottom: getSpacing('lg'),
     padding: getSpacing('lg'),
     borderRadius: getBorderRadius('lg'),
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: getColor('primary.light') + '40',
   },
   instructionsHeader: {
@@ -121,7 +125,7 @@ export const styles = StyleSheet.create({
   instructionStep: {
     ...getTypography('body'),
     color: getColor('text.secondary'),
-    lineHeight: 22,
+    lineHeight: moderateScale(22),
     marginBottom: getSpacing('xs'),
   },
   inputContainer: {
@@ -137,7 +141,7 @@ export const styles = StyleSheet.create({
   textInput: {
     ...getTypography('body'),
     backgroundColor: getColor('background.primary'),
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: getColor('border.light'),
     borderRadius: getBorderRadius('md'),
     padding: getSpacing('md'),
@@ -160,7 +164,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: getColor('background.primary'),
-    borderWidth: 2,
+    borderWidth: scale(2),
     borderStyle: 'dashed',
     borderColor: getColor('primary.main'),
     borderRadius: getBorderRadius('lg'),
@@ -181,7 +185,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: getColor('background.primary'),
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: getColor('border.light'),
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),
@@ -196,12 +200,12 @@ export const styles = StyleSheet.create({
     backgroundColor: getColor('background.primary'),
     borderRadius: getBorderRadius('lg'),
     padding: getSpacing('md'),
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: getColor('border.light'),
   },
   receiptPreview: {
     width: '100%',
-    height: 200,
+    height: verticalScale(200),
     borderRadius: getBorderRadius('md'),
     marginBottom: getSpacing('sm'),
     resizeMode: 'cover',

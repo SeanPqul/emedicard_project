@@ -173,30 +173,37 @@ export function PaymentWidget({
     >
       {/* Payment Method Selection */}
       <Text style={styles.sectionTitle}>Select Payment Method</Text>
-      {PAYMENT_METHODS.map(method => (
-        <TouchableOpacity 
-          key={method.id} 
-          style={[
-            styles.paymentOption,
-            selectedPaymentMethod === method.id && styles.paymentOptionSelected
-          ]} 
-          onPress={() => setSelectedPaymentMethod(method.id)}
-        >
-          <Ionicons 
-            name={method.icon as any} 
-            size={24} 
-            color={selectedPaymentMethod === method.id ? getColor('success.main') : getColor('text.secondary')} 
-          />
-          <View style={styles.paymentDetails}>
-            <Text style={styles.paymentName}>{method.name}</Text>
-            <Text style={styles.paymentDescription}>{method.description}</Text>
-            <Text style={styles.paymentFee}>₱{method.fee}</Text>
-          </View>
-          {selectedPaymentMethod === method.id && (
-            <Ionicons name="checkmark" size={20} color={getColor('success.main')} />
-          )}
-        </TouchableOpacity>
-      ))}
+      <View style={styles.paymentGrid}>
+        {PAYMENT_METHODS.map(method => (
+          <TouchableOpacity 
+            key={method.id} 
+            style={[
+              styles.paymentOption,
+              selectedPaymentMethod === method.id && styles.paymentOptionSelected
+            ]} 
+            onPress={() => setSelectedPaymentMethod(method.id)}
+          >
+            <Ionicons 
+              name={method.icon as any} 
+              size={32} 
+              color={selectedPaymentMethod === method.id ? getColor('success.main') : getColor('text.secondary')} 
+            />
+            <View style={styles.paymentDetails}>
+              <Text style={styles.paymentName}>{method.name}</Text>
+              <Text style={styles.paymentDescription}>{method.description}</Text>
+              <Text style={styles.paymentFee}>₱{method.fee}</Text>
+            </View>
+            {selectedPaymentMethod === method.id && (
+              <Ionicons 
+                name="checkmark-circle" 
+                size={24} 
+                color={getColor('success.main')} 
+                style={styles.checkIcon}
+              />
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
 
       {/* Payment Details */}
       {selectedPaymentMethod && (
@@ -285,13 +292,6 @@ function PaymentInstructions({
   return (
     <View style={styles.instructionsContainer}>
       <Text style={styles.instructionsTitle}>Payment Instructions:</Text>
-      {paymentMethod === 'Gcash' && (
-        <Text style={styles.instructionsText}>
-          1. Open your GCash app{"\n"}
-          2. Send ₱{amount} to 09123456789{"\n"}
-          3. Enter the reference number above
-        </Text>
-      )}
       {paymentMethod === 'Maya' && (
         <Text style={styles.instructionsText}>
           1. Open your Maya app{"\n"}
@@ -308,7 +308,7 @@ function PaymentInstructions({
       )}
       {paymentMethod === 'CityHall' && (
         <Text style={styles.instructionsText}>
-          1. Visit the City Hall{"\n"}
+          1. Visit the Sangunian Hall{"\n"}
           2. Pay ₱{amount} for health card processing{"\n"}
           3. Upload the receipt using the button above
         </Text>

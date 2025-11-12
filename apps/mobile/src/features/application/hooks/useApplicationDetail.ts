@@ -153,8 +153,6 @@ export function useApplicationDetail(applicationId: string | undefined) {
         console.error('Payment error:', error);
         Alert.alert('Payment Error', 'Failed to process payment. Please try again.');
       }
-    } else if (method === 'Gcash') {
-      Alert.alert('Coming Soon', 'GCash payment integration is coming soon!');
     } else if (method === 'BaranggayHall' || method === 'CityHall') {
       // Navigate to manual payment upload screen
       if (!application) {

@@ -33,19 +33,6 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: hp('2%'),
-  },
-  iconCircle: {
-    width: moderateScale(100),
-    height: moderateScale(100),
-    borderRadius: moderateScale(50),
-    backgroundColor: '#E8F5E8',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
   title: {
     fontSize: FONT_SIZES.headline,
     fontWeight: 'bold',
@@ -123,7 +110,7 @@ export const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHTS.medium,
   },
 
-  sendCodeButton: {
+  changePasswordButton: {
     backgroundColor: getColor('semanticUI.primaryButton'),
     borderRadius: getBorderRadius('lg'),
     height: hp('6.5%'), 
@@ -132,36 +119,24 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(12),
     ...getShadow('medium'),
   },
-  sendCodeButtonText: {
+  changePasswordButtonText: {
     color: getColor('text.inverse'),
     fontSize: FONT_SIZES.body,
     fontWeight: FONT_WEIGHTS.bold,
   },
 
-  resetPasswordButton: {
-    backgroundColor: getColor('semanticUI.primaryButton'),
+  cancelButton: {
+    backgroundColor: 'transparent',
+    borderColor: getColor('border.medium'),
+    borderWidth: 1,
     borderRadius: getBorderRadius('lg'),
     height: hp('6.5%'), 
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: verticalScale(12),
-    ...getShadow('medium'),
   },
-  resetPasswordButtonText: {
-    color: getColor('text.inverse'),
-    fontSize: FONT_SIZES.body,
-    fontWeight: FONT_WEIGHTS.bold,
-  },
-
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: verticalScale(12),
-  },
-  backText: {
+  cancelButtonText: {
     color: getColor('text.secondary'),
-    fontSize: FONT_SIZES.caption,
-    marginLeft: moderateScale(8),
+    fontSize: FONT_SIZES.body,
+    fontWeight: FONT_WEIGHTS.medium,
   },
 });

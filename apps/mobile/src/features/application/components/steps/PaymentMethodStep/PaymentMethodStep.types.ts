@@ -4,7 +4,7 @@
  * Type definitions for the payment method selection step component
  */
 
-export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall' | '';
+export type PaymentMethod = 'Maya' | 'BaranggayHall' | 'CityHall' | '';
 
 export interface PaymentMethodOption {
   id: PaymentMethod;

@@ -247,7 +247,7 @@ export function usePaymentMethod(baseAmount: number = 50): UsePaymentMethodRetur
 
   const getServiceFee = useCallback(() => {
     if (!selectedMethod) return 0;
-    return selectedMethod === 'Gcash' || selectedMethod === 'Maya' ? 5 : 0;
+    return selectedMethod === 'Maya' ? 5 : 0;
   }, [selectedMethod]);
 
   const getTotalAmount = useCallback((amount = baseAmount) => {

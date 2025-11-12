@@ -16,19 +16,10 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
 }) => {
   const paymentMethods: PaymentMethodOption[] = [
     {
-      id: 'Gcash' as const,
-      name: 'GCash',
-      icon: 'card-outline',
-      description: 'Pay instantly with GCash',
-      requiresReference: true,
-      bgColor: theme.colors.semantic.success + '10',
-      iconColor: theme.colors.semantic.success,
-    },
-    {
       id: 'Maya' as const,
       name: 'Maya',
       icon: 'card-outline', 
-      description: 'Pay instantly with Maya',
+      description: 'Pay with card, QR code, or Maya wallet',
       requiresReference: true,
       bgColor: theme.colors.brand.primary + '10',
       iconColor: theme.colors.brand.primary,
@@ -128,19 +119,19 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
         {paymentMethods.map(renderPaymentMethodCard)}
       </View>
 
-      {/* Reference Number Input for Digital Payments */}
-      {(formData.paymentMethod === 'Gcash' || formData.paymentMethod === 'Maya') && (
+      {/* Reference Number Input for Maya Payment */}
+      {formData.paymentMethod === 'Maya' && (
         <View style={styles.referenceContainer}>
           <Text style={styles.referenceLabel}>Payment Reference Number</Text>
           <CustomTextInput
             value={formData.paymentReference || ''}
             onChangeText={handleReferenceChange}
-            placeholder={`Enter your ${formData.paymentMethod} reference number`}
+            placeholder="Enter your Maya reference number"
             style={styles.referenceInput}
             autoCapitalize="none"
           />
           <Text style={styles.referenceNote}>
-            Complete your payment on {formData.paymentMethod} first, then enter the reference number here.
+            Complete your payment through Maya checkout first, then enter the reference number here.
           </Text>
         </View>
       )}
