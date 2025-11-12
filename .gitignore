@@ -67,7 +67,8 @@ ios/
 # ────────────────
 # Convex
 # ────────────────
-backend/convex/_generated/
+# IMPORTANT: backend/convex/_generated/ is NOT ignored so Vercel can access these files
+# Only ignore generated files in other locations
 apps/*/convex/_generated/
 packages/*/convex/_generated/
 
