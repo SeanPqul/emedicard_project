@@ -137,7 +137,6 @@ export class ApplicationService {
       const appWasRestarted = formStorage.handleAppRestart();
       
       if (appWasRestarted || wasRestarted) {
-        console.log('App was restarted, starting fresh application');
         return {
           formData: this.getDefaultFormData(),
           selectedDocuments: {},
@@ -149,13 +148,10 @@ export class ApplicationService {
       // Check for existing temp application in MMKV
       const tempApp = formStorage.getTempApplication();
       if (tempApp && !formStorage.isTempApplicationExpired()) {
-        // Log queue stats for debugging
         const stats = formStorage.getQueueStats();
-        console.log('Restored deferred queue:', stats);
         
         // If the queue is in a failed state, start fresh
         if (stats.queueStatus === 'failed') {
-          console.log('Previous application was in failed state, clearing and starting fresh');
           formStorage.clearTempApplication();
           return {
             formData: this.getDefaultFormData(),
@@ -175,7 +171,6 @@ export class ApplicationService {
       } else if (tempApp && formStorage.isTempApplicationExpired()) {
         // Clear expired temp data
         formStorage.clearTempApplication();
-        console.log('Cleared expired application data');
       }
       
       // Return default data
@@ -186,7 +181,6 @@ export class ApplicationService {
         restored: false
       };
     } catch (error) {
-      console.error('Error initializing form data:', error);
       return {
         formData: this.getDefaultFormData(),
         selectedDocuments: {},
@@ -205,7 +199,7 @@ export class ApplicationService {
       jobCategory: '',
       position: '',
       organization: '',
-      civilStatus: 'Single',
+      civilStatus: undefined,
       middleName: '',
       age: 0,
       nationality: '',
@@ -224,7 +218,6 @@ export class ApplicationService {
       formStorage.saveTempApplication(formData, selectedDocuments, currentStep);
       return true;
     } catch (error) {
-      console.error('Error saving form progress:', error);
       return false;
     }
   }
@@ -236,7 +229,6 @@ export class ApplicationService {
     try {
       return formStorage.addDocumentToQueue(documentId, documentFile);
     } catch (error) {
-      console.error('Error adding document to queue:', error);
       return false;
     }
   }
@@ -248,7 +240,6 @@ export class ApplicationService {
     try {
       return formStorage.removeDocumentFromQueue(documentId);
     } catch (error) {
-      console.error('Error removing document from queue:', error);
       return false;
     }
   }

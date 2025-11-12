@@ -16,7 +16,8 @@ export const getDashboardDataQuery = query({
       if (!user) return null;
     
     // First, get applications and notifications in parallel
-    const [applications, notifications]: [Doc<"applications">[], Doc<"notifications">[]] = await Promise.all([
+    // Filter out Draft applications - they should only appear after submission
+    const [allApplications, notifications]: [Doc<"applications">[], Doc<"notifications">[]] = await Promise.all([
       ctx.db
         .query("applications")
         .withIndex("by_user", (q) => q.eq("userId", user._id))
@@ -27,6 +28,9 @@ export const getDashboardDataQuery = query({
         .order("desc")
         .take(10), // Limit to recent notifications
     ]);
+    
+    // Filter out Draft applications - only show submitted applications
+    const applications = allApplications.filter(app => app.applicationStatus !== "Draft");
 
     // Then get health cards using the applications data (optimized)
     const applicationIds = new Set(applications.map(app => app._id));

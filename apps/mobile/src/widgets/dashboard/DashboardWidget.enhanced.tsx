@@ -1,7 +1,7 @@
 import React from 'react';
-import { RefreshControl, ScrollView, View, Text, Animated, TouchableOpacity } from 'react-native';
+import { RefreshControl, ScrollView, View, Text, Animated, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { 
+import {
   OfflineBanner,
   WelcomeBanner,
   RecentActivityList,
@@ -13,6 +13,7 @@ import { QuickActionsCarousel } from '@features/dashboard/components/QuickAction
 import { router } from 'expo-router';
 // Phase 4 Migration: Use new referral hooks for proper medical terminology
 import { useReferredDocumentsCount } from '@features/document-rejection/hooks';
+import { useHealthTip } from '@shared/hooks';
 import { styles } from './DashboardWidget.enhanced.styles';
 import { theme } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
@@ -58,6 +59,9 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
   // Use referral counts (medical vs document issues)
   const referralCounts = useReferredDocumentsCount(data?.userProfile?._id);
   const { totalIssues, medicalReferrals, documentIssues } = referralCounts;
+
+  // Fetch dynamic health tips
+  const { healthTip, isLoading: isLoadingTip, refreshTip } = useHealthTip();
 
   // Use real health card data from backend (no more mock data)
   const realHealthCard = healthCard ? {
@@ -349,10 +353,41 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
               </View>
               <View style={styles.infoCardContent}>
                 <Text style={styles.infoCardTitle}>Health Tip of the Day</Text>
-                <Text style={styles.infoCardDescription}>
-                  Stay hydrated! Drink at least 8 glasses of water daily.
-                </Text>
+                {isLoadingTip ? (
+                  <ActivityIndicator size="small" color={theme.colors.blue[600]} style={{ marginTop: moderateScale(8) }} />
+                ) : (
+                  <>
+                    <Text style={styles.infoCardDescription}>
+                      {healthTip?.content || 'Take care of your body. It\'s the only place you have to live.'}
+                    </Text>
+                    {healthTip?.author && (
+                      <Text style={[styles.infoCardDescription, {
+                        fontSize: moderateScale(12),
+                        fontStyle: 'italic',
+                        marginTop: moderateScale(4),
+                        color: theme.colors.text.tertiary
+                      }]}>
+                        — {healthTip.author}
+                      </Text>
+                    )}
+                  </>
+                )}
               </View>
+              <TouchableOpacity
+                onPress={refreshTip}
+                style={{
+                  padding: moderateScale(8),
+                  borderRadius: moderateScale(20),
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                }}
+                disabled={isLoadingTip}
+              >
+                <Ionicons
+                  name="refresh"
+                  size={moderateScale(20)}
+                  color={theme.colors.blue[600]}
+                />
+              </TouchableOpacity>
             </View>
           </View>
         </View>

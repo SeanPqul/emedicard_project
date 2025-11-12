@@ -31,6 +31,16 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
   const getSteps = (): ChecklistStep[] => {
     const status = currentStatus || '';
     
+    // If application is rejected, show only rejection status
+    if (status === 'Rejected' || status === 'Cancelled') {
+      return [{
+        id: 'rejected',
+        label: status === 'Rejected' ? 'Application rejected' : 'Application cancelled',
+        subtitle: 'This application has been closed',
+        status: 'current' as const
+      }];
+    }
+    
     // Define step labels based on status (present tense for in-progress, past tense for completed)
     const getStepLabel = (stepId: string, status: 'completed' | 'current' | 'upcoming') => {
       if (status === 'completed') {
@@ -183,6 +193,11 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
   };
 
   const getStepColor = (status: 'completed' | 'current' | 'upcoming') => {
+    // Special handling for rejected status
+    if (currentStatus === 'Rejected' || currentStatus === 'Cancelled') {
+      return theme.colors.semantic.error;
+    }
+    
     switch (status) {
       case 'completed':
         return theme.colors.semantic.success;
@@ -251,7 +266,7 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
                   </Text>
                 )}
               </View>
-              {step.status === 'current' && (
+              {step.status === 'current' && currentStatus !== 'Rejected' && currentStatus !== 'Cancelled' && (
                 <View style={[styles.currentBadge, { backgroundColor: categoryColor }]}>
                   <Text style={styles.currentBadgeText}>Current</Text>
                 </View>

@@ -211,8 +211,8 @@ export const rejectDocument = mutation({
         ? `\n\nSpecific Issues:\n${args.specificIssues.map(issue => `• ${issue}`).join('\n')}`
         : '';
       
-      const notificationTitle = "🚨 Application Rejected - Maximum Attempts Reached";
-      const notificationMessage = `Your application has been permanently rejected due to reaching the maximum number of attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Rejection Reason: ${args.rejectionReason}${specificIssuesText}\n\n❌ This application can no longer be continued.\n\n✅ If you wish to obtain a Health Card, please create a new application and ensure all documents meet the requirements.\n\nFor assistance with document requirements, please contact our support team.`;
+      const notificationTitle = "Application Rejected - Maximum Attempts Reached";
+      const notificationMessage = `Your application has been permanently rejected due to reaching the maximum number of attempts (${maxAttempts}) for ${documentType.name}.\n\nLast Rejection Reason: ${args.rejectionReason}${specificIssuesText}\n\nThis application can no longer be continued.\n\nIf you wish to obtain a Health Card, please create a new application and ensure all documents meet the requirements.\n\nFor assistance with document requirements, please contact our support team.`;
       
       const now = Date.now();
       
@@ -288,7 +288,7 @@ export const rejectDocument = mutation({
           await ctx.db.insert("notifications", {
             userId: adminUser._id,
             notificationType: "application_permanently_rejected",
-            title: `🚨 Application Permanently Rejected - ${applicantName}`,
+            title: `Application Permanently Rejected - ${applicantName}`,
             message: `${applicantName}'s application has been permanently rejected after ${maxAttempts} failed attempts for ${documentType.name}. Applicant must create a new application.`,
             actionUrl: `/dashboard/${application._id}/doc_verif`,
             applicationId: application._id,

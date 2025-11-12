@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { theme } from '@shared/styles/theme';
@@ -226,12 +226,35 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           {uploadingDocuments.length} document(s) are still being uploaded. Please wait for all uploads to complete before submitting.
         </Text>
         
-        <View style={{ marginTop: verticalScale(8) }}>
-          {uploadingDocuments.map((doc) => (
-            <Text key={doc.fieldName} style={[styles.validationMessage, { color: theme.colors.semantic.info }]}>
-              • {doc.name}: {getUploadState(doc.fieldName)?.progress || 0}%
-            </Text>
-          ))}
+        <View style={{ marginTop: verticalScale(8), gap: verticalScale(8) }}>
+          {uploadingDocuments.map((doc) => {
+            const progress = getUploadState(doc.fieldName)?.progress || 0;
+            return (
+              <View key={doc.fieldName} style={{ gap: verticalScale(4) }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: moderateScale(8) }}>
+                  <ActivityIndicator size="small" color={theme.colors.semantic.info} />
+                  <Text style={[styles.validationMessage, { color: theme.colors.semantic.info, fontWeight: '500', flex: 1 }]}>
+                    {doc.name}: {progress}%
+                  </Text>
+                </View>
+                {/* Progress Bar */}
+                <View style={{
+                  height: verticalScale(6),
+                  backgroundColor: theme.colors.semantic.info + '20',
+                  borderRadius: moderateScale(3),
+                  overflow: 'hidden',
+                  marginLeft: moderateScale(24)
+                }}>
+                  <View style={{
+                    height: '100%',
+                    width: `${Math.max(progress, 5)}%`, // Minimum 5% to show activity
+                    backgroundColor: theme.colors.semantic.info,
+                    borderRadius: moderateScale(3),
+                  }} />
+                </View>
+              </View>
+            );
+          })}
         </View>
       </View>
     );

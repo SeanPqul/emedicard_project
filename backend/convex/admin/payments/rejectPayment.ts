@@ -113,7 +113,7 @@ export const rejectPayment = mutation({
     
     if (maxAttemptsReached) {
       // Max attempts reached - lock application and send critical notification
-      notificationTitle = "🚨 Maximum Payment Attempts Reached";
+      notificationTitle = "Maximum Payment Attempts Reached";
       notificationMessage = `You have reached the maximum number of payment attempts (${maxAttempts}).\n\nYour application has been locked and will be reviewed by our support team.\n\nLast Rejection Reason: ${args.rejectionReason}${specificIssuesText}\n\nOur team will contact you within 48 hours. You may also contact support for immediate assistance.`;
       
       // Lock the application
@@ -139,7 +139,7 @@ export const rejectPayment = mutation({
           await ctx.db.insert("notifications", {
             userId: adminUser._id,
             notificationType: "max_attempts_reached",
-            title: `⚠️ Max Payment Attempts - ${applicant.fullname}`,
+            title: `Max Payment Attempts - ${applicant.fullname}`,
             message: `${applicant.fullname} has reached maximum payment attempts (${maxAttempts}). Application is locked and requires manual review.`,
             actionUrl: `/dashboard/${args.applicationId}/payment_validation`,
             applicationId: args.applicationId,
@@ -150,11 +150,11 @@ export const rejectPayment = mutation({
       }
     } else if (attemptNumber === REJECTION_LIMITS.PAYMENTS.FINAL_ATTEMPT_WARNING) {
       // Final attempt warning
-      notificationTitle = "⚠️ Final Payment Attempt Warning";
-      notificationMessage = `🚨 FINAL ATTEMPT: This is your last chance to submit payment correctly.\n\nReason for rejection: ${args.rejectionReason}${specificIssuesText}\n\nAttempts: ${attemptNumber} of ${maxAttempts}\n\nPlease review the requirements carefully before resubmitting. If you need help, contact our support team.`;
+      notificationTitle = "Final Payment Attempt Warning";
+      notificationMessage = `FINAL ATTEMPT: This is your last chance to submit payment correctly.\n\nReason for rejection: ${args.rejectionReason}${specificIssuesText}\n\nAttempts: ${attemptNumber} of ${maxAttempts}\n\nPlease review the requirements carefully before resubmitting. If you need help, contact our support team.`;
     } else if (attemptNumber === REJECTION_LIMITS.PAYMENTS.WARNING_THRESHOLD) {
       // Warning threshold
-      notificationMessage = `⚠️ Your payment has been rejected.\n\nReason: ${args.rejectionReason}${specificIssuesText}\n\nAttempts: ${attemptNumber} of ${maxAttempts}\n\n⚠️ Warning: You have ${maxAttempts - attemptNumber} attempt(s) remaining. Please review carefully before resubmitting.`;
+      notificationMessage = `Your payment has been rejected.\n\nReason: ${args.rejectionReason}${specificIssuesText}\n\nAttempts: ${attemptNumber} of ${maxAttempts}\n\nWarning: You have ${maxAttempts - attemptNumber} attempt(s) remaining. Please review carefully before resubmitting.`;
     }
     
     await ctx.db.insert("notifications", {

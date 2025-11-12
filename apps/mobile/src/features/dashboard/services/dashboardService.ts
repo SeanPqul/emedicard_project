@@ -107,7 +107,7 @@ export class DashboardService {
           userId: payment.userId || '',
           type: 'payment_made' as const,
           title: `Payment ${payment.status}`,
-          description: `₱${payment.netAmount.toFixed(2)} payment via ${payment.paymentMethod}`,
+          description: `${payment.netAmount.toFixed(2)} payment via ${payment.paymentMethod}`,
           timestamp: new Date(payment.updatedAt || payment._creationTime || 0),
           status: payment.status === 'Complete' ? 'success' : payment.status === 'Failed' ? 'error' : 'pending',
           metadata: {
@@ -187,7 +187,7 @@ export class DashboardService {
           userId: 'mock-user-id',
           type: 'payment_made' as const,
           title: 'Payment Complete',
-          description: '₱60.00 payment via Gcash',
+          description: '60.00 payment via Gcash',
           timestamp: new Date(Date.now() - 86400000),
           status: 'success',
         },

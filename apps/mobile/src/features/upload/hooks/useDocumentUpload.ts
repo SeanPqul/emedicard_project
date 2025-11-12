@@ -371,15 +371,11 @@ export const useDocumentUpload = (applicationId: Id<"applications">) => {
     try {
       validateFile(file, fieldName);
 
-      // Extract the best available filename, avoiding generated UUIDs and numeric IDs
-      const isGeneratedFileName = file.fileName && (
-        /^\d{8,12}\.(jpg|jpeg|png|pdf)$/i.test(file.fileName) ||  // Numeric IDs
-        /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.(jpg|jpeg|png|pdf)$/i.test(file.fileName)  // UUIDs
-      );
-
-      const fileName = (!isGeneratedFileName && file.fileName) ||
-                      file.name ||
-                      file.uri?.split('/').pop() ||
+      // Extract filename following Expo picker conventions
+      // DocumentPicker: uses `name`, ImagePicker: uses `fileName`
+      const fileName = file.name || 
+                      file.fileName || 
+                      file.uri?.split('/').pop()?.split('?')[0] ||
                       `document_${fieldName}.${file.type?.split('/')[1] || 'jpg'}`;
       
       const cachedDoc = await cacheDocumentReactive(applicationId, fieldName, {

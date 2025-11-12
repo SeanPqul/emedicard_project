@@ -1220,8 +1220,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 return null;
               })()}
               <div className="flex flex-col gap-3">
-                {/* Primary Action: Approve - Only show if not already approved */}
-                {applicationStatus?.applicationStatus !== 'Approved' && applicationStatus?.applicationStatus !== 'Complete' ? (
+                {/* Primary Action: Approve - Only show if not already approved or rejected */}
+                {applicationStatus?.applicationStatus !== 'Approved' && applicationStatus?.applicationStatus !== 'Complete' && applicationStatus?.applicationStatus !== 'Rejected' && applicationStatus?.applicationStatus !== 'Cancelled' ? (
                   <button 
                     onClick={() => handleFinalize('Approved')} 
                     className="group w-full bg-gradient-to-r from-teal-400 to-emerald-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-teal-500 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
@@ -1234,6 +1234,21 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     Approve Application
                   </button>
                 ) : null}
+                
+                {/* Show rejected status */}
+                {(applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled') && (
+                  <div className="w-full bg-red-50 border-2 border-red-200 px-6 py-4 rounded-xl flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-red-100 border-2 border-red-300 flex items-center justify-center shrink-0">
+                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-red-900 text-sm">Application Rejected</p>
+                      <p className="text-red-700 text-xs mt-0.5">This application has been permanently rejected and closed</p>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Show approved status */}
                 {(applicationStatus?.applicationStatus === 'Approved' || applicationStatus?.applicationStatus === 'Complete') && (
@@ -1265,16 +1280,18 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   </div>
                 )}
                 
-                {/* Secondary Action: Send Referral Notification */}
-                <button 
-                  onClick={handleSendReferralClick} 
-                  className="group w-full bg-gradient-to-r from-blue-400 to-indigo-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-blue-500 hover:to-indigo-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Send Applicant Notifications
-                </button>
+                {/* Secondary Action: Send Referral Notification - Hide for rejected and approved applications */}
+                {applicationStatus?.applicationStatus !== 'Rejected' && applicationStatus?.applicationStatus !== 'Cancelled' && applicationStatus?.applicationStatus !== 'Approved' && applicationStatus?.applicationStatus !== 'Complete' && (
+                  <button 
+                    onClick={handleSendReferralClick} 
+                    className="group w-full bg-gradient-to-r from-blue-400 to-indigo-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:from-blue-500 hover:to-indigo-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Send Applicant Notifications
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -1620,11 +1637,11 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         </div>
                       </div>
                       
-                      {/* Approve Button - Only show Approve for manual review */}
+                      {/* Approve Button - Only show Approve for manual review, disabled for rejected applications */}
                       <div className="mt-3">
                         <button 
                           onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} 
-                          disabled={!item.uploadId || item.status === 'Approved'} 
+                          disabled={!item.uploadId || item.status === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled'} 
                           className="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1644,10 +1661,10 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     /* Medical docs: 3 buttons (Approve + Flag for Revision + Refer to Doctor) */
                     /* Non-medical docs: 2 buttons (Approve + Flag for Revision) */
                     <div className={`mt-4 pt-4 border-t border-gray-100 ${isMedicalDocument(item.fieldIdentifier) ? 'grid grid-cols-1 sm:grid-cols-3 gap-2' : 'grid grid-cols-1 sm:grid-cols-2 gap-2'}`}>
-                      {/* Approve Button - Disabled when waiting for resubmission or doctor clearance */}
+                      {/* Approve Button - Disabled when waiting for resubmission or doctor clearance or application rejected */}
                       <button 
                       onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} 
-                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'NeedsRevision' || item.status === 'Referred'} 
+                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'NeedsRevision' || item.status === 'Referred' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled'} 
                       className="w-full bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-emerald-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1656,7 +1673,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       Approve
                     </button>
                     
-                    {/* Flag for Revision Button - Always show for all documents */}
+                    {/* Flag for Revision Button - Disabled for rejected applications */}
                     <button
                       onClick={() => {
                         const pending = getPendingAction(item.uploadId);
@@ -1675,7 +1692,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         }
                         setOpenReferralIndex(idx);
                       }}
-                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision'}
+                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled'}
                       className="w-full bg-orange-50 text-orange-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-orange-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-orange-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1684,7 +1701,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       Flag for Revision
                     </button>
                     
-                    {/* Refer to Doctor Button - Only for medical documents */}
+                    {/* Refer to Doctor Button - Only for medical documents, disabled for rejected applications */}
                     {isMedicalDocument(item.fieldIdentifier) && (
                       <button
                         onClick={() => {
@@ -1694,7 +1711,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           setReferralReason('Other medical concern');
                           setSpecificIssues(`Failed Medical Result (${item.requirementName}) - Please refer to ${FIXED_DOCTOR_NAME} at Door 7, Magsaysay Complex, Magsaysay Park, Davao City.`);
                         }}
-                        disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision'}
+                        disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled'}
                         className="w-full bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-blue-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

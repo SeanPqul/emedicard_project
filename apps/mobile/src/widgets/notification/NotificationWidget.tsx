@@ -28,6 +28,12 @@ const NOTIFICATION_ICONS: Record<string, string> = {
   ApplicationApproved: 'checkmark-circle',
   DocumentRejection: 'close-circle',
   status_update: 'information-circle',
+  payment_max_attempts: 'alert-circle',
+  payment_rejected: 'close-circle',
+  application_rejected_final: 'close-circle',
+  payment_rejection_info: 'information-circle',
+  max_attempts_reached: 'warning',
+  document_rejected: 'close-circle',
 };
 
 const NOTIFICATION_COLORS: Record<string, string> = {
@@ -41,6 +47,12 @@ const NOTIFICATION_COLORS: Record<string, string> = {
   ApplicationApproved: '#28A745',
   DocumentRejection: '#DC3545',
   status_update: '#6B7280',
+  payment_max_attempts: '#DC3545',
+  payment_rejected: '#F18F01',
+  application_rejected_final: '#DC3545',
+  payment_rejection_info: '#6B7280',
+  max_attempts_reached: '#F18F01',
+  document_rejected: '#F18F01',
 };
 
 const NOTIFICATION_TITLES: Record<string, string> = {
@@ -54,6 +66,12 @@ const NOTIFICATION_TITLES: Record<string, string> = {
   ApplicationApproved: 'Application Approved',
   DocumentRejection: 'Document Rejection',
   status_update: 'Status Update',
+  payment_max_attempts: 'Maximum Payment Attempts Reached',
+  payment_rejected: 'Payment Rejected',
+  application_rejected_final: 'Application Rejected',
+  payment_rejection_info: 'Payment Update',
+  max_attempts_reached: 'Action Required',
+  document_rejected: 'Document Rejected',
 };
 
 interface NotificationWidgetProps {

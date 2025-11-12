@@ -5,7 +5,7 @@ export interface ApplicationFormData {
   jobCategory: string;
   position: string;
   organization: string;
-  civilStatus: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
+  civilStatus?: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
   firstName?: string;
   middleName?: string;
   lastName?: string;

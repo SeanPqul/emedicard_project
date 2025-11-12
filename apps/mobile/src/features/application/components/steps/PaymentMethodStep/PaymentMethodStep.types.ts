@@ -28,7 +28,7 @@ export interface ApplicationFormData {
   jobCategory: string;
   position: string;
   organization: string;
-  civilStatus: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
+  civilStatus?: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
   paymentMethod?: PaymentMethod;
   paymentReference?: string;
 }

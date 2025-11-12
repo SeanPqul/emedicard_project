@@ -56,7 +56,7 @@ export const ActivityItem: React.FC<ActivityItemProps> = React.memo(({ activity,
       </View>
       <View style={styles.content}>
         <Text style={styles.title}>{activity.title}</Text>
-        <Text style={styles.description}>{activity.description}</Text>
+        <Text style={styles.description} numberOfLines={3}>{activity.description}</Text>
         <Text style={styles.time}>
           {formatTimestamp(activity.timestamp)}
         </Text>

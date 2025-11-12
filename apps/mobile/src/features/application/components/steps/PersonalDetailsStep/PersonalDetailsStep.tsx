@@ -290,7 +290,10 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
       </View>
       
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Civil Status</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>Civil Status</Text>
+          <Text style={{ color: theme.colors.semantic.error, marginLeft: moderateScale(4) }}>*</Text>
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.civilStatusContainer}>
           {CIVIL_STATUS_OPTIONS.map((status) => (
             <TouchableOpacity
@@ -311,6 +314,12 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
             </TouchableOpacity>
           ))}
         </ScrollView>
+        {errors.civilStatus && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: moderateScale(8) }}>
+            <Ionicons name="alert-circle" size={moderateScale(16)} color={theme.colors.semantic.error} />
+            <Text style={styles.errorText}>{errors.civilStatus}</Text>
+          </View>
+        )}
       </View>
     </View>
   );

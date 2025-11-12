@@ -87,7 +87,7 @@ export const useSubmission = ({
       }
 
       try {
-        formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 0);
+        formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 10);
 
         try {
           const response = await fetch(operation.file.uri, { method: 'HEAD' });
@@ -95,6 +95,8 @@ export const useSubmission = ({
         } catch {
           throw new Error(`Document file is no longer available: ${operation.file.name}`);
         }
+
+        formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 20);
 
         let fileResponse: Response;
         try {
@@ -106,6 +108,8 @@ export const useSubmission = ({
           throw new Error(`Failed to read file: ${fileResponse.status} ${fileResponse.statusText}`);
         }
 
+        formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 40);
+
         let fileBlob: Blob;
         try {
           fileBlob = await fileResponse.blob();
@@ -114,7 +118,7 @@ export const useSubmission = ({
         }
         const fileSize = fileBlob.size;
 
-        formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 50);
+        formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 60);
 
         let uploadUrl: string;
         try {
@@ -132,6 +136,8 @@ export const useSubmission = ({
           else contentType = 'image/jpeg';
         }
 
+        formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 70);
+
         let uploadResponse: Response;
         try {
           uploadResponse = await fetch(uploadUrl, {
@@ -145,6 +151,8 @@ export const useSubmission = ({
         if (!uploadResponse.ok) {
           throw new Error(`File upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
         }
+
+        formStorage.updateOperationStatus(queueId, operation.id, 'uploading', 90);
 
         const { storageId } = await uploadResponse.json();
 

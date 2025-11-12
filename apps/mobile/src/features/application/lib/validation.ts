@@ -14,7 +14,7 @@ export interface ApplicationFormData {
   jobCategory: string;
   position: string;
   organization: string;
-  civilStatus: CivilStatus;
+  civilStatus?: CivilStatus;
   firstName?: string;
   middleName?: string;
   lastName?: string;
@@ -166,6 +166,10 @@ export const validateApplicationStep = (
       // Validate gender (required field)
       if (!formData.gender) {
         newErrors.gender = 'Please select your gender';
+      }
+      // Validate civil status (required field)
+      if (!formData.civilStatus) {
+        newErrors.civilStatus = 'Please select your civil status';
       }
       break;
       

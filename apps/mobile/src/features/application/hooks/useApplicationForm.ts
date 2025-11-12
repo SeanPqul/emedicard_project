@@ -19,7 +19,7 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
     jobCategory: '',
     position: '',
     organization: '',
-    civilStatus: 'Single',
+    civilStatus: undefined,
     firstName: '',
     middleName: '',
     lastName: '',
@@ -96,6 +96,7 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
         if (validation.errors.position) missingFields.push('• Position/Job Title');
         if (validation.errors.organization) missingFields.push('• Organization/Company');
         if (validation.errors.gender) missingFields.push('• Gender');
+        if (validation.errors.civilStatus) missingFields.push('• Civil Status');
         
         if (missingFields.length > 0) {
           showError(
@@ -214,7 +215,7 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
               jobCategory: '',
               position: '',
               organization: '',
-              civilStatus: 'Single',
+              civilStatus: undefined,
               firstName: '',
               lastName: '',
               gender: undefined,
@@ -262,7 +263,6 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
         formStorage.clearTempApplication();
       }
     } catch (error) {
-      console.error('Error loading initial data:', error);
       showError('Failed to load application data');
     }
   }, [showSuccess, showError]);
@@ -282,7 +282,7 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
       jobCategory: '',
       position: '',
       organization: '',
-      civilStatus: 'Single',
+      civilStatus: undefined,
       firstName: '',
       lastName: '',
       gender: undefined,

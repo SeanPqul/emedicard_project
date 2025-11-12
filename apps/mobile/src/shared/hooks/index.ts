@@ -19,6 +19,7 @@ export { useStorage } from './useStorage';
 export { useDeepLink } from './useDeepLink';
 export { useNetwork } from './useNetwork';
 export { useNetworkStatus } from './useNetworkStatus';
+export { useHealthTip } from './useHealthTip';
 
 // Payment flow hooks (from processes)
 export { usePaymentFlow, usePaymentMethod, usePaymentManager } from '@processes/paymentFlow';

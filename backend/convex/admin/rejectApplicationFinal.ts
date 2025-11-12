@@ -98,8 +98,8 @@ export const rejectFinal = mutation({
     await ctx.db.insert("notifications", {
       userId: application.userId,
       applicationId: args.applicationId,
-      title: "❌ Application Rejected",
-      message: `Your application has been permanently rejected.\\n\\nReason: ${args.rejectionReason}\\n\\n❌ This application can no longer be continued.\\n\\n✅ If you wish to obtain a Health Card, please create a new application and ensure all requirements are met.\\n\\nFor assistance, please contact our support team.`,
+      title: "Application Rejected",
+      message: `Your application has been permanently rejected.\n\nReason: ${args.rejectionReason}\n\nThis application can no longer be continued.\n\nIf you wish to obtain a Health Card, please create a new application and ensure all requirements are met.\n\nFor assistance, please contact our support team.`,
       notificationType: "application_rejected_final",
       isRead: false,
       jobCategoryId: application.jobCategoryId,

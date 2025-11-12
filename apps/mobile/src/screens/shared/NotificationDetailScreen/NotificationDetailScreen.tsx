@@ -306,16 +306,24 @@ export function NotificationDetailScreen() {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Status:</Text>
                 <View style={[styles.statusBadge, { 
-                  backgroundColor: application.status === 'Under Administrative Review' 
+                  backgroundColor: application.status === 'Rejected' || application.status === 'Cancelled'
+                    ? '#FEE2E2' // Red background for rejected/cancelled
+                    : application.status === 'Under Administrative Review' 
                     ? '#FEE2E2' // Red background for locked status
                     : config?.color + '20' 
                 }]}>
                   <Text style={[styles.statusText, { 
-                    color: application.status === 'Under Administrative Review'
+                    color: application.status === 'Rejected' || application.status === 'Cancelled'
+                      ? '#DC2626' // Red text for rejected/cancelled
+                      : application.status === 'Under Administrative Review'
                       ? '#DC2626' // Red text for locked status  
                       : config?.color
                   }]}>
-                    {application.status === 'Under Administrative Review' 
+                    {application.status === 'Rejected'
+                      ? 'REJECTED'
+                      : application.status === 'Cancelled'
+                      ? 'CANCELLED'
+                      : application.status === 'Under Administrative Review' 
                       ? 'Under Administrative Review'
                       : application.status}
                   </Text>
