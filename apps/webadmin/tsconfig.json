@@ -36,7 +36,6 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@/convex/*": ["../../backend/convex/*"],
       "@emedicard/types": ["../packages/types/src"],
       "@emedicard/utils": ["../packages/utils/src"],
       "@emedicard/validation": ["../packages/validation/src"],

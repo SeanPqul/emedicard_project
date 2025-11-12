@@ -7,7 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Footer from '../components/Footer';
 import LoadingScreen from '../components/shared/LoadingScreen';
 import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { api } from 'backend/convex/_generated/api';
 
 import {
   getUserFriendlyErrorMessage,

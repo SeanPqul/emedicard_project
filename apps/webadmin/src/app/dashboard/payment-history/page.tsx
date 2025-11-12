@@ -8,7 +8,7 @@ import { useQuery } from 'convex/react';
 import Navbar from '@/components/shared/Navbar';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import ErrorMessage from '@/components/ErrorMessage';
-import { api } from '@/convex/_generated/api';
+import { api } from 'backend/convex/_generated/api';
 
 type PaymentRecord = {
   _id: string;

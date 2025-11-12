@@ -3,8 +3,8 @@
 import ErrorMessage from "@/components/ErrorMessage";
 import LoadingScreen from "@/components/shared/LoadingScreen";
 import Navbar from "@/components/shared/Navbar";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { api } from 'backend/convex/_generated/api';
+import { Id } from 'backend/convex/_generated/dataModel';
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
