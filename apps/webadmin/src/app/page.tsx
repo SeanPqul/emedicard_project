@@ -14,6 +14,7 @@ import {
   logAuthError,
   type ErrorContext
 } from '../utils/authErrorHandler';
+import { setLoggingOut } from '../utils/convexErrorHandler';
 
 // SVG Icon Components for features
 const FeatureIcon = ({ d }: { d: string }) => ( 
@@ -64,6 +65,9 @@ export default function LandingPage() {
   }, [isUserLoaded, isSignedIn, adminPrivileges, router]);
 
   useEffect(() => {
+    // Clear the logging out flag when landing on the login page
+    setLoggingOut(false);
+    
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { isConvexAuthError, isLoggingOut } from '@/utils/convexErrorHandler';
 
 interface Props {
   children: ReactNode;
@@ -28,6 +29,15 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Check if this is a Convex auth error during logout
+    // If so, silently ignore it as it's expected behavior
+    if (isConvexAuthError(error) && isLoggingOut()) {
+      console.debug('Ignoring Convex auth error during logout');
+      // Reset the error boundary state to prevent showing error UI
+      this.setState({ hasError: false, error: null });
+      return;
+    }
+
     // DEVELOPMENT MODE: Detailed logging for developers
     if (process.env.NODE_ENV === 'development') {
       console.group('🔴 ErrorBoundary - Component Error Detected');

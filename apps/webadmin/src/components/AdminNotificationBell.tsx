@@ -5,28 +5,38 @@ import { NotificationCardCompact } from './notifications';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { isLoggingOut } from '@/utils/convexErrorHandler';
 
 export default function AdminNotificationBell() {
   const router = useRouter();
+  const { isSignedIn } = useUser();
+  const [shouldSkipQueries, setShouldSkipQueries] = useState(false);
 
+  // Check if we should skip queries (not authenticated or logging out)
+  useEffect(() => {
+    setShouldSkipQueries(!isSignedIn || isLoggingOut());
+  }, [isSignedIn]);
+
+  // Only run queries if user is authenticated and not logging out
   const adminPrivileges = useQuery(
-    api.users.roles.getAdminPrivileges
+    api.users.roles.getAdminPrivileges,
+    shouldSkipQueries ? "skip" : undefined
   );
   const adminNotifications = useQuery(
     api.notifications.getAdminNotifications,
-    { notificationType: undefined }
+    shouldSkipQueries ? "skip" : { notificationType: undefined }
   );
   const rejectionHistoryNotifications = useQuery(
     api.notifications.getRejectionHistoryNotifications,
-    {}
+    shouldSkipQueries ? "skip" : {}
   );
   const paymentRejectionNotifications = useQuery(
     api.notifications.getPaymentRejectionNotifications,
-    {}
+    shouldSkipQueries ? "skip" : {}
   );
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);

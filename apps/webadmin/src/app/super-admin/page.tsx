@@ -1123,7 +1123,7 @@ export default function SuperAdminPage() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-700 flex items-center gap-1">
-                          Docs pending >24hrs
+                          Docs pending {'>'}24hrs
                           {(systemHealthMetrics?.attentionNeeded.docsPendingOver24h || 0) > 10 && <span className="text-red-600">🔴</span>}
                           {(systemHealthMetrics?.attentionNeeded.docsPendingOver24h || 0) > 5 && (systemHealthMetrics?.attentionNeeded.docsPendingOver24h || 0) <= 10 && <span className="text-amber-600">🟡</span>}
                         </span>
@@ -1131,7 +1131,7 @@ export default function SuperAdminPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-700 flex items-center gap-1">
-                          Payments pending >48hrs
+                          Payments pending {'>'}48hrs
                           {(systemHealthMetrics?.attentionNeeded.paymentsPendingOver48h || 0) > 5 && <span className="text-red-600">🔴</span>}
                           {(systemHealthMetrics?.attentionNeeded.paymentsPendingOver48h || 0) > 2 && (systemHealthMetrics?.attentionNeeded.paymentsPendingOver48h || 0) <= 5 && <span className="text-amber-600">🟡</span>}
                         </span>
