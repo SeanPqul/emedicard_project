@@ -10,6 +10,10 @@ export const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: hp(10),
   },
+  paymentGrid: {
+    marginHorizontal: theme.spacing.md,
+    gap: verticalScale(theme.spacing.md),
+  },
   sectionTitle: {
     ...theme.typography.h4,
     color: theme.colors.text.primary,
@@ -18,38 +22,46 @@ export const styles = StyleSheet.create({
     marginHorizontal: theme.spacing.md,
   },
   paymentOption: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: theme.colors.background.secondary,
-    marginHorizontal: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
-    padding: theme.spacing.md,
+    padding: theme.spacing.lg,
     borderRadius: theme.borderRadius.md,
     borderWidth: 1,
     borderColor: theme.colors.border.light,
+    minHeight: verticalScale(120),
   },
   paymentOptionSelected: {
     borderColor: theme.colors.primary[500],
     backgroundColor: theme.colors.primary[100] + '10',
   },
+  checkIcon: {
+    position: 'absolute',
+    top: theme.spacing.sm,
+    right: theme.spacing.sm,
+  },
   paymentDetails: {
     flex: 1,
-    marginLeft: theme.spacing.md,
+    marginTop: theme.spacing.sm,
+    alignItems: 'center',
   },
   paymentName: {
     ...theme.typography.body,
     color: theme.colors.text.primary,
     fontWeight: '600',
+    textAlign: 'center',
   },
   paymentDescription: {
     ...theme.typography.caption,
     color: theme.colors.text.secondary,
-    marginTop: verticalScale(2),
+    marginTop: verticalScale(4),
+    textAlign: 'center',
   },
   paymentFee: {
-    ...theme.typography.h4,
+    ...theme.typography.h3,
     color: theme.colors.primary[500],
-    marginTop: verticalScale(4),
+    marginTop: verticalScale(8),
+    fontWeight: 'bold',
   },
   paymentDetailsContainer: {
     marginTop: theme.spacing.lg,

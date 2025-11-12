@@ -61,7 +61,7 @@ export async function submitPayment(
 
     // Calculate amounts
     const amount = paymentData.amount || 250; // Default health card fee
-    const serviceFee = (paymentData.method === 'Maya' || paymentData.method === 'Gcash') ? 35 : 0;
+    const serviceFee = paymentData.method === 'Maya' ? 35 : 0;
     const netAmount = amount + serviceFee;
 
     let receiptStorageId: Id<'_storage'> | undefined;

@@ -19,7 +19,7 @@ export type ApplicationStatus =
   | 'Referred for Medical Management'; // Medical findings requiring doctor consultation
 export type ApplicationType = 'New' | 'Renew';
 export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
-export type PaymentMethod = 'Maya' | 'Gcash' | 'BaranggayHall' | 'CityHall';
+export type PaymentMethod = 'Maya' | 'BaranggayHall' | 'CityHall';
 
 // ===== APPLICATION ENTITY TYPES =====
 export interface Application {
@@ -88,7 +88,7 @@ export interface UpdateApplicationInput {
 
 export interface SubmitApplicationInput {
   formId: Id<'applications'>;
-  paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
+  paymentMethod: 'Maya' | 'BaranggayHall' | 'CityHall';
   paymentReferenceNumber: string;
   paymentReceiptId?: Id<'_storage'>;
 }

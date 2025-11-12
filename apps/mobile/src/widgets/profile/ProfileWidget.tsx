@@ -19,6 +19,7 @@ interface ProfileWidgetProps {
     email?: string;
     memberSince: number;
     imageUrl: string | null;
+    hasPassword: boolean;
   };
 }
 
@@ -80,7 +81,10 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
         {/* Account Settings Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>ACCOUNT SETTINGS</Text>
-          <TouchableOpacity style={styles.cardItem} onPress={() => router.push('/payment-history')}>
+          <TouchableOpacity 
+            style={[styles.cardItem, !user.hasPassword && styles.lastCardItem]} 
+            onPress={() => router.push('/payment-history')}
+          >
             <View style={styles.cardItemLeft}>
               <View style={styles.iconContainer}>
                 <Ionicons name="wallet-outline" size={moderateScale(20)} color="#666" />
@@ -90,15 +94,18 @@ export function ProfileWidget({ user }: ProfileWidgetProps) {
             <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
           </TouchableOpacity>
           
-          <TouchableOpacity style={[styles.cardItem, styles.lastCardItem]} onPress={() => router.push('/profile/change-password')}>
-            <View style={styles.cardItemLeft}>
-              <View style={styles.iconContainer}>
-                <Ionicons name="lock-closed-outline" size={moderateScale(20)} color="#666" />
+          {/* Only show password option if user has password authentication */}
+          {user.hasPassword && (
+            <TouchableOpacity style={[styles.cardItem, styles.lastCardItem]} onPress={() => router.push('/profile/change-password')}>
+              <View style={styles.cardItemLeft}>
+                <View style={styles.iconContainer}>
+                  <Ionicons name="lock-closed-outline" size={moderateScale(20)} color="#666" />
+                </View>
+                <Text style={styles.cardItemText}>Update your account password</Text>
               </View>
-              <Text style={styles.cardItemText}>Update your account password</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
-          </TouchableOpacity>
+              <Ionicons name="chevron-forward" size={moderateScale(20)} color="#999" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Support & Help Card */}

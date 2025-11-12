@@ -449,21 +449,13 @@ export function ApplicationDetailWidget({
               <View style={styles.paymentMethodBadge}>
                 <Text style={styles.paymentMethodBadgeText}>RECOMMENDED</Text>
               </View>
-              <MayaLogo width={moderateScale(50)} height={moderateScale(38)} />
-              <Text style={styles.paymentMethodName}>Maya</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.paymentMethodCard, styles.paymentMethodCardDisabled]}
-              onPress={() => onPaymentMethodSelect('Gcash')}
-              disabled={true}
-              activeOpacity={0.7}
-            >
-              <View style={styles.comingSoonBadge}>
-                <Text style={styles.comingSoonText}>SOON</Text>
+              <View style={styles.paymentMethodIconContainer}>
+                <MayaLogo width={moderateScale(40)} height={moderateScale(30)} />
               </View>
-              <GCashLogo width={moderateScale(50)} height={moderateScale(38)} />
-              <Text style={styles.paymentMethodName}>GCash</Text>
+              <View style={styles.paymentMethodInfo}>
+                <Text style={styles.paymentMethodName}>Maya</Text>
+                <Text style={styles.paymentMethodDescription}>Pay with Maya (Card, QR, Wallet)</Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -473,9 +465,12 @@ export function ApplicationDetailWidget({
               activeOpacity={0.7}
             >
               <View style={styles.paymentMethodIconContainer}>
-                <Ionicons name="business-outline" size={moderateScale(24)} color={theme.colors.accent.warningOrange} />
+                <Ionicons name="business-outline" size={moderateScale(28)} color={theme.colors.accent.warningOrange} />
               </View>
-              <Text style={styles.paymentMethodName}>Barangay</Text>
+              <View style={styles.paymentMethodInfo}>
+                <Text style={styles.paymentMethodName}>Barangay Hall</Text>
+                <Text style={styles.paymentMethodDescription}>Pay at barangay hall in Davao City</Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -485,9 +480,12 @@ export function ApplicationDetailWidget({
               activeOpacity={0.7}
             >
               <View style={styles.paymentMethodIconContainer}>
-                <Ionicons name="home-outline" size={moderateScale(24)} color={theme.colors.accent.safetyGreen} />
+                <Ionicons name="home-outline" size={moderateScale(28)} color={theme.colors.accent.safetyGreen} />
               </View>
-              <Text style={styles.paymentMethodName}>City Hall</Text>
+              <View style={styles.paymentMethodInfo}>
+                <Text style={styles.paymentMethodName}>Sangunian Hall</Text>
+                <Text style={styles.paymentMethodDescription}>Pay at the Sanggunian hall</Text>
+              </View>
             </TouchableOpacity>
           </View>
 

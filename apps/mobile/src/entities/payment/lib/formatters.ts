@@ -42,10 +42,9 @@ export function formatRelativeTime(timestamp: number): string {
  */
 export function formatPaymentMethod(method: string): string {
   const methodMap: Record<string, string> = {
-    'Gcash': 'GCash',
     'Maya': 'Maya',
     'BaranggayHall': 'Barangay Hall',
-    'CityHall': 'City Hall',
+    'CityHall': 'Sangunian Hall',
   };
   return methodMap[method] || method;
 }
@@ -55,7 +54,6 @@ export function formatPaymentMethod(method: string): string {
  */
 export function getPaymentMethodIcon(method: string): string {
   const iconMap: Record<string, string> = {
-    'Gcash': 'wallet-outline',
     'Maya': 'card-outline',
     'BaranggayHall': 'business-outline',
     'CityHall': 'business-outline',

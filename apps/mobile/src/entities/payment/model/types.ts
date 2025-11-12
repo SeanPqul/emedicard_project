@@ -8,7 +8,7 @@ import { Id } from '@backend/convex/_generated/dataModel';
 
 // ===== PAYMENT STATUS TYPES =====
 export type PaymentStatus = 'Pending' | 'Complete' | 'Failed';
-export type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
+export type PaymentMethod = 'Maya' | 'BaranggayHall' | 'CityHall';
 
 // ===== PAYMENT ENTITY TYPES =====
 export interface Payment {

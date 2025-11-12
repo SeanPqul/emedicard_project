@@ -11,11 +11,12 @@ export const styles = StyleSheet.create({
     backgroundColor: getColor('background.primary'),
     justifyContent: 'center',
     paddingHorizontal: wp('5%'),
-    paddingBottom: hp('5%'),
+    paddingVertical: hp('4%'),
   },
   content: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingBottom: hp('3%'),
   },
   
   // Email Icon Container
@@ -104,7 +105,7 @@ export const styles = StyleSheet.create({
 
   // Verify Button
   verifyButton: {
-    backgroundColor: getColor('semanticUI.primaryButton'),
+    backgroundColor: '#10B981',
     borderRadius: getBorderRadius('lg'),
     height: hp('6%'),
     justifyContent: 'center',
@@ -113,12 +114,15 @@ export const styles = StyleSheet.create({
     ...getShadow('medium'),
   },
   verifyButtonText: {
-    color: getColor('text.inverse'),
+    color: '#FFFFFF',
     fontSize: FONT_SIZES.body,
     fontWeight: 'bold',
   },
   buttonDisabled: {
-    backgroundColor: getColor('semanticUI.disabled'),
+    backgroundColor: '#E5E7EB',
+  },
+  buttonTextDisabled: {
+    color: '#6B7280',
   },
 
   // Resend Section

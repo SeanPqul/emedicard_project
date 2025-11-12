@@ -12,7 +12,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
-import { BaseScreen } from '@shared/components/core';
 import { Button } from '@shared/components';
 import { PaymentMethod } from '@entities/application';
 import { useManualPaymentUpload, ManualPaymentReceipt } from '@features/payment/hooks/useManualPaymentUpload';
@@ -171,8 +170,8 @@ export function ManualPaymentScreen() {
   };
 
   return (
-    <BaseScreen>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -314,16 +313,6 @@ export function ManualPaymentScreen() {
           )}
         </View>
 
-        {/* Upload Progress */}
-        {isUploading && (
-          <View style={styles.progressContainer}>
-            <ActivityIndicator size="small" color={theme.colors.primary[500]} />
-            <Text style={styles.progressText}>
-              Uploading... {uploadProgress}%
-            </Text>
-          </View>
-        )}
-
         {/* Submit Button */}
         <View style={styles.submitContainer}>
           <Button
@@ -336,6 +325,6 @@ export function ManualPaymentScreen() {
           />
         </View>
       </ScrollView>
-    </BaseScreen>
+    </View>
   );
 }

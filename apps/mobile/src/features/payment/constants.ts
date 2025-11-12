@@ -23,18 +23,10 @@ export interface UploadedReceipt {
  * Available payment methods with fees and configurations
  */
 export const PAYMENT_METHODS: PaymentMethodConfig[] = [
-  { 
-    id: 'Gcash', 
-    name: 'GCash', 
-    description: 'Pay with GCash mobile wallet', 
-    icon: 'wallet', 
-    fee: 50, 
-    serviceFee: 5 
-  },
   {
     id: 'Maya',
     name: 'Maya',
-    description: 'Pay with Maya checkout (₱60 total)',
+    description: 'Pay with Maya checkout',
     icon: 'card',
     fee: 50,
     serviceFee: 10
@@ -42,23 +34,25 @@ export const PAYMENT_METHODS: PaymentMethodConfig[] = [
   { 
     id: 'BaranggayHall', 
     name: 'Barangay Hall', 
-    description: 'Pay at the Barangay Hall', 
+    description: 'Pay at any barangay hall in Davao City', 
     icon: 'home', 
-    fee: 50 
+    fee: 50,
+    serviceFee: 10
   },
   { 
     id: 'CityHall', 
-    name: 'City Hall', 
-    description: 'Pay at the City Hall', 
+    name: 'Sangunian Hall', 
+    description: 'Pay at the city Sangunian hall', 
     icon: 'business', 
-    fee: 50 
+    fee: 50,
+    serviceFee: 10
   },
 ];
 
 /**
  * Payment method types for validation
  */
-export const DIGITAL_PAYMENT_METHODS = ['Gcash', 'Maya'] as const;
+export const DIGITAL_PAYMENT_METHODS = ['Maya'] as const;
 export const MANUAL_PAYMENT_METHODS = ['BaranggayHall', 'CityHall'] as const;
 
 export type DigitalPaymentMethod = typeof DIGITAL_PAYMENT_METHODS[number];
