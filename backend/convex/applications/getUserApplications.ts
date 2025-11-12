@@ -15,10 +15,13 @@ export const getUserApplicationsQuery = query({
     if (!user) return [];
     
     // Get applications with optimized payload
-    const applications = await ctx.db
+    const allApplications = await ctx.db
       .query("applications")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
+    
+    // Filter out soft-deleted applications
+    const applications = allApplications.filter(app => !app.deletedAt);
 
     // Aggregate server-side to minimize round-trips
     return await Promise.all(applications.map(async (application) => {

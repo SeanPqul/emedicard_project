@@ -77,6 +77,11 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
       // Manual payments waiting for admin validation - still current
       const stepData = { label: 'Awaiting payment validation', subtitle: 'Admin reviewing your payment' };
       steps.push({ id: 'payment', ...stepData, status: 'current' });
+    } else if (status === 'Under Administrative Review' || status === 'Locked - Max Attempts') {
+      // Application locked due to max payment attempts - show as blocked
+      // Note: 'Locked - Max Attempts' is old status, kept for backward compatibility
+      const stepData = { label: 'Payment under review', subtitle: 'Admin review required' };
+      steps.push({ id: 'payment', ...stepData, status: 'current' });
     } else {
       // Payment has been validated and approved
       const stepData = getStepLabel('payment', 'completed');
@@ -88,7 +93,9 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
       if (status === 'Pending Payment') {
         const stepData = getStepLabel('orientation', 'upcoming');
         steps.push({ id: 'orientation', ...stepData, status: 'upcoming' });
-      } else if (status === 'For Payment Validation') {
+      } else if (status === 'For Payment Validation' || status === 'Under Administrative Review' || status === 'Locked - Max Attempts') {
+        // Payment not validated yet or locked - orientation is still upcoming
+        // Note: 'Locked - Max Attempts' is old status, kept for backward compatibility
         const stepData = getStepLabel('orientation', 'upcoming');
         steps.push({ id: 'orientation', ...stepData, status: 'upcoming' });
       } else if (orientationCompleted) {
@@ -112,6 +119,11 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
       steps.push({ id: 'documentVerification', ...stepData, status: 'upcoming' });
     } else if (status === 'For Payment Validation') {
       const stepData = getStepLabel('documentVerification', 'upcoming');
+      steps.push({ id: 'documentVerification', ...stepData, status: 'upcoming' });
+    } else if (status === 'Under Administrative Review' || status === 'Locked - Max Attempts') {
+      // Application locked - document verification blocked until payment is resolved
+      // Note: 'Locked - Max Attempts' is old status, kept for backward compatibility
+      const stepData = { label: 'Document verification pending', subtitle: 'Awaiting payment resolution' };
       steps.push({ id: 'documentVerification', ...stepData, status: 'upcoming' });
     } else if (requiresOrientation && status === 'For Orientation') {
       const stepData = getStepLabel('documentVerification', 'upcoming');

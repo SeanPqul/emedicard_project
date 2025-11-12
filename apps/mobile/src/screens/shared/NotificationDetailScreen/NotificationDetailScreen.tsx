@@ -305,9 +305,19 @@ export function NotificationDetailScreen() {
               
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Status:</Text>
-                <View style={[styles.statusBadge, { backgroundColor: config?.color + '20' }]}>
-                  <Text style={[styles.statusText, { color: config?.color }]}>
-                    {application.status}
+                <View style={[styles.statusBadge, { 
+                  backgroundColor: application.status === 'Under Administrative Review' 
+                    ? '#FEE2E2' // Red background for locked status
+                    : config?.color + '20' 
+                }]}>
+                  <Text style={[styles.statusText, { 
+                    color: application.status === 'Under Administrative Review'
+                      ? '#DC2626' // Red text for locked status  
+                      : config?.color
+                  }]}>
+                    {application.status === 'Under Administrative Review' 
+                      ? 'Under Administrative Review'
+                      : application.status}
                   </Text>
                 </View>
               </View>

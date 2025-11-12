@@ -160,6 +160,8 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                 statusBadge = { text: 'Approved', color: '#059669' }; // Clean green
               } else if (status === 'Under Review' || status === 'Submitted') {
                 statusBadge = { text: 'In Review', color: '#2563EB' }; // Blue
+              } else if (status === 'Under Administrative Review' || status === 'Locked - Max Attempts') {
+                statusBadge = { text: 'Admin Review', color: '#DC2626' }; // Red - requires attention
               }
               
               return (

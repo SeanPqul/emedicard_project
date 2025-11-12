@@ -16,7 +16,6 @@ import { useJobCategories } from '@features/jobCategory/hooks';
 import { getHealthCardTypeName, getPaymentMethods } from '@features/healthCards';
 import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 import MayaLogo from '@/assets/svgs/maya-logo-brandlogos.net_gpvn1r359.svg';
-import GCashLogo from '@/assets/svgs/gcash-logo-brandlogos.net_arv9ck6s2.svg';
 
 interface Requirement {
   name: string;
@@ -195,9 +194,7 @@ export function DocumentRequirementsScreen() {
               {getPaymentMethods(typeof requirementsByCategory.jobCategory === 'string' ? requirementsByCategory.jobCategory : requirementsByCategory.jobCategory?.name || 'standard').map((payment, index) => (
                 <View key={index} style={styles.paymentOption}>
                   <View style={styles.paymentIcon}>
-                    {payment.method.includes('GCash') ? (
-                      <GCashLogo width={moderateScale(40)} height={moderateScale(30)} />
-                    ) : payment.method.includes('Maya') ? (
+                    {payment.method.includes('Maya') ? (
                       <MayaLogo width={moderateScale(40)} height={moderateScale(30)} />
                     ) : (
                       <Ionicons 
@@ -217,7 +214,7 @@ export function DocumentRequirementsScreen() {
               <View style={styles.paymentNote}>
                 <Ionicons name="information-circle-outline" size={moderateScale(16)} color={theme.colors.text.secondary} />
                 <Text style={styles.paymentNoteText}>
-                  For Barangay Hall or City Hall payments, you&apos;ll need to upload your Official Receipt (OR) during the application process.
+                  For Barangay Hall or Sanggunian Hall payments, you&apos;ll need to upload your Official Receipt (OR) during the application process.
                 </Text>
               </View>
             </View>

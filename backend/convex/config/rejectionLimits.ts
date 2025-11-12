@@ -52,7 +52,8 @@ export const hasReachedMaxAttempts = (
     ? REJECTION_LIMITS.DOCUMENTS.MAX_ATTEMPTS 
     : REJECTION_LIMITS.PAYMENTS.MAX_ATTEMPTS;
   
-  return attemptNumber > maxAttempts;
+  // Lock when reaching max attempts (e.g., at 3rd rejection, not after 3rd)
+  return attemptNumber >= maxAttempts;
 };
 
 // Helper function to get warning message

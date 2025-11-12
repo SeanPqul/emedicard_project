@@ -276,16 +276,12 @@ export const getPaymentMethods = (jobCategory: string): Array<{ method: string; 
       description: 'Pay online using Maya (PayMaya) - instant and secure payment'
     },
     {
-      method: 'GCash', 
-      description: 'Pay online using GCash - convenient mobile payment'
-    },
-    {
       method: 'Barangay Hall',
-      description: 'Pay at your local Barangay Hall - bring your application ID'
+      description: 'Pay at Barangay Hall in Davao City'
     },
     {
-      method: 'City Hall',
-      description: 'Pay at the City Hall cashier - business hours only'
+      method: 'Sanggunian Hall',
+      description: 'Pay at the Sanggunian Hall cashier - business hours only'
     }
   ];
 };

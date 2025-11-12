@@ -83,6 +83,7 @@ export interface UpdateApplicationInput {
 export interface SubmitApplicationInput {
   formId: GenericId<'forms'>;
   paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
+  paymentLocation?: string; // Required for BaranggayHall and CityHall
   paymentReferenceNumber: string;
   paymentReceiptId?: GenericId<'_storage'>;
 }

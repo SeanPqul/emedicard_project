@@ -44,7 +44,7 @@ export function formatPaymentMethod(method: string): string {
   const methodMap: Record<string, string> = {
     'Maya': 'Maya',
     'BaranggayHall': 'Barangay Hall',
-    'CityHall': 'Sangunian Hall',
+    'CityHall': 'Sanggunian Hall',
   };
   return methodMap[method] || method;
 }

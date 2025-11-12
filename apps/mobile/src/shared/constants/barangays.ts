@@ -1,0 +1,175 @@
+/**
+ * Davao City Barangays
+ * 
+ * List of barangays in Davao City for payment location selection
+ * Organized alphabetically for easier lookup
+ */
+
+export const DAVAO_CITY_BARANGAYS = [
+  "Acacia",
+  "Agdao",
+  "Alambre",
+  "Alejandra Navarro (Lasang)",
+  "Alfonso Angliongto Sr.",
+  "Angalan",
+  "Atan-Awe",
+  "Baganihan",
+  "Bago Aplaya",
+  "Bago Gallera",
+  "Bago Oshiro",
+  "Baguio",
+  "Balengaeng",
+  "Baliok",
+  "Bangkas Heights",
+  "Bantol",
+  "Baracatan",
+  "Bato",
+  "Bayabas",
+  "Biao Escuela",
+  "Biao Guianga",
+  "Biao Joaquin",
+  "Binugao",
+  "Bucana",
+  "Buda",
+  "Buhangin",
+  "Bunawan",
+  "Cadalian",
+  "Calinan",
+  "Callawa",
+  "Camansi",
+  "Carmen",
+  "Catalunan Grande",
+  "Catalunan Pequeño",
+  "Catigan",
+  "Cawayan",
+  "Centro (Poblacion)",
+  "Colosas",
+  "Communal",
+  "Crossing Bayabas",
+  "Dacudao",
+  "Dalag",
+  "Dalagdag",
+  "Daliao",
+  "Daliaon Plantation",
+  "Datu Salumay",
+  "Dominga",
+  "Dumoy",
+  "Eden",
+  "Fatima (Benowang)",
+  "Gatungan",
+  "Gov. Paciano Bangoy",
+  "Gov. Vicente Duterte",
+  "Gumalang",
+  "Gumitan",
+  "Ilang",
+  "Inayangan",
+  "Indangan",
+  "Kap. Tomas Monteverde, Sr.",
+  "Kilate",
+  "Lacson",
+  "Lamanan",
+  "Lampianao",
+  "Langub",
+  "Lapu-Lapu",
+  "Leon Garcia",
+  "Lizada",
+  "Los Amigos",
+  "Lubogan",
+  "Lumiad",
+  "Ma-a",
+  "Mabuhay",
+  "Magsaysay",
+  "Magtuod",
+  "Mahayag",
+  "Malabog",
+  "Malagos",
+  "Malamba",
+  "Manambulan",
+  "Mandug",
+  "Manuel Guianga",
+  "Mapula",
+  "Marapangi",
+  "Marilog",
+  "Matina Aplaya",
+  "Matina Biao",
+  "Matina Crossing",
+  "Matina Pangi",
+  "Megkawayan",
+  "Mintal",
+  "Mudiang",
+  "Mulig",
+  "New Carmen",
+  "New Valencia",
+  "Pampanga",
+  "Panacan",
+  "Panalum",
+  "Pandaitan",
+  "Pangyan",
+  "Paquibato",
+  "Paradise Embak",
+  "Rafael Castillo",
+  "Riverside",
+  "Salapawan",
+  "Salaysay",
+  "Saloy",
+  "San Antonio",
+  "San Isidro (Licanan)",
+  "Santo Niño",
+  "Sasa",
+  "Sibulan",
+  "Sirawan",
+  "Sirib",
+  "Suawan (Tuli)",
+  "Subasta",
+  "Sumimao",
+  "Tacunan",
+  "Tagakpan",
+  "Tagluno",
+  "Tagurano",
+  "Talandang",
+  "Talomo",
+  "Talomo River",
+  "Tamayong",
+  "Tambobong",
+  "Tamugan",
+  "Tapak",
+  "Tawan-Tawan",
+  "Tibuloy",
+  "Tibungco",
+  "Tigatto",
+  "Toril",
+  "Tugbok",
+  "Tulip",
+  "Ula",
+  "Utap",
+  "Vicente Hizon Sr.",
+  "Waan",
+  "Wangan",
+  "Wilfredo Aquino",
+  "Wines",
+] as const;
+
+export type DavaoCityBarangay = typeof DAVAO_CITY_BARANGAYS[number];
+
+/**
+ * Payment location options for Sanggunian Hall
+ */
+export const SANGGUNIAN_HALL_LOCATION = "Sanggunian Hall - Davao City Hall";
+
+/**
+ * Get location label based on payment method
+ */
+export function getLocationLabel(paymentMethod: 'BaranggayHall' | 'CityHall'): string {
+  return paymentMethod === 'BaranggayHall' 
+    ? 'Select Barangay' 
+    : 'Payment Location';
+}
+
+/**
+ * Get location options based on payment method
+ */
+export function getLocationOptions(paymentMethod: 'BaranggayHall' | 'CityHall'): readonly string[] {
+  return paymentMethod === 'BaranggayHall'
+    ? DAVAO_CITY_BARANGAYS
+    : [SANGGUNIAN_HALL_LOCATION];
+}

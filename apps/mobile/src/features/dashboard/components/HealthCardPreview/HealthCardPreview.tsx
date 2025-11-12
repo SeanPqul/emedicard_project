@@ -195,6 +195,9 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
         return theme.colors.blue[500];
       case 'Under Review':
         return theme.colors.orange[500];
+      case 'Under Administrative Review':
+      case 'Locked - Max Attempts': // Old status, backward compatibility
+        return theme.colors.red[500]; // Red for locked/requires admin attention
       case 'Approved':
         return theme.colors.semantic.success;
       default:
@@ -214,6 +217,15 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
   const categoryLabel = getCardTypeLabel(categoryName);
   const shortId = `#${String(application._id).slice(-6).toUpperCase()}`;
 
+  // Display professional status text
+  const getDisplayStatus = () => {
+    // Map internal status to user-friendly display text
+    if (status === 'Under Administrative Review' || status === 'Locked - Max Attempts') {
+      return 'Under Administrative Review';
+    }
+    return status;
+  };
+
   // Get action-oriented CTA text based on status
   const getActionText = () => {
     switch (status) {
@@ -228,6 +240,9 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
         return 'View progress';
       case 'Approved':
         return 'View details';
+      case 'Under Administrative Review':
+      case 'Locked - Max Attempts': // Old status, backward compatibility
+        return 'Contact support';
       default:
         return 'View application';
     }
@@ -293,7 +308,7 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
               color: theme.colors.text.primary,
               letterSpacing: -0.3,
             }}>
-              {application.status}
+              {getDisplayStatus()}
             </Text>
           </View>
           
@@ -319,7 +334,18 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
             },
             pressed && { opacity: 0.6 }
           ]}
-          onPress={() => router.push(`/(screens)/(application)/${application._id}`)}
+          onPress={() => {
+            const actionText = getActionText();
+            // Route to help center for contact support, otherwise to application details
+            if (actionText === 'Contact support') {
+              router.push({
+                pathname: '/(screens)/(shared)/help-center',
+                params: { scrollToContact: 'true' }
+              });
+            } else {
+              router.push(`/(screens)/(application)/${application._id}`);
+            }
+          }}
           accessibilityLabel={getActionText()}
           accessibilityHint="Double tap to view application details"
         >

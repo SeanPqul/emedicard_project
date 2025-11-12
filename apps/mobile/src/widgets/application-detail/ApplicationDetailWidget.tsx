@@ -426,7 +426,7 @@ export function ApplicationDetailWidget({
               <Text style={styles.feeValue}>₱50.00</Text>
             </View>
             <View style={styles.feeRow}>
-              <Text style={styles.feeLabel}>Service Fee</Text>
+              <Text style={styles.feeLabel}>Processing Fee</Text>
               <Text style={styles.feeValue}>₱10.00</Text>
             </View>
             <View style={[styles.feeRow, styles.totalRow]}>
@@ -483,7 +483,7 @@ export function ApplicationDetailWidget({
                 <Ionicons name="home-outline" size={moderateScale(28)} color={theme.colors.accent.safetyGreen} />
               </View>
               <View style={styles.paymentMethodInfo}>
-                <Text style={styles.paymentMethodName}>Sangunian Hall</Text>
+                <Text style={styles.paymentMethodName}>Sanggunian Hall</Text>
                 <Text style={styles.paymentMethodDescription}>Pay at the Sanggunian hall</Text>
               </View>
             </TouchableOpacity>
@@ -516,9 +516,18 @@ export function ApplicationDetailWidget({
             <Text style={styles.detailValue}>{application.payment.method}</Text>
           </View>
 
+          {(application.payment as any).location && (application.payment.method === 'BaranggayHall' || application.payment.method === 'CityHall') && (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Payment Location</Text>
+              <Text style={styles.detailValue}>{(application.payment as any).location}</Text>
+            </View>
+          )}
+
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Amount Paid</Text>
-            <Text style={styles.detailValue}>₱{application.payment.netAmount}</Text>
+            <Text style={styles.detailValue}>
+              ₱{application.payment.netAmount?.toFixed(2) || application.payment.amount?.toFixed(2) || '60.00'}
+            </Text>
           </View>
 
           {application.payment.referenceNumber && (

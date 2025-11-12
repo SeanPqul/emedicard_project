@@ -35,9 +35,9 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
     },
     {
       id: 'CityHall' as const,
-      name: 'City Hall',
+      name: 'Sanggunian Hall',
       icon: 'library-outline',
-      description: 'Pay in person at Davao City Hall',
+      description: 'Pay in person at Sanggunian Hall',
       requiresReference: false,
       bgColor: theme.colors.semantic.info + '10',
       iconColor: theme.colors.semantic.info,
@@ -94,7 +94,7 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
     <View style={styles.container}>
       <Text style={styles.heading}>Payment Method</Text>
       <Text style={styles.description}>
-        Choose how you'd like to pay the ₱60 application fee (₱50 + ₱10 processing fee).
+        Choose how you'd like to pay. All methods require ₱60 total (₱50 application fee + ₱10 processing fee).
       </Text>
 
       {/* Fee Breakdown */}
@@ -144,7 +144,7 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
             <View style={styles.instructionsText}>
               <Text style={styles.instructionsTitle}>Payment Instructions:</Text>
               <Text style={styles.instructionsBody}>
-                After submitting this application, visit {formData.paymentMethod === 'BaranggayHall' ? 'your local Barangay Hall' : 'Davao City Hall'} to complete your ₱60 payment. Bring your application reference number.
+                After submitting this application, visit {formData.paymentMethod === 'BaranggayHall' ? 'your local Barangay Hall' : 'Sanggunian Hall'} to complete your ₱60 payment (₱50 application + ₱10 processing). Bring your application reference number.
               </Text>
             </View>
           </View>

@@ -249,4 +249,82 @@ export const styles = StyleSheet.create({
   submitButton: {
     width: '100%',
   },
+  placeholderText: {
+    ...getTypography('body'),
+    color: getColor('text.secondary'),
+  },
+  selectedLocationText: {
+    ...getTypography('body'),
+    color: getColor('text.primary'),
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: getColor('background.primary'),
+    borderTopLeftRadius: getBorderRadius('xl'),
+    borderTopRightRadius: getBorderRadius('xl'),
+    maxHeight: '80%',
+    ...getShadow('large'),
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: getSpacing('lg'),
+    borderBottomWidth: scale(1),
+    borderBottomColor: getColor('border.light'),
+  },
+  modalTitle: {
+    ...getTypography('h3'),
+    color: getColor('text.primary'),
+    fontWeight: '600',
+  },
+  modalCloseButton: {
+    padding: getSpacing('xs'),
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: getColor('background.secondary'),
+    margin: getSpacing('lg'),
+    paddingHorizontal: getSpacing('md'),
+    paddingVertical: getSpacing('sm'),
+    borderRadius: getBorderRadius('md'),
+    borderWidth: scale(1),
+    borderColor: getColor('border.light'),
+  },
+  searchInput: {
+    flex: 1,
+    ...getTypography('body'),
+    color: getColor('text.primary'),
+    marginLeft: getSpacing('sm'),
+  },
+  locationList: {
+    maxHeight: verticalScale(400),
+  },
+  locationItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: getSpacing('lg'),
+    paddingVertical: getSpacing('md'),
+  },
+  locationItemSelected: {
+    backgroundColor: getColor('primary.light') + '10',
+  },
+  locationItemText: {
+    ...getTypography('body'),
+    color: getColor('text.primary'),
+  },
+  locationItemTextSelected: {
+    color: getColor('primary.main'),
+    fontWeight: '600',
+  },
+  locationSeparator: {
+    height: scale(1),
+    backgroundColor: getColor('border.light'),
+  },
 });

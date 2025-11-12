@@ -31,7 +31,7 @@ export function useApplications(applicationId?: string) {
 
   const submitApplicationForm = async (
     applicationId: Id<'applications'>,
-    paymentMethod: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall' | null,
+    paymentMethod: 'Maya' | 'BaranggayHall' | 'CityHall' | null,
     paymentReferenceNumber: string | null,
     receiptStorageId?: Id<'_storage'>
   ) => {

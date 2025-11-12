@@ -180,6 +180,7 @@ export const validateDocumentUploads = (
 // ===== PAYMENT VALIDATION =====
 export interface PaymentFormData {
   method: 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
+  paymentLocation?: string;
   referenceNumber: string;
   amount: number;
 }
@@ -192,6 +193,13 @@ export const validatePaymentForm = (
   // Payment method validation
   if (!formData.method) {
     (errors as any).method = 'Please select a payment method';
+  }
+
+  // Payment location validation (required for manual payments)
+  if (formData.method === 'BaranggayHall' || formData.method === 'CityHall') {
+    if (!formData.paymentLocation || !formData.paymentLocation.trim()) {
+      (errors as any).paymentLocation = 'Payment location is required for manual payments';
+    }
   }
 
   // Reference number validation

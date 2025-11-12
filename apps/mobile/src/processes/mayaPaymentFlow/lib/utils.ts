@@ -14,7 +14,7 @@ export function formatCurrency(amount: number): string {
 }
 
 /**
- * Calculate total amount including service fee
+ * Calculate total amount including processing fee
  */
 export function calculateTotalAmount(amount: number, serviceFee: number): number {
   return amount + serviceFee;

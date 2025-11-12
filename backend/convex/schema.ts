@@ -22,6 +22,7 @@ export default defineSchema({
       )
     ),
     updatedAt: v.optional(v.float64()),
+    deletedAt: v.optional(v.float64()),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_role", ["role"])
@@ -67,6 +68,7 @@ export default defineSchema({
     healthCardId: v.optional(v.id("healthCards")),
     healthCardRegistrationNumber: v.optional(v.string()),
     healthCardIssuedAt: v.optional(v.float64()),
+    deletedAt: v.optional(v.float64()),
   }).index("by_user", ["userId"]),
   
   documentTypes: defineTable({
@@ -123,6 +125,7 @@ export default defineSchema({
     requireOrientation: v.optional(
       v.union(v.boolean(), v.string())
     ),
+    deletedAt: v.optional(v.float64()),
   }),
   jobCategoryDocuments: defineTable({
     documentTypeId: v.id("documentTypes"),
@@ -292,11 +295,11 @@ export default defineSchema({
     mayaPaymentId: v.optional(v.string()),
     netAmount: v.float64(),
     paymentMethod: v.union(
-      v.literal("Gcash"),
       v.literal("Maya"),
       v.literal("BaranggayHall"),
       v.literal("CityHall")
     ),
+    paymentLocation: v.optional(v.string()), // For manual payments: barangay/hall name where payment was made
     paymentProvider: v.optional(
       v.union(
         v.literal("maya_api"),
@@ -576,6 +579,7 @@ export default defineSchema({
     rejectedReceiptId: v.optional(v.id("_storage")), // Receipt storage ID (if exists)
     referenceNumber: v.string(), // Payment reference number
     paymentMethod: v.string(), // Payment method used
+    paymentLocation: v.optional(v.string()), // Location where payment was made (for manual payments)
     amount: v.float64(), // Payment amount
     
     // Rejection Information

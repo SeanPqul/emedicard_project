@@ -21,9 +21,11 @@ export const getApplicants = query({
     //   throw new Error("Unauthorized: Only admins and inspectors can view applicants.");
     // }
 
-    return ctx.db
+    const applicants = await ctx.db
       .query("users")
       .withIndex("by_role", (q: any) => q.eq("role", "applicant"))
       .collect();
+    
+    return applicants.filter(user => !user.deletedAt);
   },
 });

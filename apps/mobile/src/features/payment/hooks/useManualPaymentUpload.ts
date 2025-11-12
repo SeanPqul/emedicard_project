@@ -15,6 +15,7 @@ export interface ManualPaymentReceipt {
 export interface ManualPaymentInput {
   applicationId: Id<"applications">;
   paymentMethod: PaymentMethod;
+  paymentLocation?: string;
   referenceNumber: string;
   receipt: ManualPaymentReceipt;
 }
@@ -54,13 +55,14 @@ export function useManualPaymentUpload() {
       setUploadProgress(80);
 
       // Step 2: Create payment record
-      // Manual payments (BaranggayHall/CityHall) have no service fee - direct cash payment
+      // All payments include ₱10 processing fee (charged by payment centers)
       const paymentId = await createPayment({
         applicationId: input.applicationId,
         amount: 50, // Application fee
-        serviceFee: 0, // No service fee for manual/cash payments
-        netAmount: 50, // Total amount (base fee only)
+        serviceFee: 10, // Processing fee (charged by payment center)
+        netAmount: 60, // Total amount (base fee + processing)
         paymentMethod: input.paymentMethod,
+        paymentLocation: input.paymentLocation,
         referenceNumber: input.referenceNumber,
         receiptStorageId: storageId,
       });

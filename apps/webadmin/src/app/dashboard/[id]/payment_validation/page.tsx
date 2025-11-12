@@ -42,10 +42,13 @@ type PaymentData = {
   applicantName: string;
   submissionDate: number;
   paymentMethod: string;
+  paymentLocation?: string;
   paymentStatus: string;
   receiptUrl: string | null;
   referenceNumber: string;
   amount: number;
+  netAmount?: number;
+  serviceFee?: number;
   mayaCheckoutId?: string;
   isResubmission?: boolean;
   rejectionHistory?: RejectionHistoryItem[];
@@ -340,16 +343,38 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                   Approve Payment & Continue to Documents
                 </button>
                 
-                {/* Secondary Action: Request Payment Correction */}
-                <button
-                  onClick={() => setIsRejectModalOpen(true)}
-                  className="w-full bg-orange-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-orange-600 border border-orange-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Request Payment Correction
-                </button>
+                {/* Secondary Action: Request Payment Correction - Only show if under max attempts */}
+                {(!paymentData.rejectionHistory || paymentData.rejectionHistory.length < 3) && (
+                  <button
+                    onClick={() => setIsRejectModalOpen(true)}
+                    className="w-full bg-orange-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-orange-600 border border-orange-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Request Payment Correction
+                  </button>
+                )}
+                
+                {/* Max Attempts Reached Notice */}
+                {paymentData.rejectionHistory && paymentData.rejectionHistory.length >= 3 && (
+                  <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                    <div className="flex items-start gap-3">
+                      <svg className="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <div>
+                        <h4 className="text-sm font-bold text-red-900">Maximum Attempts Reached</h4>
+                        <p className="text-sm text-red-800 mt-1">
+                          This application has reached the maximum number of payment correction attempts (3) and requires manual review.
+                        </p>
+                        <p className="text-sm text-red-800 mt-2 font-semibold">
+                          Available actions: Approve payment (if valid) or use "Reject Application (Final)" to permanently close this application.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Tertiary Action: Reject Application */}
                 <button
@@ -457,15 +482,20 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                 {/* Amount */}
                 <div className="space-y-2">
                   <label htmlFor="amount" className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                    Amount
+                    Total Amount
                   </label>
                   <input
                     type="text"
                     id="amount"
-                    value={`₱${(paymentData.amount ?? 0).toFixed(2)}`}
+                    value={`₱${(paymentData.netAmount ?? paymentData.amount ?? 0).toFixed(2)}`}
                     readOnly
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 bg-gray-50 cursor-not-allowed font-medium focus:outline-none"
                   />
+                  {paymentData.serviceFee && (
+                    <p className="text-xs text-gray-600">
+                      Base: ₱{paymentData.amount.toFixed(2)} + Processing: ₱{paymentData.serviceFee.toFixed(2)}
+                    </p>
+                  )}
                 </div>
 
                 {/* Payment Method */}
@@ -495,6 +525,22 @@ export default function PaymentValidationPage({ params: paramsPromise }: PagePro
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 bg-gray-50 cursor-not-allowed font-mono font-medium focus:outline-none"
                   />
                 </div>
+
+                {/* Payment Location - Only show for manual payments */}
+                {paymentData.paymentLocation && (paymentData.paymentMethod === 'BaranggayHall' || paymentData.paymentMethod === 'CityHall') && (
+                  <div className="space-y-2">
+                    <label htmlFor="paymentLocation" className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                      Payment Location
+                    </label>
+                    <input
+                      type="text"
+                      id="paymentLocation"
+                      value={paymentData.paymentLocation}
+                      readOnly
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 bg-gray-50 cursor-not-allowed font-medium focus:outline-none"
+                    />
+                  </div>
+                )}
 
                 {/* Maya Checkout ID - Only show if payment method is Maya */}
                 {paymentData.paymentMethod === 'Maya' && paymentData.mayaCheckoutId && (

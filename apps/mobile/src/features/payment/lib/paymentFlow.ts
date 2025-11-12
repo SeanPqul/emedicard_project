@@ -60,8 +60,8 @@ export async function submitPayment(
     }
 
     // Calculate amounts
-    const amount = paymentData.amount || 250; // Default health card fee
-    const serviceFee = paymentData.method === 'Maya' ? 35 : 0;
+    const amount = paymentData.amount || 50; // Default health card fee
+    const serviceFee = 10; // All payment methods have ₱10 processing fee
     const netAmount = amount + serviceFee;
 
     let receiptStorageId: Id<'_storage'> | undefined;

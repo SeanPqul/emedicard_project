@@ -217,7 +217,7 @@ export function PaymentWidget({
             </View>
             {getSelectedMethodDetails()?.serviceFee && (
               <View style={styles.feeRow}>
-                <Text style={styles.feeLabel}>Service Fee:</Text>
+                <Text style={styles.feeLabel}>Processing Fee:</Text>
                 <Text style={styles.feeValue}>₱{getSelectedMethodDetails()?.serviceFee}</Text>
               </View>
             )}
@@ -308,7 +308,7 @@ function PaymentInstructions({
       )}
       {paymentMethod === 'CityHall' && (
         <Text style={styles.instructionsText}>
-          1. Visit the Sangunian Hall{"\n"}
+          1. Visit the Sanggunian Hall{"\n"}
           2. Pay ₱{amount} for health card processing{"\n"}
           3. Upload the receipt using the button above
         </Text>

@@ -8,6 +8,8 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -19,6 +21,7 @@ import { Id } from '@backend/convex/_generated/dataModel';
 import { styles } from './ManualPaymentScreen.styles';
 import { theme } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
+import { DAVAO_CITY_BARANGAYS, SANGGUNIAN_HALL_LOCATION, getLocationLabel, getLocationOptions } from '@shared/constants/barangays';
 
 export function ManualPaymentScreen() {
   const params = useLocalSearchParams<{
@@ -27,13 +30,16 @@ export function ManualPaymentScreen() {
   }>();
 
   const [referenceNumber, setReferenceNumber] = useState('');
+  const [paymentLocation, setPaymentLocation] = useState('');
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [locationSearchQuery, setLocationSearchQuery] = useState('');
   const [receipt, setReceipt] = useState<ManualPaymentReceipt | null>(null);
-  const [errors, setErrors] = useState<{ referenceNumber?: string; receipt?: string }>({});
+  const [errors, setErrors] = useState<{ referenceNumber?: string; paymentLocation?: string; receipt?: string }>({});
 
   const { submitManualPayment, isUploading, uploadProgress } = useManualPaymentUpload();
 
   const paymentMethodName =
-    params.paymentMethod === 'BaranggayHall' ? 'Barangay Hall' : 'City Hall';
+    params.paymentMethod === 'BaranggayHall' ? 'Barangay Hall' : 'Sanggunian Hall';
 
   const handlePickImage = async () => {
     try {
@@ -114,6 +120,10 @@ export function ManualPaymentScreen() {
       newErrors.referenceNumber = 'Reference number is required';
     }
 
+    if (!paymentLocation.trim()) {
+      newErrors.paymentLocation = 'Payment location is required';
+    }
+
     if (!receipt) {
       newErrors.receipt = 'Receipt image is required';
     }
@@ -132,9 +142,14 @@ export function ManualPaymentScreen() {
       return;
     }
 
+    // Format location display
+    const locationDisplay = params.paymentMethod === 'BaranggayHall' && !paymentLocation.toLowerCase().includes('barangay')
+      ? `Barangay ${paymentLocation}`
+      : paymentLocation;
+
     Alert.alert(
-      'Confirm Submission',
-      `Submit payment receipt to ${paymentMethodName}?\n\nReference: ${referenceNumber}`,
+      'Confirm Payment Submission',
+      `Submit payment for ${paymentMethodName}?\n\nPayment Location: ${locationDisplay}\nReference Number: ${referenceNumber}`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -143,6 +158,7 @@ export function ManualPaymentScreen() {
             const result = await submitManualPayment({
               applicationId: params.applicationId as Id<'applications'>,
               paymentMethod: params.paymentMethod,
+              paymentLocation: paymentLocation.trim(),
               referenceNumber: referenceNumber.trim(),
               receipt,
             });
@@ -204,7 +220,7 @@ export function ManualPaymentScreen() {
             <Text style={styles.feeValue}>₱50.00</Text>
           </View>
           <View style={styles.feeRow}>
-            <Text style={styles.feeLabel}>Service Fee</Text>
+            <Text style={styles.feeLabel}>Processing Fee</Text>
             <Text style={styles.feeValue}>₱10.00</Text>
           </View>
           <View style={[styles.feeRow, styles.totalRow]}>
@@ -252,6 +268,25 @@ export function ManualPaymentScreen() {
           />
           {errors.referenceNumber && (
             <Text style={styles.errorText}>{errors.referenceNumber}</Text>
+          )}
+        </View>
+
+        {/* Payment Location Input */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>
+            {params.paymentMethod === 'BaranggayHall' ? 'Select Barangay' : 'Payment Location'} *
+          </Text>
+          <TouchableOpacity
+            style={[styles.textInput, errors.paymentLocation && styles.inputError, { justifyContent: 'center' }]}
+            onPress={() => setIsLocationModalOpen(true)}
+            disabled={isUploading}
+          >
+            <Text style={paymentLocation ? styles.selectedLocationText : styles.placeholderText}>
+              {paymentLocation || (params.paymentMethod === 'BaranggayHall' ? 'Select your barangay' : 'Select payment location')}
+            </Text>
+          </TouchableOpacity>
+          {errors.paymentLocation && (
+            <Text style={styles.errorText}>{errors.paymentLocation}</Text>
           )}
         </View>
 
@@ -325,6 +360,85 @@ export function ManualPaymentScreen() {
           />
         </View>
       </ScrollView>
+
+      {/* Location Picker Modal */}
+      <Modal
+        visible={isLocationModalOpen}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsLocationModalOpen(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {params.paymentMethod === 'BaranggayHall' ? 'Select Barangay' : 'Select Location'}
+              </Text>
+              <TouchableOpacity
+                onPress={() => setIsLocationModalOpen(false)}
+                style={styles.modalCloseButton}
+              >
+                <Ionicons name="close" size={moderateScale(24)} color={theme.colors.text.primary} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Search Input */}
+            {params.paymentMethod === 'BaranggayHall' && (
+              <View style={styles.searchContainer}>
+                <Ionicons name="search" size={moderateScale(20)} color={theme.colors.text.secondary} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search barangay..."
+                  value={locationSearchQuery}
+                  onChangeText={setLocationSearchQuery}
+                  autoCapitalize="words"
+                />
+              </View>
+            )}
+
+            {/* Location List */}
+            <FlatList
+              data={getLocationOptions(params.paymentMethod as 'BaranggayHall' | 'CityHall').filter(location =>
+                location.toLowerCase().includes(locationSearchQuery.toLowerCase())
+              )}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.locationItem,
+                    paymentLocation === item && styles.locationItemSelected,
+                  ]}
+                  onPress={() => {
+                    setPaymentLocation(item);
+                    setErrors(prev => ({ ...prev, paymentLocation: undefined }));
+                    setIsLocationModalOpen(false);
+                    setLocationSearchQuery('');
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.locationItemText,
+                      paymentLocation === item && styles.locationItemTextSelected,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                  {paymentLocation === item && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={moderateScale(20)}
+                      color={theme.colors.primary[500]}
+                    />
+                  )}
+                </TouchableOpacity>
+              )}
+              ItemSeparatorComponent={() => <View style={styles.locationSeparator} />}
+              style={styles.locationList}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

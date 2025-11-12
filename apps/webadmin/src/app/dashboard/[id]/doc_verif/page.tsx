@@ -384,6 +384,43 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   if (isLoading) {
     return <LoadingScreen title="Loading Application" message="Please wait while we fetch the application details..." />;
   }
+  
+  // Block access if application is locked/under review
+  if (applicationStatus?.applicationStatus === "Under Administrative Review") {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-lg text-center max-w-lg">
+          <div className="bg-orange-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 0h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2zm6-7v2m0 0h.01" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Application Under Administrative Review</h2>
+          <p className="text-gray-600 mb-4">
+            This application has reached the maximum payment submission attempts and is currently locked pending manual review by the support team.
+          </p>
+          <p className="text-gray-700 font-medium mb-6">
+            To proceed with document verification, an administrator must first resolve the payment issues or permanently reject the application.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button 
+              onClick={() => router.push(`/dashboard/${params.id}/payment_validation`)} 
+              className="bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-700 transition-all"
+            >
+              View Payment Details
+            </button>
+            <button 
+              onClick={() => router.push('/dashboard')} 
+              className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all"
+            >
+              Return to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   if (!data) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">

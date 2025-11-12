@@ -142,6 +142,10 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
       return status !== 'Cancelled' && status !== 'Approved';
     })
     .filter((app: any) => {
+      // Only show orientation if payment has been validated (Complete status)
+      const paymentValidated = app?.payment?.status === 'Complete';
+      if (!paymentValidated) return false;
+      
       const name = app?.jobCategory?.name?.toLowerCase?.() || '';
       const isFoodHandler = name.includes('food');
       const requireOrientationFlag = app?.jobCategory?.requireOrientation;

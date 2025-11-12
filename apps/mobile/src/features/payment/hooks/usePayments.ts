@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
-type PaymentMethod = 'Gcash' | 'Maya' | 'BaranggayHall' | 'CityHall';
+type PaymentMethod = 'Maya' | 'BaranggayHall' | 'CityHall';
 
 export function usePayments(applicationId?: string) {
   const existingPayment = useQuery(

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Linking, StyleSheet, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BaseScreen } from '@shared/components/core';
 import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
@@ -20,9 +20,33 @@ interface FAQItem {
  */
 export function HelpCenterScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [contactSectionY, setContactSectionY] = useState<number>(0);
+  const params = useLocalSearchParams();
 
   const toggleFAQ = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
+  };
+
+  // Auto-scroll to contact section when coming from "Contact support"
+  useEffect(() => {
+    if (params.scrollToContact === 'true' && contactSectionY > 0) {
+      // Delay to ensure layout is complete, then animate smoothly
+      const timer = setTimeout(() => {
+        scrollViewRef.current?.scrollTo({
+          y: contactSectionY - verticalScale(80), // Offset to show section with some spacing
+          animated: true,
+        });
+      }, 600); // Increased delay for smoother transition
+
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [params.scrollToContact, contactSectionY]);
+
+  const handleContactSectionLayout = (event: any) => {
+    const { y } = event.nativeEvent.layout;
+    setContactSectionY(y);
   };
 
   const handleCallCHO = () => {
@@ -74,7 +98,8 @@ export function HelpCenterScreen() {
   return (
     <BaseScreen safeArea={false}>
       <View style={styles.container}>
-        <ScrollView 
+        <ScrollView
+          ref={scrollViewRef}
           style={styles.content}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
@@ -145,7 +170,7 @@ export function HelpCenterScreen() {
           </View>
 
           {/* Contact Card */}
-          <View style={styles.card}>
+          <View onLayout={handleContactSectionLayout} style={styles.card}>
             <View style={styles.cardHeader}>
               <Ionicons name="call" size={moderateScale(24)} color={theme.colors.blue[600]} />
               <Text style={styles.cardTitle}>Need More Help?</Text>

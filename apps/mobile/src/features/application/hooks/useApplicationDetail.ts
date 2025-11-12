@@ -36,7 +36,10 @@ export function useApplicationDetail(applicationId: string | undefined) {
     const mappedPayment = {
       _id: latestPayment._id,
       amount: latestPayment.amount,
+      netAmount: latestPayment.netAmount,
+      serviceFee: latestPayment.serviceFee,
       method: latestPayment.paymentMethod,
+      location: latestPayment.paymentLocation,
       status: latestPayment.paymentStatus,
       referenceNumber: latestPayment.referenceNumber,
     };

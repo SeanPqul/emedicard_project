@@ -112,8 +112,10 @@ export function PaymentDetailScreen() {
             </View>
 
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Service Fee</Text>
-              <Text style={styles.infoValue}>{formatCurrency(payment.serviceFee)}</Text>
+              <Text style={styles.infoLabel}>Processing Fee</Text>
+              <Text style={styles.infoValue}>
+                {formatCurrency(payment.serviceFee || (payment.netAmount - payment.amount))}
+              </Text>
             </View>
 
             <View style={[styles.infoRow, styles.totalRow]}>

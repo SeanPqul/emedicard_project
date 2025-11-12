@@ -48,17 +48,20 @@ export const list = query({
       );
     }
 
-    const applications = await applicationsQuery.collect();
+    const allApplications = await applicationsQuery.collect();
+    
+    // Filter out soft-deleted applications
+    const applications = allApplications.filter(app => !app.deletedAt);
 
-    // Join with user and job category data
+    // Join with user and job category data (preserve names even if soft-deleted)
     const applicationsWithDetails = await Promise.all(
       applications.map(async (application) => {
         const user = await ctx.db.get(application.userId);
         const jobCategory = await ctx.db.get(application.jobCategoryId);
         return {
           ...application,
-          userName: user?.fullname ?? "Unknown User",
-          jobCategoryName: jobCategory?.name ?? "Unknown Category",
+          userName: user?.fullname ?? "[Deleted User]",
+          jobCategoryName: jobCategory?.name ?? "[Deleted Category]",
         };
       })
     );

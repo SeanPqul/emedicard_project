@@ -8,11 +8,11 @@ export const createPaymentMutation = mutation({
     serviceFee: v.number(),
     netAmount: v.number(),
     paymentMethod: v.union(
-      v.literal("Gcash"),
       v.literal("Maya"),
       v.literal("BaranggayHall"),
       v.literal("CityHall")
     ),
+    paymentLocation: v.optional(v.string()),
     referenceNumber: v.string(),
     receiptStorageId: v.optional(v.id("_storage")),
   },
@@ -67,6 +67,7 @@ export const createPaymentMutation = mutation({
         serviceFee: args.serviceFee,
         netAmount: args.netAmount,
         paymentMethod: args.paymentMethod,
+        paymentLocation: args.paymentLocation,
         referenceNumber: args.referenceNumber,
         receiptStorageId: args.receiptStorageId,
         paymentStatus: "Pending",

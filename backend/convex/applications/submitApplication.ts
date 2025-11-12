@@ -5,7 +5,6 @@ export const submitApplicationMutation = mutation({
   args: {
     applicationId: v.id("applications"),
     paymentMethod: v.optional(v.union(
-      v.literal("Gcash"),
       v.literal("Maya"),
       v.literal("BaranggayHall"),
       v.literal("CityHall")

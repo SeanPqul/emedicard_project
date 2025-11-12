@@ -59,6 +59,7 @@ export const rejectPayment = mutation({
       rejectedReceiptId: payment.receiptStorageId,
       referenceNumber: payment.referenceNumber,
       paymentMethod: payment.paymentMethod,
+      paymentLocation: payment.paymentLocation,
       amount: payment.amount,
       rejectionCategory: args.rejectionCategory as any,
       rejectionReason: args.rejectionReason,
@@ -118,8 +119,8 @@ export const rejectPayment = mutation({
       // Lock the application
       if (REJECTION_LIMITS.BEHAVIOR.AUTO_LOCK_APPLICATION) {
         await ctx.db.patch(args.applicationId, {
-          applicationStatus: "Locked - Max Attempts",
-          adminRemarks: `Application locked: Maximum payment rejection attempts (${maxAttempts}) reached`,
+          applicationStatus: "Under Administrative Review",
+          adminRemarks: `Application requires manual review: Maximum payment submission attempts (${maxAttempts}) has been reached. Pending support team evaluation.`,
           updatedAt: Date.now(),
         });
       }

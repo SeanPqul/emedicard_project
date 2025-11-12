@@ -36,14 +36,18 @@ export const getUsersByRoleQuery = query({
         }
 
         // Return users based on requested role
+        let users;
         if (args.role) {
-            return await ctx.db
+            users = await ctx.db
                 .query("users")
                 .withIndex("by_role", (q) => q.eq("role", args.role!))
                 .collect();
         } else {
             // Return all users if no specific role requested
-            return await ctx.db.query("users").collect();
+            users = await ctx.db.query("users").collect();
         }
+        
+        // Filter out soft-deleted users
+        return users.filter(user => !user.deletedAt);
     }
 });

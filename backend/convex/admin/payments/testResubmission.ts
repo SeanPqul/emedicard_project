@@ -13,7 +13,6 @@ export const testResubmission = mutation({
     serviceFee: v.number(),
     netAmount: v.number(),
     paymentMethod: v.union(
-      v.literal("Gcash"),
       v.literal("Maya"),
       v.literal("BaranggayHall"),
       v.literal("CityHall")
