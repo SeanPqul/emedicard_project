@@ -1,53 +1,50 @@
 import { NextResponse } from "next/server";
+import Tesseract from "tesseract.js";
 
 export const maxDuration = 30; // Max duration for Vercel function
 
 export async function POST(req: Request) {
-  const formData = await req.formData();
-  const file = formData.get("file");
-
-  if (!file) {
-    return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-  }
-
   try {
-    // Try external OCR service first if available
-    const ocrServiceUrl = process.env.OCR_SERVICE_URL;
+    const formData = await req.formData();
+    const file = formData.get("file") as File;
+
+    if (!file) {
+      return NextResponse.json(
+        { error: "No file uploaded" },
+        { status: 400 }
+      );
+    }
+
+    console.log("Processing OCR for file:", file.name, file.type, file.size);
+
+    // Convert file to buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    console.log("Starting Tesseract OCR...");
     
-    if (ocrServiceUrl) {
-      try {
-        const ocrResponse = await fetch(ocrServiceUrl, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (ocrResponse.ok) {
-          const { text } = await ocrResponse.json();
-          return NextResponse.json({ text });
-        }
-      } catch (serviceError) {
-        console.log("External OCR service unavailable, falling back to serverless OCR");
+    // Perform OCR using Tesseract.js
+    const result = await Tesseract.recognize(
+      buffer,
+      'eng',
+      {
+        logger: m => console.log("Tesseract:", m)
       }
-    }
-
-    // Fallback to serverless OCR route
-    const serverlessOcrUrl = new URL('/api/ocr-serverless', req.url);
-    const serverlessResponse = await fetch(serverlessOcrUrl, {
-      method: 'POST',
-      body: formData,
+    );
+    
+    console.log("OCR completed. Confidence:", result.data.confidence);
+    
+    return NextResponse.json({ 
+      text: result.data.text,
+      confidence: result.data.confidence 
     });
-
-    if (!serverlessResponse.ok) {
-      const errorData = await serverlessResponse.json();
-      throw new Error(errorData.error || "OCR processing failed");
-    }
-
-    const { text } = await serverlessResponse.json();
-    return NextResponse.json({ text });
   } catch (error: any) {
-    console.error("Error processing OCR:", error);
+    console.error("OCR API error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { 
+        error: "OCR processing failed",
+        details: error.message 
+      },
       { status: 500 }
     );
   }
