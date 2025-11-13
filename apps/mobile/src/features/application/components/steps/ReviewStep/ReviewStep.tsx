@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { theme } from '@shared/styles/theme';
@@ -16,6 +17,8 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   selectedDocuments,
   getUploadState,
   onEditStep,
+  termsAccepted,
+  onTermsAcceptedChange,
 }) => {
   
   const selectedCategory = jobCategoriesData?.find(cat => cat._id === formData.jobCategory);
@@ -294,11 +297,32 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   const renderTermsAndConditions = () => (
     <View style={styles.termsContainer}>
       <Text style={styles.termsTitle}>Terms & Conditions</Text>
-      <Text style={styles.termsText}>
-        By submitting this application, I confirm that all information provided is accurate and complete. 
-        I understand that false information may result in the rejection of my application or cancellation 
-        of my health card.
-      </Text>
+      
+      {/* Checkbox */}
+      <TouchableOpacity 
+        style={styles.checkboxContainer}
+        onPress={() => onTermsAcceptedChange(!termsAccepted)}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}>
+          {termsAccepted && (
+            <Ionicons name="checkmark" size={moderateScale(16)} color={theme.colors.ui.white} />
+          )}
+        </View>
+        <Text style={styles.checkboxLabel}>
+          I confirm that all information provided is accurate and complete. I have read and agree to the{' '}
+          <Text 
+            style={styles.termsLink}
+            onPress={(e) => {
+              e.stopPropagation();
+              router.push('/(screens)/(shared)/terms');
+            }}
+          >
+            Terms & Conditions
+          </Text>
+          {' '}and understand that false information may result in rejection or cancellation.
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 

@@ -178,11 +178,9 @@ export function DocumentRequirementsScreen() {
                   <View style={styles.requirementDetails}>
                     <Text style={styles.requirementName}>{requirement.name}</Text>
                     <Text style={styles.requirementDescription}>{requirement.description}</Text>
-                    {requirement.required && (
-                      <View style={styles.requiredBadge}>
-                        <Text style={styles.requiredText}>✓ Required</Text>
-                      </View>
-                    )}
+                    <View style={styles.requiredBadge}>
+                      <Text style={styles.requiredText}>✓ Required</Text>
+                    </View>
                   </View>
                 </View>
               ))}

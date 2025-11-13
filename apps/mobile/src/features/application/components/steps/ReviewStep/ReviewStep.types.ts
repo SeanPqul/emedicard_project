@@ -23,6 +23,8 @@ export interface ReviewStepProps {
   selectedDocuments: SelectedDocuments;
   getUploadState: (documentId: string) => UploadState;
   onEditStep: (step: number) => void;
+  termsAccepted: boolean;
+  onTermsAcceptedChange: (accepted: boolean) => void;
 }
 
 export interface DocumentStatusInfo {

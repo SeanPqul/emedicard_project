@@ -17,10 +17,8 @@ import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 import { styles } from './ApplicationDetailWidget.styles';
 import { theme } from '@shared/styles/theme';
 import MayaLogo from '@/assets/svgs/maya-logo-brandlogos.net_gpvn1r359.svg';
-import GCashLogo from '@/assets/svgs/gcash-logo-brandlogos.net_arv9ck6s2.svg';
 import { usePaymentRejectionHistory } from '@features/payment';
 
-// UI constants for status colors (Phase 4 Migration: Added new statuses)
 const STATUS_COLORS = {
   'Pending Payment': '#FFA500',
   'Payment Rejected': '#DC2626',
@@ -439,7 +437,12 @@ export function ApplicationDetailWidget({
           <Text style={styles.paymentMethodsTitle}>Select Payment Method</Text>
           <Text style={styles.paymentMethodsSubtitle}>Choose how you want to pay</Text>
 
-          <View style={styles.paymentMethods}>
+          {/* Digital Payment Section */}
+          <View style={styles.paymentSection}>
+            <View style={styles.paymentSectionHeader}>
+              <Ionicons name="phone-portrait-outline" size={moderateScale(18)} color={theme.colors.primary[500]} />
+              <Text style={styles.paymentSectionTitle}>Digital Payment</Text>
+            </View>
             <TouchableOpacity
               style={[styles.paymentMethodCard, isPaymentProcessing && styles.paymentMethodCardDisabled]}
               onPress={() => onPaymentMethodSelect('Maya')}
@@ -457,36 +460,45 @@ export function ApplicationDetailWidget({
                 <Text style={styles.paymentMethodDescription}>Pay with Maya (Card, QR, Wallet)</Text>
               </View>
             </TouchableOpacity>
+          </View>
 
-            <TouchableOpacity
-              style={[styles.paymentMethodCard, isPaymentProcessing && styles.paymentMethodCardDisabled]}
-              onPress={() => onPaymentMethodSelect('BaranggayHall')}
-              disabled={isPaymentProcessing}
-              activeOpacity={0.7}
-            >
-              <View style={styles.paymentMethodIconContainer}>
-                <Ionicons name="business-outline" size={moderateScale(28)} color={theme.colors.accent.warningOrange} />
-              </View>
-              <View style={styles.paymentMethodInfo}>
-                <Text style={styles.paymentMethodName}>Barangay Hall</Text>
-                <Text style={styles.paymentMethodDescription}>Pay at barangay hall in Davao City</Text>
-              </View>
-            </TouchableOpacity>
+          {/* Over-the-Counter Payment Section */}
+          <View style={styles.paymentSection}>
+            <View style={styles.paymentSectionHeader}>
+              <Ionicons name="storefront-outline" size={moderateScale(18)} color={theme.colors.primary[500]} />
+              <Text style={styles.paymentSectionTitle}>Over-the-Counter Payment</Text>
+            </View>
+            <View style={styles.paymentMethods}>
+              <TouchableOpacity
+                style={[styles.paymentMethodCard, isPaymentProcessing && styles.paymentMethodCardDisabled]}
+                onPress={() => onPaymentMethodSelect('BaranggayHall')}
+                disabled={isPaymentProcessing}
+                activeOpacity={0.7}
+              >
+                <View style={styles.paymentMethodIconContainer}>
+                  <Ionicons name="business-outline" size={moderateScale(28)} color={theme.colors.accent.warningOrange} />
+                </View>
+                <View style={styles.paymentMethodInfo}>
+                  <Text style={styles.paymentMethodName}>Barangay Hall</Text>
+                  <Text style={styles.paymentMethodDescription}>Pay at barangay hall in Davao City</Text>
+                </View>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.paymentMethodCard, isPaymentProcessing && styles.paymentMethodCardDisabled]}
-              onPress={() => onPaymentMethodSelect('CityHall')}
-              disabled={isPaymentProcessing}
-              activeOpacity={0.7}
-            >
-              <View style={styles.paymentMethodIconContainer}>
-                <Ionicons name="home-outline" size={moderateScale(28)} color={theme.colors.accent.safetyGreen} />
-              </View>
-              <View style={styles.paymentMethodInfo}>
-                <Text style={styles.paymentMethodName}>Sanggunian Hall</Text>
-                <Text style={styles.paymentMethodDescription}>Pay at the Sanggunian hall</Text>
-              </View>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.paymentMethodCard, isPaymentProcessing && styles.paymentMethodCardDisabled]}
+                onPress={() => onPaymentMethodSelect('CityHall')}
+                disabled={isPaymentProcessing}
+                activeOpacity={0.7}
+              >
+                <View style={styles.paymentMethodIconContainer}>
+                  <Ionicons name="home-outline" size={moderateScale(28)} color={theme.colors.accent.safetyGreen} />
+                </View>
+                <View style={styles.paymentMethodInfo}>
+                  <Text style={styles.paymentMethodName}>Sanggunian Hall</Text>
+                  <Text style={styles.paymentMethodDescription}>Pay at Sangguniang Panlungsod ng Dabaw</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {isPaymentProcessing && (
@@ -500,7 +512,7 @@ export function ApplicationDetailWidget({
           <View style={styles.paymentInstructions}>
             <Ionicons name="information-circle-outline" size={moderateScale(14)} color={theme.colors.primary[500]} />
             <Text style={styles.paymentInstructionText}>
-              After selecting a payment method, you&apos;ll be redirected to complete the payment process.
+              After selecting a payment method, follow the instructions to complete your payment.
             </Text>
           </View>
         </View>
@@ -530,13 +542,6 @@ export function ApplicationDetailWidget({
             </Text>
           </View>
 
-          {application.payment.referenceNumber && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Reference Number</Text>
-              <Text style={styles.detailValue}>{application.payment.referenceNumber}</Text>
-            </View>
-          )}
-
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Payment Status</Text>
             {(() => {
@@ -557,6 +562,54 @@ export function ApplicationDetailWidget({
               );
             })()}
           </View>
+
+          {application.payment.referenceNumber && (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Reference</Text>
+              <TouchableOpacity 
+                style={{ flexDirection: 'row', alignItems: 'center', gap: scale(4), flex: 2, justifyContent: 'flex-end' }}
+                onPress={async () => {
+                  try {
+                    const Clipboard = await import('expo-clipboard').catch(() => null);
+                    if (Clipboard && application.payment?.referenceNumber) {
+                      await Clipboard.setStringAsync(application.payment.referenceNumber);
+                    }
+                  } catch (error) {
+                    console.log('Copy failed');
+                  }
+                }}
+                activeOpacity={0.6}
+              >
+                <Text style={styles.detailValue} numberOfLines={1}>{application.payment.referenceNumber}</Text>
+                <Ionicons name="copy-outline" size={moderateScale(16)} color={theme.colors.text.secondary} />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {(() => {
+            const payment = application.payment as any;
+            const timestamp = payment.updatedAt || payment._creationTime;
+            
+            if (!timestamp) {
+              return null;
+            }
+            
+            const formattedTimestamp = new Date(timestamp).toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            });
+            
+            return (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Payment Date</Text>
+                <Text style={styles.detailValue}>{formattedTimestamp}</Text>
+              </View>
+            );
+          })()}
         </View>
       )}
 

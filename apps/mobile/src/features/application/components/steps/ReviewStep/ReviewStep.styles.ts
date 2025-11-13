@@ -242,4 +242,63 @@ export const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     lineHeight: moderateScale(18),
   },
+
+  importantNotice: {
+    backgroundColor: theme.colors.semantic.warning + '10',
+    padding: scale(theme.spacing.sm),
+    borderRadius: theme.borderRadius.sm,
+    borderLeftWidth: moderateScale(3),
+    borderLeftColor: theme.colors.semantic.warning,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: verticalScale(theme.spacing.md),
+    gap: scale(theme.spacing.xs),
+  },
+
+  importantNoticeText: {
+    fontSize: moderateScale(12),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(16),
+    flex: 1,
+  },
+
+  importantNoticeBold: {
+    fontWeight: '700',
+    color: theme.colors.semantic.warning,
+  },
+
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: scale(theme.spacing.sm),
+  },
+
+  checkbox: {
+    width: moderateScale(20),
+    height: moderateScale(20),
+    borderRadius: theme.borderRadius.sm,
+    borderWidth: moderateScale(2),
+    borderColor: theme.colors.border.medium,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: verticalScale(2),
+  },
+
+  checkboxChecked: {
+    backgroundColor: theme.colors.primary[500],
+    borderColor: theme.colors.primary[500],
+  },
+
+  checkboxLabel: {
+    flex: 1,
+    fontSize: moderateScale(13),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(18),
+  },
+
+  termsLink: {
+    color: theme.colors.primary[500],
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
 });

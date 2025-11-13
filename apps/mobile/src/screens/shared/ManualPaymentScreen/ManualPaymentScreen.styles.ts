@@ -138,6 +138,9 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: getSpacing('xs'),
   },
+  requiredAsterisk: {
+    color: getColor('semantic.error'),
+  },
   textInput: {
     ...getTypography('body'),
     backgroundColor: getColor('background.primary'),

@@ -73,6 +73,7 @@ export function useApplyForm() {
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [requirementsByJobCategory, setRequirementsByJobCategory] = useState<DocumentRequirement[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   // Track if initialization has happened
   const hasInitialized = useRef(false);
@@ -162,6 +163,8 @@ export function useApplyForm() {
     requirementsByJobCategory,
     loadingData,
     isSubmitting: submission.loading,
+    termsAccepted,
+    setTermsAccepted,
     
     // Feedback
     messages,

@@ -132,6 +132,11 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
             {(() => {
               // Application Summary Logic
               const hasApplication = currentApplication !== null;
+              const applicationStatus = currentApplication?.status;
+              const paymentStatus = currentApplication?.payment?.status;
+              // 'Submitted' means payment failed/expired/cancelled, need to repay
+              const isPaymentIncomplete = applicationStatus === 'Pending Payment' || applicationStatus === 'Submitted' || (!!paymentStatus && paymentStatus !== 'Complete' && paymentStatus !== 'Refunded');
+              const isManualValidation = applicationStatus === 'For Payment Validation';
               
               if (!hasApplication) {
                 // No application
@@ -168,6 +173,10 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                 statusBadge = { text: 'Admin Review', color: '#DC2626' }; // Red - requires attention
               }
               
+              if (isPaymentIncomplete && !isManualValidation) {
+                statusBadge = undefined;
+              }
+              
               return (
                 <PresetStatCards.Applications
                   value={applicationType === 'Renew' ? 'Renewal' : 'New'}
@@ -181,6 +190,11 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
             {(() => {
               // Document Verification Logic
               const hasApplication = currentApplication !== null;
+              const applicationStatus = currentApplication?.status;
+              const paymentStatus = currentApplication?.payment?.status;
+              // 'Submitted' means payment failed/expired/cancelled, need to repay
+              const isPaymentIncomplete = applicationStatus === 'Pending Payment' || applicationStatus === 'Submitted' || (!!paymentStatus && paymentStatus !== 'Complete' && paymentStatus !== 'Refunded');
+              const isManualValidation = applicationStatus === 'For Payment Validation';
               
               if (!hasApplication) {
                 // No application yet
@@ -216,8 +230,13 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
               let statusBadge: { text: string; color: string } | undefined;
               let cardGradient: [string, string] | undefined;
               
-              // Check if application is approved - documents are automatically verified
-              if (status === 'Approved' || allVerified) {
+              if (isPaymentIncomplete && !isManualValidation) {
+                // Don't show review states while payment is incomplete
+                statusValue = String(totalDocs);
+                statusText = 'Complete payment to continue';
+                statusBadge = undefined;
+                cardGradient = [theme.colors.indigo[500], theme.colors.indigo[600]];
+              } else if (status === 'Approved' || allVerified) {
                 // All documents verified
                 statusValue = '✓';
                 statusText = 'All documents approved';

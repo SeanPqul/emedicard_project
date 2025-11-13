@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { api } from "../_generated/api"; // Import api to run actions
+import { api, internal } from "../_generated/api"; // Import api to run actions
 import { Doc } from "../_generated/dataModel"; // Import Doc type for user
 import { action } from "../_generated/server";
 
@@ -58,7 +58,7 @@ export const triggerClassification = action({
     }
 
     // Update the document with the extracted text and classification
-    await ctx.runMutation(api.documents.updateDocumentClassification, {
+    await ctx.runMutation(internal.documents.updateDocumentClassification as any, {
       documentUploadId: args.documentUploadId,
       extractedText: extractedText,
       classification: classification,

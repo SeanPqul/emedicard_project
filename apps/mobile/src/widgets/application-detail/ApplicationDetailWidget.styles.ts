@@ -355,6 +355,25 @@ export const styles = StyleSheet.create({
     marginBottom: verticalScale(theme.spacing.md),
     paddingHorizontal: scale(16),
   },
+  paymentSection: {
+    marginBottom: verticalScale(theme.spacing.md),
+  },
+  paymentSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(8),
+    gap: scale(8),
+    backgroundColor: theme.colors.background.tertiary,
+    marginHorizontal: scale(16),
+    borderRadius: theme.borderRadius.sm,
+    marginBottom: verticalScale(8),
+  },
+  paymentSectionTitle: {
+    fontSize: moderateScale(13),
+    fontWeight: '600' as const,
+    color: theme.colors.text.primary,
+  },
   paymentMethods: {
     flexDirection: 'column',
     gap: moderateScale(12),

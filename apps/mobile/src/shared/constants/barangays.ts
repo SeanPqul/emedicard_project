@@ -154,7 +154,7 @@ export type DavaoCityBarangay = typeof DAVAO_CITY_BARANGAYS[number];
 /**
  * Payment location options for Sanggunian Hall
  */
-export const SANGGUNIAN_HALL_LOCATION = "Sanggunian Hall - Davao City Hall";
+export const SANGGUNIAN_HALL_LOCATION = "Sangguniang Panlungsod ng Dabaw";
 
 /**
  * Get location label based on payment method

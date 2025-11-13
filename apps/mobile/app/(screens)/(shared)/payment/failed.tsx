@@ -7,7 +7,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { Button } from '../../../../src/shared/components';
-import { FeedbackSystem } from '../../../../src/shared/components/feedback/feedback';
+import { PaymentInfo } from '../../../../src/shared/components/display';
 
 /**
  * Payment Failed Screen
@@ -25,6 +25,7 @@ export default function PaymentFailedScreen() {
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [actualStatus, setActualStatus] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [timestamp, setTimestamp] = useState<string>('');
 
   const syncPaymentStatus = useMutation(api.payments.maya.statusUpdates.syncPaymentStatus);
 
@@ -45,6 +46,17 @@ export default function PaymentFailedScreen() {
         });
 
         setActualStatus(result.status);
+        
+        // Set timestamp
+        const now = new Date();
+        setTimestamp(now.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        }));
 
         if (result.status === 'Complete') {
           console.log('?? Payment actually succeeded despite failure redirect!');
@@ -117,11 +129,16 @@ export default function PaymentFailedScreen() {
           <Text style={styles.reasonLabel}>Reason:</Text>
           <Text style={styles.reasonText}>{getFailureReason()}</Text>
         </View>
+        
+        {/* Payment Info */}
         {paymentId && (
-          <Text style={styles.details}>
-            Payment ID: {paymentId}
-          </Text>
+          <PaymentInfo
+            referenceNumber={paymentId}
+            timestamp={timestamp}
+            variant="error"
+          />
         )}
+        
         <View style={styles.buttonContainer}>
           <Button
             title="Try Payment Again"
@@ -135,13 +152,7 @@ export default function PaymentFailedScreen() {
             style={styles.button}
           />
         </View>
-        <View style={styles.helpContainer}>
-          <Text style={styles.helpText}>
-            ?? Make sure you have sufficient balance in your Maya account and try again
-          </Text>
-        </View>
       </View>
-      {/* FeedbackSystem removed - should be managed at app level */}
     </View>
   );
 }
@@ -193,13 +204,6 @@ const styles = StyleSheet.create({
     color: theme.colors.status.error,
     lineHeight: moderateScale(20),
   },
-  details: {
-    fontSize: fontScale(12),
-    color: theme.colors.text.tertiary,
-    textAlign: 'center',
-    marginBottom: verticalScale(24),
-    fontFamily: 'monospace',
-  },
   buttonContainer: {
     width: '100%',
     gap: scale(12),
@@ -210,17 +214,5 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: theme.colors.brand.primary,
-  },
-  helpContainer: {
-    backgroundColor: theme.colors.blue[50],
-    padding: scale(16),
-    borderRadius: moderateScale(12),
-    width: '100%',
-  },
-  helpText: {
-    fontSize: fontScale(14),
-    color: theme.colors.blue[700],
-    textAlign: 'center',
-    lineHeight: moderateScale(20),
   },
 });

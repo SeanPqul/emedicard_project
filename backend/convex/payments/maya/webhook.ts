@@ -86,7 +86,7 @@ export const handleMayaWebhook = httpAction(async (ctx, request: Request) => {
         break;
 
       case MAYA_WEBHOOK_EVENTS.PAYMENT_CANCELLED:
-        await ctx.runMutation(api.payments.maya.statusUpdates.updatePaymentExpired, {
+        await ctx.runMutation(api.payments.maya.statusUpdates.updatePaymentCancelled, {
           mayaPaymentId: data.id,
           webhookData: data,
         });
@@ -132,6 +132,7 @@ export const checkWebhookDuplicate = query({
       "PAYMENT_SUCCESS": "Complete",
       "PAYMENT_FAILED": "Failed",
       "PAYMENT_EXPIRED": "Expired",
+      "PAYMENT_CANCELLED": "Cancelled",
       "REFUNDED": "Refunded",
     };
     

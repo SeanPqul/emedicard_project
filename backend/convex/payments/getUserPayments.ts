@@ -24,10 +24,12 @@ export const getUserPaymentsQuery = query({
     // Aggregate payments with application details server-side
     const paymentsWithApplicationDetails = await Promise.all(
       userApplications.map(async (application) => {
+        // Get the most recent payment for this application
         const payment = await ctx.db
           .query("payments")
           .withIndex("by_application", (q) => q.eq("applicationId", application._id))
-          .unique();
+          .order("desc")
+          .first();
           
         if (!payment) return null;
         

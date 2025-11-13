@@ -213,6 +213,79 @@ export const updatePaymentFailed = mutation({
 });
 
 /**
+ * Updates payment status when payment is cancelled by user
+ */
+export const updatePaymentCancelled = mutation({
+  args: {
+    mayaPaymentId: v.string(),
+    webhookData: v.any(),
+  },
+  handler: async (ctx, args) => {
+    // Find payment by Maya payment ID
+    const payment = await ctx.db
+      .query("payments")
+      .withIndex("by_maya_payment", q => q.eq("mayaPaymentId", args.mayaPaymentId))
+      .unique();
+    
+    if (!payment) {
+      console.error("Payment not found for Maya ID:", args.mayaPaymentId);
+      // Log the orphaned webhook
+      await ctx.db.insert("paymentLogs", {
+        eventType: "webhook_received",
+        mayaPaymentId: args.mayaPaymentId,
+        errorMessage: "Payment record not found",
+        metadata: args.webhookData,
+        timestamp: Date.now(),
+      });
+      return { success: false, error: "Payment not found" };
+    }
+    
+    // Don't update if already complete
+    if (payment.paymentStatus === "Complete") {
+      return { success: true, message: "Payment already complete" };
+    }
+    
+    // Update payment status to cancelled
+    await ctx.db.patch(payment._id, {
+      paymentStatus: "Cancelled",
+      webhookPayload: args.webhookData,
+      updatedAt: Date.now(),
+    });
+    
+    // Log the cancelled payment
+    await ctx.db.insert("paymentLogs", {
+      paymentId: payment._id,
+      eventType: "payment_cancelled",
+      mayaPaymentId: args.mayaPaymentId,
+      mayaCheckoutId: payment.mayaCheckoutId,
+      metadata: args.webhookData,
+      timestamp: Date.now(),
+    });
+    
+    // Update application status back to submitted
+    await ctx.db.patch(payment.applicationId, {
+      applicationStatus: "Submitted",
+      updatedAt: Date.now(),
+    });
+    
+    // Send notification to user
+    const application = await ctx.db.get(payment.applicationId);
+    if (application) {
+      await ctx.db.insert("notifications", {
+        userId: application.userId,
+        applicationId: application._id,
+        title: "Payment Cancelled",
+        message: "Your payment was cancelled. Please initiate a new payment to continue with your application.",
+        notificationType: "Payment",
+        isRead: false,
+      });
+    }
+    
+    return { success: true };
+  },
+});
+
+/**
  * Updates payment status when checkout expires
  */
 export const updatePaymentExpired = mutation({

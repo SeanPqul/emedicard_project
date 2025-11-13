@@ -76,10 +76,16 @@ export function TermsScreen() {
             <Text style={styles.bulletPoint}>• Attendance at required orientations</Text>
             <Text style={styles.bulletPoint}>• Passing all health screenings</Text>
 
-            <Text style={styles.sectionTitle}>6. Payment Terms</Text>
+            <Text style={styles.sectionTitle}>6. Payment Terms & Refund Policy</Text>
             <Text style={styles.paragraph}>
-              All payments are processed through authorized payment gateways. Fees are non-refundable except in cases where the City Health Office cancels the application. Payment confirmation does not guarantee health card approval.
+              All payments are processed through authorized payment gateways (Maya for digital payments, or over-the-counter at Barangay Halls and Sangguniang Panlungsod ng Dabaw). Payment confirmation does not guarantee health card approval.
             </Text>
+            <Text style={styles.paragraph}>Important payment conditions:</Text>
+            <Text style={styles.bulletPoint}>• Application fees are non-refundable once paid</Text>
+            <Text style={styles.bulletPoint}>• If your application is rejected due to failed medical requirements, incomplete documents, or false information, the payment will NOT be refunded</Text>
+            <Text style={styles.bulletPoint}>• Refunds are only issued if the City Health Office cancels your application due to administrative or technical errors on their part</Text>
+            <Text style={styles.bulletPoint}>• Processing fees are final and non-refundable regardless of application outcome</Text>
+            <Text style={styles.bulletPoint}>• You are responsible for ensuring all documents and medical test results meet requirements before payment</Text>
 
             <Text style={styles.sectionTitle}>7. Data Usage</Text>
             <Text style={styles.paragraph}>

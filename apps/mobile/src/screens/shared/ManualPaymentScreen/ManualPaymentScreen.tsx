@@ -30,7 +30,10 @@ export function ManualPaymentScreen() {
   }>();
 
   const [referenceNumber, setReferenceNumber] = useState('');
-  const [paymentLocation, setPaymentLocation] = useState('');
+  // Auto-select Sanggunian Hall for CityHall payment method
+  const [paymentLocation, setPaymentLocation] = useState(
+    params.paymentMethod === 'CityHall' ? SANGGUNIAN_HALL_LOCATION : ''
+  );
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [locationSearchQuery, setLocationSearchQuery] = useState('');
   const [receipt, setReceipt] = useState<ManualPaymentReceipt | null>(null);
@@ -193,7 +196,7 @@ export function ManualPaymentScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={moderateScale(24)} color={theme.colors.text.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Manual Payment</Text>
+          <Text style={styles.headerTitle}>Over-the-Counter Payment</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -208,7 +211,10 @@ export function ManualPaymentScreen() {
           </View>
           <Text style={styles.paymentMethodTitle}>{paymentMethodName}</Text>
           <Text style={styles.paymentMethodDescription}>
-            Pay at your local {paymentMethodName} and upload your receipt
+            {params.paymentMethod === 'BaranggayHall' 
+              ? 'Pay at your barangay hall in Davao City and upload your receipt'
+              : 'Pay at Sangguniang Panlungsod ng Dabaw and upload your receipt'
+            }
           </Text>
         </View>
 
@@ -240,7 +246,7 @@ export function ManualPaymentScreen() {
             <Text style={styles.instructionsTitle}>Payment Instructions</Text>
           </View>
           <Text style={styles.instructionStep}>
-            1. Visit your nearest {paymentMethodName}
+            1. Visit {params.paymentMethod === 'BaranggayHall' ? 'your barangay hall in Davao City' : 'Sangguniang Panlungsod ng Dabaw'}
           </Text>
           <Text style={styles.instructionStep}>
             2. Pay the total amount of ₱60.00
@@ -255,7 +261,9 @@ export function ManualPaymentScreen() {
 
         {/* Reference Number Input */}
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Reference Number *</Text>
+          <Text style={styles.inputLabel}>
+            Reference Number or OR <Text style={styles.requiredAsterisk}>*</Text>
+          </Text>
           <TextInput
             style={[styles.textInput, errors.referenceNumber && styles.inputError]}
             placeholder="Enter receipt reference number"
@@ -274,15 +282,16 @@ export function ManualPaymentScreen() {
         {/* Payment Location Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>
-            {params.paymentMethod === 'BaranggayHall' ? 'Select Barangay' : 'Payment Location'} *
+            {params.paymentMethod === 'BaranggayHall' ? 'Select Barangay' : 'Payment Location'}{' '}
+            <Text style={styles.requiredAsterisk}>*</Text>
           </Text>
           <TouchableOpacity
             style={[styles.textInput, errors.paymentLocation && styles.inputError, { justifyContent: 'center' }]}
             onPress={() => setIsLocationModalOpen(true)}
-            disabled={isUploading}
+            disabled={isUploading || params.paymentMethod === 'CityHall'}
           >
             <Text style={paymentLocation ? styles.selectedLocationText : styles.placeholderText}>
-              {paymentLocation || (params.paymentMethod === 'BaranggayHall' ? 'Select your barangay' : 'Select payment location')}
+              {paymentLocation || (params.paymentMethod === 'BaranggayHall' ? 'Select your barangay' : 'Payment location')}
             </Text>
           </TouchableOpacity>
           {errors.paymentLocation && (
@@ -292,7 +301,9 @@ export function ManualPaymentScreen() {
 
         {/* Receipt Upload */}
         <View style={styles.uploadContainer}>
-          <Text style={styles.inputLabel}>Upload Receipt *</Text>
+          <Text style={styles.inputLabel}>
+            Upload Receipt <Text style={styles.requiredAsterisk}>*</Text>
+          </Text>
           
           {!receipt ? (
             <View>

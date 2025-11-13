@@ -55,6 +55,24 @@ export const PAYMENT_METHODS: PaymentMethodConfig[] = [
 export const DIGITAL_PAYMENT_METHODS = ['Maya'] as const;
 export const MANUAL_PAYMENT_METHODS = ['BaranggayHall', 'CityHall'] as const;
 
+/**
+ * Grouped payment methods for better UX
+ */
+export const PAYMENT_METHOD_GROUPS = [
+  {
+    id: 'digital',
+    title: 'Digital Payment',
+    icon: 'phone-portrait-outline',
+    methods: PAYMENT_METHODS.filter(m => DIGITAL_PAYMENT_METHODS.includes(m.id as any))
+  },
+  {
+    id: 'otc',
+    title: 'Over-the-Counter Payment',
+    icon: 'storefront-outline',
+    methods: PAYMENT_METHODS.filter(m => MANUAL_PAYMENT_METHODS.includes(m.id as any))
+  }
+];
+
 export type DigitalPaymentMethod = typeof DIGITAL_PAYMENT_METHODS[number];
 export type ManualPaymentMethod = typeof MANUAL_PAYMENT_METHODS[number];
 export type PaymentMethodId = DigitalPaymentMethod | ManualPaymentMethod;

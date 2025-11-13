@@ -49,11 +49,13 @@ interface ApplyWidgetProps {
   requirementsByJobCategory: DocumentRequirement[];
   isSubmitting: boolean;
   showImagePicker: boolean;
+  termsAccepted: boolean;
   
   // State setters
   setCurrentStep: (step: number) => void;
   setFormData: (data: ApplicationFormData) => void;
   setShowImagePicker: (show: boolean) => void;
+  setTermsAccepted: (accepted: boolean) => void;
   
   // Handlers
   handleNextStep: () => Promise<void>;
@@ -86,9 +88,11 @@ export function ApplyWidget({
   requirementsByJobCategory,
   isSubmitting,
   showImagePicker,
+  termsAccepted,
   setCurrentStep,
   setFormData,
   setShowImagePicker,
+  setTermsAccepted,
   handleNextStep,
   handlePrevious,
   handleBackPress,
@@ -155,6 +159,8 @@ export function ApplyWidget({
             selectedDocuments={selectedDocuments}
             getUploadState={getUploadState}
             onEditStep={setCurrentStep}
+            termsAccepted={termsAccepted}
+            onTermsAcceptedChange={setTermsAccepted}
           />
         );
       default:
@@ -213,12 +219,12 @@ export function ApplyWidget({
             styles.nextButton,
             currentStep === 0 && styles.nextButtonFull,
             { 
-              backgroundColor: isSubmitting ? '#D1D5DB' : '#2E86AB',
-              opacity: isSubmitting ? 0.6 : 1,
+              backgroundColor: (isSubmitting || (currentStep === STEP_TITLES.length - 1 && !termsAccepted)) ? '#D1D5DB' : '#2E86AB',
+              opacity: (isSubmitting || (currentStep === STEP_TITLES.length - 1 && !termsAccepted)) ? 0.6 : 1,
             }
           ]}
           onPress={handleNextStep}
-          disabled={isSubmitting}
+          disabled={isSubmitting || (currentStep === STEP_TITLES.length - 1 && !termsAccepted)}
         >
           <Text style={styles.nextButtonText}>
             {isSubmitting ? 'Loading...' : (currentStep === STEP_TITLES.length - 1 ? 'Submit Application' : 'Next')}

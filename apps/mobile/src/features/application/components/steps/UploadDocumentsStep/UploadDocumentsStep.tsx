@@ -62,7 +62,7 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
               <View style={styles.documentInfo}>
                 <Text style={styles.documentTitle}>
                   {document.name}
-                  {document.required && <Text style={styles.requiredAsterisk}> *</Text>}
+                  <Text style={styles.requiredAsterisk}> *</Text>
                 </Text>
                 <Text style={styles.documentDescription}>{document.description}</Text>
                 <Text style={styles.documentFormats}>

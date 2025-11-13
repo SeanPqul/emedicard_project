@@ -31,6 +31,8 @@ export function ApplyScreen() {
     requirementsByJobCategory,
     loadingData,
     isSubmitting,
+    termsAccepted,
+    setTermsAccepted,
     
     // Feedback
     messages,
@@ -76,11 +78,13 @@ export function ApplyScreen() {
         requirementsByJobCategory={requirementsByJobCategory}
         isSubmitting={isSubmitting}
         showImagePicker={showImagePicker}
+        termsAccepted={termsAccepted}
         
         // State setters
         setCurrentStep={setCurrentStep}
         setFormData={setFormData}
         setShowImagePicker={setShowImagePicker}
+        setTermsAccepted={setTermsAccepted}
         
         // Handlers
         handleNextStep={handleNextStep}

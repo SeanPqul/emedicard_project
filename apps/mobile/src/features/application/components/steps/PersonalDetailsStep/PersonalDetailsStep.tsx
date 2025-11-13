@@ -47,12 +47,6 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           styles.inputContainer,
           errors.firstName && styles.inputContainerError
         ]}>
-          <Ionicons 
-            name="person-outline" 
-            size={moderateScale(20)} 
-            color={errors.firstName ? theme.colors.semantic.error : '#6B7280'} 
-            style={styles.inputIcon}
-          />
           <TextInput
             style={styles.input}
             value={formData.firstName}
@@ -76,12 +70,6 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           <Text style={{ color: '#6B7280', marginLeft: moderateScale(4), fontSize: moderateScale(12) }}>(Optional)</Text>
         </View>
         <View style={styles.inputContainer}>
-          <Ionicons 
-            name="person-outline" 
-            size={moderateScale(20)} 
-            color={'#6B7280'} 
-            style={styles.inputIcon}
-          />
           <TextInput
             style={styles.input}
             value={formData.middleName}
@@ -102,12 +90,6 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           styles.inputContainer,
           errors.lastName && styles.inputContainerError
         ]}>
-          <Ionicons 
-            name="person-outline" 
-            size={moderateScale(20)} 
-            color={errors.lastName ? theme.colors.semantic.error : '#6B7280'} 
-            style={styles.inputIcon}
-          />
           <TextInput
             style={styles.input}
             value={formData.lastName}
@@ -131,12 +113,6 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           <Text style={{ color: '#6B7280', marginLeft: moderateScale(4), fontSize: moderateScale(12) }}>(Optional)</Text>
         </View>
         <View style={styles.inputContainer}>
-          <Ionicons 
-            name="person-outline" 
-            size={moderateScale(20)} 
-            color={'#6B7280'} 
-            style={styles.inputIcon}
-          />
           <TextInput
             style={styles.input}
             value={formData.suffix}
@@ -157,12 +133,6 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           styles.inputContainer,
           errors.age && styles.inputContainerError
         ]}>
-          <Ionicons 
-            name="calendar-outline" 
-            size={moderateScale(20)} 
-            color={errors.age ? theme.colors.semantic.error : '#6B7280'} 
-            style={styles.inputIcon}
-          />
           <TextInput
             style={styles.input}
             value={formData.age ? String(formData.age) : ''}
@@ -192,12 +162,6 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           styles.inputContainer,
           errors.nationality && styles.inputContainerError
         ]}>
-          <Ionicons 
-            name="flag-outline" 
-            size={moderateScale(20)} 
-            color={errors.nationality ? theme.colors.semantic.error : '#6B7280'} 
-            style={styles.inputIcon}
-          />
           <TextInput
             style={styles.input}
             value={formData.nationality}
@@ -224,12 +188,6 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           styles.inputContainer,
           errors.position && styles.inputContainerError
         ]}>
-          <Ionicons 
-            name="briefcase-outline" 
-            size={moderateScale(20)} 
-            color={errors.position ? theme.colors.semantic.error : '#6B7280'} 
-            style={styles.inputIcon}
-          />
           <TextInput
             style={styles.input}
             value={formData.position}
@@ -256,12 +214,6 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           styles.inputContainer,
           errors.organization && styles.inputContainerError
         ]}>
-          <Ionicons 
-            name="business-outline" 
-            size={moderateScale(20)} 
-            color={errors.organization ? theme.colors.semantic.error : '#6B7280'} 
-            style={styles.inputIcon}
-          />
           <TextInput
             style={styles.input}
             value={formData.organization}

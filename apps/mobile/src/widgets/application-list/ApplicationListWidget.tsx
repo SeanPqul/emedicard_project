@@ -18,7 +18,7 @@ import { styles } from './ApplicationListWidget.styles';
 // UI constants (Phase 4 Migration: Added new statuses)
 const STATUS_COLORS = {
   'Pending Payment': '#FFA500',
-  'Submitted': '#2E86AB',
+  'Submitted': '#FFA500', // Orange - payment failed/cancelled, needs retry
   'Under Review': '#F18F01',
   'Approved': '#28A745',
   'Rejected': '#DC3545', // DEPRECATED
@@ -155,11 +155,11 @@ export function ApplicationListWidget({
           };
         case 'Submitted':
           return {
-            mainText: 'Application Submitted',
-            subText: 'Under initial review',
-            icon: 'checkmark-circle-outline',
-            showPaymentBadge: false,
-            isUrgent: false
+            mainText: 'Payment Required',
+            subText: 'Complete payment to proceed',
+            icon: 'card-outline',
+            showPaymentBadge: false,  // Don't show badge since we have Pay button
+            isUrgent: true
           };
         case 'Under Review':
           return {
@@ -211,6 +211,7 @@ export function ApplicationListWidget({
     const getPrimaryAction = () => {
       switch (application.status) {
         case 'Pending Payment':
+        case 'Submitted':  // Submitted means payment failed/cancelled - need to retry payment
           {
             const amount = (application as any)?.payment?.netAmount ?? DEFAULT_TOTAL_AMOUNT;
             return { text: `Pay ₱${Number(amount).toFixed(2)}`, icon: 'card-outline' };

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, internalMutation } from "./_generated/server";
 
 // Helper function to extract file type from originalFileName
 function getFileTypeFromFileName(fileName: string): string {
@@ -159,26 +159,13 @@ export const resubmitDocument = mutation({
   },
 });
 
-export const updateDocumentClassification = mutation({
+export const updateDocumentClassification = internalMutation({
   args: {
     documentUploadId: v.id("documentUploads"),
     extractedText: v.string(),
     classification: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user || user.role !== "admin") {
-      throw new Error("Not authorized to update document classification");
-    }
 
     await ctx.db.patch(args.documentUploadId, {
       extractedText: args.extractedText,

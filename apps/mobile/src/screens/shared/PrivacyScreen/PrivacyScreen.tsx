@@ -70,6 +70,8 @@ export function PrivacyScreen() {
             <Text style={styles.bulletPoint}>• IP address and location data</Text>
             <Text style={styles.bulletPoint}>• Application usage data and logs</Text>
             <Text style={styles.bulletPoint}>• Payment transaction records</Text>
+            <Text style={styles.bulletPoint}>• Push notification tokens and preferences</Text>
+            <Text style={styles.bulletPoint}>• QR code data for health card verification</Text>
 
             <Text style={styles.sectionTitle}>3. How We Use Your Information</Text>
             <Text style={styles.paragraph}>
@@ -78,10 +80,12 @@ export function PrivacyScreen() {
             <Text style={styles.bulletPoint}>• Processing health card applications and renewals</Text>
             <Text style={styles.bulletPoint}>• Verifying identity and eligibility</Text>
             <Text style={styles.bulletPoint}>• Conducting medical examinations and screenings</Text>
-            <Text style={styles.bulletPoint}>• Issuing digital health cards</Text>
-            <Text style={styles.bulletPoint}>• Processing payments and maintaining transaction records</Text>
+            <Text style={styles.bulletPoint}>• Issuing digital health cards with QR codes for verification</Text>
+            <Text style={styles.bulletPoint}>• Processing payments through digital and over-the-counter methods</Text>
+            <Text style={styles.bulletPoint}>• Maintaining payment transaction records</Text>
             <Text style={styles.bulletPoint}>• Scheduling orientations and medical examinations</Text>
-            <Text style={styles.bulletPoint}>• Sending application status updates and notifications</Text>
+            <Text style={styles.bulletPoint}>• Sending application status updates and push notifications</Text>
+            <Text style={styles.bulletPoint}>• Enabling health card renewals and tracking expiration dates</Text>
             <Text style={styles.bulletPoint}>• Compliance with health regulations and sanitary inspections</Text>
             <Text style={styles.bulletPoint}>• Improving application functionality and user experience</Text>
 
@@ -100,10 +104,12 @@ export function PrivacyScreen() {
               We may share your information with:
             </Text>
             <Text style={styles.bulletPoint}>• City Health Office personnel for application processing</Text>
+            <Text style={styles.bulletPoint}>• Barangay Health Centers for over-the-counter payments and verification</Text>
+            <Text style={styles.bulletPoint}>• Sangguniang Panlungsod ng Dabaw for over-the-counter payments</Text>
             <Text style={styles.bulletPoint}>• Authorized medical professionals conducting examinations</Text>
-            <Text style={styles.bulletPoint}>• Payment processing partners (Maya PayMaya)</Text>
+            <Text style={styles.bulletPoint}>• Payment processing partners (Maya for digital payments)</Text>
             <Text style={styles.bulletPoint}>• Government agencies as required by law</Text>
-            <Text style={styles.bulletPoint}>• Employers (only health card status and validity)</Text>
+            <Text style={styles.bulletPoint}>• Employers (only health card status and validity via QR code)</Text>
             <Text style={styles.paragraph}>
               We do not sell, rent, or share your personal data with third parties for marketing purposes.
             </Text>
@@ -126,8 +132,12 @@ export function PrivacyScreen() {
             <Text style={styles.bulletPoint}>• Active health cards: Duration of validity plus 5 years</Text>
             <Text style={styles.bulletPoint}>• Expired health cards: 5 years from expiration</Text>
             <Text style={styles.bulletPoint}>• Rejected applications: 2 years from rejection date</Text>
-            <Text style={styles.bulletPoint}>• Payment records: 7 years as required by law</Text>
+            <Text style={styles.bulletPoint}>• Payment records (including failed/cancelled): 7 years as required by law</Text>
+            <Text style={styles.bulletPoint}>• Renewal applications: Treated as new applications with same retention periods</Text>
             <Text style={styles.bulletPoint}>• Account data: Until account deletion request</Text>
+            <Text style={styles.paragraph}>
+              Note: Payment records for rejected applications are retained for audit purposes, but payments are non-refundable except in cases of CHO administrative or technical errors.
+            </Text>
 
             <Text style={styles.sectionTitle}>8. Your Rights</Text>
             <Text style={styles.paragraph}>
@@ -136,10 +146,13 @@ export function PrivacyScreen() {
             <Text style={styles.bulletPoint}>• Access your personal and health information</Text>
             <Text style={styles.bulletPoint}>• Correct inaccurate or incomplete data</Text>
             <Text style={styles.bulletPoint}>• Object to processing in certain circumstances</Text>
+            <Text style={styles.bulletPoint}>• Request erasure or deletion of your account and data</Text>
             <Text style={styles.bulletPoint}>• Request data portability</Text>
+            <Text style={styles.bulletPoint}>• Withdraw consent for non-essential processing</Text>
+            <Text style={styles.bulletPoint}>• Manage push notification preferences</Text>
             <Text style={styles.bulletPoint}>• Lodge complaints with the National Privacy Commission</Text>
             <Text style={styles.paragraph}>
-              Note: Certain rights may be limited by legal obligations to maintain health records for regulatory compliance.
+              Note: Certain rights may be limited by legal obligations to maintain health records for regulatory compliance. Payment records cannot be deleted due to audit requirements.
             </Text>
 
             <Text style={styles.sectionTitle}>9. Cookies and Tracking</Text>
@@ -153,17 +166,28 @@ export function PrivacyScreen() {
               You can manage cookie preferences in your device settings, but this may affect application functionality.
             </Text>
 
-            <Text style={styles.sectionTitle}>10. Children&apos;s Privacy</Text>
+            <Text style={styles.sectionTitle}>10. Payment and Refund Policy</Text>
+            <Text style={styles.paragraph}>
+              Regarding payment data and refund policies:
+            </Text>
+            <Text style={styles.bulletPoint}>• All payment transactions are securely processed and recorded</Text>
+            <Text style={styles.bulletPoint}>• Digital payments via Maya and over-the-counter payments are both supported</Text>
+            <Text style={styles.bulletPoint}>• Payment data is retained for 7 years as required by law</Text>
+            <Text style={styles.bulletPoint}>• Payments are non-refundable if applications are rejected due to incomplete documents, failed medical examinations, or applicant-related issues</Text>
+            <Text style={styles.bulletPoint}>• Refunds are only provided for CHO administrative or technical errors</Text>
+            <Text style={styles.bulletPoint}>• All refund requests are reviewed on a case-by-case basis</Text>
+
+            <Text style={styles.sectionTitle}>11. Children&apos;s Privacy</Text>
             <Text style={styles.paragraph}>
               Minors (below 18 years) may use this application only with parental consent. Parents or guardians are responsible for monitoring their minor&apos;s use of the application and providing accurate information.
             </Text>
 
-            <Text style={styles.sectionTitle}>11. Changes to Privacy Policy</Text>
+            <Text style={styles.sectionTitle}>12. Changes to Privacy Policy</Text>
             <Text style={styles.paragraph}>
-              We may update this Privacy Policy periodically. Significant changes will be communicated through the application or via email. Your continued use after changes indicates acceptance of the updated policy.
+              We may update this Privacy Policy periodically. Significant changes will be communicated through push notifications, in-app announcements, or via email. Your continued use after changes indicates acceptance of the updated policy.
             </Text>
 
-            <Text style={styles.sectionTitle}>12. Contact Information</Text>
+            <Text style={styles.sectionTitle}>13. Contact Information</Text>
             <Text style={styles.paragraph}>
               For privacy concerns or to exercise your data rights, contact:
             </Text>
@@ -173,7 +197,7 @@ export function PrivacyScreen() {
             <Text style={styles.bulletPoint}>• Phone: 0926-686-1531 / 0999-938-0540</Text>
             <Text style={styles.bulletPoint}>• Address: Door 7, Magsaysay Park Complex, Ramon Magsaysay Avenue, Barangay 23-C (Poblacion), Davao City</Text>
 
-            <Text style={styles.sectionTitle}>13. Complaints</Text>
+            <Text style={styles.sectionTitle}>14. Complaints</Text>
             <Text style={styles.paragraph}>
               If you believe your privacy rights have been violated, you may file a complaint with:
             </Text>

@@ -7,7 +7,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { Button } from '../../../../src/shared/components';
-import { FeedbackSystem } from '../../../../src/shared/components/feedback/feedback';
+import { PaymentInfo } from '../../../../src/shared/components/display';
 
 /**
  * Payment Success Screen
@@ -24,6 +24,7 @@ export default function PaymentSuccessScreen() {
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationResult, setVerificationResult] = useState<'success' | 'failed' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [timestamp, setTimestamp] = useState<string>('');
 
   const syncPaymentStatus = useMutation(api.payments.maya.statusUpdates.syncPaymentStatus);
 
@@ -46,6 +47,18 @@ export default function PaymentSuccessScreen() {
 
         if (result.status === 'Complete') {
           setVerificationResult('success');
+          
+          // Set timestamp
+          const now = new Date();
+          setTimestamp(now.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          }));
+          
           console.log('✅ Payment verified as successful');
         } else if (result.status === 'Failed') {
           setVerificationResult('failed');
@@ -107,17 +120,22 @@ export default function PaymentSuccessScreen() {
           <Text style={styles.subtitle}>
             Your ₱60 health card payment has been processed successfully
           </Text>
-          <Text style={styles.details}>
-            Payment ID: {paymentId}
-          </Text>
+          
+          {/* Payment Info */}
+          {paymentId && (
+            <PaymentInfo
+              referenceNumber={paymentId}
+              timestamp={timestamp}
+              variant="success"
+            />
+          )}
+          
           <Button
             title="Continue to Application"
             onPress={handleContinue}
             style={styles.button}
           />
         </View>
-        {/* TODO: Implement feedback system with proper props 
-        <FeedbackSystem messages={[]} onDismiss={() => {}} /> */}
       </View>
     );
   }

@@ -57,6 +57,8 @@ export const getApplicationByIdQuery = query({
         method: payment.paymentMethod,
         status: payment.paymentStatus,
         referenceNumber: payment.referenceNumber,
+        updatedAt: payment.updatedAt,
+        _creationTime: payment._creationTime,
       } : undefined,
     };
   },
