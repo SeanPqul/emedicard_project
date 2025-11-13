@@ -59,6 +59,7 @@ import type * as admin_reviewDocument from "../admin/reviewDocument.js";
 import type * as admin_seed from "../admin/seed.js";
 import type * as admin_testFixRejectionStatus from "../admin/testFixRejectionStatus.js";
 import type * as admin_updateAdminAccount from "../admin/updateAdminAccount.js";
+import type * as admin_updateAdminAccountInternal from "../admin/updateAdminAccountInternal.js";
 import type * as admin_validatePayment from "../admin/validatePayment.js";
 import type * as applications_createApplication from "../applications/createApplication.js";
 import type * as applications_createForm from "../applications/createForm.js";
@@ -243,6 +244,7 @@ declare const fullApi: ApiFromModules<{
   "admin/seed": typeof admin_seed;
   "admin/testFixRejectionStatus": typeof admin_testFixRejectionStatus;
   "admin/updateAdminAccount": typeof admin_updateAdminAccount;
+  "admin/updateAdminAccountInternal": typeof admin_updateAdminAccountInternal;
   "admin/validatePayment": typeof admin_validatePayment;
   "applications/createApplication": typeof applications_createApplication;
   "applications/createForm": typeof applications_createForm;
