@@ -1,36 +1,28 @@
 {
-  "buildCommand": "pnpm run build",
-  "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "cd ../.. && pnpm install && cd apps/webadmin",
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- .",
+  "buildCommand": "pnpm run build",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile && cd apps/webadmin",
+  "outputDirectory": ".next",
+
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1",
       "NODE_ENV": "production"
     }
   },
+
   "functions": {
-    "src/app/api/ocr/route.ts": {
-      "maxDuration": 30
-    }
+    "src/app/api/ocr/route.ts": { "maxDuration": 60 },
+    "src/app/api/ocr-serverless/route.ts": { "maxDuration": 30 }
   },
+
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        }
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" }
       ]
     }
   ]

@@ -5,7 +5,7 @@
  * consistent date handling across mobile and web admin.
  */
 
-import { getPHTMidnightForDate } from '@/convex/lib/timezone';
+import { getPHTMidnightForDate } from '@backend/convex/lib/timezone';
 
 /**
  * Convert a date string (YYYY-MM-DD) to PHT midnight timestamp

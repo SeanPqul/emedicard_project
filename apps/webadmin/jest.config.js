@@ -11,7 +11,7 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^@/convex/(.*)$': '<rootDir>/convex/$1',
+    '^@backend/convex/(.*)$': '<rootDir>/../../backend/convex/$1',
   },
   testMatch: [
     '**/__tests__/**/*.(test|spec).[jt]s?(x)',
