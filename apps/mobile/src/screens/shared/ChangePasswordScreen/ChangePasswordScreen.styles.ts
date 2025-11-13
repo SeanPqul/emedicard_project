@@ -13,24 +13,17 @@ export const styles = StyleSheet.create({
     paddingTop: hp('4%'),
   },
 
-  orgLogosContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: hp('3%'),
-  },
-  orgLogo: {
+  iconContainer: {
     alignItems: 'center',
+    marginBottom: hp('2%'),
   },
-  logoImage: {
-    width: moderateScale(100),       
+  iconCircle: {
+    width: moderateScale(100),
     height: moderateScale(100),
-    marginBottom: verticalScale(8),
-  },
-  orgText: {
-    fontSize: FONT_SIZES.caption,  
-    color: getColor('text.secondary'),
-    fontWeight: FONT_WEIGHTS.bold,
-    textAlign: 'center',
+    borderRadius: moderateScale(50),
+    backgroundColor: '#E8F5E8',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   title: {
@@ -118,6 +111,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: verticalScale(12),
     ...getShadow('medium'),
+  },
+  changePasswordButtonDisabled: {
+    backgroundColor: '#9CA3AF',
   },
   changePasswordButtonText: {
     color: getColor('text.inverse'),

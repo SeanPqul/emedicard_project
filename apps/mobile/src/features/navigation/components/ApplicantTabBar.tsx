@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,8 @@ import ElevatedTabButton from './ElevatedTabButton';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
+import { ApplicationRestrictionModal } from '@/src/features/application/components';
+import { hasUnresolvedApplication } from '@/src/features/application/lib/applicationRestrictions';
 
 const ICONS = {
   index: {
@@ -37,6 +39,25 @@ export default function ApplicantTabBar({ state, descriptors, navigation }: Bott
   
   // Get unread notifications count
   const unreadCount = useQuery(api.notifications.getUnreadCount, {}) || 0;
+  
+  // Get user applications to check for unresolved ones
+  const userApplications = useQuery(api.applications.getUserApplications.getUserApplicationsQuery);
+  
+  // Modal state
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
+  const [unresolvedApp, setUnresolvedApp] = useState<any>(null);
+  
+  // Handler to close modal
+  const handleCloseModal = () => {
+    setShowRestrictionModal(false);
+    setUnresolvedApp(null);
+  };
+  
+  // Handler to view the unresolved application
+  const handleViewApplication = () => {
+    setShowRestrictionModal(false);
+    navigation.navigate('application');
+  };
 
   return (
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom || moderateScale(8) }]}>
@@ -45,6 +66,18 @@ export default function ApplicantTabBar({ state, descriptors, navigation }: Bott
         const routeName = route.name as keyof typeof ICONS;
 
         const onPress = () => {
+          // Check if this is the apply tab and if user has unresolved applications
+          if (routeName === 'apply' && userApplications) {
+            const { hasUnresolved, unresolvedApplication } = hasUnresolvedApplication(userApplications);
+            
+            if (hasUnresolved) {
+              // Show restriction modal instead of navigating
+              setUnresolvedApp(unresolvedApplication);
+              setShowRestrictionModal(true);
+              return;
+            }
+          }
+          
           const event = navigation.emit({
             type: 'tabPress',
             target: route.key,
@@ -107,6 +140,18 @@ export default function ApplicantTabBar({ state, descriptors, navigation }: Bott
           </TouchableOpacity>
         );
       })}
+      
+      {/* Restriction Modal */}
+      {unresolvedApp && (
+        <ApplicationRestrictionModal
+          visible={showRestrictionModal}
+          onClose={handleCloseModal}
+          onViewApplication={handleViewApplication}
+          applicationStatus={unresolvedApp.status}
+          applicationId={unresolvedApp._id}
+          jobCategory={unresolvedApp.jobCategory?.name}
+        />
+      )}
     </View>
   );
 }

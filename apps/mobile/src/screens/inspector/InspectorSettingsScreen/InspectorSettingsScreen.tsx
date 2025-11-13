@@ -68,6 +68,7 @@ export function InspectorSettingsScreen() {
           
           <TouchableOpacity
             style={[styles.cardItem, styles.lastCardItem]}
+            onPress={() => router.push('/(screens)/(shared)/profile/change-password')}
             activeOpacity={0.7}
           >
             <View style={styles.cardItemLeft}>

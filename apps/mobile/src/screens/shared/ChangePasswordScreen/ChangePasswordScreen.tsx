@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
@@ -170,23 +170,10 @@ export function ChangePasswordScreen() {
       scrollable={true}
     >
       <View style={styles.container}>
-        {/* Organization Logos */}
-        <View style={styles.orgLogosContainer}>
-          <View style={styles.orgLogo}>
-            <Image
-              source={require("@/assets/images/cho-logo.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-            <Text style={styles.orgText}>CITY HEALTH OFFICE</Text>
-          </View>
-          <View style={styles.orgLogo}>
-            <Image
-              source={require("@/assets/images/davao-city-logo.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-            <Text style={styles.orgText}>DAVAO CITY</Text>
+        {/* Icon */}
+        <View style={styles.iconContainer}>
+          <View style={styles.iconCircle}>
+            <Ionicons name="lock-closed" size={moderateScale(40)} color="#10B981" />
           </View>
         </View>
 
@@ -334,6 +321,7 @@ export function ChangePasswordScreen() {
             disabled={!isFormValid || loading}
             onPress={handleChangePassword}
             buttonStyle={styles.changePasswordButton}
+            style={(!isFormValid || loading) && styles.changePasswordButtonDisabled}
             textStyle={styles.changePasswordButtonText}
           />
 

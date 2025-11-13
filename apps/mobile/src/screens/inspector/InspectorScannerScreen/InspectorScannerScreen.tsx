@@ -73,14 +73,6 @@ export function InspectorScannerScreen() {
 
     const activeSession = dashboardData.allSessions.find(s => s.isActive);
     const upcomingSessions = dashboardData.allSessions.filter(s => s.isFuture);
-    
-    console.log('[InspectorScanner] Session status check:', {
-      totalSessions: dashboardData.allSessions.length,
-      activeSessions: activeSession ? 1 : 0,
-      upcomingSessions: upcomingSessions.length,
-      activeSessionTime: activeSession?.scheduledTime,
-      currentTime: new Date().toLocaleTimeString('en-US', { hour12: true })
-    });
 
     // Use functional setState to avoid stale closure issues
     setSelectedSession(prevSelected => {
