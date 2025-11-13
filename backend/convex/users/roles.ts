@@ -5,7 +5,7 @@ import { query, QueryCtx, MutationCtx } from "../_generated/server";
 export const AdminRole = async (ctx: QueryCtx | MutationCtx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-        return { isAdmin: false, managedCategories: [] }; // Return empty array for non-users
+        return { isAdmin: false, isSuperAdmin: false, managedCategories: [] };
     }
 
     const user = await ctx.db
@@ -13,25 +13,40 @@ export const AdminRole = async (ctx: QueryCtx | MutationCtx) => {
         .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
         .unique();
 
-    // If the user isn't in our DB yet, or their role is not admin, they have no privileges.
-    if (!user || user.role !== "admin") {
-        return { isAdmin: false, managedCategories: [] };
+    // If the user isn't in our DB yet, they have no privileges
+    if (!user) {
+        return { isAdmin: false, isSuperAdmin: false, managedCategories: [] };
     }
 
-    // THIS IS THE KEY: If the `managedCategories` field is unset (null/undefined),
-    // it means they are a Super Admin. We will represent this with the string "all".
-    if (!user.managedCategories) {
+    // System Administrator - highest privilege level
+    if (user.role === "system_admin") {
         return {
             isAdmin: true,
+            isSuperAdmin: true,
             managedCategories: "all",
         };
     }
 
-    // Otherwise, they are a regular admin. Return the array of categories they manage.
-    return {
-        isAdmin: true,
-        managedCategories: user.managedCategories,
-    };
+    // Regular Admin - check managed categories
+    if (user.role === "admin") {
+        // If managedCategories is not set, treat as super admin (backward compatibility)
+        if (!user.managedCategories) {
+            return {
+                isAdmin: true,
+                isSuperAdmin: true,
+                managedCategories: "all",
+            };
+        }
+        // Regular admin with specific categories
+        return {
+            isAdmin: true,
+            isSuperAdmin: false,
+            managedCategories: user.managedCategories,
+        };
+    }
+
+    // Not an admin
+    return { isAdmin: false, isSuperAdmin: false, managedCategories: [] };
 };
 
 // This is the PUBLIC QUERY that your dashboard will call.

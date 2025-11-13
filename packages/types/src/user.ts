@@ -7,7 +7,7 @@
 import { GenericId, BaseEntity, Timestamp } from './base';
 
 // ===== USER ROLE TYPES =====
-export type UserRole = 'applicant' | 'inspector' | 'admin';
+export type UserRole = 'applicant' | 'inspector' | 'admin' | 'system_admin';
 
 // ===== USER ENTITY TYPES =====
 export interface User extends BaseEntity {

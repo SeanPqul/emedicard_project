@@ -6,7 +6,7 @@ export interface AuthUser {
   username: string;
   fullname: string;
   isVerified: boolean;
-  role?: 'applicant' | 'inspector' | 'admin';
+  role?: 'applicant' | 'inspector' | 'admin' | 'system_admin';
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -39,7 +39,7 @@ export interface EmailVerification {
   verified: boolean;
 }
 
-export type AuthRole = 'applicant' | 'inspector' | 'admin';
+export type AuthRole = 'applicant' | 'inspector' | 'admin' | 'system_admin';
 
 export enum AuthErrorCode {
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
