@@ -52,8 +52,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: scale(theme.spacing.md),
     paddingTop: verticalScale(theme.spacing.md),
     paddingBottom: verticalScale(theme.spacing.sm),
-    borderBottomWidth: moderateScale(1),
-    borderBottomColor: theme.colors.border.light,
+    borderBottomWidth: 0,
   },
   categoriesContainer: {
     flexDirection: 'row',
@@ -217,14 +216,19 @@ export const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontWeight: '400',
     fontStyle: 'italic',
+    textAlign: 'right',
+    marginLeft: 'auto',
+    maxWidth: '55%',
+    flexShrink: 1,
+    paddingLeft: scale(6), // prevent italic glyph clipping on Android (left overhang)
   },
   // Modern Inline Header Styles
   inlineHeaderSection: {
     backgroundColor: theme.colors.background.primary,
     paddingHorizontal: scale(20),
     paddingTop: verticalScale(12),
-    paddingBottom: verticalScale(16),
-    marginBottom: verticalScale(8),
+    paddingBottom: verticalScale(12),
+    marginBottom: 0,
   },
   headerRow: {
     flexDirection: 'row',

@@ -6,8 +6,8 @@ import ErrorMessage from '@/components/ErrorMessage';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import Navbar from '@/components/shared/Navbar';
 import SuccessMessage from '@/components/SuccessMessage';
-import { api } from 'backend/convex/_generated/api'; // Moved to top
-import { Id } from 'backend/convex/_generated/dataModel';
+import { api } from '@backend/convex/_generated/api';
+import { Id } from '@backend/convex/_generated/dataModel';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';

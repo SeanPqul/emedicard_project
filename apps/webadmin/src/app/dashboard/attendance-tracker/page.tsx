@@ -2,8 +2,8 @@
 
 import DashboardActivityLog from '@/components/DashboardActivityLog';
 import Navbar from '@/components/shared/Navbar';
-import { api } from 'backend/convex/_generated/api';
-import { Id } from 'backend/convex/_generated/dataModel';
+import { api } from '@backend/convex/_generated/api';
+import { Id } from '@backend/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { ArrowLeft, Calendar, CheckCircle, Clock, Edit2, Filter, MapPin, Search, User, Users, XCircle, Lock, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';

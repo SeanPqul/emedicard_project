@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { theme } from '@shared/styles/theme';
+import { scale, verticalScale, moderateScale, fontScale } from '@shared/utils/responsive';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
@@ -93,7 +95,7 @@ export default function PaymentFailedScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color="#FF3B30" />
+          <ActivityIndicator size="large" color={theme.colors.status.error} />
           <Text style={styles.title}>Checking Payment Status...</Text>
           <Text style={styles.subtitle}>
             Verifying the final status of your payment
@@ -147,78 +149,78 @@ export default function PaymentFailedScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.background.primary,
   },
   centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: scale(24),
   },
   failureIcon: {
-    fontSize: 80,
-    marginBottom: 24,
+    fontSize: moderateScale(72),
+    marginBottom: verticalScale(16),
   },
   title: {
-    fontSize: 24,
+    fontSize: fontScale(22),
     fontWeight: 'bold',
-    color: '#1C1C1E',
+    color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: verticalScale(12),
   },
   subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: fontScale(14),
+    color: theme.colors.text.secondary,
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
+    lineHeight: moderateScale(20),
+    marginBottom: verticalScale(16),
   },
   reasonContainer: {
-    backgroundColor: '#F2F2F7',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: theme.colors.background.tertiary,
+    padding: scale(16),
+    borderRadius: moderateScale(12),
     width: '100%',
-    marginBottom: 16,
+    marginBottom: verticalScale(16),
   },
   reasonLabel: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     fontWeight: '600',
-    color: '#1C1C1E',
-    marginBottom: 4,
+    color: theme.colors.text.primary,
+    marginBottom: verticalScale(4),
   },
   reasonText: {
-    fontSize: 14,
-    color: '#FF3B30',
-    lineHeight: 20,
+    fontSize: fontScale(14),
+    color: theme.colors.status.error,
+    lineHeight: moderateScale(20),
   },
   details: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: fontScale(12),
+    color: theme.colors.text.tertiary,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: verticalScale(24),
     fontFamily: 'monospace',
   },
   buttonContainer: {
     width: '100%',
-    gap: 12,
-    marginBottom: 24,
+    gap: scale(12),
+    marginBottom: verticalScale(16),
   },
   button: {
     width: '100%',
   },
   primaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.brand.primary,
   },
   helpContainer: {
-    backgroundColor: '#E3F2FD',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: theme.colors.blue[50],
+    padding: scale(16),
+    borderRadius: moderateScale(12),
     width: '100%',
   },
   helpText: {
-    fontSize: 14,
-    color: '#1976D2',
+    fontSize: fontScale(14),
+    color: theme.colors.blue[700],
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: moderateScale(20),
   },
 });

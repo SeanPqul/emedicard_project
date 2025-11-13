@@ -70,6 +70,11 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         <Text style={styles.detailLabel}>Last Name:</Text>
         <Text style={styles.detailValue}>{formData.lastName}</Text>
       </View>
+      
+      <View style={styles.detailItem}>
+        <Text style={styles.detailLabel}>Suffix:</Text>
+        <Text style={styles.detailValue}>{formData.suffix || 'N/A'}</Text>
+      </View>
 
       <View style={styles.detailItem}>
         <Text style={styles.detailLabel}>Age:</Text>

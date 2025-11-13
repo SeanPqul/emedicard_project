@@ -50,7 +50,9 @@ export function hasPlaceholderName(name: string | null | undefined): boolean {
 export function getUserDisplayName(user: { 
   fullName?: string | null; 
   firstName?: string | null; 
+  middleName?: string | null;
   lastName?: string | null;
+  suffix?: string | null;
   username?: string | null;
   email?: string | null;
 } | null | undefined, userProfile?: any): string {
@@ -64,9 +66,15 @@ export function getUserDisplayName(user: {
     return fullName;
   }
   
-  // Try combining first and last name
+  // Try combining first, middle, last name and suffix
   if (userData.firstName && userData.lastName) {
-    const combined = `${userData.firstName} ${userData.lastName}`.trim();
+    const nameParts = [
+      userData.firstName,
+      userData.middleName,
+      userData.lastName,
+      userData.suffix
+    ].filter(Boolean);
+    const combined = nameParts.join(' ').trim();
     if (!hasPlaceholderName(combined)) {
       return combined;
     }

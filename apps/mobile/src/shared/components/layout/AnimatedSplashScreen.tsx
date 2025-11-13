@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Animated, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/src/shared/styles/theme';
 import { useNetworkStatus } from '@/src/shared/hooks/useNetworkStatus';
+import { scale, verticalScale, moderateScale, fontScale } from '@/src/shared/utils/responsive';
 
 interface AnimatedSplashScreenProps {
   onAnimationComplete?: () => void;
@@ -107,7 +108,11 @@ export const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({
           ]}
         >
           <View style={styles.iconContainer}>
-            <Text style={styles.iconText}>E</Text>
+            <Image 
+              source={require('@/assets/images/splash-icon.png')}
+              style={styles.iconImage}
+              resizeMode="contain"
+            />
           </View>
         </Animated.View>
 
@@ -165,59 +170,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   pulseCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: colors.brand.primary + '15', // 15% opacity
+    width: scale(120),
+    height: scale(120),
+    borderRadius: scale(60),
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: verticalScale(32),
   },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.brand.primary,
+    width: scale(100),
+    height: scale(100),
+    borderRadius: scale(20),
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: colors.brand.primary,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    overflow: 'hidden',
   },
-  iconText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: colors.ui.white,
-    letterSpacing: 1,
+  iconImage: {
+    width: scale(100),
+    height: scale(100),
   },
   appName: {
-    fontSize: 32,
+    fontSize: fontScale(32),
     fontWeight: 'bold',
     color: colors.text.primary,
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
     letterSpacing: 0.5,
   },
   tagline: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     color: colors.text.secondary,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
   bottomAccent: {
     position: 'absolute',
-    bottom: 60,
+    bottom: verticalScale(60),
     width: '100%',
     alignItems: 'center',
   },
   accentBar: {
-    width: 60,
-    height: 4,
-    borderRadius: 2,
+    width: scale(60),
+    height: verticalScale(4),
+    borderRadius: scale(2),
     backgroundColor: colors.brand.primary,
   },
   offlineContainer: {
@@ -226,13 +222,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
-    paddingHorizontal: 32,
-    marginTop: 100,
+    paddingHorizontal: scale(32),
+    marginTop: verticalScale(100),
   },
   offlineCard: {
     backgroundColor: colors.ui.white,
-    borderRadius: 16,
-    padding: 32,
+    borderRadius: moderateScale(16),
+    padding: scale(32),
     alignItems: 'center',
     shadowColor: colors.ui.black,
     shadowOffset: {
@@ -246,41 +242,41 @@ const styles = StyleSheet.create({
     borderColor: colors.border.light,
   },
   offlineTitle: {
-    fontSize: 20,
+    fontSize: fontScale(20),
     fontWeight: 'bold',
     color: colors.text.primary,
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: verticalScale(16),
+    marginBottom: verticalScale(8),
   },
   offlineMessage: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 20,
+    marginBottom: verticalScale(24),
+    lineHeight: fontScale(20),
   },
   retryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.brand.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    gap: 8,
+    paddingHorizontal: scale(24),
+    paddingVertical: verticalScale(12),
+    borderRadius: moderateScale(8),
+    gap: scale(8),
   },
   retryButtonText: {
     color: colors.ui.white,
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: '600',
   },
   loadingContainer: {
     position: 'absolute',
-    bottom: 120,
+    bottom: verticalScale(120),
     alignItems: 'center',
-    gap: 8,
+    gap: verticalScale(8),
   },
   loadingText: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     color: colors.text.secondary,
   },
 });

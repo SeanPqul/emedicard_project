@@ -1,4 +1,4 @@
-import { api } from 'backend/convex/_generated/api'; // Correct path to generated Convex API using alias
+import { api } from '@backend/convex/_generated/api';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { NextResponse } from 'next/server';

@@ -12,6 +12,7 @@ export const updateApplicationMutation = mutation({
     firstName: v.optional(v.string()),
     middleName: v.optional(v.string()),
     lastName: v.optional(v.string()),
+    suffix: v.optional(v.string()),
     age: v.optional(v.number()),
     nationality: v.optional(v.string()),
     gender: v.optional(v.union(v.literal("Male"), v.literal("Female"), v.literal("Other"))),

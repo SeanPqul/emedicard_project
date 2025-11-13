@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BaseScreen } from '@/src/shared/components/core';
 import { usePaymentHistory } from '@/src/features/payment-history/hooks/usePaymentHistory';
 import { PaymentStatusBadge } from '@/src/entities/payment/ui/PaymentStatusBadge';
-import { formatCurrency, formatPaymentDateTime, formatPaymentMethod, getPaymentMethodIcon } from '@/src/entities/payment/lib/formatters';
+import { formatCurrency, formatPaymentDateTime, formatPaymentMethod } from '@/src/entities/payment/lib/formatters';
 import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
 
@@ -86,14 +86,7 @@ export function PaymentDetailScreen() {
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Payment Method</Text>
-              <View style={styles.methodContainer}>
-                <Ionicons 
-                  name={getPaymentMethodIcon(payment.paymentMethod) as any} 
-                  size={moderateScale(16)} 
-                  color={theme.colors.text.secondary} 
-                />
-                <Text style={styles.infoValue}>{formatPaymentMethod(payment.paymentMethod)}</Text>
-              </View>
+              <Text style={styles.infoValue}>{formatPaymentMethod(payment.paymentMethod)}</Text>
             </View>
 
             <View style={styles.infoRow}>
@@ -263,13 +256,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     flex: 1,
     marginLeft: scale(16),
-  },
-  methodContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(6),
-    flex: 1,
-    justifyContent: 'flex-end',
   },
   totalRow: {
     borderBottomWidth: 0,

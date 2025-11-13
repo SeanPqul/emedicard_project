@@ -201,6 +201,7 @@ export class ApplicationService {
       organization: '',
       civilStatus: undefined,
       middleName: '',
+      suffix: '',
       age: 0,
       nationality: '',
     };

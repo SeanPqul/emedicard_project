@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { dev, isServer }) => {
     // Alias configuration
-    config.resolve.alias["@/convex"] = path.resolve(__dirname, "../../backend/convex");
+    config.resolve.alias["@backend/convex"] = path.resolve(__dirname, "../../backend/convex");
     config.resolve.alias["@emedicard/types"] = path.resolve(__dirname, "../../packages/types/src");
     config.resolve.alias["@emedicard/utils"] = path.resolve(__dirname, "../../packages/utils/src");
     config.resolve.alias["@emedicard/validation"] = path.resolve(__dirname, "../../packages/validation/src");
@@ -77,7 +77,7 @@ const nextConfig: NextConfig = {
 
   turbopack: {
     resolveAlias: {
-      "@/convex": path.resolve(__dirname, "../../backend/convex"),
+      "@backend/convex": path.resolve(__dirname, "../../backend/convex"),
       "@emedicard/types": path.resolve(__dirname, "../../packages/types/src"),
       "@emedicard/utils": path.resolve(__dirname, "../../packages/utils/src"),
       "@emedicard/validation": path.resolve(__dirname, "../../packages/validation/src"),

@@ -127,6 +127,29 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
 
       <View style={styles.inputGroup}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.inputLabel}>Suffix</Text>
+          <Text style={{ color: '#6B7280', marginLeft: moderateScale(4), fontSize: moderateScale(12) }}>(Optional)</Text>
+        </View>
+        <View style={styles.inputContainer}>
+          <Ionicons 
+            name="person-outline" 
+            size={moderateScale(20)} 
+            color={'#6B7280'} 
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={styles.input}
+            value={formData.suffix}
+            onChangeText={(text) => setFormData({ ...formData, suffix: text })}
+            placeholder="e.g., Jr., Sr., III, IV"
+            placeholderTextColor="#9CA3AF"
+            autoCapitalize="words"
+          />
+        </View>
+      </View>
+
+      <View style={styles.inputGroup}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={styles.inputLabel}>Age</Text>
           <Text style={{ color: theme.colors.semantic.error, marginLeft: moderateScale(4) }}>*</Text>
         </View>

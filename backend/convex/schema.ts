@@ -49,6 +49,7 @@ export default defineSchema({
     firstName: v.optional(v.string()),
     middleName: v.optional(v.string()),
     lastName: v.optional(v.string()),
+    suffix: v.optional(v.string()),
     age: v.optional(v.float64()),
     nationality: v.optional(v.string()),
     gender: v.optional(v.union(

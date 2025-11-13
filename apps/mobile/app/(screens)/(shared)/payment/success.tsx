@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { theme } from '@shared/styles/theme';
+import { scale, verticalScale, moderateScale, fontScale } from '@shared/utils/responsive';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
@@ -86,7 +88,7 @@ export default function PaymentSuccessScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={theme.colors.brand.primary} />
           <Text style={styles.title}>Verifying Payment...</Text>
           <Text style={styles.subtitle}>
             Please wait while we confirm your payment with Maya
@@ -155,52 +157,52 @@ export default function PaymentSuccessScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.background.primary,
   },
   centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: scale(24),
   },
   successIcon: {
-    fontSize: 80,
-    marginBottom: 24,
+    fontSize: moderateScale(72),
+    marginBottom: verticalScale(16),
   },
   errorIcon: {
-    fontSize: 80,
-    marginBottom: 24,
+    fontSize: moderateScale(72),
+    marginBottom: verticalScale(16),
   },
   title: {
-    fontSize: 24,
+    fontSize: fontScale(22),
     fontWeight: 'bold',
-    color: '#1C1C1E',
+    color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: verticalScale(12),
   },
   subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: fontScale(14),
+    color: theme.colors.text.secondary,
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
+    lineHeight: moderateScale(20),
+    marginBottom: verticalScale(16),
   },
   details: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: fontScale(12),
+    color: theme.colors.text.tertiary,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: verticalScale(24),
     fontFamily: 'monospace',
   },
   button: {
     width: '100%',
-    marginBottom: 16,
+    marginBottom: verticalScale(12),
   },
   buttonContainer: {
     width: '100%',
-    gap: 12,
+    gap: scale(12),
   },
   primaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.brand.primary,
   },
 });

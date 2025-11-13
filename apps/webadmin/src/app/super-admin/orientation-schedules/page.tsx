@@ -2,8 +2,8 @@
 
 import ErrorMessage from "@/components/ErrorMessage";
 import Navbar from "@/components/shared/Navbar";
-import { api } from 'backend/convex/_generated/api';
-import { Doc, Id } from 'backend/convex/_generated/dataModel';
+import { api } from '@backend/convex/_generated/api';
+import { Doc, Id } from '@backend/convex/_generated/dataModel';
 import {
   calculateDuration,
   formatDuration,

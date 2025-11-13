@@ -1,6 +1,8 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { theme } from '@shared/styles/theme';
+import { scale, verticalScale, moderateScale, fontScale } from '@shared/utils/responsive';
 import { Button } from '../../../../src/shared/components';
 
 /**
@@ -86,70 +88,70 @@ export default function PaymentCancelledScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.background.primary,
   },
   centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: scale(24),
   },
   cancelIcon: {
-    fontSize: 80,
-    marginBottom: 24,
+    fontSize: moderateScale(72),
+    marginBottom: verticalScale(16),
   },
   title: {
-    fontSize: 24,
+    fontSize: fontScale(22),
     fontWeight: 'bold',
-    color: '#1C1C1E',
+    color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: verticalScale(12),
   },
   subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: fontScale(14),
+    color: theme.colors.text.secondary,
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 16,
+    lineHeight: moderateScale(20),
+    marginBottom: verticalScale(12),
   },
   description: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: fontScale(13),
+    color: theme.colors.text.secondary,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
-    paddingHorizontal: 16,
+    lineHeight: moderateScale(20),
+    marginBottom: verticalScale(16),
+    paddingHorizontal: scale(12),
   },
   details: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: fontScale(12),
+    color: theme.colors.text.tertiary,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: verticalScale(24),
     fontFamily: 'monospace',
   },
   buttonContainer: {
     width: '100%',
-    gap: 12,
-    marginBottom: 24,
+    gap: scale(12),
+    marginBottom: verticalScale(16),
   },
   button: {
     width: '100%',
   },
   primaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.brand.primary,
   },
   infoContainer: {
-    backgroundColor: '#FFF3CD',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: theme.colors.orange[50],
+    padding: scale(16),
+    borderRadius: moderateScale(12),
     width: '100%',
     borderWidth: 1,
-    borderColor: '#FFE69C',
+    borderColor: theme.colors.orange[200],
   },
   infoText: {
-    fontSize: 14,
-    color: '#856404',
+    fontSize: fontScale(13),
+    color: theme.colors.orange[800],
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: moderateScale(18),
   },
 });

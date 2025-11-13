@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ApplicationTypeStepProps, ApplicationType } from './ApplicationTypeStep.types';
+import { ApplicationTypeStepProps } from './ApplicationTypeStep.types';
+import type { ApplicationType } from '../../../types';
 import styles from './ApplicationTypeStep.styles';
 import { theme } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';

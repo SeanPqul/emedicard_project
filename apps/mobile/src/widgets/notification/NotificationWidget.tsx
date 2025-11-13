@@ -218,7 +218,7 @@ export function NotificationWidget({
                 {getRelativeTime(notification._creationTime)}
               </Text>
             </View>
-            <Text style={styles.notificationTimestamp}>
+            <Text style={styles.notificationTimestamp} numberOfLines={1} ellipsizeMode="tail">
               {timestamp}
             </Text>
           </View>

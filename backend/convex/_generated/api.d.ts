@@ -62,6 +62,7 @@ import type * as admin_updateAdminAccount from "../admin/updateAdminAccount.js";
 import type * as admin_validatePayment from "../admin/validatePayment.js";
 import type * as applications_createApplication from "../applications/createApplication.js";
 import type * as applications_createForm from "../applications/createForm.js";
+import type * as applications_deleteApplication from "../applications/deleteApplication.js";
 import type * as applications_getApplicationById from "../applications/getApplicationById.js";
 import type * as applications_getDocumentsWithClassification from "../applications/getDocumentsWithClassification.js";
 import type * as applications_getFormById from "../applications/getFormById.js";
@@ -143,6 +144,7 @@ import type * as requirements_adminGetDocumentsByStatus from "../requirements/ad
 import type * as requirements_adminGetPendingDocuments from "../requirements/adminGetPendingDocuments.js";
 import type * as requirements_adminReviewDocument from "../requirements/adminReviewDocument.js";
 import type * as requirements_createJobCategoryRequirement from "../requirements/createJobCategoryRequirement.js";
+import type * as requirements_deleteStorageFile from "../requirements/deleteStorageFile.js";
 import type * as requirements_getDocumentUrl from "../requirements/getDocumentUrl.js";
 import type * as requirements_getFormDocumentsRequirements from "../requirements/getFormDocumentsRequirements.js";
 import type * as requirements_getJobCategoryRequirements from "../requirements/getJobCategoryRequirements.js";
@@ -242,6 +244,7 @@ declare const fullApi: ApiFromModules<{
   "admin/validatePayment": typeof admin_validatePayment;
   "applications/createApplication": typeof applications_createApplication;
   "applications/createForm": typeof applications_createForm;
+  "applications/deleteApplication": typeof applications_deleteApplication;
   "applications/getApplicationById": typeof applications_getApplicationById;
   "applications/getDocumentsWithClassification": typeof applications_getDocumentsWithClassification;
   "applications/getFormById": typeof applications_getFormById;
@@ -323,6 +326,7 @@ declare const fullApi: ApiFromModules<{
   "requirements/adminGetPendingDocuments": typeof requirements_adminGetPendingDocuments;
   "requirements/adminReviewDocument": typeof requirements_adminReviewDocument;
   "requirements/createJobCategoryRequirement": typeof requirements_createJobCategoryRequirement;
+  "requirements/deleteStorageFile": typeof requirements_deleteStorageFile;
   "requirements/getDocumentUrl": typeof requirements_getDocumentUrl;
   "requirements/getFormDocumentsRequirements": typeof requirements_getFormDocumentsRequirements;
   "requirements/getJobCategoryRequirements": typeof requirements_getJobCategoryRequirements;
