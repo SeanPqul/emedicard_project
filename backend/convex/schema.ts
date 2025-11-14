@@ -18,7 +18,8 @@ export default defineSchema({
       v.union(
         v.literal("applicant"),
         v.literal("inspector"),
-        v.literal("admin")
+        v.literal("admin"),
+        v.literal("system_admin")
       )
     ),
     updatedAt: v.optional(v.float64()),

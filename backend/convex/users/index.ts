@@ -95,7 +95,7 @@ export const getUserByClerkId = query({
 export const patchUserRoleAndCategories = mutation({
   args: {
     userId: v.id("users"),
-    role: v.union(v.literal("applicant"), v.literal("inspector"), v.literal("admin")), // Constrained role type
+    role: v.union(v.literal("applicant"), v.literal("inspector"), v.literal("admin"), v.literal("system_admin")),
     managedCategories: v.array(v.id("jobCategories")),
   },
   handler: async (ctx, args) => {
@@ -113,7 +113,7 @@ export const systemCreateUser = mutation({
     email: v.string(),
     fullname: v.string(),
     image: v.string(),
-    role: v.union(v.literal("applicant"), v.literal("inspector"), v.literal("admin")), // Constrained role type
+    role: v.union(v.literal("applicant"), v.literal("inspector"), v.literal("admin"), v.literal("system_admin")),
     managedCategories: v.array(v.id("jobCategories")),
     username: v.string(),
   },

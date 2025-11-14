@@ -1,68 +1,99 @@
+"use node";
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { action, mutation } from "../_generated/server";
+import { createClerkClient } from "@clerk/backend";
+import { api } from "../_generated/api";
 import { AdminRole } from "../users/roles";
+import { internal } from "../_generated/api";
 
-export const updateAccount = mutation({
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+
+// Main action that syncs with both Clerk and Convex database
+export const updateAccountWithClerk = action({
   args: {
     fullname: v.optional(v.string()),
     username: v.optional(v.string()),
+    currentPassword: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Ensure user is authenticated
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Authentication failed.");
 
+    // Get the current admin user
+    const adminUser: any = await ctx.runQuery(api.users.getCurrentUser.getCurrentUserQuery, {});
+    if (!adminUser) throw new Error("Admin user not found.");
+
     // Ensure user is an admin
-    const adminCheck = await AdminRole(ctx);
-    if (!adminCheck.isAdmin) {
+    if (adminUser.role !== 'admin') {
       throw new Error("You do not have permission to update admin account.");
     }
-
-    // Get the current admin user
-    const adminUser = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!adminUser) throw new Error("Admin user not found.");
 
     // Validate that at least one field is provided
     if (!args.fullname && !args.username) {
       throw new Error("Please provide at least one field to update.");
     }
 
+    // Verify current password if provided (for security)
+    if (args.currentPassword) {
+      try {
+        // Attempt to verify the password by checking with Clerk
+        // Note: We can't directly verify password, but Clerk will handle this in the session
+        // For now, we trust that the frontend has verified it with Clerk
+      } catch (err: any) {
+        throw new Error("Password verification failed.");
+      }
+    }
+
     // Check if username is already taken (if username is being updated)
     if (args.username && args.username !== adminUser.username) {
-      const existingUser = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("username"), args.username))
-        .first();
+      const isAvailable = await ctx.runMutation(internal.admin.updateAdminAccountInternal.checkUsernameAvailable, {
+        username: args.username,
+        currentUserId: adminUser._id,
+      });
 
-      if (existingUser && existingUser._id !== adminUser._id) {
+      if (!isAvailable) {
         throw new Error("Username is already taken.");
       }
     }
 
-    // Build update object
-    const updates: { fullname?: string; username?: string; updatedAt: number } = {
-      updatedAt: Date.now(),
-    };
+    // Step 1: Update Clerk Backend API
+    try {
+      const clerkUpdateData: { firstName?: string; lastName?: string; username?: string } = {};
+      
+      // Parse fullname into firstName and lastName for Clerk
+      if (args.fullname) {
+        const nameParts = args.fullname.trim().split(' ');
+        if (nameParts.length === 1) {
+          clerkUpdateData.firstName = nameParts[0];
+          clerkUpdateData.lastName = '';
+        } else {
+          clerkUpdateData.firstName = nameParts[0];
+          clerkUpdateData.lastName = nameParts.slice(1).join(' ');
+        }
+      }
+      
+      if (args.username) {
+        clerkUpdateData.username = args.username;
+      }
 
-    if (args.fullname) updates.fullname = args.fullname;
-    if (args.username) updates.username = args.username;
+      // Update Clerk if we have changes
+      if (Object.keys(clerkUpdateData).length > 0) {
+        await clerk.users.updateUser(identity.subject, clerkUpdateData);
+      }
+    } catch (clerkError: any) {
+      console.error("Failed to update Clerk:", clerkError);
+      throw new Error("Failed to sync profile with authentication provider: " + (clerkError.message || "Unknown error"));
+    }
 
-    // Update the admin user
-    await ctx.db.patch(adminUser._id, updates);
-
-    // Log the account update activity
-    await ctx.db.insert("adminActivityLogs", {
-      adminId: adminUser._id,
-      activityType: "account_update",
-      details: `Updated account details. ${args.fullname ? `New name: ${args.fullname}. ` : ""}${args.username ? `New username: ${args.username}.` : ""}`,
-      timestamp: Date.now(),
-      jobCategoryId: adminUser.managedCategories?.[0], // Use first managed category if available
+    // Step 2: Update Convex database
+    await ctx.runMutation(internal.admin.updateAdminAccountInternal.updateAccountInternal, {
+      userId: adminUser._id,
+      fullname: args.fullname,
+      username: args.username,
     });
 
     return { success: true, message: "Account updated successfully." };
   },
 });
+

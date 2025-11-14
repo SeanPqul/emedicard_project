@@ -7,8 +7,8 @@
 import { Id } from '@backend/convex/_generated/dataModel';
 
 // ===== USER ROLE TYPES =====
-export type UserRole = 'applicant' | 'inspector' | 'admin';
-// Note: Admin functionality is handled via separate web interface
+export type UserRole = 'applicant' | 'inspector' | 'admin' | 'system_admin';
+// Note: Admin and System Admin functionality is handled via separate web interface
 
 // ===== USER ENTITY TYPES =====
 export interface User {

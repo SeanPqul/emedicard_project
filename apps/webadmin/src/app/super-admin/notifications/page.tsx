@@ -22,7 +22,7 @@ type Notification = {
   isRead: boolean;
 };
 
-export default function SuperAdminNotificationsPage() {
+export default function SystemAdministratorNotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
   const [typeFilter, setTypeFilter] = useState("");
   const router = useRouter();
@@ -157,7 +157,7 @@ export default function SuperAdminNotificationsPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <ErrorMessage
           title="Access Denied"
-          message="You do not have Super Admin privileges to view this page."
+          message="You do not have System Administrator privileges to view this page."
           onCloseAction={() => router.push("/dashboard")}
         />
       </div>

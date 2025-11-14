@@ -572,11 +572,11 @@ export default function AttendanceTrackerPage() {
                     
                     {/* Finalize Button or Finalized Info */}
                     {schedule.isFinalized ? (
-                      <div className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-xl">
-                        <Lock className="w-4 h-4" />
+                      <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl shadow-lg border-2 border-yellow-400">
+                        <Lock className="w-5 h-5" />
                         <div className="text-left">
-                          <p className="text-xs font-medium">Finalized</p>
-                          <p className="text-xs text-gray-300">
+                          <p className="text-sm font-bold">Session Finalized</p>
+                          <p className="text-xs text-yellow-100">
                             {schedule.finalizedAt && new Date(schedule.finalizedAt).toLocaleDateString('en-US', {
                               month: 'short',
                               day: 'numeric',
