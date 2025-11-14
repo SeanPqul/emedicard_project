@@ -7,25 +7,15 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "ios": {
-        "simulator": false,
-        "bundleIdentifier": "com.emedicard.project"
-      },
       "android": {
         "buildType": "apk"
       }
     },
     "preview": {
-      "distribution": "internal",
-      "ios": {
-        "bundleIdentifier": "com.emedicard.project"
-      }
+      "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true,
-      "ios": {
-        "bundleIdentifier": "com.emedicard.project"
-      }
+      "autoIncrement": true
     }
   },
   "submit": {
