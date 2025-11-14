@@ -38,6 +38,10 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [adminName, setAdminName] = useState("");
+  const [adminUsername, setAdminUsername] = useState("");
+  const [adminGender, setAdminGender] = useState("");
+  const [adminBirthDate, setAdminBirthDate] = useState("");
+  const [adminPhoneNumber, setAdminPhoneNumber] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Id<"jobCategories"> | undefined>(undefined);
   const [selectedRole, setSelectedRole] = useState<"admin" | "inspector">("admin");
   const [isLoading, setIsLoading] = useState(false);
@@ -78,6 +82,10 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
         managedCategoryIds: selectedCategory ? [selectedCategory] : [],
         role: isFoodHandlerSelected ? selectedRole : undefined,
         fullname: adminName || undefined,
+        username: adminUsername || undefined,
+        gender: adminGender || undefined,
+        birthDate: adminBirthDate || undefined,
+        phoneNumber: adminPhoneNumber || undefined,
       });
 
       if (result.success) {
@@ -86,6 +94,10 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
         setAdminEmail("");
         setAdminPassword("");
         setAdminName("");
+        setAdminUsername("");
+        setAdminGender("");
+        setAdminBirthDate("");
+        setAdminPhoneNumber("");
         setSelectedCategory(undefined);
         setSelectedRole("admin");
         setShowPassword(false);
@@ -172,6 +184,26 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
               />
             </div>
 
+            {/* Username */}
+            <div>
+              <label htmlFor="adminUsername" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+                Username
+              </label>
+              <input
+                type="text"
+                id="adminUsername"
+                className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                placeholder="john.doe.admin"
+                value={adminUsername}
+                onChange={(e) => setAdminUsername(e.target.value)}
+                disabled={isLoading}
+              />
+              <p className="mt-1 text-xs text-gray-500">Optional. If left blank, username will be based on the email.</p>
+            </div>
+
             {/* Email */}
             <div>
               <label htmlFor="adminEmail" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
@@ -188,6 +220,65 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value)}
                 required
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Gender */}
+            <div>
+              <label htmlFor="adminGender" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Gender
+              </label>
+              <select
+                id="adminGender"
+                className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all bg-white"
+                value={adminGender}
+                onChange={(e) => setAdminGender(e.target.value)}
+                disabled={isLoading}
+              >
+                <option value="">Select gender (optional)</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            {/* Birthdate */}
+            <div>
+              <label htmlFor="adminBirthDate" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Birthdate
+              </label>
+              <input
+                type="date"
+                id="adminBirthDate"
+                className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                value={adminBirthDate}
+                onChange={(e) => setAdminBirthDate(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Phone Number */}
+            <div>
+              <label htmlFor="adminPhoneNumber" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498A1 1 0 0121 19.72V23a2 2 0 01-2 2h-1C9.82 25 3 18.18 3 10V5z" />
+                </svg>
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                id="adminPhoneNumber"
+                className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                placeholder="e.g. 09XX XXX XXXX"
+                value={adminPhoneNumber}
+                onChange={(e) => setAdminPhoneNumber(e.target.value)}
                 disabled={isLoading}
               />
             </div>

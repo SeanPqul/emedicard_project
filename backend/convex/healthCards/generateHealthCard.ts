@@ -1,13 +1,27 @@
 // convex/healthCards/generateHealthCard.ts
 import { v } from "convex/values";
-import { internalAction, internalMutation, internalQuery } from "../_generated/server";
 import { internal } from "../_generated/api";
-import { Id } from "../_generated/dataModel";
+import { internalAction, internalMutation, internalQuery } from "../_generated/server";
 
 /**
  * Generate health card HTML template
  * This will be converted to PDF on the client side or via external service
  */
+
+// TODO: Move these to configuration/env when we have final hosted asset URLs
+const DOCTOR_SIGNATURE_URL = ""; // e.g. "https://emedicard.davao.gov.ph/assets/signatures/Marjorie_signature.png";
+const SANITATION_CHIEF_SIGNATURE_URL = ""; // e.g. "https://emedicard.davao.gov.ph/assets/signatures/Luzminda_signature.png"
+
+function renderOptionalImg(url: string | undefined, className: string, alt: string) {
+  if (!url) return "";
+  return `<img class="${className}" src="${url}" alt="${alt}" />`;
+}
+
+function renderSignatureImg(url: string | undefined) {
+  if (!url) return "";
+  return `<img src="${url}" alt="Signature" style="max-width: 100%; max-height: 100%; object-fit: contain;" />`;
+}
+
 function generateHealthCardHTML(data: {
   registrationNumber: string;
   fullName: string;
@@ -21,6 +35,8 @@ function generateHealthCardHTML(data: {
   issuedDate: string;
   expiryDate: string;
   applicationId: string;
+  doctorSignatureUrl?: string;
+  sanitationChiefSignatureUrl?: string;
 }): string {
   return `
 <!DOCTYPE html>
@@ -285,6 +301,12 @@ function generateHealthCardHTML(data: {
       padding-top: 8px;
       border-top: 1px solid hsl(0, 0%, 20%);
     }
+
+    .doctor-signature {
+      height: 32px;
+      margin-bottom: 4px;
+      object-fit: contain;
+    }
     
     .bottom-official-name {
       font-size: 11px;
@@ -499,7 +521,9 @@ function generateHealthCardHTML(data: {
         <!-- Signature Area -->
         <div class="signature-area">
           <div class="signature-box">
-            <div class="signature-placeholder"></div>
+            <div class="signature-placeholder">
+              ${renderSignatureImg(SANITATION_CHIEF_SIGNATURE_URL)}
+            </div>
             <div class="signature-label">Signature</div>
           </div>
           
@@ -512,6 +536,11 @@ function generateHealthCardHTML(data: {
 
       <!-- Bottom Official -->
       <div class="bottom-official">
+        ${renderOptionalImg(
+          DOCTOR_SIGNATURE_URL,
+          "doctor-signature",
+          "Signature of Dr. Marjorie D. Culas"
+        )}
         <div class="bottom-official-name">Dr. Marjorie D. Culas</div>
         <div class="bottom-official-title">City Health Officer</div>
       </div>
@@ -646,6 +675,47 @@ function calculateAge(dateOfBirth: number): number {
 }
 
 /**
+ * Internal query to get signature URLs from system config
+ */
+export const getSignatureUrls = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const config = await ctx.db
+      .query("systemConfig")
+      .filter((q) => q.eq(q.field("key"), "signature_urls"))
+      .first();
+
+    if (!config) {
+      return {
+        doctorSignatureUrl: undefined,
+        sanitationChiefSignatureUrl: undefined,
+      };
+    }
+
+    try {
+      const { doctorSignatureStorageId, sanitationChiefSignatureStorageId } = JSON.parse(
+        config.value
+      );
+
+      // Get URLs from storage
+      const doctorUrl = await ctx.storage.getUrl(doctorSignatureStorageId);
+      const sanitationChiefUrl = await ctx.storage.getUrl(sanitationChiefSignatureStorageId);
+
+      return {
+        doctorSignatureUrl: doctorUrl ?? undefined,
+        sanitationChiefSignatureUrl: sanitationChiefUrl ?? undefined,
+      };
+    } catch (e) {
+      console.error("Error parsing signature config:", e);
+      return {
+        doctorSignatureUrl: undefined,
+        sanitationChiefSignatureUrl: undefined,
+      };
+    }
+  },
+});
+
+/**
  * Generate health card for approved application
  */
 export const generateHealthCard = internalAction({
@@ -653,6 +723,9 @@ export const generateHealthCard = internalAction({
     applicationId: v.id("applications"),
   },
   handler: async (ctx, args): Promise<{ success: boolean; healthCardId: any; registrationNumber: string; htmlContent: string; }> => {
+    // Get signature URLs from system config
+    const signatureUrls = await ctx.runQuery(internal.healthCards.generateHealthCard.getSignatureUrls, {});
+    
     // Get application data
     const application = await ctx.runQuery(internal.healthCards.generateHealthCard.getApplicationData, {
       applicationId: args.applicationId,

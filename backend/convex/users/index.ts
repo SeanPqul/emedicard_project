@@ -95,14 +95,30 @@ export const getUserByClerkId = query({
 export const patchUserRoleAndCategories = mutation({
   args: {
     userId: v.id("users"),
-    role: v.union(v.literal("applicant"), v.literal("inspector"), v.literal("admin"), v.literal("system_admin")),
+    role: v.union(
+      v.literal("applicant"),
+      v.literal("inspector"),
+      v.literal("admin"),
+      v.literal("system_admin"),
+    ),
     managedCategories: v.array(v.id("jobCategories")),
+    username: v.optional(v.string()),
+    gender: v.optional(v.string()),
+    birthDate: v.optional(v.string()),
+    phoneNumber: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.userId, {
+    const updates: Record<string, any> = {
       role: args.role,
       managedCategories: args.managedCategories,
-    });
+    };
+
+    if (args.username !== undefined) updates.username = args.username;
+    if (args.gender !== undefined) updates.gender = args.gender;
+    if (args.birthDate !== undefined) updates.birthDate = args.birthDate;
+    if (args.phoneNumber !== undefined) updates.phoneNumber = args.phoneNumber;
+
+    await ctx.db.patch(args.userId, updates);
   },
 });
 
@@ -113,9 +129,17 @@ export const systemCreateUser = mutation({
     email: v.string(),
     fullname: v.string(),
     image: v.string(),
-    role: v.union(v.literal("applicant"), v.literal("inspector"), v.literal("admin"), v.literal("system_admin")),
+    role: v.union(
+      v.literal("applicant"),
+      v.literal("inspector"),
+      v.literal("admin"),
+      v.literal("system_admin"),
+    ),
     managedCategories: v.array(v.id("jobCategories")),
     username: v.string(),
+    gender: v.optional(v.string()),
+    birthDate: v.optional(v.string()),
+    phoneNumber: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<Doc<"users">["_id"]> => {
     return await ctx.db.insert("users", {
@@ -126,6 +150,9 @@ export const systemCreateUser = mutation({
       role: args.role,
       managedCategories: args.managedCategories,
       username: args.username,
+      gender: args.gender,
+      birthDate: args.birthDate,
+      phoneNumber: args.phoneNumber,
     });
   },
 });
