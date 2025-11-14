@@ -63,36 +63,76 @@ export default function RejectionHistoryPage() {
     let matchesStatus = true;
     if (statusFilter) {
       if (statusFilter === "permanently_rejected") {
+        // Application rejections are permanently rejected
         matchesStatus = rejection.type === "application";
       } else if (statusFilter === "pending") {
+        // Pending = document/payment rejections/referrals not yet resubmitted
+        // Includes both OLD records (no issueType) and NEW records (with issueType)
         matchesStatus = rejection.type !== "application" && !rejection.wasReplaced;
       } else if (statusFilter === "resubmitted") {
+        // Resubmitted = document/payment rejections/referrals that were replaced
         matchesStatus = rejection.type !== "application" && rejection.wasReplaced;
       } else if (statusFilter === "referred") {
-        matchesStatus = rejection.type === "document";
+        // Referred/Flagged = items from NEW documentReferralHistory table (medical or document issues)
+        matchesStatus = !!rejection.issueType; // Has issueType means it's from referral table
       }
     }
 
-    // Issue Type Tab Filter (Medical vs Document)
-    // NOTE: This will be fully functional when backend migrates to documentReferralHistory table
-    // For now, uses heuristics based on rejection reason text
+    // Issue Type Tab Filter (Medical Referrals vs Document Issues)
+    // Medical Referrals: Only Type='Document' with issueType='medical_referral'
+    // Document Issues: Type='Document' with issueType='document_issue' + ALL Payment rejections
     let matchesIssueType = true;
-    if (issueTypeTab !== 'all' && rejection.type === 'document') {
-      const reasonLower = rejection.rejectionReason.toLowerCase();
-      const isMedical = 
-        reasonLower.includes('medical') ||
-        reasonLower.includes('doctor') ||
-        reasonLower.includes('x-ray') ||
-        reasonLower.includes('urinalysis') ||
-        reasonLower.includes('stool') ||
-        reasonLower.includes('drug test') ||
-        reasonLower.includes('neuro') ||
-        reasonLower.includes('hepatitis');
-      
+    if (issueTypeTab !== 'all') {
       if (issueTypeTab === 'medical') {
-        matchesIssueType = isMedical;
+        // Medical Referrals: ONLY documents with medical_referral issueType
+        if (rejection.type === 'document') {
+          if (rejection.issueType) {
+            // NEW: Use backend's issueType field (from documentReferralHistory)
+            matchesIssueType = rejection.issueType === 'medical_referral';
+          } else {
+            // FALLBACK: For OLD records without issueType, use heuristics
+            const reasonLower = rejection.rejectionReason.toLowerCase();
+            matchesIssueType = 
+              reasonLower.includes('medical') ||
+              reasonLower.includes('doctor') ||
+              reasonLower.includes('x-ray') ||
+              reasonLower.includes('urinalysis') ||
+              reasonLower.includes('stool') ||
+              reasonLower.includes('drug test') ||
+              reasonLower.includes('neuro') ||
+              reasonLower.includes('hepatitis');
+          }
+        } else {
+          // Non-document types (payments, etc.) don't appear in Medical Referrals
+          matchesIssueType = false;
+        }
       } else if (issueTypeTab === 'document') {
-        matchesIssueType = !isMedical;
+        // Document Issues: document_issue documents + ALL payments
+        if (rejection.type === 'payment') {
+          // ALL payments are non-medical issues
+          matchesIssueType = true;
+        } else if (rejection.type === 'document') {
+          if (rejection.issueType) {
+            // NEW: Use backend's issueType field
+            matchesIssueType = rejection.issueType === 'document_issue';
+          } else {
+            // FALLBACK: For OLD records, consider non-medical as document issues
+            const reasonLower = rejection.rejectionReason.toLowerCase();
+            const isMedical = 
+              reasonLower.includes('medical') ||
+              reasonLower.includes('doctor') ||
+              reasonLower.includes('x-ray') ||
+              reasonLower.includes('urinalysis') ||
+              reasonLower.includes('stool') ||
+              reasonLower.includes('drug test') ||
+              reasonLower.includes('neuro') ||
+              reasonLower.includes('hepatitis');
+            matchesIssueType = !isMedical;
+          }
+        } else {
+          // Other types (orientation, etc.) don't appear in Document Issues tab
+          matchesIssueType = false;
+        }
       }
     }
 
@@ -188,7 +228,7 @@ export default function RejectionHistoryPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <ErrorMessage
           title="Access Denied"
-          message="You do not have Super Admin privileges to view this page."
+          message="You do not have System Administrator privileges to view this page."
           onCloseAction={() => router.push("/dashboard")}
         />
       </div>
@@ -285,14 +325,22 @@ export default function RejectionHistoryPage() {
             {/* Calculate live stats for Medical Referrals and Document Issues */}
             {(() => {
               const documentRecords = (rejections || []).filter((r: Rejection) => r.type === 'document');
+              const paymentRecords = (rejections || []).filter((r: Rejection) => r.type === 'payment');
+              
+              // Medical Referrals: Only documents with medical issueType
               const medicalReferrals = documentRecords.filter((r: Rejection) => 
                 r.issueType === 'medical_referral' || 
-                r.rejectionReason?.toLowerCase().includes('medical')
+                (!r.issueType && r.rejectionReason?.toLowerCase().includes('medical'))
               ).length;
-              const documentIssues = documentRecords.filter((r: Rejection) => 
-                r.issueType === 'document_issue' || 
-                (!r.issueType && !r.rejectionReason?.toLowerCase().includes('medical'))
-              ).length;
+              
+              // Document Issues: Non-medical documents + ALL payments
+              const documentIssues = [
+                ...documentRecords.filter((r: Rejection) => 
+                  r.issueType === 'document_issue' || 
+                  (!r.issueType && !r.rejectionReason?.toLowerCase().includes('medical'))
+                ),
+                ...paymentRecords // ALL payments are document issues
+              ].length;
               
               return (
                 <>

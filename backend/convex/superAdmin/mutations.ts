@@ -14,7 +14,7 @@ export const createAdmin = action({ // Changed to action
     email: v.string(),
     password: v.string(),
     managedCategoryIds: v.array(v.id("jobCategories")),
-    role: v.optional(v.union(v.literal("admin"), v.literal("inspector"))),
+    role: v.optional(v.union(v.literal("admin"), v.literal("inspector"), v.literal("system_admin"))),
     fullname: v.optional(v.string()),
   },
   handler: async (ctx, args) => {

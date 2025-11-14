@@ -55,7 +55,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (isUserLoaded && isSignedIn && adminPrivileges) {
-      // Check if user is super admin and redirect accordingly
+      // Check if user is system administrator and redirect accordingly
       if (adminPrivileges.managedCategories === "all") {
         router.push('/super-admin');
       } else {
@@ -173,8 +173,12 @@ export default function LandingPage() {
       <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-lg shadow-md' : 'bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">eM</span>
+            <div className="relative w-12 h-12">
+              <img 
+                src="/images/emedicard-logo.png" 
+                alt="eMediCard Logo" 
+                className="w-full h-full rounded-xl shadow-lg object-contain"
+              />
             </div>
             <span className={`text-2xl font-bold ${isScrolled ? 'text-gray-800' : 'text-white'}`}>eMediCard</span>
           </div>

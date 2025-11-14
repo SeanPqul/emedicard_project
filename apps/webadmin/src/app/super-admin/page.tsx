@@ -370,7 +370,7 @@ const StatCard = ({ title, value, icon, colorClass }: { title: string; value: nu
   </div>
 );
 
-export default function SuperAdminPage() {
+export default function SystemAdministratorPage() {
   const [startDate, setStartDate] = useState<number | undefined>(undefined);
   const [endDate, setEndDate] = useState<number | undefined>(undefined);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -516,7 +516,7 @@ export default function SuperAdminPage() {
   };
 
   if (!isClerkLoaded || adminPrivileges === undefined) {
-    return <LoadingScreen title="Loading Super Admin Dashboard" message="Please wait while we fetch your super admin data..." />;
+    return <LoadingScreen title="Loading System Administrator Dashboard" message="Please wait while we fetch your system administrator data..." />;
   }
   
   if (!user) {
@@ -528,7 +528,7 @@ export default function SuperAdminPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <ErrorMessage
           title="Access Denied"
-          message="You do not have Super Admin privileges to view this page."
+          message="You do not have System Administrator privileges to view this page."
           onCloseAction={() => router.push("/dashboard")}
         />
       </div>
@@ -549,7 +549,7 @@ export default function SuperAdminPage() {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-                Super Admin Dashboard
+                System Administrator Dashboard
               </h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1">
                 Overview and management of all health card applications
@@ -785,7 +785,7 @@ export default function SuperAdminPage() {
               colorClass="bg-gradient-to-br from-orange-400 to-orange-500"
             />
             <StatCard
-              title="Permanently Rejected"
+              title="Application Rejected"
               value={rejectionStats?.permanentRejections.total || 0}
               icon={<StatIcon d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />}
               colorClass="bg-gradient-to-br from-red-600 to-red-700"

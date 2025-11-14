@@ -4,7 +4,7 @@
  * Type definitions for user-related entities and operations
  */
 import { GenericId, BaseEntity, Timestamp } from './base';
-export type UserRole = 'applicant' | 'inspector' | 'admin';
+export type UserRole = 'applicant' | 'inspector' | 'admin' | 'system_admin';
 export interface User extends BaseEntity {
     _id: GenericId<"users">;
     username: string;

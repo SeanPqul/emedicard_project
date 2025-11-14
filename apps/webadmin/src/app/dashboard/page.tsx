@@ -180,7 +180,7 @@ export default function DashboardPage() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    Super Admin Mode
+                    System Administrator
                   </span>
                 )}
               </div>
@@ -209,7 +209,7 @@ export default function DashboardPage() {
           <StatCard title="Pending Revisions" value={totalPendingRevisions} icon={<StatIcon d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />} colorClass="bg-gradient-to-br from-orange-400 to-orange-500" />
           <StatCard title="Approved" value={totalApproved} icon={<StatIcon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-emerald-400 to-emerald-500" />
           <StatCard title="Payment Rejected" value={totalRejected} icon={<StatIcon d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />} colorClass="bg-gradient-to-br from-orange-400 to-orange-500" />
-          <StatCard title="Permanently Rejected" value={totalPermanentlyRejected} icon={<StatIcon d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />} colorClass="bg-gradient-to-br from-gray-600 to-gray-700" />
+          <StatCard title="Application Rejected" value={totalPermanentlyRejected} icon={<StatIcon d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />} colorClass="bg-gradient-to-br from-gray-600 to-gray-700" />
         </div>
 
         {/* Controls Panel - Improved Layout */}
@@ -309,7 +309,7 @@ export default function DashboardPage() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                   </svg>
-                  Back to Super Admin
+                  Back to System Administrator
                 </Link>
               )}
               <Link 
@@ -319,7 +319,7 @@ export default function DashboardPage() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
-                Payment History
+                Payments
               </Link>
               <Link 
                 href="/dashboard/rejection-history" 

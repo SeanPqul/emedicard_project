@@ -77,41 +77,50 @@ export default function PaymentHistoryPage() {
     });
   }, [payments, search]);
 
-  // Export to CSV
+  // Export to Excel/CSV
   const exportToCSV = () => {
     if (!filteredPayments || filteredPayments.length === 0) return;
 
     const headers = [
-      'Date',
+      'Payment Date',
+      'Payment Time',
       'Reference Number',
       'Applicant Name',
       'Email',
+      'Phone',
       'Job Category',
       'Payment Method',
       'Payment Location',
-      'Status',
-      'Amount',
+      'Payment Status',
+      'Base Amount',
       'Processing Fee',
-      'Net Amount',
+      'Total Paid',
       'Maya Payment ID',
       'Application Status',
+      'Rejection Count',
     ];
 
-    const rows = filteredPayments.map((p) => [
-      new Date(p._creationTime).toLocaleDateString('en-US'),
-      p.referenceNumber,
-      p.userFullname,
-      p.userEmail,
-      p.jobCategoryName,
-      p.paymentMethod,
-      p.paymentLocation || 'N/A',
-      p.paymentStatus,
-      `₱${p.amount.toFixed(2)}`,
-      `₱${p.serviceFee.toFixed(2)}`,
-      `₱${p.netAmount.toFixed(2)}`,
-      p.mayaPaymentId || 'N/A',
-      p.applicationStatus,
-    ]);
+    const rows = filteredPayments.map((p) => {
+      const date = new Date(p._creationTime);
+      return [
+        date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+        p.referenceNumber,
+        p.userFullname,
+        p.userEmail,
+        p.userPhone || 'N/A',
+        p.jobCategoryName,
+        p.paymentMethod === 'BaranggayHall' ? 'Baranggay Hall' : p.paymentMethod === 'CityHall' ? 'City Hall' : p.paymentMethod,
+        p.paymentLocation || 'N/A',
+        p.paymentStatus,
+        p.amount.toFixed(2),
+        p.serviceFee.toFixed(2),
+        p.netAmount.toFixed(2),
+        p.mayaPaymentId || 'N/A',
+        p.applicationStatus,
+        p.rejectionCount || 0,
+      ];
+    });
 
     const csvContent = [
       headers.join(','),
@@ -122,7 +131,8 @@ export default function PaymentHistoryPage() {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `payment-history-${new Date().toISOString().split('T')[0]}.csv`);
+    const fileName = `Payments_Report_${new Date().toISOString().split('T')[0]}.csv`;
+    link.setAttribute('download', fileName);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -193,142 +203,317 @@ export default function PaymentHistoryPage() {
 
       <main className="max-w-[1800px] mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="p-2 rounded-lg hover:bg-white/80 transition-all shadow-sm"
-            aria-label="Back to dashboard"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Payment History</h1>
-            <p className="text-gray-600 mt-1">Comprehensive record of all payment transactions</p>
+        <header className="mb-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="p-2.5 rounded-xl bg-white hover:bg-gray-50 transition-all shadow-sm border border-gray-200 hover:border-emerald-300"
+              aria-label="Back to dashboard"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-3 rounded-xl shadow-lg">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Payments</h1>
+                  <p className="text-gray-600 mt-1">Comprehensive record of all payment transactions</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </header>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200">
-            <div className="text-sm text-gray-600 font-medium">Total Payments</div>
-            <div className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 lg:gap-4 mb-8">
+          {/* Total Payments */}
+          <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-gray-300">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-gray-600 shadow-sm">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-gray-900 tracking-tight">{stats.total}</div>
+              <div className="text-xs font-medium text-gray-600">Total Payments</div>
+            </div>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md border border-green-200">
-            <div className="text-sm text-green-700 font-medium">Completed</div>
-            <div className="text-2xl font-bold text-green-900 mt-1">{stats.completed}</div>
+
+          {/* Completed */}
+          <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-green-200 hover:border-green-300">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-green-500 shadow-sm">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-green-900 tracking-tight">{stats.completed}</div>
+              <div className="text-xs font-medium text-green-700">Completed</div>
+            </div>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md border border-yellow-200">
-            <div className="text-sm text-yellow-700 font-medium">Pending</div>
-            <div className="text-2xl font-bold text-yellow-900 mt-1">{stats.pending}</div>
+
+          {/* Pending */}
+          <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-yellow-200 hover:border-yellow-300">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-yellow-500 shadow-sm">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-yellow-900 tracking-tight">{stats.pending}</div>
+              <div className="text-xs font-medium text-yellow-700">Pending</div>
+            </div>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md border border-red-200">
-            <div className="text-sm text-red-700 font-medium">Failed</div>
-            <div className="text-2xl font-bold text-red-900 mt-1">{stats.failed}</div>
+
+          {/* Failed */}
+          <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-red-200 hover:border-red-300">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-red-500 shadow-sm">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-red-900 tracking-tight">{stats.failed}</div>
+              <div className="text-xs font-medium text-red-700">Failed</div>
+            </div>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md border border-emerald-200">
-            <div className="text-sm text-emerald-700 font-medium">Total Revenue</div>
-            <div className="text-2xl font-bold text-emerald-900 mt-1">{formatCurrency(stats.totalAmount)}</div>
-            <div className="text-xs text-emerald-600 mt-0.5">Gross amount collected</div>
+
+          {/* Total Revenue */}
+          <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-emerald-200 hover:border-emerald-300">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-emerald-500 shadow-sm">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-emerald-900 tracking-tight">{formatCurrency(stats.totalAmount)}</div>
+              <div className="text-xs font-medium text-emerald-700">Total Revenue</div>
+              <div className="text-[10px] text-emerald-600">Gross collected</div>
+            </div>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md border border-purple-200">
-            <div className="text-sm text-purple-700 font-medium">Net Revenue</div>
-            <div className="text-2xl font-bold text-purple-900 mt-1">{formatCurrency(stats.totalNetAmount)}</div>
-            <div className="text-xs text-purple-600 mt-0.5">After processing fees</div>
+
+          {/* Net Revenue */}
+          <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-purple-200 hover:border-purple-300">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-purple-500 shadow-sm">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-purple-900 tracking-tight">{formatCurrency(stats.totalNetAmount)}</div>
+              <div className="text-xs font-medium text-purple-700">Net Revenue</div>
+              <div className="text-[10px] text-purple-600">After fees</div>
+            </div>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md border border-orange-200">
-            <div className="text-sm text-orange-700 font-medium">Processing Fees</div>
-            <div className="text-2xl font-bold text-orange-900 mt-1">{formatCurrency(stats.totalServiceFees)}</div>
-            <div className="text-xs text-orange-600 mt-0.5">Processing charges</div>
+
+          {/* Processing Fees */}
+          <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-orange-200 hover:border-orange-300">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-orange-500 shadow-sm">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-orange-900 tracking-tight">{formatCurrency(stats.totalServiceFees)}</div>
+              <div className="text-xs font-medium text-orange-700">Processing Fees</div>
+              <div className="text-[10px] text-orange-600">Service charges</div>
+            </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Search</label>
-              <input
-                type="text"
-                placeholder="Name, email, reference number..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              />
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 mb-8">
+          <div className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              <h3 className="text-lg font-bold text-gray-900">Filters & Search</h3>
+            </div>
+            
+            {/* Single Row Layout */}
+            <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
+              {/* Search */}
+              <div className="flex-1 lg:min-w-[300px]">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Search
+                </label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, reference..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Start Date */}
+              <div className="w-full lg:w-44">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  From Date
+                </label>
+                <input
+                  type="date"
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                />
+              </div>
+
+              {/* End Date */}
+              <div className="w-full lg:w-44">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  To Date
+                </label>
+                <input
+                  type="date"
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <div className="w-full lg:w-44">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all appearance-none"
+                  style={{ backgroundImage: 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")', backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
+                >
+                  <option value="">All Status</option>
+                  <option value="Complete">Complete</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Processing">Processing</option>
+                  <option value="Failed">Failed</option>
+                  <option value="Refunded">Refunded</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Expired">Expired</option>
+                </select>
+              </div>
+
+              {/* Method Filter */}
+              <div className="w-full lg:w-44">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Method
+                </label>
+                <select
+                  value={methodFilter}
+                  onChange={(e) => setMethodFilter(e.target.value)}
+                  className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all appearance-none"
+                  style={{ backgroundImage: 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")', backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
+                >
+                  <option value="">All Methods</option>
+                  <option value="Maya">Maya</option>
+                  <option value="BaranggayHall">Baranggay Hall</option>
+                  <option value="CityHall">City Hall</option>
+                </select>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-2 lg:items-end">
+                {(dateRange.start || dateRange.end || statusFilter || methodFilter || search) && (
+                  <button
+                    onClick={() => {
+                      setDateRange({ start: '', end: '' });
+                      setStatusFilter('');
+                      setMethodFilter('');
+                      setSearch('');
+                    }}
+                    className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all border border-gray-300 flex items-center gap-2 whitespace-nowrap"
+                    title="Clear all filters"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span className="hidden xl:inline">Clear</span>
+                  </button>
+                )}
+                <button
+                  onClick={exportToCSV}
+                  disabled={filteredPayments.length === 0}
+                  className="px-4 lg:px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl font-bold hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center gap-2 whitespace-nowrap"
+                  title="Download as Excel file"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="hidden lg:inline">Download Report</span>
+                  <span className="lg:hidden">Export</span>
+                </button>
+              </div>
             </div>
 
-            {/* Status Filter */}
-            <div className="w-full lg:w-48">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="">All Status</option>
-                <option value="Complete">Complete</option>
-                <option value="Pending">Pending</option>
-                <option value="Processing">Processing</option>
-                <option value="Failed">Failed</option>
-                <option value="Refunded">Refunded</option>
-                <option value="Cancelled">Cancelled</option>
-                <option value="Expired">Expired</option>
-              </select>
+            <div className="mt-6 pt-4 border-t border-gray-200 flex items-center gap-2 text-sm text-gray-500">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Showing <span className="font-semibold text-gray-900">{filteredPayments.length}</span> of{' '}
+              <span className="font-semibold text-gray-900">{payments?.length || 0}</span> payments
             </div>
-
-            {/* Method Filter */}
-            <div className="w-full lg:w-48">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Method</label>
-              <select
-                value={methodFilter}
-                onChange={(e) => setMethodFilter(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="">All Methods</option>
-                <option value="Maya">Maya</option>
-                <option value="BaranggayHall">Baranggay Hall</option>
-                <option value="CityHall">City Hall</option>
-              </select>
-            </div>
-
-            {/* Export Button */}
-            <div className="flex items-end">
-              <button
-                onClick={exportToCSV}
-                disabled={filteredPayments.length === 0}
-                className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Export CSV
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-4 text-sm text-gray-500">
-            Showing <span className="font-semibold text-gray-700">{filteredPayments.length}</span> of{' '}
-            <span className="font-semibold text-gray-700">{payments?.length || 0}</span> payments
           </div>
         </div>
 
         {/* Payments Table */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase">Date</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase">Reference</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase">Applicant</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase">Job Category</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase">Method</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase">Location</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase">Amount</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase">Status</th>
-                  <th className="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase">Actions</th>
+                <tr className="bg-gradient-to-r from-emerald-50 to-emerald-100 border-b-2 border-emerald-200">
+                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Reference</th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Applicant</th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Job Category</th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Method</th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Location</th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Amount</th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                  <th className="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -345,35 +530,50 @@ export default function PaymentHistoryPage() {
                   </tr>
                 )}
                 {filteredPayments.map((payment) => (
-                  <tr key={payment._id} className="hover:bg-gray-50 transition-colors group">
+                  <tr key={payment._id} className="hover:bg-emerald-50/30 transition-all duration-200 group border-b border-gray-100 last:border-0">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {formatDate(payment._creationTime)}
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>{formatDate(payment._creationTime)}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-mono font-semibold text-gray-900">{payment.referenceNumber}</div>
-                      {payment.rejectionCount > 0 && (
-                        <span className="text-xs text-orange-600 font-medium">Rejected {payment.rejectionCount}x</span>
-                      )}
+                      <div className="flex flex-col gap-1">
+                        <div className="text-sm font-mono font-bold text-gray-900">{payment.referenceNumber}</div>
+                        {payment.rejectionCount > 0 && (
+                          <div className="flex items-center gap-1">
+                            <svg className="w-3 h-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-xs text-orange-600 font-semibold">Rejected {payment.rejectionCount}x</span>
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div>
-                          <div className="text-sm font-semibold text-gray-900">{payment.userFullname}</div>
-                          <div className="text-xs text-gray-500">{payment.userEmail}</div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center text-white font-semibold text-sm shadow-md shrink-0">
+                          {payment.userFullname.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-gray-900 truncate">{payment.userFullname}</div>
+                          <div className="text-xs text-gray-500 truncate">{payment.userEmail}</div>
                         </div>
                         {payment.isOrphaned && (
-                          <span className="px-2 py-1 text-xs font-bold bg-gray-100 text-gray-600 rounded-full" title="Application or user data deleted">
+                          <span className="px-2 py-1 text-xs font-bold bg-gray-100 text-gray-600 rounded-full shrink-0" title="Application or user data deleted">
                             Orphaned
                           </span>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-700 font-medium">{payment.jobCategoryName}</span>
+                      <span className="text-sm text-gray-900 font-medium">{payment.jobCategoryName}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getMethodBadgeClass(payment.paymentMethod)}`}>
-                        {payment.paymentMethod}
+                      <span className={`px-3 py-1.5 text-xs font-bold rounded-full shadow-sm ${getMethodBadgeClass(payment.paymentMethod)}`}>
+                        {payment.paymentMethod === 'BaranggayHall' ? 'Baranggay Hall' : payment.paymentMethod === 'CityHall' ? 'City Hall' : payment.paymentMethod}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -384,18 +584,20 @@ export default function PaymentHistoryPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">{formatCurrency(payment.amount)}</div>
-                      <div className="text-xs text-gray-500">Net: {formatCurrency(payment.netAmount)}</div>
+                      <div className="flex flex-col gap-0.5">
+                        <div className="text-sm font-bold text-gray-900">{formatCurrency(payment.amount)}</div>
+                        <div className="text-xs text-gray-500">Net: {formatCurrency(payment.netAmount)}</div>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1.5 text-xs font-bold rounded-full ring-2 ${getStatusBadgeClass(payment.paymentStatus)}`}>
+                      <span className={`px-3 py-1.5 text-xs font-bold rounded-full shadow-sm ${getStatusBadgeClass(payment.paymentStatus)}`}>
                         {payment.paymentStatus}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
                         onClick={() => handleViewDetails(payment)}
-                        className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-3 py-1.5 rounded-lg font-semibold text-xs transition-all"
+                        className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm hover:shadow group-hover:scale-105"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -415,25 +617,32 @@ export default function PaymentHistoryPage() {
       {/* Payment Details Modal */}
       {isDetailsModalOpen && selectedPayment && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
           onClick={() => setIsDetailsModalOpen(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden transform transition-all"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 px-6 py-5 border-b border-emerald-200">
+            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-5">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">Payment Details</h3>
-                  <p className="text-sm text-gray-600 mt-1">Reference: {selectedPayment.referenceNumber}</p>
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/20 p-2.5 rounded-xl">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Payment Details</h3>
+                    <p className="text-sm text-emerald-100 mt-0.5 font-mono">{selectedPayment.referenceNumber}</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setIsDetailsModalOpen(false)}
-                  className="p-2 hover:bg-emerald-200 rounded-lg transition-colors"
+                  className="p-2 hover:bg-white/20 rounded-xl transition-colors"
                 >
-                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -443,8 +652,13 @@ export default function PaymentHistoryPage() {
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] space-y-6">
               {/* Payment Information */}
-              <div>
-                <h4 className="text-lg font-bold text-gray-900 mb-4">Payment Information</h4>
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-5 border border-emerald-200">
+                <div className="flex items-center gap-2 mb-4">
+                  <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h4 className="text-lg font-bold text-gray-900">Payment Information</h4>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold text-gray-600 uppercase">Base Fee</label>
@@ -495,8 +709,13 @@ export default function PaymentHistoryPage() {
               </div>
 
               {/* Applicant Information */}
-              <div className="border-t border-gray-200 pt-6">
-                <h4 className="text-lg font-bold text-gray-900 mb-4">Applicant Information</h4>
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
+                <div className="flex items-center gap-2 mb-4">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <h4 className="text-lg font-bold text-gray-900">Applicant Information</h4>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold text-gray-600 uppercase">Name</label>
@@ -518,7 +737,7 @@ export default function PaymentHistoryPage() {
               </div>
 
               {/* Actions */}
-              <div className="border-t border-gray-200 pt-6">
+              <div>
                 <button
                   onClick={() => {
                     // Route to the correct page based on payment status
@@ -527,7 +746,7 @@ export default function PaymentHistoryPage() {
                       : `/dashboard/${selectedPayment.applicationId}/doc_verif`;
                     router.push(route);
                   }}
-                  className="w-full bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3.5 rounded-xl font-bold hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
