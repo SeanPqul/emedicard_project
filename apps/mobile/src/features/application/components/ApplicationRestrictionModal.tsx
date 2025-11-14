@@ -25,7 +25,7 @@ interface ApplicationRestrictionModalProps {
   onViewApplication: () => void;
   applicationStatus: ApplicationStatus;
   applicationId: string;
-  jobCategory?: string;
+  jobCategory?: string | { _id: string; name: string; colorCode?: string; requireOrientation?: boolean };
 }
 
 export function ApplicationRestrictionModal({
@@ -67,7 +67,7 @@ export function ApplicationRestrictionModal({
             {jobCategory && (
               <View style={styles.infoRow}>
                 <Ionicons name="briefcase-outline" size={moderateScale(20)} color="#6B7280" />
-                <Text style={styles.infoText}>{jobCategory}</Text>
+                <Text style={styles.infoText}>{typeof jobCategory === 'string' ? jobCategory : jobCategory.name}</Text>
               </View>
             )}
             <View style={styles.infoRow}>

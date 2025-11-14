@@ -1,8 +1,5 @@
-// SignUpScreen styles
-import { FONT_SIZES, FONT_WEIGHTS } from '@shared/utils/responsive';
-import { moderateScale, verticalScale } from '@shared/utils/responsive';
 import { StyleSheet } from 'react-native';
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from '@shared/utils/responsive';
+import { FONT_SIZES, FONT_WEIGHTS, moderateScale, verticalScale, heightPercentageToDP as hp, widthPercentageToDP as wp } from '@shared/utils/responsive';
 import { getColor, getBorderRadius, getShadow } from '@shared/styles/theme';
 
 export const styles = StyleSheet.create({
@@ -12,21 +9,21 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: wp('5%'),
     paddingBottom: hp('4%'),
-    paddingTop: hp('4%'),
+    paddingTop: hp('2%'),
   },
 
   orgLogosContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginVertical: hp('3%'),
+    marginVertical: hp('1%'),
   },
   orgLogo: {
     alignItems: 'center',
   },
   logoImage: {
-    width: moderateScale(100),       
-    height: moderateScale(100),
-    marginBottom: verticalScale(8),
+    width: moderateScale(80),       
+    height: moderateScale(80),
+    marginBottom: verticalScale(4),
   },
   orgText: {
     fontSize: FONT_SIZES.caption,  

@@ -52,7 +52,6 @@ export function BaseScreen({
   statusBarStyle = 'dark-content',
   statusBarColor,
 }: BaseScreenProps) {
-  const insets = useSafeAreaInsets();
   
   const Container = safeArea ? SafeAreaView : View;
   

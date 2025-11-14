@@ -164,10 +164,8 @@ export function SignUpScreen() {
 
   return (
     <BaseScreen 
-      safeArea={true}
       keyboardAvoiding={true}
       scrollable={true}
-      edges={['top', 'bottom']}
     >
       <View style={styles.container}>
         {/* Organization Logos */}

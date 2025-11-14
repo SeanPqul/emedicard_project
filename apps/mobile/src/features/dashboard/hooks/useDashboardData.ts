@@ -30,6 +30,13 @@ export function useDashboardData() {
     const apps = dashboardData.userApplications as DashboardApplication[] | undefined;
     if (!apps || apps.length === 0) return null;
 
+    // Filter out terminal/closed applications that shouldn't be shown as "current"
+    const terminalStatuses = ['Rejected', 'Approved', 'Payment Rejected'];
+    const activeApps = apps.filter(app => !terminalStatuses.includes(app.status));
+    
+    // If no active apps, return null (don't show terminal ones)
+    if (activeApps.length === 0) return null;
+
     // Priority order: show applications being actively processed first
     const statusPriority: Record<string, number> = {
       // NEW - Phase 4 Migration: Action-required statuses get high priority
@@ -38,13 +45,12 @@ export function useDashboardData() {
       'Under Review': 3,        // Actively being reviewed
       'For Orientation': 4,     // Ready for orientation
       'For Payment Validation': 5, // Payment being validated
-      'Submitted': 6,           // Just submitted
-      'Approved': 7,            // Completed
+      'For Document Verification': 6, // Waiting for document verification
+      'Submitted': 7,           // Just submitted
       'Pending Payment': 8,     // Waiting for user payment
-      'Rejected': 9,            // DEPRECATED - Lowest priority
     };
 
-    return apps.reduce((best, app) => {
+    return activeApps.reduce((best, app) => {
       if (!best) return app as any;
       
       const bestPriority = statusPriority[best.status] || 999;

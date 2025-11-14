@@ -1,8 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
 import { BaseScreen } from '@/src/shared/components/core';
 import { useApplyForm } from '@/src/features/application/hooks';
+import { useApplications } from '@/src/features/application/hooks/useApplications';
 import { ApplyWidget } from '@/src/widgets/apply';
+import { ApplicationRestrictionModal } from '@/src/features/application/components/ApplicationRestrictionModal';
+import { hasUnresolvedApplication } from '@/src/features/application/lib/applicationRestrictions';
 import { theme } from '@/src/shared/styles/theme';
 import { moderateScale } from '@/src/shared/utils/responsive';
 
@@ -17,6 +21,29 @@ import { moderateScale } from '@/src/shared/utils/responsive';
  * All UI rendering is handled by ApplyWidget
  */
 export function ApplyScreen() {
+  const router = useRouter();
+  const { data, isLoading: applicationsLoading } = useApplications();
+  const applications = data?.userApplications;
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
+  const [unresolvedApp, setUnresolvedApp] = useState<any>(null);
+  const [accessChecked, setAccessChecked] = useState(false);
+
+  // Check for unresolved applications - must complete before showing form
+  useEffect(() => {
+    if (!applicationsLoading) {
+      // Applications might be undefined or empty array
+      const appList = applications || [];
+      const { hasUnresolved, unresolvedApplication } = hasUnresolvedApplication(appList);
+      
+      if (hasUnresolved && unresolvedApplication) {
+        setUnresolvedApp(unresolvedApplication);
+        setShowRestrictionModal(true);
+      }
+      
+      setAccessChecked(true);
+    }
+  }, [applicationsLoading, applications]);
+
   const {
     // State
     currentStep,
@@ -58,9 +85,48 @@ export function ApplyScreen() {
     requirementsLoading,
   } = useApplyForm();
 
+  const handleViewApplication = () => {
+    setShowRestrictionModal(false);
+    if (unresolvedApp?._id) {
+      router.push(`/(tabs)/applications/${unresolvedApp._id}`);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowRestrictionModal(false);
+    router.back();
+  };
+
+  // Wait for application access check to complete
+  if (!accessChecked || applicationsLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+        <Text style={styles.loadingText}>Checking application status...</Text>
+      </View>
+    );
+  }
+
+  // Show restriction modal if user has unresolved application
+  if (showRestrictionModal && unresolvedApp) {
+    return (
+      <BaseScreen safeArea={false}>
+        <ApplicationRestrictionModal
+          visible={showRestrictionModal}
+          onClose={handleCloseModal}
+          onViewApplication={handleViewApplication}
+          applicationStatus={unresolvedApp.status}
+          applicationId={unresolvedApp._id}
+          jobCategory={unresolvedApp.jobCategory}
+        />
+      </BaseScreen>
+    );
+  }
+
   if (loadingData) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={theme.colors.primary[500]} />
         <Text style={styles.loadingText}>Loading application data...</Text>
       </View>
     );
