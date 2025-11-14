@@ -15,6 +15,7 @@ export const createApplicationMutation = mutation({
     age: v.optional(v.number()),
     nationality: v.optional(v.string()),
     gender: v.optional(v.union(v.literal("Male"), v.literal("Female"), v.literal("Other"))),
+    securityGuard: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -45,6 +46,7 @@ export const createApplicationMutation = mutation({
       age: args.age,
       nationality: args.nationality,
       gender: args.gender,
+      securityGuard: args.securityGuard ?? undefined,
       applicationStatus: "Draft", // Start as Draft until user submits
     });
 

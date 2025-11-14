@@ -35,6 +35,17 @@ export const get = query({
     const checklist = await Promise.all(
       requiredDocs.map(async (req) => {
         const documentType = await ctx.db.get(req.documentTypeId);
+        
+        // Filter out security-only documents for non-security guards
+        // Drug Test and Neuro Exam are only for security guards in Non-Food Category
+        const isSecurityOnlyDoc = documentType?.fieldIdentifier === 'drugTestId' || 
+                                  documentType?.fieldIdentifier === 'neuroExamId';
+        
+        // If this is a security-only document and the applicant is NOT a security guard, skip it
+        if (isSecurityOnlyDoc && !application.securityGuard) {
+          return null; // Will be filtered out later
+        }
+        
         // Find the user's upload that matches this requirement
         const userUpload = uploadedDocs.find(up => up.documentTypeId === req.documentTypeId);
 
@@ -109,22 +120,29 @@ export const get = query({
         };
       })
     );
+    
+    // Filter out null values (security-only documents for non-security guards)
+    const filteredChecklist = checklist.filter(item => item !== null);
 
     // 6. Return everything in one neat package
     return {
       applicantName: user.fullname,
       jobCategoryName: jobCategory.name,
-      checklist: checklist,
+      checklist: filteredChecklist,
       // Additional applicant details from application table
       applicantDetails: {
         firstName: application.firstName,
         lastName: application.lastName,
         middleName: application.middleName,
+        suffix: application.suffix,
         email: user.email,
+        age: application.age,
         gender: application.gender,
         nationality: application.nationality,
         civilStatus: application.civilStatus,
         organization: application.organization,
+        position: application.position,
+        securityGuard: application.securityGuard,
       },
     };
   },

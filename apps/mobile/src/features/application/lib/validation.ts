@@ -22,6 +22,8 @@ export interface ApplicationFormData {
   age?: number;
   nationality?: string;
   gender?: 'Male' | 'Female' | 'Other';
+  // Non-Food specialization
+  securityGuard?: boolean; // If true, show Drug Test + Neuro Exam requirements
 }
 
 export interface ValidationResult {

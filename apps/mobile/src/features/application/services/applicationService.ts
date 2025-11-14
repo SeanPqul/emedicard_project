@@ -204,6 +204,7 @@ export class ApplicationService {
       suffix: '',
       age: 0,
       nationality: '',
+      securityGuard: false,
     };
   }
 

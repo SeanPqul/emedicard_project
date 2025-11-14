@@ -131,7 +131,18 @@ export function useApplyForm() {
     if (formData.jobCategory && currentRequirements.length > 0) {
       try {
         const transformedReqs = transformRequirements(currentRequirements, formData.jobCategory);
-        setRequirementsByJobCategory(transformedReqs);
+        
+        // Filter Non-Food optional docs based on Security Guard flag
+        const selectedCategory = activeJobCategories.find(cat => cat._id === formData.jobCategory);
+        const isNonFood = (selectedCategory?.name || '').toLowerCase().includes('non-food');
+        let filtered = transformedReqs;
+        if (isNonFood) {
+          const isSecurityGuard = !!formData.securityGuard || /security|guard/i.test(formData.position || '');
+          if (!isSecurityGuard) {
+            filtered = transformedReqs.filter(r => !(r.fieldName === 'drugTestId' || r.fieldName === 'neuroExamId' || /drug\s*test/i.test(r.name) || /neuro/i.test(r.name)));
+          }
+        }
+        setRequirementsByJobCategory(filtered);
       } catch (error) {
         console.error('Error loading requirements:', error);
         showError('Failed to load document requirements');
@@ -140,7 +151,7 @@ export function useApplyForm() {
       setRequirementsByJobCategory([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.jobCategory, currentRequirements.length]);
+  }, [formData.jobCategory, formData.securityGuard, formData.position, currentRequirements.length, activeJobCategories.length]);
 
   const handleNextStep = async () => {
     const success = await handleNext(requirementsByJobCategory, STEP_TITLES);

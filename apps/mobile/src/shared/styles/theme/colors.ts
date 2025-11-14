@@ -144,6 +144,7 @@ export const colors = {
   },
   jobCategories: {
     foodHandler: '#FFD700', // Yellow for food handlers
+    nonFoodWorker: '#10B981', // Green for non-food workers
     securityGuard: '#4169E1', // Royal Blue for security guards
     others: '#6B46C1', // Purple for other categories
     pink: '#FF69B4', // Pink for skin-to-skin contact jobs

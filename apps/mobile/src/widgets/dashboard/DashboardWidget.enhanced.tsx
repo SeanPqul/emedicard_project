@@ -139,12 +139,27 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
               const isManualValidation = applicationStatus === 'For Payment Validation';
               
               if (!hasApplication) {
-                // No application
+                // Check if user has completed applications (health cards)
+                const totalApplications = userApplications?.length || 0;
+                const hasHealthCard = dashboardStats?.validHealthCards > 0;
+                
+                if (hasHealthCard || totalApplications > 0) {
+                  // Has completed applications or health card
+                  return (
+                    <PresetStatCards.Applications
+                      value={totalApplications.toString()}
+                      subtitle={totalApplications === 1 ? "Application" : "Applications"}
+                      onPress={() => router.push('/(tabs)/application')}
+                    />
+                  );
+                }
+                
+                // No application at all
                 return (
                   <PresetStatCards.Applications
                     value="-"
-                    subtitle={isNewUser ? "Start your journey" : "No active application"}
-                    onPress={() => router.push(isNewUser ? '/(tabs)/apply' : '/(tabs)/application')}
+                    subtitle="Start your journey"
+                    onPress={() => router.push('/(tabs)/apply')}
                   />
                 );
               }
@@ -197,12 +212,26 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
               const isManualValidation = applicationStatus === 'For Payment Validation';
               
               if (!hasApplication) {
+                // Check if user has health card (means documents were approved)
+                const hasHealthCard = dashboardStats?.validHealthCards > 0;
+                
+                if (hasHealthCard) {
+                  // Documents were approved (health card issued)
+                  return (
+                    <PresetStatCards.DocumentVerification
+                      value="✓"
+                      subtitle="Documents approved"
+                      onPress={() => router.push('/(tabs)/application')}
+                    />
+                  );
+                }
+                
                 // No application yet
                 return (
                   <PresetStatCards.DocumentVerification
                     value="-"
-                    subtitle={isNewUser ? "Start your application" : "No active application"}
-                    onPress={() => router.push(isNewUser ? '/(tabs)/apply' : '/(tabs)/application')}
+                    subtitle="Start your application"
+                    onPress={() => router.push('/(tabs)/apply')}
                   />
                 );
               }
