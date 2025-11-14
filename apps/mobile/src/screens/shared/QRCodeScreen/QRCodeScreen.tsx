@@ -11,6 +11,7 @@ import { styles } from '../../../shared/styles/screens/shared-qr-code';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import ViewShot from 'react-native-view-shot';
+import { generateVerificationUrl } from '../../../features/healthCards/lib/health-card-display-utils';
 
 export function QRCodeScreen() {
   const qrRef = useRef<any>(null);
@@ -77,8 +78,9 @@ export function QRCodeScreen() {
     
     setIsSharing(true);
     try {
+      const verificationUrl = generateVerificationUrl(healthCard);
       await Share.share({
-        message: `🏥 Health Card QR Code\n\n📋 Registration: ${healthCard.registrationNumber}\n🏷️ Type: ${healthCard.jobCategory?.name || 'Health Card'}\n👤 Holder: ${getHolderName()}\n📅 Expires: ${formatDate(healthCard.expiryDate)}\n\n✅ Verify at: https://emedicard.davao.gov.ph/verify/${healthCard.registrationNumber}`,
+        message: `🏥 Health Card QR Code\n\n📋 Registration: ${healthCard.registrationNumber}\n🏷️ Type: ${healthCard.jobCategory?.name || 'Health Card'}\n👤 Holder: ${getHolderName()}\n📅 Expires: ${formatDate(healthCard.expiryDate)}\n\n✅ Verify at: ${verificationUrl}`,
       });
     } catch (error) {
       console.error('Error sharing QR code:', error);
@@ -155,7 +157,7 @@ export function QRCodeScreen() {
         <ViewShot ref={qrRef} options={{ format: 'png', quality: 1.0 }}>
           <View style={styles.qrContainer}>
             <QRCode
-              value={`https://emedicard.davao.gov.ph/verify/${healthCard.registrationNumber}`}
+              value={generateVerificationUrl(healthCard)}
               size={200}
               color="#000000"
               backgroundColor="#FFFFFF"
