@@ -29,7 +29,7 @@ export const getUserCardsQuery = query({
         const card = await ctx.db
           .query("healthCards")
           .withIndex("by_application", (q) => q.eq("applicationId", applicationId))
-          .unique();
+          .first();
         return card;
       })
     );
