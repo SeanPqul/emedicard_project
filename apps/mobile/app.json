@@ -10,7 +10,8 @@
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.emedicard.project"
     },
     "android": {
       "package": "com.emedicard.project",
