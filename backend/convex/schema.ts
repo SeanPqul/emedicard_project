@@ -438,6 +438,7 @@ export default defineSchema({
     specificIssues: v.array(v.string()), // Bullet points of specific issues
     doctorName: v.optional(v.string()), // Doctor name for medical referrals (e.g., "Dr. Juan Dela Cruz")
     clinicAddress: v.optional(v.string()), // Clinic/venue address for medical referrals
+    findingDescription: v.optional(v.string()), // Medical finding selected during referral (pre-fills lab finding form later)
 
     // Tracking
     referredBy: v.id("users"), // Admin who created this referral/issue
@@ -457,6 +458,11 @@ export default defineSchema({
       v.literal("cleared"),           // Issue resolved, user can proceed
       v.literal("flagged_again")      // Issue persists, flagged again
     )),
+    
+    // Onsite Verification Tracking (when applicant visits venue after treatment)
+    verifiedBy: v.optional(v.id("users")), // Admin who verified onsite completion
+    verifiedAt: v.optional(v.float64()), // Timestamp of onsite verification
+    verificationNotes: v.optional(v.string()), // Optional notes from admin about verification
 
     // Notification Tracking
     notificationSent: v.optional(v.boolean()), // Whether applicant has been notified

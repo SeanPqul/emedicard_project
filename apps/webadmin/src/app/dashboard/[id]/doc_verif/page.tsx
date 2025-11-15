@@ -3,6 +3,7 @@
 
 import ApplicantActivityLog from '@/components/ApplicantActivityLog';
 import ErrorMessage from '@/components/ErrorMessage';
+import LabFindingRecorderForm from '@/components/LabFindingRecorderForm';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import Navbar from '@/components/shared/Navbar';
 import SuccessMessage from '@/components/SuccessMessage';
@@ -17,6 +18,7 @@ interface AppError { title: string; message: string; }
 
 type ChecklistItem = {
   _id: Id<"jobCategoryDocuments">;
+  documentTypeId: Id<"documentTypes">; // Actual document type ID (for referral queries)
   requirementName: string;
   status: string;
   fileUrl: string | null;
@@ -30,6 +32,7 @@ type ChecklistItem = {
   attemptNumber?: number; // Current attempt count (0-4+)
   maxAttemptsReached?: boolean; // True if >= 4 attempts
   remainingAttempts?: number; // Remaining attempts (0-3)
+  hasLabFinding?: boolean; // NEW: Indicates if lab finding has been recorded
 };
 
 type ApplicantDetails = {
@@ -57,7 +60,7 @@ type ApplicationData = {
 const createAppError = (message: string, title: string = 'Invalid Input'): AppError => ({ title, message });
 
 // Fixed doctor name for Davao City
-const FIXED_DOCTOR_NAME = "Dr. TBD"; // TODO: Update this after doctor interview
+const FIXED_DOCTOR_NAME = "Dr. Marjorie D. Culas"; // Updated doctor name
 
 // Medical documents based on fieldIdentifier (require doctor referral)
 const MEDICAL_FIELD_IDENTIFIERS = [
@@ -85,6 +88,58 @@ const medicalReferralReasons = [
   'Hepatitis B antibody - requires consultation',
   'Other medical concern',
 ];
+
+// Lab findings options based on medical requirement type
+// These findings will be selected during referral and used to pre-fill lab finding form
+const LAB_FINDING_OPTIONS: Record<string, string[]> = {
+  urinalysisId: [
+    "WBC elevated – Cleared post-Rx",
+    "RBC elevated – Cleared post-Rx",
+    "Protein detected – Cleared post-Rx",
+    "Glucose detected – Cleared post-Rx",
+    "Bacteria present – Cleared post-Rx",
+    "Crystals present – Cleared post-Rx",
+    "pH abnormal – Cleared post-Rx",
+    "Specific gravity abnormal – Cleared post-Rx",
+    "Other urinalysis finding – Cleared",
+  ],
+  chestXrayId: [
+    "Chest X-ray abnormal – TB ruled out, Cleared",
+    "Chest X-ray abnormal – Pneumonia cleared",
+    "Sputum positive – TB ruled out post-treatment",
+    "Lung infiltrates – Cleared post-treatment",
+    "Pleural effusion – Resolved",
+    "Bronchitis – Cleared post-Rx",
+    "Other chest finding – Cleared",
+  ],
+  stoolId: [
+    "Parasite detected – Cleared post-Rx",
+    "Ova detected – Cleared post-Rx",
+    "Blood in stool – Cleared post-investigation",
+    "Bacteria detected – Cleared post-Rx",
+    "Amoeba detected – Cleared post-treatment",
+    "Giardia detected – Cleared post-Rx",
+    "Other stool finding – Cleared",
+  ],
+  drugTestId: [
+    "Positive drug test – Cleared after rehabilitation",
+    "Other drug test finding – Cleared",
+  ],
+  neuroExamId: [
+    "Failed neuropsychiatric evaluation – Cleared post-treatment",
+    "Other neuro exam finding – Cleared",
+  ],
+  hepatitisBId: [
+    "Hepatitis B antibody – Consultation completed",
+    "Other hepatitis B finding – Cleared",
+  ],
+};
+
+// Helper to get findings for a specific medical document
+const getFindingsForDocument = (fieldIdentifier?: string): string[] => {
+  if (!fieldIdentifier) return [];
+  return LAB_FINDING_OPTIONS[fieldIdentifier] || [];
+};
 
 // Non-medical requirement issue options (for flagging document problems)
 const nonMedicalIssueOptions = [
@@ -136,6 +191,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [openReferralIndex, setOpenReferralIndex] = useState<number | null>(null);
   const [modalType, setModalType] = useState<'flag_revision' | 'refer_doctor' | null>(null); // Track which modal is open
   const [referralReason, setReferralReason] = useState<string>('');
+  const [findingDescription, setFindingDescription] = useState<string>(''); // Medical finding selected during referral
   const [issueCategory, setIssueCategory] = useState('other');
   const [specificIssues, setSpecificIssues] = useState('');
   const [extractedText, setExtractedText] = useState<string[] | null>(null); // New state for extracted text
@@ -147,6 +203,10 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const [isPaymentDetailsExpanded, setIsPaymentDetailsExpanded] = useState(false); // New state for collapsible payment details
   const [isOrientationDetailsExpanded, setIsOrientationDetailsExpanded] = useState(false); // New state for collapsible orientation details
   const [isHealthCardExpanded, setIsHealthCardExpanded] = useState(false); // New state for collapsible health card details
+  const [showLabFindingsFor, setShowLabFindingsFor] = useState<number | null>(null); // Lab findings form toggle
+  const [approveConfirmation, setApproveConfirmation] = useState<{index: number, uploadId: Id<'documentUploads'>, documentName: string} | null>(null); // Confirmation modal for approve
+  const [onsiteVerificationModal, setOnsiteVerificationModal] = useState<{index: number, uploadId: Id<'documentUploads'>, documentName: string, documentTypeId: Id<'documentTypes'>} | null>(null); // Onsite verification confirmation
+  const [verificationNotes, setVerificationNotes] = useState<string>(''); // Notes for onsite verification
   
   // Pending actions state - stores actions before database save
   const [pendingActions, setPendingActions] = useState<{
@@ -157,6 +217,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     notes: string;
     doctorName?: string;
     documentName: string;
+    finding?: string; // Medical finding selected during referral (for pre-filling lab finding form)
   }[]>([]);
   
   const router = useRouter();
@@ -185,6 +246,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const reviewDocument = useMutation(api.admin.reviewDocument.review);
   const referDocumentMutation = useMutation(api.admin.documents.referDocument.referDocument); // Actually refers documents
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
+  const approveWithOnsiteVerification = useMutation(api.admin.documents.approveWithOnsiteVerification.approve); // Approve after onsite verification
   
   // Fetch payment data and application status
   const paymentData = useQuery(api.payments.getForApplication.get, { applicationId: params.id });
@@ -199,12 +261,6 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const healthCardDetails = useQuery(api.healthCards.getHealthCard.getByApplication, { 
     applicationId: params.id 
   });
-  
-  // Fetch previous health card for renewal applications
-  const previousHealthCard = useQuery(
-    api.healthCards.getHealthCard.get,
-    applicationStatus?.previousHealthCardId ? { healthCardId: applicationStatus.previousHealthCardId } : 'skip'
-  );
 
   const loadData = async () => {
     try {
@@ -307,6 +363,33 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
       if (newStatus === 'Rejected' && !data?.checklist.some((doc: ChecklistItem) => doc.status === 'Referred' || doc.status === 'NeedsRevision')) {
         throw new Error("To send notifications, at least one document must be flagged for revision or referred for medical management.");
       }
+      
+      // CRITICAL VALIDATION: Check if any referred medical documents are approved but missing lab findings
+      if (newStatus === 'Approved' && referralHistoryData && referralHistoryData.length > 0) {
+        // Find medical documents that were referred and approved
+        const approvedReferredMedicalDocs = data?.checklist.filter((doc: ChecklistItem) => {
+          // Must be approved medical document
+          if (doc.status !== 'Approved' || !isMedicalDocument(doc.fieldIdentifier)) return false;
+          
+          // Check if this document was referred to doctor (has referral history)
+          const referralInfo = getReferralDetails(doc.documentTypeId);
+          if (!referralInfo) return false;
+          
+          // Check if referral was medical (not just document issue)
+          if (referralInfo.issueType !== 'medical_referral') return false;
+          
+          // Check if lab finding is missing
+          return !doc.hasLabFinding;
+        });
+        
+        if (approvedReferredMedicalDocs && approvedReferredMedicalDocs.length > 0) {
+          const docNames = approvedReferredMedicalDocs.map(d => d.requirementName).join(', ');
+          throw new Error(
+            `Cannot approve application. The following medical document(s) were referred to doctor and approved after treatment, but lab findings have not been recorded yet: ${docNames}. ` +
+            `Please click "Record Finding" button for each document before final approval. Lab findings are required for health card generation.`
+          );
+        }
+      }
 
       await finalizeApplication({ applicationId: params.id, newStatus });
       
@@ -337,6 +420,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
         errorTitle = "Orientation Required";
       } else if (cleanMessage.includes('payment') || cleanMessage.includes('Payment')) {
         errorTitle = "Payment Required";
+      } else if (cleanMessage.includes('lab finding') || cleanMessage.includes('Lab finding')) {
+        errorTitle = "Lab Findings Required";
       } else if (cleanMessage.includes('document') || cleanMessage.includes('Document')) {
         errorTitle = "Document Review Required";
       }
@@ -362,6 +447,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     setError(null);
     
     try {
+      const totalNotifications = pendingActions.length;
+      
       // Save all pending actions to database
       for (const action of pendingActions) {
         if (action.actionType === 'refer_doctor') {
@@ -372,8 +459,9 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
             medicalReferralCategory: "other_medical_concern",
             referralReason: action.reason,
             specificIssues: action.notes.split(',').map(s => s.trim()).filter(s => s),
-            doctorName: action.doctorName || "Dr. TBD",
+            doctorName: action.doctorName || "Dr. Marjorie D. Culas",
             clinicAddress: "Door 7, Magsaysay Complex, Magsaysay Park, Davao City",
+            findingDescription: action.finding,
           });
         } else {
           // Document quality issue
@@ -390,16 +478,61 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
       // Clear pending actions after successful save
       setPendingActions([]);
       
-      // Reload data to show updated statuses
+      // Show success message
+      setSuccessMessage(`Successfully sent ${totalNotifications} notification(s) to applicant. Redirecting to dashboard...`);
+      
+      // Redirect to dashboard after a short delay
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 2000);
+      
+    } catch (e: any) {
+      // Clean up error message by removing Convex technical details
+      let cleanMessage = e.message || 'An unexpected error occurred';
+      
+      // Remove Convex error prefix if present
+      cleanMessage = cleanMessage.replace(/^\[CONVEX [^\]]+\]\s*/, '');
+      cleanMessage = cleanMessage.replace(/Server Error\s+/, '');
+      cleanMessage = cleanMessage.replace(/Uncaught Error:\s*/, '');
+      
+      setError(createAppError(cleanMessage, 'Failed to send notifications'));
+    }
+  };
+
+  // Handler for onsite verification approval
+  const handleOnsiteVerificationApproval = async () => {
+    if (!onsiteVerificationModal) return;
+    
+    try {
+      setError(null);
+      
+      // Call backend mutation to approve with verification details
+      await approveWithOnsiteVerification({
+        documentUploadId: onsiteVerificationModal.uploadId,
+        documentTypeId: onsiteVerificationModal.documentTypeId,
+        verificationNotes: verificationNotes.trim() || undefined,
+      });
+      
+      // Close modal and reset notes
+      setOnsiteVerificationModal(null);
+      setVerificationNotes('');
+      
+      // Show success message
+      setSuccessMessage('✅ Document approved after onsite verification. Referral cleared.');
+      setTimeout(() => setSuccessMessage(null), 3000);
+      
+      // Reload data
       await loadData();
       
-      // Call finalizeApplication to send notifications
-      await handleFinalize('Rejected');
-      
-      setSuccessMessage(`Successfully sent ${pendingActions.length} notification(s) to applicant.`);
-      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (e: any) {
-      setError(createAppError(e.message, 'Failed to send notifications'));
+      // Clean up error message
+      let cleanMessage = e.message || 'An unexpected error occurred';
+      cleanMessage = cleanMessage.replace(/^\[CONVEX [^\]]+\]\s*/, '');
+      cleanMessage = cleanMessage.replace(/Server Error\s+/, '');
+      cleanMessage = cleanMessage.replace(/Uncaught Error:\s*/, '');
+      
+      setError(createAppError(cleanMessage, 'Verification Failed'));
+      setOnsiteVerificationModal(null);
     }
   };
 
@@ -1701,7 +1834,35 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           )}
                         </div>
                       </div>
-                      {applicationStatus?.applicationStatus !== 'Rejected' && <StatusBadge status={getEffectiveStatus(item)} />}
+                      <div className="flex items-center gap-2">
+                        {applicationStatus?.applicationStatus !== 'Rejected' && <StatusBadge status={getEffectiveStatus(item)} />}
+                        
+                        {/* Lab Finding Recorded Badge */}
+                        {item.hasLabFinding && isMedicalDocument(item.fieldIdentifier) && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200">
+                            <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Finding Recorded
+                          </span>
+                        )}
+                        
+                        {/* Lab Finding Required Warning - For approved referred medical docs without findings */}
+                        {(() => {
+                          const referralInfo = getReferralDetails(item.documentTypeId);
+                          const wasReferredForMedical = referralInfo?.issueType === 'medical_referral';
+                          const needsLabFinding = item.status === 'Approved' && wasReferredForMedical && !item.hasLabFinding && isMedicalDocument(item.fieldIdentifier);
+                          
+                          return needsLabFinding ? (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-300 animate-pulse">
+                              <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              Finding Required
+                            </span>
+                          ) : null;
+                        })()}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {item.fileUrl ? (
@@ -1713,6 +1874,38 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             </svg>
                             View
                           </button>
+                          {/* Record Lab Finding Button - Only for medical documents, beside Extract button */}
+                          {isMedicalDocument(item.fieldIdentifier) && (() => {
+                            const hasPendingReferral = getPendingAction(item.uploadId)?.actionType === 'refer_doctor';
+                            const isDisabled = applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || hasPendingReferral;
+                            return (
+                            <button
+                              onClick={() => {
+                                if (hasPendingReferral) {
+                                  setError(createAppError(
+                                    'Cannot record lab finding yet. Please send the referral notification first by clicking "Send Applicant Notifications" button.',
+                                    'Action Required'
+                                  ));
+                                  return;
+                                }
+                                setShowLabFindingsFor(showLabFindingsFor === idx ? null : idx);
+                              }}
+                              disabled={isDisabled}
+                              className={`text-sm px-4 py-2 rounded-xl font-medium border flex items-center gap-2 transition-all ${
+                                hasPendingReferral 
+                                  ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                                  : 'bg-teal-50 text-teal-700 hover:bg-teal-100 border-teal-100'
+                              }`}
+                              title={hasPendingReferral ? 'Send referral notification first' : 'Record lab findings from medical clearance'}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              {showLabFindingsFor === idx ? 'Hide' : (item.hasLabFinding ? 'Update' : 'Record')} Finding
+                            </button>
+                            );
+                          })()}
+                          
                           <button
                             onClick={async () => {
                               if (item.fileUrl) {
@@ -1783,6 +1976,23 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             )}
                             {ocrLoading ? 'Extracting...' : 'Extract'}
                           </button>
+                          
+                          {/* OPTIONAL: Record Lab Finding - Only for resubmitted medical referrals */}
+                          {item.isResubmission && 
+                           isMedicalDocument(item.fieldIdentifier) && 
+                           item.status === 'Pending' && 
+                           applicationStatus?.applicationStatus !== 'Rejected' && (
+                            <button
+                              onClick={() => setShowLabFindingsFor(idx)}
+                              className="text-sm bg-teal-50 text-teal-700 px-4 py-2 rounded-xl font-medium hover:bg-teal-100 border border-teal-100 flex items-center gap-2"
+                              title="Record lab findings from medical clearance"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                              </svg>
+                              Record Finding
+                            </button>
+                          )}
                         </>
                       ) : (
                         <span className="text-sm text-gray-400 px-4 py-2 italic">Not Submitted</span>
@@ -1810,6 +2020,32 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               readOnly
                               className="mt-1 block w-full px-3 py-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-md cursor-not-allowed sm:text-sm font-medium"
                             />
+                          </div>
+                        )}
+                        
+                        {/* Findings Dropdown - Only when referring to doctor for medical documents */}
+                        {modalType === 'refer_doctor' && (
+                          <div>
+                            <label htmlFor={`finding-${idx}`} className="block text-sm font-medium text-gray-700">
+                              Finding <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                              id={`finding-${idx}`}
+                              name={`finding-${idx}`}
+                              value={findingDescription}
+                              onChange={(e) => setFindingDescription(e.target.value)}
+                              className="mt-1 block w-full pl-3 pr-10 py-2 text-base text-gray-700 border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            >
+                              <option value="">Select Finding</option>
+                              {getFindingsForDocument(item.fieldIdentifier).map((finding) => (
+                                <option key={finding} value={finding}>
+                                  {finding}
+                                </option>
+                              ))}
+                            </select>
+                            <p className="mt-1 text-xs text-gray-500">
+                              This finding will pre-fill the lab finding form after onsite verification
+                            </p>
                           </div>
                         )}
                         
@@ -1866,6 +2102,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             setOpenReferralIndex(null);
                             setModalType(null);
                             setReferralReason('');
+                            setFindingDescription('');
                             setSpecificIssues('');
                             setSuccessMessage('Pending action removed.');
                             setTimeout(() => setSuccessMessage(null), 2000);
@@ -1881,12 +2118,18 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             setOpenReferralIndex(null);
                             setModalType(null);
                             setReferralReason('');
+                            setFindingDescription('');
                             setSpecificIssues('');
                           }} className="bg-gray-200 text-gray-800 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-300">Cancel</button>
                         <button onClick={() => {
                           try {
                             // Validate referral reason
                             if (!referralReason) throw new Error('Please select a reason before saving.');
+                            
+                            // Validate finding if referring to doctor
+                            if (modalType === 'refer_doctor' && !findingDescription) {
+                              throw new Error('Please select a finding before saving referral.');
+                            }
 
                             // Remove existing pending action for this document if any
                             const updatedPending = pendingActions.filter(action => action.uploadId !== item.uploadId);
@@ -1900,6 +2143,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               notes: specificIssues,
                               doctorName: modalType === 'refer_doctor' ? FIXED_DOCTOR_NAME : undefined,
                               documentName: item.requirementName,
+                              finding: modalType === 'refer_doctor' ? findingDescription : undefined,
                             };
                             
                             setPendingActions([...updatedPending, newAction]);
@@ -1908,6 +2152,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             setOpenReferralIndex(null);
                             setModalType(null);
                             setReferralReason('');
+                            setFindingDescription('');
                             setIssueCategory('other');
                             setSpecificIssues('');
                             setError(null);
@@ -1929,9 +2174,111 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       </div>
                     </div>
                   )}
+                  
+                  {/* Lab Findings Form - Inline (shown for medical documents when Record Lab Finding button is clicked) */}
+                  {showLabFindingsFor === idx && (
+                    <div className="mt-4 pt-4 border-t border-gray-200 bg-gradient-to-br from-teal-50 to-cyan-50 -m-4 p-4 rounded-b-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                          <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Record Lab Finding for "{item.requirementName}"
+                        </h4>
+                        <button
+                          onClick={() => setShowLabFindingsFor(null)}
+                          className="text-gray-500 hover:text-gray-700 transition-colors"
+                          title="Close"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <div className="flex items-start gap-2">
+                          <svg className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <p className="text-sm text-blue-800">
+                            📋 This finding will appear on the health card when the application is approved. 
+                            Recording is <span className="font-semibold">optional but recommended</span> for medical monitoring purposes.
+                          </p>
+                        </div>
+                      </div>
+                      <LabFindingRecorderForm
+                        applicationId={params.id}
+                        documentName={item.requirementName}
+                        prefillFinding={getReferralFinding(item.documentTypeId)}
+                        prefillDoctorName={FIXED_DOCTOR_NAME}
+                        prefillClearedDate={new Date().toISOString().split('T')[0]}
+                        onSuccess={async () => {
+                          setShowLabFindingsFor(null);
+                          setSuccessMessage('✅ Lab finding recorded successfully! This will appear on the health card when approved.');
+                          setTimeout(() => setSuccessMessage(null), 4000);
+                          // Reload data to show updated hasLabFinding flag
+                          await loadData();
+                        }}
+                        onCancel={() => setShowLabFindingsFor(null)}
+                      />
+                    </div>
+                  )}
 
-                  {/* Manual Review Required State - Show when max attempts reached */}
-                  {item.maxAttemptsReached ? (
+                  {/* Referred to Doctor State - Show when document status is Referred */}
+                  {item.status === 'Referred' && !item.maxAttemptsReached ? (() => {
+                    const referralInfo = getReferralDetails(item.documentTypeId);
+                    return (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <div className="px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-3 text-blue-700">
+                          <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm">🩺 Medical Referral - Awaiting Treatment Completion</p>
+                            <p className="text-blue-600 text-xs mt-1">
+                              Applicant has been referred to doctor for medical consultation. Approve after applicant completes treatment and visits venue for verification.
+                            </p>
+                            {referralInfo && (
+                              <div className="mt-2 pt-2 border-t border-blue-200 text-xs space-y-1">
+                                <p>📋 <span className="font-medium">Finding:</span> {referralInfo.findingDescription || 'Medical concern detected'}</p>
+                                <p>👨‍⚕️ <span className="font-medium">Doctor:</span> {referralInfo.doctorName || FIXED_DOCTOR_NAME}</p>
+                                <p>🏛️ <span className="font-medium">Venue:</span> {referralInfo.clinicAddress || 'City Health Office, Magsaysay Park Complex, Door 7'}</p>
+                                <p>📅 <span className="font-medium">Referred:</span> {new Date(referralInfo.referredAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                <p>⏰ <span className="font-medium">Attempt:</span> #{referralInfo.attemptNumber}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Approve Button for Referred Document */}
+                      <div className="mt-3">
+                        <button 
+                          onClick={() => {
+                            if (item.uploadId && referralInfo?.documentTypeId) {
+                              setOnsiteVerificationModal({index: idx, uploadId: item.uploadId, documentName: item.requirementName, documentTypeId: referralInfo.documentTypeId});
+                            } else {
+                              setError(createAppError('Unable to find referral information. Please refresh the page.', 'Referral Data Missing'));
+                            }
+                          }} 
+                          disabled={!item.uploadId || !referralInfo?.documentTypeId || item.status === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'} 
+                          className="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          {item.status === 'Approved' ? 'Already Approved' : 'Approve After Treatment Verification'}
+                        </button>
+                      </div>
+                      {item.status !== 'Approved' && (
+                        <p className="text-xs text-gray-500 mt-2 text-center">
+                          ✓ Verify applicant completed prescribed treatment and visited venue with proof before approving
+                        </p>
+                      )}
+                    </div>
+                    );
+                  })() : item.maxAttemptsReached ? (
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-lg">
                         <div className="flex items-start gap-3 text-red-700">
@@ -1952,10 +2299,16 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         </div>
                       </div>
                       
-                      {/* Approve Button - Only show Approve for manual review, disabled for rejected applications */}
+                      {/* Approve Button for Manual Review */}
                       <div className="mt-3">
                         <button 
-                          onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} 
+                          onClick={() => {
+                            // For max attempts, we need to get documentTypeId from upload record
+                            // Use regular approval flow for non-medical max attempts
+                            if (item.uploadId) {
+                              setApproveConfirmation({index: idx, uploadId: item.uploadId, documentName: item.requirementName});
+                            }
+                          }} 
                           disabled={!item.uploadId || item.status === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'} 
                           className="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm"
                         >
@@ -1964,21 +2317,21 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           </svg>
                           {item.status === 'Approved' ? 'Already Approved' : 'Approve After In-Person Verification'}
                         </button>
-                        {item.status !== 'Approved' && (
-                          <p className="text-xs text-gray-500 mt-2 text-center">
-                            ✓ Verify applicant brought original documents to venue before approving
-                          </p>
-                        )}
                       </div>
+                      {item.status !== 'Approved' && (
+                        <p className="text-xs text-gray-500 mt-2 text-center">
+                          ✓ Verify applicant brought original documents to venue before approving
+                        </p>
+                      )}
                     </div>
                   ) : (
                     /* Normal State - Show flag/refer buttons */
-                    /* Medical docs: 3 buttons (Approve + Flag for Revision + Refer to Doctor) */
+                    /* Medical docs: 3 buttons (Approve + Flag for Revision + Refer to Doctor) - Record Finding is beside Extract button */
                     /* Non-medical docs: 2 buttons (Approve + Flag for Revision) */
                     <div className={`mt-4 pt-4 border-t border-gray-100 ${isMedicalDocument(item.fieldIdentifier) ? 'grid grid-cols-1 sm:grid-cols-3 gap-2' : 'grid grid-cols-1 sm:grid-cols-2 gap-2'}`}>
                       {/* Approve Button - Disabled when waiting for resubmission or doctor clearance or application rejected or payment incomplete */}
                       <button 
-                      onClick={() => item.uploadId && handleStatusChange(idx, item.uploadId, 'Approved')} 
+                      onClick={() => item.uploadId && setApproveConfirmation({index: idx, uploadId: item.uploadId, documentName: item.requirementName})} 
                       disabled={!item.uploadId || item.status === 'Approved' || item.status === 'NeedsRevision' || item.status === 'Referred' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'} 
                       className="w-full bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-emerald-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                     >
@@ -1997,6 +2350,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           setModalType(pending.actionType);
                           setIssueCategory(pending.category);
                           setReferralReason(pending.reason);
+                          setFindingDescription(pending.finding || '');
                           setSpecificIssues(pending.notes);
                         } else {
                           // New action
@@ -2045,6 +2399,127 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
           </div>
         </div>
       </main>
+      {/* Approve Confirmation Modal */}
+      {approveConfirmation && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setApproveConfirmation(null)}>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start gap-4 mb-4">
+              <div className="bg-emerald-100 rounded-full p-3 shrink-0">
+                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Approve Document?</h3>
+                <p className="text-sm text-gray-600 mb-1">
+                  You are about to approve:
+                </p>
+                <p className="text-sm font-semibold text-gray-800 bg-gray-50 px-3 py-2 rounded-lg">
+                  {approveConfirmation.documentName}
+                </p>
+                <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-5 h-5 text-yellow-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <p className="text-xs text-yellow-800">
+                      <span className="font-semibold">Warning:</span> Once approved, you cannot change this document to "Flag for Revision" or "Refer to Doctor" without validation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setApproveConfirmation(null)}
+                className="flex-1 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  await handleStatusChange(approveConfirmation.index, approveConfirmation.uploadId, 'Approved');
+                  setApproveConfirmation(null);
+                }}
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg"
+              >
+                Yes, Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Onsite Verification Confirmation Modal */}
+      {onsiteVerificationModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => {
+          setOnsiteVerificationModal(null);
+          setVerificationNotes('');
+        }}>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start gap-4 mb-4">
+              <div className="bg-emerald-100 rounded-full p-3 shrink-0">
+                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.818-4.954A9.955 9.955 0 0121.95 12c0 5.516-4.486 10-10 10S2 17.516 2 12 6.484 2 12 2c1.908 0 3.673.525 5.169 1.438m-2.987 4.984" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Confirm Onsite Verification</h3>
+                <p className="text-sm text-gray-600 mb-1">
+                  You are about to approve:
+                </p>
+                <p className="text-sm font-semibold text-gray-800 bg-gray-50 px-3 py-2 rounded-lg mb-3">
+                  {onsiteVerificationModal.documentName}
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div className="text-xs text-blue-800">
+                      <p className="font-semibold mb-1">Attestation:</p>
+                      <p>
+                        By approving, you confirm that the applicant has visited the venue with their Application ID and showed proof of completed treatment from the doctor as prescribed.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {/* Optional Notes Field */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Verification Notes <span className="text-gray-500 font-normal">(Optional)</span>
+                  </label>
+                  <textarea
+                    value={verificationNotes}
+                    onChange={(e) => setVerificationNotes(e.target.value)}
+                    placeholder="Add any additional notes about the verification..."
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setOnsiteVerificationModal(null);
+                  setVerificationNotes('');
+                }}
+                className="flex-1 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleOnsiteVerificationApproval}
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg"
+              >
+                Yes, Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* The View Document Modal */}
       {viewModalDocUrl && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setViewModalDocUrl(null)}>

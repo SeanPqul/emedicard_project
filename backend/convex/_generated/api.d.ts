@@ -46,6 +46,8 @@ import type * as _orientationSchedules_seedOrientationSchedules from "../_orient
 import type * as _orientationSchedules_timeUtils from "../_orientationSchedules/timeUtils.js";
 import type * as admin_activityLogs from "../admin/activityLogs.js";
 import type * as admin_adminMain from "../admin/adminMain.js";
+import type * as admin_cleanupOldUploads from "../admin/cleanupOldUploads.js";
+import type * as admin_documents_approveWithOnsiteVerification from "../admin/documents/approveWithOnsiteVerification.js";
 import type * as admin_documents_referDocument from "../admin/documents/referDocument.js";
 import type * as admin_documents_rejectDocument from "../admin/documents/rejectDocument.js";
 import type * as admin_documents_sendReferralNotifications from "../admin/documents/sendReferralNotifications.js";
@@ -60,6 +62,7 @@ import type * as admin_payments_rejectPayment from "../admin/payments/rejectPaym
 import type * as admin_payments_testResubmission from "../admin/payments/testResubmission.js";
 import type * as admin_rejectApplicationFinal from "../admin/rejectApplicationFinal.js";
 import type * as admin_rejectionHistory from "../admin/rejectionHistory.js";
+import type * as admin_resetDocumentVerification from "../admin/resetDocumentVerification.js";
 import type * as admin_reviewDocument from "../admin/reviewDocument.js";
 import type * as admin_seed from "../admin/seed.js";
 import type * as admin_testFixRejectionStatus from "../admin/testFixRejectionStatus.js";
@@ -236,6 +239,8 @@ declare const fullApi: ApiFromModules<{
   "_orientationSchedules/timeUtils": typeof _orientationSchedules_timeUtils;
   "admin/activityLogs": typeof admin_activityLogs;
   "admin/adminMain": typeof admin_adminMain;
+  "admin/cleanupOldUploads": typeof admin_cleanupOldUploads;
+  "admin/documents/approveWithOnsiteVerification": typeof admin_documents_approveWithOnsiteVerification;
   "admin/documents/referDocument": typeof admin_documents_referDocument;
   "admin/documents/rejectDocument": typeof admin_documents_rejectDocument;
   "admin/documents/sendReferralNotifications": typeof admin_documents_sendReferralNotifications;
@@ -250,6 +255,7 @@ declare const fullApi: ApiFromModules<{
   "admin/payments/testResubmission": typeof admin_payments_testResubmission;
   "admin/rejectApplicationFinal": typeof admin_rejectApplicationFinal;
   "admin/rejectionHistory": typeof admin_rejectionHistory;
+  "admin/resetDocumentVerification": typeof admin_resetDocumentVerification;
   "admin/reviewDocument": typeof admin_reviewDocument;
   "admin/seed": typeof admin_seed;
   "admin/testFixRejectionStatus": typeof admin_testFixRejectionStatus;

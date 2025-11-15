@@ -35,13 +35,23 @@ function formatCardDate(timestamp: number): string {
 // Helper: Render test section rows
 function renderTestSection(findings: any[], maxRows: number = 2): string {
   let html = '';
+  // Filter to only show unique findings (prevent duplicates)
+  const uniqueFindings = findings.filter((finding, index, self) =>
+    index === self.findIndex((f) => f.findingKind === finding.findingKind && f.testType === finding.testType)
+  );
+  
   for (let i = 0; i < maxRows; i++) {
-    const finding = findings[i];
+    const finding = uniqueFindings[i];
     if (finding && finding.showOnCard) {
+      // Truncate finding text if too long (max 50 characters)
+      const truncatedFinding = finding.findingKind.length > 50 
+        ? finding.findingKind.substring(0, 47) + '...' 
+        : finding.findingKind;
+      
       html += `
         <div class="table-row">
           <div class="table-cell">${formatCardDate(finding.clearedDate)}</div>
-          <div class="table-cell">${finding.findingKind}</div>
+          <div class="table-cell finding-text">${truncatedFinding}</div>
           <div class="table-cell">${formatCardDate(finding.monitoringExpiry)}</div>
         </div>
       `;
@@ -257,6 +267,7 @@ function generateHealthCardHTML(data: {
     }
     
     .workplace-row {
+      display: flex;
       border-bottom: 1px solid hsl(0, 0%, 20%);
       padding-bottom: 2px;
       margin-bottom: 4px;
@@ -264,12 +275,13 @@ function generateHealthCardHTML(data: {
     
     .workplace-label {
       font-size: 10px;
+      margin-right: 4px;
     }
     
     .workplace-value {
       font-size: 11px;
       font-weight: 600;
-      margin-left: 16px;
+      flex: 1;
     }
     
     /* Photo and Signature Section */
@@ -484,13 +496,30 @@ function generateHealthCardHTML(data: {
     .table-cell {
       font-size: 9px;
       text-align: center;
-      padding: 4px 2px;
+      padding: 3px 1px;
       border-right: 1px solid hsl(0, 0%, 20%);
-      min-height: 20px;
+      min-height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .table-cell:last-child {
       border-right: none;
+    }
+    
+    /* Special styling for finding text (middle column) */
+    .table-cell.finding-text {
+      font-size: 6.5px;
+      line-height: 1.15;
+      padding: 2px 1px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
     
     .serial-number {
@@ -560,8 +589,8 @@ function generateHealthCardHTML(data: {
         </div>
         
         <div class="workplace-row">
-          <div class="workplace-label">Workplace:</div>
-          <div class="workplace-value">${data.workplace}</div>
+          <span class="workplace-label">Workplace:</span>
+          <span class="workplace-value">${data.workplace}</span>
         </div>
       </div>
 

@@ -5,6 +5,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { Id } from "../_generated/dataModel";
+import { AdminRole } from "../users/roles";
 
 /**
  * Get active officials for health card generation
@@ -121,13 +122,18 @@ export const setOfficial = mutation({
       throw new Error("Authentication required");
     }
 
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isSuperAdmin) {
+      throw new Error("System Administrator access required. Only system administrators can manage officials.");
+    }
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (!user || user.role !== "system_admin") {
-      throw new Error("System Administrator access required");
+    if (!user) {
+      throw new Error("User not found");
     }
 
     // 2. Check if there's an active official for this position
@@ -193,6 +199,11 @@ export const updateOfficialDetails = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Authentication required");
+    }
+
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isSuperAdmin) {
+      throw new Error("System Administrator access required. Only system administrators can update official details.");
     }
 
     const user = await ctx.db
