@@ -8,6 +8,11 @@
  * @module
  */
 
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
 import type * as _notifications_clearReadNotifications from "../_notifications/clearReadNotifications.js";
 import type * as _notifications_createNotification from "../_notifications/createNotification.js";
 import type * as _notifications_getAdminNotifications from "../_notifications/getAdminNotifications.js";
@@ -100,6 +105,7 @@ import type * as healthCards_generateHealthCard from "../healthCards/generateHea
 import type * as healthCards_getHealthCard from "../healthCards/getHealthCard.js";
 import type * as healthCards_getUserCards from "../healthCards/getUserCards.js";
 import type * as healthCards_issueHealthCard from "../healthCards/issueHealthCard.js";
+import type * as healthCards_regenerateHealthCard from "../healthCards/regenerateHealthCard.js";
 import type * as healthCards_updateHealthCard from "../healthCards/updateHealthCard.js";
 import type * as http from "../http.js";
 import type * as jobCategories_createJobCategory from "../jobCategories/createJobCategory.js";
@@ -157,6 +163,7 @@ import type * as requirements_resubmitDocument from "../requirements/resubmitDoc
 import type * as requirements_updateDocumentField from "../requirements/updateDocumentField.js";
 import type * as requirements_updateJobCategoryRequirement from "../requirements/updateJobCategoryRequirement.js";
 import type * as requirements_uploadDocuments from "../requirements/uploadDocuments.js";
+import type * as signatures_uploadSignatures from "../signatures/uploadSignatures.js";
 import type * as storage_generateUploadUrl from "../storage/generateUploadUrl.js";
 import type * as superAdmin_mutations from "../superAdmin/mutations.js";
 import type * as superAdmin_queries from "../superAdmin/queries.js";
@@ -177,12 +184,6 @@ import type * as verification_getVerificationLogsByUser from "../verification/ge
 import type * as verification_getVerificationStats from "../verification/getVerificationStats.js";
 import type * as verification_logQRScan from "../verification/logQRScan.js";
 import type * as verification_logVerificationAttempt from "../verification/logVerificationAttempt.js";
-
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -285,6 +286,7 @@ declare const fullApi: ApiFromModules<{
   "healthCards/getHealthCard": typeof healthCards_getHealthCard;
   "healthCards/getUserCards": typeof healthCards_getUserCards;
   "healthCards/issueHealthCard": typeof healthCards_issueHealthCard;
+  "healthCards/regenerateHealthCard": typeof healthCards_regenerateHealthCard;
   "healthCards/updateHealthCard": typeof healthCards_updateHealthCard;
   http: typeof http;
   "jobCategories/createJobCategory": typeof jobCategories_createJobCategory;
@@ -342,6 +344,7 @@ declare const fullApi: ApiFromModules<{
   "requirements/updateDocumentField": typeof requirements_updateDocumentField;
   "requirements/updateJobCategoryRequirement": typeof requirements_updateJobCategoryRequirement;
   "requirements/uploadDocuments": typeof requirements_uploadDocuments;
+  "signatures/uploadSignatures": typeof signatures_uploadSignatures;
   "storage/generateUploadUrl": typeof storage_generateUploadUrl;
   "superAdmin/mutations": typeof superAdmin_mutations;
   "superAdmin/queries": typeof superAdmin_queries;
@@ -363,15 +366,11 @@ declare const fullApi: ApiFromModules<{
   "verification/logQRScan": typeof verification_logQRScan;
   "verification/logVerificationAttempt": typeof verification_logVerificationAttempt;
 }>;
-declare const fullApiWithMounts: typeof fullApi;
-
 export declare const api: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "public">
 >;
 export declare const internal: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "internal">
 >;
-
-export declare const components: {};
