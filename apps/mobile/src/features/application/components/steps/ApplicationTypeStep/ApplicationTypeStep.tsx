@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { ApplicationTypeStepProps } from './ApplicationTypeStep.types';
 import type { ApplicationType } from '../../../types';
 import styles from './ApplicationTypeStep.styles';
@@ -12,6 +13,15 @@ export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = ({
   setFormData,
   errors,
 }) => {
+  const handleTypeSelection = (type: ApplicationType) => {
+    setFormData({ ...formData, applicationType: type });
+    
+    // If user selects Renew, navigate directly to card selection screen
+    if (type === 'Renew') {
+      router.push('/(screens)/(shared)/renewal/select-card');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select Application Type</Text>
@@ -27,7 +37,7 @@ export const ApplicationTypeStep: React.FC<ApplicationTypeStepProps> = ({
               styles.radioOption,
               formData.applicationType === type && styles.radioOptionSelected
             ]}
-            onPress={() => setFormData({ ...formData, applicationType: type })}
+            onPress={() => handleTypeSelection(type)}
             activeOpacity={0.7}
           >
             <View style={[
