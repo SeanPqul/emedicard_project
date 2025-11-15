@@ -414,9 +414,19 @@ export default function DashboardPage() {
                       <span className="text-gray-600 text-sm">{new Date(app._creationTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorClasses[app.applicationStatus]?.bg || 'bg-gray-100'} ${statusColorClasses[app.applicationStatus]?.text || 'text-gray-800'} shadow-sm`}>
-                        {app.applicationStatus}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorClasses[app.applicationStatus]?.bg || 'bg-gray-100'} ${statusColorClasses[app.applicationStatus]?.text || 'text-gray-800'} shadow-sm`}>
+                          {app.applicationStatus}
+                        </span>
+                        {app.applicationType === 'Renew' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Renewal
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button 

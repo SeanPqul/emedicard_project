@@ -199,6 +199,12 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const healthCardDetails = useQuery(api.healthCards.getHealthCard.getByApplication, { 
     applicationId: params.id 
   });
+  
+  // Fetch previous health card for renewal applications
+  const previousHealthCard = useQuery(
+    api.healthCards.getHealthCard.get,
+    applicationStatus?.previousHealthCardId ? { healthCardId: applicationStatus.previousHealthCardId } : 'skip'
+  );
 
   const loadData = async () => {
     try {
@@ -772,6 +778,114 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         </p>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Collapsible Previous Health Card Section - Only show for Renewal applications */}
+            {applicationStatus?.applicationType === 'Renew' && applicationStatus?.previousHealthCardId && (
+              <div className="bg-white rounded-2xl shadow-sm border border-blue-200 overflow-hidden">
+                <button
+                  onClick={() => setIsHealthCardExpanded(!isHealthCardExpanded)}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-blue-50 transition-colors"
+                  aria-expanded={isHealthCardExpanded}
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <h2 className="text-base font-bold text-blue-900">Previous Health Card (Renewal)</h2>
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                      Renewal Application
+                    </span>
+                  </div>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                      isHealthCardExpanded ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Collapsible Content */}
+                <div
+                  className={`transition-all duration-300 ease-in-out ${
+                    isHealthCardExpanded ? 'max-h-[400px] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'
+                  }`}
+                >
+                  <div className="px-6 pb-6 pt-2 space-y-3 border-t border-blue-100">
+                    {previousHealthCard === undefined ? (
+                      <div className="flex items-center justify-center p-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      </div>
+                    ) : !previousHealthCard ? (
+                      <div className="text-center p-4 text-gray-500">
+                        Previous card information not available
+                      </div>
+                    ) : (
+                      <>
+                        {/* Registration Number */}
+                        <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                          <svg className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                          </svg>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Registration Number</label>
+                            <p className="text-sm font-mono font-bold text-blue-900 mt-0.5">{previousHealthCard.registrationNumber}</p>
+                          </div>
+                        </div>
+                        
+                        {/* Issued Date */}
+                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                          <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Issued Date</label>
+                            <p className="text-sm font-medium text-gray-900 mt-0.5">
+                              {new Date(previousHealthCard.issuedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Expiry Date */}
+                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                          <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Expiry Date</label>
+                            <p className="text-sm font-medium text-gray-900 mt-0.5">
+                              {new Date(previousHealthCard.expiryDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Status */}
+                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                          <svg className="w-4 h-4 text-gray-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Card Status</label>
+                            <p className="text-sm font-medium mt-0.5">
+                              <span className={`capitalize px-2 py-1 rounded-full text-xs ${
+                                previousHealthCard.status === 'active' ? 'bg-green-100 text-green-800' :
+                                previousHealthCard.status === 'expired' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {previousHealthCard.status}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

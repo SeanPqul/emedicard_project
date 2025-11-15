@@ -1,0 +1,172 @@
+sequenceDiagram
+    actor User
+    participant Mobile as Mobile App
+    participant Convex as Convex Backend
+    participant Storage as Convex Storage
+    participant Admin as WebAdmin
+    
+    Note over User,Admin: Phase 1: Renewal Eligibility Check
+    
+    User->>Mobile: Opens Dashboard
+    Mobile->>Convex: Query user's health cards
+    Convex-->>Mobile: Return health cards with expiry dates
+    Mobile->>Mobile: Calculate days until expiry
+    
+    alt Card Expiring Soon (<30 days)
+        Mobile-->>User: Show "RENEW SOON" badge
+    else Card Expired
+        Mobile-->>User: Show "EXPIRED" badge
+    end
+    
+    User->>Mobile: Clicks "Renew Health Card"
+    Mobile->>Convex: checkRenewalEligibilityQuery
+    
+    Convex->>Convex: Check eligibility criteria
+    Note over Convex: - Has approved application with card
+    Note over Convex: - No pending applications
+    Note over Convex: - No existing renewal in progress
+    
+    alt Eligible for Renewal
+        Convex->>Convex: Get previous application data
+        Convex->>Convex: Get health card details
+        Convex-->>Mobile: Return eligibility + previous data
+        Mobile->>Mobile: Navigate to card selection screen
+        
+    else Not Eligible
+        Convex-->>Mobile: Return ineligible + reason
+        Mobile-->>User: Show error message
+        Note over User: e.g., "Pending application exists"
+    end
+    
+    Note over User,Admin: Phase 2: Card Selection
+    
+    Mobile->>Convex: getUserCardsQuery
+    Convex-->>Mobile: Return all user's health cards
+    Mobile-->>User: Display card selection list
+    Note over User,Mobile: Shows registration #, issue/expiry dates
+    Note over User,Mobile: Urgency badges (EXPIRED, URGENT, RENEW SOON)
+    
+    User->>Mobile: Selects card to renew
+    
+    alt Card Valid >30 days
+        Mobile-->>User: Show confirmation dialog
+        Note over User: "Card valid for X days. Renew now?"
+        User->>Mobile: Confirms renewal
+    else Card Expiring Soon or Expired
+        Note over Mobile: Skip confirmation
+    end
+    
+    Mobile->>Mobile: Navigate to application form
+    Note over Mobile: Pass healthCardId as param
+    
+    Note over User,Admin: Phase 3: Pre-fill Application Data
+    
+    Mobile->>Convex: getPreviousApplicationDataQuery
+    Note over Mobile,Convex: Pass healthCardId
+    
+    Convex->>Convex: Get health card
+    Convex->>Convex: Get linked application
+    Convex->>Convex: Verify ownership (security check)
+    Convex->>Convex: Get job category details
+    Convex-->>Mobile: Return previous application data
+    
+    Mobile->>Mobile: Pre-fill form fields
+    Note over Mobile: - Personal details (name, age, etc.)
+    Note over Mobile: - Job category (pre-selected)
+    Note over Mobile: - Position, organization
+    Note over Mobile: - Civil status
+    
+    Mobile-->>User: Show pre-filled renewal form
+    Note over User,Mobile: Display "Renewal Application" banner
+    
+    User->>Mobile: Reviews & updates data (if needed)
+    Note over User: Can change job category, position, etc.
+    
+    User->>Mobile: Clicks "Next"
+    
+    Note over User,Admin: Phase 4: Create Renewal Application
+    
+    Mobile->>Convex: createRenewalApplicationMutation
+    Note over Mobile,Convex: Pass form data + previousHealthCardId
+    
+    Convex->>Convex: Validate health card ownership
+    Convex->>Convex: Check no pending renewal exists
+    Convex->>Convex: Calculate renewal count
+    Note over Convex: Count previous "Renew" applications
+    
+    Convex->>Convex: Create application record
+    Note over Convex: applicationType: "Renew"
+    Note over Convex: previousHealthCardId: <selected card>
+    Note over Convex: isRenewal: true
+    Note over Convex: renewalCount: <calculated>
+    Note over Convex: applicationStatus: "Draft"
+    
+    Convex-->>Mobile: Return renewalApplicationId
+    Mobile-->>User: Show "Renewal Application Created"
+    
+    Note over User,Admin: Phase 5: Document Upload (Fresh Documents Required)
+    
+    Mobile-->>User: "Upload fresh documents"
+    Note over User: Cannot reuse old documents
+    Note over User: All documents must be current
+    
+    User->>Mobile: Opens Document Upload
+    Mobile->>Convex: Query required documents
+    Note over Convex: Based on selected job category
+    Convex-->>Mobile: Return document types
+    
+    loop For each required document
+        User->>Mobile: Selects NEW file
+        Mobile->>Storage: Upload file
+        Storage-->>Mobile: Return storageFileId
+        Mobile->>Convex: createDocumentUpload mutation
+        Note over Convex: Links to renewal application
+        Convex-->>Mobile: Confirm upload
+    end
+    
+    User->>Mobile: Clicks "Submit for Review"
+    Mobile->>Convex: updateApplicationStatus mutation
+    Note over Convex: Status: "Draft" → "Submitted"
+    Convex->>Convex: Create notification for admin
+    Convex-->>Mobile: Confirm submission
+    Mobile-->>User: Show "Renewal Submitted"
+    
+    Note over User,Admin: Phase 6-9: Same as New Application
+    Note over User,Admin: - Admin reviews documents
+    Note over User,Admin: - User makes payment (₱60)
+    Note over User,Admin: - Admin validates payment
+    Note over User,Admin: - Orientation (if category changed)
+    Note over User,Admin: - Admin approves application
+    
+    Note over User,Admin: Phase 10: New Health Card Issuance
+    
+    Admin->>Convex: approveApplication mutation
+    Note over Admin: For renewal application
+    
+    Convex->>Convex: Generate NEW registration number
+    Note over Convex: Each renewal gets unique number
+    Convex->>Convex: Create NEW health card
+    Note over Convex: Status: "active"
+    Note over Convex: issuedDate: now
+    Note over Convex: expiryDate: +1 year
+    
+    Convex->>Convex: Update OLD health card
+    Note over Convex: Status: "active" → "expired"
+    Note over Convex: Old card invalidated
+    
+    Convex->>Convex: Update renewal application
+    Note over Convex: Status → "Approved"
+    Note over Convex: Link to new healthCardId
+    
+    Convex->>Convex: Create notification for user
+    Convex-->>Admin: Confirm approval
+    
+    Convex->>Mobile: Push notification
+    Mobile-->>User: "Health card renewed!"
+    
+    User->>Mobile: Opens "My Health Cards"
+    Mobile->>Convex: Query health cards
+    Convex-->>Mobile: Return cards (new active, old expired)
+    Mobile-->>User: Display NEW health card
+    Note over User: Old card shows as "Expired"
+    Note over User: New card shows as "Active"

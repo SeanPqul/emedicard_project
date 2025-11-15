@@ -1,0 +1,118 @@
+sequenceDiagram
+    actor Admin
+    participant WebAdmin
+    participant Convex as Convex Backend
+    participant Mobile as Mobile App
+    actor User
+    
+    Admin->>WebAdmin: Opens "Document Verification" dashboard
+    WebAdmin->>Convex: Query applications needing review
+    Note over WebAdmin,Convex: Filter: status = "Submitted"
+    Convex-->>WebAdmin: Return pending applications
+    
+    Admin->>WebAdmin: Selects application to review
+    WebAdmin->>Convex: Query application details
+    Convex-->>WebAdmin: Return application data
+    WebAdmin->>Convex: Query document uploads
+    Convex-->>WebAdmin: Return uploaded documents
+    
+    WebAdmin-->>Admin: Display documents for review
+    
+    loop For each document
+        Admin->>WebAdmin: Clicks document to view
+        WebAdmin->>Convex: getDocumentAccessUrl query
+        Note over Convex: Generate HMAC-signed URL
+        Convex-->>WebAdmin: Return signed URL
+        WebAdmin->>Admin: Display document in viewer
+        
+        alt Document Approved
+            Admin->>WebAdmin: Clicks "Approve"
+            WebAdmin->>Convex: approveDocument mutation
+            Note over Convex: reviewStatus: "Pending" → "Approved"
+            Note over Convex: Set reviewedBy, reviewedAt
+            Convex->>Convex: Create adminActivityLog
+            Convex-->>WebAdmin: Confirm approval
+            
+        else Non-Medical Issue (Needs Revision)
+            Admin->>WebAdmin: Clicks "Mark for Revision"
+            Admin->>WebAdmin: Selects issue category
+            Note over Admin: e.g., "blurry_photo", "expired_document"
+            Admin->>WebAdmin: Enters detailed reason
+            Admin->>WebAdmin: Lists specific issues
+            
+            WebAdmin->>Convex: createDocumentReferral mutation
+            Note over Convex: issueType: "document_issue"
+            Note over Convex: documentIssueCategory: <selected>
+            Convex->>Convex: Create documentReferralHistory record
+            Convex->>Convex: Preserve original file (audit)
+            Convex->>Convex: Update reviewStatus: "NeedsRevision"
+            Convex->>Convex: Create adminActivityLog
+            Convex->>Convex: Create notification for user
+            Convex-->>WebAdmin: Confirm referral
+            
+            Convex->>Mobile: Push notification
+            Mobile-->>User: "Document needs revision"
+            
+            User->>Mobile: Views rejection details
+            Mobile->>Convex: Query documentReferralHistory
+            Convex-->>Mobile: Return reason + specific issues
+            Mobile-->>User: Display detailed feedback
+            
+            User->>Mobile: Re-uploads corrected document
+            Mobile->>Convex: createDocumentUpload mutation
+            Note over Convex: Link via replacementUploadId
+            Note over Convex: Increment attemptNumber
+            Convex->>Convex: Update referralHistory.wasReplaced = true
+            Convex-->>Mobile: Confirm upload
+            
+        else Medical Finding (Referral)
+            Admin->>WebAdmin: Clicks "Refer for Medical Management"
+            Admin->>WebAdmin: Selects medical category
+            Note over Admin: e.g., "abnormal_xray", "positive_drug_test"
+            Admin->>WebAdmin: Enters clinical findings
+            Admin->>WebAdmin: Enters doctor info (optional)
+            
+            WebAdmin->>Convex: createMedicalReferral mutation
+            Note over Convex: issueType: "medical_referral"
+            Note over Convex: medicalReferralCategory: <selected>
+            Convex->>Convex: Create documentReferralHistory record
+            Convex->>Convex: Update reviewStatus: "Referred"
+            Convex->>Convex: Update application status
+            Note over Convex: Status → "Referred for Medical Management"
+            Convex->>Convex: Create adminActivityLog
+            Convex->>Convex: Create notification for user
+            Convex-->>WebAdmin: Confirm referral
+            
+            Convex->>Mobile: Push notification
+            Mobile-->>User: "Medical consultation required"
+            
+            User->>Mobile: Views referral details
+            Mobile->>Convex: Query documentReferralHistory
+            Convex-->>Mobile: Return medical findings + doctor info
+            Mobile-->>User: Display referral information
+            Note over User: User seeks medical consultation
+            Note over User: Gets treatment/clearance
+        end
+    end
+    
+    Admin->>WebAdmin: Reviews all documents
+    
+    alt All Documents Approved
+        WebAdmin->>Convex: Check document approval status
+        Convex->>Convex: Update application status
+        Note over Convex: Status: "Submitted" → "For Payment Validation"
+        Convex->>Convex: Set paymentDeadline (7 days)
+        Convex->>Convex: Create notification for user
+        Convex-->>WebAdmin: Confirm status update
+        
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Documents approved! Proceed to payment"
+        
+    else Some Documents Need Revision
+        Convex->>Convex: Keep status "Documents Need Revision"
+        Convex->>Convex: Wait for user resubmission
+        
+    else Medical Referral Required
+        Convex->>Convex: Keep status "Referred for Medical Management"
+        Convex->>Convex: Application on hold until clearance
+    end

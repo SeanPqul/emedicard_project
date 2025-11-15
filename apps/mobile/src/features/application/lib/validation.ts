@@ -24,6 +24,8 @@ export interface ApplicationFormData {
   gender?: 'Male' | 'Female' | 'Other';
   // Non-Food specialization
   securityGuard?: boolean; // If true, show Drug Test + Neuro Exam requirements
+  // Renewal tracking
+  previousHealthCardId?: string; // For renewal applications, links to previous card
 }
 
 export interface ValidationResult {

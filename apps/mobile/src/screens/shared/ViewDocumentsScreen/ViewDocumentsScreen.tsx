@@ -88,6 +88,7 @@ export function ViewDocumentsScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Approved':
+      case 'Verified': // Treat both as equivalent - industry standard
         return getColor('accent.safetyGreen');
       case 'Referred': // Medical referral
         return '#3B82F6'; // Blue
@@ -104,6 +105,7 @@ export function ViewDocumentsScreen() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'Approved':
+      case 'Verified': // Treat both as equivalent
         return 'checkmark-circle';
       case 'Referred': // Medical referral
         return 'medkit-outline';
@@ -120,7 +122,8 @@ export function ViewDocumentsScreen() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'Approved':
-        return 'Approved';
+      case 'Verified': // Display "Verified" for both (industry standard)
+        return 'Verified';
       case 'Referred': // Medical referral
         return 'Medical Referral';
       case 'NeedsRevision': // Document issue

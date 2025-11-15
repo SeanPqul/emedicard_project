@@ -81,6 +81,28 @@ export const useSubmission = ({
       return existingAppId;
     }
 
+    // Check if this is a renewal application
+    if (formData.applicationType === 'Renew' && formData.previousHealthCardId) {
+      // Use renewal mutation for new renewal applications
+      const applicationId = await applications.mutations.createRenewalApplication({
+        previousHealthCardId: formData.previousHealthCardId as Id<'healthCards'>,
+        jobCategoryId: formData.jobCategory as Id<'jobCategories'>,
+        position: formData.position,
+        organization: formData.organization,
+        civilStatus: formData.civilStatus,
+        firstName: formData.firstName,
+        middleName: formData.middleName,
+        lastName: formData.lastName,
+        suffix: formData.suffix,
+        age: formData.age,
+        nationality: formData.nationality,
+        gender: formData.gender,
+      });
+      formStorage.setApplicationId(applicationId);
+      return applicationId;
+    }
+
+    // Regular new application
     const applicationId = await applications.mutations.createApplication({
       applicationType: formData.applicationType,
       jobCategoryId: formData.jobCategory as Id<'jobCategories'>,

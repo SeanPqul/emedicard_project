@@ -73,7 +73,13 @@ export default defineSchema({
     healthCardRegistrationNumber: v.optional(v.string()),
     healthCardIssuedAt: v.optional(v.float64()),
     deletedAt: v.optional(v.float64()),
-  }).index("by_user", ["userId"]),
+    // Renewal tracking fields
+    previousHealthCardId: v.optional(v.id("healthCards")),
+    isRenewal: v.optional(v.boolean()),
+    renewalCount: v.optional(v.float64()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_previous_card", ["previousHealthCardId"]),
   
   documentTypes: defineTable({
     description: v.string(),

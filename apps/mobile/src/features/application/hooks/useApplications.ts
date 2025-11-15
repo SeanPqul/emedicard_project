@@ -9,7 +9,9 @@ export function useApplications(applicationId?: string) {
   );
   const userApplications = useQuery(api.applications.getUserApplications.getUserApplicationsQuery);
   const createApplicationMutation = useMutation(api.applications.createApplication.createApplicationMutation);
+  const createRenewalApplicationMutation = useMutation(api.applications.createRenewalApplication.createRenewalApplicationMutation);
   const updateApplicationMutation = useMutation(api.applications.updateApplication.updateApplicationMutation);
+  const deleteApplicationMutation = useMutation(api.applications.deleteApplication.deleteApplication);
   const submitApplicationMutation = useMutation(api.applications.submitApplication.submitApplicationMutation);
 
   const createApplication = async (input: {
@@ -29,8 +31,29 @@ export function useApplications(applicationId?: string) {
     return createApplicationMutation(input);
   };
 
+  const createRenewalApplication = async (input: {
+    previousHealthCardId: Id<'healthCards'>;
+    jobCategoryId: Id<'jobCategories'>;
+    position: string;
+    organization: string;
+    civilStatus: string;
+    firstName?: string;
+    middleName?: string;
+    lastName?: string;
+    suffix?: string;
+    age?: number;
+    nationality?: string;
+    gender?: 'Male' | 'Female' | 'Other';
+  }) => {
+    return createRenewalApplicationMutation(input);
+  };
+
   const updateApplication = async (applicationId: Id<'applications'>, updates: any) => {
     return updateApplicationMutation({ applicationId, ...updates });
+  };
+
+  const deleteApplication = async (applicationId: string) => {
+    return deleteApplicationMutation({ applicationId: applicationId as Id<'applications'> });
   };
 
   const submitApplicationForm = async (
@@ -61,7 +84,9 @@ export function useApplications(applicationId?: string) {
     
     mutations: {
       createApplication,
+      createRenewalApplication,
       updateApplication,
+      deleteApplication,
       submitApplicationForm,
       // Backwards compatibility aliases
       createForm: createApplication,

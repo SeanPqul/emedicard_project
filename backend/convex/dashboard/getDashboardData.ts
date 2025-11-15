@@ -1,5 +1,6 @@
 import { query } from "../_generated/server";
 import { Doc, Id } from "../_generated/dataModel";
+import { areAllDocumentsVerified } from "../lib/documentStatus";
 
 export const getDashboardDataQuery = query({
   args: {},
@@ -68,8 +69,8 @@ export const getDashboardDataQuery = query({
           .collect();
         const rejectedPendingCount = rejectionHistory.filter(r => !r.wasReplaced).length;
 
-        // Check if all documents are verified
-        const documentsVerified = documents.length > 0 && documents.every(doc => doc.reviewStatus === "Verified");
+        // Check if all documents are verified (accepts both "Verified" and "Approved")
+        const documentsVerified = areAllDocumentsVerified(documents);
 
         return {
           _id: application._id,

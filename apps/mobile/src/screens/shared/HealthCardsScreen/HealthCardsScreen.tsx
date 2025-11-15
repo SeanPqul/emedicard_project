@@ -232,11 +232,11 @@ export function HealthCardsScreen() {
                   </TouchableOpacity>
                 </View>
 
-                {/* Renew Button for Expired Cards */}
-                {status === 'expired' && (
+                {/* Renew Button for Expired or Expiring Soon Cards */}
+                {(status === 'expired' || (card as any).daysUntilExpiry <= 30) && (
                   <TouchableOpacity
                     style={styles.renewButton}
-                    onPress={() => router.push('/(tabs)/apply')}
+                    onPress={() => router.push('/(screens)/(shared)/renewal/select-card')}
                     activeOpacity={0.8}
                   >
                     <Ionicons name="refresh" size={moderateScale(20)} color="#FFFFFF" />

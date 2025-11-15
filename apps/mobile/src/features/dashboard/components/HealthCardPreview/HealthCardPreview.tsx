@@ -33,16 +33,44 @@ export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
   userProfile,
   isNewUser,
 }) => {
-  // If no health card, show application status card instead
-  if (!healthCard && currentApplication) {
-    return <ApplicationStatusCard application={currentApplication} />;
-  }
+  // Determine if we should show application status
+  const terminalStatuses = ['Approved', 'Cancelled', 'Payment Rejected', 'Rejected'];
+  const hasActiveApplication = currentApplication && !terminalStatuses.includes(currentApplication.status);
+  const isRenewal = currentApplication?.applicationType === 'Renew';
+  const showApplicationStatus = hasActiveApplication && (!healthCard || isRenewal);
 
-// If no health card and no application, suppress CTA here — WelcomeBanner owns the new-user CTA
-  if (!healthCard) {
+  // If no health card and no application, suppress CTA here — WelcomeBanner owns the new-user CTA
+  if (!healthCard && !currentApplication) {
     return null;
   }
+  
+  // If only application (no health card), show only application status
+  if (!healthCard && hasActiveApplication) {
+    return <ApplicationStatusCard application={currentApplication} />;
+  }
+  
+  // If health card exists but no active application, show only health card
+  if (healthCard && !showApplicationStatus) {
+    return <HealthCardDisplay healthCard={healthCard} />;
+  }
+  
+  // If both exist (renewal scenario), show both
+  if (healthCard && showApplicationStatus) {
+    return (
+      <View>
+        <ApplicationStatusCard application={currentApplication} />
+        <View style={{ marginTop: moderateScale(16) }}>
+          <HealthCardDisplay healthCard={healthCard} />
+        </View>
+      </View>
+    );
+  }
+  
+  return null;
+};
 
+// Component for displaying the health card
+const HealthCardDisplay: React.FC<{ healthCard: any }> = ({ healthCard }) => {
   const daysUntilExpiry = differenceInDays(new Date(healthCard.expiryDate), new Date());
   const isExpiringSoon = daysUntilExpiry <= 30 && daysUntilExpiry > 0;
   const isExpired = daysUntilExpiry <= 0;
@@ -189,6 +217,7 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
         return theme.colors.orange[500];
       case 'For Payment Validation':
         return theme.colors.orange[600];
+      case 'Scheduled':
       case 'For Orientation':
         return theme.colors.blue[500];
       case 'Submitted':
@@ -248,6 +277,9 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
     }
   };
 
+  // Check if it's a renewal
+  const isRenewal = application.applicationType === 'Renew';
+
   return (
     <View style={styles.container}>
       <View style={styles.applicationCard}>
@@ -283,16 +315,35 @@ const ApplicationStatusCard: React.FC<{ application: any }> = ({ application }) 
               {categoryLabel}
             </Text>
           </View>
-          {/* Application ID - subtle but scannable */}
-          <Text style={{ 
-            color: theme.colors.text.tertiary, 
-            fontSize: moderateScale(13), 
-            fontWeight: '600',
-            letterSpacing: 0.5,
-            opacity: 0.7,
-          }}>
-            {shortId}
-          </Text>
+          {/* Application ID with Renewal badge */}
+          <View style={{ alignItems: 'flex-end', gap: moderateScale(4) }}>
+            {isRenewal && (
+              <View style={{
+                paddingHorizontal: moderateScale(8),
+                paddingVertical: moderateScale(3),
+                borderRadius: moderateScale(10),
+                backgroundColor: theme.colors.blue[500],
+              }}>
+                <Text style={{
+                  color: '#FFFFFF',
+                  fontSize: moderateScale(10),
+                  fontWeight: '700',
+                  letterSpacing: 0.3,
+                }}>
+                  RENEWAL
+                </Text>
+              </View>
+            )}
+            <Text style={{ 
+              color: theme.colors.text.tertiary, 
+              fontSize: moderateScale(13), 
+              fontWeight: '600',
+              letterSpacing: 0.5,
+              opacity: 0.7,
+            }}>
+              {shortId}
+            </Text>
+          </View>
         </View>
 
         {/* Status section with checklist */}

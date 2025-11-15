@@ -74,11 +74,11 @@ export function QRCodeScreen() {
   };
   
   const handleShareQR = async () => {
-    if (!healthCard) return;
+    if (!healthCard || !healthCard._id) return;
     
     setIsSharing(true);
     try {
-      const verificationUrl = generateVerificationUrl(healthCard);
+      const verificationUrl = generateVerificationUrl(healthCard as any);
       await Share.share({
         message: `🏥 Health Card QR Code\n\n📋 Registration: ${healthCard.registrationNumber}\n🏷️ Type: ${healthCard.jobCategory?.name || 'Health Card'}\n👤 Holder: ${getHolderName()}\n📅 Expires: ${formatDate(healthCard.expiryDate)}\n\n✅ Verify at: ${verificationUrl}`,
       });
@@ -157,7 +157,7 @@ export function QRCodeScreen() {
         <ViewShot ref={qrRef} options={{ format: 'png', quality: 1.0 }}>
           <View style={styles.qrContainer}>
             <QRCode
-              value={generateVerificationUrl(healthCard)}
+              value={generateVerificationUrl(healthCard as any)}
               size={200}
               color="#000000"
               backgroundColor="#FFFFFF"

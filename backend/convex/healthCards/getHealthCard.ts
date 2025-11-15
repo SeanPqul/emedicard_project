@@ -2,6 +2,19 @@ import { v } from "convex/values";
 import { query } from "../_generated/server";
 
 /**
+ * Get health card by ID
+ */
+export const get = query({
+  args: {
+    healthCardId: v.id("healthCards"),
+  },
+  handler: async (ctx, args) => {
+    const healthCard = await ctx.db.get(args.healthCardId);
+    return healthCard;
+  },
+});
+
+/**
  * Get health card for an application
  */
 export const getByApplication = query({

@@ -1,0 +1,144 @@
+sequenceDiagram
+    actor User
+    participant Mobile as Mobile App
+    participant Convex as Convex Backend
+    participant Inspector as Inspector App
+    actor Admin
+    
+    Note over User,Admin: Phase 1: Schedule Creation (Admin)
+    
+    Admin->>Inspector: Opens "Orientation Schedules"
+    Admin->>Inspector: Clicks "Create Schedule"
+    Admin->>Inspector: Fills schedule details
+    Note over Admin: Date, time, venue, capacity, instructor
+    
+    Inspector->>Convex: createOrientationSchedule mutation
+    Convex->>Convex: Create schedule record
+    Note over Convex: availableSlots = totalSlots
+    Note over Convex: isAvailable = true
+    Convex-->>Inspector: Confirm creation
+    Inspector-->>Admin: Show "Schedule created"
+    
+    Note over User,Admin: Phase 2: Booking (User)
+    
+    Mobile->>Convex: Check application requirements
+    Convex-->>Mobile: Orientation required (Yellow Card)
+    Mobile-->>User: Show "Book Orientation" prompt
+    
+    User->>Mobile: Opens Orientation Booking screen
+    Mobile->>Convex: Query available schedules
+    Note over Mobile,Convex: Filter: isAvailable = true, date >= today
+    Convex-->>Mobile: Return available schedules
+    
+    Mobile-->>User: Display schedule options
+    Note over User: Shows date, time, venue, available slots
+    
+    User->>Mobile: Selects preferred schedule
+    User->>Mobile: Clicks "Confirm Booking"
+    
+    Mobile->>Convex: createOrientationBooking mutation
+    Note over Mobile,Convex: Pass scheduleId + applicationId
+    
+    Convex->>Convex: Verify availability
+    alt Slots Available
+        Convex->>Convex: Create booking record
+        Note over Convex: status: "scheduled"
+        Note over Convex: Denormalize schedule details
+        Convex->>Convex: Generate QR code
+        Note over Convex: QR contains: bookingId, userId, scheduleId
+        Convex->>Convex: Decrement schedule.availableSlots
+        Convex->>Convex: Create notification for user
+        Convex-->>Mobile: Return booking + QR code
+        
+        Mobile-->>User: Show booking confirmation
+        Mobile-->>User: Display QR code
+        Note over User: "Show this QR at orientation"
+        
+    else Fully Booked
+        Convex-->>Mobile: Return error "Schedule full"
+        Mobile-->>User: Show "Fully booked, choose another"
+    end
+    
+    Note over User,Admin: Phase 3: Check-in
+    
+    User->>User: Arrives at orientation venue
+    User->>Mobile: Opens booking details
+    Mobile-->>User: Display QR code
+    
+    Admin->>Inspector: Opens "Orientation Check-in"
+    Admin->>Inspector: Selects today's schedule
+    Admin->>Inspector: Scans user's QR code
+    
+    Inspector->>Convex: checkInUser mutation
+    Note over Inspector,Convex: Pass bookingId from QR
+    
+    Convex->>Convex: Verify booking exists
+    Convex->>Convex: Verify schedule date is today
+    Convex->>Convex: Update booking status
+    Note over Convex: status: "scheduled" → "checked-in"
+    Note over Convex: checkInTime: now
+    Note over Convex: checkedInBy: <inspector ID>
+    Convex->>Convex: Create adminActivityLog
+    Convex-->>Inspector: Confirm check-in
+    
+    Inspector-->>Admin: Show "Check-in successful"
+    
+    Convex->>Mobile: Push notification
+    Mobile-->>User: "Checked in successfully"
+    
+    Note over User,Admin: Phase 4: Orientation Session
+    
+    Note over User: Attends 2-hour orientation
+    Note over User: Learns food safety, hygiene practices
+    
+    Note over User,Admin: Phase 5: Check-out
+    
+    Admin->>Inspector: Scans user's QR code again
+    Inspector->>Convex: checkOutUser mutation
+    Note over Inspector,Convex: Pass bookingId
+    
+    Convex->>Convex: Verify user is checked-in
+    Convex->>Convex: Calculate attendance duration
+    Note over Convex: duration = checkOutTime - checkInTime
+    
+    alt Attended Minimum Duration (e.g., 1.5 hours)
+        Convex->>Convex: Update booking status
+        Note over Convex: status: "checked-in" → "completed"
+        Note over Convex: checkOutTime: now
+        Note over Convex: checkedOutBy: <inspector ID>
+        Note over Convex: completedAt: now
+        
+        Convex->>Convex: Update application
+        Note over Convex: orientationCompleted: true
+        Convex->>Convex: Update application status
+        Note over Convex: Ready for final approval
+        
+        Convex->>Convex: Create adminActivityLog
+        Convex-->>Inspector: Confirm check-out
+        
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Orientation completed!"
+        
+    else Left Early
+        Convex->>Convex: Update status: "missed"
+        Convex->>Convex: Add inspectorNotes: "Left early"
+        Convex-->>Inspector: Show "Incomplete attendance"
+        
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Please attend full session"
+    end
+    
+    Note over User,Admin: Phase 6: Finalization (Admin)
+    
+    Admin->>Inspector: Reviews attendance for session
+    Admin->>Inspector: Clicks "Finalize Session"
+    
+    Inspector->>Convex: finalizeOrientationSession mutation
+    Convex->>Convex: Update schedule
+    Note over Convex: isFinalized: true
+    Note over Convex: finalizedAt: now
+    Note over Convex: finalizedBy: <admin ID>
+    
+    Convex->>Convex: Process no-shows
+    Note over Convex: Update bookings with status "scheduled" → "no-show"
+    Convex-->>Inspector: Confirm finalization

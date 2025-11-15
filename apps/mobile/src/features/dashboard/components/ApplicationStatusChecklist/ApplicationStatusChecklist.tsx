@@ -93,7 +93,7 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
       // Note: 'Locked - Max Attempts' is old status, kept for backward compatibility
       const stepData = { label: 'Payment under review', subtitle: 'Admin review required' };
       steps.push({ id: 'payment', ...stepData, status: 'current' });
-    } else if (status === 'For Orientation' || status === 'For Document Verification' || status === 'Documents Need Revision' || status === 'Under Review' || status === 'Approved') {
+    } else if (status === 'Scheduled' || status === 'For Orientation' || status === 'For Document Verification' || status === 'Documents Need Revision' || status === 'Under Review' || status === 'Approved') {
       // Payment has been validated and approved - only these statuses mean payment is complete
       const stepData = getStepLabel('payment', 'completed');
       steps.push({ id: 'payment', ...stepData, status: 'completed' });
@@ -126,6 +126,10 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
         // These statuses should have orientation completed
         const stepData = getStepLabel('orientation', 'completed');
         steps.push({ id: 'orientation', ...stepData, status: 'completed' });
+      } else if (status === 'Scheduled') {
+        // Orientation is scheduled but not yet attended
+        const stepData = { label: 'Orientation pending', subtitle: 'Attend scheduled session' };
+        steps.push({ id: 'orientation', ...stepData, status: 'current' });
       } else {
         // Default to current if status is unclear or 'For Orientation'
         const stepData = getStepLabel('orientation', 'current');
@@ -134,6 +138,8 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
     }
 
     // Document verification step
+    // IMPORTANT: Check documentsVerified flag FIRST before checking status
+    // This ensures that once all documents are approved, it shows as completed regardless of status
     if (status === 'Pending Payment' || status === 'Submitted') {
       // Payment not completed yet - document verification is still upcoming
       const stepData = getStepLabel('documentVerification', 'upcoming');
@@ -146,23 +152,23 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
       // Note: 'Locked - Max Attempts' is old status, kept for backward compatibility
       const stepData = { label: 'Document verification pending', subtitle: 'Awaiting payment resolution' };
       steps.push({ id: 'documentVerification', ...stepData, status: 'upcoming' });
-    } else if (requiresOrientation && status === 'For Orientation') {
-      const stepData = getStepLabel('documentVerification', 'upcoming');
-      steps.push({ id: 'documentVerification', ...stepData, status: 'upcoming' });
+    } else if (documentsVerified || status === 'Approved') {
+      // Mark as completed if:
+      // 1. All documents are actually verified (documentsVerified === true), OR
+      // 2. Application is approved (always means docs were verified)
+      const stepData = getStepLabel('documentVerification', 'completed');
+      steps.push({ id: 'documentVerification', ...stepData, status: 'completed' });
     } else if (status === 'For Document Verification' || status === 'Documents Need Revision') {
+      // Documents still under review or need revision
       const stepData = getStepLabel('documentVerification', 'current');
       steps.push({ id: 'documentVerification', ...stepData, status: 'current' });
-    } else if (documentsVerified) {
-      // Only mark as completed if documents are actually verified
-      const stepData = getStepLabel('documentVerification', 'completed');
-      steps.push({ id: 'documentVerification', ...stepData, status: 'completed' });
-    } else if (status === 'Approved') {
-      // Approved status always means documents were verified
-      const stepData = getStepLabel('documentVerification', 'completed');
-      steps.push({ id: 'documentVerification', ...stepData, status: 'completed' });
+    } else if (requiresOrientation && (status === 'For Orientation' || status === 'Scheduled')) {
+      // Parallel processing: documents being verified while user waits for orientation
+      // Since documentsVerified check already passed above, this means docs are still being reviewed
+      const stepData = getStepLabel('documentVerification', 'current');
+      steps.push({ id: 'documentVerification', ...stepData, status: 'current' });
     } else {
-      // Default to current for statuses like Under Review when documents aren't verified yet
-      // Note: Submitted status is already handled above (shows as upcoming)
+      // Default to current for other statuses when documents aren't verified yet
       const stepData = getStepLabel('documentVerification', 'current');
       steps.push({ id: 'documentVerification', ...stepData, status: 'current' });
     }
@@ -176,7 +182,7 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
       const stepData = getStepLabel('review', 'current');
       steps.push({ id: 'review', ...stepData, status: 'current' });
     } else {
-      // For Submitted (payment failed), Pending Payment, etc. - show as upcoming
+      // For Submitted (payment failed), Pending Payment, Scheduled, etc. - show as upcoming
       const stepData = getStepLabel('review', 'upcoming');
       steps.push({ id: 'review', ...stepData, status: 'upcoming' });
     }

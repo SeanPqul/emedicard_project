@@ -97,4 +97,31 @@ export const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     marginTop: verticalScale(theme.spacing.md),
   },
+
+  // Renewal banner
+  renewalBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.primary[50],
+    padding: moderateScale(12),
+    marginHorizontal: moderateScale(16),
+    marginBottom: verticalScale(16),
+    borderRadius: moderateScale(8),
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.primary[600],
+  },
+  renewalBannerContent: {
+    flex: 1,
+    marginLeft: moderateScale(12),
+  },
+  renewalBannerTitle: {
+    fontSize: moderateScale(14),
+    fontWeight: '600',
+    color: theme.colors.primary[700],
+    marginBottom: verticalScale(2),
+  },
+  renewalBannerText: {
+    fontSize: moderateScale(12),
+    color: theme.colors.primary[600],
+  },
 });

@@ -270,6 +270,23 @@ export const checkRenewalEligibilityQuery = query({
 
 **Save the file.**
 
+### Step 2.2: Make Eligibility Logic Reusable & Authoritative (Recommended)
+
+To keep the backend as the single source of truth for renewal rules, plan a follow-up refactor where the eligibility logic is shared between the query and the renewal mutation.
+
+- **New File (planned):** `C:\Em\backend\convex\applications\lib\renewalEligibility.ts`
+- **Responsibility:** Centralize all renewal eligibility checks so they cannot be bypassed by a custom client.
+- The helper should:
+  - Accept the user's applications and the relevant health card as inputs.
+  - Block renewal when **any** application (new or renew) is in a pending/unresolved state.
+  - Enforce the **30‑day rule**: only allow renewal when the card is **expired** or **within 30 days of expiry**.
+  - Return a structured result, e.g. `{ isEligible, reason, eligibleApplication, eligibleCard }`.
+- **Usage plan:**
+  - Update `checkRenewalEligibilityQuery` (Step 2.1) to call this helper instead of duplicating the rules.
+  - Update `createRenewalApplicationMutation` (Phase 3) to call the same helper and **throw** when `isEligible` is `false`, so invalid renewals cannot be created even if the frontend is bypassed.
+
+You can implement Phase 2 and Phase 3 as written for an initial version, then apply this refactor to keep all future rules (e.g. new statuses or additional checks) in one place.
+
 ---
 
 # PHASE 3: BACKEND RENEWAL MUTATION

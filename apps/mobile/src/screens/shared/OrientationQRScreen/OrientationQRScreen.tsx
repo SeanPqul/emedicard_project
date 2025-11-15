@@ -10,6 +10,7 @@ import { BaseScreen } from '@shared/components/core';
 import { theme } from '@shared/styles/theme';
 import { moderateScale, verticalScale, scale } from '@shared/utils/responsive';
 import { format } from 'date-fns';
+import { formatTime } from '@features/inspector/lib/utils';
 
 /**
  * OrientationQRScreen
@@ -173,7 +174,7 @@ export function OrientationQRScreen() {
                 <View style={styles.detailRow}>
                   <Ionicons name="log-in-outline" size={moderateScale(20)} color={theme.colors.semantic.success} />
                   <Text style={styles.detailText}>
-                    Checked in: {format(new Date(attendance.checkInTime), 'h:mm a')}
+                    Checked in: {formatTime(attendance.checkInTime)}
                   </Text>
                 </View>
               )}
@@ -182,7 +183,7 @@ export function OrientationQRScreen() {
                 <View style={styles.detailRow}>
                   <Ionicons name="log-out-outline" size={moderateScale(20)} color={theme.colors.semantic.success} />
                   <Text style={styles.detailText}>
-                    Checked out: {format(new Date(attendance.checkOutTime), 'h:mm a')}
+                    Checked out: {formatTime(attendance.checkOutTime)}
                   </Text>
                 </View>
               )}

@@ -51,6 +51,10 @@ interface ApplyWidgetProps {
   showImagePicker: boolean;
   termsAccepted: boolean;
   
+  // Renewal props
+  isRenewalMode?: boolean;
+  renewalCardNumber?: string;
+  
   // State setters
   setCurrentStep: (step: number) => void;
   setFormData: (data: ApplicationFormData) => void;
@@ -89,6 +93,8 @@ export function ApplyWidget({
   isSubmitting,
   showImagePicker,
   termsAccepted,
+  isRenewalMode = false,
+  renewalCardNumber,
   setCurrentStep,
   setFormData,
   setShowImagePicker,
@@ -175,7 +181,7 @@ export function ApplyWidget({
         <TouchableOpacity onPress={handleBackPress}>
           <Ionicons name="arrow-back" size={24} color="#212529" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>New Application</Text>
+        <Text style={styles.headerTitle}>{isRenewalMode ? 'Renewal Application' : 'New Application'}</Text>
         <View style={styles.headerRight}>
           {formStorage.hasTempApplication() && (
             <TouchableOpacity onPress={handleCancelApplication} style={styles.cancelButton}>
@@ -188,8 +194,23 @@ export function ApplyWidget({
       {/* Step Indicator */}
       <StepIndicator currentStep={currentStep} stepTitles={STEP_TITLES} />
 
+      {/* Renewal Banner */}
+      {isRenewalMode && (
+        <View style={styles.renewalBanner}>
+          <Ionicons name="refresh-circle" size={moderateScale(24)} color="#2E86AB" />
+          <View style={styles.renewalBannerContent}>
+            <Text style={styles.renewalBannerTitle}>Renewal Application</Text>
+            <Text style={styles.renewalBannerText}>
+              {renewalCardNumber 
+                ? `Renewing card: ${renewalCardNumber}` 
+                : 'Your information has been pre-filled from your previous application'}
+            </Text>
+          </View>
+        </View>
+      )}
+
       {/* Scrollable Content */}
-      <ScrollView 
+      <ScrollView
         style={styles.content} 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ 
@@ -205,7 +226,8 @@ export function ApplyWidget({
 
       {/* Navigation Buttons - Absolute positioned above tab bar */}
       <View style={[styles.navigationButtons, { bottom: moderateScale(60) + (insets.bottom || 0) }]}>
-        {currentStep > 0 && (
+        {/* Show Previous button only if not at first step. For renewal mode, first step is 1 (Job Category) */}
+        {(isRenewalMode ? currentStep > 1 : currentStep > 0) && (
           <TouchableOpacity 
             style={styles.previousButton} 
             onPress={handlePrevious}
@@ -217,7 +239,8 @@ export function ApplyWidget({
         <TouchableOpacity
           style={[
             styles.nextButton,
-            currentStep === 0 && styles.nextButtonFull,
+            // Make next button full width when there's no previous button
+            (isRenewalMode ? currentStep === 1 : currentStep === 0) && styles.nextButtonFull,
             { 
               backgroundColor: (isSubmitting || (currentStep === STEP_TITLES.length - 1 && !termsAccepted)) ? '#D1D5DB' : '#2E86AB',
               opacity: (isSubmitting || (currentStep === STEP_TITLES.length - 1 && !termsAccepted)) ? 0.6 : 1,

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useQuery } from 'convex/react';
+import { api } from '@backend/convex/_generated/api';
+import { Id } from '@backend/convex/_generated/dataModel';
 import { BaseScreen } from '@/src/shared/components/core';
 import { useApplyForm } from '@/src/features/application/hooks';
 import { useApplications } from '@/src/features/application/hooks/useApplications';
@@ -22,6 +25,20 @@ import { moderateScale } from '@/src/shared/utils/responsive';
  */
 export function ApplyScreen() {
   const router = useRouter();
+  
+  // Detect renewal mode from URL params
+  const params = useLocalSearchParams();
+  const isRenewalMode = params.action === 'renew';
+  const healthCardId = params.healthCardId as string | undefined;
+  
+  // Fetch previous application data for renewal
+  const previousAppData = useQuery(
+    api.applications.getPreviousApplicationData.getPreviousApplicationDataQuery,
+    isRenewalMode && healthCardId 
+      ? { healthCardId: healthCardId as Id<"healthCards"> } 
+      : 'skip'
+  );
+  
   const { data, isLoading: applicationsLoading } = useApplications();
   const applications = data?.userApplications;
   const [showRestrictionModal, setShowRestrictionModal] = useState(false);
@@ -29,9 +46,15 @@ export function ApplyScreen() {
   const [accessChecked, setAccessChecked] = useState(false);
 
   // Check for unresolved applications on mount only
-  // Don't re-check when applications update to avoid race condition after submission
+  // Skip this check for renewal mode - select-card screen already handles eligibility
   useEffect(() => {
     if (!applicationsLoading && !accessChecked) {
+      // Skip unresolved check if coming from renewal flow
+      if (isRenewalMode) {
+        setAccessChecked(true);
+        return;
+      }
+      
       // Applications might be undefined or empty array
       const appList = applications || [];
       const { hasUnresolved, unresolvedApplication } = hasUnresolvedApplication(appList);
@@ -43,7 +66,7 @@ export function ApplyScreen() {
       
       setAccessChecked(true);
     }
-  }, [applicationsLoading, accessChecked]);
+  }, [applicationsLoading, accessChecked, isRenewalMode]);
 
   const {
     // State
@@ -85,6 +108,34 @@ export function ApplyScreen() {
     // Requirements
     requirementsLoading,
   } = useApplyForm();
+
+  // Pre-populate form data and skip Application Type step for renewal mode
+  useEffect(() => {
+    if (isRenewalMode && previousAppData && !formData.firstName && healthCardId) {
+      // Set form data first
+      setFormData({
+        ...formData,
+        applicationType: 'Renew',
+        firstName: previousAppData.application.firstName || '',
+        middleName: previousAppData.application.middleName || '',
+        lastName: previousAppData.application.lastName || '',
+        suffix: previousAppData.application.suffix || '',
+        age: previousAppData.application.age || undefined,
+        nationality: previousAppData.application.nationality || '',
+        gender: previousAppData.application.gender || undefined,
+        position: previousAppData.application.position || '',
+        organization: previousAppData.application.organization || '',
+        civilStatus: (previousAppData.application.civilStatus as any) || 'Single',
+        jobCategory: previousAppData.application.jobCategoryId || '',
+        previousHealthCardId: healthCardId as Id<"healthCards">,
+      });
+      
+      // Skip Application Type step (step 0) and go directly to Job Category (step 1)
+      if (currentStep === 0) {
+        setCurrentStep(1);
+      }
+    }
+  }, [isRenewalMode, previousAppData, formData.firstName, healthCardId, currentStep]);
 
   const handleViewApplication = () => {
     setShowRestrictionModal(false);
@@ -146,6 +197,10 @@ export function ApplyScreen() {
         isSubmitting={isSubmitting}
         showImagePicker={showImagePicker}
         termsAccepted={termsAccepted}
+        
+        // Renewal props
+        isRenewalMode={isRenewalMode}
+        renewalCardNumber={previousAppData?.healthCard?.registrationNumber}
         
         // State setters
         setCurrentStep={setCurrentStep}

@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 export default function ManageAccountPage() {
   const router = useRouter();
   const { user: clerkUser, isLoaded } = useUser();
-  const currentUser = useQuery(api.users.getCurrentUser.getCurrentUserQuery) ?? null;
+  const currentUser = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
   const updateAccount = useAction(api.admin.updateAdminAccount.updateAccountWithClerk);
 
   const [username, setUsername] = useState('');
@@ -178,14 +178,19 @@ export default function ManageAccountPage() {
     }
   };
 
+  // Show loading while auth is initializing
   if (!isLoaded || currentUser === undefined) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+          <p className="text-gray-600 font-medium">Loading account...</p>
+        </div>
       </div>
     );
   }
 
+  // Only show error after loading is complete
   if (!clerkUser || !currentUser) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -557,19 +562,6 @@ export default function ManageAccountPage() {
                     <p className="text-sm font-semibold text-blue-900">Account Restrictions</p>
                     <p className="text-sm text-blue-700 mt-1">
                       Your <strong>email</strong> and <strong>full name</strong> cannot be changed. Email is managed by authentication provider. Full name is set during account creation only.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-4 bg-emerald-50 border-l-4 border-emerald-400 rounded-r-lg">
-                <div className="flex items-start gap-2">
-                  <svg className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <p className="text-sm font-semibold text-emerald-900">Synced Changes</p>
-                    <p className="text-sm text-emerald-700 mt-1">
-                      Username and password changes are automatically synced with both Clerk (authentication) and the system database.
                     </p>
                   </div>
                 </div>

@@ -15,6 +15,7 @@ export type ApplicationStatus =
   | 'Submitted' 
   | 'Under Review' 
   | 'Approved' 
+  | 'Cancelled' // Auto-cancelled or user-cancelled application
   | 'Documents Need Revision' // Non-medical document issues
   | 'Referred for Medical Management'; // Medical findings requiring doctor consultation
 export type ApplicationType = 'New' | 'Renew';

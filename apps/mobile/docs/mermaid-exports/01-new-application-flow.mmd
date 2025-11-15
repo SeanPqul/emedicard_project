@@ -1,0 +1,222 @@
+sequenceDiagram
+    actor User
+    participant Mobile as Mobile App
+    participant Convex as Convex Backend
+    participant Storage as Convex Storage
+    participant Admin as WebAdmin
+    
+    Note over User,Admin: Phase 1: Application Submission
+    
+    User->>Mobile: Opens "Apply" screen
+    Mobile->>Convex: Query jobCategories
+    Convex-->>Mobile: Return available categories
+    Mobile-->>User: Display job categories
+    
+    User->>Mobile: Selects category & fills form
+    Note over User,Mobile: Personal details, position, organization
+    
+    User->>Mobile: Clicks "Next" (Review)
+    Mobile->>Mobile: Validates form data
+    
+    User->>Mobile: Clicks "Submit Application"
+    Mobile->>Convex: createApplication mutation
+    Note over Convex: Creates application with status "Draft"
+    Convex-->>Mobile: Return applicationId
+    Mobile-->>User: Show "Application Created"
+    
+    Note over User,Admin: Phase 2: Document Upload
+    
+    User->>Mobile: Opens Document Upload
+    Mobile->>Convex: Query required documents for category
+    Convex-->>Mobile: Return document types
+    
+    loop For each required document
+        User->>Mobile: Selects file from device
+        Mobile->>Storage: Upload file
+        Storage-->>Mobile: Return storageFileId
+        Mobile->>Convex: createDocumentUpload mutation
+        Note over Convex: Creates upload with status "Pending"
+        Convex-->>Mobile: Confirm upload saved
+    end
+    
+    User->>Mobile: Clicks "Submit for Review"
+    Mobile->>Convex: updateApplicationStatus mutation
+    Note over Convex: Status: "Draft" → "Submitted"
+    Convex->>Convex: Create notification for admin
+    Convex-->>Mobile: Confirm submission
+    Mobile-->>User: Show "Application Submitted"
+    
+    Note over User,Admin: Phase 3: Admin Document Review
+    
+    Admin->>Convex: Query pending applications
+    Convex-->>Admin: Return applications with "Submitted" status
+    
+    Admin->>Admin: Reviews application details
+    Admin->>Convex: Query document uploads
+    Convex-->>Admin: Return uploaded documents
+    
+    alt Documents Approved
+        Admin->>Convex: approveDocuments mutation
+        Note over Convex: Updates reviewStatus: "Pending" → "Approved"
+        Convex->>Convex: Update application status
+        Note over Convex: Status: "Submitted" → "For Payment Validation"
+        Convex->>Convex: Create notification for user
+        Convex-->>Admin: Confirm approval
+        
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Documents approved, proceed to payment"
+        
+    else Documents Need Revision
+        Admin->>Convex: rejectDocument mutation
+        Note over Convex: Creates documentReferralHistory record
+        Note over Convex: issueType: "document_issue"
+        Convex->>Convex: Update application status
+        Note over Convex: Status: "Submitted" → "Documents Need Revision"
+        Convex->>Convex: Create notification for user
+        Convex-->>Admin: Confirm rejection
+        
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Document needs revision"
+        User->>Mobile: Re-uploads corrected document
+        Mobile->>Convex: createDocumentUpload mutation
+        Note over Convex: Links to previous via replacementUploadId
+        
+    else Medical Referral Required
+        Admin->>Convex: referDocument mutation
+        Note over Convex: Creates documentReferralHistory record
+        Note over Convex: issueType: "medical_referral"
+        Convex->>Convex: Update application status
+        Note over Convex: Status: "Submitted" → "Referred for Medical Management"
+        Convex->>Convex: Create notification for user
+        Convex-->>Admin: Confirm referral
+        
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Medical consultation required"
+    end
+    
+    Note over User,Admin: Phase 4: Payment
+    
+    User->>Mobile: Opens Payment screen
+    Mobile->>Convex: Query payment details
+    Convex-->>Mobile: Return amount (₱60)
+    Mobile-->>User: Display payment options
+    alt Online Payment (Maya)
+        User->>Mobile: Selects "Pay with Maya"
+        Mobile->>Convex: createPayment mutation
+        Note over Convex: Creates payment with status "Pending"
+        Convex->>Maya: Create checkout session
+        Maya-->>Convex: Return checkout URL
+        Convex-->>Mobile: Return checkout URL
+        Mobile->>Maya: Opens Maya checkout
+        User->>Maya: Completes payment
+        Maya->>Convex: Webhook: payment_success
+        Note over Convex: Updates payment status to "Complete"
+        Convex->>Convex: Create paymentLog
+        Convex->>Convex: Create notification for user
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Payment successful"
+        
+    else Manual Payment (Barangay/City Hall)
+        User->>Mobile: Selects "Pay at Barangay Hall"
+        Mobile-->>User: Show payment instructions
+        User->>User: Makes payment at hall
+        User->>Mobile: Uploads receipt
+        Mobile->>Storage: Upload receipt
+        Storage-->>Mobile: Return storageFileId
+        Mobile->>Convex: createManualPayment mutation
+        Note over Convex: Creates payment with status "Pending"
+        Convex->>Convex: Create notification for admin
+        Convex-->>Mobile: Confirm submission
+        Mobile-->>User: "Receipt submitted for validation"
+    end
+    
+    Note over User,Admin: Phase 5: Payment Validation (Manual Only)
+    
+    Admin->>Convex: Query pending payments
+    Convex-->>Admin: Return payments with "Pending" status
+    
+    alt Payment Approved
+        Admin->>Convex: approvePayment mutation
+        Note over Convex: Status: "Pending" → "Complete"
+        Convex->>Convex: Update application status
+        Note over Convex: Status: "For Payment Validation" → next phase
+        Convex->>Convex: Create notification for user
+        Convex-->>Admin: Confirm approval
+        
+    else Payment Rejected
+        Admin->>Convex: rejectPayment mutation
+        Note over Convex: Creates paymentRejectionHistory record
+        Note over Convex: Payment status: "Pending" → "Failed"
+        Convex->>Convex: Create notification for user
+        Convex-->>Admin: Confirm rejection
+    end
+    
+    Note over User,Admin: Phase 6: Orientation (if required)
+    
+    alt Job Category Requires Orientation
+        Convex->>Convex: Check jobCategory.requireOrientation
+        Convex->>Convex: Update application status
+        Note over Convex: Status → "For Orientation"
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Book orientation session"
+        
+        User->>Mobile: Opens Orientation Booking
+        Mobile->>Convex: Query available schedules
+        Convex-->>Mobile: Return orientationSchedules
+        Mobile-->>User: Display available dates/times
+        
+        User->>Mobile: Selects schedule
+        Mobile->>Convex: createOrientationBooking mutation
+        Note over Convex: Creates booking with status "scheduled"
+        Note over Convex: Decrements availableSlots
+        Convex->>Convex: Generate QR code
+        Convex-->>Mobile: Return booking + QR code
+        Mobile-->>User: Show booking confirmation + QR
+        
+        User->>User: Attends orientation session
+        User->>Mobile: Shows QR code to inspector
+        
+        Admin->>Mobile: Scans QR code (Inspector app)
+        Mobile->>Convex: checkInUser mutation
+        Note over Convex: Status: "scheduled" → "checked-in"
+        Note over Convex: Records checkInTime
+        Convex-->>Mobile: Confirm check-in
+        
+        Note over User: Attends orientation (2 hours)
+        
+        Admin->>Mobile: Scans QR code again
+        Mobile->>Convex: checkOutUser mutation
+        Note over Convex: Status: "checked-in" → "completed"
+        Note over Convex: Records checkOutTime
+        Convex->>Convex: Update application.orientationCompleted = true
+        Convex-->>Mobile: Confirm check-out
+        
+    else No Orientation Required
+        Note over Convex: Skip orientation phase
+    end
+    
+    Note over User,Admin: Phase 7: Final Approval & Health Card Issuance
+    
+    Admin->>Convex: Query ready-to-approve applications
+    Convex-->>Admin: Return applications (all requirements met)
+    
+    Admin->>Admin: Final review
+    Admin->>Convex: approveApplication mutation
+    Note over Convex: Generate unique registration number
+    Note over Convex: Generate health card HTML
+    Convex->>Convex: Create healthCard record
+    Note over Convex: Status: "active"
+    Note over Convex: Set issuedDate, expiryDate (1 year)
+    Convex->>Convex: Update application status
+    Note over Convex: Status → "Approved"
+    Note over Convex: Link healthCardId to application
+    Convex->>Convex: Create notification for user
+    Convex-->>Admin: Confirm approval
+    
+    Convex->>Mobile: Push notification
+    Mobile-->>User: "Health card issued!"
+    
+    User->>Mobile: Opens "My Health Cards"
+    Mobile->>Convex: Query user's health cards
+    Convex-->>Mobile: Return health cards
+    Mobile-->>User: Display health card with QR code

@@ -2,6 +2,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { AdminRole } from "../users/roles";
+import { areAllDocumentsVerified } from "../lib/documentStatus";
 
 export const review = mutation({
   args: {
@@ -55,6 +56,59 @@ export const review = mutation({
       await ctx.db.patch(rejectionHistory._id, {
         status: args.status === "Approved" ? "approved" : "rejected",
       });
+    }
+
+    // Check if all documents are now verified and update application status if needed
+    const allDocuments = await ctx.db
+      .query("documentUploads")
+      .withIndex("by_application", (q) => q.eq("applicationId", application._id))
+      .collect();
+    
+    const allVerified = areAllDocumentsVerified(allDocuments);
+    
+    if (allVerified) {
+      const statusesThatNeedUpdate = ["For Document Verification", "Scheduled", "For Orientation", "Documents Need Revision"];
+      
+      if (statusesThatNeedUpdate.includes(application.applicationStatus)) {
+        const jobCategory = await ctx.db.get(application.jobCategoryId);
+        const requiresOrientation = jobCategory?.requireOrientation === "Yes" || jobCategory?.requireOrientation === true;
+        
+        let newStatus = application.applicationStatus;
+        let shouldUpdate = false;
+        
+        if (application.applicationStatus === "For Document Verification" || application.applicationStatus === "Documents Need Revision") {
+          // Moving from document verification stage
+          if (requiresOrientation && !application.orientationCompleted) {
+            newStatus = "For Orientation";
+          } else {
+            newStatus = "Under Review";
+          }
+          shouldUpdate = true;
+        } else if (application.applicationStatus === "Scheduled" && requiresOrientation && !application.orientationCompleted) {
+          // Documents verified during orientation wait - stay as Scheduled
+          shouldUpdate = false;
+        } else if (application.applicationStatus === "For Orientation" && (!requiresOrientation || application.orientationCompleted)) {
+          // Orientation not needed or already done, move to review
+          newStatus = "Under Review";
+          shouldUpdate = true;
+        }
+        
+        if (shouldUpdate && newStatus !== application.applicationStatus) {
+          await ctx.db.patch(application._id, {
+            applicationStatus: newStatus,
+            updatedAt: Date.now(),
+          });
+          
+          // Notify user that documents are verified
+          await ctx.db.insert("notifications", {
+            userId: application.userId,
+            title: "Documents Verified",
+            message: "All your documents have been verified and approved!",
+            notificationType: "status_update",
+            isRead: false,
+          });
+        }
+      }
     }
 
     // Log admin activity

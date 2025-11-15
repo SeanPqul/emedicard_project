@@ -180,6 +180,14 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                 statusBadge = { text: 'Medical Referral', color: '#3B82F6' }; // Blue - medical
               } else if (status === 'Documents Need Revision') {
                 statusBadge = { text: 'Docs Needed', color: '#F59E0B' };
+              } else if (status === 'Scheduled') {
+                statusBadge = { text: 'Scheduled', color: '#10B981' }; // Green - orientation scheduled
+              } else if (status === 'For Orientation') {
+                statusBadge = { text: 'Orientation', color: '#10B981' }; // Green - ready
+              } else if (status === 'For Document Verification') {
+                statusBadge = { text: 'Doc Review', color: '#6366F1' }; // Indigo
+              } else if (status === 'For Payment Validation') {
+                statusBadge = { text: 'Validating', color: '#8B5CF6' }; // Purple
               } else if (status === 'Approved' || status === 'Completed') {
                 statusBadge = { text: 'Approved', color: '#059669' }; // Clean green
               } else if (status === 'Under Review' || status === 'Submitted') {
@@ -315,6 +323,13 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                 year: 'numeric'
               });
               
+              // Check for active renewal application (terminal statuses that can't have renewals)
+              const terminalStatuses = ['Approved', 'Cancelled', 'Payment Rejected', 'Referred for Medical Management'];
+              const activeRenewal = userApplications?.find((app: any) => 
+                app.applicationType === 'Renew' && 
+                !terminalStatuses.includes(app.status)
+              );
+              
               // Determine status and styling
               let statusValue: string;
               let statusText: string;
@@ -322,10 +337,10 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
               let cardGradient: [string, string] | undefined;
               
               if (daysUntilExpiry < 0) {
-                // Expired
+                // Expired - URGENT RENEWAL
                 statusValue = 'Expired';
-                statusText = 'Renew required';
-                statusBadge = { text: 'Expired', color: theme.colors.red[700] };
+                statusText = 'Renew now';
+                statusBadge = { text: 'RENEW NOW', color: theme.colors.red[700] };
                 cardGradient = [theme.colors.red[500], theme.colors.red[600]];
               } else if (daysUntilExpiry <= 7) {
                 // Expiring soon (< 7 days)
@@ -346,11 +361,37 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                 cardGradient = [theme.colors.primary[500], theme.colors.primary[600]];
               }
               
+              // Add renewal status to subtitle if there's an active renewal
+              if (activeRenewal) {
+                const renewalStatusMap: Record<string, string> = {
+                  'Pending Payment': 'Payment Due',
+                  'For Payment Validation': 'Payment Validating',
+                  'Submitted': 'Submitted',
+                  'Scheduled': 'Orientation Scheduled',
+                  'For Document Verification': 'Documents Review',
+                  'Under Review': 'Under Review',
+                  'Documents Need Revision': 'Docs Needed',
+                  'For Orientation': 'Orientation Pending',
+                };
+                const renewalStatus = renewalStatusMap[activeRenewal.status] || activeRenewal.status;
+                statusText = `${statusText}\n🔄 Renewal: ${renewalStatus}`;
+              }
+              
               return (
                 <PresetStatCards.HealthCard
                   value={statusValue}
                   subtitle={statusText}
-                  onPress={() => router.push('/(screens)/(shared)/health-cards')}
+                  onPress={() => {
+                    // If there's an active renewal, go to application details
+                    if (activeRenewal) {
+                      router.push('/(tabs)/application');
+                    } else if (daysUntilExpiry <= 30) {
+                      // Navigate to card selection for renewal
+                      router.push('/(screens)/(shared)/renewal/select-card');
+                    } else {
+                      router.push('/(screens)/(shared)/health-cards');
+                    }
+                  }}
                   badge={statusBadge}
                   gradient={cardGradient}
                 />

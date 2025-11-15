@@ -102,12 +102,20 @@ export class DashboardService {
     // Add payments
     payments?.forEach(payment => {
       if (payment) {
+        // Format payment method properly
+        const methodMap: Record<string, string> = {
+          'Maya': 'Maya',
+          'BaranggayHall': 'Barangay Hall',
+          'CityHall': 'Sanggunian Hall',
+        };
+        const formattedMethod = methodMap[payment.paymentMethod] || payment.paymentMethod;
+        
         activities.push({
           id: payment._id,
           userId: payment.userId || '',
           type: 'payment_made' as const,
           title: `Payment ${payment.status}`,
-          description: `${payment.netAmount.toFixed(2)} payment via ${payment.paymentMethod}`,
+          description: `P${payment.netAmount.toFixed(2)} payment via ${formattedMethod}`,
           timestamp: new Date(payment.updatedAt || payment._creationTime || 0),
           status: payment.status === 'Complete' ? 'success' : payment.status === 'Failed' ? 'error' : 'pending',
           metadata: {
@@ -187,7 +195,7 @@ export class DashboardService {
           userId: 'mock-user-id',
           type: 'payment_made' as const,
           title: 'Payment Complete',
-          description: '60.00 payment via Gcash',
+          description: 'P60.00 payment via GCash',
           timestamp: new Date(Date.now() - 86400000),
           status: 'success',
         },

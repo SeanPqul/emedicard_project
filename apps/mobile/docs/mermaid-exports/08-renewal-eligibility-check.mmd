@@ -1,0 +1,100 @@
+sequenceDiagram
+    actor User
+    participant Mobile as Mobile App
+    participant Convex as Convex Backend
+    
+    User->>Mobile: Opens Dashboard
+    Mobile->>Convex: getCurrentUserQuery
+    Convex-->>Mobile: Return user details
+    
+    Mobile->>Convex: checkRenewalEligibilityQuery
+    
+    Convex->>Convex: Authenticate user
+    Note over Convex: Get identity from auth context
+    
+    alt Not Authenticated
+        Convex-->>Mobile: Return { isEligible: false, reason: "Not authenticated" }
+        Mobile-->>User: Redirect to login
+    end
+    
+    Convex->>Convex: Get user by clerkId
+    
+    alt User Not Found
+        Convex-->>Mobile: Return { isEligible: false, reason: "User not found" }
+        Mobile-->>User: Show error
+    end
+    
+    Convex->>Convex: Query user's applications
+    Note over Convex: Filter: userId = user._id, deletedAt = undefined
+    
+    Convex->>Convex: Check for pending applications
+    Note over Convex: Check statuses:
+    Note over Convex: - Not "Approved"
+    Note over Convex: - Not "Payment Rejected"
+    Note over Convex: - Not "Referred for Medical Management"
+    
+    alt Has Pending Applications
+        Convex-->>Mobile: Return { isEligible: false, reason: "Application in progress" }
+        Mobile-->>User: Show "Complete current application first"
+    end
+    
+    Convex->>Convex: Check for pending renewal
+    Note over Convex: Filter: applicationType = "Renew", status != approved/rejected
+    
+    alt Has Pending Renewal
+        Convex-->>Mobile: Return { isEligible: false, reason: "Renewal in progress" }
+        Mobile-->>User: Show "Renewal already submitted"
+    end
+    
+    Convex->>Convex: Find approved applications
+    Note over Convex: Filter: status = "Approved"
+    Convex->>Convex: Sort by approvedAt (descending)
+    
+    alt No Approved Applications
+        Convex-->>Mobile: Return { isEligible: false, reason: "No approved application" }
+        Mobile-->>User: Show "Apply for health card first"
+    end
+    
+    Convex->>Convex: Get most recent approved application
+    Convex->>Convex: Query health card for application
+    Note over Convex: Use by_application index
+    
+    alt No Health Card Found
+        Convex-->>Mobile: Return { isEligible: false, reason: "No health card found" }
+        Mobile-->>User: Show "Contact support"
+    end
+    
+    Convex->>Convex: Get job category for card
+    
+    Convex->>Convex: Calculate card status
+    Note over Convex: isExpired = expiryDate < now
+    Note over Convex: isExpiringSoon = expiryDate < (now + 30 days)
+    Note over Convex: daysUntilExpiry = (expiryDate - now) / 86400000
+    
+    Convex->>Convex: Prepare eligibility response
+    
+    Convex-->>Mobile: Return {
+    Note over Convex,Mobile: isEligible: true,
+    Note over Convex,Mobile: reason: "Eligible for renewal",
+    Note over Convex,Mobile: previousCard: { ...cardData, jobCategory, status },
+    Note over Convex,Mobile: previousApplication: { ...appData, jobCategory }
+    Note over Convex,Mobile: }
+    
+    Mobile->>Mobile: Process eligibility data
+    
+    alt Card Expired
+        Mobile-->>User: Show "EXPIRED - Renew Now" badge
+        Mobile-->>User: Enable renewal button (urgent)
+        
+    else Card Expiring Soon (<30 days)
+        Mobile-->>User: Show "RENEW SOON" badge
+        Mobile-->>User: Enable renewal button
+        
+    else Card Still Valid (>30 days)
+        Mobile-->>User: Show expiry date
+        Mobile-->>User: Enable renewal button (with confirmation)
+    end
+    
+    User->>Mobile: Clicks "Renew Health Card"
+    Mobile->>Mobile: Navigate to card selection screen
+    Note over Mobile: Pass eligibility data as context

@@ -36,6 +36,28 @@ crons.weekly(
 );
 
 /**
+ * AUTO-CANCEL EXPIRED PENDING PAYMENT APPLICATIONS
+ * 
+ * Runs: Daily at 12:00 AM UTC (8:00 AM Philippine Time)
+ * Purpose: Cancels applications that haven't been paid within 7 days
+ * 
+ * Business Rules:
+ * - Applications in "Pending Payment" status
+ * - Payment deadline has passed (7 days from submission)
+ * - User receives notification about cancellation
+ * - Cancelled applications remain in history for reference
+ */
+crons.daily(
+  "auto-cancel-expired-applications",
+  {
+    hourUTC: 0,       // 12:00 AM UTC = 8:00 AM Philippine Time
+    minuteUTC: 0,
+  },
+  // @ts-ignore - Deep type instantiation limitation
+  internal.applications.autoCancelExpiredApplications.cancelExpiredApplications
+);
+
+/**
  * To add more scheduled jobs, use:
  * 
  * Daily job:

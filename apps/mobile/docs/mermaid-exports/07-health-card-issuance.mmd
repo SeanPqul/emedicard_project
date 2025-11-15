@@ -1,0 +1,104 @@
+sequenceDiagram
+    actor Admin
+    participant WebAdmin
+    participant Convex as Convex Backend
+    participant Mobile as Mobile App
+    actor User
+    
+    Note over Admin,User: Prerequisites Check
+    
+    Admin->>WebAdmin: Opens "Ready for Approval" dashboard
+    WebAdmin->>Convex: Query applications ready for approval
+    Note over WebAdmin,Convex: Filter applications where:
+    Note over WebAdmin,Convex: - All documents approved
+    Note over WebAdmin,Convex: - Payment complete
+    Note over WebAdmin,Convex: - Orientation done (if required)
+    
+    Convex-->>WebAdmin: Return eligible applications
+    WebAdmin-->>Admin: Display applications list
+    
+    Admin->>WebAdmin: Selects application to approve
+    WebAdmin->>Convex: Query full application details
+    Convex-->>WebAdmin: Return application, documents, payment
+    
+    Admin->>Admin: Final review of all details
+    Admin->>WebAdmin: Clicks "Approve & Issue Health Card"
+    
+    Note over Admin,User: Health Card Generation
+    
+    WebAdmin->>Convex: approveApplicationAndIssueCard mutation
+    
+    Convex->>Convex: Generate unique registration number
+    Note over Convex: Format: CHO-YYYY-XXXXXX
+    Note over Convex: e.g., CHO-2025-001234
+    
+    Convex->>Convex: Get applicant details
+    Note over Convex: Name, photo, job category, etc.
+    
+    Convex->>Convex: Generate health card HTML
+    Note over Convex: Template includes:
+    Note over Convex: - Registration number
+    Note over Convex: - Applicant photo
+    Note over Convex: - Personal details
+    Note over Convex: - Job category color
+    Note over Convex: - Issue/expiry dates
+    Note over Convex: - QR code for verification
+    
+    Convex->>Convex: Create healthCard record
+    Note over Convex: status: "active"
+    Note over Convex: issuedDate: now
+    Note over Convex: expiryDate: +1 year from now
+    Note over Convex: htmlContent: <generated HTML>
+    
+    Convex->>Convex: Update application
+    Note over Convex: applicationStatus → "Approved"
+    Note over Convex: approvedAt: now
+    Note over Convex: healthCardId: <new card ID>
+    Note over Convex: healthCardRegistrationNumber: <number>
+    Note over Convex: healthCardIssuedAt: now
+    
+    Convex->>Convex: Create notification for user
+    Note over Convex: "Your health card has been issued!"
+    
+    Convex->>Convex: Create adminActivityLog
+    Note over Convex: action: "health_card_issued"
+    
+    Convex-->>WebAdmin: Confirm issuance
+    WebAdmin-->>Admin: Show "Health card issued"
+    
+    Convex->>Mobile: Push notification
+    Mobile-->>User: "Health card issued! 🎉"
+    
+    Note over Admin,User: User Views Health Card
+    
+    User->>Mobile: Opens "My Health Cards" screen
+    Mobile->>Convex: getUserHealthCards query
+    Note over Mobile,Convex: Pass userId
+    
+    Convex->>Convex: Get user's applications
+    Convex->>Convex: Get linked health cards
+    Convex->>Convex: Join with job categories
+    Convex-->>Mobile: Return health cards with details
+    
+    Mobile-->>User: Display health card(s)
+    Note over User: Shows:
+    Note over User: - Registration number
+    Note over User: - Photo
+    Note over User: - Job category badge
+    Note over User: - Issue/expiry dates
+    Note over User: - Status (Active/Expired)
+    Note over User: - QR code
+    
+    User->>Mobile: Clicks "View Full Card"
+    Mobile->>Convex: getHealthCardHTML query
+    Convex-->>Mobile: Return card HTML content
+    Mobile-->>User: Display rendered health card
+    
+    User->>Mobile: Clicks "Download Card"
+    Mobile->>Mobile: Generate PDF from HTML
+    Mobile->>Mobile: Save to device
+    Mobile-->>User: "Health card saved"
+    
+    User->>Mobile: Clicks "Share Card"
+    Mobile->>Mobile: Generate shareable image
+    Mobile-->>User: Show share options

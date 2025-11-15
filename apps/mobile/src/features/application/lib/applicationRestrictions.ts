@@ -14,11 +14,13 @@ import { ApplicationStatus } from '@/src/entities/application';
  * 
  * These represent completed processes where the user can start fresh:
  * - Approved: User received their health card, can apply for renewal later
+ * - Cancelled: Application was cancelled (auto-cancelled due to non-payment or user cancelled)
  * - Payment Rejected: Application ended, user can try again with valid payment
  * - Referred for Medical Management: Special case requiring external doctor consultation
  */
 const TERMINAL_STATUSES: ApplicationStatus[] = [
   'Approved',
+  'Cancelled',
   'Payment Rejected',
   'Referred for Medical Management',
 ];
@@ -87,4 +89,50 @@ export function getRestrictionMessage(status: ApplicationStatus): string {
     default:
       return 'You have an application in progress. Please wait for it to be completed before applying again.';
   }
+}
+
+/**
+ * Checks if user can create a renewal application
+ * @param applications - Array of user applications
+ * @returns Object with canRenew flag and message
+ */
+export function canCreateRenewal(applications: any[]): {
+  canRenew: boolean;
+  message: string;
+} {
+  if (!applications || applications.length === 0) {
+    return {
+      canRenew: false,
+      message: 'You must have an approved health card before you can renew.',
+    };
+  }
+
+  // Check for pending renewal
+  const pendingRenewal = applications.find(
+    app => app.applicationType === 'Renew' && isUnresolvedStatus(app.status)
+  );
+
+  if (pendingRenewal) {
+    return {
+      canRenew: false,
+      message: 'You already have a renewal application in progress.',
+    };
+  }
+
+  // Check for approved applications with health cards
+  const hasApprovedApp = applications.some(
+    app => app.status === 'Approved'
+  );
+
+  if (!hasApprovedApp) {
+    return {
+      canRenew: false,
+      message: 'You must have an approved health card before you can renew.',
+    };
+  }
+
+  return {
+    canRenew: true,
+    message: '',
+  };
 }

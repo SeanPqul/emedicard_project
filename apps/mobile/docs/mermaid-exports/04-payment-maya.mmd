@@ -1,0 +1,86 @@
+sequenceDiagram
+    actor User
+    participant Mobile as Mobile App
+    participant Convex as Convex Backend
+    participant Maya as Maya Payment API
+    
+    User->>Mobile: Opens Payment screen
+    Mobile->>Convex: Query payment requirements
+    Note over Mobile,Convex: Pass applicationId
+    Convex->>Convex: Calculate fees
+    Note over Convex: Total: ₱60
+    Convex-->>Mobile: Return amount details
+    Mobile-->>User: Display payment options
+    
+    User->>Mobile: Selects "Pay with Maya"
+    Mobile->>Convex: createMayaCheckout mutation
+    
+    Convex->>Convex: Create payment record
+    Note over Convex: paymentStatus: "Pending"
+    Note over Convex: paymentMethod: "Maya"
+    Note over Convex: paymentProvider: "maya_api"
+    
+    Convex->>Maya: POST /checkout
+    Note over Convex,Maya: Pass amount, redirectUrl, webhookUrl
+    
+    alt Maya API Success
+        Maya-->>Convex: Return checkoutId + checkoutUrl
+        Convex->>Convex: Update payment.mayaCheckoutId
+        Convex->>Convex: Update payment.checkoutUrl
+        Convex->>Convex: Create paymentLog (checkout_created)
+        Convex-->>Mobile: Return checkoutUrl
+        
+        Mobile->>Maya: Opens Maya checkout page
+        Mobile-->>User: Display Maya payment form
+        
+        User->>Maya: Enters payment details
+        User->>Maya: Confirms payment
+        
+        Maya->>Maya: Process payment
+        
+        alt Payment Successful
+            Maya->>Convex: Webhook: payment.success
+            Note over Maya,Convex: POST /api/webhooks/maya
+            
+            Convex->>Convex: Verify webhook signature
+            Convex->>Convex: Update payment status
+            Note over Convex: paymentStatus: "Pending" → "Complete"
+            Convex->>Convex: Set settlementDate
+            Convex->>Convex: Create paymentLog (payment_success)
+            Convex->>Convex: Update application status
+            Note over Convex: Check if orientation required
+            Convex->>Convex: Create notification for user
+            Convex->>Convex: Create adminActivityLog
+            Convex-->>Maya: Return 200 OK
+            
+            Maya->>Mobile: Redirect to successUrl
+            Mobile->>Convex: Query payment status
+            Convex-->>Mobile: Return "Complete"
+            Mobile-->>User: Show "Payment Successful!"
+            
+        else Payment Failed
+            Maya->>Convex: Webhook: payment.failed
+            Convex->>Convex: Update payment status
+            Note over Convex: paymentStatus: "Pending" → "Failed"
+            Convex->>Convex: Store failureReason
+            Convex->>Convex: Create paymentLog (payment_failed)
+            Convex-->>Maya: Return 200 OK
+            
+            Maya->>Mobile: Redirect to failureUrl
+            Mobile-->>User: Show "Payment Failed"
+            Mobile-->>User: Option to retry
+            
+        else Payment Expired
+            Maya->>Convex: Webhook: payment.expired
+            Convex->>Convex: Update payment status
+            Note over Convex: paymentStatus: "Pending" → "Expired"
+            Convex->>Convex: Create paymentLog (payment_expired)
+            Convex-->>Maya: Return 200 OK
+        end
+        
+    else Maya API Error
+        Maya-->>Convex: Return error
+        Convex->>Convex: Create paymentLog (checkout_failed)
+        Convex-->>Mobile: Return error
+        Mobile-->>User: Show error message
+    end

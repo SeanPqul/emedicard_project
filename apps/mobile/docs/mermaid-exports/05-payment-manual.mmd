@@ -1,0 +1,95 @@
+sequenceDiagram
+    actor User
+    participant Mobile as Mobile App
+    participant Convex as Convex Backend
+    participant Storage as Convex Storage
+    participant Admin as WebAdmin
+    
+    User->>Mobile: Selects "Pay at Barangay Hall"
+    Mobile->>Convex: getManualPaymentInstructions query
+    Convex-->>Mobile: Return payment details + locations
+    Mobile-->>User: Display payment instructions
+    Note over User: Amount: ₱60
+    Note over User: Account details, reference format
+    
+    User->>User: Goes to Barangay/City Hall
+    User->>User: Makes cash payment
+    User->>User: Receives official receipt
+    
+    User->>Mobile: Opens "Upload Receipt" screen
+    User->>Mobile: Takes photo / selects receipt image
+    Mobile->>Storage: Upload receipt image
+    Storage-->>Mobile: Return storageFileId
+    
+    Mobile->>Convex: createManualPayment mutation
+    Note over Mobile,Convex: Pass receipt info + storageFileId
+    
+    Convex->>Convex: Create payment record
+    Note over Convex: paymentStatus: "Pending"
+    Note over Convex: paymentMethod: "BaranggayHall" or "CityHall"
+    Note over Convex: paymentProvider: "manual"
+    Note over Convex: receiptStorageId: <storageFileId>
+    
+    Convex->>Convex: Create notification for admin
+    Note over Convex: "New manual payment for validation"
+    Convex->>Convex: Create paymentLog
+    Convex-->>Mobile: Confirm submission
+    Mobile-->>User: Show "Receipt submitted for validation"
+    
+    Admin->>WebAdmin: Opens "Payment Validation" dashboard
+    WebAdmin->>Convex: Query pending manual payments
+    Convex-->>WebAdmin: Return payments with "Pending" status
+    
+    Admin->>WebAdmin: Selects payment to review
+    WebAdmin->>Convex: Query payment details
+    Convex-->>WebAdmin: Return payment + receipt
+    WebAdmin->>Convex: Get receipt access URL
+    Convex-->>WebAdmin: Return signed URL
+    WebAdmin-->>Admin: Display receipt image
+    
+    alt Receipt Valid
+        Admin->>WebAdmin: Clicks "Approve Payment"
+        Admin->>WebAdmin: Enters validation notes (optional)
+        
+        WebAdmin->>Convex: approveManualPayment mutation
+        Convex->>Convex: Update payment status
+        Note over Convex: paymentStatus: "Pending" → "Complete"
+        Convex->>Convex: Set settlementDate
+        Convex->>Convex: Create paymentLog (payment_success)
+        Convex->>Convex: Update application status
+        Note over Convex: Proceed to next phase
+        Convex->>Convex: Create notification for user
+        Convex->>Convex: Create adminActivityLog
+        Convex-->>WebAdmin: Confirm approval
+        
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Payment approved!"
+        
+    else Receipt Invalid
+        Admin->>WebAdmin: Clicks "Reject Payment"
+        Admin->>WebAdmin: Selects rejection category
+        Note over Admin: e.g., "invalid_receipt", "wrong_amount"
+        Admin->>WebAdmin: Enters rejection reason
+        Admin->>WebAdmin: Lists specific issues
+        
+        WebAdmin->>Convex: rejectManualPayment mutation
+        Convex->>Convex: Create paymentRejectionHistory record
+        Convex->>Convex: Preserve receipt (audit)
+        Convex->>Convex: Update payment status
+        Note over Convex: paymentStatus: "Pending" → "Failed"
+        Convex->>Convex: Create paymentLog (payment_failed)
+        Convex->>Convex: Create notification for user
+        Convex->>Convex: Create adminActivityLog
+        Convex-->>WebAdmin: Confirm rejection
+        
+        Convex->>Mobile: Push notification
+        Mobile-->>User: "Payment rejected"
+        
+        User->>Mobile: Views rejection details
+        Mobile->>Convex: Query paymentRejectionHistory
+        Convex-->>Mobile: Return reason + specific issues
+        Mobile-->>User: Display detailed feedback
+        
+        User->>Mobile: Re-submits payment with new receipt
+        Note over User: Repeat manual payment flow
+    end
