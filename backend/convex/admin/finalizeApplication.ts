@@ -27,15 +27,79 @@ export const finalize = mutation({
       .withIndex("by_application", q => q.eq("applicationId", args.applicationId))
       .collect();
 
-    // 2. Perform validation on the backend for security.
-    // Check for any documents still pending review
-    if (uploadedDocs.some(doc => doc.reviewStatus === "Pending")) {
-      throw new Error("Please review and assign a status (Approve, Refer, or Flag) to all documents before proceeding.");
+    // 1.1 Fetch the list of documents relevant for this job category
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) throw new Error("Application not found.");
+
+    const jobDocs = await ctx.db
+      .query("jobCategoryDocuments")
+      .withIndex("by_job_category", q => q.eq("jobCategoryId", application.jobCategoryId))
+      .collect();
+
+    // Load document type metadata to filter by fieldIdentifier when needed
+    const docTypeMap = new Map<string, { fieldIdentifier?: string; name?: string }>();
+    for (const jd of jobDocs) {
+      const dt: any = await ctx.db.get(jd.documentTypeId as any);
+      docTypeMap.set((jd.documentTypeId as any).toString(), { fieldIdentifier: dt?.fieldIdentifier, name: dt?.name });
     }
 
-    // Check for documents that need referral/resubmission
-    // "Rejected" (old), "Referred" (medical), "NeedsRevision" (document issue)
-    const hasReferralsOrIssues = uploadedDocs.some(doc =>
+    // Determine which document types are actually required
+    // - Only 'isRequired' docs are enforced
+    // - For Non-Food (pink/non-food handling differs), exclude Drug Test / Neuro when securityGuard === false
+    const jobCategory = await ctx.db.get(application.jobCategoryId);
+    const catName = jobCategory?.name?.toLowerCase() || "";
+    const isNonFood = catName.includes("non-food") || catName.includes("nonfood");
+
+    const requiredDocs = jobDocs.filter(jd => jd.isRequired).filter(jd => {
+      const key = (jd.documentTypeId as any).toString();
+      const fid = docTypeMap.get(key)?.fieldIdentifier || "";
+      if (isNonFood && application.securityGuard !== true) {
+        if (fid === "drugTestId" || fid === "neuroExamId") return false; // not required for non-guards
+      }
+      return true;
+    });
+
+    const relevantDocTypeIds = new Set(requiredDocs.map(jd => jd.documentTypeId));
+
+    // 1.2 Build a map of the LATEST upload per relevant document type
+    const latestByType = new Map<string, typeof uploadedDocs[number]>();
+    for (const up of uploadedDocs) {
+      // Skip uploads for documents not part of this job category
+      if (!relevantDocTypeIds.has(up.documentTypeId as any)) continue;
+      const existing = latestByType.get((up.documentTypeId as any).toString());
+      if (!existing || (up.uploadedAt ?? 0) > (existing.uploadedAt ?? 0)) {
+        latestByType.set((up.documentTypeId as any).toString(), up);
+      }
+    }
+
+    // 2. Perform validation on the backend for security, using only latest uploads for relevant docs
+    // 2.1 Ensure each relevant document has an upload
+    const missing: string[] = [];
+    for (const jd of requiredDocs) {
+      const key = (jd.documentTypeId as any).toString();
+      const latest = latestByType.get(key);
+      if (!latest) {
+        const name = docTypeMap.get(key)?.name || "Unknown";
+        missing.push(name);
+      }
+    }
+    if (missing.length > 0) {
+      throw new Error(
+        `Please review and assign a status (Approve, Refer, or Flag) to all documents before proceeding. Missing: ${missing.join(", ")}`
+      );
+    }
+
+    // 2.2 Check for any Pending among the latest uploads
+    const pendingDocs = [...latestByType.values()].filter(doc => doc.reviewStatus === "Pending");
+    if (pendingDocs.length > 0) {
+      const names = pendingDocs.map(d => docTypeMap.get((d.documentTypeId as any).toString())?.name || "Unknown");
+      throw new Error(
+        `Please review and assign a status (Approve, Refer, or Flag) to all documents before proceeding. Pending: ${names.join(", ")}`
+      );
+    }
+
+    // 2.3 Check for referred or needs revision when attempting final approval
+    const hasReferralsOrIssues = [...latestByType.values()].some(doc =>
       doc.reviewStatus === "Rejected" ||
       doc.reviewStatus === "Referred" ||
       doc.reviewStatus === "NeedsRevision"
@@ -45,10 +109,7 @@ export const finalize = mutation({
       throw new Error("To send referral notifications, at least one document must be referred or flagged.");
     }
 
-    // Get application and applicant details for logging
-    const application = await ctx.db.get(args.applicationId);
-    if (!application) throw new Error("Application not found.");
-    
+    // Get application and applicant details for logging (already fetched above)
     const applicant = await ctx.db.get(application.userId);
     if (!applicant) throw new Error("Applicant not found.");
 

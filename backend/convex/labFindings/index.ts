@@ -5,6 +5,69 @@
 import { v } from "convex/values";
 import { mutation, query, internalMutation, internalQuery } from "../_generated/server";
 import { Id } from "../_generated/dataModel";
+import { AdminRole } from "../users/roles";
+
+/**
+ * TEST ONLY: Record lab finding without auth (for testing via Dashboard)
+ * WARNING: Remove this in production! Use recordLabFinding instead.
+ */
+export const recordLabFindingTest = mutation({
+  args: {
+    applicationId: v.id("applications"),
+    testType: v.union(
+      v.literal("urinalysis"),
+      v.literal("xray_sputum"),
+      v.literal("stool")
+    ),
+    findingKind: v.string(),
+    findingStatus: v.union(
+      v.literal("cleared_with_monitoring"),
+      v.literal("cleared_no_monitoring"),
+      v.literal("pending_retest")
+    ),
+    clearedDate: v.float64(),
+    monitoringExpiry: v.float64(),
+    monitoringPeriodMonths: v.float64(),
+    doctorName: v.string(),
+    treatmentNotes: v.optional(v.string()),
+    clinicAddress: v.optional(v.string()),
+    showOnCard: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    // NO AUTH CHECK - TEST ONLY!
+    
+    // 1. Get any user for recordedBy
+    const anyUser = await ctx.db.query("users").first();
+    if (!anyUser) {
+      throw new Error("No users in database");
+    }
+
+    // 2. Validate application exists
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) {
+      throw new Error("Application not found");
+    }
+
+    // 3. Insert finding record
+    const findingId = await ctx.db.insert("labTestFindings", {
+      applicationId: args.applicationId,
+      testType: args.testType,
+      findingKind: args.findingKind,
+      findingStatus: args.findingStatus,
+      clearedDate: args.clearedDate,
+      monitoringExpiry: args.monitoringExpiry,
+      monitoringPeriodMonths: args.monitoringPeriodMonths,
+      doctorName: args.doctorName,
+      treatmentNotes: args.treatmentNotes,
+      clinicAddress: args.clinicAddress,
+      showOnCard: args.showOnCard,
+      recordedBy: anyUser._id,
+      recordedAt: Date.now(),
+    });
+
+    return { success: true, findingId };
+  },
+});
 
 /**
  * Record a lab test finding for an application
@@ -40,13 +103,18 @@ export const recordLabFinding = mutation({
       throw new Error("Authentication required");
     }
 
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isAdmin) {
+      throw new Error("Admin access required. Only admins and system administrators can record lab findings.");
+    }
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (!user || !["admin", "system_admin"].includes(user.role ?? "")) {
-      throw new Error("Admin access required");
+    if (!user) {
+      throw new Error("User not found");
     }
 
     // 2. Validate application exists and not yet approved
@@ -217,13 +285,18 @@ export const updateLabFinding = mutation({
       throw new Error("Authentication required");
     }
 
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isAdmin) {
+      throw new Error("Admin access required. Only admins and system administrators can update lab findings.");
+    }
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (!user || !["admin", "system_admin"].includes(user.role ?? "")) {
-      throw new Error("Admin access required");
+    if (!user) {
+      throw new Error("User not found");
     }
 
     // 2. Get existing finding
@@ -274,13 +347,18 @@ export const deleteLabFinding = mutation({
       throw new Error("Authentication required");
     }
 
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isAdmin) {
+      throw new Error("Admin access required. Only admins and system administrators can delete lab findings.");
+    }
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (!user || !["admin", "system_admin"].includes(user.role ?? "")) {
-      throw new Error("Admin access required");
+    if (!user) {
+      throw new Error("User not found");
     }
 
     // 2. Get existing finding

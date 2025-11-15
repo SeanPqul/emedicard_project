@@ -53,6 +53,7 @@ export const referDocument = mutation({
     specificIssues: v.array(v.string()), // Bullet points of specific issues
     doctorName: v.optional(v.string()), // Required for medical referrals
     clinicAddress: v.optional(v.string()), // Venue for medical consultation
+    findingDescription: v.optional(v.string()), // Medical finding selected during referral (for pre-filling lab finding form)
   },
   handler: async (ctx, args) => {
     try {
@@ -160,6 +161,7 @@ export const referDocument = mutation({
           specificIssues: args.specificIssues,
           doctorName: args.doctorName,
           clinicAddress: args.clinicAddress,
+          findingDescription: args.findingDescription,
 
           // Tracking
           referredBy: admin._id,
