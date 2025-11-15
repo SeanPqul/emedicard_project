@@ -3,7 +3,7 @@
 // Handles recording and querying medical test findings that appear on health cards
 
 import { v } from "convex/values";
-import { mutation, query, internalMutation } from "../_generated/server";
+import { mutation, query, internalMutation, internalQuery } from "../_generated/server";
 import { Id } from "../_generated/dataModel";
 
 /**
@@ -93,6 +93,41 @@ export const recordLabFinding = mutation({
  * Returns findings grouped by test type for easy rendering
  */
 export const getLabFindings = query({
+  args: { applicationId: v.id("applications") },
+  handler: async (ctx, args) => {
+    const findings = await ctx.db
+      .query("labTestFindings")
+      .withIndex("by_application", (q) =>
+        q.eq("applicationId", args.applicationId)
+      )
+      .filter((q) => q.eq(q.field("deletedAt"), undefined))
+      .collect();
+
+    // Enrich with recorder info
+    const enrichedFindings = await Promise.all(
+      findings.map(async (finding) => {
+        const recorder = await ctx.db.get(finding.recordedBy);
+        return {
+          ...finding,
+          recorderName: recorder?.fullname || "Admin",
+        };
+      })
+    );
+
+    // Group by test type for easy rendering
+    return {
+      urinalysis: enrichedFindings.filter((f) => f.testType === "urinalysis"),
+      xray_sputum: enrichedFindings.filter((f) => f.testType === "xray_sputum"),
+      stool: enrichedFindings.filter((f) => f.testType === "stool"),
+      all: enrichedFindings,
+    };
+  },
+});
+
+/**
+ * Internal query version for health card generation
+ */
+export const getLabFindingsInternal = internalQuery({
   args: { applicationId: v.id("applications") },
   handler: async (ctx, args) => {
     const findings = await ctx.db

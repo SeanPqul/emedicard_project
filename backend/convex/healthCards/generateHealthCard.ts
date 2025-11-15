@@ -805,7 +805,7 @@ export const generateHealthCard = internalAction({
     // Phase 2: Fetch lab findings for this application
     let labFindings: any = { urinalysis: [], xray_sputum: [], stool: [] };
     try {
-      labFindings = await ctx.runQuery(internal.labFindings.index.getLabFindings, {
+      labFindings = await ctx.runQuery(internal.labFindings.index.getLabFindingsInternal, {
         applicationId: args.applicationId,
       });
     } catch (error) {
