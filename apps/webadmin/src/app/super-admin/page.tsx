@@ -15,7 +15,7 @@ import {
   Bar,
   BarChart,
   Cell,
-  Legend,
+  Legend as RechartsLegend,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -32,6 +32,10 @@ type AdminActivityLogWithApplicantName = Doc<"adminActivityLogs"> & {
     email?: string;
   };
 };
+
+// Typed Legend component to fix TypeScript issues with recharts
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Legend = RechartsLegend as any;
 
 // Admin Creation Modal
 const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolean; onClose: () => void; jobCategories: { _id: Id<"jobCategories">; name: string }[] | undefined }) => {
@@ -104,9 +108,9 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
       } else {
         setError(result.errorMessage || "Failed to create admin. Please try again.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to create admin (frontend catch):", err);
-      setError(err.message || "An unexpected error occurred. Please try again.");
+      setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -1036,7 +1040,7 @@ export default function SystemAdministratorPage() {
                       
                       {activity.comment && (
                         <p className="text-xs text-gray-600 italic ml-9 mt-1">
-                          "{activity.comment}"
+                          &quot;{activity.comment}&quot;
                         </p>
                       )}
                     </div>
