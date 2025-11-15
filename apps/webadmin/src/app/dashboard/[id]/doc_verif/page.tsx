@@ -237,6 +237,18 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
     }
     return item.status;
   };
+  
+  // Helper function to get referral details for a document
+  const getReferralDetails = (documentTypeId: Id<'documentTypes'>) => {
+    if (!referralHistoryData) return null;
+    return referralHistoryData.find((r: any) => r.documentTypeId === documentTypeId);
+  };
+  
+  // Helper function to get referral finding description for pre-filling lab finding form
+  const getReferralFinding = (documentTypeId: Id<'documentTypes'>) => {
+    const referralInfo = getReferralDetails(documentTypeId);
+    return referralInfo?.findingDescription || '';
+  };
 
   // --- DATA FETCHING ---
   // @ts-ignore - Type instantiation is excessively deep
@@ -261,6 +273,16 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const healthCardDetails = useQuery(api.healthCards.getHealthCard.getByApplication, { 
     applicationId: params.id 
   });
+  
+  // Fetch referral history for this application
+  const referralHistoryData = useQuery(api.documents.referralQueries.getReferralHistory, {
+    applicationId: params.id
+  });
+  
+  // Fetch previous health card for renewal applications
+  const previousHealthCard = applicationStatus?.previousHealthCardId 
+    ? useQuery(api.healthCards.getHealthCard.get, { healthCardId: applicationStatus.previousHealthCardId })
+    : undefined;
 
   const loadData = async () => {
     try {
@@ -1025,7 +1047,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
             )}
             
             {/* Collapsible Payment Details Card - Only show for 3rd party payments (Maya, Gcash) */}
-            {paymentData && (paymentData.paymentMethod === 'Maya' || paymentData.paymentMethod === 'Gcash') && (
+            {paymentData && (String(paymentData.paymentMethod) === 'Maya' || String(paymentData.paymentMethod) === 'Gcash') && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <button
                   onClick={() => setIsPaymentDetailsExpanded(!isPaymentDetailsExpanded)}
@@ -2225,7 +2247,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                   )}
 
                   {/* Referred to Doctor State - Show when document status is Referred */}
-                  {item.status === 'Referred' && !item.maxAttemptsReached ? (() => {
+                  {String(item.status) === 'Referred' && !item.maxAttemptsReached ? (() => {
                     const referralInfo = getReferralDetails(item.documentTypeId);
                     return (
                     <div className="mt-4 pt-4 border-t border-gray-100">
@@ -2262,16 +2284,16 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               setError(createAppError('Unable to find referral information. Please refresh the page.', 'Referral Data Missing'));
                             }
                           }} 
-                          disabled={!item.uploadId || !referralInfo?.documentTypeId || item.status === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'} 
+                          disabled={!item.uploadId || !referralInfo?.documentTypeId || String(item.status) === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
                           className="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          {item.status === 'Approved' ? 'Already Approved' : 'Approve After Treatment Verification'}
+                          {String(item.status) === 'Approved' ? 'Already Approved' : 'Approve After Treatment Verification'}
                         </button>
                       </div>
-                      {item.status !== 'Approved' && (
+                      {String(item.status) !== 'Approved' && (
                         <p className="text-xs text-gray-500 mt-2 text-center">
                           ✓ Verify applicant completed prescribed treatment and visited venue with proof before approving
                         </p>
@@ -2309,16 +2331,16 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               setApproveConfirmation({index: idx, uploadId: item.uploadId, documentName: item.requirementName});
                             }
                           }} 
-                          disabled={!item.uploadId || item.status === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'} 
+                          disabled={!item.uploadId || String(item.status) === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
                           className="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          {item.status === 'Approved' ? 'Already Approved' : 'Approve After In-Person Verification'}
+                          {String(item.status) === 'Approved' ? 'Already Approved' : 'Approve After In-Person Verification'}
                         </button>
                       </div>
-                      {item.status !== 'Approved' && (
+                      {String(item.status) !== 'Approved' && (
                         <p className="text-xs text-gray-500 mt-2 text-center">
                           ✓ Verify applicant brought original documents to venue before approving
                         </p>
@@ -2332,7 +2354,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       {/* Approve Button - Disabled when waiting for resubmission or doctor clearance or application rejected or payment incomplete */}
                       <button 
                       onClick={() => item.uploadId && setApproveConfirmation({index: idx, uploadId: item.uploadId, documentName: item.requirementName})} 
-                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'NeedsRevision' || item.status === 'Referred' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'} 
+                      disabled={!item.uploadId || String(item.status) === 'Approved' || String(item.status) === 'NeedsRevision' || String(item.status) === 'Referred' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
                       className="w-full bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-emerald-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2361,7 +2383,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         }
                         setOpenReferralIndex(idx);
                       }}
-                      disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
+                      disabled={!item.uploadId || String(item.status) === 'Approved' || String(item.status) === 'Referred' || String(item.status) === 'NeedsRevision' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
                       className="w-full bg-orange-50 text-orange-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-orange-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-orange-100 disabled:border-gray-200 flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
