@@ -701,4 +701,18 @@ export default defineSchema({
     createdAt: v.string(), // Storing as string for simplicity, can be v.float64() for timestamp
   }).index("by_createdAt", ["createdAt"]),
 
+  // Signatures table - stores storageIds for official signatures used in health certificates
+  signatures: defineTable({
+    storageId: v.id("_storage"), // Reference to file in Convex storage
+    name: v.string(), // File name (e.g., "Marjorie_signature.png")
+    type: v.union(
+      v.literal("doctor"),           // Dr. Marjorie D. Culas (City Health Officer)
+      v.literal("sanitation_chief")  // Luzminda N. Paig (Sanitation Chief)
+    ),
+    uploadedAt: v.float64(),
+    uploadedBy: v.optional(v.id("users")), // Admin who uploaded (optional for scripts)
+  })
+    .index("by_type", ["type"])
+    .index("by_uploaded_at", ["uploadedAt"]),
+
 });

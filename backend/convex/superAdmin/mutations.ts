@@ -14,8 +14,18 @@ export const createAdmin = action({ // Changed to action
     email: v.string(),
     password: v.string(),
     managedCategoryIds: v.array(v.id("jobCategories")),
-    role: v.optional(v.union(v.literal("admin"), v.literal("inspector"), v.literal("system_admin"))),
+    role: v.optional(
+      v.union(
+        v.literal("admin"),
+        v.literal("inspector"),
+        v.literal("system_admin"),
+      ),
+    ),
     fullname: v.optional(v.string()),
+    username: v.optional(v.string()),
+    gender: v.optional(v.string()),
+    birthDate: v.optional(v.string()),
+    phoneNumber: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // 1. Verify Super Admin privileges (optional, but good for security)
@@ -37,16 +47,18 @@ export const createAdmin = action({ // Changed to action
         // If the user wants to update password for existing admin, a different flow is needed.
       } else {
         // If user doesn't exist in Clerk, create them with the provided password.
-        const names = args.fullname ? args.fullname.split(' ') : [];
-        const firstName = names[0] || args.email.split('@')[0];
-        const lastName = names.slice(1).join(' ') || '';
+        const names = args.fullname ? args.fullname.split(" ") : [];
+        const firstName = names[0] || args.email.split("@")[0];
+        const lastName = names.slice(1).join(" ") || "";
+        const usernameForNewUser = (args.username && args.username.trim()) || args.email.split("@")[0];
         
         clerkUser = await clerk.users.createUser({
           emailAddress: [args.email],
           password: args.password,
           skipPasswordChecks: false,
-          firstName: firstName,
+          firstName,
           lastName: lastName || undefined,
+          username: usernameForNewUser,
         });
       }
     } catch (error: any) { // Explicitly type error as any to access properties
@@ -81,9 +93,16 @@ export const createAdmin = action({ // Changed to action
     const finalRole = args.role || "admin";
     
     // Determine the fullname to use
-    const finalFullname = args.fullname || 
-                          (clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : 
-                           clerkUser.firstName || args.email);
+    const finalFullname = args.fullname ||
+      (clerkUser.firstName && clerkUser.lastName
+        ? `${clerkUser.firstName} ${clerkUser.lastName}`
+        : clerkUser.firstName || args.email);
+
+    // Determine the username to use (for Convex and Clerk)
+    const finalUsername = (args.username && args.username.trim())
+      || clerkUser.username
+      || args.email.split("@")[0]
+      || args.email;
 
     if (existingConvexUser) {
       // Update existing user
@@ -91,6 +110,10 @@ export const createAdmin = action({ // Changed to action
         userId: existingConvexUser._id,
         role: finalRole,
         managedCategories: args.managedCategoryIds,
+        username: finalUsername,
+        gender: args.gender,
+        birthDate: args.birthDate,
+        phoneNumber: args.phoneNumber,
       });
     } else {
       // Create new user in Convex
@@ -101,7 +124,10 @@ export const createAdmin = action({ // Changed to action
         image: clerkUser.imageUrl || "",
         role: finalRole,
         managedCategories: args.managedCategoryIds,
-        username: (clerkUser.username ?? args.email.split('@')[0]) || args.email,
+        username: finalUsername,
+        gender: args.gender,
+        birthDate: args.birthDate,
+        phoneNumber: args.phoneNumber,
       });
     }
 

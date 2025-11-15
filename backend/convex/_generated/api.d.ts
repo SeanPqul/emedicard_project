@@ -8,6 +8,11 @@
  * @module
  */
 
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
 import type * as _notifications_clearReadNotifications from "../_notifications/clearReadNotifications.js";
 import type * as _notifications_createNotification from "../_notifications/createNotification.js";
 import type * as _notifications_getAdminNotifications from "../_notifications/getAdminNotifications.js";
@@ -61,19 +66,14 @@ import type * as admin_testFixRejectionStatus from "../admin/testFixRejectionSta
 import type * as admin_updateAdminAccount from "../admin/updateAdminAccount.js";
 import type * as admin_updateAdminAccountInternal from "../admin/updateAdminAccountInternal.js";
 import type * as admin_validatePayment from "../admin/validatePayment.js";
-import type * as applications_autoCancelExpiredApplications from "../applications/autoCancelExpiredApplications.js";
-import type * as applications_checkRenewalEligibility from "../applications/checkRenewalEligibility.js";
 import type * as applications_createApplication from "../applications/createApplication.js";
 import type * as applications_createForm from "../applications/createForm.js";
-import type * as applications_createRenewalApplication from "../applications/createRenewalApplication.js";
 import type * as applications_deleteApplication from "../applications/deleteApplication.js";
 import type * as applications_getApplicationById from "../applications/getApplicationById.js";
 import type * as applications_getDocumentsWithClassification from "../applications/getDocumentsWithClassification.js";
 import type * as applications_getFormById from "../applications/getFormById.js";
-import type * as applications_getPreviousApplicationData from "../applications/getPreviousApplicationData.js";
 import type * as applications_getUserApplications from "../applications/getUserApplications.js";
 import type * as applications_getWithDocuments from "../applications/getWithDocuments.js";
-import type * as applications_lib_renewalEligibility from "../applications/lib/renewalEligibility.js";
 import type * as applications_list from "../applications/list.js";
 import type * as applications_submitApplication from "../applications/submitApplication.js";
 import type * as applications_updateApplication from "../applications/updateApplication.js";
@@ -91,7 +91,6 @@ import type * as documentUploads_get from "../documentUploads/get.js";
 import type * as documentUploads_getReviewedDocumentsWithDetails from "../documentUploads/getReviewedDocumentsWithDetails.js";
 import type * as documentUploads_getStorageFileIdAction from "../documentUploads/getStorageFileIdAction.js";
 import type * as documentUploads_getStorageFileIdByUploadId from "../documentUploads/getStorageFileIdByUploadId.js";
-import type * as documents from "../documents.js";
 import type * as documents_classifyDocument from "../documents/classifyDocument.js";
 import type * as documents_documentAccessLogs from "../documents/documentAccessLogs.js";
 import type * as documents_documentQueries from "../documents/documentQueries.js";
@@ -101,10 +100,12 @@ import type * as documents_referralQueries from "../documents/referralQueries.js
 import type * as documents_rejectionQueries from "../documents/rejectionQueries.js";
 import type * as documents_secureAccessQueries from "../documents/secureAccessQueries.js";
 import type * as documents_triggerClassification from "../documents/triggerClassification.js";
+import type * as documents from "../documents.js";
 import type * as healthCards_generateHealthCard from "../healthCards/generateHealthCard.js";
 import type * as healthCards_getHealthCard from "../healthCards/getHealthCard.js";
 import type * as healthCards_getUserCards from "../healthCards/getUserCards.js";
 import type * as healthCards_issueHealthCard from "../healthCards/issueHealthCard.js";
+import type * as healthCards_regenerateHealthCard from "../healthCards/regenerateHealthCard.js";
 import type * as healthCards_updateHealthCard from "../healthCards/updateHealthCard.js";
 import type * as http from "../http.js";
 import type * as jobCategories_createJobCategory from "../jobCategories/createJobCategory.js";
@@ -112,7 +113,6 @@ import type * as jobCategories_deleteJobCategory from "../jobCategories/deleteJo
 import type * as jobCategories_getAllJobCategories from "../jobCategories/getAllJobCategories.js";
 import type * as jobCategories_getManaged from "../jobCategories/getManaged.js";
 import type * as jobCategories_updateJobCategory from "../jobCategories/updateJobCategory.js";
-import type * as lib_documentStatus from "../lib/documentStatus.js";
 import type * as lib_serverTime from "../lib/serverTime.js";
 import type * as lib_sessionStatus from "../lib/sessionStatus.js";
 import type * as lib_timezone from "../lib/timezone.js";
@@ -123,11 +123,11 @@ import type * as notifications from "../notifications.js";
 import type * as ocr_extractDocumentText from "../ocr/extractDocumentText.js";
 import type * as ocr_saveExtractedText from "../ocr/saveExtractedText.js";
 import type * as orientationSchedules from "../orientationSchedules.js";
-import type * as orientations from "../orientations.js";
 import type * as orientations_attendance from "../orientations/attendance.js";
 import type * as orientations_getUserOrientations from "../orientations/getUserOrientations.js";
 import type * as orientations_index from "../orientations/index.js";
 import type * as orientations_queries from "../orientations/queries.js";
+import type * as orientations from "../orientations.js";
 import type * as payments_createPayment from "../payments/createPayment.js";
 import type * as payments_getAllPayments from "../payments/getAllPayments.js";
 import type * as payments_getForApplication from "../payments/getForApplication.js";
@@ -163,6 +163,7 @@ import type * as requirements_resubmitDocument from "../requirements/resubmitDoc
 import type * as requirements_updateDocumentField from "../requirements/updateDocumentField.js";
 import type * as requirements_updateJobCategoryRequirement from "../requirements/updateJobCategoryRequirement.js";
 import type * as requirements_uploadDocuments from "../requirements/uploadDocuments.js";
+import type * as signatures_uploadSignatures from "../signatures/uploadSignatures.js";
 import type * as storage_generateUploadUrl from "../storage/generateUploadUrl.js";
 import type * as superAdmin_mutations from "../superAdmin/mutations.js";
 import type * as superAdmin_queries from "../superAdmin/queries.js";
@@ -184,12 +185,14 @@ import type * as verification_getVerificationStats from "../verification/getVeri
 import type * as verification_logQRScan from "../verification/logQRScan.js";
 import type * as verification_logVerificationAttempt from "../verification/logVerificationAttempt.js";
 
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
-
+/**
+ * A utility for referencing Convex functions in your app's API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
 declare const fullApi: ApiFromModules<{
   "_notifications/clearReadNotifications": typeof _notifications_clearReadNotifications;
   "_notifications/createNotification": typeof _notifications_createNotification;
@@ -244,19 +247,14 @@ declare const fullApi: ApiFromModules<{
   "admin/updateAdminAccount": typeof admin_updateAdminAccount;
   "admin/updateAdminAccountInternal": typeof admin_updateAdminAccountInternal;
   "admin/validatePayment": typeof admin_validatePayment;
-  "applications/autoCancelExpiredApplications": typeof applications_autoCancelExpiredApplications;
-  "applications/checkRenewalEligibility": typeof applications_checkRenewalEligibility;
   "applications/createApplication": typeof applications_createApplication;
   "applications/createForm": typeof applications_createForm;
-  "applications/createRenewalApplication": typeof applications_createRenewalApplication;
   "applications/deleteApplication": typeof applications_deleteApplication;
   "applications/getApplicationById": typeof applications_getApplicationById;
   "applications/getDocumentsWithClassification": typeof applications_getDocumentsWithClassification;
   "applications/getFormById": typeof applications_getFormById;
-  "applications/getPreviousApplicationData": typeof applications_getPreviousApplicationData;
   "applications/getUserApplications": typeof applications_getUserApplications;
   "applications/getWithDocuments": typeof applications_getWithDocuments;
-  "applications/lib/renewalEligibility": typeof applications_lib_renewalEligibility;
   "applications/list": typeof applications_list;
   "applications/submitApplication": typeof applications_submitApplication;
   "applications/updateApplication": typeof applications_updateApplication;
@@ -274,7 +272,6 @@ declare const fullApi: ApiFromModules<{
   "documentUploads/getReviewedDocumentsWithDetails": typeof documentUploads_getReviewedDocumentsWithDetails;
   "documentUploads/getStorageFileIdAction": typeof documentUploads_getStorageFileIdAction;
   "documentUploads/getStorageFileIdByUploadId": typeof documentUploads_getStorageFileIdByUploadId;
-  documents: typeof documents;
   "documents/classifyDocument": typeof documents_classifyDocument;
   "documents/documentAccessLogs": typeof documents_documentAccessLogs;
   "documents/documentQueries": typeof documents_documentQueries;
@@ -284,10 +281,12 @@ declare const fullApi: ApiFromModules<{
   "documents/rejectionQueries": typeof documents_rejectionQueries;
   "documents/secureAccessQueries": typeof documents_secureAccessQueries;
   "documents/triggerClassification": typeof documents_triggerClassification;
+  documents: typeof documents;
   "healthCards/generateHealthCard": typeof healthCards_generateHealthCard;
   "healthCards/getHealthCard": typeof healthCards_getHealthCard;
   "healthCards/getUserCards": typeof healthCards_getUserCards;
   "healthCards/issueHealthCard": typeof healthCards_issueHealthCard;
+  "healthCards/regenerateHealthCard": typeof healthCards_regenerateHealthCard;
   "healthCards/updateHealthCard": typeof healthCards_updateHealthCard;
   http: typeof http;
   "jobCategories/createJobCategory": typeof jobCategories_createJobCategory;
@@ -295,7 +294,6 @@ declare const fullApi: ApiFromModules<{
   "jobCategories/getAllJobCategories": typeof jobCategories_getAllJobCategories;
   "jobCategories/getManaged": typeof jobCategories_getManaged;
   "jobCategories/updateJobCategory": typeof jobCategories_updateJobCategory;
-  "lib/documentStatus": typeof lib_documentStatus;
   "lib/serverTime": typeof lib_serverTime;
   "lib/sessionStatus": typeof lib_sessionStatus;
   "lib/timezone": typeof lib_timezone;
@@ -306,11 +304,11 @@ declare const fullApi: ApiFromModules<{
   "ocr/extractDocumentText": typeof ocr_extractDocumentText;
   "ocr/saveExtractedText": typeof ocr_saveExtractedText;
   orientationSchedules: typeof orientationSchedules;
-  orientations: typeof orientations;
   "orientations/attendance": typeof orientations_attendance;
   "orientations/getUserOrientations": typeof orientations_getUserOrientations;
   "orientations/index": typeof orientations_index;
   "orientations/queries": typeof orientations_queries;
+  orientations: typeof orientations;
   "payments/createPayment": typeof payments_createPayment;
   "payments/getAllPayments": typeof payments_getAllPayments;
   "payments/getForApplication": typeof payments_getForApplication;
@@ -346,6 +344,7 @@ declare const fullApi: ApiFromModules<{
   "requirements/updateDocumentField": typeof requirements_updateDocumentField;
   "requirements/updateJobCategoryRequirement": typeof requirements_updateJobCategoryRequirement;
   "requirements/uploadDocuments": typeof requirements_uploadDocuments;
+  "signatures/uploadSignatures": typeof signatures_uploadSignatures;
   "storage/generateUploadUrl": typeof storage_generateUploadUrl;
   "superAdmin/mutations": typeof superAdmin_mutations;
   "superAdmin/queries": typeof superAdmin_queries;
@@ -367,31 +366,11 @@ declare const fullApi: ApiFromModules<{
   "verification/logQRScan": typeof verification_logQRScan;
   "verification/logVerificationAttempt": typeof verification_logVerificationAttempt;
 }>;
-
-/**
- * A utility for referencing Convex functions in your app's public API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
- * ```
- */
 export declare const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">
 >;
-
-/**
- * A utility for referencing Convex functions in your app's internal API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = internal.myModule.myFunction;
- * ```
- */
 export declare const internal: FilterApi<
   typeof fullApi,
   FunctionReference<any, "internal">
 >;
-
-export declare const components: {};
