@@ -23,6 +23,41 @@ function renderSignatureImg(url: string | undefined) {
   return `<img src="${url}" alt="Signature" />`;
 }
 
+// Helper: Format date for card display (MM/DD)
+function formatCardDate(timestamp: number): string {
+  const date = new Date(timestamp);
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const year = date.getFullYear().toString().slice(-2);
+  return `${month}/${day}/${year}`;
+}
+
+// Helper: Render test section rows
+function renderTestSection(findings: any[], maxRows: number = 2): string {
+  let html = '';
+  for (let i = 0; i < maxRows; i++) {
+    const finding = findings[i];
+    if (finding && finding.showOnCard) {
+      html += `
+        <div class="table-row">
+          <div class="table-cell">${formatCardDate(finding.clearedDate)}</div>
+          <div class="table-cell">${finding.findingKind}</div>
+          <div class="table-cell">${formatCardDate(finding.monitoringExpiry)}</div>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="table-row">
+          <div class="table-cell"></div>
+          <div class="table-cell"></div>
+          <div class="table-cell"></div>
+        </div>
+      `;
+    }
+  }
+  return html;
+}
+
 function generateHealthCardHTML(data: {
   registrationNumber: string;
   fullName: string;
@@ -38,6 +73,17 @@ function generateHealthCardHTML(data: {
   applicationId: string;
   doctorSignatureUrl?: string;
   sanitationChiefSignatureUrl?: string;
+  // NEW: Dynamic official names and designations
+  cityHealthOfficerName?: string;
+  cityHealthOfficerDesignation?: string;
+  sanitationChiefName?: string;
+  sanitationChiefDesignation?: string;
+  // Phase 2: Lab findings
+  labFindings?: {
+    urinalysis: any[];
+    xray_sputum: any[];
+    stool: any[];
+  };
 }): string {
   return `
 <!DOCTYPE html>
@@ -540,10 +586,10 @@ function generateHealthCardHTML(data: {
             ${renderOptionalImg(
               data.sanitationChiefSignatureUrl,
               "sanitation-signature",
-              "Signature of Luzminda N. Paig"
+              `Signature of ${data.sanitationChiefName || 'Luzminda N. Paig'}`
             )}
-            <div class="signatory-name">Luzminda N. Paig</div>
-            <div class="signatory-title">Sanitation Chief</div>
+            <div class="signatory-name">${data.sanitationChiefName || 'Luzminda N. Paig'}</div>
+            <div class="signatory-title">${data.sanitationChiefDesignation || 'Sanitation Chief'}</div>
           </div>
         </div>
       </div>
@@ -553,10 +599,10 @@ function generateHealthCardHTML(data: {
         ${renderOptionalImg(
           data.doctorSignatureUrl,
           "doctor-signature",
-          "Signature of Dr. Marjorie D. Culas"
+          `Signature of ${data.cityHealthOfficerName || 'Dr. Marjorie D. Culas'}`
         )}
-        <div class="bottom-official-name">Dr. Marjorie D. Culas</div>
-        <div class="bottom-official-title">City Health Officer</div>
+        <div class="bottom-official-name">${data.cityHealthOfficerName || 'Dr. Marjorie D. Culas'}</div>
+        <div class="bottom-official-title">${data.cityHealthOfficerDesignation || 'City Health Officer'}</div>
       </div>
     </div>
     </div>
@@ -595,16 +641,7 @@ function generateHealthCardHTML(data: {
             <div class="table-header-cell">Kind</div>
             <div class="table-header-cell">Exp Date</div>
           </div>
-          <div class="table-row">
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-          </div>
-          <div class="table-row">
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-          </div>
+          ${renderTestSection(data.labFindings?.urinalysis || [], 2)}
         </div>
       </div>
       
@@ -617,16 +654,7 @@ function generateHealthCardHTML(data: {
             <div class="table-header-cell">Kind</div>
             <div class="table-header-cell">Exp Date</div>
           </div>
-          <div class="table-row">
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-          </div>
-          <div class="table-row">
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-          </div>
+          ${renderTestSection(data.labFindings?.xray_sputum || [], 2)}
         </div>
       </div>
       
@@ -639,16 +667,7 @@ function generateHealthCardHTML(data: {
             <div class="table-header-cell">Kind</div>
             <div class="table-header-cell">Exp Date</div>
           </div>
-          <div class="table-row">
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-          </div>
-          <div class="table-row">
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-            <div class="table-cell"></div>
-          </div>
+          ${renderTestSection(data.labFindings?.stool || [], 2)}
         </div>
       </div>
       
@@ -697,17 +716,51 @@ export const generateHealthCard = internalAction({
     applicationId: v.id("applications"),
   },
   handler: async (ctx, args): Promise<{ success: boolean; healthCardId: any; registrationNumber: string; htmlContent: string; }> => {
-    // Query signature URLs from the signatures table
-    let doctorSignatureUrl: string | undefined = DOCTOR_SIGNATURE_URL || undefined;
-    let sanitationChiefSignatureUrl: string | undefined = SANITATION_CHIEF_SIGNATURE_URL || undefined;
+    // NEW: Fetch current officials from systemConfig
+    let doctorSignatureUrl: string | undefined;
+    let sanitationChiefSignatureUrl: string | undefined;
+    let cityHealthOfficer: any = null;
+    let sanitationChief: any = null;
 
-    // Try to fetch signatures from the database
+    // Try to fetch officials from systemConfig first (new system)
     try {
-      const signatures = await ctx.runQuery(internal.healthCards.generateHealthCard.getSignatureUrls, {});
-      if (signatures.doctorUrl) doctorSignatureUrl = signatures.doctorUrl;
-      if (signatures.sanitationChiefUrl) sanitationChiefSignatureUrl = signatures.sanitationChiefUrl;
+      const officials = await ctx.runQuery(internal.healthCards.generateHealthCard.getActiveOfficialsForCard, {});
+      
+      if (officials.cityHealthOfficer) {
+        cityHealthOfficer = officials.cityHealthOfficer;
+        doctorSignatureUrl = officials.cityHealthOfficer.signatureUrl;
+      }
+      
+      if (officials.sanitationChief) {
+        sanitationChief = officials.sanitationChief;
+        sanitationChiefSignatureUrl = officials.sanitationChief.signatureUrl;
+      }
     } catch (error) {
-      console.error("Error fetching signature URLs:", error);
+      console.error("Error fetching officials from systemConfig:", error);
+      
+      // FALLBACK: Try old signatures table for backward compatibility
+      try {
+        const signatures = await ctx.runQuery(internal.healthCards.generateHealthCard.getSignatureUrls, {});
+        if (signatures.doctorUrl) {
+          doctorSignatureUrl = signatures.doctorUrl;
+          // Use hardcoded names as fallback
+          cityHealthOfficer = {
+            name: "Dr. Marjorie D. Culas",
+            designation: "City Health Officer",
+            signatureUrl: signatures.doctorUrl,
+          };
+        }
+        if (signatures.sanitationChiefUrl) {
+          sanitationChiefSignatureUrl = signatures.sanitationChiefUrl;
+          sanitationChief = {
+            name: "Luzminda N. Paig",
+            designation: "Sanitation Chief",
+            signatureUrl: signatures.sanitationChiefUrl,
+          };
+        }
+      } catch (fallbackError) {
+        console.error("Error fetching fallback signatures:", fallbackError);
+      }
     }
     
     // Get application data
@@ -749,7 +802,18 @@ export const generateHealthCard = internalAction({
     const qrCodeData = `https://emedicard.davao.gov.ph/verify/${registrationNumber}`;
     const qrCodeDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCodeData)}`;
 
-    // Generate HTML
+    // Phase 2: Fetch lab findings for this application
+    let labFindings: any = { urinalysis: [], xray_sputum: [], stool: [] };
+    try {
+      labFindings = await ctx.runQuery(internal.labFindings.index.getLabFindings, {
+        applicationId: args.applicationId,
+      });
+    } catch (error) {
+      console.log("No lab findings found or error fetching:", error);
+      // Continue with empty findings - most applications won't have any
+    }
+
+    // Generate HTML with dynamic official names and lab findings
     const htmlContent = generateHealthCardHTML({
       registrationNumber,
       fullName: application.fullName,
@@ -765,16 +829,78 @@ export const generateHealthCard = internalAction({
       applicationId: args.applicationId,
       doctorSignatureUrl,
       sanitationChiefSignatureUrl,
+      // NEW: Pass dynamic official names
+      cityHealthOfficerName: cityHealthOfficer?.name,
+      cityHealthOfficerDesignation: cityHealthOfficer?.designation,
+      sanitationChiefName: sanitationChief?.name,
+      sanitationChiefDesignation: sanitationChief?.designation,
+      // Phase 2: Pass lab findings
+      labFindings,
     });
 
-    // Store health card record
+    // Prepare signedBy snapshot for health card record
+    const signedBySnapshot = {
+      cityHealthOfficer: cityHealthOfficer
+        ? {
+            name: cityHealthOfficer.name,
+            designation: cityHealthOfficer.designation,
+            signatureUrl: doctorSignatureUrl,
+            configId: cityHealthOfficer.configId,
+          }
+        : {
+            name: "Dr. Marjorie D. Culas",
+            designation: "City Health Officer",
+            signatureUrl: doctorSignatureUrl,
+            configId: undefined,
+          },
+      sanitationChief: sanitationChief
+        ? {
+            name: sanitationChief.name,
+            designation: sanitationChief.designation,
+            signatureUrl: sanitationChiefSignatureUrl,
+            configId: sanitationChief.configId,
+          }
+        : {
+            name: "Luzminda N. Paig",
+            designation: "Sanitation Chief",
+            signatureUrl: sanitationChiefSignatureUrl,
+            configId: undefined,
+          },
+    };
+
+    // Phase 2: Collect finding IDs from all types
+    const allFindings = [
+      ...(labFindings.urinalysis || []),
+      ...(labFindings.xray_sputum || []),
+      ...(labFindings.stool || []),
+    ];
+    
+    const findingIds = allFindings
+      .filter((f: any) => f.showOnCard)
+      .map((f: any) => f._id);
+
+    // Store health card record with signedBy snapshot and findings
     const healthCardId: any = await ctx.runMutation(internal.healthCards.generateHealthCard.createHealthCardRecord, {
       applicationId: args.applicationId,
       registrationNumber,
       htmlContent,
       issuedDate: issuedDate.getTime(),
       expiryDate: expiryDate.getTime(),
+      signedBy: signedBySnapshot,
+      includedFindings: findingIds.length > 0 ? findingIds : undefined,
     });
+
+    // Phase 2: Link findings back to the generated health card
+    for (const finding of allFindings) {
+      try {
+        await ctx.runMutation(internal.labFindings.index.linkFindingToCard, {
+          findingId: finding._id,
+          healthCardId,
+        });
+      } catch (error) {
+        console.error(`Error linking finding ${finding._id} to card:`, error);
+      }
+    }
 
     // Update application with health card reference
     await ctx.runMutation(internal.healthCards.generateHealthCard.updateApplicationWithHealthCard, {
@@ -793,7 +919,61 @@ export const generateHealthCard = internalAction({
 });
 
 /**
- * Internal query to get signature URLs from signatures table
+ * Internal query to get active officials from systemConfig (NEW SYSTEM)
+ */
+export const getActiveOfficialsForCard = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    // Query active officials from systemConfig
+    const cityHealthOfficer = await ctx.db
+      .query("systemConfig")
+      .withIndex("by_key", (q) => q.eq("key", "city_health_officer"))
+      .filter((q) => q.eq(q.field("value.isActive"), true))
+      .first();
+
+    const sanitationChief = await ctx.db
+      .query("systemConfig")
+      .withIndex("by_key", (q) => q.eq("key", "sanitation_chief"))
+      .filter((q) => q.eq(q.field("value.isActive"), true))
+      .first();
+
+    // Get signature URLs from storage if available
+    let cityHealthOfficerSignatureUrl: string | undefined;
+    let sanitationChiefSignatureUrl: string | undefined;
+
+    if (cityHealthOfficer?.value.signatureStorageId) {
+      cityHealthOfficerSignatureUrl =
+        (await ctx.storage.getUrl(cityHealthOfficer.value.signatureStorageId)) ?? undefined;
+    }
+
+    if (sanitationChief?.value.signatureStorageId) {
+      sanitationChiefSignatureUrl =
+        (await ctx.storage.getUrl(sanitationChief.value.signatureStorageId)) ?? undefined;
+    }
+
+    return {
+      cityHealthOfficer: cityHealthOfficer
+        ? {
+            name: cityHealthOfficer.value.name,
+            designation: cityHealthOfficer.value.designation,
+            signatureUrl: cityHealthOfficerSignatureUrl,
+            configId: cityHealthOfficer._id,
+          }
+        : null,
+      sanitationChief: sanitationChief
+        ? {
+            name: sanitationChief.value.name,
+            designation: sanitationChief.value.designation,
+            signatureUrl: sanitationChiefSignatureUrl,
+            configId: sanitationChief._id,
+          }
+        : null,
+    };
+  },
+});
+
+/**
+ * Internal query to get signature URLs from signatures table (DEPRECATED - for backward compatibility)
  */
 export const getSignatureUrls = internalQuery({
   args: {},
@@ -907,6 +1087,22 @@ export const createHealthCardRecord = internalMutation({
     htmlContent: v.string(),
     issuedDate: v.float64(),
     expiryDate: v.float64(),
+    signedBy: v.optional(v.object({
+      cityHealthOfficer: v.object({
+        name: v.string(),
+        designation: v.string(),
+        signatureUrl: v.optional(v.string()),
+        configId: v.optional(v.id("systemConfig")),
+      }),
+      sanitationChief: v.object({
+        name: v.string(),
+        designation: v.string(),
+        signatureUrl: v.optional(v.string()),
+        configId: v.optional(v.id("systemConfig")),
+      }),
+    })),
+    // Phase 2: Lab findings
+    includedFindings: v.optional(v.array(v.id("labTestFindings"))),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("healthCards", {
@@ -917,6 +1113,8 @@ export const createHealthCardRecord = internalMutation({
       expiryDate: args.expiryDate,
       status: "active",
       createdAt: Date.now(),
+      signedBy: args.signedBy, // Store snapshot of officials
+      includedFindings: args.includedFindings, // Phase 2: Store findings IDs
     });
   },
 });

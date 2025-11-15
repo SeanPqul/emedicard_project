@@ -113,6 +113,8 @@ import type * as jobCategories_deleteJobCategory from "../jobCategories/deleteJo
 import type * as jobCategories_getAllJobCategories from "../jobCategories/getAllJobCategories.js";
 import type * as jobCategories_getManaged from "../jobCategories/getManaged.js";
 import type * as jobCategories_updateJobCategory from "../jobCategories/updateJobCategory.js";
+import type * as labFindings_index from "../labFindings/index.js";
+import type * as labFindings_referenceData from "../labFindings/referenceData.js";
 import type * as lib_serverTime from "../lib/serverTime.js";
 import type * as lib_sessionStatus from "../lib/sessionStatus.js";
 import type * as lib_timezone from "../lib/timezone.js";
@@ -167,6 +169,7 @@ import type * as signatures_uploadSignatures from "../signatures/uploadSignature
 import type * as storage_generateUploadUrl from "../storage/generateUploadUrl.js";
 import type * as superAdmin_mutations from "../superAdmin/mutations.js";
 import type * as superAdmin_queries from "../superAdmin/queries.js";
+import type * as systemConfig_index from "../systemConfig/index.js";
 import type * as users_createUser from "../users/createUser.js";
 import type * as users_getApplicants from "../users/getApplicants.js";
 import type * as users_getCurrentUser from "../users/getCurrentUser.js";
@@ -294,6 +297,8 @@ declare const fullApi: ApiFromModules<{
   "jobCategories/getAllJobCategories": typeof jobCategories_getAllJobCategories;
   "jobCategories/getManaged": typeof jobCategories_getManaged;
   "jobCategories/updateJobCategory": typeof jobCategories_updateJobCategory;
+  "labFindings/index": typeof labFindings_index;
+  "labFindings/referenceData": typeof labFindings_referenceData;
   "lib/serverTime": typeof lib_serverTime;
   "lib/sessionStatus": typeof lib_sessionStatus;
   "lib/timezone": typeof lib_timezone;
@@ -348,6 +353,7 @@ declare const fullApi: ApiFromModules<{
   "storage/generateUploadUrl": typeof storage_generateUploadUrl;
   "superAdmin/mutations": typeof superAdmin_mutations;
   "superAdmin/queries": typeof superAdmin_queries;
+  "systemConfig/index": typeof systemConfig_index;
   "users/createUser": typeof users_createUser;
   "users/getApplicants": typeof users_getApplicants;
   "users/getCurrentUser": typeof users_getCurrentUser;
