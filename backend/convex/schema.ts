@@ -72,11 +72,11 @@ export default defineSchema({
     healthCardId: v.optional(v.id("healthCards")),
     healthCardRegistrationNumber: v.optional(v.string()),
     healthCardIssuedAt: v.optional(v.float64()),
+    // Renewal tracking fields (added by team leader)
+    isRenewal: v.optional(v.boolean()), // Whether this is a renewal application
+    previousHealthCardId: v.optional(v.id("healthCards")), // Reference to previous health card if renewal
+    renewalCount: v.optional(v.float64()), // Number of times this user has renewed
     deletedAt: v.optional(v.float64()),
-    // Renewal tracking fields
-    previousHealthCardId: v.optional(v.id("healthCards")),
-    isRenewal: v.optional(v.boolean()),
-    renewalCount: v.optional(v.float64()),
   })
     .index("by_user", ["userId"])
     .index("by_previous_card", ["previousHealthCardId"]),
@@ -125,6 +125,26 @@ export default defineSchema({
     createdAt: v.float64(),
     revokedAt: v.optional(v.float64()),
     revokedReason: v.optional(v.string()),
+    
+    // NEW: Snapshot of Officials at Time of Issuance (for historical accuracy)
+    // This preserves who signed the card even if officials change later
+    signedBy: v.optional(v.object({
+      cityHealthOfficer: v.object({
+        name: v.string(),
+        designation: v.string(),
+        signatureUrl: v.optional(v.string()), // URL at time of generation
+        configId: v.optional(v.id("systemConfig")), // Links back to config record
+      }),
+      sanitationChief: v.object({
+        name: v.string(),
+        designation: v.string(),
+        signatureUrl: v.optional(v.string()),
+        configId: v.optional(v.id("systemConfig")),
+      }),
+    })),
+    
+    // Phase 2: Lab Test Findings - Track which findings are displayed on this card
+    includedFindings: v.optional(v.array(v.id("labTestFindings"))),
   })
     .index("by_application", ["applicationId"])
     .index("by_registration", ["registrationNumber"])
@@ -702,6 +722,7 @@ export default defineSchema({
   }).index("by_createdAt", ["createdAt"]),
 
   // Signatures table - stores storageIds for official signatures used in health certificates
+  // NOTE: This table is kept for backward compatibility, but new system uses systemConfig
   signatures: defineTable({
     storageId: v.id("_storage"), // Reference to file in Convex storage
     name: v.string(), // File name (e.g., "Marjorie_signature.png")
@@ -714,5 +735,81 @@ export default defineSchema({
   })
     .index("by_type", ["type"])
     .index("by_uploaded_at", ["uploadedAt"]),
+
+  // System Configuration - stores configurable system settings (officials, signatures, etc.)
+  // Replaces hardcoded official names with dynamic configuration
+  systemConfig: defineTable({
+    // Configuration Key (unique identifier for config type)
+    key: v.string(), // "city_health_officer", "sanitation_chief"
+    
+    // Official Information
+    value: v.object({
+      name: v.string(), // "Dr. Marjorie D. Culas"
+      designation: v.string(), // "City Health Officer"
+      signatureStorageId: v.optional(v.id("_storage")), // Link to signature file
+      isActive: v.boolean(), // Is this the current official?
+      effectiveFrom: v.float64(), // When they took office (timestamp)
+      effectiveTo: v.optional(v.float64()), // When they stepped down (null = still active)
+    }),
+    
+    // Audit Trail
+    updatedAt: v.float64(),
+    updatedBy: v.id("users"), // System Admin who made the change
+    notes: v.optional(v.string()), // "Appointed per City Order No. 2025-123"
+    
+    // Change History (for major updates)
+    changeReason: v.optional(v.string()), // "Official retirement", "New appointment"
+  })
+    .index("by_key", ["key"]) // Query by key, then filter by isActive in code
+    .index("by_updated_at", ["updatedAt"]), // For audit/history queries
+
+  // Lab Test Findings - Phase 2: Medical test results that appear on health cards
+  // Used when applicants have medical findings that were cleared but need monitoring
+  labTestFindings: defineTable({
+    // Core Relationships
+    applicationId: v.id("applications"),
+    healthCardId: v.optional(v.id("healthCards")), // Set when card is generated
+    referralHistoryId: v.optional(v.id("documentReferralHistory")), // Link back to referral
+    
+    // Test Classification (maps to card sections)
+    testType: v.union(
+      v.literal("urinalysis"),     // URINALYSIS section
+      v.literal("xray_sputum"),    // X-RAY / SPUTUM section
+      v.literal("stool")           // STOOL section
+    ),
+    
+    // Finding Details (what prints on card)
+    findingKind: v.string(),       // "WBC elevated – Cleared post-Rx" (from dropdown)
+    findingStatus: v.union(
+      v.literal("cleared_with_monitoring"),  // Show on card, needs retest
+      v.literal("cleared_no_monitoring"),    // Cleared completely, don't show
+      v.literal("pending_retest")            // Currently in monitoring period
+    ),
+    
+    // Dates (critical for card display)
+    clearedDate: v.float64(),      // Date applicant was cleared (prints as "Date")
+    monitoringExpiry: v.float64(), // Next retest due date (prints as "Exp Date")
+    monitoringPeriodMonths: v.float64(), // Duration: 3, 6, or 12 months
+    
+    // Medical Context (not displayed on card)
+    doctorName: v.string(),        // Who cleared them
+    treatmentNotes: v.optional(v.string()),  // Treatment details
+    clinicAddress: v.optional(v.string()),   // Where treated
+    
+    // Display Control
+    showOnCard: v.boolean(),       // Admin decides: print this finding or not
+    
+    // Audit Trail
+    recordedBy: v.id("users"),     // Which admin recorded this
+    recordedAt: v.float64(),       // When recorded
+    updatedAt: v.optional(v.float64()),
+    deletedAt: v.optional(v.float64()),  // Soft delete
+  })
+    .index("by_application", ["applicationId"])
+    .index("by_health_card", ["healthCardId"])
+    .index("by_test_type", ["testType", "recordedAt"])
+    .index("by_expiry", ["monitoringExpiry"]) // For future: reminder cron jobs
+    .index("by_status", ["findingStatus", "monitoringExpiry"])
+    .index("by_referral", ["referralHistoryId"]),
 
 });
