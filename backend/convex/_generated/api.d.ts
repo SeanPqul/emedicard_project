@@ -8,6 +8,11 @@
  * @module
  */
 
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
 import type * as _notifications_clearReadNotifications from "../_notifications/clearReadNotifications.js";
 import type * as _notifications_createNotification from "../_notifications/createNotification.js";
 import type * as _notifications_getAdminNotifications from "../_notifications/getAdminNotifications.js";
@@ -91,7 +96,6 @@ import type * as documentUploads_get from "../documentUploads/get.js";
 import type * as documentUploads_getReviewedDocumentsWithDetails from "../documentUploads/getReviewedDocumentsWithDetails.js";
 import type * as documentUploads_getStorageFileIdAction from "../documentUploads/getStorageFileIdAction.js";
 import type * as documentUploads_getStorageFileIdByUploadId from "../documentUploads/getStorageFileIdByUploadId.js";
-import type * as documents from "../documents.js";
 import type * as documents_classifyDocument from "../documents/classifyDocument.js";
 import type * as documents_documentAccessLogs from "../documents/documentAccessLogs.js";
 import type * as documents_documentQueries from "../documents/documentQueries.js";
@@ -101,6 +105,7 @@ import type * as documents_referralQueries from "../documents/referralQueries.js
 import type * as documents_rejectionQueries from "../documents/rejectionQueries.js";
 import type * as documents_secureAccessQueries from "../documents/secureAccessQueries.js";
 import type * as documents_triggerClassification from "../documents/triggerClassification.js";
+import type * as documents from "../documents.js";
 import type * as healthCards_generateHealthCard from "../healthCards/generateHealthCard.js";
 import type * as healthCards_getHealthCard from "../healthCards/getHealthCard.js";
 import type * as healthCards_getUserCards from "../healthCards/getUserCards.js";
@@ -124,11 +129,11 @@ import type * as notifications from "../notifications.js";
 import type * as ocr_extractDocumentText from "../ocr/extractDocumentText.js";
 import type * as ocr_saveExtractedText from "../ocr/saveExtractedText.js";
 import type * as orientationSchedules from "../orientationSchedules.js";
-import type * as orientations from "../orientations.js";
 import type * as orientations_attendance from "../orientations/attendance.js";
 import type * as orientations_getUserOrientations from "../orientations/getUserOrientations.js";
 import type * as orientations_index from "../orientations/index.js";
 import type * as orientations_queries from "../orientations/queries.js";
+import type * as orientations from "../orientations.js";
 import type * as payments_createPayment from "../payments/createPayment.js";
 import type * as payments_getAllPayments from "../payments/getAllPayments.js";
 import type * as payments_getForApplication from "../payments/getForApplication.js";
@@ -186,12 +191,14 @@ import type * as verification_getVerificationStats from "../verification/getVeri
 import type * as verification_logQRScan from "../verification/logQRScan.js";
 import type * as verification_logVerificationAttempt from "../verification/logVerificationAttempt.js";
 
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
-
+/**
+ * A utility for referencing Convex functions in your app's API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
 declare const fullApi: ApiFromModules<{
   "_notifications/clearReadNotifications": typeof _notifications_clearReadNotifications;
   "_notifications/createNotification": typeof _notifications_createNotification;
@@ -276,7 +283,6 @@ declare const fullApi: ApiFromModules<{
   "documentUploads/getReviewedDocumentsWithDetails": typeof documentUploads_getReviewedDocumentsWithDetails;
   "documentUploads/getStorageFileIdAction": typeof documentUploads_getStorageFileIdAction;
   "documentUploads/getStorageFileIdByUploadId": typeof documentUploads_getStorageFileIdByUploadId;
-  documents: typeof documents;
   "documents/classifyDocument": typeof documents_classifyDocument;
   "documents/documentAccessLogs": typeof documents_documentAccessLogs;
   "documents/documentQueries": typeof documents_documentQueries;
@@ -286,6 +292,7 @@ declare const fullApi: ApiFromModules<{
   "documents/rejectionQueries": typeof documents_rejectionQueries;
   "documents/secureAccessQueries": typeof documents_secureAccessQueries;
   "documents/triggerClassification": typeof documents_triggerClassification;
+  documents: typeof documents;
   "healthCards/generateHealthCard": typeof healthCards_generateHealthCard;
   "healthCards/getHealthCard": typeof healthCards_getHealthCard;
   "healthCards/getUserCards": typeof healthCards_getUserCards;
@@ -309,11 +316,11 @@ declare const fullApi: ApiFromModules<{
   "ocr/extractDocumentText": typeof ocr_extractDocumentText;
   "ocr/saveExtractedText": typeof ocr_saveExtractedText;
   orientationSchedules: typeof orientationSchedules;
-  orientations: typeof orientations;
   "orientations/attendance": typeof orientations_attendance;
   "orientations/getUserOrientations": typeof orientations_getUserOrientations;
   "orientations/index": typeof orientations_index;
   "orientations/queries": typeof orientations_queries;
+  orientations: typeof orientations;
   "payments/createPayment": typeof payments_createPayment;
   "payments/getAllPayments": typeof payments_getAllPayments;
   "payments/getForApplication": typeof payments_getForApplication;
@@ -371,31 +378,11 @@ declare const fullApi: ApiFromModules<{
   "verification/logQRScan": typeof verification_logQRScan;
   "verification/logVerificationAttempt": typeof verification_logVerificationAttempt;
 }>;
-
-/**
- * A utility for referencing Convex functions in your app's public API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
- * ```
- */
 export declare const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">
 >;
-
-/**
- * A utility for referencing Convex functions in your app's internal API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = internal.myModule.myFunction;
- * ```
- */
 export declare const internal: FilterApi<
   typeof fullApi,
   FunctionReference<any, "internal">
 >;
-
-export declare const components: {};
