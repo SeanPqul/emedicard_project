@@ -26,6 +26,7 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
     age: 0,
     nationality: '',
     gender: undefined,
+    securityGuard: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedDocuments, setSelectedDocuments] = useState<SelectedDocuments>({});
@@ -219,6 +220,7 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
               firstName: '',
               lastName: '',
               gender: undefined,
+              securityGuard: false,
             });
             setSelectedDocuments({});
             setCurrentStep(0);
@@ -286,6 +288,7 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
       firstName: '',
       lastName: '',
       gender: undefined,
+      securityGuard: false,
     });
     
     // Reset selected documents

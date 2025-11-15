@@ -62,6 +62,8 @@ export default defineSchema({
     organization: v.string(),
     paymentDeadline: v.optional(v.float64()),
     position: v.string(),
+    // Non-Food specialization: whether applicant is a security guard (enables extra docs)
+    securityGuard: v.optional(v.boolean()),
     updatedAt: v.optional(v.float64()),
     userId: v.id("users"),
     lastUpdatedBy: v.optional(v.id("users")), // New field to track which admin last updated the application

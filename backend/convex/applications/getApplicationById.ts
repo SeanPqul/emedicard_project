@@ -25,6 +25,7 @@ export const getApplicationByIdQuery = query({
     // Return enriched application data
     return {
       ...application,
+      securityGuard: application.securityGuard ?? false,
       userName: user?.fullname ?? "Unknown User",
       jobCategoryName: jobCategory?.name ?? "Unknown Category",
       // Map applicationStatus to status for frontend compatibility
@@ -42,6 +43,7 @@ export const getApplicationByIdQuery = query({
         organization: application.organization,
         civilStatus: application.civilStatus,
         jobCategory: application.jobCategoryId,
+        securityGuard: application.securityGuard ?? false,
       },
       jobCategory: jobCategory ? {
         _id: jobCategory._id,

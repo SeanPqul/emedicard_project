@@ -16,6 +16,7 @@ export const updateApplicationMutation = mutation({
     age: v.optional(v.number()),
     nationality: v.optional(v.string()),
     gender: v.optional(v.union(v.literal("Male"), v.literal("Female"), v.literal("Other"))),
+    securityGuard: v.optional(v.boolean()),
     applicationStatus: v.optional(v.union(
       v.literal("Submitted"),
       v.literal("For Orientation"),

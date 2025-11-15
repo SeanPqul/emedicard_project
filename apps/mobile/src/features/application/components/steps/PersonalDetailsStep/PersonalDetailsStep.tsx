@@ -204,6 +204,38 @@ export const PersonalDetailsStep: React.FC<PersonalDetailsStepProps> = ({
           </View>
         )}
       </View>
+
+      {/* Security Guard toggle — only for Non-Food */}
+      {selectedCategory?.name?.toLowerCase().includes('non-food') && (
+        <View style={[styles.inputGroup, { marginTop: moderateScale(6) }]}>
+          <TouchableOpacity
+            onPress={() => setFormData({ ...formData, securityGuard: !formData.securityGuard })}
+            activeOpacity={0.7}
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+          >
+            <View style={{
+              width: moderateScale(18),
+              height: moderateScale(18),
+              borderRadius: 4,
+              borderWidth: 2,
+              borderColor: formData.securityGuard ? theme.colors.accent.safetyGreen : '#9CA3AF',
+              backgroundColor: formData.securityGuard ? theme.colors.accent.safetyGreen : 'transparent',
+              alignItems: 'center', justifyContent: 'center',
+              marginRight: moderateScale(8)
+            }}>
+              {formData.securityGuard && (
+                <Ionicons name="checkmark" size={moderateScale(12)} color="#fff" />
+              )}
+            </View>
+            <Text style={{ fontSize: moderateScale(14), color: theme.colors.text.primary, fontWeight: '600' }}>
+              I am a Security Guard
+            </Text>
+          </TouchableOpacity>
+          <Text style={{ color: theme.colors.text.secondary, fontSize: moderateScale(12), marginTop: moderateScale(6) }}>
+            When checked, additional documents (Drug Test and Neuropsychiatric Test) will be required.
+          </Text>
+        </View>
+      )}
       
       <View style={styles.inputGroup}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>

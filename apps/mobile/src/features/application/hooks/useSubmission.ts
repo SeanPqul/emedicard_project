@@ -76,6 +76,7 @@ export const useSubmission = ({
         age: formData.age,
         nationality: formData.nationality,
         gender: formData.gender,
+        securityGuard: formData.securityGuard === true,
       });
       return existingAppId;
     }
@@ -93,6 +94,7 @@ export const useSubmission = ({
       age: formData.age,
       nationality: formData.nationality,
       gender: formData.gender,
+      securityGuard: formData.securityGuard === true,
     });
     formStorage.setApplicationId(applicationId);
     return applicationId;

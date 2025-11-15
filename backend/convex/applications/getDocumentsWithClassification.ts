@@ -22,11 +22,15 @@ type ApplicantDetails = {
   firstName?: string;
   lastName?: string;
   middleName?: string;
+  suffix?: string;
   email?: string;
+  age?: number;
   gender?: string;
   nationality?: string;
   civilStatus?: string;
   organization?: string;
+  position?: string;
+  securityGuard?: boolean;
 };
 
 type GetDocumentsResult = {

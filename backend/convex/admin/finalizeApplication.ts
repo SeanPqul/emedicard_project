@@ -52,16 +52,49 @@ export const finalize = mutation({
     const applicant = await ctx.db.get(application.userId);
     if (!applicant) throw new Error("Applicant not found.");
 
-    // 2.5. CRITICAL: Check orientation requirement for Food Handlers
+    // 2.5. CRITICAL: Validate payment before approval
+    if (args.newStatus === "Approved") {
+      // Check payment status - must be completed and validated
+      const payment = await ctx.db
+        .query("payments")
+        .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
+        .first();
+      
+      if (!payment) {
+        throw new Error("Cannot approve application. No payment record found. The applicant must complete payment first.");
+      }
+      
+      if (payment.paymentStatus !== "Complete") {
+        throw new Error(
+          `Cannot approve application. Payment status is "${payment.paymentStatus}". ` +
+          "The payment must be completed and validated before document approval."
+        );
+      }
+      
+      // Check application payment status
+      if (application.applicationStatus === "Pending Payment") {
+        throw new Error("Cannot approve application. Application is still pending payment. Please ensure payment has been validated first.");
+      }
+    }
+    
+    // 2.6. CRITICAL: Check orientation requirement for Food Handlers ONLY
     // Note: Document verification can happen in parallel with orientation
     // Admin can review documents while applicant attends/books orientation
     // BUT final approval requires BOTH documents approved AND orientation completed
     if (args.newStatus === "Approved") {
       const jobCategory = await ctx.db.get(application.jobCategoryId);
-      const requiresOrientation = 
+      const categoryName = jobCategory?.name?.toLowerCase() || '';
+      
+      // Only check orientation for Food Handlers, exclude non-food and pink card
+      const isNonFood = categoryName.includes('non-food') || categoryName.includes('nonfood');
+      const isPinkCard = categoryName.includes('pink') || categoryName.includes('skin') || categoryName.includes('contact');
+      const isFoodHandler = !isNonFood && !isPinkCard && categoryName.includes('food');
+      
+      const requiresOrientation = isFoodHandler && (
         jobCategory?.requireOrientation === true || 
         jobCategory?.requireOrientation === "true" ||
-        jobCategory?.requireOrientation === "Yes";
+        jobCategory?.requireOrientation === "Yes"
+      );
       
       if (requiresOrientation && !application.orientationCompleted) {
         throw new Error(

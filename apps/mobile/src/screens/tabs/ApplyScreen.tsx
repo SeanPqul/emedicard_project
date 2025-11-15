@@ -28,9 +28,10 @@ export function ApplyScreen() {
   const [unresolvedApp, setUnresolvedApp] = useState<any>(null);
   const [accessChecked, setAccessChecked] = useState(false);
 
-  // Check for unresolved applications - must complete before showing form
+  // Check for unresolved applications on mount only
+  // Don't re-check when applications update to avoid race condition after submission
   useEffect(() => {
-    if (!applicationsLoading) {
+    if (!applicationsLoading && !accessChecked) {
       // Applications might be undefined or empty array
       const appList = applications || [];
       const { hasUnresolved, unresolvedApplication } = hasUnresolvedApplication(appList);
@@ -42,7 +43,7 @@ export function ApplyScreen() {
       
       setAccessChecked(true);
     }
-  }, [applicationsLoading, applications]);
+  }, [applicationsLoading, accessChecked]);
 
   const {
     // State
