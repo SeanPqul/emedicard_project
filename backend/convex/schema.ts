@@ -110,8 +110,10 @@ export default defineSchema({
     createdAt: v.float64(),
     revokedAt: v.optional(v.float64()),
     revokedReason: v.optional(v.string()),
-    cardType: v.optional(v.string()), // Card type/color (e.g., "yellow", "pink", "blue")
-    
+
+    // Phase 3: Card Type - Color coding based on job category (Yellow/Green/Pink)
+    cardType: v.optional(v.union(v.literal("yellow"), v.literal("green"), v.literal("pink"))),
+
     // NEW: Snapshot of Officials at Time of Issuance (for historical accuracy)
     // This preserves who signed the card even if officials change later
     signedBy: v.optional(v.object({
@@ -131,9 +133,6 @@ export default defineSchema({
     
     // Phase 2: Lab Test Findings - Track which findings are displayed on this card
     includedFindings: v.optional(v.array(v.id("labTestFindings"))),
-    
-    // Phase 3: Card Type - Color coding based on job category (Yellow/Green/Pink)
-    cardType: v.optional(v.union(v.literal("yellow"), v.literal("green"), v.literal("pink"))),
   })
     .index("by_application", ["applicationId"])
     .index("by_registration", ["registrationNumber"])
@@ -449,15 +448,9 @@ export default defineSchema({
       v.literal("flagged_again")      // Issue persists, flagged again
     )),
     
-    // Onsite Verification Tracking (when applicant visits venue after treatment)
-    verifiedBy: v.optional(v.id("users")), // Admin who verified onsite completion
-    verifiedAt: v.optional(v.float64()), // Timestamp of onsite verification
-    verificationNotes: v.optional(v.string()), // Optional notes from admin about verification
-
-    // Clearance Tracking (for medical referrals that get cleared)
-    findingDescription: v.optional(v.string()), // Description of the medical finding
-    verifiedAt: v.optional(v.float64()), // When the medical issue was verified/cleared
+    // Onsite Verification / Clearance Tracking (when applicant visits venue after treatment)
     verifiedBy: v.optional(v.id("users")), // Admin who verified/cleared the medical issue
+    verifiedAt: v.optional(v.float64()), // When the medical issue was verified/cleared
     verificationNotes: v.optional(v.string()), // Notes from admin about the verification/clearance
 
     // Notification Tracking
