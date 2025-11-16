@@ -176,39 +176,39 @@ export default function DashboardPage() {
           <DashboardActivityLog />
         </Navbar>
       
-      <main className="max-w-[1600px] mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-[1600px] mx-auto py-4 sm:py-6 px-3 sm:px-4 lg:px-8">
         {/* Header Section */}
-        <header className="mb-8 pt-2">
-          <div className="flex items-center justify-between flex-wrap gap-4">
+        <header className="mb-6 sm:mb-8 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Admin Dashboard</h1>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">Admin Dashboard</h1>
                 {adminPrivileges.managedCategories === "all" && (
-                  <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-md">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-md w-fit">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                     System Administrator
                   </span>
                 )}
               </div>
-              <p className="text-gray-600 mt-2 text-base">
+              <p className="text-gray-600 mt-1.5 sm:mt-2 text-sm sm:text-base">
                 {adminPrivileges.managedCategories === "all" 
                   ? "Viewing all applications across all categories and admins" 
                   : "Overview and management of health card applications"}
               </p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Last updated: {new Date().toLocaleTimeString()}</span>
+              <span className="whitespace-nowrap">Last updated: {new Date().toLocaleTimeString()}</span>
             </div>
           </div>
         </header>
 
         {/* Stats Grid - Improved Layout with 9 cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-9 gap-3 lg:gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-9 gap-2 sm:gap-3 lg:gap-4 mb-6 sm:mb-8">
           <StatCard title="Submitted" value={totalPending} icon={<StatIcon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />} colorClass="bg-gradient-to-br from-yellow-400 to-yellow-500" />
           <StatCard title="Doc Verification" value={totalForDocVerification} icon={<StatIcon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />} colorClass="bg-gradient-to-br from-cyan-400 to-cyan-500" />
           <StatCard title="Referred to Doctor" value={totalReferrals} icon={<StatIcon d="M8 7h12M8 12h12m-12 5h12M4 7h.01M4 12h.01M4 17h.01" />} colorClass="bg-gradient-to-br from-amber-400 to-amber-500" />
@@ -221,14 +221,14 @@ export default function DashboardPage() {
         </div>
 
         {/* Controls Panel - Improved Layout */}
-        <div className="bg-white rounded-2xl shadow-md border border-gray-200 mb-8">
-          <div className="p-6">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border border-gray-200 mb-6 sm:mb-8">
+          <div className="p-4 sm:p-6">
             {/* Top Section: Filters */}
-            <div className="flex flex-col lg:flex-row lg:items-end gap-6 mb-6 pb-6 border-b border-gray-200">
-              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-end gap-4 sm:gap-6 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-gray-200">
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {/* Smart Job Category Filter */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <label className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-700">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
                     </div>
                   ) : adminPrivileges.managedCategories === "all" ? (
                     <select 
-                      className="w-full px-4 py-2.5 pr-10 border border-gray-300 text-gray-900 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white transition-all"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-8 sm:pr-10 border border-gray-300 text-gray-900 rounded-lg sm:rounded-xl shadow-sm text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white transition-all"
                       value={categoryFilter} 
                       onChange={e => setCategoryFilter(e.target.value as Id<"jobCategories"> | "")}
                     >
@@ -257,15 +257,15 @@ export default function DashboardPage() {
                 </div>
                 
                 {/* Status Filter */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <label className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-700">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
                     Status Filter
                   </label>
                   <select 
-                    className="w-full px-4 py-2.5 pr-10 border border-gray-300 text-gray-900 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white transition-all" 
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-8 sm:pr-10 border border-gray-300 text-gray-900 rounded-lg sm:rounded-xl shadow-sm text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white transition-all" 
                     value={statusFilter} 
                     onChange={e => setStatusFilter(e.target.value)}
                   >
@@ -285,20 +285,20 @@ export default function DashboardPage() {
               </div>
               
               {/* Search Input */}
-              <div className="relative shrink-0">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="relative w-full lg:w-auto lg:shrink-0">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
                   Search
                 </label>
                 <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                    <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-4">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <input 
                     type="text" 
                     placeholder="Search applicants..." 
-                    className="w-full sm:w-80 pl-11 pr-4 py-2.5 border border-gray-300 text-gray-900 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all" 
+                    className="w-full lg:w-80 pl-9 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-gray-300 text-gray-900 rounded-lg sm:rounded-xl shadow-sm text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all" 
                     value={search} 
                     onChange={e => setSearch(e.target.value)}
                   />
@@ -307,12 +307,12 @@ export default function DashboardPage() {
             </div>
             
             {/* Bottom Section: Quick Actions */}
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700">Quick Actions:</span>
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 sm:gap-3">
+              <span className="text-xs sm:text-sm font-semibold text-gray-700">Quick Actions:</span>
               {adminPrivileges.managedCategories === "all" && (
                 <Link 
                   href="/super-admin" 
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:from-purple-600 hover:to-purple-700 border border-purple-400 transition-all shadow-md hover:shadow-lg"
+                  className="inline-flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold hover:from-purple-600 hover:to-purple-700 border border-purple-400 transition-all shadow-md hover:shadow-lg whitespace-nowrap"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
@@ -322,7 +322,7 @@ export default function DashboardPage() {
               )}
               <Link 
                 href="/dashboard/payment-history" 
-                className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl font-medium hover:bg-emerald-100 border border-emerald-200 transition-all shadow-sm hover:shadow"
+                className="inline-flex items-center gap-1.5 sm:gap-2 bg-emerald-50 text-emerald-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium hover:bg-emerald-100 border border-emerald-200 transition-all shadow-sm hover:shadow whitespace-nowrap"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -331,7 +331,7 @@ export default function DashboardPage() {
               </Link>
               <Link 
                 href="/dashboard/rejection-history" 
-                className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-xl font-medium hover:bg-orange-100 border border-orange-200 transition-all shadow-sm hover:shadow"
+                className="inline-flex items-center gap-1.5 sm:gap-2 bg-orange-50 text-orange-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium hover:bg-orange-100 border border-orange-200 transition-all shadow-sm hover:shadow whitespace-nowrap"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -341,7 +341,7 @@ export default function DashboardPage() {
               {(managedJobCategories?.some(cat => cat.name === "Food Category") || adminPrivileges.managedCategories === "all") && (
                 <Link 
                   href="/dashboard/attendance-tracker" 
-                  className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl font-medium hover:bg-emerald-100 border border-emerald-200 transition-all shadow-sm hover:shadow"
+                  className="inline-flex items-center gap-1.5 sm:gap-2 bg-emerald-50 text-emerald-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium hover:bg-emerald-100 border border-emerald-200 transition-all shadow-sm hover:shadow whitespace-nowrap"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -351,7 +351,7 @@ export default function DashboardPage() {
               )}
               <Link 
                 href="/dashboard/lab-findings" 
-                className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-xl font-medium hover:bg-blue-100 border border-blue-200 transition-all shadow-sm hover:shadow"
+                className="inline-flex items-center gap-1.5 sm:gap-2 bg-blue-50 text-blue-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium hover:bg-blue-100 border border-blue-200 transition-all shadow-sm hover:shadow whitespace-nowrap"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -363,7 +363,7 @@ export default function DashboardPage() {
                   <button
                     onClick={() => setShowAdvancedMenu(!showAdvancedMenu)}
                     onBlur={() => setTimeout(() => setShowAdvancedMenu(false), 200)}
-                    className="inline-flex items-center gap-2 bg-gray-50 text-gray-700 px-4 py-2 rounded-xl font-medium hover:bg-gray-100 border border-gray-200 transition-all shadow-sm hover:shadow relative"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 bg-gray-50 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium hover:bg-gray-100 border border-gray-200 transition-all shadow-sm hover:shadow relative whitespace-nowrap"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -391,7 +391,7 @@ export default function DashboardPage() {
                   )}
                 </div>
               )}
-              <div className="ml-auto text-sm text-gray-500">
+              <div className="sm:ml-auto text-xs sm:text-sm text-gray-500 w-full sm:w-auto text-center sm:text-right mt-2 sm:mt-0">
                 Showing <span className="font-semibold text-gray-700">{filteredApplications.length}</span> of <span className="font-semibold text-gray-700">{applications?.length || 0}</span> applications
               </div>
             </div>
@@ -399,8 +399,8 @@ export default function DashboardPage() {
         </div>
         
         {/* Applications Table - Enhanced Design */}
-        <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto responsive-table-wrapper">
             <table className="w-full">
               <thead>
                 <tr className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">

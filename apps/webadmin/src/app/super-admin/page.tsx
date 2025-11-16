@@ -117,20 +117,20 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-gray-200 transform transition-all max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full flex justify-center items-start sm:items-center z-50 p-2 sm:p-4 lg:p-6 animate-fadeIn">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full border border-gray-200 transform transition-all max-h-[95vh] sm:max-h-[90vh] overflow-y-auto my-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-6 rounded-t-2xl">
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 rounded-t-xl sm:rounded-t-2xl">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-white/20 p-3 rounded-xl">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="bg-white/20 p-2 sm:p-3 rounded-lg sm:rounded-xl">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Create Admin</h2>
-                <p className="text-emerald-100 text-sm mt-1">Add a new administrator or inspector to manage health card applications</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-white">Create Admin</h2>
+                <p className="text-emerald-100 text-xs sm:text-sm mt-1 hidden sm:block">Add a new administrator or inspector to manage health card applications</p>
               </div>
             </div>
             <button
@@ -146,32 +146,32 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
         </div>
 
         {/* Body */}
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           {/* Success Message */}
           {successMessage && (
-            <div className="bg-green-50 border-l-4 border-green-500 text-green-700 px-6 py-4 rounded-xl mb-6 flex items-center gap-3 animate-fadeIn">
-              <svg className="w-6 h-6 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-green-50 border-l-4 border-green-500 text-green-700 px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl mb-4 sm:mb-6 flex items-start sm:items-center gap-2 sm:gap-3 animate-fadeIn">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="font-medium">{successMessage}</span>
+              <span className="text-sm sm:text-base font-medium">{successMessage}</span>
             </div>
           )}
 
           {/* Error Message */}
           {error && !error.includes("Password") && (
-            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-6 py-4 rounded-xl mb-6 flex items-center gap-3 animate-fadeIn">
-              <svg className="w-6 h-6 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl mb-4 sm:mb-6 flex items-start sm:items-center gap-2 sm:gap-3 animate-fadeIn">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="font-medium">{error}</span>
+              <span className="text-sm sm:text-base font-medium">{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Full Name */}
             <div>
-              <label htmlFor="adminName" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label htmlFor="adminName" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Full Name
@@ -179,7 +179,7 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
               <input
                 type="text"
                 id="adminName"
-                className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                className="block w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 text-gray-700 text-sm sm:text-base rounded-lg sm:rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
                 placeholder="John Doe"
                 value={adminName}
                 onChange={(e) => setAdminName(e.target.value)}

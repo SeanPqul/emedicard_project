@@ -6,7 +6,7 @@ import LoadingScreen from "@/components/shared/LoadingScreen";
 import Navbar from "@/components/shared/Navbar";
 import { api } from "@backend/convex/_generated/api";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -108,7 +108,7 @@ export default function SystemConfigPage() {
             onEdit={() => setEditing("sanitation_chief")}
             onCancel={() => setEditing(null)}
             onSave={async (data) => {
-              await setOfficial({
+              await setOfficials({
                 key: "sanitation_chief",
                 name: data.name,
                 designation: data.designation,
