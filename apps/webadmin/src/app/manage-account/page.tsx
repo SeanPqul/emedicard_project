@@ -12,7 +12,10 @@ import { useEffect, useState } from 'react';
 export default function ManageAccountPage() {
   const router = useRouter();
   const { user: clerkUser, isLoaded } = useUser();
-  const currentUser = useQuery(api.users.getCurrentUser.getCurrentUserQuery);
+  const currentUser = useQuery(
+    api.users.getCurrentUser.getCurrentUserQuery,
+    isLoaded && clerkUser ? undefined : "skip"
+  );
   const updateAccount = useAction(api.admin.updateAdminAccount.updateAccountWithClerk);
 
   const [username, setUsername] = useState('');

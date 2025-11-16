@@ -85,7 +85,7 @@ export const get = query({
           maxAttemptsReached = attemptNumber >= 4; // Block at 4th attempt
           remainingAttempts = Math.max(0, 3 - attemptNumber);
           
-          // Check if this is a resubmission
+          // Check if this is a resubmission - check BOTH rejection and referral history
           const rejectionHistory = await ctx.db
             .query("documentRejectionHistory")
             .withIndex("by_document_type", (q) => 
@@ -95,14 +95,25 @@ export const get = query({
             .order("desc")
             .first();
           
-          // If there's a rejection history and it was replaced, this is a resubmission
-          if (rejectionHistory && rejectionHistory.wasReplaced) {
+          const referralHistory = await ctx.db
+            .query("documentReferralHistory")
+            .withIndex("by_document_type", (q) => 
+              q.eq("applicationId", application._id)
+               .eq("documentTypeId", req.documentTypeId)
+            )
+            .order("desc")
+            .first();
+          
+          // If there's a rejection OR referral history and it was replaced, this is a resubmission
+          if ((rejectionHistory && rejectionHistory.wasReplaced) || 
+              (referralHistory && referralHistory.wasReplaced)) {
             isResubmission = true;
           }
         }
 
         return {
-          _id: req._id, // Add the requirement's ID
+          _id: req._id, // The requirement's ID (jobCategoryDocuments)
+          documentTypeId: req.documentTypeId, // The actual document type ID (needed for referral queries)
           requirementName: documentType?.name ?? "Unknown Requirement",
           isRequired: req.isRequired,
           fieldIdentifier: documentType?.fieldIdentifier, // Add fieldIdentifier for medical document detection

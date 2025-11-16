@@ -40,7 +40,7 @@ type PaymentRecord = {
 
 export default function PaymentHistoryPage() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   
   // State
   const [search, setSearch] = useState('');
@@ -50,15 +50,26 @@ export default function PaymentHistoryPage() {
   const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-  // Data fetching
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
-  const payments = useQuery(api.payments.getAllPayments.get, {
-    status: statusFilter || undefined,
-    paymentMethod: methodFilter || undefined,
-    startDate: dateRange.start ? new Date(dateRange.start).getTime() : undefined,
-    endDate: dateRange.end ? new Date(dateRange.end).getTime() : undefined,
-  });
-  const stats = useQuery(api.payments.getAllPayments.getStats);
+  // Data fetching - wait for authentication to be ready
+  const adminPrivileges = useQuery(
+    api.users.roles.getAdminPrivileges,
+    isLoaded && user ? undefined : "skip"
+  );
+  const payments = useQuery(
+    api.payments.getAllPayments.get,
+    isLoaded && user && adminPrivileges && adminPrivileges.isAdmin
+      ? {
+          status: statusFilter || undefined,
+          paymentMethod: methodFilter || undefined,
+          startDate: dateRange.start ? new Date(dateRange.start).getTime() : undefined,
+          endDate: dateRange.end ? new Date(dateRange.end).getTime() : undefined,
+        }
+      : "skip"
+  );
+  const stats = useQuery(
+    api.payments.getAllPayments.getStats,
+    isLoaded && user && adminPrivileges && adminPrivileges.isAdmin ? undefined : "skip"
+  );
 
   // Filter payments by search
   const filteredPayments = useMemo(() => {

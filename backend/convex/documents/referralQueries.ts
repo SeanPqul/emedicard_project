@@ -57,6 +57,7 @@ export const getReferralHistory = query({
           specificIssues: data.specificIssues,
           doctorName: data.doctorName,
           clinicAddress: data.clinicAddress,
+          findingDescription: data.findingDescription, // Medical finding for referral details
           referredAt: data.referredAt,
           referredByName: (referredBy as any)?.fullname || "Admin",
           attemptNumber: data.attemptNumber,
@@ -177,6 +178,7 @@ export const getDocumentReferralDetails = query({
         specificIssues: item.specificIssues,
         doctorName: item.doctorName,
         clinicAddress: source === 'new' ? item.clinicAddress : undefined,
+        findingDescription: source === 'new' ? item.findingDescription : undefined, // Medical finding for pre-filling lab form
         attemptNumber: item.attemptNumber,
         referredAt: source === 'new' ? item.referredAt : item.rejectedAt,
         referredBy: {

@@ -5,6 +5,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { Id } from "../_generated/dataModel";
+import { AdminRole } from "../users/roles";
 
 /**
  * Get active officials for health card generation
@@ -121,13 +122,18 @@ export const setOfficial = mutation({
       throw new Error("Authentication required");
     }
 
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isSuperAdmin) {
+      throw new Error("System Administrator access required. Only system administrators can manage officials.");
+    }
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (!user || user.role !== "system_admin") {
-      throw new Error("System Administrator access required");
+    if (!user) {
+      throw new Error("User not found");
     }
 
     // 2. Check if there's an active official for this position
@@ -177,6 +183,43 @@ export const setOfficial = mutation({
 });
 
 /**
+ * Update sanitation chief signature only (keeps name/designation)
+ * FOR DASHBOARD USE ONLY - No auth required
+ */
+export const updateSanitationChiefSignature = mutation({
+  args: {
+    signatureStorageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    // Get current active sanitation chief
+    const sanitationChief = await ctx.db
+      .query("systemConfig")
+      .withIndex("by_key", (q) => q.eq("key", "sanitation_chief"))
+      .filter((q) => q.eq(q.field("value.isActive"), true))
+      .first();
+
+    if (!sanitationChief) {
+      throw new Error("No active sanitation chief found. Please configure one first.");
+    }
+
+    // Update ONLY the signature, keep everything else
+    await ctx.db.patch(sanitationChief._id, {
+      value: {
+        ...sanitationChief.value,
+        signatureStorageId: args.signatureStorageId,
+      },
+      updatedAt: Date.now(),
+      notes: "Signature updated via dashboard",
+    });
+
+    return { 
+      success: true, 
+      message: `Sanitation chief signature updated successfully for ${sanitationChief.value.name}`
+    };
+  },
+});
+
+/**
  * Update an existing official's details (without changing active status)
  * System Admin only
  */
@@ -193,6 +236,11 @@ export const updateOfficialDetails = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Authentication required");
+    }
+
+    const adminCheck = await AdminRole(ctx);
+    if (!adminCheck.isSuperAdmin) {
+      throw new Error("System Administrator access required. Only system administrators can update official details.");
     }
 
     const user = await ctx.db
