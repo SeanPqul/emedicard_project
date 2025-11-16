@@ -46,10 +46,20 @@ export default function RejectionHistoryPage() {
   const router = useRouter();
 
   const { isLoaded: isClerkLoaded, user } = useUser();
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
-  const rejections = useQuery(api.admin.rejectionHistory.getAllRejections, {});
-  const stats = useQuery(api.admin.rejectionHistory.getRejectionStats, {});
-
+  const adminPrivileges = useQuery(
+    api.users.roles.getAdminPrivileges,
+    isClerkLoaded && user ? undefined : "skip"
+  );
+  const canViewRejections =
+    isClerkLoaded && !!user && !!adminPrivileges && adminPrivileges.managedCategories === "all";
+  const rejections = useQuery(
+    api.admin.rejectionHistory.getAllRejections,
+    canViewRejections ? {} : "skip"
+  );
+  const stats = useQuery(
+    api.admin.rejectionHistory.getRejectionStats,
+    canViewRejections ? {} : "skip"
+  );
   // Filter rejections
   // @ts-ignore - Type inference issue with Convex-generated types
   const filteredRejections = (rejections || []).filter((rejection: Rejection) => {
@@ -155,7 +165,12 @@ export default function RejectionHistoryPage() {
     }
   };
 
-  const getStatusBadge = (status?: RejectionStatus, wasReplaced?: boolean, type?: RejectionType) => {
+  const getStatusBadge = (
+    status?: RejectionStatus,
+    wasReplaced?: boolean,
+    type?: RejectionType,
+    issueType?: "medical_referral" | "document_issue",
+  ) => {
     // Application rejections are permanently rejected
     if (type === "application") {
       return (
@@ -170,9 +185,18 @@ export default function RejectionHistoryPage() {
     
     switch (finalStatus) {
       case "pending":
+        // Medical referrals: show "Pending Referral" to distinguish from resubmission flow
+        if (issueType === "medical_referral") {
+          return (
+            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+              Pending Referral
+            </span>
+          );
+        }
+        // Non-medical docs & payments: Pending Resubmission
         return (
           <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-            Pending
+            Pending Resubmission
           </span>
         );
       case "in_progress":
@@ -562,18 +586,18 @@ export default function RejectionHistoryPage() {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-xs sm:text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
-                <tr className="text-gray-700">
-                  <th className="text-left px-6 py-4 font-bold">Applicant</th>
-                  <th className="text-left px-6 py-4 font-bold">Job Category</th>
-                  <th className="text-left px-6 py-4 font-bold">Type</th>
-                  <th className="text-left px-6 py-4 font-bold">Document/Item</th>
-                  <th className="text-left px-6 py-4 font-bold">Reason</th>
-                  <th className="text-left px-6 py-4 font-bold">Rejected By</th>
-                  <th className="text-left px-6 py-4 font-bold">Date</th>
-                  <th className="text-left px-6 py-4 font-bold">Status</th>
-                  <th className="text-right px-6 py-4 font-bold">Actions</th>
+                <tr className="text-gray-700 text-[11px] sm:text-xs">
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold">Applicant</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold">Job Category</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold">Type</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold">Document/Item</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold">Reason</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold">Rejected By</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold">Date</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold">Status</th>
+                  <th className="text-right px-3 py-2 sm:px-4 sm:py-3 font-bold">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -594,26 +618,26 @@ export default function RejectionHistoryPage() {
                 {rejections &&
                   filteredRejections.map((rejection: Rejection) => (
                     <tr key={rejection._id} className="hover:bg-red-50/30 transition-all duration-150 border-b border-gray-100 last:border-0">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap">
                         <div className="font-medium text-gray-900">
                           {rejection.applicantName}
                         </div>
                         <div className="text-xs text-gray-500">{rejection.applicantEmail}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-gray-600">
                         {rejection.jobCategory}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap">
                         <span
                           className={`px-3 py-1 text-xs font-semibold rounded-full ${getTypeBadgeColor(rejection.type)}`}
                         >
                           {rejection.type.charAt(0).toUpperCase() + rejection.type.slice(1)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-gray-600">
                         {rejection.documentType}
                       </td>
-                      <td className="px-6 py-4 max-w-xs">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 max-w-xs">
                         <div className="text-gray-900 truncate">{rejection.rejectionReason}</div>
                         {rejection.specificIssues.length > 0 && (
                           <div className="text-xs text-gray-500 mt-1">
@@ -621,19 +645,24 @@ export default function RejectionHistoryPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap">
                         <div className="text-gray-900">{rejection.rejectedBy}</div>
                         <div className="text-xs text-gray-500">{rejection.rejectedByEmail}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-gray-600">
                         {formatDistanceToNow(new Date(rejection.rejectedAt), {
                           addSuffix: true,
                         })}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(rejection.status, rejection.wasReplaced, rejection.type)}
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap">
+                        {getStatusBadge(
+                          rejection.status,
+                          rejection.wasReplaced,
+                          rejection.type,
+                          rejection.issueType,
+                        )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-right">
                         {rejection.applicationId && (
                           <Link
                             href={

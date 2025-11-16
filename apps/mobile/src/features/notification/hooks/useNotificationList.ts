@@ -18,12 +18,41 @@ type BackendNotification = {
   isRead: boolean;
 };
 
+// Normalize backend notification types to canonical frontend types
+// This keeps the mobile UI stable even if backend/webadmin use slightly different strings.
+const normalizeNotificationType = (backendType: string): string => {
+  switch (backendType) {
+    // Medical referral flows (new terminology)
+    case 'document_referred_medical':
+    case 'document_referral_medical':
+      return 'DocumentReferredMedical';
+
+    // Document issue / needs correction flows
+    case 'document_needs_correction':
+    case 'document_issue_flagged':
+    case 'DocumentIssue':
+    case 'document_rejected':
+    case 'document_rejection':
+      return 'DocumentIssueFlagged';
+
+    // Application rejection (max attempts / permanent)
+    case 'application_rejected_max_attempts':
+    case 'application_permanently_rejected':
+      return 'application_rejected_final';
+
+    default:
+      return backendType;
+  }
+};
+
 // Map backend notifications to frontend format
 const mapNotification = (backendNotif: BackendNotification): NotificationItem => {
+  const normalizedType = normalizeNotificationType(backendNotif.notificationType);
+
   return {
     ...backendNotif,
-    type: backendNotif.notificationType,
-    read: backendNotif.isRead ?? false
+    type: normalizedType,
+    read: backendNotif.isRead ?? false,
   };
 };
 

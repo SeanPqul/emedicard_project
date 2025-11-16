@@ -167,7 +167,12 @@ export default function AdminRejectionHistoryPage() {
     }
   };
 
-  const getStatusBadge = (status?: RejectionStatus, wasReplaced?: boolean, type?: RejectionType) => {
+  const getStatusBadge = (
+    status?: RejectionStatus,
+    wasReplaced?: boolean,
+    type?: RejectionType,
+    issueType?: "medical_referral" | "document_issue",
+  ) => {
     // Application rejections are final decisions
     if (type === "application") {
       return (
@@ -182,6 +187,15 @@ export default function AdminRejectionHistoryPage() {
     
     switch (finalStatus) {
       case "pending":
+        // For medical referrals, "pending" means awaiting referral completion, not resubmission
+        if (issueType === "medical_referral") {
+          return (
+            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+              Pending Referral
+            </span>
+          );
+        }
+        // For non-medical documents and payments, keep "Pending Resubmission"
         return (
           <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
             Pending Resubmission
@@ -554,18 +568,18 @@ export default function AdminRejectionHistoryPage() {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-xs sm:text-sm">
               <thead>
-                <tr className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Applicant</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Job Category</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Type</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Document/Item</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Reason</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Rejected By</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Date</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
-                  <th className="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                <tr className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 text-[11px] sm:text-xs">
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold text-gray-700 uppercase tracking-wider">Applicant</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold text-gray-700 uppercase tracking-wider">Job Category</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold text-gray-700 uppercase tracking-wider">Type</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold text-gray-700 uppercase tracking-wider">Document/Item</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold text-gray-700 uppercase tracking-wider">Reason</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold text-gray-700 uppercase tracking-wider">Rejected By</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold text-gray-700 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-3 py-2 sm:px-4 sm:py-3 font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                  <th className="text-right px-3 py-2 sm:px-4 sm:py-3 font-bold text-gray-700 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -605,26 +619,26 @@ export default function AdminRejectionHistoryPage() {
                           : "hover:bg-gray-50"
                       }`}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap">
                         <div className="font-medium text-gray-900">
                           {rejection.applicantName}
                         </div>
                         <div className="text-xs text-gray-500">{rejection.applicantEmail}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-gray-600">
                         {rejection.jobCategory}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap">
                         <span
                           className={`px-3 py-1 text-xs font-semibold rounded-full ${getTypeBadgeColor(rejection.type)}`}
                         >
                           {rejection.type.charAt(0).toUpperCase() + rejection.type.slice(1)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-gray-600">
                         {rejection.documentType}
                       </td>
-                      <td className="px-6 py-4 max-w-xs">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 max-w-xs">
                         <div className="text-gray-900 truncate">{rejection.rejectionReason}</div>
                         {rejection.specificIssues.length > 0 && (
                           <div className="text-xs text-gray-500 mt-1">
@@ -632,19 +646,24 @@ export default function AdminRejectionHistoryPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap">
                         <div className="text-gray-900">{rejection.rejectedBy}</div>
                         <div className="text-xs text-gray-500">{rejection.rejectedByEmail}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-gray-600">
                         {formatDistanceToNow(new Date(rejection.rejectedAt), {
                           addSuffix: true,
                         })}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(rejection.status, rejection.wasReplaced, rejection.type)}
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap">
+                        {getStatusBadge(
+                          rejection.status,
+                          rejection.wasReplaced,
+                          rejection.type,
+                          rejection.issueType,
+                        )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-right">
                         {rejection.type === "application" ? (
                           <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-500 px-4 py-2 rounded-xl font-semibold text-xs">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

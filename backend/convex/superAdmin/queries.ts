@@ -111,32 +111,77 @@ export const getApplicantsByHealthCardType = query({
 export const getAdminsByHealthCardType = query({
   args: {},
   handler: async (ctx) => {
-    const admins = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("role"), "admin"))
-      .collect();
+    // Include all admin-like roles in the breakdown
+    const [admins, inspectors, systemAdmins] = await Promise.all([
+      ctx.db
+        .query("users")
+        .withIndex("by_role", (q) => q.eq("role", "admin"))
+        .collect(),
+      ctx.db
+        .query("users")
+        .withIndex("by_role", (q) => q.eq("role", "inspector"))
+        .collect(),
+      ctx.db
+        .query("users")
+        .withIndex("by_role", (q) => q.eq("role", "system_admin"))
+        .collect(),
+    ]);
+
+    const adminLikeUsers = [...admins, ...inspectors, ...systemAdmins];
 
     const adminsByHealthCardType: Record<string, string[]> = {};
 
-    for (const admin of admins) {
-      if (admin.managedCategories && admin.managedCategories.length > 0) {
-        for (const categoryId of admin.managedCategories) {
-          const jobCategory = await ctx.db.get(categoryId);
-          const categoryName = jobCategory?.name || "Unknown Category";
+    for (const user of adminLikeUsers) {
+      const isSystemAdmin = user.role === "system_admin";
+      const hasManagedCategories =
+        !!user.managedCategories && user.managedCategories.length > 0;
 
-          if (!adminsByHealthCardType[categoryName]) {
-            adminsByHealthCardType[categoryName] = [];
-          }
-          adminsByHealthCardType[categoryName].push(admin.username || admin.email);
-        }
-      } else {
+      // Build a display name that reflects the role for clarity in the UI
+      const baseName = user.username || user.email;
+      const roleSuffix =
+        user.role === "inspector"
+          ? " (Inspector)"
+          : user.role === "system_admin"
+          ? " (System Admin)"
+          : "";
+      const displayName = `${baseName}${roleSuffix}`;
+
+      // System admins and legacy "super admins" (admin with no managedCategories)
+      // are grouped under a dedicated "Super Admin" bucket
+      if (isSystemAdmin || (!hasManagedCategories && user.role === "admin")) {
         const superAdminCategory = "Super Admin";
         if (!adminsByHealthCardType[superAdminCategory]) {
           adminsByHealthCardType[superAdminCategory] = [];
         }
-        adminsByHealthCardType[superAdminCategory].push(admin.username || admin.email);
+        adminsByHealthCardType[superAdminCategory].push(displayName);
+        continue;
       }
+
+      // For regular admins/inspectors: group by the job categories they actually manage.
+      // If a managedCategories entry no longer resolves to a valid jobCategory
+      // (e.g. deleted or corrupted ID), skip it so it doesn't pollute metrics
+      // as "Unknown Category".
+      if (hasManagedCategories && user.managedCategories) {
+        for (const categoryId of user.managedCategories) {
+          const jobCategory = await ctx.db.get(categoryId);
+          if (!jobCategory || jobCategory.deletedAt) {
+            // Category no longer exists / is soft-deleted – ignore this mapping
+            continue;
+          }
+
+          const categoryName = jobCategory.name;
+
+          if (!adminsByHealthCardType[categoryName]) {
+            adminsByHealthCardType[categoryName] = [];
+          }
+          adminsByHealthCardType[categoryName].push(displayName);
+        }
+      }
+      // Note: if a user only has invalid managedCategories, they won't appear
+      // in the breakdown at all – this keeps the metrics clean and avoids
+      // showing stale "Unknown Category" assignments.
     }
+
     return adminsByHealthCardType;
   },
 });
