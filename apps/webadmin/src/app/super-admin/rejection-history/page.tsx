@@ -18,7 +18,7 @@ type RejectionStatus = "pending" | "in_progress" | "resubmitted" | "cleared" | "
 type Rejection = {
   _id: Id<"documentRejectionHistory"> | Id<"documentReferralHistory"> | Id<"paymentRejectionHistory"> | Id<"applicationRejectionHistory"> | Id<"adminActivityLogs">;
   type: RejectionType;
-  applicationId: Id<"applications"> | undefined;
+  applicationId?: Id<"applications">;
   applicantName: string;
   applicantEmail: string;
   jobCategory: string;
@@ -34,6 +34,8 @@ type Rejection = {
   replacedAt?: number;
   status?: RejectionStatus;
   issueType?: "medical_referral" | "document_issue"; // NEW: from documentReferralHistory table
+  rejectionType?: string; // For application rejections
+  triggerSource?: string; // For application rejections
 };
 
 export default function RejectionHistoryPage() {
@@ -49,6 +51,7 @@ export default function RejectionHistoryPage() {
   const stats = useQuery(api.admin.rejectionHistory.getRejectionStats, {});
 
   // Filter rejections
+  // @ts-ignore - Type inference issue with Convex-generated types
   const filteredRejections = (rejections || []).filter((rejection: Rejection) => {
     const matchesSearch =
       rejection.applicantName.toLowerCase().includes(search.toLowerCase()) ||

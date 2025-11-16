@@ -22,7 +22,7 @@ type PaymentRecord = {
   referenceNumber: string;
   mayaCheckoutId?: string;
   mayaPaymentId?: string;
-  receiptUrl?: string;
+  receiptUrl?: string | null;
   updatedAt?: number;
   settlementDate?: number;
   applicationId: string;
