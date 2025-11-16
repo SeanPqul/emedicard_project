@@ -69,6 +69,24 @@ const formatForDisplay = (text: string): string => {
     .replace(/\n/g, '\n');
 };
 
+// Health check endpoint for Render.com
+app.get("/", (req: Request, res: Response) => {
+  res.json({ 
+    status: "healthy", 
+    service: "OCR Service",
+    version: "1.0.0",
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get("/health", (req: Request, res: Response) => {
+  res.json({ 
+    status: "healthy", 
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  });
+});
+
 app.post("/ocr", upload.single("file"), async (req: Request, res: Response) => {
   let preprocessedPath: string | null = null;
   
@@ -133,4 +151,5 @@ app.post("/ocr", upload.single("file"), async (req: Request, res: Response) => {
   }
 });
 
-app.listen(5001, () => console.log("✅ OCR service running on port 5001"));
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => console.log(`✅ OCR service running on port ${PORT}`));

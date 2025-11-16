@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: emedicard-ocr-service
+    runtime: node
+    region: singapore # Change to your preferred region (oregon, frankfurt, singapore)
+    plan: free
+    branch: main # Change if your default branch is different
+    rootDir: backend/ocr-service
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /health
