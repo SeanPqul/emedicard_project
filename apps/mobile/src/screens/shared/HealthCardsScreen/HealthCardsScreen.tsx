@@ -166,9 +166,9 @@ export function HealthCardsScreen() {
 
                 {/* Card Body */}
                 <View style={styles.cardBody}>
-                  {/* Card ID Section */}
+                  {/* Registration Number Section */}
                   <View style={styles.infoSection}>
-                    <Text style={styles.sectionLabel}>Card ID</Text>
+                    <Text style={styles.sectionLabel}>Reg No.</Text>
                     <Text style={styles.cardId}>{card.registrationNumber || (card as any).verificationToken}</Text>
                   </View>
 

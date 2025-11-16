@@ -38,6 +38,15 @@ export const getUserCardsQuery = query({
       })
     );
 
+    // Filter out health cards that have been renewed (superseded by newer cards)
+    // A card is superseded if another application has it as previousHealthCardId
+    // We only need to check this user's applications since cards are user-specific
+    const supersededCardIds = new Set(
+      userApplications
+        .map(app => app.previousHealthCardId)
+        .filter(Boolean)
+    );
+
     const cardsWithDetails = await Promise.all(
       healthCards.filter(Boolean).map(async (card) => {
         const application = await ctx.db.get(card!.applicationId);
@@ -58,6 +67,11 @@ export const getUserCardsQuery = query({
       })
     );
 
-    return cardsWithDetails;
+    // Filter out superseded cards (cards that have been renewed)
+    const activeCards = cardsWithDetails.filter(
+      card => !supersededCardIds.has(card._id)
+    );
+
+    return activeCards;
   },
 });

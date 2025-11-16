@@ -159,9 +159,9 @@ const HealthCardDisplay: React.FC<{ healthCard: any }> = ({ healthCard }) => {
         shadowRadius: 8,
         elevation: 3,
       }}>
-        {/* Card ID */}
+        {/* Registration Number */}
         <View style={{ marginBottom: moderateScale(12) }}>
-          <Text style={{ fontSize: moderateScale(11), color: theme.colors.text.secondary, fontWeight: '500', marginBottom: moderateScale(4) }}>Card ID</Text>
+          <Text style={{ fontSize: moderateScale(11), color: theme.colors.text.secondary, fontWeight: '500', marginBottom: moderateScale(4) }}>Reg No.</Text>
           <Text style={{ fontSize: moderateScale(16), color: theme.colors.text.primary, fontWeight: '700', letterSpacing: 0.5 }}>{healthCard.cardNumber}</Text>
         </View>
 
