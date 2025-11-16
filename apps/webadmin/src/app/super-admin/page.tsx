@@ -476,8 +476,14 @@ export default function SystemAdministratorPage() {
   const router = useRouter();
 
   const { isLoaded: isClerkLoaded, user } = useUser();
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
-  const jobCategories = useQuery(api.jobCategories.getManaged.get);
+  const adminPrivileges = useQuery(
+    api.users.roles.getAdminPrivileges,
+    isClerkLoaded && user ? undefined : "skip"
+  );
+  const jobCategories = useQuery(
+    api.jobCategories.getManaged.get,
+    isClerkLoaded && user ? undefined : "skip"
+  );
   const { totalApplications, applicationsByStatus } = useQuery(
     api.superAdmin.queries.getApplicationStats,
     isClerkLoaded && user ? { startDate, endDate } : "skip"

@@ -13,6 +13,69 @@ import { internalAction, internalMutation, internalQuery } from "../_generated/s
 const DOCTOR_SIGNATURE_URL = ""; // Will be set from storage query
 const SANITATION_CHIEF_SIGNATURE_URL = ""; // Will be set from storage query
 
+// Health Card Types based on Job Category
+type CardType = 'yellow' | 'green' | 'pink';
+
+// Color schemes for different card types
+const CARD_COLORS = {
+  yellow: {
+    background: 'hsl(48, 95%, 88%)',    // Bright yellow
+    border: 'hsl(45, 85%, 40%)',         // Dark yellow
+    headerBg: 'hsl(48, 90%, 82%)',       // Slightly darker yellow
+  },
+  green: {
+    background: 'hsl(145, 60%, 88%)',    // Light green
+    border: 'hsl(145, 50%, 35%)',        // Dark green
+    headerBg: 'hsl(145, 55%, 82%)',      // Slightly darker green
+  },
+  pink: {
+    background: 'hsl(330, 70%, 92%)',    // Light pink
+    border: 'hsl(330, 60%, 45%)',        // Dark pink
+    headerBg: 'hsl(330, 65%, 86%)',      // Slightly darker pink
+  },
+};
+
+/**
+ * Classify health card type based on job category name
+ * Yellow = Food Handlers
+ * Green = Non-Food Workers
+ * Pink = Skin-to-Skin Contact Workers
+ */
+function classifyCardType(jobCategoryName: string | undefined): CardType {
+  if (!jobCategoryName) return 'yellow'; // Default to yellow
+  
+  const categoryLower = jobCategoryName.toLowerCase();
+  
+  // Pink Card - Skin-to-Skin Contact
+  if (
+    categoryLower.includes('pink') ||
+    categoryLower.includes('skin') ||
+    categoryLower.includes('contact') ||
+    categoryLower.includes('massage') ||
+    categoryLower.includes('barber') ||
+    categoryLower.includes('salon') ||
+    categoryLower.includes('spa') ||
+    categoryLower.includes('beautician') ||
+    categoryLower.includes('tattoo') ||
+    categoryLower.includes('piercing')
+  ) {
+    return 'pink';
+  }
+  
+  // Green Card - Non-Food
+  if (
+    categoryLower.includes('non-food') ||
+    categoryLower.includes('nonfood') ||
+    categoryLower.includes('green')
+  ) {
+    return 'green';
+  }
+  
+  // Yellow Card - Food Handlers (default)
+  // Includes: food, yellow, handler, restaurant, cafe, etc.
+  return 'yellow';
+}
+
 function renderOptionalImg(url: string | undefined, className: string, alt: string) {
   if (!url) return "";
   return `<img class="${className}" src="${url}" alt="${alt}" />`;
@@ -94,7 +157,10 @@ function generateHealthCardHTML(data: {
     xray_sputum: any[];
     stool: any[];
   };
+  // Phase 3: Card type for color coding
+  cardType: CardType;
 }): string {
+  const colors = CARD_COLORS[data.cardType];
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -140,9 +206,9 @@ function generateHealthCardHTML(data: {
       width: 320px;
       max-width: 320px;
       min-height: 448px;
-      background: hsl(40, 30%, 94%);
-      border: 2px solid hsl(0, 0%, 20%);
-      border-right: 1px solid hsl(0, 0%, 20%);
+      background: ${colors.background};
+      border: 2px solid ${colors.border};
+      border-right: 1px solid ${colors.border};
       padding: 14px;
     }
     
@@ -233,7 +299,7 @@ function generateHealthCardHTML(data: {
     
     .info-row {
       display: flex;
-      border-bottom: 1px solid hsl(0, 0%, 20%);
+      border-bottom: 1px solid ${colors.border};
       padding-bottom: 2px;
       margin-bottom: 4px;
     }
@@ -251,7 +317,7 @@ function generateHealthCardHTML(data: {
     
     .info-row-multi {
       display: flex;
-      border-bottom: 1px solid hsl(0, 0%, 20%);
+      border-bottom: 1px solid ${colors.border};
       padding-bottom: 2px;
       margin-bottom: 4px;
       gap: 16px;
@@ -268,7 +334,7 @@ function generateHealthCardHTML(data: {
     
     .workplace-row {
       display: flex;
-      border-bottom: 1px solid hsl(0, 0%, 20%);
+      border-bottom: 1px solid ${colors.border};
       padding-bottom: 2px;
       margin-bottom: 4px;
     }
@@ -294,7 +360,7 @@ function generateHealthCardHTML(data: {
     .photo {
       width: 90px;
       height: 105px;
-      border: 1px solid hsl(0, 0%, 20%);
+      border: 1px solid ${colors.border};
       background: white;
       display: flex;
       align-items: center;
@@ -321,7 +387,7 @@ function generateHealthCardHTML(data: {
     }
     
     .signature-box {
-      border-bottom: 1px solid hsl(0, 0%, 20%);
+      border-bottom: 1px solid ${colors.border};
       padding-bottom: 6px;
       margin-top: 8px;
     }
@@ -366,7 +432,7 @@ function generateHealthCardHTML(data: {
       text-align: center;
       margin-top: 6px;
       padding-top: 6px;
-      border-top: 1px solid hsl(0, 0%, 20%);
+      border-top: 1px solid ${colors.border};
       position: relative;
     }
 
@@ -392,9 +458,9 @@ function generateHealthCardHTML(data: {
       width: 320px;
       max-width: 320px;
       min-height: 448px;
-      background: hsl(40, 30%, 94%);
-      border: 2px solid hsl(0, 0%, 20%);
-      border-left: 1px solid hsl(0, 0%, 20%);
+      background: ${colors.background};
+      border: 2px solid ${colors.border};
+      border-left: 1px solid ${colors.border};
       padding: 14px;
     }
     
@@ -435,7 +501,7 @@ function generateHealthCardHTML(data: {
     
     .date-box {
       text-align: center;
-      border: 1px solid hsl(0, 0%, 20%);
+      border: 1px solid ${colors.border};
       padding: 6px 4px;
     }
     
@@ -461,14 +527,14 @@ function generateHealthCardHTML(data: {
     }
     
     .test-table {
-      border: 1px solid hsl(0, 0%, 20%);
+      border: 1px solid ${colors.border};
     }
     
     .table-header {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      border-bottom: 1px solid hsl(0, 0%, 20%);
-      background: hsl(40, 30%, 94%);
+      border-bottom: 1px solid ${colors.border};
+      background: ${colors.headerBg};
     }
     
     .table-header-cell {
@@ -476,7 +542,7 @@ function generateHealthCardHTML(data: {
       font-weight: 600;
       text-align: center;
       padding: 3px;
-      border-right: 1px solid hsl(0, 0%, 20%);
+      border-right: 1px solid ${colors.border};
     }
     
     .table-header-cell:last-child {
@@ -486,7 +552,7 @@ function generateHealthCardHTML(data: {
     .table-row {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      border-bottom: 1px solid hsl(0, 0%, 20%);
+      border-bottom: 1px solid ${colors.border};
     }
     
     .table-row:last-child {
@@ -497,7 +563,7 @@ function generateHealthCardHTML(data: {
       font-size: 9px;
       text-align: center;
       padding: 3px 1px;
-      border-right: 1px solid hsl(0, 0%, 20%);
+      border-right: 1px solid ${colors.border};
       min-height: 22px;
       display: flex;
       align-items: center;
@@ -791,7 +857,7 @@ export const generateHealthCard = internalAction({
         console.error("Error fetching fallback signatures:", fallbackError);
       }
     }
-    
+
     // Get application data
     const application = await ctx.runQuery(internal.healthCards.generateHealthCard.getApplicationData, {
       applicationId: args.applicationId,
@@ -841,8 +907,44 @@ export const generateHealthCard = internalAction({
       console.log("No lab findings found or error fetching:", error);
       // Continue with empty findings - most applications won't have any
     }
+    
+    // Phase 3: Classify card type based on job category
+    const cardType = classifyCardType(application.jobCategoryName);
+    console.log(`Health card type classified as: ${cardType} for job category: ${application.jobCategoryName}`);
 
-    // Generate HTML with dynamic official names and lab findings
+    // Phase 4: Dynamic instructor name for YELLOW cards only (food handlers)
+    // Get the orientation instructor who conducted the food safety training
+    // Green/Pink cards keep the configured sanitation chief name
+    if (cardType === 'yellow') {
+      console.log(`[DEBUG] Yellow card detected, fetching orientation instructor for application ${args.applicationId}`);
+      try {
+        const instructor = await ctx.runQuery(internal.healthCards.generateHealthCard.getOrientationInstructor, {
+          applicationId: args.applicationId,
+        });
+        
+        console.log(`[DEBUG] Orientation instructor result:`, instructor);
+        
+        if (instructor) {
+          // Override sanitation chief with actual orientation instructor for yellow cards
+          sanitationChief = {
+            name: instructor.name,
+            designation: instructor.designation,
+            signatureUrl: sanitationChiefSignatureUrl,
+            configId: sanitationChief?.configId,
+          };
+          console.log(`✅ Yellow card: Using orientation instructor ${instructor.name} (${instructor.designation})`);
+        } else {
+          console.log(`⚠️ Yellow card: No orientation instructor found, using default sanitation chief ${sanitationChief?.name}`);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching orientation instructor for yellow card:", error);
+        // Fall back to default sanitation chief if error
+      }
+    } else {
+      console.log(`${cardType} card: Using default sanitation chief ${sanitationChief?.name || 'Luzminda N. Paig'}`);
+    }
+
+    // Generate HTML with dynamic official names, lab findings, and card type
     const htmlContent = generateHealthCardHTML({
       registrationNumber,
       fullName: application.fullName,
@@ -865,6 +967,8 @@ export const generateHealthCard = internalAction({
       sanitationChiefDesignation: sanitationChief?.designation,
       // Phase 2: Pass lab findings
       labFindings,
+      // Phase 3: Pass card type for color coding
+      cardType,
     });
 
     // Prepare signedBy snapshot for health card record
@@ -908,7 +1012,7 @@ export const generateHealthCard = internalAction({
       .filter((f: any) => f.showOnCard)
       .map((f: any) => f._id);
 
-    // Store health card record with signedBy snapshot and findings
+    // Store health card record with signedBy snapshot, findings, and card type
     const healthCardId: any = await ctx.runMutation(internal.healthCards.generateHealthCard.createHealthCardRecord, {
       applicationId: args.applicationId,
       registrationNumber,
@@ -917,6 +1021,7 @@ export const generateHealthCard = internalAction({
       expiryDate: expiryDate.getTime(),
       signedBy: signedBySnapshot,
       includedFindings: findingIds.length > 0 ? findingIds : undefined,
+      cardType, // Phase 3: Store card type
     });
 
     // Phase 2: Link findings back to the generated health card
@@ -1026,6 +1131,47 @@ export const getSignatureUrls = internalQuery({
 });
 
 /**
+ * Internal query to get orientation instructor for food handler applications
+ * Returns the inspector who conducted the orientation (stored in orientationBookings)
+ */
+export const getOrientationInstructor = internalQuery({
+  args: {
+    applicationId: v.id("applications"),
+  },
+  handler: async (ctx, args) => {
+    console.log(`[getOrientationInstructor] Fetching for application:`, args.applicationId);
+    
+    // Get the orientation booking for this application
+    const booking = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
+      .filter((q) => q.eq(q.field("status"), "completed"))
+      .first();
+    
+    console.log(`[getOrientationInstructor] Orientation booking:`, {
+      found: !!booking,
+      instructor: booking?.instructor,
+      status: booking?.status
+    });
+    
+    if (!booking?.instructor) {
+      console.log(`[getOrientationInstructor] No orientation instructor found`);
+      return null;
+    }
+
+    console.log(`[getOrientationInstructor] Returning instructor:`, {
+      name: booking.instructor.name,
+      designation: booking.instructor.designation
+    });
+
+    return {
+      name: booking.instructor.name,
+      designation: booking.instructor.designation,
+    };
+  },
+});
+
+/**
  * Internal query to get application data for health card generation
  */
 export const getApplicationData = internalQuery({
@@ -1091,6 +1237,7 @@ export const getApplicationData = internalQuery({
       nationality: application.nationality || 'Filipino',
       workplace: application.organization || 'N/A',
       photoUrl: photoUrl || undefined,
+      jobCategoryName: jobCategory?.name, // NEW: For card type classification
     };
   },
 });
@@ -1132,6 +1279,8 @@ export const createHealthCardRecord = internalMutation({
     })),
     // Phase 2: Lab findings
     includedFindings: v.optional(v.array(v.id("labTestFindings"))),
+    // Phase 3: Card type
+    cardType: v.optional(v.union(v.literal("yellow"), v.literal("green"), v.literal("pink"))),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("healthCards", {
@@ -1144,6 +1293,7 @@ export const createHealthCardRecord = internalMutation({
       createdAt: Date.now(),
       signedBy: args.signedBy, // Store snapshot of officials
       includedFindings: args.includedFindings, // Phase 2: Store findings IDs
+      cardType: args.cardType, // Phase 3: Store card type for reference
     });
   },
 });

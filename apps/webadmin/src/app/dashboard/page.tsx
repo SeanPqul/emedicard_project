@@ -56,8 +56,14 @@ export default function DashboardPage() {
   // --- 2. DATA FETCHING ---
   const { isLoaded: isClerkLoaded, user } = useUser();
   // @ts-ignore - Type instantiation is excessively deep
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges); 
-  const managedJobCategories: Doc<"jobCategories">[] | undefined = useQuery(api.jobCategories.getManaged.get);
+  const adminPrivileges = useQuery(
+    api.users.roles.getAdminPrivileges,
+    isClerkLoaded && user ? undefined : "skip"
+  ); 
+  const managedJobCategories: Doc<"jobCategories">[] | undefined = useQuery(
+    api.jobCategories.getManaged.get,
+    isClerkLoaded && user && adminPrivileges && adminPrivileges.isAdmin ? undefined : "skip"
+  );
 
   useEffect(() => {
     if (adminPrivileges && adminPrivileges.managedCategories !== "all" && managedJobCategories && managedJobCategories.length > 0 && categoryFilter === "") {
@@ -67,12 +73,13 @@ export default function DashboardPage() {
 
   const applications = useQuery(
     api.applications.list.list,
-    adminPrivileges === undefined ? { } : // Pass an empty object or specific defaults if adminPrivileges is still loading
-    {
-      status: statusFilter || undefined,
-      jobCategory: categoryFilter === "" ? undefined : (categoryFilter as Id<"jobCategories">),
-      managedCategories: adminPrivileges.managedCategories as "all" | Id<"jobCategories">[] | undefined, // Explicitly cast to resolve TypeScript error
-    }
+    isClerkLoaded && user && adminPrivileges && adminPrivileges.isAdmin
+      ? {
+          status: statusFilter || undefined,
+          jobCategory: categoryFilter === "" ? undefined : (categoryFilter as Id<"jobCategories">),
+          managedCategories: adminPrivileges.managedCategories as "all" | Id<"jobCategories">[] | undefined,
+        }
+      : "skip" // Wait for authentication to be ready
   );
 
   const filteredApplications = (applications ?? [])

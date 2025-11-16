@@ -145,10 +145,14 @@ export default defineSchema({
     
     // Phase 2: Lab Test Findings - Track which findings are displayed on this card
     includedFindings: v.optional(v.array(v.id("labTestFindings"))),
+    
+    // Phase 3: Card Type - Color coding based on job category (Yellow/Green/Pink)
+    cardType: v.optional(v.union(v.literal("yellow"), v.literal("green"), v.literal("pink"))),
   })
     .index("by_application", ["applicationId"])
     .index("by_registration", ["registrationNumber"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_card_type", ["cardType"]),
   jobCategories: defineTable({
     colorCode: v.string(),
     name: v.string(),

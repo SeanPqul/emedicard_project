@@ -183,6 +183,43 @@ export const setOfficial = mutation({
 });
 
 /**
+ * Update sanitation chief signature only (keeps name/designation)
+ * FOR DASHBOARD USE ONLY - No auth required
+ */
+export const updateSanitationChiefSignature = mutation({
+  args: {
+    signatureStorageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    // Get current active sanitation chief
+    const sanitationChief = await ctx.db
+      .query("systemConfig")
+      .withIndex("by_key", (q) => q.eq("key", "sanitation_chief"))
+      .filter((q) => q.eq(q.field("value.isActive"), true))
+      .first();
+
+    if (!sanitationChief) {
+      throw new Error("No active sanitation chief found. Please configure one first.");
+    }
+
+    // Update ONLY the signature, keep everything else
+    await ctx.db.patch(sanitationChief._id, {
+      value: {
+        ...sanitationChief.value,
+        signatureStorageId: args.signatureStorageId,
+      },
+      updatedAt: Date.now(),
+      notes: "Signature updated via dashboard",
+    });
+
+    return { 
+      success: true, 
+      message: `Sanitation chief signature updated successfully for ${sanitationChief.value.name}`
+    };
+  },
+});
+
+/**
  * Update an existing official's details (without changing active status)
  * System Admin only
  */

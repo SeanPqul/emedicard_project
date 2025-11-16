@@ -9,6 +9,7 @@ import Navbar from '@/components/shared/Navbar';
 import SuccessMessage from '@/components/SuccessMessage';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
+import { useUser } from '@clerk/nextjs';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -221,6 +222,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   }[]>([]);
   
   const router = useRouter();
+  const { user, isLoaded } = useUser(); // Add auth state check
 
   // --- HELPER FUNCTIONS ---
   // Helper function to check if document has pending action
@@ -260,29 +262,41 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   const finalizeApplication = useMutation(api.admin.finalizeApplication.finalize);
   const approveWithOnsiteVerification = useMutation(api.admin.documents.approveWithOnsiteVerification.approve); // Approve after onsite verification
   
-  // Fetch payment data and application status
-  const paymentData = useQuery(api.payments.getForApplication.get, { applicationId: params.id });
-  const applicationStatus = useQuery(api.applications.getApplicationById.getApplicationByIdQuery, { applicationId: params.id });
+  // Fetch payment data and application status - wait for auth to be ready
+  const paymentData = useQuery(
+    api.payments.getForApplication.get,
+    isLoaded && user ? { applicationId: params.id } : "skip"
+  );
+  const applicationStatus = useQuery(
+    api.applications.getApplicationById.getApplicationByIdQuery,
+    isLoaded && user ? { applicationId: params.id } : "skip"
+  );
   
   // Fetch orientation details for Food Handlers (Yellow Card)
-  const orientationDetails = useQuery(api.admin.orientation.getOrientationByApplicationId, { 
-    applicationId: params.id 
-  });
+  const orientationDetails = useQuery(
+    api.admin.orientation.getOrientationByApplicationId,
+    isLoaded && user ? { applicationId: params.id } : "skip"
+  );
   
   // Fetch health card details
-  const healthCardDetails = useQuery(api.healthCards.getHealthCard.getByApplication, { 
-    applicationId: params.id 
-  });
+  const healthCardDetails = useQuery(
+    api.healthCards.getHealthCard.getByApplication,
+    isLoaded && user ? { applicationId: params.id } : "skip"
+  );
   
   // Fetch referral history for this application
-  const referralHistoryData = useQuery(api.documents.referralQueries.getReferralHistory, {
-    applicationId: params.id
-  });
+  const referralHistoryData = useQuery(
+    api.documents.referralQueries.getReferralHistory,
+    isLoaded && user ? { applicationId: params.id } : "skip"
+  );
   
   // Fetch previous health card for renewal applications
-  const previousHealthCard = applicationStatus?.previousHealthCardId 
-    ? useQuery(api.healthCards.getHealthCard.get, { healthCardId: applicationStatus.previousHealthCardId })
-    : undefined;
+  const previousHealthCard = useQuery(
+    api.healthCards.getHealthCard.get,
+    isLoaded && user && applicationStatus?.previousHealthCardId
+      ? { healthCardId: applicationStatus.previousHealthCardId }
+      : "skip"
+  );
 
   const loadData = async () => {
     try {
