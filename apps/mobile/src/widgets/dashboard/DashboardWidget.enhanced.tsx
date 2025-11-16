@@ -74,7 +74,7 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
     fullName: healthCard.application?.firstName && healthCard.application?.lastName
       ? `${healthCard.application.firstName} ${healthCard.application.middleName || ''} ${healthCard.application.lastName}`.trim()
       : userProfile?.fullname || 'User',
-    qrCodeData: `https://emedicard.davao.gov.ph/verify/${healthCard.registrationNumber || (healthCard as any).verificationToken}`,
+    qrCodeData: `https://emedicard-project.vercel.app/verify/${healthCard.registrationNumber || (healthCard as any).verificationToken}`,
   } : undefined;
 
   return (

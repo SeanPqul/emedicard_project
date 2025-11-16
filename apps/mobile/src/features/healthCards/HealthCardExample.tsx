@@ -134,7 +134,7 @@ export const HealthCardExample: React.FC<HealthCardExampleProps> = ({ token }) =
         {/* Card Details */}
         <View style={styles.cardContent}>
           <View style={styles.detailRow}>
-            <Text style={styles.labelText}>Card ID</Text>
+            <Text style={styles.labelText}>Reg No.</Text>
             <Text style={styles.valueText}>{card._id}</Text>
           </View>
 

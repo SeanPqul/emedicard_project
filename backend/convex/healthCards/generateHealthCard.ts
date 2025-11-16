@@ -912,7 +912,7 @@ export const generateHealthCard = internalAction({
     const age = application.dateOfBirth || 18;
 
     // Generate QR code as data URL using an external service
-    const qrCodeData = `https://emedicard.davao.gov.ph/verify/${registrationNumber}`;
+    const qrCodeData = `https://emedicard-project.vercel.app/verify/${registrationNumber}`;
     const qrCodeDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCodeData)}`;
 
     // Phase 2: Fetch lab findings for this application

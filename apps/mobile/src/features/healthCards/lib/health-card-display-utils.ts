@@ -92,7 +92,7 @@ export const getStatusColor = (status: string): string => {
 export const generateVerificationUrl = (card: HealthCardData | BackendHealthCard): string => {
   // New schema uses registrationNumber, old schema uses verificationToken
   const token = 'registrationNumber' in card ? card.registrationNumber : (card as any).verificationToken;
-  const baseUrl = process.env.EXPO_PUBLIC_VERIFICATION_URL || 'https://emedicard-verify.vercel.app';
+  const baseUrl = process.env.EXPO_PUBLIC_VERIFICATION_URL || 'https://emedicard-project.vercel.app';
   return `${baseUrl}/verify/${token}`;
 };
 
