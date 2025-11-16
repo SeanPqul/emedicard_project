@@ -137,7 +137,9 @@ export function useApplyForm() {
         const isNonFood = (selectedCategory?.name || '').toLowerCase().includes('non-food');
         let filtered = transformedReqs;
         if (isNonFood) {
-          const isSecurityGuard = !!formData.securityGuard || /security|guard/i.test(formData.position || '');
+          // Use ONLY the checkbox value, not the position text
+          // This allows users to be "Security" position without extra docs unless they explicitly check the box
+          const isSecurityGuard = !!formData.securityGuard;
           if (!isSecurityGuard) {
             filtered = transformedReqs.filter(r => !(r.fieldName === 'drugTestId' || r.fieldName === 'neuroExamId' || /drug\s*test/i.test(r.name) || /neuro/i.test(r.name)));
           }

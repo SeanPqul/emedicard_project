@@ -871,11 +871,29 @@ export const generateHealthCard = internalAction({
       throw new Error("Application must be approved before generating health card");
     }
 
-    // Get total count of issued cards for registration number
-    const cardCount = await ctx.runQuery(internal.healthCards.generateHealthCard.getHealthCardCount, {});
-
-    // Generate registration number
-    const registrationNumber = generateRegistrationNumber(cardCount);
+    // Get unique registration number (check for duplicates)
+    let registrationNumber: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    do {
+      const cardCount = await ctx.runQuery(internal.healthCards.generateHealthCard.getHealthCardCount, {});
+      registrationNumber = generateRegistrationNumber(cardCount + attempts);
+      
+      // Check if this registration number already exists
+      const existingCard = await ctx.runQuery(internal.healthCards.generateHealthCard.checkRegistrationNumberExists, {
+        registrationNumber,
+      });
+      
+      if (!existingCard) {
+        break; // Unique number found
+      }
+      
+      attempts++;
+      if (attempts >= maxAttempts) {
+        throw new Error("Unable to generate unique registration number after multiple attempts");
+      }
+    } while (attempts < maxAttempts);
 
     // Calculate dates
     const issuedDate = new Date();
@@ -1250,6 +1268,23 @@ export const getHealthCardCount = internalQuery({
   handler: async (ctx) => {
     const cards = await ctx.db.query("healthCards").collect();
     return cards.length;
+  },
+});
+
+/**
+ * Internal query to check if registration number already exists
+ */
+export const checkRegistrationNumberExists = internalQuery({
+  args: {
+    registrationNumber: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existingCard = await ctx.db
+      .query("healthCards")
+      .filter((q) => q.eq(q.field("registrationNumber"), args.registrationNumber))
+      .first();
+    
+    return existingCard !== null;
   },
 });
 

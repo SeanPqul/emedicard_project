@@ -110,8 +110,6 @@ export default defineSchema({
     createdAt: v.float64(),
     revokedAt: v.optional(v.float64()),
     revokedReason: v.optional(v.string()),
-    cardType: v.optional(v.string()), // Card type/color (e.g., "yellow", "pink", "blue")
-    
     // NEW: Snapshot of Officials at Time of Issuance (for historical accuracy)
     // This preserves who signed the card even if officials change later
     signedBy: v.optional(v.object({
@@ -449,15 +447,8 @@ export default defineSchema({
       v.literal("flagged_again")      // Issue persists, flagged again
     )),
     
-    // Onsite Verification Tracking (when applicant visits venue after treatment)
-    verifiedBy: v.optional(v.id("users")), // Admin who verified onsite completion
-    verifiedAt: v.optional(v.float64()), // Timestamp of onsite verification
-    verificationNotes: v.optional(v.string()), // Optional notes from admin about verification
-
-    // Clearance Tracking (for medical referrals that get cleared)
-    findingDescription: v.optional(v.string()), // Description of the medical finding
-    verifiedAt: v.optional(v.float64()), // When the medical issue was verified/cleared
-    verifiedBy: v.optional(v.id("users")), // Admin who verified/cleared the medical issue
+    verifiedBy: v.optional(v.id("users")), // Admin who verified onsite completion or cleared medical issue
+    verifiedAt: v.optional(v.float64()), // Timestamp of onsite verification or medical clearance
     verificationNotes: v.optional(v.string()), // Notes from admin about the verification/clearance
 
     // Notification Tracking

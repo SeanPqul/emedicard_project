@@ -298,11 +298,11 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
             })()}
             {(() => {
               // Health Card Comprehensive Logic (Possession + Validity)
-              const hasValidCard = dashboardStats?.validHealthCards > 0;
               const cardExpiryDate = realHealthCard?.expiryDate || healthCard?.expiryDate;
               
-              if (!hasValidCard || !cardExpiryDate) {
-                // No active card
+              // Check if we have a card to display
+              if (!cardExpiryDate || !healthCard) {
+                // No card found
                 return (
                   <PresetStatCards.HealthCard
                     value="-"
@@ -336,8 +336,25 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
               let statusBadge: { text: string; color: string } | undefined;
               let cardGradient: [string, string] | undefined;
               
-              if (daysUntilExpiry < 0) {
-                // Expired - URGENT RENEWAL
+              // If there's an active renewal, show renewal status instead of renewal prompts
+              if (activeRenewal) {
+                const renewalStatusMap: Record<string, string> = {
+                  'Pending Payment': 'Payment Due',
+                  'For Payment Validation': 'Payment Validating',
+                  'Submitted': 'Submitted',
+                  'Scheduled': 'Orientation Scheduled',
+                  'For Document Verification': 'Documents Review',
+                  'Under Review': 'Under Review',
+                  'Documents Need Revision': 'Docs Needed',
+                  'For Orientation': 'Orientation Pending',
+                };
+                const renewalStatus = renewalStatusMap[activeRenewal.status] || activeRenewal.status;
+                statusValue = '🔄';
+                statusText = `Renewal: ${renewalStatus}`;
+                statusBadge = { text: 'In Progress', color: theme.colors.blue[700] };
+                cardGradient = [theme.colors.blue[500], theme.colors.blue[600]];
+              } else if (daysUntilExpiry < 0) {
+                // Expired - URGENT RENEWAL (only if no active renewal)
                 statusValue = 'Expired';
                 statusText = 'Renew now';
                 statusBadge = { text: 'RENEW NOW', color: theme.colors.red[700] };
@@ -359,22 +376,6 @@ export function DashboardWidgetEnhanced({ data, handlers, isOnline }: DashboardW
                 statusValue = '✅'; // Green check emoji
                 statusText = `Valid until ${expiryDateFormatted}`;
                 cardGradient = [theme.colors.primary[500], theme.colors.primary[600]];
-              }
-              
-              // Add renewal status to subtitle if there's an active renewal
-              if (activeRenewal) {
-                const renewalStatusMap: Record<string, string> = {
-                  'Pending Payment': 'Payment Due',
-                  'For Payment Validation': 'Payment Validating',
-                  'Submitted': 'Submitted',
-                  'Scheduled': 'Orientation Scheduled',
-                  'For Document Verification': 'Documents Review',
-                  'Under Review': 'Under Review',
-                  'Documents Need Revision': 'Docs Needed',
-                  'For Orientation': 'Orientation Pending',
-                };
-                const renewalStatus = renewalStatusMap[activeRenewal.status] || activeRenewal.status;
-                statusText = `${statusText}\n🔄 Renewal: ${renewalStatus}`;
               }
               
               return (

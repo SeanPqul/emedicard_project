@@ -29,6 +29,21 @@ export function HealthCardsScreen() {
   // Use our new simplified hook
   const { data: userHealthCards, isLoading, mutations: { createVerificationLog } } = useHealthCards();
 
+  // Determine the latest card per job category (by issued date)
+  const latestByCategory = React.useMemo(() => {
+    const map: Record<string, BackendHealthCard> = {};
+    if (!userHealthCards) return map;
+    for (const c of userHealthCards) {
+      const key = (c.jobCategory as any)?._id || (c as any).jobCategoryId || (c.jobCategory as any)?.name || 'unknown';
+      const issued = (c as any).issuedDate || (c as any).issuedAt || 0;
+      const existing = map[key];
+      const existingIssued = (existing as any)?.issuedDate || (existing as any)?.issuedAt || 0;
+      if (!existing || issued > existingIssued) {
+        map[key] = c;
+      }
+    }
+    return map;
+  }, [userHealthCards]);
 
   const handleShareCard = async (card: BackendHealthCard) => {
     try {
@@ -129,6 +144,8 @@ export function HealthCardsScreen() {
               const status = getCardStatus(card);
               const cardColor = getCardColor(card.jobCategory);
               const verificationUrl = generateVerificationUrl(card);
+              const categoryKey = (card.jobCategory as any)?._id || (card as any).jobCategoryId || (card.jobCategory as any)?.name || 'unknown';
+              const isLatestForCategory = latestByCategory[categoryKey]?._id === card._id;
             
             return (
               <View key={card._id} style={styles.cardContainer}>
@@ -233,7 +250,7 @@ export function HealthCardsScreen() {
                 </View>
 
                 {/* Renew Button for Expired or Expiring Soon Cards */}
-                {(status === 'expired' || (card as any).daysUntilExpiry <= 30) && (
+                {isLatestForCategory && (status === 'expired' || (card as any).daysUntilExpiry <= 30) && (
                   <TouchableOpacity
                     style={styles.renewButton}
                     onPress={() => router.push('/(screens)/(shared)/renewal/select-card')}

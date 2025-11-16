@@ -44,6 +44,7 @@ export function ApplyScreen() {
   const [showRestrictionModal, setShowRestrictionModal] = useState(false);
   const [unresolvedApp, setUnresolvedApp] = useState<any>(null);
   const [accessChecked, setAccessChecked] = useState(false);
+  const [hasPopulatedRenewal, setHasPopulatedRenewal] = useState(false);
 
   // Check for unresolved applications on mount only
   // Skip this check for renewal mode - select-card screen already handles eligibility
@@ -111,7 +112,7 @@ export function ApplyScreen() {
 
   // Pre-populate form data and skip Application Type step for renewal mode
   useEffect(() => {
-    if (isRenewalMode && previousAppData && !formData.firstName && healthCardId) {
+    if (isRenewalMode && previousAppData && !formData.firstName && healthCardId && !hasPopulatedRenewal) {
       // Set form data first
       setFormData({
         ...formData,
@@ -128,6 +129,8 @@ export function ApplyScreen() {
         civilStatus: (previousAppData.application.civilStatus as any) || 'Single',
         jobCategory: previousAppData.application.jobCategoryId || '',
         previousHealthCardId: healthCardId as Id<"healthCards">,
+        // CRITICAL: Pre-populate security guard flag from previous application
+        securityGuard: previousAppData.application.securityGuard || false,
       });
       
       // Skip Application Type (step 0) AND Job Category (step 1) - go directly to Personal Details (step 2)
@@ -135,8 +138,11 @@ export function ApplyScreen() {
       if (currentStep === 0) {
         setCurrentStep(2);
       }
+      
+      // Mark as populated to prevent re-population after discard
+      setHasPopulatedRenewal(true);
     }
-  }, [isRenewalMode, previousAppData, formData.firstName, healthCardId, currentStep]);
+  }, [isRenewalMode, previousAppData, formData.firstName, healthCardId, currentStep, hasPopulatedRenewal]);
 
   const handleViewApplication = () => {
     setShowRestrictionModal(false);

@@ -48,6 +48,10 @@ export const getApplicationDocumentsRequirementsQuery = query({
       .withIndex("by_job_category", (q) => q.eq("jobCategoryId", application.jobCategoryId))
       .collect();
 
+    // Check if this is Non-Food category
+    const catName = jobCategory?.name?.toLowerCase() || "";
+    const isNonFood = catName.includes("non-food") || catName.includes("nonfood");
+
     // Get detailed document requirements with junction data
     const documentRequirements = await Promise.all(
       jobCategoryRequirements.map(async (junctionRecord) => {
@@ -62,6 +66,17 @@ export const getApplicationDocumentsRequirementsQuery = query({
         };
       })
     );
+
+    // Filter out Drug Test and Neuro for Non-Food workers who are NOT security guards
+    const filteredRequirements = documentRequirements.filter(doc => {
+      const fid = doc.fieldIdentifier || "";
+      if (isNonFood && application.securityGuard !== true) {
+        if (fid === "drugTestId" || fid === "neuroExamId") {
+          return false; // Exclude for non-guards in Non-Food category
+        }
+      }
+      return true;
+    });
 
     // Map uploaded documents with their requirements
     const documentsWithRequirements = await Promise.all(
@@ -81,8 +96,8 @@ export const getApplicationDocumentsRequirementsQuery = query({
       application,
       jobCategory,
       uploadedDocuments: documentsWithRequirements,
-      requiredDocuments: documentRequirements,
-      totalRequired: documentRequirements.length,
+      requiredDocuments: filteredRequirements, // Use filtered requirements
+      totalRequired: filteredRequirements.length, // Count only applicable requirements
       totalUploaded: uploadedDocuments.length,
     };
   },

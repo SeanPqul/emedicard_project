@@ -26,11 +26,15 @@ export const getUserCardsQuery = query({
 
     const healthCards = await Promise.all(
       applicationIds.map(async (applicationId) => {
-        const card = await ctx.db
+        // Fetch ALL cards for this application and get the most recent one
+        const allCards = await ctx.db
           .query("healthCards")
           .withIndex("by_application", (q) => q.eq("applicationId", applicationId))
-          .first();
-        return card;
+          .order("desc") // Order by _creationTime descending (newest first)
+          .collect();
+        
+        // Return the most recent card (first in the array after ordering by desc)
+        return allCards.length > 0 ? allCards[0] : null;
       })
     );
 

@@ -57,6 +57,7 @@ export const getPreviousApplicationDataQuery = query({
         organization: application.organization,
         civilStatus: application.civilStatus,
         jobCategoryId: application.jobCategoryId,
+        securityGuard: application.securityGuard, // CRITICAL: Include for checkbox pre-population
       },
       jobCategory,
       healthCard: {

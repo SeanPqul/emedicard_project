@@ -31,18 +31,22 @@ export const get = query({
       .withIndex("by_application", q => q.eq("applicationId", application._id))
       .collect();
 
+    // Check if this is Non-Food category
+    const catName = jobCategory?.name?.toLowerCase() || "";
+    const isNonFood = catName.includes("non-food") || catName.includes("nonfood");
+    
     // 5. THE MAGIC MERGE: Create a final checklist for the UI
     const checklist = await Promise.all(
       requiredDocs.map(async (req) => {
         const documentType = await ctx.db.get(req.documentTypeId);
         
-        // Filter out security-only documents for non-security guards
-        // Drug Test and Neuro Exam are only for security guards in Non-Food Category
+        // Filter out Drug Test and Neuro Exam for Non-Food workers who are NOT security guards
+        // These documents are ONLY required for security guards in Non-Food category
         const isSecurityOnlyDoc = documentType?.fieldIdentifier === 'drugTestId' || 
                                   documentType?.fieldIdentifier === 'neuroExamId';
         
-        // If this is a security-only document and the applicant is NOT a security guard, skip it
-        if (isSecurityOnlyDoc && !application.securityGuard) {
+        // Skip these documents if: Non-Food category AND not a security guard
+        if (isNonFood && isSecurityOnlyDoc && application.securityGuard !== true) {
           return null; // Will be filtered out later
         }
         

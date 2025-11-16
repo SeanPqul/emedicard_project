@@ -100,6 +100,8 @@ export const createRenewalApplicationMutation = mutation({
       age: args.age || previousApplication.age,
       nationality: args.nationality || previousApplication.nationality,
       gender: args.gender || previousApplication.gender,
+      // CRITICAL: Preserve securityGuard flag for document requirements
+      securityGuard: previousApplication.securityGuard,
       // Renewal tracking fields
       previousHealthCardId: args.previousHealthCardId,
       isRenewal: true,

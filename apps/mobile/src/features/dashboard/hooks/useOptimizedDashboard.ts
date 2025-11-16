@@ -207,10 +207,34 @@ export const useOptimizedDashboard = () => {
     return jobCategories.find((cat: any) => cat._id === id) as JobCategory | undefined;
   }, [jobCategories]);
 
-  // Get health card (first valid one)
+  // Get health card with smart prioritization
   const healthCard = useMemo(() => {
     const healthCards = effectiveDashboardData?.healthCards;
-    return healthCards && healthCards.length > 0 ? healthCards[0] : null;
+    if (!healthCards || healthCards.length === 0) return null;
+    
+    // If only one card, return it
+    if (healthCards.length === 1) return healthCards[0];
+    
+    // Prioritize: 1) Active cards over expired, 2) Most recently issued
+    const now = Date.now();
+    const sortedCards = [...healthCards].sort((a, b) => {
+      const aExpiry = a.expiryDate || (a as any).expiresAt || 0;
+      const bExpiry = b.expiryDate || (b as any).expiresAt || 0;
+      const aIsActive = aExpiry > now;
+      const bIsActive = bExpiry > now;
+      
+      // Active cards come before expired cards
+      if (aIsActive !== bIsActive) {
+        return aIsActive ? -1 : 1;
+      }
+      
+      // Among cards with same status, prefer most recently issued
+      const aIssued = a.issuedDate || (a as any).issuedAt || 0;
+      const bIssued = b.issuedDate || (b as any).issuedAt || 0;
+      return bIssued - aIssued;
+    });
+    
+    return sortedCards[0];
   }, [effectiveDashboardData?.healthCards]);
 
   return {

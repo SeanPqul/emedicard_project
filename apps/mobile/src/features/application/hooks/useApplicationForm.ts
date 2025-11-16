@@ -180,8 +180,31 @@ export const useApplicationForm = ({ showSuccess, showError }: UseApplicationFor
             text: 'Discard Changes',
             style: 'destructive',
             onPress: () => {
+              // Clear storage first
               formStorage.cancelApplication();
-              router.back();
+              
+              // Reset component state to prevent re-saving
+              setFormData({
+                applicationType: 'New',
+                jobCategory: '',
+                position: '',
+                organization: '',
+                civilStatus: undefined,
+                firstName: '',
+                middleName: '',
+                lastName: '',
+                age: 0,
+                nationality: '',
+                gender: undefined,
+                securityGuard: false,
+              });
+              setSelectedDocuments({});
+              setCurrentStep(0);
+              setErrors({});
+              
+              // Navigate to apply tab without renewal params to clear renewal mode
+              // This prevents the renewal state from persisting after discard
+              router.replace('/(tabs)/apply');
             },
           },
           {
