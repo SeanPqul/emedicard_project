@@ -912,9 +912,9 @@ export const generateHealthCard = internalAction({
     const cardType = classifyCardType(application.jobCategoryName);
     console.log(`Health card type classified as: ${cardType} for job category: ${application.jobCategoryName}`);
 
-    // Phase 4: Dynamic instructor name for YELLOW cards only (food handlers)
-    // Get the orientation instructor who conducted the food safety training
-    // Green/Pink cards keep the configured sanitation chief name
+    // Phase 4: Dynamic inspector name based on card type
+    // Yellow: Use orientation instructor for THIS application
+    // Green/Pink: Use most recent orientation instructor (last active inspector)
     if (cardType === 'yellow') {
       console.log(`[DEBUG] Yellow card detected, fetching orientation instructor for application ${args.applicationId}`);
       try {
@@ -925,7 +925,6 @@ export const generateHealthCard = internalAction({
         console.log(`[DEBUG] Orientation instructor result:`, instructor);
         
         if (instructor) {
-          // Override sanitation chief with actual orientation instructor for yellow cards
           sanitationChief = {
             name: instructor.name,
             designation: instructor.designation,
@@ -934,14 +933,33 @@ export const generateHealthCard = internalAction({
           };
           console.log(`✅ Yellow card: Using orientation instructor ${instructor.name} (${instructor.designation})`);
         } else {
-          console.log(`⚠️ Yellow card: No orientation instructor found, using default sanitation chief ${sanitationChief?.name}`);
+          console.log(`⚠️ Yellow card: No orientation instructor found, using fallback ${sanitationChief?.name}`);
         }
       } catch (error) {
         console.error("❌ Error fetching orientation instructor for yellow card:", error);
-        // Fall back to default sanitation chief if error
       }
     } else {
-      console.log(`${cardType} card: Using default sanitation chief ${sanitationChief?.name || 'Luzminda N. Paig'}`);
+      // Green/Pink cards: Use most recent orientation instructor (last active)
+      console.log(`[DEBUG] ${cardType} card detected, fetching most recent orientation instructor`);
+      try {
+        const recentInspector = await ctx.runQuery(internal.healthCards.generateHealthCard.getMostRecentOrientationInstructor, {});
+        
+        console.log(`[DEBUG] Most recent instructor result:`, recentInspector);
+        
+        if (recentInspector) {
+          sanitationChief = {
+            name: recentInspector.name,
+            designation: recentInspector.designation,
+            signatureUrl: sanitationChiefSignatureUrl,
+            configId: sanitationChief?.configId,
+          };
+          console.log(`✅ ${cardType} card: Using most recent inspector ${recentInspector.name} (${recentInspector.designation})`);
+        } else {
+          console.log(`⚠️ ${cardType} card: No recent instructor found, using fallback ${sanitationChief?.name}`);
+        }
+      } catch (error) {
+        console.error(`❌ Error fetching recent inspector for ${cardType} card:`, error);
+      }
     }
 
     // Generate HTML with dynamic official names, lab findings, and card type
@@ -1131,6 +1149,55 @@ export const getSignatureUrls = internalQuery({
 });
 
 /**
+ * Internal query to get most recent orientation instructor
+ * Used for Green/Pink cards to show the last active inspector
+ */
+export const getMostRecentOrientationInstructor = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    console.log(`[getMostRecentOrientationInstructor] Fetching most recent completed orientation`);
+    
+    // Get all completed orientation bookings and sort by completedAt
+    const completedBookings = await ctx.db
+      .query("orientationBookings")
+      .withIndex("by_status", (q) => q.eq("status", "completed"))
+      .collect();
+    
+    console.log(`[getMostRecentOrientationInstructor] Found ${completedBookings.length} completed orientations`);
+    
+    // Filter bookings that have instructor data and sort by completedAt
+    const bookingsWithInstructor = completedBookings
+      .filter(b => b.instructor?.name)
+      .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0)); // Most recent first
+    
+    const recentBooking = bookingsWithInstructor[0];
+    
+    console.log(`[getMostRecentOrientationInstructor] Recent booking:`, {
+      found: !!recentBooking,
+      instructor: recentBooking?.instructor,
+      completedAt: recentBooking?.completedAt,
+      totalWithInstructor: bookingsWithInstructor.length
+    });
+    
+    if (!recentBooking?.instructor) {
+      console.log(`[getMostRecentOrientationInstructor] No recent orientation with instructor found`);
+      return null;
+    }
+
+    console.log(`[getMostRecentOrientationInstructor] Returning instructor:`, {
+      name: recentBooking.instructor.name,
+      originalDesignation: recentBooking.instructor.designation
+    });
+
+    // Always use "Sanitation Chief" as designation
+    return {
+      name: recentBooking.instructor.name,
+      designation: "Sanitation Chief",
+    };
+  },
+});
+
+/**
  * Internal query to get orientation instructor for food handler applications
  * Returns the inspector who conducted the orientation (stored in orientationBookings)
  */
@@ -1161,12 +1228,15 @@ export const getOrientationInstructor = internalQuery({
 
     console.log(`[getOrientationInstructor] Returning instructor:`, {
       name: booking.instructor.name,
-      designation: booking.instructor.designation
+      originalDesignation: booking.instructor.designation,
+      overriddenTo: 'Sanitation Chief'
     });
 
+    // Always use "Sanitation Chief" as designation for all health cards
+    // regardless of what's stored in orientationBookings
     return {
       name: booking.instructor.name,
-      designation: booking.instructor.designation,
+      designation: "Sanitation Chief",
     };
   },
 });
