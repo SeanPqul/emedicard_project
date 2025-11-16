@@ -459,7 +459,7 @@ const BulkCreateModal = ({
   // Get all inspectors
   const inspectors = useQuery(api.admin.orientation.getInspectors);
 
-  const bulkCreateSchedules = useMutation(api.orientationSchedules.mutations.bulkCreateSchedules) as any;
+  const bulkCreateSchedules = useMutation(api.orientationSchedules.bulkCreateSchedules) as any;
 
   // Live preview and validation
   const timePreview = useMemo(() => formatTimeRange(startTime, endTime), [startTime, endTime]);

@@ -56,11 +56,15 @@ export const getByRegistration = query({
     const user = await ctx.db.get(application.userId);
     if (!user) return null;
 
+    // Get job category for display
+    const jobCategory = await ctx.db.get(application.jobCategoryId);
+
     return {
       ...healthCard,
       isExpired,
       isValid: healthCard.status === "active" && !isExpired,
       applicantName: user.fullname,
+      jobCategory: jobCategory ? { name: jobCategory.name } : undefined,
     };
   },
 });

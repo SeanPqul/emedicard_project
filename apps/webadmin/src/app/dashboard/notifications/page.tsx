@@ -45,9 +45,9 @@ export default function AdminNotificationsPage() {
     {}
   );
   
-  const markAsRead = useMutation(api.notifications.markNotificationAsRead.markNotificationAsRead);
-  const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead.markRejectionHistoryAsRead);
-  const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead.markAllNotificationsAsRead);
+  const markAsRead = useMutation(api.notifications.markNotificationAsRead);
+  const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);
+  const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
   const clearReadNotifications = useMutation(api.notifications.clearReadNotifications);
 
   // Combine all notifications
