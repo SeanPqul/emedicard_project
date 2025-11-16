@@ -47,13 +47,31 @@ export default function SelectCardForRenewalScreen() {
     );
   }
 
+  // Show ineligibility message as a screen instead of blocking alert
   if (!eligibility?.isEligible) {
-    Alert.alert(
-      'Cannot Renew',
-      eligibility?.reason || 'You are not eligible for renewal at this time.',
-      [{ text: 'OK', onPress: () => router.back() }]
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={moderateScale(24)} color={theme.colors.text.primary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Renewal Not Available</Text>
+        </View>
+        <View style={styles.ineligibleContainer}>
+          <Ionicons name="time-outline" size={moderateScale(72)} color={theme.colors.gray[400]} />
+          <Text style={styles.ineligibleTitle}>Cannot Renew Yet</Text>
+          <Text style={styles.ineligibleText}>
+            {eligibility?.reason || 'You are not eligible for renewal at this time.'}
+          </Text>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.primaryButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     );
-    return null;
   }
 
   const handleSelectCard = (healthCardId: string, cardDetails: any) => {
@@ -330,5 +348,39 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14), 
     fontWeight: '600', 
     color: theme.colors.ui.white 
+  },
+  ineligibleContainer: {
+    flex: 1, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    padding: moderateScale(32)
+  },
+  ineligibleTitle: {
+    fontSize: moderateScale(20), 
+    fontWeight: '600', 
+    color: theme.colors.text.primary, 
+    marginTop: verticalScale(24), 
+    marginBottom: verticalScale(12),
+    textAlign: 'center'
+  },
+  ineligibleText: {
+    fontSize: moderateScale(15), 
+    color: theme.colors.text.secondary, 
+    textAlign: 'center',
+    lineHeight: moderateScale(22),
+    marginBottom: verticalScale(32)
+  },
+  primaryButton: {
+    backgroundColor: theme.colors.primary[600], 
+    paddingHorizontal: moderateScale(32), 
+    paddingVertical: verticalScale(14), 
+    borderRadius: moderateScale(8),
+    minWidth: moderateScale(140)
+  },
+  primaryButtonText: {
+    fontSize: moderateScale(16), 
+    fontWeight: '600', 
+    color: theme.colors.ui.white,
+    textAlign: 'center'
   },
 });

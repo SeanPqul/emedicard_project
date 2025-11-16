@@ -15,6 +15,7 @@ export type ApplicationStatus =
   | 'Submitted' 
   | 'Under Review' 
   | 'Approved' 
+  | 'Rejected' // Permanently rejected application
   | 'Cancelled' // Auto-cancelled or user-cancelled application
   | 'Documents Need Revision' // Non-medical document issues
   | 'Referred for Medical Management'; // Medical findings requiring doctor consultation
@@ -181,4 +182,7 @@ export interface ApplicationWithDetails {
 export interface ApplicationDetails extends ApplicationWithDetails {
   paymentDeadline?: number;
   payment?: PaymentDetails;
+  // Server-computed fields (tamper-proof)
+  daysUntilDeadline?: number | null;
+  isPaymentOverdue?: boolean;
 }

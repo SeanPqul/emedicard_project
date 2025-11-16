@@ -15,6 +15,9 @@ export interface BackendHealthCard {
   createdAt: number;
   revokedAt?: number;
   revokedReason?: string;
+  // Server-computed fields (tamper-proof)
+  isExpired?: boolean;
+  isValid?: boolean;
   application?: {
     _id: Id<"applications">;
     _creationTime: number;

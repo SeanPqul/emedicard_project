@@ -122,10 +122,9 @@ export function CurrentSessionCard({ session, serverTime }: CurrentSessionCardPr
   // For upcoming sessions, this will update every second due to forceUpdate
   let timeContext = '';
   if (session && serverTime) {
-    // Use current client time - the serverTime prop should be the initial server timestamp
-    // The hook passes serverTime correctly, we just use Date.now() for current time
-    const currentServerTime = Date.now();
-    timeContext = getTimeContext(session, currentServerTime);
+    // Use the serverTime prop passed from useInspectorDashboard (tamper-proof)
+    // The hook already calculates accurate current time using server offset
+    timeContext = getTimeContext(session, serverTime);
   }
 
   if (!session) {

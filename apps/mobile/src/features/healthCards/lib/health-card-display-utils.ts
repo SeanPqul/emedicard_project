@@ -40,22 +40,33 @@ export const getCardColor = (jobCategory: any): string => {
 
 /**
  * Determines the status of a health card based on expiry date
+ * Uses server-computed expiry when available (tamper-proof)
  */
 export const getCardStatus = (card: HealthCardData | BackendHealthCard): 'active' | 'expired' | 'revoked' => {
-  // New schema: check status field directly
-  if ('status' in card && card.status) {
-    return card.status as 'active' | 'expired' | 'revoked';
+  // Check if card is revoked (manual admin action)
+  if ('status' in card && card.status === 'revoked') {
+    return 'revoked';
   }
   
-  // Fallback for old schema
+  // Prefer server-computed expiry status (tamper-proof)
+  if ('isExpired' in card && typeof (card as any).isExpired === 'boolean') {
+    return (card as any).isExpired ? 'expired' : 'active';
+  }
+  
+  // Fallback: Client-side validation (for backwards compatibility)
   const now = Date.now();
   const expiryDate = 'expiryDate' in card ? card.expiryDate : (card as any).expiresAt;
+  
   if (!expiryDate) {
-    return 'active'; // Default to active if no expiry date
+    // If no expiry date, use status field
+    return ('status' in card && card.status) ? card.status as 'active' | 'expired' | 'revoked' : 'active';
   }
+  
+  // Card is expired if current time is past expiry date
   if (expiryDate < now) {
     return 'expired';
   }
+  
   return 'active';
 };
 

@@ -71,19 +71,17 @@ export const HealthCardPreview: React.FC<HealthCardPreviewProps> = ({
 
 // Component for displaying the health card
 const HealthCardDisplay: React.FC<{ healthCard: any }> = ({ healthCard }) => {
+  // Use server-computed expiry if available (tamper-proof)
+  // Falls back to client-side check for backwards compatibility
+  const isExpired = healthCard.isExpired !== undefined 
+    ? healthCard.isExpired 
+    : new Date(healthCard.expiryDate).getTime() < Date.now();
+  
   const daysUntilExpiry = differenceInDays(new Date(healthCard.expiryDate), new Date());
-  const isExpiringSoon = daysUntilExpiry <= 30 && daysUntilExpiry > 0;
-  const isExpired = daysUntilExpiry <= 0;
+  const isExpiringSoon = daysUntilExpiry <= 30 && daysUntilExpiry > 0 && !isExpired;
 
-  const getCardColor = (): string => {
-    if (healthCard.type.toLowerCase().includes('food')) {
-      return theme.colors.jobCategories.foodHandler; // Yellow/Gold (#FFD700)
-    }
-    if (healthCard.type.toLowerCase().includes('dental')) {
-      return theme.colors.blue[500];
-    }
-    return theme.colors.primary[500];
-  };
+  // Use the centralized color utility that handles all card types
+  const cardColor = getJobCategoryColor(healthCard.type);
 
   const getStatusColor = () => {
     if (isExpired) return theme.colors.semantic.error;
@@ -96,8 +94,6 @@ const HealthCardDisplay: React.FC<{ healthCard: any }> = ({ healthCard }) => {
     if (isExpiringSoon) return `Expires in ${daysUntilExpiry} days`;
     return 'Active';
   };
-
-  const cardColor = getCardColor();
 
   return (
     <Pressable

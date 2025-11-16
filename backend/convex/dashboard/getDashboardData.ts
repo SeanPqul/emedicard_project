@@ -40,16 +40,42 @@ export const getDashboardDataQuery = query({
       applicationIds.has(card.applicationId)
     );
 
-    // Get payments for user's applications (fetch most recent payment per application)
-    // Optimized: batch payment queries to reduce round trips
+    // Get payments for user's applications (fetch most recent COMPLETED payment per application)
+    // Prioritizes Complete > Validated > Pending over Cancelled/Failed payments
     const payments = await Promise.all(
       applications.map(async (application) => {
-        const payment = await ctx.db
+        const allPayments = await ctx.db
           .query("payments")
           .withIndex("by_application", (q) => q.eq("applicationId", application._id))
           .order("desc")
-          .first();
-        return payment;
+          .collect();
+        
+        if (allPayments.length === 0) return null;
+        
+        // Priority order: Complete > Processing > Pending > Failed > others
+        const priorityOrder: Record<string, number> = {
+          "Complete": 1,
+          "Processing": 2,
+          "Pending": 3,
+          "Failed": 4,
+          "Refunded": 5,
+          "Cancelled": 6,
+          "Expired": 7,
+        };
+        
+        // Sort by priority first, then by creation time (newest first)
+        const sortedPayments = allPayments.sort((a, b) => {
+          const priorityA = priorityOrder[a.paymentStatus] || 99;
+          const priorityB = priorityOrder[b.paymentStatus] || 99;
+          
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
+          
+          return b._creationTime - a._creationTime;
+        });
+        
+        return sortedPayments[0];
       })
     ).then(results => results.filter((p): p is NonNullable<typeof p> => p !== null));
 
@@ -86,7 +112,11 @@ export const getDashboardDataQuery = query({
             requireOrientation: jobCategory.requireOrientation
           } : undefined,
           documentCount: documents.length,
-          hasPayment: payments.some(p => p && p.applicationId === application._id),
+          hasPayment: payments.some(p => 
+            p && 
+            p.applicationId === application._id && 
+            p.paymentStatus === 'Complete'
+          ),
           hasRejectedDocuments: rejectedPendingCount > 0,
           rejectedDocumentsCount: rejectedPendingCount,
           documentsVerified,
