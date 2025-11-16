@@ -84,9 +84,16 @@ export const review = mutation({
             newStatus = "Under Review";
           }
           shouldUpdate = true;
-        } else if (application.applicationStatus === "Scheduled" && requiresOrientation && !application.orientationCompleted) {
-          // Documents verified during orientation wait - stay as Scheduled
-          shouldUpdate = false;
+        } else if (application.applicationStatus === "Scheduled") {
+          // Handle Scheduled status
+          if (requiresOrientation && !application.orientationCompleted) {
+            // Yellow card (Food Handler) - documents verified during orientation wait, stay as Scheduled
+            shouldUpdate = false;
+          } else {
+            // Pink/Green card (no orientation required) OR orientation already completed - move to review
+            newStatus = "Under Review";
+            shouldUpdate = true;
+          }
         } else if (application.applicationStatus === "For Orientation" && (!requiresOrientation || application.orientationCompleted)) {
           // Orientation not needed or already done, move to review
           newStatus = "Under Review";

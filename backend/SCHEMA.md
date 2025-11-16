@@ -1,3 +1,8 @@
+# Database Schema
+
+This document contains the complete Convex database schema for the health card application system.
+
+```typescript
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
@@ -110,7 +115,6 @@ export default defineSchema({
     createdAt: v.float64(),
     revokedAt: v.optional(v.float64()),
     revokedReason: v.optional(v.string()),
-    cardType: v.optional(v.string()), // Card type/color (e.g., "yellow", "pink", "blue")
     
     // NEW: Snapshot of Officials at Time of Issuance (for historical accuracy)
     // This preserves who signed the card even if officials change later
@@ -443,12 +447,6 @@ export default defineSchema({
       v.literal("cleared"),           // Issue resolved, user can proceed
       v.literal("flagged_again")      // Issue persists, flagged again
     )),
-
-    // Clearance Tracking (for medical referrals that get cleared)
-    findingDescription: v.optional(v.string()), // Description of the medical finding
-    verifiedAt: v.optional(v.float64()), // When the medical issue was verified/cleared
-    verifiedBy: v.optional(v.id("users")), // Admin who verified/cleared the medical issue
-    verificationNotes: v.optional(v.string()), // Notes from admin about the verification/clearance
 
     // Notification Tracking
     notificationSent: v.optional(v.boolean()), // Whether applicant has been notified
@@ -805,3 +803,4 @@ export default defineSchema({
     .index("by_referral", ["referralHistoryId"]),
 
 });
+```

@@ -15,12 +15,28 @@ export const getApplicationByIdQuery = query({
       ? await ctx.db.get(application.jobCategoryId)
       : null;
 
-    // Get payment information if exists (fetch most recent payment)
-    const payment = await ctx.db
+    // Get payment information if exists (fetch most recent SUCCESSFUL payment)
+    // Priority: Complete > Processing > Pending > Failed/Cancelled/Expired
+    const allPayments = await ctx.db
       .query("payments")
       .withIndex("by_application", (q) => q.eq("applicationId", applicationId))
       .order("desc")
-      .first();
+      .collect();
+    
+    // Find the most recent successful payment first
+    let payment = allPayments.find(p => p.paymentStatus === "Complete");
+    
+    // If no complete payment, fall back to most recent payment (any status)
+    if (!payment && allPayments.length > 0) {
+      payment = allPayments[0];
+    }
+
+    // SERVER-SIDE payment deadline validation (tamper-proof)
+    const now = Date.now();
+    const isPaymentOverdue = application.paymentDeadline ? now > application.paymentDeadline : false;
+    const daysUntilDeadline = application.paymentDeadline 
+      ? Math.floor((application.paymentDeadline - now) / (1000 * 60 * 60 * 24))
+      : null;
 
     // Return enriched application data
     return {
@@ -30,6 +46,9 @@ export const getApplicationByIdQuery = query({
       jobCategoryName: jobCategory?.name ?? "Unknown Category",
       // Map applicationStatus to status for frontend compatibility
       status: application.applicationStatus,
+      // Server-computed deadline fields (tamper-proof)
+      isPaymentOverdue,
+      daysUntilDeadline,
       form: {
         _id: application._id, // Use application ID since there's no separate form
         applicationType: application.applicationType,

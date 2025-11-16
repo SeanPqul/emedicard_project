@@ -14,15 +14,18 @@ import { ApplicationStatus } from '@/src/entities/application';
  * 
  * These represent completed processes where the user can start fresh:
  * - Approved: User received their health card, can apply for renewal later
+ * - Rejected: Application was permanently rejected, user can start a new application
  * - Cancelled: Application was cancelled (auto-cancelled due to non-payment or user cancelled)
  * - Payment Rejected: Application ended, user can try again with valid payment
- * - Referred for Medical Management: Special case requiring external doctor consultation
+ * 
+ * Note: 'Referred for Medical Management' is NOT terminal - it's an active status
+ * requiring the user to complete treatment and return for re-evaluation.
  */
 const TERMINAL_STATUSES: ApplicationStatus[] = [
   'Approved',
+  'Rejected',
   'Cancelled',
   'Payment Rejected',
-  'Referred for Medical Management',
 ];
 
 /**
@@ -84,6 +87,9 @@ export function getRestrictionMessage(status: ApplicationStatus): string {
     
     case 'Documents Need Revision':
       return 'Your documents need revision. Please update your current application before creating a new one.';
+    
+    case 'Referred for Medical Management':
+      return 'Your application requires medical clearance. Please complete your treatment and return for re-evaluation before applying again.';
     
     // Catch-all for any other in-progress status (including future additions)
     default:

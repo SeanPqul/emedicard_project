@@ -5,11 +5,21 @@ import { query } from "../_generated/server";
 export const get = query({
   args: { applicationId: v.id("applications") },
   handler: async (ctx, args) => {
-    // 1. Find the payment record for this application
-    const payment = await ctx.db
+    // 1. Find the most recent SUCCESSFUL payment record for this application
+    // Priority: Complete > Processing > Pending > Failed/Cancelled
+    const allPayments = await ctx.db
       .query("payments")
       .withIndex("by_application", q => q.eq("applicationId", args.applicationId))
-      .first();
+      .order("desc")
+      .collect();
+    
+    // Prioritize completed payments over cancelled ones
+    let payment = allPayments.find(p => p.paymentStatus === "Complete");
+    
+    // If no complete payment, fall back to most recent payment
+    if (!payment && allPayments.length > 0) {
+      payment = allPayments[0];
+    }
       
     if (!payment) return null;
 

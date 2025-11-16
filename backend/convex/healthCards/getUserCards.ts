@@ -38,10 +38,18 @@ export const getUserCardsQuery = query({
       healthCards.filter(Boolean).map(async (card) => {
         const application = await ctx.db.get(card!.applicationId);
         const jobCategory = application ? await ctx.db.get(application.jobCategoryId) : null;
+        
+        // SERVER-SIDE expiry validation (tamper-proof)
+        const now = Date.now();
+        const isExpired = now > card!.expiryDate;
+        
         return {
           ...card,
           application,
           jobCategory,
+          // Add computed fields for security
+          isExpired,
+          isValid: card!.status === "active" && !isExpired,
         };
       })
     );

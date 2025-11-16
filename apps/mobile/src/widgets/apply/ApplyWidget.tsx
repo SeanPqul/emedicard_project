@@ -115,6 +115,19 @@ export function ApplyWidget({
 }: ApplyWidgetProps) {
   const insets = useSafeAreaInsets();
 
+  // For renewals, filter out Application Type and Job Category from step titles
+  // Job category is locked to previous health card's category
+  const displayStepTitles = isRenewalMode 
+    ? STEP_TITLES.filter((_, index) => index !== 0 && index !== 1) // Skip steps 0 and 1
+    : STEP_TITLES;
+  
+  // Map actual step numbers to display step numbers for renewals
+  const getDisplayStep = (actualStep: number): number => {
+    if (!isRenewalMode) return actualStep;
+    // For renewals: step 2 -> 0, step 3 -> 1, step 4 -> 2
+    return actualStep - 2;
+  };
+
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 0:
@@ -192,7 +205,7 @@ export function ApplyWidget({
       </View>
 
       {/* Step Indicator */}
-      <StepIndicator currentStep={currentStep} stepTitles={STEP_TITLES} />
+      <StepIndicator currentStep={getDisplayStep(currentStep)} stepTitles={displayStepTitles} />
 
       {/* Renewal Banner */}
       {isRenewalMode && (
@@ -226,8 +239,8 @@ export function ApplyWidget({
 
       {/* Navigation Buttons - Absolute positioned above tab bar */}
       <View style={[styles.navigationButtons, { bottom: moderateScale(60) + (insets.bottom || 0) }]}>
-        {/* Show Previous button only if not at first step. For renewal mode, first step is 1 (Job Category) */}
-        {(isRenewalMode ? currentStep > 1 : currentStep > 0) && (
+        {/* Show Previous button only if not at first step. For renewal mode, first step is 2 (Personal Details) */}
+        {(isRenewalMode ? currentStep > 2 : currentStep > 0) && (
           <TouchableOpacity 
             style={styles.previousButton} 
             onPress={handlePrevious}
@@ -240,7 +253,7 @@ export function ApplyWidget({
           style={[
             styles.nextButton,
             // Make next button full width when there's no previous button
-            (isRenewalMode ? currentStep === 1 : currentStep === 0) && styles.nextButtonFull,
+            (isRenewalMode ? currentStep === 2 : currentStep === 0) && styles.nextButtonFull,
             { 
               backgroundColor: (isSubmitting || (currentStep === STEP_TITLES.length - 1 && !termsAccepted)) ? '#D1D5DB' : '#2E86AB',
               opacity: (isSubmitting || (currentStep === STEP_TITLES.length - 1 && !termsAccepted)) ? 0.6 : 1,

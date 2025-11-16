@@ -92,15 +92,13 @@ export function ApplicationDetailWidget({
 
   const statusColor = STATUS_COLORS[application.status as keyof typeof STATUS_COLORS] ?? theme.colors.primary[500];
 
-  const getDaysUntilDeadline = (deadline?: number) => {
-    if (!deadline) return null;
-    const now = Date.now();
-    const diff = deadline - now;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    return days;
-  };
-
-  const daysUntilDeadline = getDaysUntilDeadline(application.paymentDeadline);
+  // Use server-computed deadline if available (tamper-proof)
+  // Falls back to client-side calculation for backwards compatibility
+  const daysUntilDeadline = application.daysUntilDeadline !== undefined
+    ? application.daysUntilDeadline
+    : application.paymentDeadline
+    ? Math.floor((application.paymentDeadline - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
 
   return (
     <View style={styles.container}>

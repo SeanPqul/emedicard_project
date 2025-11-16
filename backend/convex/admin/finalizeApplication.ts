@@ -55,18 +55,26 @@ export const finalize = mutation({
     // 2.5. CRITICAL: Validate payment before approval
     if (args.newStatus === "Approved") {
       // Check payment status - must be completed and validated
-      const payment = await ctx.db
+      // Priority: fetch COMPLETED payment over cancelled/failed ones
+      const allPayments = await ctx.db
         .query("payments")
         .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
-        .first();
+        .order("desc")
+        .collect();
       
-      if (!payment) {
+      // Find the most recent successful payment first
+      let payment = allPayments.find(p => p.paymentStatus === "Complete");
+      
+      // If no complete payment exists, check if there's any payment at all
+      if (!payment && allPayments.length === 0) {
         throw new Error("Cannot approve application. No payment record found. The applicant must complete payment first.");
       }
       
-      if (payment.paymentStatus !== "Complete") {
+      if (!payment) {
+        // There are payments but none are complete
+        const latestPayment = allPayments[0];
         throw new Error(
-          `Cannot approve application. Payment status is "${payment.paymentStatus}". ` +
+          `Cannot approve application. Payment status is "${latestPayment.paymentStatus}". ` +
           "The payment must be completed and validated before document approval."
         );
       }

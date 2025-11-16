@@ -130,9 +130,10 @@ export function ApplyScreen() {
         previousHealthCardId: healthCardId as Id<"healthCards">,
       });
       
-      // Skip Application Type step (step 0) and go directly to Job Category (step 1)
+      // Skip Application Type (step 0) AND Job Category (step 1) - go directly to Personal Details (step 2)
+      // Job category is locked to previous health card's category for renewals
       if (currentStep === 0) {
-        setCurrentStep(1);
+        setCurrentStep(2);
       }
     }
   }, [isRenewalMode, previousAppData, formData.firstName, healthCardId, currentStep]);
