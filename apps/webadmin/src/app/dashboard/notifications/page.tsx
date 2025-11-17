@@ -140,142 +140,172 @@ export default function AdminNotificationsPage() {
   }
 
   const unreadCount = allNotifications.filter(n => !n.isRead).length;
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto py-6 px-4 sm:px-6">
-        {/* Clean Header */}
-        <header className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Notifications</h1>
-              <p className="text-gray-500 text-sm mt-1">
-                Notifications for your managed categories
-                {unreadCount > 0 && (
-                  <span className="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-red-500 text-white">
-                    {unreadCount} unread
-                  </span>
-                )}
-              </p>
-            </div>
+      <main className="mx-auto w-full max-w-6xl px-4 pb-8 pt-6 sm:px-6 lg:px-8">
+        {/* Header */}
+        <header className="mb-5 flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-emerald-600">
+              Inbox
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold text-slate-900">Notifications</h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Updates for the applications and payments you manage.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3">
+            {unreadCount > 0 && (
+              <span className="inline-flex items-center justify-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-100">
+                {unreadCount} unread
+              </span>
+            )}
             <button
               onClick={() => router.push("/dashboard")}
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
             >
-              ← Back to Dashboard
+              Back to dashboard
             </button>
           </div>
         </header>
 
-        {/* Simple Filters */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilter("all")}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  filter === "all"
-                    ? "bg-emerald-600 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                All ({allNotifications.length})
-              </button>
-              <button
-                onClick={() => setFilter("unread")}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  filter === "unread"
-                    ? "bg-emerald-600 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                Unread ({unreadCount})
-              </button>
-              <button
-                onClick={() => setFilter("read")}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  filter === "read"
-                    ? "bg-emerald-600 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                Read ({allNotifications.length - unreadCount})
-              </button>
-            </div>
+        <section className="space-y-4">
+          {/* Filters */}
+          <div className="rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm shadow-slate-100 backdrop-blur-sm sm:p-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              {/* Status filter tabs */}
+              <div className="flex flex-none gap-2 overflow-x-auto pb-1 text-sm">
+                <button
+                  onClick={() => setFilter("all")}
+                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                    filter === "all"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  All ({allNotifications.length})
+                </button>
+                <button
+                  onClick={() => setFilter("unread")}
+                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                    filter === "unread"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  Unread ({unreadCount})
+                </button>
+                <button
+                  onClick={() => setFilter("read")}
+                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                    filter === "read"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  Read ({allNotifications.length - unreadCount})
+                </button>
+              </div>
 
-            <select
-              className="px-3 py-1.5 border border-gray-200 text-sm text-gray-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-            >
-              <option value="">All Types</option>
-              {groupedTypes.map((group) => (
-                <optgroup key={group.label} label={group.label}>
-                  {group.types.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
+              {/* Type filter + bulk actions */}
+              <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                <select
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:w-56"
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                >
+                  <option value="">All types</option>
+                  {groupedTypes.map((group) => (
+                    <optgroup key={group.label} label={group.label}>
+                      {group.types.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
-                </optgroup>
-              ))}
-            </select>
+                </select>
 
-            <div className="sm:ml-auto flex gap-2">
-              {unreadCount > 0 && (
-                <button
-                  onClick={handleMarkAllAsRead}
-                  className="px-3 py-1.5 bg-emerald-600 text-white text-sm rounded-lg font-medium hover:bg-emerald-700 transition-colors"
-                >
-                  Mark All as Read
-                </button>
-              )}
-              {allNotifications.filter(n => n.isRead).length > 0 && (
-                <button
-                  onClick={handleClearRead}
-                  className="px-3 py-1.5 bg-gray-600 text-white text-sm rounded-lg font-medium hover:bg-gray-700 transition-colors"
-                >
-                  Clear Read
-                </button>
-              )}
+                <div className="flex gap-2 sm:ml-2">
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={handleMarkAllAsRead}
+                      className="flex-1 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 sm:flex-none"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                  {allNotifications.filter(n => n.isRead).length > 0 && (
+                    <button
+                      onClick={handleClearRead}
+                      className="flex-1 rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-1 sm:flex-none"
+                    >
+                      Clear read
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Clean Notifications List */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          {filteredNotifications.length === 0 ? (
-            <div className="text-center py-12">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 text-gray-300 mx-auto mb-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+          {/* Small helper row */}
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-slate-500">
+            <span>
+              Showing {filteredNotifications.length} of {allNotifications.length} notifications
+            </span>
+            {(filter !== "all" || typeFilter) && (
+              <button
+                onClick={() => {
+                  setFilter("all");
+                  setTypeFilter("");
+                }}
+                className="text-xs font-medium text-emerald-700 hover:text-emerald-800"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-              <p className="text-gray-500 text-sm">No notifications to display</p>
-            </div>
-          ) : (
-            <div>
-              {filteredNotifications.map((notification: Notification, index) => (
-                <NotificationCard
-                  key={notification._id}
-                  notification={notification}
-                  onClick={() => handleNotificationClick(notification)}
-                  showBorder={index !== filteredNotifications.length - 1}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+                Clear filters
+              </button>
+            )}
+          </div>
+
+          {/* Notifications list */}
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white/80 shadow-sm shadow-slate-100">
+            {filteredNotifications.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 text-slate-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-slate-700">You're all caught up</p>
+                  <p className="mt-1 text-xs text-slate-500">New updates will show up here as they come in.</p>
+                </div>
+              </div>
+            ) : (
+              <div>
+                {filteredNotifications.map((notification: Notification, index) => (
+                  <NotificationCard
+                    key={notification._id}
+                    notification={notification}
+                    onClick={() => handleNotificationClick(notification)}
+                    showBorder={index !== filteredNotifications.length - 1}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </main>
     </div>
   );
