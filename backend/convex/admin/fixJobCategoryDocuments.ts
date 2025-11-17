@@ -46,7 +46,7 @@ export const fixJobCategoryDocumentsRelationships = mutation({
     const correctRelationships: Record<string, { name: string; required: boolean }[]> = {
       "Food Category": [
         { name: "Valid Government ID", required: true },
-        { name: "2x2 ID Picture", required: true },
+        { name: "1x1 ID Picture", required: true },
         { name: "Chest X-ray", required: true },
         { name: "Urinalysis", required: true },
         { name: "Stool Examination", required: true },
@@ -54,7 +54,7 @@ export const fixJobCategoryDocumentsRelationships = mutation({
       ],
       "Non-Food Category": [
         { name: "Valid Government ID", required: true },
-        { name: "2x2 ID Picture", required: true },
+        { name: "1x1 ID Picture", required: true },
         { name: "Chest X-ray", required: true },
         { name: "Urinalysis", required: true },
         { name: "Stool Examination", required: true },
@@ -64,7 +64,7 @@ export const fixJobCategoryDocumentsRelationships = mutation({
       ],
       "Skin-to-Skin Category": [
         { name: "Valid Government ID", required: true },
-        { name: "2x2 ID Picture", required: true },
+        { name: "1x1 ID Picture", required: true },
         { name: "Chest X-ray", required: true },
         { name: "Urinalysis", required: true },
         { name: "Stool Examination", required: true },

@@ -135,7 +135,7 @@ export const finalize = mutation({
         // There are payments but none are complete
         const latestPayment = allPayments[0];
         throw new Error(
-          `Cannot approve application. Payment status is "${latestPayment.paymentStatus}". ` +
+          `Cannot approve application. Payment status is "${latestPayment!.paymentStatus}". ` +
           "The payment must be completed and validated before document approval."
         );
       }

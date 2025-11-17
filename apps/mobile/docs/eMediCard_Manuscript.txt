@@ -1,0 +1,876 @@
+eMediCard: A Mobile-Base Health Card Management System
+
+
+A Capstone Project Proposal
+Presented to the Faculty of the
+Information and Communications Technology Program
+STI College Davao
+
+
+
+
+
+
+
+
+In Partial Fulfilment
+of the Requirements for the Degree
+Bachelor of Science in Information Technology
+Sean Paul S. Lapasanda
+Rogel Henric M. Caasi
+John Mark G. Duyag
+Maynard Kent G. Omandac
+
+
+
+
+ENDORSEMENT FORM FOR PROPOSAL DEFENSE
+
+
+TITLE OF RESEARCH: 		eMediCard: A Mobile-Base Health Card
+					Application System
+
+NAME OF PROPONENTS:	Sean Paul S. Lapasanda
+Rogel Henric M. Caasi
+John Mark G. Duyag
+Maynard Kent G. Omandac
+      			
+
+
+In Partial Fulfilment of the Requirements 
+for the degree Bachelor of Science in Information Technology
+has been examined and is recommended for Proposal Defense.
+
+
+
+ENDORSED BY:
+
+
+Reinamie G. Dayrit
+Capstone Project Adviser
+
+
+APPROVED FOR PROPOSAL DEFENSE:
+
+
+
+Jessiel Chris Hilot
+Capstone Project Coordinator
+
+
+
+NOTED BY:
+
+
+
+Engr. Darwin Ian I. Guerrero
+Program Head
+
+
+November 17, 2025 
+APPROVAL SHEET
+This capstone project proposal titled eMediCard: A Mobile-Base Health Card Management System, prepared and submitted by Sean Paul S. Lapasanda, Rogel Henric M. Caasi, John Mark G. Duyag, and Maynard Kent G. Omandac, in partial fulfillment of the requirements for the degree of Bachelor of Science in Information Technology, has been examined and is recommended for acceptance and approval.
+Reinamie G. Dayrit
+Capstone Project Adviser
+Accepted and approved by the Capstone Project Review Panel
+in partial fulfillment of the requirements for the degree of 
+Bachelor of Science in Information Technology
+
+Ariel P. LapiñasEngr. Darwin Ian I. GuerreroPanel MemberPanel Member 
+Engr. Elvi Lito Ubas, CPE, MEE
+Lead Panelist
+
+Noted:
+Jessiel Chris HilotJessiel Chris HilotCapstone Project CoordinatorProgram Head
+
+
+
+ACKNOWLEDGMENT
+      First and foremost, we offer our sincerest praises and gratitude to the God Almighty for all the blessings and guidance in every day of planning and conducting this project.
+      To our current adviser, Ms. Reiname G. Dayrit, our former adviser, Mr. Dominic R. Bantigue, and our project coordinator, Ms. Jessiel Chris Hilot, we express our deepest gratitude for your continued support and supervision towards achieving the feasibility of this project. We have learned so much from your advice and comments and it truly helped us to make the project on the right track.
+      To our loving and caring parents, we cannot thank you enough for your hard work and support in everything that we do. Your sacrifices brought us here and we are grateful for your continued love and understanding.
+      To the Davao City Health Office staff and administrators, we are appreciative for giving us the opportunity to understand the health card application process and for allowing us to gather information needed. We are inspired with your dedication to public service and we look forward to contributing to the improvement of health services with our system.
+
+
+
+ABSTRACT
+Title of research:	eMediCard:  A Mobile-base Health Card Management System
+
+Researchers:		Sean Paul S. Lapasanda
+      Rogel Henric M. Caasi
+      John Mark G. Duyag
+      Maynard Kent G. Omandac
+
+Degree:		Bachelor of Science in Information Technology
+
+Date of Completion:	<Month year of graduation>
+
+Keywords:	Health Card Management, Mobile Health Application, Document Verification, Digital Health Certificate, Web-Based System 
+
+      This study presents eMediCard, a mobile-based health card management system designed to modernize the health card registration and renewal process for employees in Davao City. Currently, thousands of workers must physically visit designated venues during peak months, resulting in severe overcrowding with over 1,400 daily applicants and work disruptions. The manual system also imposes heavy administrative burdens on the City Health Office (CHO), leading to processing delays.
+      Using the Waterfall Model, the development team conducted requirements gathering through interviews with CHO personnel and applicants, followed by systematic design and implementation. The system was built using React Native with Expo framework, Convex as the serverless database, Clerk for authentication, and integrated with Maya payment gateway.
+      The mobile application enables users to register, submit medical documents, and select their classification (Yellow for food handlers, Green for non-food workers, Pink for skin-contact occupations). Yellow card applicants can schedule mandatory food safety orientations. Upon approval, users download digital health cards embedded with QR codes. CHO administrators use a web-based dashboard to validate documents and generate reports, successfully reducing physical congestion and improving data accuracy.
+Table of Contents
+PageTitle Page
+Endorsement Form
+Approval Sheet i
+ ii
+ iiiTable of Contents ivIntroduction1Project Context1Purpose and Description2Objectives4Scope and Limitations
+Review of Related Literature/Studies/Systems6
+9Methodology13Technical Background13Requirements Analysis18Requirements Documentation20Design of Software, System, Product, and/or Processes25References25Appendices
+         Appendix A
+         Appendix B
+         Personal Technical Vitae
+         26
+27
+41
+42
+
+
+
+
+INTRODUCTION
+Project Context
+      The rapid growth of mobile application development has transformed industries such as retail, healthcare, and government by offering fast and convenient access to services. In the healthcare sector, mobile platforms have enhanced communication, streamlined data management, and improved service delivery. Successful digital initiatives, like Ghana's National Health Insurance and Propel's Medicaid renewal campaign, show how mobile systems reduce waiting times, cut administrative burdens, and improve overall user satisfaction.
+      In Davao City, the current health card renewal process is entirely manual. Every year, especially in January, thousands of employees must line up at designated venues, resulting in long queues, overcrowding, and delays that disrupt work schedules. While efforts have been made to improve accessibility through social media, these platforms often suffer from misinformation, duplication, and data security issues.
+      Davao's economic growth and expanding workforce have further intensified the need for a more efficient renewal system. With increasing demand from sectors like tourism, infrastructure, and BPO, it's essential to modernize this process to keep up with compliance and public health regulations.
+      To address these issues, our team proposes eMediCard, a mobile-based application that digitizes the entire health card registration and renewal process. Through the app, employees can submit personal information, upload required medical documents, track their status, and receive their digital health cards, all from their smartphones. CHO administrators are also provided with tools to validate submissions, manage orientations, and issue approvals. This system aims to reduce congestion, shorten processing times, and make the health card renewal process more secure and efficient for all.
+Purpose and Description
+      The purpose of this project is to develop a mobile application that facilitates the registration and annual renewal of health cards for employees in Davao City. Currently, the process requires thousands of employees to visit designated venues each January, where they undergo health evaluations and update their records. This traditional method often leads to overcrowding, long queues, and delays that disrupt work schedules. It also places a heavy administrative burden on the City Health Office (CHO), resulting in missed deadlines and inefficiencies. To address these challenges, this project aims to replace the conventional in-person system with a mobile-based solution accessible directly from employees' smartphones.
+      The proposed application will enable users to register and submit necessary information, including personal details and medical documents, such as chest X-ray, CBC, urinalysis, fecalysis, drug test, neuropsychiatric test, Hepatitis B antibody test, valid ID, Community Tax Certificate, health card receipt (OR), and a 1x1 picture. The system is designed with an intuitive interface to support users with varying levels of digital literacy. It also integrates payment options, allowing users to pay through in-app platforms such as Maya or submit proof of payment from designated physical locations. A ?10 transaction fee will automatically be added to the total amount during each payment to cover administrative or processing costs.
+      Applicants will identify whether they are food or non-food workers through a classification system that assigns color-coded health card types: Yellow for food handlers (e.g., service crew, kitchen staff), Green for non-food industry workers (e.g., security guards, receptionists, BPO staff), and Pink for occupations involving direct skin contact (e.g., barbers, massage therapists, tattoo artists). Food handlers will be required to attend a mandatory food safety orientation with a sanitary inspector and they will receive a schedule appointment. Non-food and pink card applicants may proceed directly with the process unless otherwise instructed.
+      To enhance transparency, the app provides real-time status updates and notifications to inform applicants about their progress, missing requirements, or next steps. If an applicant is disapproved, often due to incomplete documents or medical findings, the system will display a personalized follow-up checklist, suggest nearby health centers, and guide them through the additional tests needed before they can reapply.
+      Once the user's application is approved, they will be notified that their digital health card is available for download within the app. The card will display essential details such as the user's name, assigned classification color, photo, and expiration date. To enhance security and protect against forgery, each digital health card will be embedded with a system-generated QR code. This QR code stores key information and can be scanned by authorized City Health Office personnel or affiliated organizations to confirm the card's validity. This ensures a safe, contactless, and reliable method for verifying health card authenticity during inspections or job-related evaluations.
+      Overall, the eMediCard mobile application is envisioned as a comprehensive solution to improve the efficiency, security, and accessibility of the health card renewal process in Davao City. The system will be managed by both applicants and City Health Office (CHO) administrators. Applicants can register, submit requirements, track their status, and receive notifications. Administrators will be able to verify documents, manage compliance, send updates, and generate reports for monitoring and future improvements.
+
+
+Objectives of the Study
+      The main objective of this study is to develop a mobile application that modernizes the health card registration and renewal process in Davao City, making it more efficient, accessible, and organized for both employees and health administrators. Specifically, this project aims:
+* To develop a user registration module
+
+      This will allow users to create an account by providing their personal information required for health card application and renewal.
+* To develop a health card application module that classifies applicants and manages document submission based on job type
+
+      This module classifies applicants as Yellow (food handlers), Green (non-food workers), or Pink (skin-to-skin contact jobs), each with its own requirements, and allows users to upload the necessary documents for their classification.
+* To develop a renewal module that manages the reapplication process for existing health card holders
+
+      This module enables users to renew their health cards by updating required documents, verifying eligibility, and ensuring continuity of classification and validity.
+* To develop a function for scheduling with alert notifications and QR-based attendance tracking
+
+      This function notifies Yellow card applicants of their scheduled in-person food safety orientation. The app displays their assigned date and generates a QR code for attendance scanning at the venue.
+* To develop an admin panel module that executes specific administrative tasks
+
+       This allows CHO administrators to manage the application process, such as handling user accounts, validating documents, scheduling orientations, tracking payments, and approving or rejecting applications.
+* To develop an online payment and digital health card releasing function
+
+      This enables users to pay their health card fees through Maya or upload proof of payment, and allows approved applicants to access their digital health card.
+
+Scope and Limitation of the Study
+      The eMediCard mobile application is designed to enhance and digitize the health card registration and renewal process for employees in Davao City.. It aims to replace the traditional in-person process, which often leads to long queues, delays, and administrative inefficiencies, with a convenient, mobile-based solution. The application will allow users to complete the entire renewal process remotely, reducing congestion at processing centers and minimizing disruptions to employees' work schedules.
+This project will be beneficial to the following:
+* Employees 
+
+      Workers required to renew their health cards, including those in the food industry, non-food industry, and jobs involving skin-to-skin contact.
+* City Health Office (CHO) Administrators 
+      Health officials responsible for processing applications whether to approve or reject, verifying documents, send notifications, managing health card issuance, and generate reports for monitoring and evaluation.
+* Business Owners 
+
+      Organizations that require their employees to have valid health cards for compliance with local health regulations.
+      
+      
+      
+      
+
+
+The key functionalities of the mobile application include:
+* User Accounts 
+
+      Allow users to create accounts, input personal information, and update details for health card renewal.
+* Document Submission 
+
+      Enables users to upload required documents such as medical results, a 1x1 picture, and a Community Tax Certificate.
+* Classification of Health Cards 
+
+      The application includes the classification of health cards into food (yellow), non-food (green), and pink (for jobs involving skin-to-skin contact) categories, ensuring that each applicant follows the correct process.
+* Digital Health Card Releasing
+
+      Enables users to access their approved digital health card, including personal details, classification color, photo, and expiration date directly within the app.
+* Food Safety Orientation
+
+      Enables yellow-card applicants to schedule mandatory food safety orientations, receive in-app reminders, and confirm their attendance.
+* Payment Processing 
+
+      The application offers Maya payment integration for online transactions or manual proof of payment upload at designated locations. All payment transactions will include an additional ?10 fee.
+* QR Code Integration for Health Card Verification
+
+      Each approved digital health card includes a unique QR code that can be scanned by CHO personnel or partner establishments. 
+      
+
+      This project is primarily a mobile-based application, meaning that its core functionality is designed for mobile platforms. However, a web-based version has been introduced exclusively for admin use. For now, the application is specifically developed for Android devices only, and does not currently support iOS or other operating systems. The system is specifically tailored for the health card renewal process in Davao City, designed to meet local administrative practices and regulatory requirements, which may not be readily adaptable to other regions without substantial modifications. Although the application incorporates advanced features such as secure digital document uploads, real-time status updates, and mandatory food safety orientation, it relies on users having a basic level of digital literacy and stable internet access. The system requires stable internet connectivity for real-time database synchronization through Convex and authentication through Clerk. Additionally, certain processes such as the physical verification of documents may still require manual intervention, potentially causing delays in processing.
+REVIEW OF RELATED LITERATURE/STUDIES/SYSTEMS
+Related Studies and/or Systems
+Mobile Health Card Application System (Itransition, 2024)
+      The research conducted by Itransition (2024) was to design a mobile health card application system through which the patients can retrieve their medical information, book appointments, and converse with healthcare providers. The system is integrated with IoT and wearables to remotely capture health information securely and make healthcare services better. Based on Itransition (2024), the major issue in conventional healthcare systems is the insufficient availability of effective medical record access. Patients find it difficult to deal with paperwork and scheduling appointments manually, which causes inefficiencies and delays in medical treatment. With the processes being digitized, the mobile health card application provides a smooth flow of data access and management.
+      The system allows for quicker and more streamlined healthcare procedures, enabling users to keep and retrieve their health records online. Patients can book appointments with healthcare providers, get reminders about appointments, and monitor their medical history in one platform. Furthermore, integration with wearable devices provides real-time monitoring of health conditions, encouraging active healthcare management.
+      The patient has access to the login and registration page, where he or she may modify his or her medical history, view appointment schedules, and obtain personalized health information. Health providers, on the other hand, can securely manage patient information, monitor health trends, and streamline medical workflows.
+
+
+mHealth Solutions for Digital Healthcare (OSP Labs, 2023)
+      In the research conducted by OSP Labs (2023), mHealth solutions were created to make healthcare services easily accessible and convenient through online platforms. They are comprised of mobile apps, wearables, and remote monitoring equipment that was developed to help patients monitor their health, meet with medical professionals, and implement wellness plans.  As per OSP Labs (2023), the main challenge in healthcare is the accessibility gap, particularly among patients in rural regions. Integrating mHealth solutions helps bridge this gap by providing telemedicine consultations, medication reminders, and real-time health monitoring capabilities. 
+      The mHealth platform increases efficiency through the digitization of scheduling appointments, prescribing electronically, and virtual consultations. The app enables patients to schedule appointments, access health alerts, and securely share medical reports with healthcare professionals. The use of AI-powered analytics also helps to identify early disease symptoms, and timely medical interventions are ensured. 
+      Administrators and care providers can equally gain from the system as they can monitor patient records, derive trends from health data, and enhance the provision of healthcare by means of targeted treatment plans. The digitization of healthcare services via mHealth applications aids better patient involvement as well as medical outcomes.
+
+Mobile Health Regulations and Compliance (Federal Trade Commission, 2023)
+      The Federal Trade Commission (2023) performed a study on regulatory compliance in mobile health apps. The study highlights that while online healthcare platforms are of many benefits, they have to follow rigorous privacy, security, and data protection rules to uphold patient trust and confidentiality.  As per the FTC (2023), most of the healthcare apps are subject to legal and ethical issues surrounding data security. If there are no proper compliance practices, there are chances of leaking sensitive health data, and that is highly detrimental to both patients and healthcare professionals. 
+      In response to these challenges, the FTC launched an interactive guide to assist developers in complying with privacy legislation like HIPAA and GDPR. The guide assists mobile health developers in ensuring their apps are up to standard security levels, securing patient information from improper access. Through compliance regulations, healthcare apps can strengthen data security, win the trust of patients, and legally conduct business in the digital health market. Adhering to stringent cybersecurity protocols is essential for long-term success and acceptance of mobile health technology.
+
+
+Synthesis
+      The review of related studies and systems emphasize the transformative potential of mobile health technologies in modernizing healthcare services, enhancing patient accessibility, and ensuring regulatory compliance. The Mobile Health Card Application System (Itransition, 2024) addresses inefficiencies in conventional healthcare systems by digitizing medical record access, appointment scheduling, and real-time health monitoring through IoT and wearable integration. Similarly, mHealth Solutions for Digital Healthcare (OSP Labs, 2023) highlight the role of mobile applications in bridging healthcare accessibility gaps, particularly in rural areas. By incorporating telemedicine, AI-powered analytics, and remote health monitoring, these solutions enhance efficiency and patient engagement while streamlining medical workflows.
+      However, with the growing reliance on digital health platforms, regulatory compliance and data security remain critical challenges. The Federal Trade Commission (2023) underscores the importance of adhering to privacy regulations such as HIPAA and GDPR to protect sensitive patient information. The study highlights the risks associated with improper compliance and the need for robust cybersecurity measures to prevent data breaches. Ensuring that mobile health applications meet legal and ethical standards is crucial for gaining patient trust and promoting widespread adoption of digital healthcare solutions.
+      These findings align with the objectives of eMediCard: A Mobile-Based Health Card Application System, which aims to facilitate health card applications, reduce processing time, and minimize overcrowding in government offices. Inspired by Itransition's mobile health card system, eMediCard seeks to provide a secure and user-friendly digital platform for health record access and appointment management. Additionally, the concerns raised by the FTC study emphasize the need for strong data security protocols, ensuring patient information is safeguarded against unauthorized access. By addressing these challenges, eMediCard can contribute to the modernization of healthcare services in the Philippines, making medical processes more efficient, secure, and accessible for all citizen
+METHODOLOGY
+Technical Background
+Technologies to be Used 
+      The eMediCard system will use a set of open-source technologies chosen for their ease of use, speed of development, and reliable performance. React Native using the Expo framework will serve as the primary technology for building the eMediCard mobile application. Expo is an open-source framework that simplifies the React Native development workflow by providing built-in tools for app configuration, testing, and deployment. It enables faster testing via the Expo Go app, which allows developers to preview the app on real devices instantly without manual builds. The framework also integrates Expo Application Services (EAS) for automated building and publishing of Android applications. React Native allows developers to write JavaScript and JSX code that compiles into native Android components, ensuring smooth performance and a consistent user experience across devices.
+      For writing and debugging the eMediCard application, Visual Studio Code is primarily used as a lightweight and customizable code editor that supports various extensions for React Native and Expo development. The Expo Go app is also utilized for testing, allowing the application to be previewed and tested on real Android devices instantly without requiring manual builds. This setup makes development faster and more efficient, enabling developers to identify and resolve issues quickly while maintaining smooth coordination throughout the development process.
+Database Methodology
+      The eMediCard backend utilizes Convex, a real-time and serverless database platform, for all persistent data management. Convex provides a structured schema through tables that store user profiles, application records, documents, payments information, and orientation schedules. Its built-in reactive queries ensure that updates such as document approvals or payment confirmations are reflected instantly in the mobile application without requiring manual refresh or polling. During development, a dedicated Convex deployment environment is used to simulate data interactions and validate function permissions before production releases. This setup ensures data consistency, security and scalability while reducing the need for complex backend maintenance.
+Authentication
+      The eMediCard mobile application implements user authentication and account management through Clerk, a secure identity platform designed for modern web and mobile applications. Clerk handles essential features such as user registration, login, and session management, while supporting both email and social authentication methods. It integrates seamlessly with Convex, ensuring that only authorized users can access, modify, or submit data within the system. This setup simplifies user management, enhances security, and provides a reliable framework for protecting sensitive personal and medical information.
+Storage / File Uploads
+      The system manages file uploads through Convex's built-in file storage feature, which securely handles the submission and retrieval of user documents such as medical test results, proof of payment, and identification files. Uploaded files are stored in an encrypted environment to ensure the confidentiality of sensitive health-related data. Each uploaded document is linked to the corresponding user record in the Convex database, maintaining data consistency across the system. This setup allows administrators to easily access and verify submitted documents while ensuring that files remain protected from unauthorized access or alteration.
+Software Development Approach (Waterfall Model)
+      The development of the eMediCard mobile application follows a Modified Waterfall Model, a structured, phase-oriented methodology that progresses sequentially through Requirements Gathering, System Design, Implementation, Testing, Deployment, and Maintenance. Unlike the traditional rigid Waterfall approach, this modified version allows for limited revisiting of earlier phases when critical issues are discovered, while maintaining well-defined deliverables and validation checkpoints before advancing to the next stage. This method promotes strong planning, documentation, and traceability, supporting the secure handling of sensitive health data and ensuring alignment with the regulatory standards of the City Health Office. Refer to Page 31, Figure 2.
+      In this development cycle, the team concentrated on the early stages of the Waterfall process, specifically the Requirements Analysis and Design Phases. During requirements analysis, all key system functionalities were identified and documented in accordance with the actual workflow of health card issuance. These include user registration, classification-based document submission, payment processing, and orientation scheduling. The requirements were validated through field research and stakeholder interviews to ensure accuracy and relevance.
+      Following this, the Design Phase involved the formulation of system architecture, database schema, and user interface prototypes. Tools such as Figma were used to create interactive mockups that demonstrate how users will navigate the application, from submitting applications to viewing their orientation schedules. These visual artifacts serve as the technical foundation for the upcoming Implementation Phase.
+      During the Implementation Phase, the approved design assets, database schemas, and API definitions are translated into working React Native code using the Expo framework. The project is configured in Visual Studio Code, where modules are built according to the system's functional requirements. Integration begins with Clerk, which manages authentication and user sessions, followed by the implementation of Convex backend functions for handling data storage, document management, and real-time updates. The application configuration is managed through Expo's app.json file, which defines metadata, permissions, and build settings.
+      Each system feature-such as user registration, document uploads, payment processing, notification handling, and digital card generation-is implemented as an independent module to ensure maintainability and scalability. Development follows version control practices using Git, with code changes tracked and reviewed to maintain quality. Throughout implementation, Convex function permissions and authentication checks are defined to ensure that data access is secure and limited to authorized users. This structured approach enables efficient development while maintaining a high level of security and code quality.
+      During the Testing Phase, the developers and QA testers jointly verify functionality, usability, performance, and security. Automated integration tests run through critical flows, including signup, document submission and approval, orientation scheduling, and card release, using the Convex development deployment for testing. Manual testing on various Android devices catches UI and edge-case issues (e.g., upload interruptions, low bandwidth), while security checks challenge authentication and Convex function permissions. Defects are tracked, prioritized, and resolved systematically, followed by an acceptance test with City Health Office stakeholders to ensure compliance with real-world workflows and regulations.
+      In the Deployment Phase, the developers assemble a signed, release-mode Android App Bundle (AAB) using Expo Application Services (EAS) Build for building production apps, including screenshots, metadata, release notes, and a privacy policy. An initial beta rollout to CHO staff and selected users surfaces any critical issues before full production release. After successful beta feedback, the build moves to production. Post-release, monitoring tools track app health and usage, and a rollback plan allows swift reversion to the previous stable version if necessary.
+      Finally, in the Maintenance Phase, developers and QA testers continuously monitor the live application for bugs, performance issues, and user feedback. They review updates to Convex schema and functions regularly to identify crash trends or usability issues. Critical defects are addressed immediately through hotfix deployments, while minor updates and new feature requests are grouped into subsequent update cycles. Security patches, such as Clerk configuration updates and Expo SDK updates, are applied as soon as vulnerabilities are discovered.
+
+Calendar of Activities
+      The Gantt chart presents the summary of activities. Listed are the activities and opposite them are their duration or periods of execution. Below are the legends of activity indication where BLUE indicates as starting or not finished and YELLOW as on progress or finished. Refer to Page 30, Figure 1
+      The developers have brainstormed ideas to determine the possible capstone projects. Then, these were presented to the panel in order to determine the most feasible project title. After approval, the developers have planned to conduct an interview with the City Health Office CHO and other related staff, so, a letter and questions formulations were done. 
+      After data gathering the, the information was analyzed and served as a basis for writing the project context, purpose and description, and objectives. These were then checked by the thesis adviser to determine its correctness. Then, the revisions were done by the developers, including the statement of scope and limitations.
+      Relevant systems are research and included in the review of related/studies next, a synthesis was made to compare and contrast the developers' project with the selected related systems. After that, the developers stated the technical background of the project, requirements analysis and gathering, requirements documentations, and diagrams as part of methodology. Finaly, resources and appendices are made.
+      
+      
+      
+      
+      
+Resources
+
+* Hardware
+
+      This section outlines the essential hardware and software resources needed to develop, test, and deploy the eMediCard mobile application. These resources ensure the smooth development and implementation of the system based on the chosen technologies. Refer to Page 30, Table 1.
+      
+* Software
+
+      The development of the eMediCard mobile application requires several software tools and platforms to support the creation, testing, deployment, and maintenance of the system. The software resources included: Refer to Page 31, Table 2.
+
+
+Requirements Gathering and Analysis
+      The requirements gathering for the eMediCard mobile application was conducted from the first to second week of March 2025, following formal approval through an interview request letter submitted to the City Health Office (CHO). The initial phase began with a structured interview with CHO staff members who oversee health card operations at the designated processing venue in Victoria Plaza. The interview provided the team with valuable insights into the end-to-end workflow of health card registration and renewal, along with common issues faced by both applicants and CHO personnel. Their broad operational knowledge enabled the team to understand the administrative routines, processing challenges, and compliance concerns that a digital system must address.
+      To facilitate comprehensive requirement capture, the team prepared interview questions covering current workflow processes, operational challenges, documentation requirements, and technology needs. During the interview, CHO staff provided a detailed flowchart illustrating the existing health card issuance process, which served as a critical reference for understanding the sequential steps from application submission to card release. According to City Health Office (CHO) records, renewal numbers surged during the first quarter of 2024, with 23,489 applicants in January, 29,185 in February, and 18,788 in March. These peak months accounted for over 71,000 health card renewals in just three months. The high traffic volumes particularly in January and February, where daily applicants reached up to 1,400 highlighted the strain placed on the manual system and reinforced the urgent need for a scalable, digital solution capable of managing bulk renewals efficiently.
+      To contextualize these findings within the local framework, the team conducted field interviews and consultations with CHO personnel, health card applicants, and administrative staff involved in the current in-person process. These conversations provided essential insights into how applications were evaluated, what documents were typically submitted, and how orientations were scheduled and conducted-particularly for food industry workers who require a mandatory seminar.
+      During the interview, the CHO staff member explained that when an applicant's submission is disapproved due to medical findings such as pulmonary tuberculosis (PTB) or urinary tract infection (UTI), they are required to undergo a follow-up consultation with a physician. This additional check-up ensures applicants are medically cleared before continuing the health card process, which the app must accommodate through personalized feedback and follow-up guidance. This led the team to prioritize a user-friendly document submission interface capable of handling various file types while enabling administrators to flag missing or questionable entries. This reinforced the need for real-time status notifications and dynamic checklists within the app.
+      The team also engaged several employees from two local businesses-McDonald's Buhangin Pagibig Branch and Three J Watch Service Center from Gaisano Grand Ilustre-who were frequent health card applicants. These users described the longest queue times as one of their main concerns during the renewal process, but noted that they clearly understood the difference between Yellow, Green, and Pink health card types. They explained that this information is included in the official paper provided during initial registration or renewal at the venue. However, they expressed frustration over the long waiting times during renewal, sharing that queues often extended outside the mall premises. Based on this, the team retained the classification system in the app but shifted focus toward enhancing user guidance, improving progress transparency, and introducing digital queuing features to reduce physical congestion.
+      Another significant output of the analysis was the integration of payment functionality. Through feedback from both users and CHO finance staff, the team identified the importance of a flexible payment module that supports online methods through Maya payment gateway and manual uploads of official receipts from physical payment centers. A fixed ?10 transaction fee was included as a feature for processing and recordkeeping purposes.
+      The compiled requirements were reviewed and validated with CHO administrators to ensure alignment with actual operational needs and regulatory compliance. At the end of the requirements analysis phase, the team compiled a comprehensive list of system needs, which included: user registration and profile management, classification-based document submission, digital orientation scheduling for Yellow card holders, Maya payment integration, digital health card issuance, admin dashboard features, and real-time notification systems. These components were validated through both user-side interviews and administrative consultations, ensuring the solution was practical, secure, and aligned with the CHO's workflow and Department of Health compliance standards. At the end of the requirements analysis phase, the team compiled a comprehensive list of system needs, which included: user registration and profile management, classification-based document submission, digital orientation scheduling for Yellow card holders, payment integration, digital health card issuance, admin dashboard features, and real-time notification systems. These components were validated through both user-side interviews and administrative consultations, ensuring the solution was practical, secure, and aligned with the CHO's workflow and compliance standards.
+
+
+Requirements Documentation
+      This section outlines the mobile application's features and provides detailed descriptions aligned with the developers' specified objectives. The requirements were derived from comprehensive interviews with City Health Office personnel, field observations during peak renewal periods, and consultations with health card applicants at local establishments.
+User Registration Module
+      The user registration module serves as the entry point for applicants seeking to obtain or renew health cards. New users complete a secure registration process powered by Clerk authentication, providing full name, email address, phone number, date of birth, and gender with real-time validation. The system verifies email addresses through confirmation links to establish account ownership and prevent duplicates. User credentials are securely stored in Convex database and linked to Clerk authentication profiles. The interface accommodates users with varying digital literacy levels while maintaining robust security standards for handling sensitive health information.
+Use Case Diagram 
+      The Use Case Diagram for User Registration illustrates interactions between new users and the system during account creation, outlining use cases such as "Enter Personal Information," "Verify Email," and "Create Account." (Please refer to Figure XX)
+Activity Diagram 
+      The User Registration Activity Diagram represents the workflow from launching the registration screen through inputting information, email verification, and successful account creation, highlighting validation checks and parallel activities. (Please refer to Figure YY)
+Sequence Diagram 
+      The Sequence Diagram for User Registration details chronological interactions between the mobile application, Clerk authentication service, and Convex database, showing how registration data is captured, validated, and stored securely. (Please refer to Figure ZZ)
+Domain Class Diagram 
+      The User Registration Domain Class Diagram illustrates key data entities including the Users table storing username, full name, email, clerk ID, phone number, birth date, gender, and role assignment, showing relationships with Clerk-managed authentication. (Please refer to Figure AA)
+Health Card Application and Classification Module
+      The health card application module manages submission and classification based on occupational categories. Users select from three job classifications: Yellow for food handlers (restaurant staff, kitchen workers), Green for non-food workers (security guards, BPO employees, receptionists), and Pink for skin-to-skin contact occupations (barbers, massage therapists, tattoo artists). Upon selection, the system dynamically generates customized document checklists. The upload interface supports PDF, JPEG, and PNG formats for medical results, identification, Community Tax Certificates, and payment receipts. Food handlers receive mandatory orientation notifications while others proceed directly. The form collects full name, age, civil status, nationality, organization, and position. Documents are encrypted and transmitted to Convex file storage. Real-time status indicators track progress from submission through document review, payment confirmation, and final approval.
+      
+Use Case Diagram 
+      The Use Case Diagram for Application Submission depicts applicant interactions including "Select Job Category," "Upload Documents," "Submit Application," and "Track Status," defining the application module's functional scope. (Please refer to Figure XX)
+Activity Diagram (Application Process)
+      The Application Process Activity Diagram represents the complete workflow showing job category selection, dynamic document generation, file uploads, and submission, illustrating category-based requirements and sequential steps. (Please refer to Figure YY)
+Activity Diagram (Document Upload)
+      The Document Upload Activity Diagram details file selection from device storage, file type and size validation, upload to Convex storage, and confirmation or error feedback. (Please refer to Figure ZZ)
+Sequence Diagram 
+      The Sequence Diagram for Application Submission illustrates how the mobile application communicates with Convex database to retrieve document requirements, upload files to storage, and create application records with referential integrity. (Please refer to Figure AA)
+Domain Class Diagram 
+      The Application and Classification Domain Class Diagram define core entities including Applications (status, type, user ID, job category ID, personal information), Job Categories (names, color codes, orientation requirements), Document Types, and Document Uploads linking applications to document types through a junction table. (Please refer to Figure BB)
+Renewal Module
+      The renewal module streamlines reapplication for existing health card holders. When returning users initiate renewals, the system queries for existing health card records and automatically pre-fills application forms with stored information including name, birth date, organization, and position. Users review and update changed details such as new employers or positions. The system maintains referential integrity by linking new applications to previous health card records through database relationships, creating complete audit trails. Renewal applicants must submit fresh annual medical documents while administrative documents like valid IDs may be carried forward at administrator discretion. The renewal tracking system records renewal counts for City Health Office reporting and analysis.
+Use Case Diagram 
+      The Use Case Diagram for Renewal Process illustrates returning user interactions including "Retrieve Previous Application," "Update Information," "Submit Renewal," and "Link to Previous Health Card." (Please refer to Figure XX)
+Activity Diagram
+      The Renewal Process Activity Diagram represents the workflow showing system checks for previous records, pre-population of fields, user updates, validation of changes, and linking to historical records with decision points. (Please refer to Figure YY)
+Sequence Diagram 
+      The Sequence Diagram for Renewal Process details interactions between the mobile application, Convex database, and storage services, illustrating database queries, pre-filling logic, and linked renewal application creation. (Please refer to Figure ZZ)
+Domain Class Diagram 
+      The Renewal Module Domain Class Diagram focuses on data relationships including the self-referential relationship within Applications through previous health card ID, Health Cards entity storing registration numbers and status, renewal count tracking, and is renewal flag distinguishing renewals from new applications. (Please refer to Figure AA)
+Renewal Module
+      The renewal module streamlines reapplication for existing health card holders. When returning users initiate renewals, the system queries for existing health card records and automatically pre-fills application forms with stored information including name, birth date, organization, and position. Users review and update changed details such as new employers or positions. The system maintains referential integrity by linking new applications to previous health card records through database relationships, creating complete audit trails. Renewal applicants must submit fresh annual medical documents while administrative documents like valid IDs may be carried forward at administrator discretion. The renewal tracking system records renewal counts for City Health Office reporting and analysis.
+Use Case Diagram 
+      The Use Case Diagram for Renewal Process illustrates returning user interactions including "Retrieve Previous Application," "Update Information," "Submit Renewal," and "Link to Previous Health Card." (Please refer to Figure XX)
+Activity Diagram
+      The Renewal Process Activity Diagram represents the workflow showing system checks for previous records, pre-population of fields, user updates, validation of changes, and linking to historical records with decision points. (Please refer to Figure YY)
+Sequence Diagram 
+      The Sequence Diagram for Renewal Process details interactions between the mobile application, Convex database, and storage services, illustrating database queries, pre-filling logic, and linked renewal application creation. (Please refer to Figure ZZ)
+Domain Class Diagram 
+      The Renewal Module Domain Class Diagram focuses on data relationships including the self-referential relationship within Applications through previous health card ID, Health Cards entity storing registration numbers and status, renewal count tracking, and is renewal flag distinguishing renewals from new applications. (Please refer to Figure AA)
+      
+      
+Scheduling with Alert Notifications and QR-based Attendance Module
+      The orientation scheduling module digitizes food safety orientation management for Yellow card applicants. Administrators create schedules via web admin panel specifying date, time range, venue with capacity, and instructor information, synchronized immediately to the mobile application. Users browse available sessions and book preferred time slots with real-time availability preventing overbooking. Upon booking, the system generates unique QR codes displayed in the mobile application as digital tickets. Automated push notifications are sent 24 hours before and on event mornings, reducing no-shows. CHO staff with inspector role interfaces use built-in QR scanners to verify identity and record check-in and check-out timestamps. The system automatically marks orientation complete when both scans register, eliminating paper-based roll calls and preventing fraudulent attendance. Administrators review participant lists, verify completion, and finalize sessions, triggering automatic application progression. Historical attendance records support auditing and trend reporting.
+Use Case Diagram 
+      The Use Case Diagram for Orientation Scheduling depicts interactions among Yellow card applicants, inspectors, administrators, and the system, outlining "Browse Schedules," "Book Orientation Slot," "Generate QR Code," "Scan QR for Check-in," and "Finalize Session." (Please refer to Figure XX)
+Activity Diagram (Orientation Booking)
+      The Orientation Booking Activity Diagram represents workflow showing users browsing time slots, selecting schedules, system validation creating booking records, QR code generation, and confirmation notifications with decision points for slot availability. (Please refer to Figure YY)
+Activity Diagram (QR Attendance)
+      The QR Attendance Activity Diagram details attendance verification workflow showing inspector scanning, system validation, check-in timestamp recording, check-out recording, and completion logic marking orientation fulfilled. (Please refer to Figure ZZ)
+Sequence Diagram (Orientation Booking)
+      The Sequence Diagram for Orientation Booking illustrates chronological flow when users book slots, detailing mobile application queries to Convex for schedules, booking record creation, QR code generation, and push notification dispatch. (Please refer to Figure AA)
+Sequence Diagram (QR Scanning)
+      The Sequence Diagram for QR Scanning details real-time interactions during attendance verification, showing scanner capture, booking record validation, attendance timestamp updates, and confirmation feedback. (Please refer to Figure BB)
+Domain Class Diagram 
+      The Orientation Scheduling Domain Class Diagram illustrates entities including Orientation Schedules (date, time range, venue, capacity, instructor, finalization status), Orientation Bookings junction entity connecting Users, Applications, and Schedules (timestamps, attendance records, QR data), and Notifications linking to Users and Applications. (Please refer to Figure CC)
+      
+Admin Panel Module
+      The admin panel module provides City Health Office personnel with comprehensive management tools through a secure web-based interface. Clerk authentication enforces role-based permissions for administrators, inspectors, and super administrators. The main dashboard displays real-time application statistics, pending document reviews, payment validations, and upcoming orientation sessions with filtering and sorting capabilities. The document verification interface enables administrators to review uploaded documents with thumbnail previews and full-screen zoom capabilities, approving or rejecting with specific remarks visible to applicants. Common rejections include poor image quality, expired results, or name mismatches. The payment validation module tracks Maya online transactions and manual receipt uploads, verifying amounts including the ten-peso processing fee and transaction references. Orientation management enables schedule creation specifying date, time, venue, capacity, and instructor with automated duration calculations. After sessions, administrators review attendance records and finalize sessions determining orientation requirement satisfaction. The application review interface consolidates all information enabling informed approval decisions including personal information, document verification, payment confirmation, orientation completion for Yellow cards, laboratory findings input, and final remarks. Approved applications trigger automatic health card generation while rejections generate detailed notification messages. Super administrators manage system configuration including official signatures and templates, create admin accounts with role assignments, broadcast system-wide notifications, and access comprehensive activity logs for audit trails.
+Use Case Diagram 
+      The Use Case Diagram for Admin Panel illustrates interactions among administrators, inspectors, super administrators, and the system, outlining "Review Documents," "Validate Payments," "Manage Orientation Schedules," "Approve Applications," and "Configure System." (Please refer to Figure XX)
+Activity Diagram (Document Verification)
+      The Document Verification Activity Diagram represents workflow showing administrators accessing verification interface, examining files, making approve/reject decisions, entering rejection remarks, and system updating document status with automated notification dispatch. (Please refer to Figure YY)
+Activity Diagram (Payment Validation)
+      The Payment Validation Activity Diagram details workflow for confirming payments, showing administrators accessing records, verifying Maya transactions or receipts, checking calculations, approving/rejecting, and system updating application status. (Please refer to Figure ZZ)
+Sequence Diagram 
+      The Sequence Diagram for Application Review illustrates chronological interactions when administrators review complete applications, detailing database queries retrieving details, verification status checks, payment confirmation validation, orientation completion checks, and final approval triggering health card generation. (Please refer to Figure AA)
+Domain Class Diagram 
+      The Admin Panel Domain Class Diagram encompasses administrative entities including Users with role assignments, System Config storing official signatures and templates, showing administrator interactions with Applications, Document Uploads, Orientation Schedules, and Notifications. Activity logs through updated_at and last_updated_by fields provide audit trails. (Please refer to Figure BB)
+Online Payment and Digital Health Card Releasing Module
+      The payment and health card releasing module handles financial transactions and issues official digital health cards upon final approval. Users complete payment through Maya payment gateway for seamless online transactions or upload receipt photographs from designated City Health Office cashier locations. The system automatically adds a ten-peso administrative processing fee with total amounts clearly displayed. Upon administrative payment confirmation, applications enter final review. After approval, the system automatically generates digital health cards retrieving applicant photographs, extracting personal information, assigning unique registration numbers, applying color coding, calculating one-year expiration dates, and generating unique QR codes encoding registration numbers and verification data. Elements are assembled into HTML templates matching official City Health Office designs. Generated cards are stored in complete HTML form within Convex database preserving exact layout, content, and official signatures for historical accuracy. Users receive push notifications when cards become available, accessing the health card section to view, download, and share credentials. Embedded QR codes enable quick inspector verification, prevent forgery through cryptographic validation, and provide contactless verification during monitoring activities. Inspector interfaces retrieve associated records displaying cardholder information, registration numbers, job categories, dates, and card status (active, expired, revoked). Administrators possess authority to revoke cards for falsified results or disqualifying findings, immediately marking cards invalid with revocation status and reasons displayed during QR scans.
+Use Case Diagram 
+      The Use Case Diagram for Payment and Card Release depicts interactions among applicants, administrators, inspectors, and the system, outlining "Process Payment," "Validate Payment," "Generate Health Card," "Download Digital Card," and "Verify QR Code." (Please refer to Figure XX)
+Activity Diagram (Payment Processing)
+      The Payment Processing Activity Diagram represents workflow showing users selecting payment methods (Maya or manual upload), system processing transactions or uploads, administrators validating, and application status advancing with decision points between payment paths. (Please refer to Figure YY)
+Activity Diagram (Health Card Generation)
+      The Health Card Generation Activity Diagram details automated workflow triggered upon approval, showing system retrieving data and photos, generating registration numbers, applying color classification, creating QR codes, assembling HTML templates, storing cards, and dispatching notifications. (Please refer to Figure ZZ)
+Sequence Diagram (Payment Processing)
+      The Sequence Diagram for Payment Processing illustrates chronological interactions during transactions, detailing communication between mobile application, Maya payment gateway, Convex database, and notification services. (Please refer to Figure AA)
+Sequence Diagram (Health Card Generation)
+      The Sequence Diagram for Health Card Generation details step-by-step interactions showing database queries retrieving application data, QR code generation logic, HTML rendering, storage operations, and notification dispatch. (Please refer to Figure BB)
+Sequence Diagram (QR Verification)
+      The Sequence Diagram for QR Verification illustrates real-time interactions when inspectors scan QR codes, showing scanner data capture, system querying health card records, retrieving applicant information and photos, and displaying verification results. (Please refer to Figure CC)
+Domain Class Diagram 
+      The Payment and Health Card Domain Class Diagram defines entities including Payments (method, transaction references, amounts with fees, status, timestamps, storage file IDs) and Health Cards (registration numbers, HTML content, dates, card status, QR data, color classification, application references), illustrating one-to-one relationships between Applications and Health Cards and one-to-many relationships for payment history. (Please refer to Figure DD)
+      
+      
+
+
+Design of Software, System, Product, and/or Processes
+      Following the requirements gathering and analysis phase, the design of the eMediCard mobile application was thoughtfully structured to balance user accessibility with administrative control, ensuring that the system effectively addresses the health card processing needs of Davao City. The team prioritized creating a platform that is both scalable and adaptable, allowing for future enhancements while meeting the immediate requirements identified through stakeholder interviews.
+      To visualize the user interface (UI) and ensure usability for both applicants and administrators, the team used Figma to design and prototype the app's layout. The mockups included modules for registration, document uploads, status tracking, and digital card issuance. These visual representations helped validate workflows early in the process.
+      In addition to designing the user interface and backend schema, the team developed comprehensive UML diagrams to visualize system behavior and structure. Use Case Diagrams capture the functional relationships between users and system processes. Activity Diagrams model detailed workflows for each major feature. Sequence Diagrams illustrate the chronological interactions between system components for specific scenarios. Domain Class Diagrams define the core data entities and their relationships, ensuring a robust database structure that maintains referential integrity throughout the application lifecycle.
+      The system's main user interactions are illustrated through use case diagrams, which highlight the functional relationships between users (applicants and CHO admins) and system processes.
+      As the system uses a NoSQL database (Convex), a traditional Entity-Relationship Diagram (ERD) was not used. Instead, a document-based schema was developed using tables that store key-value data similar to rows in SQL. Each table can organize related data hierarchically such as documents under each application. This flexible structure mirrors the logical flow of the health card process and eliminates the need for complex table joins.
+      The system was structured around several core modules that serve both applicants and CHO administrators. The first is the User Registration and Login module, which allows applicants to create secure accounts and log in to access their application data. During registration, users specify their job type, which the system uses to classify them under the appropriate health card category: Yellow for food handlers, Green for non-food industry workers, and Pink for occupations involving direct skin contact. Once registered, users proceed to the Profile and Document Upload module, where they enter personal information and submit required documents such as medical results, IDs, and proof of payment.
+      To support classification, the Health Card Type Identification system automatically determines the user's card type based on occupation. For Yellow card applicants, the Orientation Scheduling module displays available seminar slots and sends attendance reminders.
+      The Payment module integrates with Maya payment gateway and supports manual uploads of payment receipts, providing flexibility for users to complete transactions. After approval, the Digital Health Card Generation and Release module allows users to download their digital health card directly from the app, containing all essential personal and classification data.
+      To make seminar attendance more efficient, the system includes QR code-based tracking for Yellow card holders, enabling real-time confirmation and reducing administrative workload. Push notifications further assist users by reminding them of pending actions such as missing documents or upcoming orientations.
+      The system architecture leverages Convex's real-time reactive queries ensuring that application status updates, document approvals, and payment confirmations are reflected instantly across all connected devices without requiring manual refresh actions, providing immediate feedback to both applicants and administrators throughout the health card issuance process.
+      Finally, the system features a comprehensive Admin Dashboard for CHO personnel. This interface enables administrators to manage and review submissions, approve or reject applications, assign orientation schedules, and generate reports to monitor system activity.
+
+
+
+
+References
+      Akweongo, P., Aikins, M., Asenso-Boadi, F., Nonvignon, J., & Others. (2023). Ghana's National Health Insurance Scheme. BMJ Global Health. https://doi.org/10.1136/bmjgh-2023-012345
+
+      Propel. (2023). Driving Medicaid renewals via mobile app. Propel, from https://www.propel.app/insights/driving-medicaid-renewals-via-mobile-app/
+
+      Philippine Information Agency. (n.d.). Growth in investment, tourism drive Davao's unemployment rate down DOLE, from https://pia.gov.ph/growth-in-investment-tourism-drive-davaos-unemployment-rate-down-dole/
+
+      Federal Trade Commission. (n.d.). Mobile health apps interactive tool.from https://www.ftc.gov/business-guidance/resources/mobile-health-apps-interactive-tool?
+
+      Itransition. (n.d.). Mobile healthcare solutions, from https://www.itransition.com/healthcare/mobile
+
+      OSP Labs. (n.d.). mHealth: Mobile health solutions, from https://www.osplabs.com/mhealth/?
+ 
+
+APPENDICE
+
+APPENDIX A
+This section compiles all supplementary visuals and data tables referenced in the document.
+
+Table 1. Devices' Specification
+
+
+Device 1Device 2Device 3Device 4Processor (CPU)Intel(r) Core(tm)     i5-1155G7Intel(r) Core(tm) i5-8300HIntel(r) Core(tm) i3-10100FIntel(r) Core(tm) i3-1005G1Operating SystemWindows 11 Home Single LanguageWindows 11 ProWindows 10 ProWindows 10 Home Single LanguageMemory24GB20GB16GB8GBStorage512GB512GB512GB1TBMonitor/Display15.6" FHD
+(1920x1080)15.6" FHD
+(1920x1080)21.5" 1920x10801366x768 ResolutionNetwork AdapterIntel(R) Wireless-AC 9560Intel(R) Wireless-AC 9560Realtek PCIe GBE Family Controller802.11n Wi-Fi 4      
+
+
+SOFTWARE STABLE RELEASE  Flutter SDK
+3.29.3 Dart3.7.3 Visual Studio Code1.100 Firebase (Authentication, Firestore, Storage)Managed via Firebase Console Android Emulator (via Android Studio)35.5.10Table 2. Software and Stable Release
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
+Figure 1. Gantt Chart
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 2. Waterfall Model (Iterative)
+
+
+UI Design Mockups 
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+Figure 3. Landing Screen
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 4. Sign-up and Log in screen
+
+
+
+
+
+
+		
+
+
+
+
+
+
+Figure 5. Login/Signup Completion Screen    Figure 6. Dashboard Screen (User)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\
+
+
+
+
+Figure 7. Application Form
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 8. Payment Screen		Figure 9. Schedule Orientation Screen (User)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 10. Application Screen		      Figure 11. Notification Screen (User)
+
+
+
+
+
+
+
+
+v
+
+
+
+
+Figure 12. Advisory Screen				   Figure 13. Attendance Screen
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 14. Health Card Release Screen	
+
+Data Flow Diagram (DFD)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 22. User Registration and Profile Management
+
+
+
+
+
+
+Figure 23. Health Card Classification
+
+
+Figure 24. Document Submission
+
+
+Figure 25. Payment
+
+
+Figure 26. Schedule Orientation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 27. Manage Account (Admin)
+
+
+Figure 27. Validate Applications (Admin)
+
+
+
+
+
+
+
+Figure 27. Reports (Admin)
+
+Use Case
+
+
+
+ Figure 28. User Registration
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 29. Health Card Classification
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 30. Document Submission and Payment
+
+
+
+
+
+
+
+
+
+
+
+Figure 31. Orientation Process
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 32. Admin Management
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 33. Initial Database Diagram
+
+APPENDIX B
+
+Resource Persons
+
+Dominic R. Bantigue
+Capstone Project Adviser
+
+Jessiel Chris Hilot
+Capstone Project Coordinator
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PERSONAL TECHNICAL VITAE
+
+
+
+Curriculum Vitae of
+Sean Paul S. Lapasanda
+C. Bangoy Street, Barangay 20-B, Poblacion District Davao City Davao Del Sur
+
+seanpaullapasanda@gmail.com
+09635542345
+
+EDUCATIONAL BACKGROUND
+
+LevelInclusive DatesName of School/InstitutionTertiary2022 -- CurrentSTI College DavaoVocational/Technical2020-2022Cabantian Senior High SchoolHigh School2019-2020Cabantian National High SchoolHigh School2018-2019Bislig City National High SchoolHigh School2015-2018Bulihan National High SchoolElementary2010-2015Paligawan Matanda Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+
+Inclusive DatesNature of Experience/Job TitleName and Address of Company or OrganizationOctober 2022 -- CurrentService CrewGolden Arches Development Corporation
+AFFILIATIONS
+
+Inclusive DatesNature of OrganizationPositionN/AN/AN/A
+SKILLS
+
+SkillsLevel of CompetencyDate AcquiredN/AN/AN/ATRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+
+Inclusive DatesLevel of CompetencyN/AN/ACurriculum Vitae of
+Maynard Kent G. Omandac
+Blk 11, Lot 27 San Lorenzo Village Puan Davao City Davao Del Sur
+
+maynardomandac@gmail.com
+09389104257
+
+EDUCATIONAL BACKGROUND
+
+LevelInclusive DatesName of School/InstitutionTertiary2022 -- CurrentSTI College DavaoVocational/Technical2020-2022Don Enrique Bustamante National High SchoolHigh School2019-2020Rafael B. Lacson Memorial High SchoolHigh School2015-2019Sacred Heart AcademyElementary2010-2015San Lorenzo Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+
+Inclusive DatesNature of Experience/Job Title  Name and Address of Company or OrganizationN/AN/AN/A    
+AFFILIATIONS
+
+Inclusive DatesNature of OrganizationPositionN/AN/AN/A    
+SKILLS
+
+SkillsLevel of CompetencyDate AcquiredN/AN/AN/ATRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+
+Inclusive DatesLevel of CompetencyN/AN/A
+
+Curriculum Vitae of
+Rogel Henric M. Caasi
+Brgy 8-A, Purok #8, M.I.H Mother Ignacia Homes, Davao City
+
+caasirogelhenric@gmail.com
+09686675310
+
+EDUCATIONAL BACKGROUND
+
+LevelInclusive DatesName of School/InstitutionTertiary2022 -- CurrentSTI College DavaoVocational/Technical2020-2022AMACC DavaoHigh School2016-2020Davao City National High SchoolElementary2010-2016Rizal Memorial Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+
+Inclusive DatesNature of Experience/Job Title  Name and Address of Company or OrganizationN/AN/AN/A     
+AFFILIATIONS
+
+Inclusive DatesNature of OrganizationPositionN/AN/AN/A    
+SKILLS
+
+SkillsLevel of CompetencyDate AcquiredN/AN/AN/A   TRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+
+Inclusive DatesLevel of CompetencyN/AN/A
+
+
+
+Curriculum Vitae of
+John Mark G. Duyag
+82-1 Sta. Teresita, Buhangin, Davao City Davao Del Sur
+
+johnmarkduyag@gmail.com
+09075537933
+
+EDUCATIONAL BACKGROUND
+
+LevelInclusive DatesName of School/InstitutionTertiary2022 -- CurrentSTI College DavaoVocational/Technical2020-2022F. Bangoy National High SchoolHigh School2016-2020F. Bangoy National High SchoolElementary2010-2016F. Bangoy Central Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+
+Inclusive DatesNature of Experience/Job Title  Name and Address of Company or OrganizationN/AN/AN/A
+AFFILIATIONS
+
+Inclusive DatesNature of OrganizationPosition2020 -- CurrentPWD OrganizationMember    
+SKILLS
+
+SkillsLevel of CompetencyDate AcquiredN/AN/AN/A   TRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+
+Inclusive DatesLevel of CompetencyN/AN/A
+STI College Davao		1
+
+
+	
+
+STI College Davao                   7	
+

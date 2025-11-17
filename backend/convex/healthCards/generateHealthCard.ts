@@ -1275,7 +1275,7 @@ export const getApplicationData = internalQuery({
 
     const jobCategory = await ctx.db.get(application.jobCategoryId);
 
-    // Get user photo from documentUploads (validId or photo2x2)
+    // Get user photo from documentUploads (validId or picture)
     const documents = await ctx.db
       .query("documentUploads")
       .withIndex("by_application", (q) => q.eq("applicationId", args.applicationId))
@@ -1284,7 +1284,7 @@ export const getApplicationData = internalQuery({
     let photoUrl: string | undefined;
     // Note: documentUploads have storageFileId field
     // We need to get the URL from storage for photo documents
-    // Look for photo2x2 or validId documents by checking documentType
+    // Look for picture or validId documents by checking documentType
     const photoDoc = documents[0]; // Get first document as fallback
     
     if (photoDoc?.storageFileId) {

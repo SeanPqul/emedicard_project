@@ -49,11 +49,11 @@ export const cleanupOldUploads = internalMutation({
       // Keep the first one (newest), delete the rest
       for (let i = 0; i < uploads.length; i++) {
         if (i === 0) {
-          console.log(`   ✅ KEEPING: ${uploads[i]._id} (Status: ${uploads[i].reviewStatus}, Uploaded: ${new Date(uploads[i].uploadedAt).toLocaleString()})`);
+          console.log(`   ✅ KEEPING: ${uploads[i]!._id} (Status: ${uploads[i]!.reviewStatus}, Uploaded: ${new Date(uploads[i]!.uploadedAt).toLocaleString()})`);
           keptCount++;
         } else {
-          console.log(`   ❌ DELETING: ${uploads[i]._id} (Status: ${uploads[i].reviewStatus}, Uploaded: ${new Date(uploads[i].uploadedAt).toLocaleString()})`);
-          await ctx.db.delete(uploads[i]._id);
+          console.log(`   ❌ DELETING: ${uploads[i]!._id} (Status: ${uploads[i]!.reviewStatus}, Uploaded: ${new Date(uploads[i]!.uploadedAt).toLocaleString()})`);
+          await ctx.db.delete(uploads[i]!._id);
           deletedCount++;
         }
       }
