@@ -6,6 +6,7 @@ import ErrorMessage from '@/components/ErrorMessage';
 import LabFindingRecorderForm from '@/components/LabFindingRecorderForm';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import Navbar from '@/components/shared/Navbar';
+import ReadOnlyBanner from '@/components/ReadOnlyBanner';
 import SuccessMessage from '@/components/SuccessMessage';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
@@ -223,6 +224,15 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
   
   const router = useRouter();
   const { user, isLoaded } = useUser(); // Add auth state check
+  
+  // Fetch admin privileges to check for read-only oversight mode
+  const adminPrivileges = useQuery(
+    api.users.roles.getAdminPrivileges,
+    isLoaded && user ? undefined : "skip"
+  );
+  
+  // Check if current user is in read-only mode (system_admin oversight)
+  const isReadOnly = adminPrivileges?.isReadOnlyOversight === true;
 
   // --- HELPER FUNCTIONS ---
   // Helper function to check if document has pending action
@@ -637,6 +647,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
       <Navbar>
         <ApplicantActivityLog applicantName={data.applicantName} applicationId={params.id} />
       </Navbar>
+      
+      {isReadOnly && <ReadOnlyBanner />}
 
       <main className="max-w-[1600px] mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <header className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -1681,13 +1693,14 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     
                     return (
                       <button 
-                        onClick={() => isPaymentComplete ? handleFinalize('Approved') : null} 
-                        disabled={!isPaymentComplete}
+                        onClick={() => (isPaymentComplete && !isReadOnly) ? handleFinalize('Approved') : null} 
+                        disabled={!isPaymentComplete || isReadOnly}
+                        title={isReadOnly ? 'Read-only mode: Cannot approve applications' : undefined}
                         className={`group w-full px-6 py-3.5 rounded-xl font-semibold transition-all shadow-sm flex items-center justify-center gap-2 ${
-                          isPaymentComplete
+                          isPaymentComplete && !isReadOnly
                             ? 'bg-gradient-to-r from-teal-400 to-emerald-500 text-white hover:from-teal-500 hover:to-emerald-600 hover:shadow-md cursor-pointer'
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
+                        } ${isReadOnly ? 'opacity-50' : ''}`}
                       >
                         <svg className={`w-5 h-5 ${isPaymentComplete ? 'group-hover:scale-110' : ''} transition-transform`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1750,13 +1763,14 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     return (
                       <div className="w-full">
                         <button 
-                          onClick={() => isPaymentComplete ? handleSendReferralClick() : null} 
-                          disabled={!isPaymentComplete}
+                          onClick={() => (isPaymentComplete && !isReadOnly) ? handleSendReferralClick() : null} 
+                          disabled={!isPaymentComplete || isReadOnly}
+                          title={isReadOnly ? 'Read-only mode: Cannot send notifications' : undefined}
                           className={`group w-full px-6 py-3.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                            isPaymentComplete
+                            isPaymentComplete && !isReadOnly
                               ? 'bg-gradient-to-r from-blue-400 to-indigo-500 text-white hover:from-blue-500 hover:to-indigo-600 shadow-sm hover:shadow-md'
                               : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          }`}
+                          } ${isReadOnly ? 'opacity-50' : ''}`}
                         >
                           <svg className="w-5 h-5 ${isPaymentComplete ? 'group-hover:scale-110' : ''} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -1913,7 +1927,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           {/* Record Lab Finding Button - Only for medical documents, beside Extract button */}
                           {isMedicalDocument(item.fieldIdentifier) && (() => {
                             const hasPendingReferral = getPendingAction(item.uploadId)?.actionType === 'refer_doctor';
-                            const isDisabled = applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || hasPendingReferral;
+                            const isDisabled = isReadOnly || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || hasPendingReferral;
                             return (
                             <button
                               onClick={() => {
@@ -1928,11 +1942,11 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               }}
                               disabled={isDisabled}
                               className={`text-sm px-4 py-2 rounded-xl font-medium border flex items-center gap-2 transition-all ${
-                                hasPendingReferral 
+                                hasPendingReferral || isReadOnly
                                   ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
                                   : 'bg-teal-50 text-teal-700 hover:bg-teal-100 border-teal-100'
-                              }`}
-                              title={hasPendingReferral ? 'Send referral notification first' : 'Record lab findings from medical clearance'}
+                              } ${isReadOnly ? 'opacity-50' : ''}`}
+                              title={isReadOnly ? 'Read-only mode: Cannot record findings' : hasPendingReferral ? 'Send referral notification first' : 'Record lab findings from medical clearance'}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -2132,7 +2146,9 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       <div className="flex justify-between items-center gap-3 mt-4">
                         {/* Remove button - only show if there's a pending action */}
                         {getPendingAction(item.uploadId) && (
-                          <button onClick={() => {
+                          <button 
+                            onClick={() => {
+                            if (isReadOnly) return;
                             // Remove pending action
                             setPendingActions(pendingActions.filter(action => action.uploadId !== item.uploadId));
                             setOpenReferralIndex(null);
@@ -2142,7 +2158,10 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             setSpecificIssues('');
                             setSuccessMessage('Pending action removed.');
                             setTimeout(() => setSuccessMessage(null), 2000);
-                          }} className="bg-red-100 text-red-700 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-red-200 flex items-center gap-1">
+                          }} 
+                          disabled={isReadOnly}
+                          title={isReadOnly ? 'Read-only mode: Cannot remove actions' : undefined}
+                          className={`bg-red-100 text-red-700 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-red-200 flex items-center gap-1 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${isReadOnly ? 'opacity-50' : ''}`}>
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -2157,7 +2176,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             setFindingDescription('');
                             setSpecificIssues('');
                           }} className="bg-gray-200 text-gray-800 px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-300">Cancel</button>
-                        <button onClick={() => {
+                        <button 
+                          onClick={() => {
                           try {
                             // Validate referral reason
                             if (!referralReason) throw new Error('Please select a reason before saving.');
@@ -2203,7 +2223,10 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                           } catch (e: any) {
                             setError(createAppError(e.message, 'Validation Error'));
                           }
-                        }} className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700">
+                        }} 
+                        disabled={isReadOnly}
+                        title={isReadOnly ? 'Read-only mode: Cannot save referrals' : undefined}
+                        className={`bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed ${isReadOnly ? 'opacity-50' : ''}`}>
                           {modalType === 'refer_doctor' ? 'Save Referral' : 'Save & Flag for Revision'}
                         </button>
                         </div>
@@ -2298,8 +2321,9 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               setError(createAppError('Unable to find referral information. Please refresh the page.', 'Referral Data Missing'));
                             }
                           }} 
-                          disabled={!item.uploadId || !referralInfo?.documentTypeId || String(item.status) === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
-                          className="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm"
+                          disabled={isReadOnly || !item.uploadId || !referralInfo?.documentTypeId || String(item.status) === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
+                          title={isReadOnly ? 'Read-only mode: Cannot approve documents' : undefined}
+                          className={`w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm ${isReadOnly ? 'opacity-50' : ''}`}
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -2345,8 +2369,9 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                               setApproveConfirmation({index: idx, uploadId: item.uploadId, documentName: item.requirementName});
                             }
                           }} 
-                          disabled={!item.uploadId || String(item.status) === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
-                          className="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm"
+                          disabled={isReadOnly || !item.uploadId || String(item.status) === 'Approved' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
+                          title={isReadOnly ? 'Read-only mode: Cannot approve documents' : undefined}
+                          className={`w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-600 disabled:border-gray-200 flex items-center justify-center gap-2 shadow-sm ${isReadOnly ? 'opacity-50' : ''}`}
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -2367,9 +2392,10 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     <div className={`mt-4 pt-4 border-t border-gray-100 ${isMedicalDocument(item.fieldIdentifier) ? 'grid grid-cols-1 sm:grid-cols-3 gap-2' : 'grid grid-cols-1 sm:grid-cols-2 gap-2'}`}>
                       {/* Approve Button - Disabled when waiting for resubmission or doctor clearance or application rejected or payment incomplete */}
                       <button 
-                      onClick={() => item.uploadId && setApproveConfirmation({index: idx, uploadId: item.uploadId, documentName: item.requirementName})} 
-                      disabled={!item.uploadId || String(item.status) === 'Approved' || String(item.status) === 'NeedsRevision' || String(item.status) === 'Referred' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
-                      className="w-full bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-emerald-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-100 disabled:border-gray-200 flex items-center justify-center gap-2"
+                      onClick={() => item.uploadId && !isReadOnly && setApproveConfirmation({index: idx, uploadId: item.uploadId, documentName: item.requirementName})} 
+                      disabled={isReadOnly || !item.uploadId || String(item.status) === 'Approved' || String(item.status) === 'NeedsRevision' || String(item.status) === 'Referred' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
+                      title={isReadOnly ? 'Read-only mode: Cannot approve documents' : undefined}
+                      className={`w-full bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-emerald-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-emerald-100 disabled:border-gray-200 flex items-center justify-center gap-2 ${isReadOnly ? 'opacity-50' : ''}`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -2380,6 +2406,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {/* Flag for Revision Button - Disabled for rejected applications or payment incomplete */}
                     <button
                       onClick={() => {
+                        if (isReadOnly) return;
                         const pending = getPendingAction(item.uploadId);
                         if (pending) {
                           // Load existing pending action for editing
@@ -2397,8 +2424,9 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                         }
                         setOpenReferralIndex(idx);
                       }}
-                      disabled={!item.uploadId || String(item.status) === 'Approved' || String(item.status) === 'Referred' || String(item.status) === 'NeedsRevision' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
-                      className="w-full bg-orange-50 text-orange-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-orange-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-orange-100 disabled:border-gray-200 flex items-center justify-center gap-2"
+                      disabled={isReadOnly || !item.uploadId || String(item.status) === 'Approved' || String(item.status) === 'Referred' || String(item.status) === 'NeedsRevision' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
+                      title={isReadOnly ? 'Read-only mode: Cannot flag documents' : undefined}
+                      className={`w-full bg-orange-50 text-orange-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-orange-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-orange-100 disabled:border-gray-200 flex items-center justify-center gap-2 ${isReadOnly ? 'opacity-50' : ''}`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -2410,14 +2438,16 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                     {isMedicalDocument(item.fieldIdentifier) && (
                       <button
                         onClick={() => {
+                          if (isReadOnly) return;
                           setOpenReferralIndex(idx);
                           setModalType('refer_doctor');
                           setIssueCategory('other');
                           setReferralReason('Other medical concern');
                           setSpecificIssues(`Failed Medical Result (${item.requirementName}) - Please refer to ${FIXED_DOCTOR_NAME} at Door 7, Magsaysay Complex, Magsaysay Park, Davao City.`);
                         }}
-                        disabled={!item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
-                        className="w-full bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-blue-100 disabled:border-gray-200 flex items-center justify-center gap-2"
+                        disabled={isReadOnly || !item.uploadId || item.status === 'Approved' || item.status === 'Referred' || item.status === 'NeedsRevision' || applicationStatus?.applicationStatus === 'Rejected' || applicationStatus?.applicationStatus === 'Cancelled' || paymentData?.paymentStatus !== 'Complete'}
+                        title={isReadOnly ? 'Read-only mode: Cannot refer documents' : undefined}
+                        className={`w-full bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all border border-blue-100 disabled:border-gray-200 flex items-center justify-center gap-2 ${isReadOnly ? 'opacity-50' : ''}`}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -2474,10 +2504,14 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
               </button>
               <button
                 onClick={async () => {
-                  await handleStatusChange(approveConfirmation.index, approveConfirmation.uploadId, 'Approved');
-                  setApproveConfirmation(null);
+                  if (!isReadOnly) {
+                    await handleStatusChange(approveConfirmation.index, approveConfirmation.uploadId, 'Approved');
+                    setApproveConfirmation(null);
+                  }
                 }}
-                className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg"
+                disabled={isReadOnly}
+                title={isReadOnly ? 'Read-only mode: Cannot approve documents' : undefined}
+                className={`flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed ${isReadOnly ? 'opacity-50' : ''}`}
               >
                 Yes, Approve
               </button>
@@ -2546,8 +2580,10 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 Cancel
               </button>
               <button
-                onClick={handleOnsiteVerificationApproval}
-                className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg"
+                onClick={() => !isReadOnly && handleOnsiteVerificationApproval()}
+                disabled={isReadOnly}
+                title={isReadOnly ? 'Read-only mode: Cannot approve documents' : undefined}
+                className={`flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed ${isReadOnly ? 'opacity-50' : ''}`}
               >
                 Yes, Approve
               </button>
@@ -2765,8 +2801,10 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                 Cancel
               </button>
               <button
-                onClick={handleConfirmSendReferral}
-                className="flex-1 px-8 py-3 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg"
+                onClick={() => !isReadOnly && handleConfirmSendReferral()}
+                disabled={isReadOnly}
+                title={isReadOnly ? 'Read-only mode: Cannot send notifications' : undefined}
+                className={`flex-1 px-8 py-3 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed ${isReadOnly ? 'opacity-50' : ''}`}
               >
                 Send Notifications
               </button>

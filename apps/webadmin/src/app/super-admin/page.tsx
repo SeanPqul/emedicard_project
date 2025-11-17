@@ -45,7 +45,6 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
   const [adminUsername, setAdminUsername] = useState("");
   const [adminGender, setAdminGender] = useState("");
   const [adminBirthDate, setAdminBirthDate] = useState("");
-  const [adminPhoneNumber, setAdminPhoneNumber] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Id<"jobCategories"> | undefined>(undefined);
   const [selectedRole, setSelectedRole] = useState<"admin" | "inspector">("admin");
   const [isLoading, setIsLoading] = useState(false);
@@ -89,7 +88,6 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
         username: adminUsername || undefined,
         gender: adminGender || undefined,
         birthDate: adminBirthDate || undefined,
-        phoneNumber: adminPhoneNumber || undefined,
       });
 
       if (result.success) {
@@ -101,7 +99,6 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
         setAdminUsername("");
         setAdminGender("");
         setAdminBirthDate("");
-        setAdminPhoneNumber("");
         setSelectedCategory(undefined);
         setSelectedRole("admin");
         setShowPassword(false);
@@ -264,25 +261,6 @@ const AdminCreationModal = ({ isOpen, onClose, jobCategories }: { isOpen: boolea
                 className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
                 value={adminBirthDate}
                 onChange={(e) => setAdminBirthDate(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Phone Number */}
-            <div>
-              <label htmlFor="adminPhoneNumber" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498A1 1 0 0121 19.72V23a2 2 0 01-2 2h-1C9.82 25 3 18.18 3 10V5z" />
-                </svg>
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="adminPhoneNumber"
-                className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
-                placeholder="e.g. 09XX XXX XXXX"
-                value={adminPhoneNumber}
-                onChange={(e) => setAdminPhoneNumber(e.target.value)}
                 disabled={isLoading}
               />
             </div>
@@ -747,7 +725,7 @@ export default function SystemAdministratorPage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
-              Oversee Admin Dashboard
+              View All Applications
             </button>
             <button
               onClick={() => router.push("/dashboard/payment-history")}
