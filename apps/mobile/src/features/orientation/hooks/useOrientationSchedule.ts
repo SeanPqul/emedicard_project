@@ -4,6 +4,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import type { Id } from '@backend/convex/_generated/dataModel';
 import type { OrientationSchedule } from '../model/types';
+import { extractConvexErrorMessage, getErrorTitle } from '@shared/utils/convexErrorParser';
 
 /**
  * Custom hook for managing orientation scheduling
@@ -56,6 +57,8 @@ export function useOrientationSchedule(applicationId: Id<"applications"> | undef
     scheduledDate: new Date(bookedSession.scheduledDate).toISOString(),
     venue: bookedSession.venue,
     status: bookedSession.status,
+    checkInTime: bookedSession.checkInTime,
+    checkOutTime: bookedSession.checkOutTime,
   } : null;
 
   /**
@@ -81,11 +84,12 @@ export function useOrientationSchedule(applicationId: Id<"applications"> | undef
 
       return { success: true, data: result };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to book orientation slot';
+      const errorMessage = extractConvexErrorMessage(err);
+      const errorTitle = getErrorTitle(err);
       setError(errorMessage);
       
       Alert.alert(
-        'Booking Failed',
+        errorTitle,
         errorMessage,
         [{ text: 'OK' }]
       );
@@ -114,11 +118,12 @@ export function useOrientationSchedule(applicationId: Id<"applications"> | undef
 
       return { success: true };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel booking';
+      const errorMessage = extractConvexErrorMessage(err);
+      const errorTitle = getErrorTitle(err);
       setError(errorMessage);
       
       Alert.alert(
-        'Cancellation Failed',
+        errorTitle,
         errorMessage,
         [{ text: 'OK' }]
       );

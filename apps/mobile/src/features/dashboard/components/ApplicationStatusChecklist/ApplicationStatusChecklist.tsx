@@ -114,24 +114,27 @@ export const ApplicationStatusChecklist: React.FC<ApplicationStatusChecklistProp
         // Note: 'Locked - Max Attempts' is old status, kept for backward compatibility
         const stepData = getStepLabel('orientation', 'upcoming');
         steps.push({ id: 'orientation', ...stepData, status: 'upcoming' });
-      } else if (orientationCompleted) {
-        // Only mark as completed if orientation was actually completed (check-in/check-out done)
-        const stepData = getStepLabel('orientation', 'completed');
-        steps.push({ id: 'orientation', ...stepData, status: 'completed' });
-      } else if (status === 'For Document Verification' || status === 'Documents Need Revision') {
-        // Orientation should be completed before document verification
-        const stepData = getStepLabel('orientation', 'completed');
-        steps.push({ id: 'orientation', ...stepData, status: 'completed' });
-      } else if (status === 'Under Review' || status === 'Approved') {
-        // These statuses should have orientation completed
+      } else if (orientationCompleted || status === 'Under Review' || status === 'Approved') {
+        // Only mark as completed if:
+        // 1. Orientation was actually completed (orientationCompleted flag), OR
+        // 2. Application reached Under Review/Approved (these always require completed orientation)
         const stepData = getStepLabel('orientation', 'completed');
         steps.push({ id: 'orientation', ...stepData, status: 'completed' });
       } else if (status === 'Scheduled') {
         // Orientation is scheduled but not yet attended
         const stepData = { label: 'Orientation pending', subtitle: 'Attend scheduled session' };
         steps.push({ id: 'orientation', ...stepData, status: 'current' });
+      } else if (status === 'For Orientation') {
+        // Payment complete, user needs to schedule/attend orientation
+        const stepData = { label: 'Orientation pending', subtitle: 'Schedule your orientation session' };
+        steps.push({ id: 'orientation', ...stepData, status: 'current' });
+      } else if (status === 'For Document Verification' || status === 'Documents Need Revision') {
+        // Documents are being verified but orientation might not be done yet
+        // These statuses don't guarantee orientation completion
+        const stepData = getStepLabel('orientation', 'current');
+        steps.push({ id: 'orientation', ...stepData, status: 'current' });
       } else {
-        // Default to current if status is unclear or 'For Orientation'
+        // Default to current for any other unclear status
         const stepData = getStepLabel('orientation', 'current');
         steps.push({ id: 'orientation', ...stepData, status: 'current' });
       }

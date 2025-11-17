@@ -287,6 +287,24 @@ export const styles = StyleSheet.create({
     lineHeight: moderateScale(18),
   },
 
+  statusInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: theme.colors.blue[50],
+    padding: moderateScale(12),
+    borderRadius: moderateScale(8),
+    marginTop: verticalScale(16),
+    gap: scale(8),
+    borderLeftWidth: 3,
+    borderLeftColor: theme.colors.blue[600],
+  },
+  statusInfoText: {
+    flex: 1,
+    fontSize: moderateScale(13),
+    color: theme.colors.text.secondary,
+    lineHeight: moderateScale(18),
+  },
+
   qrButton: {
     flexDirection: 'row',
     alignItems: 'center',
