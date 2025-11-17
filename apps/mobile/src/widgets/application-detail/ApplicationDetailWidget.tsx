@@ -369,7 +369,7 @@ export function ApplicationDetailWidget({
         // 3. Payment has been validated (NOT waiting for validation)
         // 4. Status is not Rejected, Cancelled, or Approved
         const shouldShowOrientation = requiresOrientation && !orientationCompleted &&
-          !['Pending Payment', 'For Payment Validation', 'Payment Rejected', 'Rejected', 'Cancelled', 'Approved', 'Referred for Medical Management', 'Documents Need Revision'].includes(application.status);
+          !['Pending Payment', 'For Payment Validation', 'Payment Rejected', 'Rejected', 'Cancelled', 'Approved', 'Referred for Medical Management'].includes(application.status);
 
         return shouldShowOrientation;
       })() && (
