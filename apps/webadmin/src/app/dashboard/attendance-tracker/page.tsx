@@ -587,14 +587,6 @@ export default function AttendanceTrackerPage() {
                           </p>
                         </div>
                       </div>
-                    ) : schedule.isPast && schedule.attendees.length > 0 ? (
-                      <button
-                        onClick={() => handleFinalizeSession(schedule)}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-lg hover:shadow-xl font-semibold text-sm"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Finalize Session
-                      </button>
                     ) : null}
                   </div>
                 </div>
@@ -741,7 +733,7 @@ export default function AttendanceTrackerPage() {
                       <div className="flex items-center gap-3">
                         <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
                         <p className="text-sm text-blue-700">
-                          <span className="font-semibold">Action Required:</span> This session has ended. Please review the attendance records and click "Finalize Session" to process all attendance and update applicant statuses.
+                          <span className="font-semibold">Session Ended:</span> This session has ended. Attendance was tracked automatically via QR code check-in and check-out. Use this screen only to review or manually correct records if needed.
                         </p>
                       </div>
                     ) : (
@@ -750,7 +742,7 @@ export default function AttendanceTrackerPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <p className="text-sm text-blue-700">
-                          <span className="font-semibold">Note:</span> Attendance is automatically tracked when inspectors check in/out attendees via QR code scanning. You can finalize the session after it ends to process all records.
+                          <span className="font-semibold">Note:</span> Attendance is automatically tracked when inspectors check in and out attendees via QR code scanning. No manual session finalization is required.
                         </p>
                       </div>
                     )}
