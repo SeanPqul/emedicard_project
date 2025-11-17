@@ -18,35 +18,37 @@ interface Props {
 }
 
 // Reference data (imported from backend)
+// NOTE: Option labels intentionally keep only the text before the previous "  " suffixes
+// (e.g., "WBC elevated" instead of "WBC elevated  Cleared post-Rx") per UI requirements.
 const LAB_FINDING_OPTIONS = {
   urinalysis: [
-    "WBC elevated – Cleared post-Rx",
-    "RBC elevated – Cleared post-Rx",
-    "Protein detected – Cleared post-Rx",
-    "Glucose detected – Cleared post-Rx",
-    "Bacteria present – Cleared post-Rx",
-    "Crystals present – Cleared post-Rx",
-    "pH abnormal – Cleared post-Rx",
-    "Specific gravity abnormal – Cleared post-Rx",
-    "Other urinalysis finding – Cleared",
+    "WBC elevated",
+    "RBC elevated",
+    "Protein detected",
+    "Glucose detected",
+    "Bacteria present",
+    "Crystals present",
+    "pH abnormal",
+    "Specific gravity abnormal",
+    "Other urinalysis finding",
   ],
   xray_sputum: [
-    "Chest X-ray abnormal – TB ruled out, Cleared",
-    "Chest X-ray abnormal – Pneumonia cleared",
-    "Sputum positive – TB ruled out post-treatment",
-    "Lung infiltrates – Cleared post-treatment",
-    "Pleural effusion – Resolved",
-    "Bronchitis – Cleared post-Rx",
-    "Other chest finding – Cleared",
+    "Chest X-ray abnormal",
+    "Chest X-ray abnormal",
+    "Sputum positive",
+    "Lung infiltrates",
+    "Pleural effusion",
+    "Bronchitis",
+    "Other chest finding",
   ],
   stool: [
-    "Parasite detected – Cleared post-Rx",
-    "Ova detected – Cleared post-Rx",
-    "Blood in stool – Cleared post-investigation",
-    "Bacteria detected – Cleared post-Rx",
-    "Amoeba detected – Cleared post-treatment",
-    "Giardia detected – Cleared post-Rx",
-    "Other stool finding – Cleared",
+    "Parasite detected",
+    "Ova detected",
+    "Blood in stool",
+    "Bacteria detected",
+    "Amoeba detected",
+    "Giardia detected",
+    "Other stool finding",
   ],
 };
 
@@ -104,7 +106,16 @@ export default function LabFindingRecorderForm({ applicationId, referralHistoryI
       // Calculate monitoring expiry date
       const clearedDate = new Date(formData.clearedDate);
       const monitoringExpiry = new Date(clearedDate);
-      monitoringExpiry.setMonth(monitoringExpiry.getMonth() + formData.monitoringPeriodMonths);
+
+      if (formData.monitoringPeriodMonths < 1) {
+        // Handle sub-month durations (e.g., 0.5 month = ~2 weeks)
+        const days = Math.round(formData.monitoringPeriodMonths * 30);
+        monitoringExpiry.setDate(monitoringExpiry.getDate() + days);
+      } else {
+        monitoringExpiry.setMonth(
+          monitoringExpiry.getMonth() + formData.monitoringPeriodMonths
+        );
+      }
       
       await recordFinding({
         applicationId,
@@ -170,22 +181,23 @@ export default function LabFindingRecorderForm({ applicationId, referralHistoryI
       </div>
       
       {/* Finding Kind Dropdown */}
-      {formData.testType && (
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Finding *</label>
-          <select
-            required
-            value={formData.findingKind}
-            onChange={(e) => setFormData({ ...formData, findingKind: e.target.value })}
-            className="w-full p-2 border border-gray-300 rounded-md text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Select Finding</option>
-            {LAB_FINDING_OPTIONS[formData.testType].map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-1">Finding *</label>
+        <select
+          required={!!formData.testType}
+          disabled={!formData.testType}
+          value={formData.findingKind}
+          onChange={(e) => setFormData({ ...formData, findingKind: e.target.value })}
+          className="w-full p-2 border border-gray-300 rounded-md text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+        >
+          <option value="">
+            {formData.testType ? "Select Finding" : "Select test type first"}
+          </option>
+          {(LAB_FINDING_OPTIONS as any)[formData.testType]?.map((option: string) => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Cleared Date */}
@@ -228,7 +240,12 @@ export default function LabFindingRecorderForm({ applicationId, referralHistoryI
           <p className="text-xs text-gray-600 mt-1">
             Retest due: {(() => {
               const date = new Date(formData.clearedDate);
-              date.setMonth(date.getMonth() + formData.monitoringPeriodMonths);
+              if (formData.monitoringPeriodMonths < 1) {
+                const days = Math.round(formData.monitoringPeriodMonths * 30);
+                date.setDate(date.getDate() + days);
+              } else {
+                date.setMonth(date.getMonth() + formData.monitoringPeriodMonths);
+              }
               return date.toLocaleDateString();
             })()}
           </p>

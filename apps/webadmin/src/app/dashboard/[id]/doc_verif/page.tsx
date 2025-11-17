@@ -1060,8 +1060,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
               </div>
             )}
             
-            {/* Collapsible Payment Details Card - Only show for 3rd party payments (Maya, Gcash) */}
-            {paymentData && (String(paymentData.paymentMethod) === 'Maya' || String(paymentData.paymentMethod) === 'Gcash') && (
+            {/* Collapsible Payment Details Card - Show for all payments (online and manual) */}
+            {paymentData && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <button
                   onClick={() => setIsPaymentDetailsExpanded(!isPaymentDetailsExpanded)}
@@ -1100,7 +1100,7 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                       </svg>
                       <div className="flex-1">
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount</label>
-                        <p className="text-sm font-medium text-gray-900 mt-0.5">₱{(paymentData.netAmount ?? 0).toFixed(2)}</p>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">₱{(paymentData.netAmount ?? (paymentData as any).amount ?? 0).toFixed(2)}</p>
                       </div>
                     </div>
                     
