@@ -16,6 +16,7 @@ export const LAB_FINDING_OPTIONS = {
   ],
   
   xray_sputum: [
+    
     "Chest X-ray abnormal",
     "Chest X-ray abnormal",
     "Sputum positive",
