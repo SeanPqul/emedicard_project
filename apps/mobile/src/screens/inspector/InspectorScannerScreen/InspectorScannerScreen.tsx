@@ -11,6 +11,7 @@ import { useInspectorDashboard } from '@features/inspector/hooks';
 import { SessionWithStats } from '@features/inspector/lib/types';
 import { QRCodeScanner } from '@features/scanner/components/QRCodeScanner/QRCodeScanner';
 import { useToast } from '@shared/components';
+import { extractConvexErrorMessage } from '@shared/utils/convexErrorParser';
 
 export function InspectorScannerScreen() {
   const { data: dashboardData, isLoading, refetch } = useInspectorDashboard();
@@ -276,14 +277,18 @@ export function InspectorScannerScreen() {
       }
     } catch (error) {
       console.error('[Scanner] Error during check-in/out:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process attendance';
+      const errorMessage = extractConvexErrorMessage(error);
       
+      // Show user-friendly error messages
       if (errorMessage.includes('scheduled for')) {
-        showToast(`Wrong date: ${errorMessage}`, 'error', 4000);
+        // Date validation error - extract just the friendly message
+        showToast(errorMessage, 'error', 5000);
       } else if (errorMessage.includes('Cannot check out without checking in')) {
         showToast('Must check in first before checking out', 'error', 4000);
       } else if (errorMessage.includes('No orientation scheduled') || errorMessage.includes('No checked-in orientation')) {
-        showToast('No active booking found', 'info', 4000);
+        showToast('No active booking found for this applicant', 'info', 4000);
+      } else if (errorMessage.includes('Cannot check in') || errorMessage.includes('Cannot cancel')) {
+        showToast(errorMessage, 'error', 5000);
       } else {
         showToast(errorMessage, 'error', 4000);
       }

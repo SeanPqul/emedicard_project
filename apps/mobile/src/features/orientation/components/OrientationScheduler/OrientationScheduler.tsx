@@ -32,6 +32,9 @@ interface OrientationSchedulerProps {
       name: string;
       address: string;
     };
+    status?: string;
+    checkInTime?: number;
+    checkOutTime?: number;
   } | null;
   onCancelBooking?: () => void;
   isCancelling?: boolean;
@@ -90,13 +93,44 @@ export function OrientationScheduler({
 
   // If user has already booked, show the booked session
   if (bookedSession) {
+    // Determine status display based on booking status
+    const isCheckedIn = bookedSession.status === "checked-in" || bookedSession.checkInTime != null;
+    const isCompleted = bookedSession.status === "completed" || bookedSession.checkOutTime != null;
+    const canCancel = bookedSession.status === "scheduled" && !isCheckedIn && !isCompleted;
+
+    type StatusConfig = {
+      icon: "checkmark-circle" | "checkmark-done-circle" | "time";
+      text: string;
+      color: string;
+    };
+
+    let statusConfig: StatusConfig = {
+      icon: "checkmark-circle",
+      text: "Booked",
+      color: theme.colors.semantic.success,
+    };
+
+    if (isCompleted) {
+      statusConfig = {
+        icon: "checkmark-done-circle",
+        text: "Completed",
+        color: theme.colors.semantic.success,
+      };
+    } else if (isCheckedIn) {
+      statusConfig = {
+        icon: "time",
+        text: "Checked In",
+        color: theme.colors.blue[500],
+      };
+    }
+
     return (
       <View style={styles.container}>
         <View style={styles.bookedCard}>
           <View style={styles.bookedHeader}>
             <View style={styles.successBadge}>
-              <Ionicons name="checkmark-circle" size={moderateScale(24)} color={theme.colors.semantic.success} />
-              <Text style={styles.successBadgeText}>Booked</Text>
+              <Ionicons name={statusConfig.icon} size={moderateScale(24)} color={statusConfig.color} />
+              <Text style={[styles.successBadgeText, { color: statusConfig.color }]}>{statusConfig.text}</Text>
             </View>
           </View>
 
@@ -143,7 +177,8 @@ export function OrientationScheduler({
             </TouchableOpacity>
           )}
 
-          {onCancelBooking && (
+          {/* Only show cancel button if booking is scheduled (not checked-in or completed) */}
+          {onCancelBooking && canCancel && (
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={handleCancelBooking}
@@ -158,6 +193,18 @@ export function OrientationScheduler({
                 </>
               )}
             </TouchableOpacity>
+          )}
+
+          {/* Show info message for checked-in/completed status */}
+          {(isCheckedIn || isCompleted) && (
+            <View style={styles.statusInfo}>
+              <Ionicons name="information-circle" size={moderateScale(16)} color={theme.colors.blue[600]} />
+              <Text style={styles.statusInfoText}>
+                {isCompleted 
+                  ? "Your orientation has been completed. Thank you for attending!"
+                  : "You are checked in. Please wait for the session to complete, then scan again to check out."}
+              </Text>
+            </View>
           )}
         </View>
       </View>

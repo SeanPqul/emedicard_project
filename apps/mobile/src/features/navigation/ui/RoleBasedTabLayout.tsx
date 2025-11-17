@@ -26,6 +26,9 @@ export default function RoleBasedTabLayout() {
     );
   }
 
+  // Check if user is admin - hide tab bar completely
+  const isAdmin = userProfile?.role === 'admin';
+
   return (
     <Tabs 
       screenOptions={{
@@ -33,8 +36,9 @@ export default function RoleBasedTabLayout() {
         headerShown: false,
         tabBarActiveTintColor: getColor('green.500') || '#10B981',
         tabBarInactiveTintColor: getColor('gray.400') || '#9CA3AF',
+        tabBarStyle: isAdmin ? { display: 'none' } : undefined,
       }}
-      tabBar={(props) => <ApplicantTabBar {...props} />}
+      tabBar={(props) => isAdmin ? null : <ApplicantTabBar {...props} />}
     >
       {visibleTabs.map((tab) => (
         <Tabs.Screen 

@@ -21,3 +21,6 @@ export {
 } from './documentStatus';
 
 export type { DocumentStatusInfo, DocumentUploadStatus, UploadState } from './documentStatus';
+
+// Error handling utilities
+export { extractConvexErrorMessage, getErrorTitle } from './convexErrorParser';
