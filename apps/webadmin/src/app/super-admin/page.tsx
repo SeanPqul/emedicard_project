@@ -15,9 +15,9 @@ import {
   Bar,
   BarChart,
   Cell,
-  Legend as RechartsLegend,
   Pie,
   PieChart,
+  Legend as RechartsLegend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -948,7 +948,7 @@ export default function SystemAdministratorPage() {
                 </div>
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-6 ">
             <div style={{ height: 320 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barChartData}>
