@@ -5,7 +5,7 @@ import { query, QueryCtx, MutationCtx } from "../_generated/server";
 export const AdminRole = async (ctx: QueryCtx | MutationCtx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-        return { isAdmin: false, isSuperAdmin: false, managedCategories: [] };
+        return { isAdmin: false, isSuperAdmin: false, managedCategories: [], isReadOnlyOversight: false };
     }
 
     const user = await ctx.db
@@ -15,15 +15,17 @@ export const AdminRole = async (ctx: QueryCtx | MutationCtx) => {
 
     // If the user isn't in our DB yet, they have no privileges
     if (!user) {
-        return { isAdmin: false, isSuperAdmin: false, managedCategories: [] };
+        return { isAdmin: false, isSuperAdmin: false, managedCategories: [], isReadOnlyOversight: false };
     }
 
     // System Administrator - highest privilege level
+    // Read-only when viewing admin dashboard (oversight mode)
     if (user.role === "system_admin") {
         return {
             isAdmin: true,
             isSuperAdmin: true,
             managedCategories: "all",
+            isReadOnlyOversight: true, // System admins can view but not modify application data
         };
     }
 
@@ -35,6 +37,7 @@ export const AdminRole = async (ctx: QueryCtx | MutationCtx) => {
                 isAdmin: true,
                 isSuperAdmin: true,
                 managedCategories: "all",
+                isReadOnlyOversight: false,
             };
         }
         // Regular admin with specific categories
@@ -42,11 +45,12 @@ export const AdminRole = async (ctx: QueryCtx | MutationCtx) => {
             isAdmin: true,
             isSuperAdmin: false,
             managedCategories: user.managedCategories,
+            isReadOnlyOversight: false,
         };
     }
 
     // Not an admin
-    return { isAdmin: false, isSuperAdmin: false, managedCategories: [] };
+    return { isAdmin: false, isSuperAdmin: false, managedCategories: [], isReadOnlyOversight: false };
 };
 
 // This is the PUBLIC QUERY that your dashboard will call.

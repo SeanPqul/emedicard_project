@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "../../_generated/server";
+import { requireWriteAccess } from "../../users/permissions";
 import { REJECTION_LIMITS, hasReachedMaxAttempts } from "../../config/rejectionLimits";
 
 /**
@@ -57,6 +58,9 @@ export const referDocument = mutation({
   },
   handler: async (ctx, args) => {
     try {
+      // 0. Prevent system admins from referring/flagging documents (read-only oversight)
+      await requireWriteAccess(ctx);
+      
       // 1. Verify admin permissions
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) {

@@ -6,6 +6,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import ErrorMessage from "@/components/ErrorMessage";
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import Navbar from '@/components/shared/Navbar';
+import ReadOnlyBanner from '@/components/ReadOnlyBanner';
 import { api } from '@backend/convex/_generated/api';
 import { Doc, Id } from '@backend/convex/_generated/dataModel';
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
@@ -46,7 +47,6 @@ export default function DashboardPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string | Id<"jobCategories"> | "">("");
-  const [showAdvancedMenu, setShowAdvancedMenu] = useState(false);
   const router = useRouter();
 
   // --- Constants ---
@@ -201,6 +201,9 @@ export default function DashboardPage() {
         </Navbar>
       
       <main className="max-w-[1600px] mx-auto py-4 sm:py-6 px-3 sm:px-4 lg:px-8">
+        {/* Read-Only Banner for System Admins */}
+        {adminPrivileges.isReadOnlyOversight && <ReadOnlyBanner />}
+        
         {/* Header Section */}
         <header className="mb-6 sm:mb-8 pt-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -384,39 +387,6 @@ export default function DashboardPage() {
                 </svg>
                 Lab Findings
               </Link>
-              {adminPrivileges.managedCategories === "all" && (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowAdvancedMenu(!showAdvancedMenu)}
-                    onBlur={() => setTimeout(() => setShowAdvancedMenu(false), 200)}
-                    className="inline-flex items-center gap-1.5 sm:gap-2 bg-gray-50 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium hover:bg-gray-100 border border-gray-200 transition-all shadow-sm hover:shadow relative whitespace-nowrap"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
-                    Advanced Options
-                  </button>
-                  {showAdvancedMenu && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <Link
-                        href="/super-admin/system-config"
-                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors group"
-                      >
-                        <div className="w-9 h-9 bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg flex items-center justify-center group-hover:from-teal-100 group-hover:to-teal-200 transition-all">
-                          <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="font-semibold text-sm text-gray-900">System Config</div>
-                          <div className="text-xs text-gray-500">Manage officials & settings</div>
-                        </div>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
               <div className="sm:ml-auto text-xs sm:text-sm text-gray-500 w-full sm:w-auto text-center sm:text-right mt-2 sm:mt-0">
                 Showing <span className="font-semibold text-gray-700">{filteredApplications.length}</span> of <span className="font-semibold text-gray-700">{applications?.length || 0}</span> applications
               </div>

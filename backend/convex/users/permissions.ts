@@ -185,6 +185,48 @@ export async function isAdmin(
 }
 
 /**
+ * Check if current user is in read-only oversight mode (system_admin)
+ * 
+ * @param ctx - Query or Mutation context
+ * @returns true if user is system_admin in read-only oversight mode
+ */
+export async function isReadOnlyOversight(
+  ctx: QueryCtx | MutationCtx
+): Promise<boolean> {
+  const privileges = await AdminRole(ctx);
+  return privileges.isReadOnlyOversight || false;
+}
+
+/**
+ * Require write access - throws error if user is in read-only mode
+ * Use this guard at the beginning of mutation functions that modify application data
+ * 
+ * @param ctx - Mutation context
+ * @throws Error if user is in read-only oversight mode
+ * 
+ * @example
+ * export const approveDocument = mutation({
+ *   handler: async (ctx, args) => {
+ *     await requireWriteAccess(ctx); // Blocks system_admin from modifying
+ *     // ... rest of mutation logic
+ *   }
+ * });
+ */
+export async function requireWriteAccess(
+  ctx: QueryCtx | MutationCtx
+): Promise<void> {
+  const isReadOnly = await isReadOnlyOversight(ctx);
+  
+  if (isReadOnly) {
+    throw new Error(
+      "Access denied: System Administrators have read-only access to the admin dashboard. " +
+      "You can view all data but cannot make changes to applications, documents, or payments. " +
+      "Please use a regular admin account to perform this action."
+    );
+  }
+}
+
+/**
  * Filter a list of items by category access
  * Useful for listing applications, documents, etc.
  * 

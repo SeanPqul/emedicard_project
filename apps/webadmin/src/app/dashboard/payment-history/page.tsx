@@ -88,10 +88,63 @@ export default function PaymentHistoryPage() {
     });
   }, [payments, search]);
 
-  // Export to Excel/CSV
+  // Export to Excel/CSV with Comprehensive Summary
   const exportToCSV = () => {
     if (!filteredPayments || filteredPayments.length === 0) return;
 
+    // Calculate detailed statistics
+    const totalBaseAmount = filteredPayments.reduce((sum, p) => sum + p.amount, 0);
+    const totalProcessingFees = filteredPayments.reduce((sum, p) => sum + p.serviceFee, 0);
+    const totalPaid = filteredPayments.reduce((sum, p) => sum + p.netAmount, 0);
+    
+    // Status breakdown
+    const statusCounts = filteredPayments.reduce((acc, p) => {
+      acc[p.paymentStatus] = (acc[p.paymentStatus] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    // Payment method breakdown with totals
+    const methodBreakdown = filteredPayments.reduce((acc, p) => {
+      const method = p.paymentMethod === 'BaranggayHall' ? 'Baranggay Hall' : 
+                     p.paymentMethod === 'CityHall' ? 'City Hall' : p.paymentMethod;
+      if (!acc[method]) {
+        acc[method] = { count: 0, baseAmount: 0, fees: 0, total: 0 };
+      }
+      acc[method].count++;
+      acc[method].baseAmount += p.amount;
+      acc[method].fees += p.serviceFee;
+      acc[method].total += p.netAmount;
+      return acc;
+    }, {} as Record<string, { count: number; baseAmount: number; fees: number; total: number }>);
+
+    // Build CSV content with sections
+    const csvLines: string[] = [];
+    const separator = '="' + '='.repeat(100) + '"';
+
+    // ============ REPORT HEADER ============
+    csvLines.push('EMEDICARD PAYMENT REPORT');
+    csvLines.push('');
+    csvLines.push(`Report Generated:,${new Date().toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`);
+    csvLines.push(`Total Records:,${filteredPayments.length}`);
+    
+    // Applied filters
+    if (statusFilter || methodFilter || dateRange.start || dateRange.end) {
+      csvLines.push('');
+      csvLines.push('FILTERS APPLIED');
+      if (statusFilter) csvLines.push(`Status Filter:,${statusFilter}`);
+      if (methodFilter) csvLines.push(`Method Filter:,${methodFilter === 'BaranggayHall' ? 'Baranggay Hall' : methodFilter === 'CityHall' ? 'City Hall' : methodFilter}`);
+      if (dateRange.start) csvLines.push(`From Date:,${dateRange.start}`);
+      if (dateRange.end) csvLines.push(`To Date:,${dateRange.end}`);
+    }
+    
+    csvLines.push('');
+    csvLines.push(separator);
+    csvLines.push('');
+
+    // ============ DETAILED TRANSACTIONS ============
+    csvLines.push('PAYMENT TRANSACTIONS');
+    csvLines.push('');
+    
     const headers = [
       'Payment Date',
       'Payment Time',
@@ -110,10 +163,11 @@ export default function PaymentHistoryPage() {
       'Application Status',
       'Rejection Count',
     ];
+    csvLines.push(headers.join(','));
 
-    const rows = filteredPayments.map((p) => {
+    filteredPayments.forEach((p) => {
       const date = new Date(p._creationTime);
-      return [
+      const row = [
         date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
         date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
         p.referenceNumber,
@@ -131,13 +185,60 @@ export default function PaymentHistoryPage() {
         p.applicationStatus,
         p.rejectionCount || 0,
       ];
+      csvLines.push(row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','));
     });
 
-    const csvContent = [
-      headers.join(','),
-      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
-    ].join('\n');
+    // ============ FINANCIAL SUMMARY ============
+    csvLines.push('');
+    csvLines.push(separator);
+    csvLines.push('');
+    csvLines.push('FINANCIAL SUMMARY');
+    csvLines.push('');
+    csvLines.push(`Total Transactions:,${filteredPayments.length}`);
+    csvLines.push(`Total Base Amount:,PHP ${totalBaseAmount.toFixed(2)}`);
+    csvLines.push(`Total Processing Fees:,PHP ${totalProcessingFees.toFixed(2)}`);
+    csvLines.push(`Total Amount Collected:,PHP ${totalPaid.toFixed(2)}`);
+    csvLines.push(`Average Transaction:,PHP ${(totalPaid / filteredPayments.length).toFixed(2)}`);
 
+    // ============ STATUS BREAKDOWN ============
+    csvLines.push('');
+    csvLines.push('STATUS BREAKDOWN');
+    csvLines.push('Status,Count,Percentage');
+    Object.entries(statusCounts)
+      .sort(([, a], [, b]) => b - a)
+      .forEach(([status, count]) => {
+        const percentage = ((count / filteredPayments.length) * 100).toFixed(1);
+        csvLines.push(`${status},${count},${percentage}%`);
+      });
+
+    // ============ PAYMENT METHOD BREAKDOWN ============
+    csvLines.push('');
+    csvLines.push('PAYMENT METHOD BREAKDOWN');
+    csvLines.push('Method,Transactions,Base Amount,Processing Fees,Total Collected');
+    Object.entries(methodBreakdown)
+      .sort(([, a], [, b]) => b.count - a.count)
+      .forEach(([method, data]) => {
+        csvLines.push(
+          `${method},${data.count},PHP ${data.baseAmount.toFixed(2)},PHP ${data.fees.toFixed(2)},PHP ${data.total.toFixed(2)}`
+        );
+      });
+
+    // ============ GRAND TOTALS ============
+    csvLines.push('');
+    csvLines.push(separator);
+    csvLines.push('');
+    csvLines.push('GRAND TOTALS');
+    csvLines.push(`Total Records:,${filteredPayments.length}`);
+    csvLines.push(`Total Base Amount:,PHP ${totalBaseAmount.toFixed(2)}`);
+    csvLines.push(`Total Processing Fees:,PHP ${totalProcessingFees.toFixed(2)}`);
+    csvLines.push(`TOTAL COLLECTED:,PHP ${totalPaid.toFixed(2)}`);
+    csvLines.push('');
+    csvLines.push(separator);
+    csvLines.push('');
+    csvLines.push(`Report End - Generated on ${new Date().toLocaleDateString('en-US')}`);
+
+    // Create and download with UTF-8 BOM for Excel compatibility
+    const csvContent = '\ufeff' + csvLines.join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -319,22 +420,6 @@ export default function PaymentHistoryPage() {
             </div>
           </div>
 
-          {/* Net Revenue */}
-          <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-purple-200 hover:border-purple-300">
-            <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-purple-500 shadow-sm">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-purple-900 tracking-tight">{formatCurrency(stats.totalNetAmount)}</div>
-              <div className="text-xs font-medium text-purple-700">Net Revenue</div>
-              <div className="text-[10px] text-purple-600">After fees</div>
-            </div>
-          </div>
-
           {/* Processing Fees */}
           <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-orange-200 hover:border-orange-300">
             <div className="flex items-start justify-between mb-3">
@@ -348,6 +433,22 @@ export default function PaymentHistoryPage() {
               <div className="text-2xl font-bold text-orange-900 tracking-tight">{formatCurrency(stats.totalServiceFees)}</div>
               <div className="text-xs font-medium text-orange-700">Processing Fees</div>
               <div className="text-[10px] text-orange-600">Service charges</div>
+            </div>
+          </div>
+
+          {/* Net Revenue */}
+          <div className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-purple-200 hover:border-purple-300">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-purple-500 shadow-sm">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-purple-900 tracking-tight">{formatCurrency(stats.totalNetAmount)}</div>
+              <div className="text-xs font-medium text-purple-700">Net Revenue</div>
+              <div className="text-[10px] text-purple-600">After fees</div>
             </div>
           </div>
         </div>

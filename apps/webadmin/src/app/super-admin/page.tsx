@@ -750,6 +750,15 @@ export default function SystemAdministratorPage() {
               Oversee Admin Dashboard
             </button>
             <button
+              onClick={() => router.push("/dashboard/payment-history")}
+              className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              Payments
+            </button>
+            <button
               onClick={() => router.push("/super-admin/rejection-history")}
               className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow"
             >
@@ -791,12 +800,12 @@ export default function SystemAdministratorPage() {
               <button
                 onClick={() => setShowAdvancedMenu(!showAdvancedMenu)}
                 onBlur={() => setTimeout(() => setShowAdvancedMenu(false), 200)}
-                className="inline-flex items-center gap-1.5 bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 border border-gray-200 transition-all shadow-sm hover:shadow"
+                className="inline-flex items-center justify-center bg-gray-50 text-gray-700 p-2 rounded-lg hover:bg-gray-100 border border-gray-200 transition-all shadow-sm hover:shadow"
+                title="Advanced Options"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                 </svg>
-                Advanced Options
               </button>
               {showAdvancedMenu && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">

@@ -2,6 +2,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { AdminRole } from "../users/roles";
+import { requireWriteAccess } from "../users/permissions";
 import { areAllDocumentsVerified } from "../lib/documentStatus";
 
 export const review = mutation({
@@ -16,6 +17,9 @@ export const review = mutation({
   handler: async (ctx, args) => {
     const adminCheck = await AdminRole(ctx);
     if (!adminCheck.isAdmin) throw new Error("Not authorized");
+    
+    // Prevent system admins from modifying documents (read-only oversight)
+    await requireWriteAccess(ctx);
 
     const identity = await ctx.auth.getUserIdentity();
     const adminUser = await ctx.db.query("users").withIndex("by_clerk_id", q => q.eq("clerkId", identity!.subject)).unique();

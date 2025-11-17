@@ -2,6 +2,7 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { AdminRole } from "../users/roles";
+import { requireWriteAccess } from "../users/permissions";
 import { internal } from "../_generated/api";
 
 export const finalize = mutation({
@@ -11,6 +12,9 @@ export const finalize = mutation({
   },
   handler: async (ctx, args) => {
     await AdminRole(ctx); // Security check
+    
+    // Prevent system admins from finalizing applications (read-only oversight)
+    await requireWriteAccess(ctx);
 
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Authentication failed.");

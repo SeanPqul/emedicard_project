@@ -2,6 +2,7 @@
 import { v } from "convex/values";
 import { mutation } from "../../_generated/server";
 import { AdminRole } from "../../users/roles";
+import { requireWriteAccess } from "../../users/permissions";
 import { REJECTION_LIMITS, hasReachedMaxAttempts } from "../../config/rejectionLimits";
 
 /**
@@ -20,6 +21,9 @@ export const rejectPayment = mutation({
     // Security check - must be admin
     const adminCheck = await AdminRole(ctx);
     if (!adminCheck.isAdmin) throw new Error("Not authorized");
+    
+    // Prevent system admins from rejecting payments (read-only oversight)
+    await requireWriteAccess(ctx);
 
     // Get authenticated user
     const identity = await ctx.auth.getUserIdentity();

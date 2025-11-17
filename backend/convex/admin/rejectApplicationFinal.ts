@@ -2,6 +2,7 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { AdminRole } from "../users/roles";
+import { requireWriteAccess } from "../users/permissions";
 
 /**
  * Permanently reject an application (for severe issues, fraud, or when admin determines
@@ -22,6 +23,9 @@ export const rejectFinal = mutation({
   },
   handler: async (ctx, args) => {
     await AdminRole(ctx); // Security check
+    
+    // Prevent system admins from permanently rejecting applications (read-only oversight)
+    await requireWriteAccess(ctx);
 
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Authentication failed.");

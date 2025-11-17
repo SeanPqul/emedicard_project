@@ -2,6 +2,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { AdminRole } from "../users/roles";
+import { requireWriteAccess } from "../users/permissions";
 
 export const validate = mutation({
   args: {
@@ -12,6 +13,9 @@ export const validate = mutation({
   handler: async (ctx, args) => {
     const adminCheck = await AdminRole(ctx); // Security check
     if (!adminCheck.isAdmin) throw new Error("Not authorized");
+    
+    // Prevent system admins from validating payments (read-only oversight)
+    await requireWriteAccess(ctx);
 
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Authentication failed.");
