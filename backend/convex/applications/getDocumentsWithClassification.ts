@@ -72,7 +72,7 @@ export const get = action({
         let hasLabFinding = false;
         if (item.fieldIdentifier && documentToTestType[item.fieldIdentifier]) {
           const testType = documentToTestType[item.fieldIdentifier];
-          hasLabFinding = labFindings?.[testType]?.length > 0;
+          hasLabFinding = labFindings?.[testType!]?.length > 0;
         }
 
         return {

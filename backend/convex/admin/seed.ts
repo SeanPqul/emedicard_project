@@ -32,7 +32,7 @@ export const seedJobCategoriesAndRequirements = mutation({
     //Insert document types
     const documentTypes = [
       { name: "Valid Government ID", fieldIdentifier: "validId", description: "Any valid government-issued ID", icon: "card-outline", isRequired: true },
-      { name: "2x2 ID Picture", fieldIdentifier: "picture", description: "Recent colored 2x2 ID picture", icon: "camera-outline", isRequired: true },
+      { name: "1x1 ID Picture", fieldIdentifier: "picture", description: "Recent colored 1x1 ID picture", icon: "camera-outline", isRequired: true },
       { name: "Chest X-ray", fieldIdentifier: "chestXrayId", description: "Recent chest X-ray result", icon: "medical-outline", isRequired: true },
       { name: "Urinalysis", fieldIdentifier: "urinalysisId", description: "Complete urinalysis test", icon: "flask-outline", isRequired: true },
       { name: "Stool Examination", fieldIdentifier: "stoolId", description: "Stool examination result", icon: "analytics-outline", isRequired: true },
@@ -61,7 +61,7 @@ export const seedJobCategoriesAndRequirements = mutation({
     const categoryRequirementMap: Record<string, { name: string; required: boolean }[]> = {
       "Food Category": [
         { name: "Valid Government ID", required: true },
-        { name: "2x2 ID Picture", required: true },
+        { name: "1x1 ID Picture", required: true },
         { name: "Chest X-ray", required: true },
         { name: "Urinalysis", required: true },
         { name: "Stool Examination", required: true },
@@ -69,7 +69,7 @@ export const seedJobCategoriesAndRequirements = mutation({
       ],
       "Non-Food Category": [
         { name: "Valid Government ID", required: true },
-        { name: "2x2 ID Picture", required: true },
+        { name: "1x1 ID Picture", required: true },
         { name: "Chest X-ray", required: true },
         { name: "Urinalysis", required: true },
         { name: "Stool Examination", required: true },
@@ -79,7 +79,7 @@ export const seedJobCategoriesAndRequirements = mutation({
       ],
       "Skin-to-Skin Category": [
         { name: "Valid Government ID", required: true },
-        { name: "2x2 ID Picture", required: true },
+        { name: "1x1 ID Picture", required: true },
         { name: "Chest X-ray", required: true },
         { name: "Urinalysis", required: true },
         { name: "Stool Examination", required: true },
