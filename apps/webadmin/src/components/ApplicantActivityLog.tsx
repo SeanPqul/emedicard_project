@@ -48,27 +48,59 @@ const ApplicantActivityLog: React.FC<ApplicantActivityLogProps> = ({ application
       </button>
 
       {showLog && (
-        <div className="absolute right-0 mt-2 w-96 bg-white border border-gray-200 text-black rounded-md shadow-lg z-10 p-4">
-          <h3 className="text-lg font-semibold mb-2">Activity History</h3>
-          <p className="text-sm text-gray-800 mb-4">For: {applicantName}</p>
+        <div className="absolute right-0 mt-2 w-96 bg-white border border-gray-200 text-black rounded-lg shadow-lg z-10 p-4">
+          <h3 className="text-lg font-bold mb-2 text-gray-900">Activity History</h3>
+          <p className="text-sm text-gray-700 font-semibold mb-4">For: <span className="text-gray-900">{applicantName}</span></p>
           <div className="max-h-60 overflow-y-auto">
-            {activityLogs === undefined && <p className="text-gray-500">Loading logs...</p>}
+            {activityLogs === undefined && <p className="text-gray-700 font-medium">Loading logs...</p>}
             {activityLogs?.length === 0 && (
-              <p className="text-gray-500">No activity logs found.</p>
+              <p className="text-gray-700 font-medium">No activity logs found.</p>
             )}
             {activityLogs?.map((activity: AdminActivityLogWithApplicantName) => (
-              <div key={activity._id} className="mb-3 pb-3 border-b border-gray-100 last:border-b-0">
-                <p className="text-sm text-gray-800 font-medium">
-                  <span className="font-bold">{activity.admin?.fullname}</span> ({activity.admin?.email}) {(activity.details || activity.action || "performed an action").toLowerCase()}
-                  {activity.applicantName && ` for `}
-                  {activity.applicantName && <span className="font-bold">{activity.applicantName}</span>}.
-                </p>
-                {activity.comment && (
-                  <p className="text-xs text-gray-700 bg-gray-50 p-1 rounded">Remarks: {activity.comment}</p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {new Date(activity.timestamp).toLocaleString()}
-                </p>
+              <div key={activity._id} className="mb-4 pb-4 border-b border-gray-200 last:border-b-0">
+                <div className="flex gap-3">
+                  {/* Icon */}
+                  <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-100 border border-emerald-200 flex items-center justify-center mt-0.5">
+                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    {/* Admin Info */}
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-gray-900 truncate">
+                          {activity.admin?.fullname || 'Unknown Admin'}
+                        </p>
+                        <p className="text-xs text-gray-600 truncate">
+                          {activity.admin?.email || 'No email'}
+                        </p>
+                      </div>
+                      <span className="text-xs text-gray-700 font-medium whitespace-nowrap">
+                        {new Date(activity.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                    
+                    {/* Action Details */}
+                    <p className="text-sm text-gray-800 leading-relaxed mb-1">
+                      {activity.details || activity.action || "Performed an action"}
+                      {activity.applicantName && (
+                        <span className="font-semibold text-gray-900"> for {activity.applicantName}</span>
+                      )}
+                    </p>
+                    
+                    {/* Comment */}
+                    {activity.comment && (
+                      <div className="bg-amber-50 border-l-2 border-amber-400 px-3 py-2 rounded-r mt-2">
+                        <p className="text-xs text-amber-900 font-medium">
+                          <span className="font-bold">Note:</span> {activity.comment}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

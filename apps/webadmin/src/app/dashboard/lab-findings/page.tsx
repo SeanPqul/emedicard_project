@@ -16,7 +16,10 @@ import { useState } from "react";
 export default function LabFindingsPage() {
   const router = useRouter();
   const { isLoaded: isClerkLoaded, user } = useUser();
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
+  const adminPrivileges = useQuery(
+    api.users.roles.getAdminPrivileges,
+    isClerkLoaded && user ? undefined : "skip"
+  );
   
   const [selectedApplicationId, setSelectedApplicationId] = useState<Id<"applications"> | null>(null);
   const [showRecorder, setShowRecorder] = useState(false);
@@ -25,7 +28,7 @@ export default function LabFindingsPage() {
   // Get all applications with findings
   const applications = useQuery(
     api.applications.list.list,
-    adminPrivileges?.isAdmin ? {
+    isClerkLoaded && !!user && !!adminPrivileges && adminPrivileges.isAdmin ? {
       managedCategories: adminPrivileges.managedCategories as any,
     } : "skip"
   );

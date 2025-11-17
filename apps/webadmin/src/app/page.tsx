@@ -127,16 +127,20 @@ export default function LandingPage() {
 
     try {
       await signIn.create({
-        strategy: 'reset_password_email_code',
+        strategy: 'email_link',
         identifier: email,
+        // After clicking the magic link, Clerk will redirect back here.
+        // Our existing useEffect will detect the signed-in user and route
+        // them to /dashboard or /super-admin based on adminPrivileges.
+        redirectUrl: window.location.href,
       });
-      
+
       setForgotPasswordSuccess(true);
       setError('');
-      
+
       // Log success for developers
       if (process.env.NODE_ENV === 'development') {
-        console.log('Password reset email sent successfully to:', email);
+        console.log('Magic sign-in link email sent successfully to:', email);
       }
     } catch (err: any) {
       const errorContext: ErrorContext = {
@@ -146,7 +150,7 @@ export default function LandingPage() {
         url: window.location.href,
       };
       const userFriendlyMessage = getUserFriendlyErrorMessage(err);
-      setError(userFriendlyMessage || 'Failed to send password reset email. Please try again.');
+      setError(userFriendlyMessage || 'Failed to send sign-in link. Please try again.');
       logAuthError(err, errorContext);
     } finally {
       setLoading(false);
@@ -330,14 +334,14 @@ export default function LandingPage() {
       {/* Admin Login Modal */}
       {showLoginModal && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6 md:p-8 animate-fadeIn overflow-y-auto" 
           onClick={resetModal}
           role="dialog"
           aria-modal="true"
           aria-labelledby="login-modal-title"
         >
           <div 
-            className="bg-white rounded-2xl w-full max-w-md p-8 shadow-2xl relative transform transition-all animate-slideUp" 
+            className="bg-white rounded-xl sm:rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-2xl relative transform transition-all animate-slideUp my-auto" 
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
@@ -351,15 +355,15 @@ export default function LandingPage() {
               </svg>
             </button>
 
-            <div className="mb-6">
-              <h2 id="login-modal-title" className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-              <p className="text-gray-600 text-sm">Sign in to access your dashboard</p>
+            <div className="mb-4 sm:mb-6">
+              <h2 id="login-modal-title" className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+              <p className="text-gray-600 text-xs sm:text-sm">Sign in to access your dashboard</p>
             </div>
 
             {!showForgotPassword ? (
-              <form onSubmit={handleLogin} className="space-y-5">
+              <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="email" className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
                     Email Address
                   </label>
                   <input 
@@ -367,14 +371,14 @@ export default function LandingPage() {
                     id="email" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
-                    className="w-full px-4 py-3 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" 
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 text-gray-800 text-sm sm:text-base rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" 
                     placeholder="admin@emedicard.com" 
                     required 
                     aria-required="true"
                   />
                 </div>
                 <div>
-                  <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="password" className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
                     Password
                   </label>
                   <div className="relative">
@@ -383,7 +387,7 @@ export default function LandingPage() {
                       id="password" 
                       value={password} 
                       onChange={e => setPassword(e.target.value)} 
-                      className="w-full px-4 py-3 pr-12 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" 
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border border-gray-300 text-gray-800 text-sm sm:text-base rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" 
                       placeholder="••••••••" 
                       required 
                       aria-required="true"
@@ -469,7 +473,7 @@ export default function LandingPage() {
                           </svg>
                           Sending...
                         </span>
-                      ) : "Send Reset Link"}
+                      ) : "Send sign-in link"}
                     </button>
                     <button 
                       type="button"
@@ -500,8 +504,8 @@ export default function LandingPage() {
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                         <div>
-                          <p className="text-sm font-semibold text-emerald-900 mb-1">Reset Email Sent!</p>
-                          <p className="text-sm text-emerald-800">Check your email for password reset instructions. The link will expire in 24 hours.</p>
+                          <p className="text-sm font-semibold text-emerald-900 mb-1">Sign-in Email Sent!</p>
+                          <p className="text-sm text-emerald-800">Check your email for a secure sign-in link. After clicking it, youll be redirected back and signed in automatically.</p>
                         </div>
                       </div>
                     </div>

@@ -6,12 +6,13 @@ import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 
 type PageProps = {
-  params: {
+  params: Promise<{
     id: Id<'applications'>;
-  };
+  }>;
 };
 
-export default function OrientationSchedulerPage({ params }: PageProps) {
+export default function OrientationSchedulerPage({ params: paramsPromise }: PageProps) {
+  const params = React.use(paramsPromise);
   const application = useQuery(api.applications.getApplicationById.getApplicationByIdQuery, { applicationId: params.id });
   const existingOrientation = useQuery(api.admin.orientation.getOrientationByApplicationId, { applicationId: params.id });
   const scheduleOrientation = useMutation(api.admin.orientation.scheduleOrientation);

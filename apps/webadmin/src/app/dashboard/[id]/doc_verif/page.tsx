@@ -1850,8 +1850,8 @@ export default function DocumentVerificationPage({ params: paramsPromise }: Page
                             {item.requirementName}
                             {item.isRequired && <span className="text-rose-500 ml-1">*</span>}
                             
-                            {/* ATTEMPT COUNTER BADGE - Only show if there have been rejections */}
-                            {(item.attemptNumber ?? 0) > 0 && (
+                            {/* ATTEMPT COUNTER BADGE - Only for non-medical documents (resubmission flow) */}
+                            {!isMedicalDocument(item.fieldIdentifier) && (item.attemptNumber ?? 0) > 0 && (
                               <span className={`ml-2 px-2 py-0.5 text-xs font-semibold rounded-md ${
                                 item.attemptNumber === 1 ? 'bg-gray-100 text-gray-600' :
                                 item.attemptNumber === 2 ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' :

@@ -34,6 +34,11 @@ const NOTIFICATION_ICONS: Record<string, string> = {
   payment_rejection_info: 'information-circle',
   max_attempts_reached: 'warning',
   document_rejected: 'close-circle',
+  // New medical/document referral types (normalized in useNotificationList)
+  DocumentReferredMedical: 'medkit',
+  DocumentIssueFlagged: 'alert-circle',
+  MedicalReferralResubmission: 'medkit',
+  DocumentResubmission: 'document-text',
 };
 
 const NOTIFICATION_COLORS: Record<string, string> = {
@@ -53,6 +58,11 @@ const NOTIFICATION_COLORS: Record<string, string> = {
   payment_rejection_info: '#6B7280',
   max_attempts_reached: '#F18F01',
   document_rejected: '#F18F01',
+  // New medical/document referral types (normalized in useNotificationList)
+  DocumentReferredMedical: '#DC2626', // red-ish for medical findings
+  DocumentIssueFlagged: '#F18F01',    // orange for document issues
+  MedicalReferralResubmission: '#2563EB',
+  DocumentResubmission: '#2563EB',
 };
 
 const NOTIFICATION_TITLES: Record<string, string> = {
@@ -72,6 +82,11 @@ const NOTIFICATION_TITLES: Record<string, string> = {
   payment_rejection_info: 'Payment Update',
   max_attempts_reached: 'Action Required',
   document_rejected: 'Document Rejected',
+  // New medical/document referral types (normalized in useNotificationList)
+  DocumentReferredMedical: 'Medical Finding Detected',
+  DocumentIssueFlagged: 'Document Needs Correction',
+  MedicalReferralResubmission: 'Medical Results Resubmitted',
+  DocumentResubmission: 'Document Resubmitted',
 };
 
 interface NotificationWidgetProps {

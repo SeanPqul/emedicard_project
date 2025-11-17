@@ -1,12 +1,10 @@
 'use client';
 
-import { useStoreUser } from '@/app/hooks/useStoreUser';
 import { NotificationCardCompact } from './notifications';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { useAuth, useUser } from '@clerk/nextjs';
-import Link from 'next/link';
+import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { isLoggingOut } from '@/utils/convexErrorHandler';

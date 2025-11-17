@@ -50,7 +50,11 @@ const ScheduleModal = ({
   const [error, setError] = useState<string | null>(null);
 
   // Get all inspectors
-  const inspectors = useQuery(api.admin.orientation.getInspectors);
+  const { isLoaded: isClerkLoaded, user } = useUser();
+  const inspectors = useQuery(
+    api.admin.orientation.getInspectors,
+    isClerkLoaded && user ? undefined : "skip"
+  );
 
   const createSchedule = useMutation(api.orientationSchedules.createSchedule) as any;
   const updateSchedule = useMutation(api.orientationSchedules.updateSchedule) as any;
@@ -457,7 +461,11 @@ const BulkCreateModal = ({
   const [error, setError] = useState<string | null>(null);
 
   // Get all inspectors
-  const inspectors = useQuery(api.admin.orientation.getInspectors);
+  const { isLoaded: isClerkLoaded, user } = useUser();
+  const inspectors = useQuery(
+    api.admin.orientation.getInspectors,
+    isClerkLoaded && user ? undefined : "skip"
+  );
 
   const bulkCreateSchedules = useMutation(api.orientationSchedules.bulkCreateSchedules) as any;
 

@@ -28,14 +28,27 @@ export default function SystemAdministratorNotificationsPage() {
   const router = useRouter();
 
   const { isLoaded: isClerkLoaded, user } = useUser();
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
+  const adminPrivileges = useQuery(
+    api.users.roles.getAdminPrivileges,
+    isClerkLoaded && user ? undefined : "skip"
+  );
+
+  const isSystemAdmin =
+    isClerkLoaded && !!user && !!adminPrivileges && adminPrivileges.managedCategories === "all";
   
   // Get all admin notifications (this should be updated to get all system notifications for super admin)
-  const adminNotifications = useQuery(api.notifications.getAdminNotifications, 
-    { notificationType: undefined }
+  const adminNotifications = useQuery(
+    api.notifications.getAdminNotifications,
+    isSystemAdmin ? { notificationType: undefined } : "skip"
   );
-  const rejectionNotifications = useQuery(api.notifications.getRejectionHistoryNotifications, {});
-  const paymentRejectionNotifications = useQuery(api.notifications.getPaymentRejectionNotifications, {});
+  const rejectionNotifications = useQuery(
+    api.notifications.getRejectionHistoryNotifications,
+    isSystemAdmin ? {} : "skip"
+  );
+  const paymentRejectionNotifications = useQuery(
+    api.notifications.getPaymentRejectionNotifications,
+    isSystemAdmin ? {} : "skip"
+  );
   
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markRejectionAsRead = useMutation(api.notifications.markRejectionHistoryAsRead);

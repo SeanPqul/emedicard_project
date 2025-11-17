@@ -1,21 +1,28 @@
 // app/super-admin/system-config/page.tsx
 "use client";
 
-import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import ErrorMessage from "@/components/ErrorMessage";
+import LoadingScreen from "@/components/shared/LoadingScreen";
+import Navbar from "@/components/shared/Navbar";
 import { api } from "@backend/convex/_generated/api";
 import { RedirectToSignIn, useUser } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import LoadingScreen from "@/components/shared/LoadingScreen";
-import ErrorMessage from "@/components/ErrorMessage";
-import Navbar from "@/components/shared/Navbar";
+import { useState } from "react";
 
 export default function SystemConfigPage() {
   const router = useRouter();
   const { isLoaded: isClerkLoaded, user } = useUser();
-  const adminPrivileges = useQuery(api.users.roles.getAdminPrivileges);
-  const officials = useQuery(api.systemConfig.index.getActiveOfficials);
-  const setOfficial = useMutation(api.systemConfig.index.setOfficial);
+  const adminPrivileges = useQuery(
+    api.users.roles.getAdminPrivileges,
+    isClerkLoaded && user ? undefined : "skip"
+  );
+  const canViewConfig =
+    isClerkLoaded && !!user && !!adminPrivileges && adminPrivileges.isSuperAdmin;
+  const officials = useQuery(
+    api.systemConfig.index.getActiveOfficials,
+    canViewConfig ? {} : "skip"
+  );
   
   const [editing, setEditing] = useState<"city_health_officer" | "sanitation_chief" | null>(null);
 
@@ -101,7 +108,7 @@ export default function SystemConfigPage() {
             onEdit={() => setEditing("sanitation_chief")}
             onCancel={() => setEditing(null)}
             onSave={async (data) => {
-              await setOfficial({
+              await setOfficials({
                 key: "sanitation_chief",
                 name: data.name,
                 designation: data.designation,
@@ -214,7 +221,7 @@ function OfficialCard({ title, configKey, official, isEditing, onEdit, onCancel,
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Dr. Maria Santos"
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2 border border-gray-300 text-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
@@ -226,7 +233,7 @@ function OfficialCard({ title, configKey, official, isEditing, onEdit, onCancel,
             value={formData.designation}
             onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
             placeholder="City Health Officer II"
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 text-gray-600 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
@@ -237,7 +244,7 @@ function OfficialCard({ title, configKey, official, isEditing, onEdit, onCancel,
             value={formData.changeReason}
             onChange={(e) => setFormData({ ...formData, changeReason: e.target.value })}
             placeholder="New appointment per City Order No. 2025-123"
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
@@ -248,7 +255,7 @@ function OfficialCard({ title, configKey, official, isEditing, onEdit, onCancel,
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             placeholder="Additional notes..."
             rows={2}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
