@@ -756,6 +756,33 @@ export default defineSchema({
     .index("by_key", ["key"]) // Query by key, then filter by isActive in code
     .index("by_updated_at", ["updatedAt"]), // For audit/history queries
 
+  // Pricing Configuration - stores dynamic pricing that can be edited by super admins
+  // Replaces hardcoded pricing constants with database-driven configuration
+  pricingConfig: defineTable({
+    // Configuration Key (unique identifier for pricing type)
+    key: v.string(), // "base_fee", "maya_service_fee", "baranggay_service_fee", "cityhall_service_fee"
+    
+    // Pricing Information
+    value: v.object({
+      amount: v.float64(), // e.g., 50.00
+      currency: v.string(), // "PHP"
+      description: v.string(), // "Base health card application fee"
+      isActive: v.boolean(), // Is this the current active price?
+      effectiveFrom: v.float64(), // When this price became active (timestamp)
+      effectiveTo: v.optional(v.float64()), // When it was replaced (null = still active)
+    }),
+    
+    // Audit Trail
+    updatedAt: v.float64(),
+    updatedBy: v.id("users"), // System Admin who made the change
+    notes: v.optional(v.string()), // Additional context
+    
+    // Change History
+    changeReason: v.optional(v.string()), // "Price adjustment per city ordinance", "Service fee update"
+  })
+    .index("by_key", ["key"]) // Query by key, then filter by isActive in code
+    .index("by_updated_at", ["updatedAt"]), // For audit/history queries
+
   // Lab Test Findings - Phase 2: Medical test results that appear on health cards
   // Used when applicants have medical findings that were cleared but need monitoring
   labTestFindings: defineTable({

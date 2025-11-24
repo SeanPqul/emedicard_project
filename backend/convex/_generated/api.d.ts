@@ -158,6 +158,7 @@ import type * as payments_maya_types from "../payments/maya/types.js";
 import type * as payments_maya_webhook from "../payments/maya/webhook.js";
 import type * as payments_resubmitPayment from "../payments/resubmitPayment.js";
 import type * as payments_updatePaymentStatus from "../payments/updatePaymentStatus.js";
+import type * as pricingConfig_index from "../pricingConfig/index.js";
 import type * as requirements_adminBatchReviewDocuments from "../requirements/adminBatchReviewDocuments.js";
 import type * as requirements_adminGetDocumentsByStatus from "../requirements/adminGetDocumentsByStatus.js";
 import type * as requirements_adminGetPendingDocuments from "../requirements/adminGetPendingDocuments.js";
@@ -351,6 +352,7 @@ declare const fullApi: ApiFromModules<{
   "payments/maya/webhook": typeof payments_maya_webhook;
   "payments/resubmitPayment": typeof payments_resubmitPayment;
   "payments/updatePaymentStatus": typeof payments_updatePaymentStatus;
+  "pricingConfig/index": typeof pricingConfig_index;
   "requirements/adminBatchReviewDocuments": typeof requirements_adminBatchReviewDocuments;
   "requirements/adminGetDocumentsByStatus": typeof requirements_adminGetDocumentsByStatus;
   "requirements/adminGetPendingDocuments": typeof requirements_adminGetPendingDocuments;
