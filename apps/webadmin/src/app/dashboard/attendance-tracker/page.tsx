@@ -5,7 +5,7 @@ import Navbar from '@/components/shared/Navbar';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { ArrowLeft, Calendar, CheckCircle, Clock, Edit2, Filter, MapPin, Search, User, Users, XCircle, Lock, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, CheckCircle, Clock, Edit2, Filter, MapPin, Search, User, Users, XCircle, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
 
@@ -91,16 +91,6 @@ export default function AttendanceTrackerPage() {
     status: 'completed' | 'missed' | 'excused';
     notes: string;
   }>({ status: 'completed', notes: '' });
-  const [successModal, setSuccessModal] = useState<{
-    show: boolean;
-    completedCount: number;
-    missedCount: number;
-    excusedCount: number;
-  } | null>(null);
-  const [confirmModal, setConfirmModal] = useState<{
-    show: boolean;
-    schedule: OrientationSchedule | null;
-  }>({ show: false, schedule: null });
 
   // Convert selected date to timestamp (start of day)
   const selectedTimestamp = selectedDate.getTime();
@@ -126,9 +116,6 @@ export default function AttendanceTrackerPage() {
   // Mutations
   const manuallyUpdateStatus = useMutation(
     api.orientations.attendance.manuallyUpdateAttendanceStatus
-  );
-  const finalizeSession = useMutation(
-    api.orientations.attendance.finalizeSessionAttendance
   );
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,38 +150,6 @@ export default function AttendanceTrackerPage() {
     setSearchQuery(prev => ({ ...prev, [scheduleId]: query }));
   };
 
-  const handleFinalizeSession = async (schedule: OrientationSchedule) => {
-    // Show confirmation modal
-    setConfirmModal({ show: true, schedule });
-  };
-
-  const confirmFinalization = async () => {
-    if (!confirmModal.schedule) return;
-
-    const schedule = confirmModal.schedule;
-    setConfirmModal({ show: false, schedule: null });
-
-    try {
-      const result = await finalizeSession({
-        scheduleId: schedule.scheduleId,
-        selectedDate: schedule.date,
-        timeSlot: schedule.time,
-        venue: schedule.venue.name,
-      });
-
-      if (result.success) {
-        setSuccessModal({
-          show: true,
-          completedCount: result.completedCount,
-          missedCount: result.missedCount,
-          excusedCount: result.excusedCount,
-        });
-      }
-    } catch (error: any) {
-      console.error('Error finalizing session:', error);
-      alert(`❌ ${error.message || 'Failed to finalize session. Please try again.'}`);
-    }
-  };
 
   const handleManualStatusUpdate = async () => {
     if (!editingAttendee) return;
@@ -217,14 +172,7 @@ export default function AttendanceTrackerPage() {
   };
 
   const getSessionStatusBadge = (schedule: OrientationSchedule) => {
-    if (schedule.isFinalized) {
-      return (
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-gray-700 to-gray-800 text-white shadow-lg border-2 border-gray-600">
-          <Lock className="w-4 h-4" />
-          <span className="font-semibold text-sm">Finalized</span>
-        </div>
-      );
-    } else if (schedule.isActive) {
+    if (schedule.isActive) {
       return (
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg animate-pulse border-2 border-emerald-400">
           <div className="w-2 h-2 rounded-full bg-white animate-ping" />
@@ -461,11 +409,7 @@ export default function AttendanceTrackerPage() {
             {filteredSchedules.map((schedule) => (
               <div
                 key={schedule.scheduleId}
-                className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all ${
-                  schedule.isFinalized 
-                    ? 'border-2 border-gray-400 opacity-95' 
-                    : 'border-2 border-gray-200 hover:border-emerald-300'
-                }`}
+className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all border-2 border-gray-200 hover:border-emerald-300`}
               >
                 {/* Enhanced Session Header */}
                 <div className={`px-6 py-5 text-white relative overflow-hidden ${
@@ -526,11 +470,7 @@ export default function AttendanceTrackerPage() {
                 </div>
 
                 {/* Enhanced Session Stats */}
-                <div className={`px-6 py-4 border-b border-gray-200 ${
-                  schedule.isFinalized 
-                    ? 'bg-gradient-to-r from-gray-100 to-gray-200' 
-                    : 'bg-gradient-to-r from-gray-50 to-gray-100'
-                }`}>
+                <div className={`px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100`}>
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex flex-wrap gap-6 text-sm">
                       <div className="flex items-center gap-3">
@@ -570,24 +510,8 @@ export default function AttendanceTrackerPage() {
                       </div>
                     </div>
                     
-                    {/* Finalize Button or Finalized Info */}
-                    {schedule.isFinalized ? (
-                      <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl shadow-lg border-2 border-yellow-400">
-                        <Lock className="w-5 h-5" />
-                        <div className="text-left">
-                          <p className="text-sm font-bold">Session Finalized</p>
-                          <p className="text-xs text-yellow-100">
-                            {schedule.finalizedAt && new Date(schedule.finalizedAt).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    ) : null}
+                    {/* Finalize removed: attendance is processed automatically at inspector check-out */}
+                    {null}
                   </div>
                 </div>
 
@@ -674,35 +598,28 @@ export default function AttendanceTrackerPage() {
                                 {getAttendanceStatus(attendee)}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                {schedule.isFinalized ? (
-                                  <div className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
-                                    <Lock className="w-3 h-3" />
-                                    Locked
-                                  </div>
-                                ) : (
-                                  <button
-                                    onClick={() => {
-                                      setEditingAttendee({
-                                        bookingId: attendee.bookingId,
-                                        scheduleId: schedule.scheduleId,
-                                      });
-                                      const initialStatus: 'completed' | 'missed' | 'excused' = 
-                                        attendee.orientationStatus === 'scheduled' || attendee.orientationStatus === 'checked-in' 
-                                          ? 'completed' 
-                                          : (attendee.orientationStatus === 'completed' || attendee.orientationStatus === 'missed' || attendee.orientationStatus === 'excused')
-                                            ? attendee.orientationStatus
-                                            : 'completed';
-                                      setStatusUpdateForm({
-                                        status: initialStatus,
-                                        notes: attendee.inspectorNotes || '',
-                                      });
-                                    }}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors border border-blue-200 hover:border-blue-300"
-                                  >
-                                    <Edit2 className="w-3 h-3" />
-                                    Edit Status
-                                  </button>
-                                )}
+                                <button
+                                  onClick={() => {
+                                    setEditingAttendee({
+                                      bookingId: attendee.bookingId,
+                                      scheduleId: schedule.scheduleId,
+                                    });
+                                    const initialStatus: 'completed' | 'missed' | 'excused' = 
+                                      attendee.orientationStatus === 'scheduled' || attendee.orientationStatus === 'checked-in' 
+                                        ? 'completed' 
+                                        : (attendee.orientationStatus === 'completed' || attendee.orientationStatus === 'missed' || attendee.orientationStatus === 'excused')
+                                          ? attendee.orientationStatus
+                                          : 'completed';
+                                    setStatusUpdateForm({
+                                      status: initialStatus,
+                                      notes: attendee.inspectorNotes || '',
+                                    });
+                                  }}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors border border-blue-200 hover:border-blue-300"
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                  Edit Status
+                                </button>
                               </td>
                             </tr>
                           ))}
@@ -716,178 +633,31 @@ export default function AttendanceTrackerPage() {
                 {/* Session Status Note */}
                 {schedule.attendees.length > 0 && (
                   <div className={`px-6 py-4 border-t border-gray-200 ${
-                    schedule.isFinalized 
-                      ? 'bg-gray-100' 
-                      : schedule.isActive
+                      schedule.isActive
                       ? 'bg-emerald-50'
                       : 'bg-blue-50'
                   }`}>
-                    {schedule.isFinalized ? (
+                    {schedule.isPast ? (
                       <div className="flex items-center gap-3">
-                        <Lock className="w-5 h-5 text-gray-700 shrink-0" />
-                        <p className="text-sm text-gray-700">
-                          <span className="font-semibold">Session Finalized:</span> This orientation session has been finalized. All attendance records have been processed and applicant statuses have been updated. No further changes can be made.
-                        </p>
-                      </div>
-                    ) : schedule.isPast ? (
-                      <div className="flex items-center gap-3">
-                        <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
-                        <p className="text-sm text-blue-700">
-                          <span className="font-semibold">Session Ended:</span> This session has ended. Attendance was tracked automatically via QR code check-in and check-out. Use this screen only to review or manually correct records if needed.
+                        <AlertCircle className="w-5 h-5 text-blue-700 shrink-0" />
+                        <p className="text-sm text-blue-800">
+                          <span className="font-semibold">Session Completed:</span> Attendance updates are applied automatically at inspector check-out. You can still adjust statuses manually if needed.
                         </p>
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
-                        <svg className="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p className="text-sm text-blue-700">
-                          <span className="font-semibold">Note:</span> Attendance is automatically tracked when inspectors check in and out attendees via QR code scanning. No manual session finalization is required.
+                        <Clock className="w-5 h-5 text-emerald-700 shrink-0" />
+                        <p className="text-sm text-emerald-800">
+                          <span className="font-semibold">Session Active:</span> Use the inspector app to check-in and check-out attendees in real time.
                         </p>
                       </div>
                     )}
                   </div>
                 )}
+                  </div>
+                )}
               </div>
             ))}
-          </div>
-        )}
-
-        {/* Confirmation Modal */}
-        {confirmModal.show && confirmModal.schedule && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 transform transition-all animate-in zoom-in-95 duration-300">
-              {/* Warning Icon */}
-              <div className="flex justify-center mb-4">
-                <div className="bg-orange-100 rounded-full p-3">
-                  <AlertCircle className="w-12 h-12 text-orange-600" />
-                </div>
-              </div>
-
-              {/* Title */}
-              <h3 className="text-2xl font-bold text-center text-gray-900 mb-2">
-                Finalize Session?
-              </h3>
-              
-              {/* Warning Message */}
-              <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4 mb-4">
-                <p className="text-sm text-orange-800 font-medium mb-2">
-                  ⚠️ This action cannot be undone!
-                </p>
-                <p className="text-sm text-gray-700">
-                  Finalizing this session will:
-                </p>
-                <ul className="mt-2 space-y-1 text-sm text-gray-700 list-disc list-inside">
-                  <li>Lock all attendance records</li>
-                  <li>Update applicant statuses automatically</li>
-                  <li>Prevent any further edits to this session</li>
-                  <li>Send notifications to affected applicants</li>
-                </ul>
-              </div>
-
-              {/* Session Info */}
-              <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">Session Details:</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-700">
-                      {new Date(confirmModal.schedule.date).toLocaleDateString('en-US', {
-                        timeZone: 'Asia/Manila',
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-700">{confirmModal.schedule.time}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-700">{confirmModal.schedule.venue.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-700">
-                      {confirmModal.schedule.attendeeCount} attendees ({confirmModal.schedule.completedCount} completed)
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setConfirmModal({ show: false, schedule: null })}
-                  className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmFinalization}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 font-semibold transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                >
-                  Yes, Finalize Session
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Success Modal */}
-        {successModal?.show && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all animate-in zoom-in-95 duration-300">
-              {/* Success Icon */}
-              <div className="flex justify-center mb-4">
-                <div className="bg-emerald-100 rounded-full p-3">
-                  <CheckCircle className="w-12 h-12 text-emerald-600" />
-                </div>
-              </div>
-
-              {/* Title */}
-              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
-                Session Validated Successfully!
-              </h3>
-              
-              {/* Message */}
-              <p className="text-center text-gray-600 text-sm mb-6">
-                Attendance records have been validated and applicant statuses updated to Approved.
-              </p>
-
-              {/* Stats */}
-              <div className="space-y-3 mb-6">
-                {successModal.completedCount > 0 && (
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <span className="text-sm font-medium text-green-900">Completed</span>
-                    <span className="text-lg font-bold text-green-600">{successModal.completedCount}</span>
-                  </div>
-                )}
-                {successModal.missedCount > 0 && (
-                  <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                    <span className="text-sm font-medium text-red-900">Missed</span>
-                    <span className="text-lg font-bold text-red-600">{successModal.missedCount}</span>
-                  </div>
-                )}
-                {successModal.excusedCount > 0 && (
-                  <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                    <span className="text-sm font-medium text-yellow-900">Excused</span>
-                    <span className="text-lg font-bold text-yellow-600">{successModal.excusedCount}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Close Button */}
-              <button
-                onClick={() => setSuccessModal(null)}
-                className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-              >
-                Continue
-              </button>
-            </div>
           </div>
         )}
 

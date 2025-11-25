@@ -14,31 +14,36 @@ export const JobCategoryStep: React.FC<JobCategoryStepProps> = ({
 }) => {
   const getCardColor = (categoryName: string) => {
     const name = categoryName.toLowerCase();
-    if (name.includes('food handler') || name.includes('food service')) {
+    // IMPORTANT: Check for "non-food" BEFORE generic "food" so "non-food" doesn't match as food
+    if (name.includes('non-food') || name.includes('nonfood') || name.includes('security') || name.includes('office') || name.includes('retail')) {
+      return 'Green';
+    } else if (name.includes('food')) {
       return 'Yellow';
     } else if (name.includes('skin') || name.includes('contact')) {
       return 'Pink';
-    } else if (name.includes('non-food') || name.includes('security') || name.includes('office')) {
-      return 'Green';
     }
     return 'Green';
   };
 
   const getIcon = (categoryName: string) => {
     const name = categoryName.toLowerCase();
-    if (name.includes('food handler') || name.includes('food service')) {
+    // IMPORTANT: Check for "non-food" BEFORE generic "food"
+    if (name.includes('non-food') || name.includes('nonfood') || name.includes('security') || name.includes('office') || name.includes('retail')) {
+      return 'business-outline';
+    } else if (name.includes('food')) {
       return 'restaurant';
     } else if (name.includes('skin') || name.includes('contact')) {
       return 'hand-left';
-    } else if (name.includes('non-food') || name.includes('security') || name.includes('office')) {
-      return 'business-outline';
     }
     return 'briefcase';
   };
 
   const getJobExamples = (categoryName: string) => {
     const name = categoryName.toLowerCase();
-    if (name.includes('food handler')) {
+    // IMPORTANT: Check for "non-food" BEFORE generic "food"
+    if (name.includes('non-food') || name.includes('nonfood') || name.includes('security') || name.includes('office') || name.includes('retail')) {
+      return 'Security guards, office workers, retail staff';
+    } else if (name.includes('food')) {
       return 'Restaurant staff, kitchen workers, food servers';
     } else if (name.includes('skin')) {
       return 'Barbers, massage therapists, tattoo artists';

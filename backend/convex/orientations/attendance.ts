@@ -243,16 +243,12 @@ export const checkOut = mutation({
     const timeElapsed = Date.now() - booking.checkInTime;
     const timeElapsedMinutes = Math.floor(timeElapsed / (60 * 1000));
 
-    // TEMPORARILY DISABLED FOR TESTING
-    // TODO: Re-enable this validation before production
-    /*
     if (timeElapsed < requiredDurationMs) {
       const remainingMinutes = Math.ceil((requiredDurationMs - timeElapsed) / (60 * 1000));
       throw new Error(
         `Cannot check out yet. This orientation requires ${requiredDurationMinutes} minutes. Time elapsed: ${timeElapsedMinutes} minutes. Please wait ${remainingMinutes} more minutes.`
       );
     }
-    */
 
     // Perform check-out
     const checkOutTime = Date.now();
