@@ -10,6 +10,7 @@ export interface PaymentSubmissionData {
   method: PaymentMethod;
   referenceNumber: string;
   amount?: number;
+  serviceFee?: number; // Added dynamic service fee
   receiptImage?: string; // Base64 or file URI
   metadata?: Record<string, any>;
 }
@@ -60,8 +61,8 @@ export async function submitPayment(
     }
 
     // Calculate amounts
-    const amount = paymentData.amount || 50; // Default health card fee
-    const serviceFee = 10; // All payment methods have ₱10 processing fee
+    const amount = paymentData.amount || 50; // Default health card fee if not passed
+    const serviceFee = paymentData.serviceFee || 10; // Default service fee if not passed
     const netAmount = amount + serviceFee;
 
     let receiptStorageId: Id<'_storage'> | undefined;

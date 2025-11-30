@@ -16,6 +16,10 @@ export const updateUserMutation = action({
         gender: v.optional(v.string()),
         birthDate: v.optional(v.string()),
         phoneNumber: v.optional(v.string()),
+        // Registration fields
+        registrationStatus: v.optional(v.string()),
+        registrationDocumentId: v.optional(v.string()),
+        registrationSubmittedAt: v.optional(v.string()),
     },
     handler: async (ctx, args): Promise<any> => {
         const identity = await ctx.auth.getUserIdentity();
@@ -43,11 +47,14 @@ export const updateUserMutation = action({
             }
         } catch (clerkError: any) {
             console.error("Failed to update Clerk:", clerkError);
-            throw new Error("Failed to sync profile with authentication provider: " + (clerkError.message || "Unknown error"));
+             // If we are just updating registration data, we can proceed
+             if (!args.registrationStatus) {
+               throw new Error("Failed to sync profile with authentication provider: " + (clerkError.message || "Unknown error"));
+            }
         }
 
         // Step 2: Update Convex database
-        const dbUpdates: Record<string, string> = {};
+        const dbUpdates: Record<string, any> = {};
         
         if (args.firstName && args.lastName) {
             dbUpdates.fullname = `${args.firstName} ${args.lastName}`.trim();
@@ -60,6 +67,11 @@ export const updateUserMutation = action({
         if (args.gender !== undefined) dbUpdates.gender = args.gender;
         if (args.birthDate !== undefined) dbUpdates.birthDate = args.birthDate;
         if (args.phoneNumber !== undefined) dbUpdates.phoneNumber = args.phoneNumber;
+        
+        // Registration fields
+        if (args.registrationStatus !== undefined) dbUpdates.registrationStatus = args.registrationStatus;
+        if (args.registrationDocumentId !== undefined) dbUpdates.registrationDocumentId = args.registrationDocumentId;
+        if (args.registrationSubmittedAt !== undefined) dbUpdates.registrationSubmittedAt = args.registrationSubmittedAt;
 
         await ctx.runMutation(api.users.updateUserDb.updateUserDatabase, {
             userId: user._id,

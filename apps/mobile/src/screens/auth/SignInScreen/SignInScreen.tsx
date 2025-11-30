@@ -55,7 +55,7 @@ export function SignInScreen() {
       
       if (attempt.status === "complete") {
         await setActive({ session: attempt.createdSessionId });
-        router.replace("/(tabs)");
+        // Router redirection is handled by the auth layout based on user status
       } else {
         setError({
           code: 'ADDITIONAL_VERIFICATION',
@@ -81,7 +81,7 @@ export function SignInScreen() {
       
       if (activate && createdSessionId) {
         activate({ session: createdSessionId });
-        router.replace("/(tabs)");
+        // Router redirection is handled by the auth layout based on user status
       }
     } catch (err) {
       Alert.alert("Error", "Google sign in failed. Please try again.");

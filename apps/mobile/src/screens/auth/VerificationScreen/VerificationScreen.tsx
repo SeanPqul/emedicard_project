@@ -141,7 +141,7 @@ export function VerificationScreen() {
   const handleContinue = useCallback(async () => {
     if (sessionId && setActive) {
       await setActive({ session: sessionId });
-      router.replace('/(tabs)/index');
+      router.replace('/(auth)/upload-documents');
     }
   }, [sessionId, setActive, router]);
 

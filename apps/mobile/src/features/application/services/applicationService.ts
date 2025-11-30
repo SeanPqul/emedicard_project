@@ -290,10 +290,11 @@ export class ApplicationService {
 
   /**
    * Calculates payment amounts based on method
+   * Can optionally accept dynamic pricing configuration
    */
-  static calculatePaymentAmounts(paymentMethod?: PaymentMethod) {
-    const APPLICATION_FEE = 50;
-    const PROCESSING_FEE = 10;
+  static calculatePaymentAmounts(paymentMethod?: PaymentMethod, pricing?: { baseFee: number; serviceFee: number }) {
+    const APPLICATION_FEE = pricing?.baseFee ?? 50;
+    const PROCESSING_FEE = pricing?.serviceFee ?? 10;
     const TOTAL_FEE = APPLICATION_FEE + PROCESSING_FEE;
     
     return {

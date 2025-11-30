@@ -153,7 +153,7 @@ export function SignUpScreen() {
       
       if (setActive && createdSessionId) {
         setActive({ session: createdSessionId });
-        router.replace("/(tabs)");
+        // Router redirection is handled by the auth layout based on user status
       }
     } catch (err) {
       Alert.alert("Error", "Google sign up failed. Please try again.");
