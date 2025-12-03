@@ -59,6 +59,7 @@ export function useUsers(role?: "applicant" | "inspector" | "admin") {
     profileImage?: string;
     registrationStatus?: string;
     registrationDocumentId?: string;
+    registrationDocumentType?: string;
     registrationSubmittedAt?: string;
   }) => {
     return updateUserAction(updates);

@@ -1,8 +1,10 @@
-import { useState, useCallback, Dispatch, SetStateAction } from 'react';
+import { useState, useCallback, useEffect, Dispatch, SetStateAction } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import * as MediaLibrary from 'expo-media-library'; // Still needed for permissions
+import * as MediaLibrary from 'expo-media-library';
+import { useQuery } from 'convex/react';
+import { api } from '@backend/convex/_generated/api';
 import { DocumentFile, SelectedDocuments } from '@shared/types';
 import { formStorage } from '../services/formStorage';
 
@@ -13,6 +15,8 @@ interface UseDocumentSelectionProps {
   currentStep: number;
   showSuccess: (title: string, message: string) => void;
   showError: (title: string, message?: string) => void;
+  currentUser?: any;
+  requirements?: any[];
 }
 
 /**
@@ -65,9 +69,58 @@ export const useDocumentSelection = ({
   currentStep,
   showSuccess,
   showError,
+  currentUser,
+  requirements = [],
 }: UseDocumentSelectionProps) => {
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+
+  // Fetch the URL for the registration document if it exists
+  const registrationDocumentUrl = useQuery(
+    api.storage.getUrl.getUrl,
+    currentUser?.registrationDocumentId
+      ? { storageId: currentUser.registrationDocumentId }
+      : 'skip'
+  );
+
+  useEffect(() => {
+    if (!currentUser || !requirements || requirements.length === 0) return;
+
+    const hasGovernmentIdFromRegistration =
+      currentUser.registrationDocumentType === 'government_id' &&
+      currentUser.registrationDocumentId;
+
+    if (!hasGovernmentIdFromRegistration) return;
+
+    const validIdRequirement = requirements.find((req: any) => req.fieldName === 'validId');
+    if (!validIdRequirement) return;
+
+    if (selectedDocuments['validId']?.isAutoFilled || selectedDocuments['validId']?.uri) return;
+
+    // Wait for the URL to be fetched
+    if (!registrationDocumentUrl) return;
+
+    const autoFilledDocument = {
+      uri: registrationDocumentUrl, // Use the actual URL instead of storage ID
+      name: 'Government ID (From Registration)',
+      fileName: 'Government ID (From Registration)',
+      type: 'image/jpeg',
+      size: 0,
+      mimeType: 'image/jpeg',
+      isAutoFilled: true,
+      registrationDocumentId: currentUser.registrationDocumentId, // Store storage ID for upload
+    };
+
+    setSelectedDocuments(prev => ({
+      ...prev,
+      validId: autoFilledDocument,
+    }));
+
+    formStorage.saveTempApplication(formData, {
+      ...selectedDocuments,
+      validId: autoFilledDocument,
+    }, currentStep);
+  }, [currentUser, requirements, selectedDocuments, setSelectedDocuments, formData, currentStep, registrationDocumentUrl]);
 
   const handleDocumentPicker = useCallback(async (documentId: string) => {
     setSelectedDocumentId(documentId);

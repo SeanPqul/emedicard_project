@@ -10,6 +10,7 @@ export interface DocumentFile {
   size: number; // Required to match UploadFile type
   mimeType?: string;
   fileName?: string;
+  isAutoFilled?: boolean; // Indicates if document was auto-filled from registration
 }
 
 export interface SelectedDocuments {

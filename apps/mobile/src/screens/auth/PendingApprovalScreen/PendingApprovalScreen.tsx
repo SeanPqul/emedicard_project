@@ -29,9 +29,13 @@ export function PendingApprovalScreen() {
 
   const handleRetry = async () => {
     try {
-      // Reset status to allow navigation back to upload screen
+      // Reset status and clear document data to allow navigation back to upload screen
       // Sending empty string acts as a reset signal (status becomes "" which falls to 'else' case in layout)
-      await updateUser({ registrationStatus: "" }); 
+      await updateUser({ 
+        registrationStatus: "",
+        registrationDocumentId: "",
+        registrationDocumentType: ""
+      }); 
       // The layout will automatically redirect to upload-documents when it sees status is not approved/pending/rejected
     } catch (error) {
       showToast("Failed to reset status", "error");

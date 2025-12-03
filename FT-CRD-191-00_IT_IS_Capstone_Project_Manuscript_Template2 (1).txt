@@ -1,0 +1,1303 @@
+ServeWise: Saas Restaurant Sales & Inventory Management System
+
+
+
+
+
+
+
+
+     A Capstone Project Presented to the Faculty of the
+Information and Communications Technology Program STI College Davao
+
+
+
+In Partial Fulfilment
+     of the Requirements for the Degree Bachelor of Science in Information Technology
+
+
+James Kurt B. Encluna Dexter D. Laum
+Honey Flor Magno Roger C. Perez Jr.
+
+
+
+
+December 2025
+
+
+
+STI College Davao	i
+
+ENDORSEMENT FORM FOR ORAL DEFENSE
+
+
+TITLE OF RESEARCH:	ServeWise: Saas Restaurant Sales & Inventory		Management System
+
+
+NAME OF PROPONENTS:	James Kurt B. Encluna
+Dexter D. Laum Honey Flor Magno Roger C. Perez Jr.
+
+
+
+In Partial Fulfilment of the Requirements
+for the degree Bachelor of Science in Information Technology has been examined and is recommended for Oral Defense.
+
+
+
+ENDORSED BY:
+
+
+Ariel P. Lapiñas
+Capstone Project Adviser
+
+
+
+APPROVED FOR ORAL DEFENSE:
+
+
+Jessiel Chris D. Hilot
+Capstone Project Coordinator
+
+
+
+NOTED BY:
+
+
+
+Jessiel Chris D. Hilot
+Program Head
+
+
+
+
+
+November 2025
+
+APPROVAL SHEET
+
+This capstone project titled ServeWise: Saas Restaurant Sales & Inventory Management System, prepared and submitted by Dexter D. Laum, Roger C Perez Jr., James Kurt B. Encluna, and Honey Flor Magno, in partial fulfillment of the requirements for the degree of Bachelor of Science in Information Technology, has been examined and is recommended for acceptance and approval.
+Ariel P. Lapiñas
+Capstone Project Adviser
+
+
+
+Accepted and approved by the Capstone Project Review Panel in partial fulfillment of the requirements for the degree of Bachelor of Science in Information Technology
+
+
+
+
+Reinamie G. Dayrit	Engr. Darwin Ian I. Guererro
+Panel Member	Panel Member
+
+
+
+
+Engr. Elvi Lito E. Ubas, CPE, MEEd
+Lead Panelist
+
+
+
+
+Noted:
+
+
+
+Jessiel Chris D. Hilot	Jessiel Chris D. Hilot
+Capstone Project Coordinator	Program Head
+
+
+
+
+
+
+
+November 2025
+
+ACKNOWLEDGEMENTS
+
+The researchers would like to extend their heartfelt gratitude to the following individuals who have made the completion of this Capstone Project:
+
+To Almighty God, for His guidance, wisdom, and strength that have sustained us throughout the course of this research. His divine presence inspired us to persevere and overcome every challenge we faced. Truly, without His grace and blessings, the success of this project would not have been possible.
+
+To our Capstone Project Coordinator, Ms. Jessiel Chris D. Hilot, for providing consistent guidance, coordination, and encouragement throughout the duration of the study. Your leadership and direction ensured that the project met all necessary academic and institutional requirements.
+
+To our Capstone Project Adviser, Mr. Ariel P. Lapiñas, for your expert advice, valuable insights, and continuous support in the development of ServeWise. Your constructive feedback and technical guidance greatly contributed to the improvement and success of this research.
+
+To our Capstone Project Review Panel, Mr. Elvi Lito E. Ubas, Ms. Reinamie G. Dayrit, and Mr. Darwin Ian I. Guerrero, for their time, effort, and expertise in evaluating this study. Your thoughtful comments, suggestions, and recommendations have helped refine and strengthen the final output of the project.
+
+To the College of Information and Communications Technology (CICT) and our instructors throughout the program, who have strengthened our skills, broadened our knowledge, and instilled in us the discipline and competence needed to complete this project. Your teachings and support have played a vital role in our academic development.
+
+To our Parents and/or Guardians, who served as our pillars of strength. Your unconditional love, prayers, patience, and financial support carried us through times of exhaustion and doubt. Your sacrifices inspired us to give our best and remain
+
+committed to finishing this project with integrity and dedication. We are forever grateful for your unwavering belief in our capabilities.
+
+To our Friends, Classmates, and Inspirations, thank you for the shared ideas, discussions, encouragement, and emotional support. Whether through late-night conversations, collaborative brainstorming, or simple acts of motivation, your presence helped lighten the burden of this academic journey. Your understanding and positivity kept us inspired even during the most demanding stages of the project.
+
+
+
+"Commit to the Lord whatever you do, and He will establish your plans."
+
+
+- Proverbs 16:3 (NIV)
+
+Abstract
+
+Title of research:	ServeWise: Saas Restaurant Sales & Inventory Management
+System
+
+Researchers:	James Kurt B. Encluna Dexter D. Laum
+Honey Flor Magno Roger C. Perez Jr.
+
+
+Degree:	Bachelor of Science in Information Technology
+
+Date of Completion:  December 2025
+
+Keywords:	ServeWise, Restaurant Saas, Web-Based System
+
+
+      ServeWise is a web-based Sales and Inventory Management System designed to streamline restaurant operations through integrated sales tracking, order processing, inventory automation, supplier coordination, and subscription-based service access. This project addresses the challenges commonly faced by small to medium restaurants, such as inaccurate inventory counts, manual sales consolidation, inefficient ordering processes, and the absence of centralized digital management tools.
+
+      The study begins by identifying the operational gaps in traditional restaurant management workflows and establishing the need for an all-in-one solution like ServeWise. The system's objectives focus on providing real-time inventory monitoring, automated spoilage and damage logging, accurate sales processing, supplier and purchase order management, and a subscription module that allows restaurant managers to select and maintain service plans.
+
+      The methodology chapter outlines the system development approach, which follows standard software engineering practices-including requirements gathering, process modeling, design, development, and testing. Various diagrams such as Data Flow Diagrams and Activity Diagrams were used to illustrate system processes. The development phase details the implementation of modules including sales and order processing,  supplier  management,  inventory  automation,  and  subscription
+
+handling. The testing phase validates system functionality, reliability, and usability through unit, functional, and user acceptance testing to ensure alignment with the defined requirements.
+
+      The results demonstrate that ServeWise successfully improves the accuracy, efficiency, and organization of restaurant operations. However, limitations include the lack of support for multiple branches under a single account and the absence of offline mode. Recommendations for future enhancement include integrating multi-branch management, expanding the system from nationwide to global usage, developing offline capabilities, and upgrading features to support high-class restaurants with more complex workflows.
+
+TABLE OF CONTENTS
+Page
+Title Page	i
+
+Endorsement form for Oral Defense Approval Sheet
+Acknowledgements
+ 
+ii iii iv
+
+Abstract	vi
+Table of Contents	viii
+List of Figures	x
+List of Tables	xii
+Introduction	1
+Project Context	1
+Purpose and Description	3
+Objectives	4
+Scope and Limitations	6
+Review of Related Literature/Studies/Systems	10
+Methodology	14
+Technical Background	14
+Requirements Analysis	17
+Requirements Documentation	19
+Design of Software, System, Product, and/or Processes	20
+Development	23
+Results and Discussion	25
+Testing	25
+Description of Prototype	31
+Implementation Plan	33
+Implementation Results	34
+Conclusion	35
+References	38
+Appendices	39
+Resource Persons	74
+Evaluation Tool/Test Documents	75
+Sample Input/Output/Reports	77
+User's Guide	84
+Personal Technical Vitae	88
+
+
+List of Figures
+
+Figure	Page
+1 Spiral Model	39
+2 Calendar of Activities	40
+3 Use-Case Diagram (Objective 1)	41
+4 Use-Case Diagram (Objective 2)	42
+5 Use-Case Diagram (Objective 3)	43
+6 Use-Case Diagram (Objective 4)	44
+7 Use-Case Diagram (Objective 5)	45
+8 Use-Case Diagram (Objective 6)	46
+9 Sequence Diagram (Objective 1)	47
+10 Sequence Diagram (Objective 2)	48
+11 Sequence Diagram (Objective 3)	49
+12 Sequence Diagram (Objective 4)	50
+13 Sequence Diagram (Objective 5)	51
+14 Sequence Diagram (Objective 6)	52
+15 Domain Diagram (Objective 1)	53
+16 Domain Diagram (Objective 2)	54
+17 Domain Diagram (Objective 3)	55
+18 Domain Diagram (Objective 4)	56
+19 Domain Diagram (Objective 5)	57
+20 Domain Diagram (Objective 6)	58
+21 Activity Diagram (Objective 1)	59
+22 Activity Diagram (Objective 2)	60
+23 Activity Diagram (Objective 3)	61
+24 Activity Diagram (Objective 4)	62
+
+Figure	Page
+25 Activity Diagram (Objective 5)	63
+26 Activity Diagram (Objective 6)	64
+27 ServeWise Landing Page	65
+28 ServeWise Login Page	65
+29 ServeWise Registration Page	66
+30 ServeWise Subscription Page	66
+31 Manager Dashboard	67
+32 Manager's Subscription Page	67
+33 Waiter's Dashboard	68
+34 Kitchen Staff Dashboard	68
+35 Cashier Dashboard	69
+36 Manager's Inventory Page	69
+37 Purchase Order Page	70
+38 Supplier Bills Page	70
+39 List of Employees Page	71
+40 Menu Items Page	71
+41 Menu Plans Page	72
+42 Restaurant Tables Page	72
+43 Reports & Analytics Page	73
+44 Generate Report Page	73
+
+List of Tables
+
+Figure	Page
+1 Login Test Case	25
+2 Registration Test Case	26
+3 Supplier Management Test Case	27
+4 Sales & POS Module Test Case	28
+5 Inventory Management Test Case	28
+6 Spoilage/Wastage Report Test Case	29
+7 Purchase Order Module Test Case	29
+8 Reporting & Analytics Test Case	29
+9 CSS Framework Test Case	30
+
+INTRODUCTION
+Project Context
+
+      The restaurant industry is a vital part of the economy, yet many establishments face operational inefficiencies due to outdated sales and inventory management systems. Restaurants in the Philippines still adopt largely manual processes or non- integrated systems, resulting in stock shortages, over-purchasing, and financial losses incurred as a result of delayed order processing. All of these affect profitability and customer satisfaction along with efficiency.
+      One of the biggest problems that restaurant owners and managers face is keeping track of their inventories. Manual recordkeeping often gives false stock levels whereby the records show a shortage that interrupts service, or a surplus of stock that could go to waste. In addition, time-consuming but error-prone processes characterize tracking sales and creating financial reports, making it a hard rip for restaurant owners to make better-informed decisions for their business. Strategic planning and cost control have so faced their own hurdles by lack of real-time insights into sales trends and stock usage.
+      Inefficiencies in order processing add to the bottlenecks in operations, which, alongside traditional methods, such as written notes or a verbal exchange of information between the staff and kitchen, increase likelihood for error. Such inefficiencies in service slow down, create wrong orders, and raise customer dissatisfaction. A fragmented, non-centralized order system along sales tracking and inventory management makes restaurant operations less efficient.
+      ServeWise: SaaS Restaurant Sales and Inventory Management System would offer such a solution to install on a cloud platform where an integrated sales monitoring, order processing, and inventory management application is intended. It brings in real- time stock monitoring, automated low-stock alerts, supplier order management, and financial reporting to the owners, managers, and staff of these restaurants. ServeWise makes use of cloud technologies for such access over many devices to become available for use in remote monitoring and expansion of effective restaurant controls.
+
+      This also encompasses access based on roles assigning the employees to process orders and payments while managers create reports, track the use of inventory and manage suppliers' transactions. Their automatic features minimize human errors, perfect communication between restaurant staff, and fulfill the ordering. ServeWise offers data analytics and reporting tools that give restaurant owners the right information to make learned decisions regarding pricing strategies, menu offerings, and resource allocation in the restaurant.
+      ServeWise comes at a very opportune time and is very practical given the present scenario in the country, where most restaurants are still struggling to go digital. The rampant use of contactless payments, online orderings, and cloud-based business solutions attests to the need for an integrated restaurant management system. ServeWise is an accessible and adaptable solution in effect to assist small and mid-sized restaurants in improving their operational efficiency through reduced financial losses and customer satisfaction levels. This research aims to modernize restaurant operations in the Philippines, which will be a critical tool in helping businesses compete in an increasingly fast-evolving market.
+
+Purpose and Description
+
+      This project seeks to produce an online restaurant management system where managers and owners of restaurants can efficiently manage daily activities. The system allows the users to register and sign in to access a dashboard that shows financial and inventory status, sales status monitoring, kitchen inventory management, order processing, and planning for smooth restaurant operations. The system will automate very critical tasks such as monitoring stock levels, alerts on low inventory, helpful in making informed business decisions for restaurant owners, enhances kitchen operation because of directing order stream on delays and waste. This project also streamlines internal operations of the restaurant to enhance standards of efficiency, minimize errors, and maximize profitability, as it offers real-time, data-driven, and integrated approaches to the restaurant management world to eliminate all these challenges.
+      In addition, some of the significant features included in the system would be real-time inventory tracking, automated order processing, sales monitoring, and financial reporting. This implies that the owners and managers could control their activities better and with more flexibility because they are in a cloud-based technology through this system. The system also eases the conduct of supplier transactions for timely and coordinated stock replenishment to avoid disruption of service.
+      ServeWise can be also used on improving the order processing, thus enabling the kitchen staff to receive timely, precise order details. Order entry is automated to prevent and make stat updates directly into the inventories, thus increasing efficiency. Detailed financial reports facilitate better sales tracking and enable evaluation of business performance for strategy development. Role-based access control is part of this platform, meaning specific tasks can only be performed by authorized individuals, thus increasing security and accountability.
+
+      Integrating inventory management, sales tracking, and order processing under a single platform will improve efficiency and reduce waste toward profitability, as this project will offer practical and scalable solutions to support that transformation
+
+Objectives
+
+General Objective
+
+      ServeWise is a System as a Service (Saas) restaurant sales and inventory management system that aims to enhance restaurant efficiency by combining sales tracking, order processing, and inventory management in one platform. This study focuses designing and implementing a digital solution for streamlining the daily tasks of restaurant management, eliminating human error, and enhancing business profitability.
+
+
+
+Specific Objectives:
+* To develop a comprehensive purchase order and bills payment management module.
+Streamlines the procurement process by enabling restaurant staff to create, track, and manage purchase orders efficiently.
+
+* To develop a menu preparation management module.
+Enables restaurant staff to plan daily or weekly menus efficiently, incorporating an item request feature that allows kitchen staff to request necessary ingredients or supplies from stockroom.
+
+* To develop a customer order and billing function.
+Allows restaurant staff to accurately take and process dine - in and take out orders, automatically generate itemized bills and record payments through various methods.
+
+* To develop a damage and spoilage management module.
+Enables restaurant staff to log, categorize, and track inventory losses due to damage or spoilage.
+
+* To develop a reporting generation module.
+Enables managers to automatically generate comprehensive reports on sales, inventory levels, purchase orders, billing, and spoilage data.
+
+* To develop a subscription module for restaurant owners.
+Allows restaurant owners to choose and manage service plans, monitor billing cycles, receive renewal notifications, and securely process subscription payments.
+
+Scope and Limitations
+
+      ServeWise restaurant sales and inventory management system aims to help speed up restaurant operations by combining sales tracking, order processing, and inventory management into one digital platform. This system is primarily meant to help restaurant owners and managers control regular operations efficiently, reduce human errors, and increase profitability by means of data-driven decision-making. This system aims to provide an easy-to-use website for monitoring kitchen inventory in real time, order management, and financial tracking.
+
+      This system is targeted toward restaurant owners and managers will enjoy automated financial tracking and inventory monitoring to equip these two important people in making sound business decisions. Meanwhile, staff will use the new efficient order processing system, allowing for reduced errors and better customer experience. Finally, suppliers will see a fast-tracked transaction process for timely stock replenishing and improved integration with restaurant businesses.
+
+      The intended scope of usage for ServeWise is local to national, with its initial implementation focused on small to medium-sized restaurants in the Philippines. While the system is technically accessible online and could be scaled internationally in the future, this capstone project is developed with the operational needs and business environment of Filipino restaurants in mind. The system will support establishments operating in urban areas, food hubs, or commercial centers, where digital tools can significantly improve day-to-day operations.
+
+      The development project and its implementation will be held within a specified time frame, usually stretched over a semester or an academic year as a capstone project. This study will involve designing and testing the system for usability, reliability, and effectiveness in enhancing restaurant operations.
+
+Included in the proposed system are its main features:
+
+
+* Purchase Order and Bills Payment Management
+
+      Enables staff to efficiently create, track, and manage purchase orders and process supplier payments.
+* Inventory Management
+
+      Real-time inventory tracking of ingredients stock levels to avoid a shortage or overstocking.
+* Order Processing
+
+      Automated order processing to facilitate communication between front- end staff and kitchen workforces.
+* Reports & Analysis
+
+      A financial-tracking module to generate sales reports, monitor revenue, and track expenses.
+* Supplier Management
+
+Tools for supplier management to order and replenish stocks.
+
+* Accessibility
+
+      Cloud-based so that restaurant owners and managers can oversee business operations remotely.
+
+Limitations
+
+      The ServeWise system does have a few limitations, which the research team cannot change. First, for cloud-based applications, a stable internet connection is required for proper system functioning. In cases where a restaurant is located in areas with poor internet connectivity, the system's ability to operate in real time may be affected.
+
+      Second, the implementation of the system is currently limited to small and medium-sized restaurants. Larger establishments with more complex business processes may require deeper customization or integration with existing enterprise solutions, which are beyond the scope of this study.
+
+      Third, ServeWise does not support managing multiple restaurant branches under a single account. Each branch must operate independently, with separate user accounts, data inputs, and reporting dashboards. For restaurant chains, this may result in duplicated workload and inconsistent consolidation of operational data.
+
+      Fourth, the inventory management module focuses exclusively on food ingredients. The system does not support tracking non-food inventory such as utensils, cleaning supplies, furniture, or equipment. Restaurants requiring complete stockroom management may need additional systems or future module extensions to handle these categories.
+
+      Last of all, only the core functionalities of restaurant operations are covered in the current version. Features such as customer relationship management (CRM), loyalty programs, mobile applications, advanced analytics, and AI-driven forecasting are not included in the initial rollout.
+
+      ServeWise, as a restaurant sales and inventory management system, still provides a comprehensive digital solution to many operational challenges faced by food service establishments. While it has notable limitations, the system significantly contributes to efficiency, accuracy, and operational organization-making it a valuable tool for restaurants aiming to modernize their processes. Despite constraints in multi-
+
+branch support, inventory coverage, scalability, and internet dependency, ServeWise successfully addresses the essential needs of small to medium-sized restaurants through streamlined sales monitoring, automated inventory tracking, and simplified order processing.
+
+      The limitations identified in this study also highlight meaningful opportunities for system enhancement. Future developers may explore expanding ServeWise to include multi-branch consolidation, broader inventory management capabilities, offline-ready features, and extended modules such as CRM, supplier portals, mobile applications, and advanced analytics. By recognizing these areas for growth, the study not only evaluates the system's current capabilities but also creates a clear direction for continuous improvement. Ultimately, ServeWise establishes a strong foundation for digital restaurant management and offers valuable insights that can guide future innovations in the food service technology landscape.
+
+Review of Related Literature/Studies/Systems
+
+Online Restaurant Management and Advertising System (Piyush Patil, Kailas Patole, Hardik Variya, Vijaya Pinjarkar, 2022)
+
+      According to the study, the aim of the project was to create a responsive website of restaurants that help customers to order food online. in conjunction with this, the application should respond because the website will be available on devices with completely different screen sizes. and the project allows advertising on the website while the client views the menu. Therefore, restaurants will build their reputation and a simple customer community.
+
+      On the website, the login module will allow customers and restaurants to enter while they are registered on the website. Every manager / user will have a login id and password to log in to the website. This registration module is shown to visitors when they need to place specific orders, and new restaurant registrations that want to do business with them on their online restaurant management website. Once confirmation has been made through the website, the order is confirmed, and delivery will be delivered to the address of the dedicated customer. The Pay Bill is Work done by customer. The customer will have the option to pay off the debt online or pay off the debt in cash. The final module states that after placing an order or doing other things on the website the customer will click on the exit profile.
+
+Web-based Integrated Restaurant Management System (Linda Uchenna Oghenekaro, Jacinta Chielozonam Okafor, 2023)
+
+      The study of Linda Uchenna Oghenekaro and Jacinta Chielozonam Okafor aimed to develop wed-based restaurant management information system offers, a web- based food ordering system with POS, cashier, kitchen, tables that can be adjusted to meet the requirements of restaurant businesses to increase inventory positions, increase profits, and better customer service by optimizing workforce needs and reduce operating costs.
+
+      According to the study of Linda Uchenna Oghenekaro and Jacinta Chielozonam Okafor, the existing system is characterized with many problems which are staff are taking too much time pursuing mistakes instead of tending to customers, inventory doesn't match your tallies, sales going unrecorded, and other. Restaurant personnel use computerized management database information systems to gather data, process data and keep it for future use and product ordering. The proposed system was implemented using HTML/CSS for the user interface, PHP and MYSQL database for the back end. Structured system analysis and design methodology were adopted. The system designed will allow the pliability to the Users/ Customers to order from Restaurants.
+
+Web-based Inventory Management System (Tanaman et al., 2023)
+
+      The study of Tanaman et al. (2023) aimed to develop a web-based inventory management system to help a small business enterprise in Pagadian City, Philippines, automate its inventory tracking and sales reporting. The system focuses on resolving inefficiencies in manual inventory management, where paper-based processes led to errors, delays, and lack of real-time data visibility. According to Tanaman et al. (2023), the primary problem faced by the business was the manual handling of inventory requests and sales reports, which relied on paper forms. This method was prone to data inaccuracy due to lost or damaged forms, as well as inconsistencies from multiple employees recording data on the same documents. Additionally, generating sales reports was time-consuming since calculations were done manually using spreadsheets, leading to inefficiencies in stock management. The lack of a centralized system also made it difficult for the business owner to monitor inventory levels across four branches and a mobile store in real time.
+
+      By transitioning from a paper-based to a web-based system, the business can now manage inventory more efficiently, reduce human errors, and improve overall operational productivity. The study highlights how digital solutions can address common challenges in small businesses, particularly in inventory management.
+
+Synthesis
+      In the Online Restaurant Management and Advertising System by Piyush Patil, Kailas Patole, Hardik Variya, Vijaya Pinjarkar, 2021. The e-Menu provides more information about menu items and drinks than the standard paper menu. The convenience and easy access to the local menu are the many things that make you order food during the restaurant. The service is moving very fast. In addition, the project allows advertising on the website
+
+      On the other hand, Linda Uchenna Oghenekaro and Jacinta Chielozonam Okafor integrated restaurant management system, has proven to be a more cost effective and scalable solution for Sammies Fast-Food. It maintained features that allow users gain access to the application such as the shopping cart, which creates the platform for the pacing orders and make payments. The admin rights give the administrator the privilege of managing the activities of the restaurant. All available meals were also maintained on the food list page, and the information could be updated depending on the meals available at every given moment. Staffing was also maintained on the staff management page, where orders and reservations were easily allocated to staff.
+
+      Tanaman et al. (2023) created a web-based inventory management system for a small business in the Philippines, automating inventory tracking and sales reporting to eliminate paper-based errors and provide real-time data visibility. This system enables seamless stock requests, warehouse processing, and centralized monitoring across multiple branches. These studies highlight the transformative potential of web-based systems in addressing common challenges such as manual inefficiencies, data inaccuracies, and lack of real-time visibility. The proposed solutions demonstrate scalability and applicability to similar businesses, emphasizing the importance of digital tools in improving operational efficiency and decision-making.
+
+      The innovation in these systems lies in their ability to integrate multiple functionalities-such as online ordering, inventory tracking, and real-time reporting into a single platform, tailored to the specific needs of small and medium enterprises. By adopting such solutions, businesses can achieve greater accuracy, efficiency, and customer engagement, paving the way for sustainable growth.
+
+METHODOLOGY
+Technical Background
+
+      Today's information technology landscape is rapidly evolving, demanding constant upgrades to tools and frameworks for building robust, easy-to-use, and scalable web-based systems that are highly efficient, reliable, and responsive. In this context, ServeWise is proposed as a SaaS (Software as a Service) restaurant sales and inventory management system that incorporates modern web development technologies to streamline restaurant operations and deliver a seamless experience to end users, including restaurant staff, managers, and suppliers. The development of ServeWise follows the Spiral Model, a risk-driven software development methodology that combines iterative design and systematic risk management across four main phases: Planning, Risk Analysis, Development and Testing, and Evaluation.
+
+      In the Planning phase, the development team identified the system's core requirements through data gathering and research by analyzing the operational needs of modern restaurants, leading to the specification of modules for order processing, inventory tracking, sales monitoring, supplier management, and user role functionalities. This phase also included the selection of a suitable technology stack that ensures modularity, scalability, and maintainability.
+
+      In the Risk Analysis phase, the team assessed potential technical and operational risks such as system performance under load, data security, and user accessibility. Mitigation strategies were adopted, including the use of Laravel's built-in authentication and security mechanisms, normalized relational database design for optimized queries, and Vue.js's efficient rendering to maintain responsiveness across modules.
+
+      The Development and Testing phase will utilize a local development environment powered by XAMPP, integrating Apache, PHP, and MySQL to support the Laravel framework on the backend and Vue.js on the frontend. HTML will provide the structural backbone, while Vue's component-based architecture will enable modular, dynamic interfaces tailored to different user roles. Laravel's MVC architecture and Eloquent ORM will streamline backend development, and rigorous
+
+testing will be ensured that modules like real-time inventory updates, role-based access control, and transaction logging functions reliably.
+
+       In the Evaluation phase, the website will be reviewed for usability, and real- user feedback from simulations guided continuous refinements to user experience and system logic. Evaluation results were cycled back into the planning phase of the next spiral iteration to support ongoing enhancement and adaptation of the system.
+
+      Through this iterative and adaptive approach, ServeWise is being built as a robust and scalable system that effectively addresses the challenges of restaurant management. The selected technology stack-Vue.js, HTML, Laravel, and MySQL- encourages rapid prototyping, security, and future scalability. It enables efficient development without the immediate need for expensive infrastructure while providing a solid foundation for cloud deployment, third-party integrations, and large-scale adoption.
+
+Resources
+Hardware
+
+      The development and testing of ServeWise were conducted using two distinct hardware devices to ensure the system performs efficiently across different setups. The first device used was an Acer Aspire Lite 15, running on Windows 11 Pro 64-bit. It is equipped with an AMD Ryzen 5 5600X 6-core processor clocked at 3.70 GHz, 16 GB of RAM, and 1 TB of storage. This setup included an AOC 24B36H+ 23.8-inch monitor with a 120Hz refresh rate, providing smooth and responsive visual output. The second device was an HP desktop powered by an Intel Core i3 10th Gen processor with four cores running at 3.60 GHz. It also operated on Windows 11 Pro 64-bit, with 8 GB of RAM and 1 TB of storage. This system used an ACER EK220Q monitor with a 1920x1080 resolution and a 60Hz refresh rate. These two hardware configurations allowed the team to test the system's functionality under both high-end and mid-range conditions, ensuring compatibility and performance across a range of user environments.
+
+
+
+Software
+
+      For the software side, ServeWise was developed using a modern and efficient web development stack. Prototyping and UI mockups were created in Figma to design the system's interface before actual development. The backend was built using Laravel, a PHP framework that offers powerful features for routing, database management, and security. Data is stored and managed using MySQL, run locally through XAMPP, providing a reliable relational database environment. For the frontend, the team utilized Vue.js, a progressive JavaScript framework known for its flexibility and reactive components. This combination of tools and frameworks ensured the system was both visually appealing and functionally robust.
+
+Requirements Analysis
+
+      The development of ServeWise, a SaaS-based Restaurant Sales and Inventory Management System, began with a critical phase: requirements gathering and analysis. This stage was vital in ensuring the system would align with the practical needs of restaurant operations, particularly in areas like inventory tracking, sales monitoring, and staff coordination. From the outset, the team aimed to build a system that could adapt to real-world workflows and future demands in the food service industry.
+      However, the process wasn't without challenges. Due to confidentiality concerns and restrictions related to the internal operations of restaurants, the team was unable to conduct extensive interviews with multiple establishments. In response, the development team adopted a research-driven approach to gather the necessary insights. This involved reviewing existing restaurant management software, analyzing how SaaS models were implemented in the food industry, and identifying key trends and common limitations in current systems.
+      To supplement this research, the team engaged in informal conversations with individuals working in small food businesses. While these discussions didn't offer a comprehensive overview, they provided valuable, real-life perspectives on issues such as inventory control, order tracking, supplier coordination, and staff management.
+      Through this methodical process, the team was able to identify a set of core features essential for different user roles within the system. ServeWise needed to include secure login functionality with role-based access control to ensure that users like managers, cashiers, and suppliers could only access the features relevant to their responsibilities. For example, cashiers needed tools to handle transactions, print receipts, and monitor daily sales, while managers required access to sales reports, inventory data, and overall business performance metrics. The supplier module had to support order requests, delivery status updates, and item listings.
+      Equally important was the ability to generate reports and analytics. Managers needed to see daily, weekly, or monthly summaries to support decision-making. The team also recognized the importance of making the system scalable, so it could support small to medium-sized businesses and potentially integrate with other tools in the
+
+future.
+
+      Although the lack of in-depth interviews posed a limitation, the team made sure that every design decision was backed by research and grounded in realistic scenarios. By combining secondary research, case studies, and real user feedback, the team ensured that ServeWise would be both practical and responsive to the needs of restaurant operations.
+      This careful, human-centered approach to requirements gathering laid a solid foundation for the next stages of development. It helped ensure that ServeWise would not only meet the current demands of restaurant owners and staff but also remain flexible enough to evolve with the industry's needs.
+
+Requirements Documentation
+
+      This section serves as a comprehensive record of the ServeWise Restaurant Management System's functional and non-functional requirements. It outlines the specific features, capabilities, and constraints that guided the system's development, ensuring a shared understanding between the development team and stakeholders. The process of requirements gathering involved detailed consultations and interviews with restaurant personnel, including managers, cashiers, waiters, and suppliers. This direct engagement was essential for identifying real-world operational needs, challenges with existing manual processes, and desired functionalities. The insights obtained were then carefully analyzed and translated into a structured set of system requirements.
+
+      To clearly articulate these requirements and visualize the intended behavior and structure of ServeWise, a series of Unified Modeling Language (UML) diagrams were employed. Use Case Diagrams captured the functional scope of the system from the perspectives of different users, including managers, staff, and suppliers. Sequence Diagrams illustrated the dynamic interactions between system components for specific scenarios, such as purchase order processing, customer billing, and subscription management. Activity Diagrams modeled detailed workflows and business processes, highlighting step-by-step operations for tasks such as menu planning, order handling, inventory logging, and damage or spoilage reporting. Finally, the Domain Diagram defined the core data entities-such as customers, orders, ingredients, suppliers, and subscriptions-and their relationships, providing a clear representation of the system's data structure.
+
+      Collectively, these visual tools provided a detailed blueprint of ServeWise's design and operational flow. They ensured that the system's development aligned precisely with user needs, operational standards, and project objectives. This thorough documentation serves as a critical reference for the subsequent design, development, and testing phases, minimizing ambiguities and facilitating effective communication among the development team, stakeholders, and end-users.
+
+Design of Software, System, Product, and/or Processes
+
+      The design phase of ServeWise focused on crafting a comprehensive and user- centered system that addresses the operational challenges of restaurant management. ServeWise is envisioned as a software-as-a-service (SaaS) platform that enables restaurants to streamline their sales processes, monitor inventory in real-time, manage staff, track supplier orders, and maintain visibility across business operations. This design phase emphasized both the functional structure of the system and the user experience, ensuring the product remains intuitive, scalable, and efficient for everyday use by various stakeholders such as restaurant staff, managers, suppliers, and administrators.
+
+      To achieve a seamless and consistent user experience, Figma was used as the primary tool for user interface design. The design process included developing wireframes and interactive mockups for the landing page, login and registration screens, and multiple role-specific dashboards (Admin, Manager, Cashier, Supplier). Each page was crafted with usability in mind, following a structured layout and visual hierarchy that supports accessibility and clarity. Interactive components such as navigation menus, modals, forms, and tables were standardized across the design system, which not only ensures a cohesive user experience but also simplifies the development phase.
+
+      To complement the functional and structural models, Sequence Diagrams were developed to illustrate the real-time flow of interactions between system components and actors across the major modules of ServeWise. These diagrams depict how requests are initiated, how the system processes each action step-by-step, and how responses are returned-providing a clear visualization of the dynamic behavior involved in Sales Processing, Inventory Management, Order Management, Reporting, and Subscription Management. By outlining the chronological exchange of messages, the Sequence Diagrams help identify the required system operations, interaction dependencies, data exchanges, and the coordination between internal components. This modeling approach ensures consistency between the system's intended workflows and its actual implementation, while also supporting the validation of process logic and the refinement of system behavior (Refer to pages 47 - 52, Figures 9 - 14).
+
+      Use-case diagrams were employed to define and visualize the interactions between external actors and the system. These diagrams mapped out the key system functionalities from the perspective of each role-Administrator, Manager, Cashier, and Supplier-highlighting critical tasks such as managing inventory, processing sales, submitting supplier orders, generating reports, and handling user account administration. By modeling these interactions, the design team ensured complete functional coverage and user-specific capabilities that align with the real-world workflows of restaurant operations (Refer to pages 41 - 46, Figures 3 - 8).
+
+      The Domain Diagrams formed the backbone of ServeWise's database design, illustrating the core entities-such as Users, Employees, Products, Inventory Logs, Sales, Orders, Suppliers, and Subscriptions-and their interrelations. The Domain diagrams were normalized to eliminate data redundancy and to enforce referential integrity through the use of primary and foreign keys. These diagrams helped visualize how data flows between modules and supported the development of a scalable and efficient relational schema (Refer to page 53 - 58, Figure 15 - 20).
+
+      The system's workflows and operational processes are modeled using Activity Diagrams, which provide a clear representation of the step-by-step activities within ServeWise. These diagrams capture the dynamic flow of tasks across core modules such as employee management, inventory tracking, sales processing, order management, subscriptions, and supplier coordination. By visualizing the sequence of actions, decision points, and parallel processes, the activity diagrams help ensure that business logic is accurately translated into the system's implementation. They serve as a blueprint for understanding process dependencies, identifying potential bottlenecks, and guiding the development of efficient and coherent workflows. This detailed modeling is essential for supporting accurate task execution, streamlining operations, and enabling the system to generate reliable reports, track trends, and facilitate automated decision-making within the application (Refer to page 59 - 64, Figures 21 - 26).
+
+      In terms of system architecture, ServeWise adopts a multi-tier architectural approach that separates concerns across three primary layers: the presentation layer, business logic layer, and data layer. This separation supports scalability, modularity,
+
+and easier maintenance. The presentation layer handles user interaction through the web interface, while the business logic layer processes application workflows, role-based access control, order computations, and other operational rules. The data layer manages interactions with the relational database. This architecture is ideal for a SaaS platform, as it allows for isolated scaling of individual components, enhances security by restricting direct access to data, and facilitates smoother system updates and feature expansion.
+
+      To ensure flexibility and maintainability in the software logic, ServeWise integrates several key software design patterns. The Factory Pattern is employed to manage the creation of user roles and system entities dynamically. The Singleton Pattern ensures centralized access to critical resources such as configuration files or system logs. The Strategy Pattern is used in scenarios requiring dynamic selection of business rules, such as computing discounts, generating reports, or selecting payment processing methods. Meanwhile, the Observer Pattern supports reactive behavior- such as notifying managers when inventory levels are low or when new supplier orders are fulfilled. Complementing these object-oriented techniques, procedural programming is used for scripting specific workflows like daily report generation, stock reconciliation, and bulk data imports, allowing for a clean and task-oriented execution of linear processes.
+
+      Altogether, the design of ServeWise integrates thoughtful user experience planning and comprehensive system modeling through the use of Use Case Diagrams, Sequence Diagrams, Activity Diagrams, and a Domain Diagram. These visual models collectively illustrate the system's functional scope, dynamic interactions, workflow processes, and underlying data structure. By combining these structured diagrams with a well-organized system architecture and sound programming principles, ServeWise is built on a strong foundation that ensures the system remains responsive, efficient, and maintainable. This cohesive design enables the platform to effectively support the operational needs of modern restaurant environments while allowing flexibility for future enhancements and scalability.
+
+Development
+
+      The development of the system followed a structured and standards-based approach to ensure reliability, maintainability, and scalability. The developers adopted the Software Development Life Cycle (SDLC) using the Agile methodology, which allowed iterative development and continuous feedback from stakeholders. Each iteration involved planning, designing, coding, testing, and deployment activities to ensure that every system component met the defined functional and non-functional requirements.
+
+      The system was primarily developed using Laravel as the backend framework and Vue.js for the frontend. Laravel provided a robust and secure environment for handling authentication, role-based access control, and database management through Eloquent ORM, while Vue.js ensured a responsive and dynamic user interface. The integration of Laravel Breeze facilitated the implementation of secure authentication features, and Spatie Roles and Permissions was used to manage user roles such as Manager, Supervisor, Cashier, Supplier, and Administrator.
+
+      The development process adhered to industry standards for coding and documentation. Source codes were managed using Git and hosted on GitHub to maintain version control and enable team collaboration. Each developer worked on a dedicated branch for specific modules, ensuring that code reviews and merge requests- maintained code quality and minimized conflicts.
+
+      Database design followed normalization standards to avoid redundancy and improve data integrity. MySQL was use as the database management system due to its reliability and compatibility with Laravel. All database tables were structured according to the data flow diagrams and entity-relationship models designed during the analysis phase.
+
+      The frontend development emphasized usability and accessibility. Modern web design principles were applied to ensure an intuitive interface with consistent navigation and responsive layouts. The team also used Tailwind CSS to achieve a clean and scalable design system.
+
+       System deployment was done using Railway, a cloud hosting platform that supports continuous integration and deployment (CI/CD). Environment variables were properly configured to secure API keys and sensitive information. The developers also conducted functionality and integration testing to ensure that modules performed as expected when combined.
+
+       Throughout the development, coding standards were guided by PSR-12 (PHP Standards Recommendation) and ESLint rules for JavaScript, ensuring consistency and readability. Comprehensive documentation was maintained to support future maintenance and scalability.
+
+       In summary, the development process combined systematic planning, modern web technologies, and coding best practices to produce a high-quality, secure, and efficient system that meets the project objectives.
+
+RESULTS AND DISCUSSION
+Testing
+
+      The testing phase of ServeWise ensured that all core modules functioned accurately and reliably based on the system's requirements. Both manual and automated testing were conducted to validate user inputs, outputs, and overall system processes. Real-world scenarios involving Managers, Cashiers, Suppliers, and Administrators were simulated to confirm proper role-based operations. Initial testing focused on user authentication, registration, and data validation to ensure secure access and accurate data handling.
+
+Table 1: Login Test Case
+
+Test IDScenarioExpected
+ResultActual ResultRemarksLTC1Enter Incorrect EmailDisplay error prompt "No account found in this email
+address."Displayed the same error prompt.Must provide a valid email.LTC2Enter Incorrect PasswordDisplay error prompt "The provided credentials do not match our
+records"Displayed the same error prompt.Must provide a correct password.LTC3Attempt login without "@" in the emailDisplay error prompt
+"Please
+include an '@'
+in the email
+address."Displayed the same error prompt.Must include "@" in the email address.
+Table 2: Registration Test Case
+
+Test IDScenarioExpected
+ResultActual ResultRemarksRTC1Register user without entering emailDisplay error prompt
+"Please fill out
+this field."Displayed the same error prompt.Must fill out required email field.RTC2Register user without selecting a
+roleDisplay error prompt "The role field is
+required."Displayed the same error prompt.Role selection required.RTC3Register user after filling all fields.Display
+prompt "User
+Successfully Registered."Displayed the success message.Registration Successful.
+Table 3: Supplier Management Test Case
+
+Test IDScenarioExpected
+ResultActual ResultRemarksSMT1 Add supplier without filling the required
+fieldsDisplay error prompt "Please fill out
+this field."Display the same error prompt.Must fill all required fields.SMT2Add supplier with valid information.Display prompt "Supplier successfully
+added." Display the same prompt.   Test Successful.SMT3Update supplierDisplay prompt "Supplier information updated
+successfully." Display the same prompt.  Update Successful.
+Table 4: Sales & POS Module Test Case
+
+Test IDScenarioExpected
+ResultActual ResultRemarksPST1Create new orderOrder saved and displayed in POS
+terminalWorks as expected   Test SuccessfulPST2 Apply Discount.Updated total reflects
+discountWorks as expected.   Test Successful.PST3Process customer paymentDisplay prompt
+"Payment
+successful."Works as expected.   Test Successful.
+
+
+
+Table 5: Inventory Management Test Case
+
+Test IDScenarioExpected
+ResultActual ResultRemarksIMT1  Add new inventory itemItem added to the inventory
+listWorks as expected   Test SuccessfulIMT2Insufficient stock during
+sales.Display
+prompt "Item out of stock".Works as expected.Accurate stock validation.IMT3Update stock levels.New quantity reflected
+correctlyWorks as expected.   Test Successful.
+Table 6: Spoilage/Waste Reporting Test Case
+
+Test IDScenarioExpected
+ResultActual ResultRemarksSWT1Report spoiled
+itemSpoilage entry
+createdWorks as
+expectedTest
+SuccessfulSWT2Submit incomplete spoilage form.Display prompt
+"Please fill out
+all fields".Works as expected.Required fields enforced.
+
+
+
+Table 7: Purchase Order Module Test Case
+
+Test IDScenarioExpected
+ResultActual ResultRemarksPOT1Create new
+purchase orderPO saved and
+added to listWorks as
+expectedTest
+SuccessfulPOT2Received
+supplier delivery.Status updated
+to "Received".Works as expected.Inventory updated.
+
+
+
+Table 8: Reporting & Analytics Test Case
+
+Test IDScenarioExpected
+ResultActual ResultRemarksRPT1Generate sales
+reportPDF generated
+successfullyWorks as
+expectedTest
+SuccessfulRPT2 Filter report by date range.List shows correct filtered
+results.Works as expected.Accurate results.
+Table 9: CSS Framework Testing Summary
+
+FrameworksPurpose in ServeWise     Test ConsiderationsResultTailwind CSS Component styling, layout, responsivenessChecked for consistent spacing, alignments, breakpointsFully responsive.BootstrapForm validation, UI, modals, navigation.Tested input validation states, modal behavior.Functions properly.Custom CSS Overrides for theme matching.Ensure no conflict with Tailwind defaults.No conflicts found.
+Description of Prototype
+
+      The prototype of ServeWise, a SaaS-based Restaurant Sales and Inventory Management System, was developed to demonstrate the core functionalities and overall system workflow. It highlights how restaurant operations-such as sales tracking, order processing, inventory monitoring, and supplier coordination-can be efficiently managed within an integrated platform.
+
+System Requirements
+      The system requires both hardware and software resources to operate efficiently.
+
+Hardware Requirements:
+* Server/Host Machine: Intel Core or Ryzen processor or higher, 4GB RAM or higher, and 256GB storage
+* Client Devices: Any modern device (desktop, laptop, or tablet) with at least 4GB RAM and a stable internet connection
+
+Software Requirements:
+* Backend Framework: Laravel
+* Frontend Framework: Vue.js
+* Database Management System: MySQL
+* Development Tools: Visual Studio Code, XAMPP, GitHub
+* Hosting Platform: Railway (for deployment)
+* Browser Compatibility: Google Chrome, Microsoft Edge, Mozilla Firefox
+
+      The design follows a modern web layout using Tailwind CSS for consistent styling and responsiveness. Visual indicators, charts, and tables were incorporated to help users quickly analyze sales trends and inventory levels.
+
+Evaluation and Testing
+
+
+      The prototype underwent thorough evaluation and testing to ensure that it met all functional and non-functional requirements. Functional testing validated system processes such as user login, product management, order handling, and reporting. Each module was evaluated using defined test cases that compared expected and actual results. Usability testing was also conducted to assess the interface's intuitiveness and user experience.
+
+      Feedback gathered from simulated restaurant operations guided minor adjustments to improve navigation flow and data validation. The successful completion of testing confirmed that the prototype performs reliably and aligns with the intended goals of ServeWise.
+
+Implementation Plan
+
+      ServeWise is a comprehensive restaurant management system designed to automate and streamline operations, including sales, inventory, purchase orders, menu planning, customer orders, billing, spoilage management, reporting, and subscription management. Built using Laravel (PHP), Vue SPA, and MySQL, the system provides role-based interfaces for managers, cashiers, waiters, and suppliers to ensure efficiency and accuracy.
+
+      The implementation process will begin with preparation and planning, which involves assessing existing restaurant processes, defining hardware and software requirements, and preparing the deployment environment. This will be followed by system installation, including server setup, database configuration, and application deployment. Any existing data, such as customer records, employee information, inventory, and supplier data, will be migrated into the system while ensuring data integrity. Staff training will be conducted to familiarize users with system features, supported by user manuals and workflow documentation.
+
+       System testing and validation will then ensure that all modules function as expected and meet operational requirements. Once tested, ServeWise will be gradually transitioned into full operational use, with ongoing monitoring of performance and user adoption. Successful implementation will require hardware such as computers for staff and servers, stable internet connectivity, and software including Laravel, MySQL, and report-generation libraries. Facilities such as secure workstations and server/cloud hosting are also needed, along with personnel support from developers, administrators, and restaurant staff. Site-specific requirements include reliable power supply, comprehensive network coverage, role-based access control, and scheduled data backups to ensure system security and continuity.
+
+      This implementation plan ensures a smooth deployment, enabling the restaurant to transition from manual processes to an automated, integrated system efficiently while maintaining operational stability and data accuracy.
+
+Implementation Results
+
+      During the implementation phase of ServeWise, several key outputs were generated that demonstrate the system's functionality and provide a foundation for future improvements. The deployment of the system on the restaurant's server enabled all user roles, including managers, cashiers, waiters, and suppliers, to access their respective dashboards and perform their tasks effectively.
+
+      The Purchase Order and Bills Payment Module successfully allowed managers to create, track, and manage orders while automatically updating supplier payment records. The Menu Preparation Module enabled managers to plan daily and weekly menus, which were immediately accessible to kitchen staff for reference. The Customer Order and Billing Function allowed waiters to accurately take dine-in and take-out orders, while cashiers were able to generate itemized bills and record payments efficiently. The Damage and Spoilage Management Module provided staff with a convenient method to log inventory losses, which managers could review and approve, improving accountability. The Reporting Generation Module successfully produced accurate reports on sales, inventory, purchase orders, billing, and spoilage data, supporting managerial decision-making. Lastly, the Subscription Management Module enabled restaurant owners to select service plans, process secure payments, and receive renewal notifications.
+
+      Overall, the outputs during the implementation phase confirmed that ServeWise functions as intended and highlighted areas for further optimization, such as improving report filtering, enhancing notification alerts, and refining the user interface for faster navigation. These results serve as a foundation for continuous improvement and full operational efficiency of the system.
+
+CONCLUSION
+
+      The development and testing of the ServeWise Restaurant Management System successfully produced a functional and integrated platform that addresses the essential operational and administrative needs of restaurants. The system incorporates critical modules-such as Purchase Order and Bills Payment Management, Menu Preparation, Customer Order and Billing, Damage and Spoilage Management, Reporting Generation, and Subscription Management-to streamline operations, improve data accuracy, and enhance efficiency.
+
+      By utilizing modern technologies such as Laravel, Vue SPA, MySQL, and Tailwind CSS, the proponents achieved a stable, scalable, and user-friendly system. Comprehensive testing during implementation verified the accuracy of data handling, the security of sensitive restaurant information, and the performance consistency across all modules. The system ensures that restaurant staff and management can perform their respective tasks digitally, reducing manual errors and improving workflow coordination. Role-based access for managers, cashiers, waiters, and suppliers further maintains data confidentiality and operational integrity.
+
+      Overall, ServeWise successfully achieved its goal of providing an organized, dependable, and efficient digital solution that improves restaurant management, from procurement and menu planning to customer orders, billing, reporting, and subscription handling.
+
+Recommendations
+
+
+       To ensure smooth and effective operation of the ServeWise Restaurant Management System, it is recommended that users access the system through desktop computers or laptops with an updated web browser and a stable internet connection, as the system currently relies on online functionality. Staff should receive proper training on data entry, order processing, and inventory logging to maintain data accuracy and operational efficiency.
+
+       In consideration of technical and functional limitations identified during the implementation phase, the following recommendations are proposed for future enhancement and development:
+
+* Support Multiple Branches Under One Account: Enable restaurant chains to manage several branches from a single account, allowing centralized control and consolidated reporting.
+
+* Develop Offline Mode Functionality: Introduce offline or local caching features to ensure continuity of operations during internet outages, preventing workflow disruptions and data loss.
+
+* Expand Geographic Scope: Modify the system to support restaurant operations beyond the national level, enabling global adaptability and compliance with different regional requirements.
+
+* Upgrade for High-Class Restaurants: Incorporate advanced features tailored to upscale and fine-dining establishments, such as enhanced reporting, premium reservation management, and customer experience tracking.
+
+* Enhance Reporting and Notifications: Expand customizable reports and real- time notifications to improve operational monitoring and communication between staff and management.
+
+* Optimize Subscription Management: Introduce more robust automated handling of subscription payments, renewals, and plan upgrades to streamline administrative tasks.
+
+      By implementing these recommendations, ServeWise can evolve into a more comprehensive and versatile restaurant management system. These improvements will enhance operational efficiency, system reliability, and scalability, enabling ServeWise to accommodate a broader range of restaurant types and locations while maintaining high standards of service and management accuracy.
+
+REFERENCES
+Angellin, K., Oetama, R. S., & Amri, M. (2023). Web-Based Inventory and Sales
+Information System: Indonesian Micro Small Medium Enterprise Case Study. JOINS (Journal of Information System), 8(1), 57-66. [PDF] Web-Based Inventory and Sales Information System: Indonesian Micro Small Medium Enterprise Case Study | Semantic Scholar
+
+Oghenekaro, L. U., Okafor, J. C. (2023). Web-based integrated restaurant management
+system. Journal of Computer Science and Information Technology, 11(2), Article 57. Web-based Integrated Restaurant Management System
+
+Patil, P., Patole, K., Variya, H., Pinjarkar, V. (2021). Online restaurant management
+and advertising system. International Journal of Research in Engineering, Science and Management, 5(4), Article 109. (PDF) Online Restaurant Management and Advertising System
+
+Tanaman, H., Yusuf, M., Aisyah, S., & Others. (2023). Web-based inventory
+management	system.	BMC	Digital	Business,	3,	Article	29. Web_based_Inventory_Management_System.pdf - ISSN 2278-3083 Maredel
+T. Tanaman et al., International Journal of Science Advanced Information Technology, 12 (5), - College Sidekick
+
+Appendices
+
+The following pages contains the Spiral Model, Gantt Chart, Use-Case Diagrams, Sequence Diagrams, Domain Diagrams, Activity Diagrams, Sample UI, Resource Persons, Evaluation Tool/Test Documents, Sample Input/Output, User's Guide, and Personal Technical Vitae of the researchers.
+
+
+Figure 1: Spiral Mode
+
+
+
+
+
+Figure 2: Calendar of Activities
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 3: Use-Case Diagram (Objective 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 4: Use-Case Diagram (Objective 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 5: Use-Case Diagram (Objective 3)
+
+
+
+
+
+
+
+
+
+
+Figure 6: Use-Case Diagram (Objective 4)
+
+
+
+
+
+
+
+
+
+
+
+Figure 7: Use-Case Diagram (Objective 5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 8: Use-Case Diagram (Objective 6)
+
+
+
+Figure 9: Sequence Diagram (Objective 1)
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 10: Sequence Diagram (Objective 2)
+
+
+
+Figure 11: Sequence Diagram (Objective 3)
+
+
+
+Figure 12: Sequence Diagram (Objective 4)
+
+
+
+
+
+Figure 13: Sequence Diagram (Objective 5)
+
+
+
+Figure 14: Sequence Diagram (Objective 6)
+
+
+
+
+
+
+Figure 15: Domain Diagram (Objective 1)
+
+
+
+
+
+Figure 16: Domain Diagram (Objective 2)
+
+
+
+
+
+
+
+
+
+
+
+Figure 17: Domain Diagram (Objective 3)
+
+
+
+
+Figure 18: Domain Diagram (Objective 4)
+
+
+
+
+
+
+
+
+Figure 19: Domain Diagram (Objective 5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 20: Domain Diagram (Objective 6)
+
+
+
+Figure 21: Activity Diagram (Objective 1)
+
+
+
+Figure 22: Activity Diagram (Objective 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 23: Activity Diagram (Objective 3)
+
+
+Figure 24: Activity Diagram (Objective 4)
+
+
+Figure 25: Activity Diagram (Objective 5)
+
+
+Figure 26: Activity Diagram (Objective 6)
+
+System's user interface
+
+
+
+
+
+Figure 27: ServeWise's Landing Page
+
+
+Figure 28: ServeWise's Login Page
+
+
+
+Figure 29: ServeWise's Registration Page
+
+
+
+
+Figure 30: ServeWise's Subscription Page
+
+
+
+Figure 31: Manager Dashboard
+
+
+
+Figure 32: Manager's Subscription Page
+
+
+
+Figure 33: Waiter's Dashboard
+
+
+
+Figure 34: Kitchen Staff Dashboard
+
+
+
+Figure 35: Cashier Dashboard
+
+
+Figure 36: Manager's Inventory
+
+
+
+Figure 37: Purchase Order
+
+
+Figure 38: Supplier Bills
+
+
+
+Figure 39: List of Employees
+
+
+Figure 40: Menu Items
+
+
+
+Figure 41: Menu Plans
+
+
+Figure 42: Restaurant Tables
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 43: Reports & Analytics
+
+
+Figure 44: Generate Report Page
+
+APPENDIX A. RESOURCE PERSONS
+
+
+
+Resources Persons Ariel P. Lapiñas Capstone Project Adviser
+
+Jessiel Chris D. Hilot
+
+Capstone Project Coordinator
+
+APPENDIX B. EVALUATION TOOL/TEST DOCUMENTS
+
+
+
+Name (Optional):	
+
+Date: 	
+
+
+Survey Questionnaire (ServeWise System Evaluation - Manager, Staff, and Admin Users)
+
+
+Good day! We, the developers of ServeWise: A SaaS Restaurant Sales and Inventory Management System, kindly request your participation in evaluating the system's functionality, usability, and overall performance. Your feedback is essential in helping us refine and improve the system for real-world restaurant operations. Please rate each condition based on your experience using the legend below. Rest assured that all responses will remain confidential and will be used solely for educational and testing purposes. Thank you for your time and valuable feedback.
+
+
+Legend:
+Strongly Disagree	-	SD
+Disagree	-	D
+Uncertain	-	U
+Agree	-	A
+Strongly Agree	-	SA
+
+ConditionSDDUASAThe system is easy to learn, navigate, and use.The login, authentication, and role-based access control function reliably and securely.Managing	restaurant	staff	accounts	and permissions is clear and efficient.Adding, updating, and tracking inventory items is straightforward and understandable.The sales processing and order management features work smoothly and accurately.The system records transactions, discounts, and payments correctly.The supplier management module is functional and easy to operate.
+Generating reports (sales, inventory, expenses, and profit analysis) is clear and efficient.Exporting reports and viewing profit analysis provides helpful insights for decision-making.Managing subscription plans and renewals is intuitive.The system responds quickly and performs well during essential operations.The overall functionality and usefulness of ServeWise meet my expectations for restaurant operations.
+
+
+Final Thoughts:
+
+
+
+
+
+
+
+APPENDIX C. SAMPLE INPUT/OUTPUT/REPORTS
+
+
+
+Input 1: Create Employee
+
+
+Output 1: Create Employee
+
+
+Input 2: Create Supplier
+
+
+Output 2: Create Supplier
+
+
+
+Input 3: Create Purchase Order
+
+
+Output 3: Create Purchase Order
+
+
+
+Input 4: Create New Dish
+
+
+
+Output 4: Create New Dish
+
+
+
+
+
+Input 5: Create Menu Plan
+
+
+
+Output 5: Create Menu Plan
+
+
+
+Input 6: Add Ingredient Offer
+
+
+
+Output 6: Add Ingredient Offer
+
+
+
+Input 7: Create Table
+
+
+
+Output 7: Create Table
+
+APPENDIX D. USER'S GUIDE
+
+
+1. Account Registration (Manager Only)
+
+
+Only the Manager is allowed to register directly on the system. Staff (waiters, cashiers, kitchen staff, etc.) do not register themselves; their accounts are created under the owner's facility.
+
+1.1 Creating the Facility Owner Account
+
+
+1. Open your browser and go to the ServeWise System URL. (https://servedwise-production.up.railway.app)
+2. On the login page, click Register / Sign Up.
+3. Fill in the registration form: Full Name, Date of Birth, Gender, Email Address
+4. Next, fill the restaurant details: Restaurant Name, Address, Postal Code, Restaurant Contact Number
+5. Set up your preferred password
+6. After setting up your password, upload the necessary documents that proves your ownership of a restaurant (Mayor's Permit, Business Permit, BIR Registration, etc.).
+7. Read and accept the terms and conditions if shown.
+8. Click Register / Create Account.
+
+
+If email verification is enabled:
+
+
+1. Check your email inbox or spam for a message from the system.
+2. Click the verification link in the email.
+3. After verification, your owner account is ready to use.
+
+2. First Login and Facility Setup (Owner)
+
+
+2.1 Logging In
+1. Go back to the Login page.
+2. Enter your registered email and password.
+3. Click Login.
+4. You will be redirected to the Subscription Page.
+
+
+1.2 Subscription Setup (Manager)
+
+
+The system requires the uses of subscriptions to access the functions of the system:
+
+1. The system will display all the available subscription packages in the system.
+2. Choose a plan and click Subscribe Now.
+5. Complete the payment steps (if online payment is enabled).
+6. After success, you can now access your Manager Dashboard.
+
+
+
+2. Registering Your Supplier
+
+
+1. From the sidebar, go to the Suppliers section.
+2. Click Add Supplier.
+3. Fill out the details (Name, Contact Number, Email, Address, Business Registration ID, and Tax ID) then click Create Supplier.
+4. After adding the supplier, his name will now display in the supplier list.
+Click the letter icon to send an invitation link to the supplier's registered email
+address.
+5. Once the supplier clicked the invitation link, he will be redirected to the Create Supplier page to set up his preferred password for his account on ServeWise.
+
+6. Once the supplier clicked the Confirm button, he will be redirected to his own Supplier Dashboard.
+
+
+
+3. Creating Staff Accounts (By Manager Only)
+
+
+Staff do not register via the public registration form. Instead, the manager creates their accounts.
+
+3.1 Adding Staff
+
+
+1On the side bar, click Employees.
+2. Click Add Employee.
+3. Fill in: Employee Name, Date of Birth, Gender, Email Address - this will be the staff's login email., Role - e.g., Waiter, Cashier, Kitchen Staff, and Password.
+4. Click Save / Create Account.
+
+
+3.2 How Staff Log In (No Self-Registration)
+
+
+Once their account is created by the owner:
+
+
+1. Staff go to the ServeWise System URL.
+2. Enter the email assigned by the manager and their password.
+3. Click Login.
+4. They will see the modules allowed for their role (Taking Customer Order, Customer Payments, Order Preparation, etc.) under your facility.
+
+4. After Setup - Daily Use
+
+After the owner account, facility, subscription, and staff accounts are set up:
+
+Manager focuses on:
+* Managing restaurant profile and settings
+* Handling subscription plans and payment processing
+* Monitoring and updating inventory levels
+* Approving and generating purchase orders
+* Managing suppliers and reviewing deliveries
+* Reviewing spoilage/wastage reports submitted by kitchen staff
+* Viewing and analyzing high-level reports:
+o Sales and revenue
+o Inventory summary
+o Purchase orders
+o Spoilage/wastage
+o Billing and subscription
+
+Staff use:
+
+
+1. Sales / POS Staff (Cashier / Front Counter)
+* Process customer orders.
+* Handles dine-in, take-out, and delivery transactions.
+* Issue receipts and record payments.
+* Apply discounts or promotions (if permitted)
+* End-of-day sales reporting (submitted to Manager)
+
+
+2. Waiter
+* Take customer orders (table orders)
+* Send orders to the kitchen via the POS/order system.
+* Update order status (served, canceled, modified).
+
+
+3. Kitchen Staff
+* View incoming orders sent from POS/Waiters
+* Update food preparation status (preparing, cooked, ready for serving)
+* Report spoilage/wastage of ingredients.
+
+APPENDIX E. PERSONAL TECHNICAL VITAE
+
+Curriculum Vitae of
+DEXTER D. LAUM
+Purok 5-B Upper Sto Niño Manggahan Tibungco, Davao City laum.299704@davao.sti.edu.ph
++639972261573
+
+EDUCATIONAL BACKGROUND
+LEVELINCLUSIVE DATENAME OF SCHOOLTertiary2012-2014
+2022 - PresentUniversity of Mindanao STI College DavaoJunior High School2009 - 2012UM Ilang-Tibungco Junior CollegeElementary2004 - 2009F. Bustamante Central Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+INCLUSIVE DATES      NATURE OF EXPERIENCE/JOB TITLE NAME AND ADDRESS OF COMPANY/ORGANIZATIONN/AN/AN/A
+AFFILIATIONS
+INCLUSIVE DATES  NATURE OF ORGANIZATIONPOSITIONN/AN/AN/A
+SKILLS
+SKILLS  LEVEL OF COMPETENCYDATE ACQUIREDBack-End DeveloperINTERMEDIATE2022
+TRAININGS, SEMINARS OR WORKSHOPS ATTENDED
+INCLUSIVE DATESLEVEL OF COMPETENCYN/AN/A
+Curriculum Vitae of
+ROGER C. PEREZ JR.
+Saint Jude, Zone 1, Buhangin, Davao City perez.372897@davao.sti.edu.ph
++639662415379
+
+EDUCATIONAL BACKGROUND
+LEVELINCLUSIVE DATENAME OF SCHOOLTertiary2022-PresentSTI College DavaoSenior High School2017-2018
+2018-2019St. John Paul II College of Davao
+Binucayan National High SchoolJunior High School2013-2017Binucayan National High SchoolElementary2008-2013Binucayan Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+INCLUSIVE DATES      NATURE OF EXPERIENCE/JOB TITLE NAME AND ADDRESS OF COMPANY/ORGANIZATIONN/AN/AN/A
+AFFILIATIONS
+INCLUSIVE DATES  NATURE OF ORGANIZATIONPOSITIONN/AN/AN/A
+SKILLS
+SKILLS  LEVEL OF COMPETENCYDATE ACQUIREDBack-End DeveloperINTERMEDIATE2022
+TRAININGS, SEMINARS OR WORKSHOPS ATTENDED
+INCLUSIVE DATESLEVEL OF COMPETENCYN/AN/A
+Curriculum Vitae of
+JAMES KURT B. ENCLUNA
+Purok 8 San Miguel Brgy. Indangan, Davao City encluna.366736@davao.sti.edu.ph
++639277776471
+
+EDUCATIONAL BACKGROUND
+LEVELINCLUSIVE DATENAME OF SCHOOLTertiary2022-2023
+2023-PresentAssumption College of Davao
+STI College of DavaoSenior High School2020-2022Holy Child College of DavaoJunior High School2016-2017
+
+2017-2020General Santos City SPED Integrated School
+Cabantian National High SchoolElementary2010-2016Mabuhay Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+INCLUSIVE DATES      NATURE OF EXPERIENCE/JOB TITLE NAME AND ADDRESS OF COMPANY/ORGANIZATIONN/AN/AN/A
+AFFILIATIONS
+INCLUSIVE DATES  NATURE OF ORGANIZATIONPOSITIONN/AN/AN/A
+SKILLS
+SKILLS  LEVEL OF COMPETENCYDATE ACQUIREDFront-End DeveloperINTERMEDIATE2022
+TRAININGS, SEMINARS OR WORKSHOPS ATTENDED
+INCLUSIVE DATESLEVEL OF COMPETENCYN/AN/A
+Curriculum Vitae of
+HONEY FLOR MAGNO
+Santa Teresita Buhangin, Davao City magno.292002@davao.sti.edu.ph
++639984229746
+
+EDUCATIONAL BACKGROUND
+LEVELINCLUSIVE DATENAME OF SCHOOLTertiary2022-PresentSTI College DavaoSenior High School2021-2022Maryknoll Academy of CateelJunior High School2016-2020Maryknoll Academy of CateelElementary2010-2016Taytayan Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+INCLUSIVE DATES      NATURE OF EXPERIENCE/JOB TITLE NAME AND ADDRESS OF COMPANY/ORGANIZATIONN/AN/AN/A
+AFFILIATIONS
+INCLUSIVE DATES  NATURE OF ORGANIZATIONPOSITIONN/AN/AN/A
+SKILLS
+SKILLS  LEVEL OF COMPETENCYDATE ACQUIREDFront-End DeveloperINTERMEDIATE2022
+TRAININGS, SEMINARS OR WORKSHOPS ATTENDED
+INCLUSIVE DATESLEVEL OF COMPETENCYN/AN/A
+
+
+
+
+
+
+
+

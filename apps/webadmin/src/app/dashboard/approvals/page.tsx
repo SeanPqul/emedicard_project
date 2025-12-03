@@ -175,6 +175,24 @@ function ApprovalDetail({ user, onApprove, onReject, isProcessing }: any) {
     user.registrationDocumentId ? { storageId: user.registrationDocumentId } : "skip"
   );
 
+  // Helper function to get document type label
+  const getDocumentTypeLabel = (type: string | undefined) => {
+    switch (type) {
+      case 'government_id':
+        return 'Government-Issued ID';
+      case 'previous_health_card':
+        return 'Previous Health Card';
+      case 'medical_certificate':
+        return 'Medical Certificate';
+      case 'other':
+        return 'Other Supporting Document';
+      default:
+        return 'Verification Document';
+    }
+  };
+
+  const documentTypeLabel = getDocumentTypeLabel(user.registrationDocumentType);
+
   return (
     <div className="flex flex-col h-full">
       {/* Sticky Header */}
@@ -213,12 +231,19 @@ function ApprovalDetail({ user, onApprove, onReject, isProcessing }: any) {
           {/* Document Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-              <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Verification Document
-              </h3>
+              <div>
+                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {documentTypeLabel}
+                </h3>
+                {user.registrationDocumentType && (
+                  <p className="text-xs text-gray-500 ml-7 mt-1">
+                    Document Type: {documentTypeLabel}
+                  </p>
+                )}
+              </div>
               {imageUrl && (
                 <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
                   Open in new tab
@@ -232,7 +257,7 @@ function ApprovalDetail({ user, onApprove, onReject, isProcessing }: any) {
                 imageUrl ? (
                   <img 
                     src={imageUrl} 
-                    alt="Verification Document" 
+                    alt={documentTypeLabel}
                     className="max-w-full max-h-[600px] object-contain shadow-md rounded bg-white"
                   />
                 ) : (
@@ -255,6 +280,12 @@ function ApprovalDetail({ user, onApprove, onReject, isProcessing }: any) {
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Submission Details</h4>
               <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-500 text-sm">Document Type</span>
+                  <span className="text-gray-900 font-medium text-sm">
+                    {documentTypeLabel}
+                  </span>
+                </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500 text-sm">Submitted At</span>
                   <span className="text-gray-900 font-medium text-sm">

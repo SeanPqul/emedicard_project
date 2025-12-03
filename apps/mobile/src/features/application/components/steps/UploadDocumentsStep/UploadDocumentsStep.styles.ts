@@ -280,6 +280,33 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(16),
     marginBottom: verticalScale(2),
   },
+  // Auto-filled Badge Styles
+  autoFilledBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#D1FAE5',
+    paddingVertical: verticalScale(8),
+    paddingHorizontal: scale(12),
+    borderRadius: moderateScale(8),
+    marginTop: verticalScale(8),
+  },
+  autoFilledText: {
+    fontSize: moderateScale(13),
+    color: '#065F46',
+    fontWeight: '500',
+    marginLeft: scale(6),
+    flex: 1,
+  },
+  changeButton: {
+    paddingVertical: verticalScale(4),
+    paddingHorizontal: scale(8),
+  },
+  changeLink: {
+    fontSize: moderateScale(13),
+    color: '#059669',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
 });
 
 export default styles;

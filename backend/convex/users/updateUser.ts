@@ -19,6 +19,7 @@ export const updateUserMutation = action({
         // Registration fields
         registrationStatus: v.optional(v.string()),
         registrationDocumentId: v.optional(v.string()),
+        registrationDocumentType: v.optional(v.string()),
         registrationSubmittedAt: v.optional(v.string()),
     },
     handler: async (ctx, args): Promise<any> => {
@@ -71,6 +72,7 @@ export const updateUserMutation = action({
         // Registration fields
         if (args.registrationStatus !== undefined) dbUpdates.registrationStatus = args.registrationStatus;
         if (args.registrationDocumentId !== undefined) dbUpdates.registrationDocumentId = args.registrationDocumentId;
+        if (args.registrationDocumentType !== undefined) dbUpdates.registrationDocumentType = args.registrationDocumentType;
         if (args.registrationSubmittedAt !== undefined) dbUpdates.registrationSubmittedAt = args.registrationSubmittedAt;
 
         await ctx.runMutation(api.users.updateUserDb.updateUserDatabase, {
