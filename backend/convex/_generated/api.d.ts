@@ -181,6 +181,8 @@ import type * as storage_getUrl from "../storage/getUrl.js";
 import type * as superAdmin_mutations from "../superAdmin/mutations.js";
 import type * as superAdmin_queries from "../superAdmin/queries.js";
 import type * as systemConfig_index from "../systemConfig/index.js";
+import type * as testData_generateRenewalTestData from "../testData/generateRenewalTestData.js";
+import type * as testData_index from "../testData/index.js";
 import type * as users_createUser from "../users/createUser.js";
 import type * as users_getApplicants from "../users/getApplicants.js";
 import type * as users_getCurrentUser from "../users/getCurrentUser.js";
@@ -378,6 +380,8 @@ declare const fullApi: ApiFromModules<{
   "superAdmin/mutations": typeof superAdmin_mutations;
   "superAdmin/queries": typeof superAdmin_queries;
   "systemConfig/index": typeof systemConfig_index;
+  "testData/generateRenewalTestData": typeof testData_generateRenewalTestData;
+  "testData/index": typeof testData_index;
   "users/createUser": typeof users_createUser;
   "users/getApplicants": typeof users_getApplicants;
   "users/getCurrentUser": typeof users_getCurrentUser;
