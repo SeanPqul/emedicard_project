@@ -654,8 +654,6 @@ className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all border
                     )}
                   </div>
                 )}
-                  </div>
-                )}
               </div>
             ))}
           </div>
