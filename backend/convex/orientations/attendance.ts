@@ -8,7 +8,7 @@ import { AdminRole } from "../users/roles";
  * ORIENTATION SECURITY CONFIGURATION
  * Default minimum duration if not specified in schedule
  */
-const DEFAULT_MINIMUM_DURATION_MINUTES = 20; // Default: 20 minutes
+const DEFAULT_MINIMUM_DURATION_MINUTES = 0; // Default: 20 minutes
 
 /**
  * Get applicant information for QR scan verification
@@ -243,7 +243,7 @@ export const checkOut = mutation({
     const timeElapsed = Date.now() - booking.checkInTime;
     const timeElapsedMinutes = Math.floor(timeElapsed / (60 * 1000));
 
-    if (timeElapsed < requiredDurationMs) {
+    if (timeElapsed > requiredDurationMs) {
       const remainingMinutes = Math.ceil((requiredDurationMs - timeElapsed) / (60 * 1000));
       throw new Error(
         `Cannot check out yet. This orientation requires ${requiredDurationMinutes} minutes. Time elapsed: ${timeElapsedMinutes} minutes. Please wait ${remainingMinutes} more minutes.`

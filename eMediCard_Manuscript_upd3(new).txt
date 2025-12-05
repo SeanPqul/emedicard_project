@@ -184,7 +184,7 @@ This project will be beneficial to the following:
 The key functionalities of the mobile application include:
 * User Accounts & Verification
 
-      Allow users to create secure accounts, input personal details, and submit proof of identity (e.g., Valid ID) to verify their legitimacy before applying.
+      Allow users to create secure accounts by providing login credentials (email and password) and uploading verification documents (such as Valid ID) to establish account authenticity before applying..
 * Document Submission 
 
       Enables users to upload required documents such as medical results, a 1x1 picture, and a Community Tax Certificate.
@@ -368,8 +368,7 @@ Design of Software, System, Product, and/or Processes
       In addition to designing the user interface and backend schema, the team developed comprehensive UML diagrams to visualize system behavior and structure. Use Case Diagrams capture the functional relationships between users and system processes. Activity Diagrams model detailed workflows for each major feature. Sequence Diagrams illustrate the chronological interactions between system components for specific scenarios. Domain Class Diagrams define the core data entities and their relationships, ensuring a robust database structure that maintains referential integrity throughout the application lifecycle.
       The system's main user interactions are illustrated through use case diagrams, which highlight the functional relationships between users (applicants and CHO admins) and system processes.
       As the system uses a NoSQL database (Convex), a traditional Entity-Relationship Diagram (ERD) was not used. Instead, a document-based schema was developed using tables that store key-value data similar to rows in SQL. Each table can organize related data hierarchically such as documents under each application. This flexible structure mirrors the logical flow of the health card process and eliminates the need for complex table joins.
-      The system was structured around several core modules that serve both applicants and CHO administrators. The first is the User Registration and users proceed to the Profile and Document Upload module, where they enter personal
-           information, which allows applicants to create secure accounts and log in to access their application data. The user journey begins with the User Registration and Verification module. Here, applicants create a secure account by entering their email and password, followed immediately by uploading a verification document (such as a Valid ID, Medical Certificate, or Expired Health Card) to authenticate their identity. Once the account is created and verified, users proceed to the Application Module, where they specify their job type. The system then classifies them into the appropriate health card category: Yellow for food handlers, Green for non-food industry workers, or Pink for skin-contact occupations.
+      The system was structured around several core modules that serve both applicants and CHO administrators. The user journey begins with the User Registration and Verification module. Here, applicants create a secure account by entering their email and password, followed immediately by uploading a verification document (such as a Valid ID, Medical Certificate, or Expired Health Card) to authenticate their identity. Once the account is created and verified, users proceed to the Application Module, where they enter personal information such as full name, age, civil status, nationality, organization, and position, and submit required documents for their health card classification.
       To support classification, the Health Card Type Identification system automatically determines the user's card type based on occupation. For Yellow card applicants, the Orientation Scheduling module displays available seminar slots and sends attendance reminders.
       The Payment module integrates with Maya payment gateway and supports manual uploads of payment receipts, providing flexibility for users to complete transactions. After approval, the Digital Health Card Generation and Release module allows users to download their digital health card directly from the app, containing all essential personal and classification data.
       To make seminar attendance more efficient, the system includes QR code-based tracking for Yellow card holders, enabling real-time confirmation and reducing administrative workload. Push notifications further assist users by reminding them of pending actions such as missing documents or upcoming orientations.
@@ -579,6 +578,19 @@ Figure 1. Gantt Chart
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
  Figure 3. User Registration (Use Case)
 
 
@@ -603,7 +615,8 @@ Figure 1. Gantt Chart
 
 
 
-Figure 4. Health Card Classification (Use Case
+
+Figure 4. Health Card Classification (Use Case)
 
 
 
@@ -619,9 +632,7 @@ Figure 4. Health Card Classification (Use Case
 
 
 
-
-Figure 5. Document Submission and Payment (Use Case)
-
+Figure 5. Payment Processing and Digital Health Card Release (Use Case)
 
 
 
@@ -632,7 +643,11 @@ Figure 5. Document Submission and Payment (Use Case)
 
 
 
-Figure 6. Orientation Process (Use Case)
+
+
+
+Figure 6. Orientation Scheduling and Attendance (Use Case)
+
 
 
 
@@ -677,6 +692,7 @@ Figure 14. Document Verification (Activity Diagram)
 Figure 15. Payment Validation (Activity Diagram) 
 Figure 16. Payment Processing (Activity Diagram) 
 Figure 17. Health Card Generation (Activity Diagram) 
+
 Figure 18. User Registration (Sequence Diagram) 
 Figure 19. Health Card Application & Classification (Sequence Diagram) 
 Figure 20. Renewal Processing (Sequence Diagram) 
@@ -685,7 +701,7 @@ Figure 22. QR Attendance Scanning (Sequence Diagram)
 Figure 23. Admin Panel & Application Review (Sequence Diagram) 
 Figure 24. Payment Processing (Sequence Diagram) 
 Figure 25. Digital Health Card Generation (Sequence Diagram)
-
+ 
 
 Figure 26. User Management Database (Domain Diagram)
 
