@@ -1,0 +1,1471 @@
+BirthCare: A Web-Based Birthing Home for Patient Services and Records Management System
+
+
+
+A Capstone Project Proposal Presented to the Faculty of the
+Information and Communications Technology Program STI College Davao
+
+
+
+
+
+In Partial Fulfilment
+of the Requirements for the Degree
+Bachelor of Science in Information Technology
+
+
+
+
+
+
+Carol Clare R. Balista Aldrin Mar J. Alivio Kent Gerald B. Jandug
+
+December 2025
+
+ENDORSEMENT FORM FOR ORAL DEFENSE
+
+
+TITLE OF RESEARCH:	BirthCare: A Web-Based Birthing Home for
+Patient Services and Records Management System
+
+NAME OF PROPONENTS:	Carol Clare R. Balista
+Aldrin Mar J. Alivio Kent Gerald B. Jandug
+
+
+In Partial Fulfilment of the Requirements
+for the degree Bachelor of Science in Information Technology has been examined and is recommended for Oral Defense.
+
+
+
+
+ENDORSED BY:
+
+
+Engr. Elvi Lito e. Ubas, CPE, MEEd
+Capstone Project Adviser
+
+APPROVED FOR ORAL DEFENSE:
+
+
+
+Jessiel Chris D. Hilot
+Capstone Project Coordinator
+
+
+
+NOTED BY:
+
+
+Jessiel Chris D. Hilot
+Program Head
+
+
+
+
+
+November 2025
+
+APPROVAL SHEET
+
+
+This capstone project titled BirthCare: A Web-Based Birthing Home for Patient Services and Records Management System, prepared and submitted by Aldrin Mar J. Alivio, Carol Clare R. Balista, and Kent Gerald B. Jandug, in partial fulfillment of the requirements for the degree of Bachelor of Science in Information Technology, has been examined and is recommended for acceptance and approval.
+
+
+Engr. Elvi Lito E. Ubas, CPE, MEEd
+Capstone Project Adviser
+
+
+Accepted and approved by the Capstone Project Review Panel in partial fulfillment of the requirements for the degree of Bachelor of Science in Information Technology
+
+
+
+
+
+
+
+
+
+Ariel P. LapiñasEngr. Darwin Ian I. GuerreroPanel MemberPanel Member
+
+
+
+Dominic R. Bantigue
+Lead Panelist
+
+
+
+
+Noted:
+
+
+
+Jessiel Chris D. HilotJessiel Chris D. HilotCapstone Project CoordinatorProgram Head
+
+
+
+November 2025
+
+ACKNOWLEDGEMENT
+
+The researchers would like to extend their heartfelt gratitude to the following:
+
+      To Almighty God, for His guidance, wisdom, and strength that have sustained us throughout the course of this research. Truly, without His grace and blessings, the success of this project would not have been possible.
+      To our Capstone Project Coordinator, Ms. Jessiel Chris D. Hilot, for providing consistent guidance, coordination, and encouragement throughout the duration of the study. Your leadership and direction ensured that the project met all necessary academic and institutional requirements.
+      To our Capstone Project Adviser, Mr. Elvi Lito E. Ubas, for your expert advice, valuable insights, and continuous support in the development of BirthCare. Your constructive feedback and technical guidance greatly contributed to the improvement and success of this research.
+To our Capstone Project Review Panel, Mr. Dominic R. Bantigue, Mr. Ariel
+P. Lapiñas, and Mr. Darwin Ian I. Guerrero, for their time, effort, and expertise in evaluating this study. Your thoughtful comments, suggestions, and recommendations have helped refine and strengthen the final output of the project.
+      To the Staff of Buhangin Health Center and Calunod Paanakan Center, for their warm accommodation, assistance, and cooperation during the conduct of our interviews.
+      To our Parents and/or Guardians, for their unconditional love, prayers, and financial support. Your encouragement has been the driving force behind the researchers' perseverance and dedication throughout this journey.
+      To our Friends and Inspirations, for their constant motivation and moral support that kept the researchers inspired during both challenging and fulfilling moments of the research.
+"Commit to the Lord whatever you do, and He will establish your plans."- Proverbs 16:3 (NIV)
+
+ABSTRACT
+
+Title of research:	BirthCare: A Web-Based Birthing Home for Patient Services
+And Records Management System
+Researchers:	Carol Clare R. Balista Aldrin Mar J. Alivio Kent Gerald B. Jandug
+
+Degree:	Bachelor of Science in Information Technology
+Date of Completion:  December 2025
+Keywords:	Birthing Home, Web-Based System, Maternal Care, Newborn Care
+
+
+      This study named BirthCare, it is a web-based system for birthing homes that centralizes patient services and records management. It replaces manual processes by digitizing patient records, labor monitoring, prenatal scheduling, and billing, primarily supporting midwives, healthcare staff, and facility owners to improve efficiency and maternal care.
+      Using the Spiral Model, the developers followed iterative planning, risk analysis, development, and evaluation, with requirements gathered through consultations and interviews. The system design used various diagrams (domain, class, activity, database) to ensure accurate, consistent, and well-structured data.
+      For implementation, Figma was used for UI prototyping, Next.js and Tailwind CSS for the frontend, Laravel for the backend, and MySQL for the database. The resulting system proved scalable, reliable, and accessible, reducing administrative workload and improving record accuracy. Recommended future enhancements include mobile access, notification features, freeform user feedback, and expansion to other healthcare facilities.
+
+Table of Contents
+
+
+PageTitle PageEndorsement form for Oral Defense1Approval Sheet2Acknowledgements3Abstract4Table of Contents5List of Figures7List of Tables10IntroductionProject Context11Purpose and Description13Objectives15Scope and Limitations
+Review of Related Literature/Studies/Systems16
+20MethodologyTechnical Background24Requirements Analysis29Requirements Documentation31Design of Software, System, Product, and/or Processes40Development58Results and DiscussionTesting59Description of Prototype64Implementation Plan65Implementation Results66Conclusion67References70Appendices71Resource Persons132Evaluation Tool/Test Documents133Sample Input/Output/Reports135
+User's Guide140Personal Technical Vitae144
+List of Figures
+
+
+
+
+FigurePage1	Gantt Chart of Activities732	Spiral Model743	Patient Management (Use-Case)754	Billing and Payment Module (Use-Case)765	Patient Discharge Module (Use-Case)776	Report Generation Module (Use-Case)787	Mapping Feature Module (Use-Case)798	Subscription Management Module (Use-Case)809	Patient Management (Domain Diagram)8110 Billing and Payment Database (Domain Diagram)8211 Patient Discharge Database (Domain Diagram)8312 Report Generation and Document Management Database (DomainDiagram)8413 Mapping Feature (Domain Diagram)8514 Subscription Database (Domain Diagram)8615 Patient Admission (Activity Diagram)8716 Patient Billing and Payment (Activity Diagram)8817 Patient Discharge (Activity Diagram)8918 Report Generation and Document Management (Activity Diagram)9019 Mapping and Consultation History (Activity Diagram)9120 Subscription Management (Activity Diagram)9221 Patient Admission Module (Sequence Diagram)9322 Billing and Payment Module (Sequence Diagram)9423 Patient Discharge Module (Sequence Diagram)95
+24 Report Generation and Document Management (Sequence Diagram)	96
+25 Mapping Feature (Sequence Diagram)	97
+26 Subscription Management Module (Sequence Diagram)	98
+27 The Whole System Design Class Diagram (BirthCare - Web Application)	99
+28 System Design Class Diagram (Admission & Labor Monitoring)	100
+29 System Design Class Diagram (Billing & Payments)	101
+30 System Design Class Diagram (Birthcare Management)	102
+31 System Design Class Diagram (Patient Management)	103
+32 System Design Class Diagram (Patient Prenatal)	104
+33 System Design Class Diagram (Room Management)	105
+34 System Design Class Diagram (Subscription Management)	106
+35 System Design Class Diagram (User Management)	107
+36 The Whole Database Design (BirthCare - Web Application)	108
+37 Database Design (Web-based System)	109
+38 Database Design (patient admission module)	110
+39 Database Design (billing and payment module)	111
+40 Database Design (patient discharge module)	112
+41 Database Design (report generation and document management module)	113
+42 Database Design (mapping feature)	114
+43 Database Design (subscription management module)	115
+44 BirthCare's Landing Page	116
+45 BirthCare's Subscription Plan	116
+46 BirthCare's Login Page	117
+47 BirthCare's Registration Page	117
+48 Owner's Dashboard	118
+49 Owner's Subscription Page	118
+50 Staff's Dashboard	119
+
+51 Patient List Page	119
+52 Patient Document Page	120
+53 Patient Chart Page	120
+54 Patient Admission Page	121
+55 Mother's Discharge Page	121
+56 Newborn Discharge Page	122
+57 Patient Referrals Page	122
+58 Patient Prenatal Schedule's Page	123
+59 Patient Prenatal Forms Page	123
+60 Patient Prenatal Visit Logs	124
+61 Room Management Page	124
+62 Patient Labor Monitoring Page	125
+63 Newborn Birth Details & APGAR Score Page	125
+64 Newborn Screening Form Page	126
+65 Certificate of Live Birth Page	126
+66 Item Charges Page	127
+67 Payments Dashboard	127
+68 Payments Reports & Analytics Page	128
+69 Registered Facilities Map Page	128
+70 Role Management Page	129
+71 Staff Management Page	129
+72 Admin's Dashboard	130
+73 Admins's BirthCare's Application Page	130
+74 Admins's Subscription Transaction Page	131
+75 Admins's user Management Page	131
+
+List of TablesFigureNo.Page1BirthCare - Patient Management (Patients Table)492BirthCare - Patient Management (Patient Admission Table)503BirthCare - Billing & Payments (Patient Bills Table)514BirthCare - Billing & Payments (Bill Items Table)525BirthCare - Billing & Payments (Patient Charges Table)536BirthCare - User & Access Control (Users Table)547BirthCare - User & Access Control (System Roles Table)558BirthCare - User & Access Control (BirthCare Roles Table)569BirthCare - User & Access Control (Permissions Table)5710Owner's Registration Test Case5911Owner's Login Test Case5912Patient Registration Test Case6013Patient Prenatal Test Case6114Mapping Test Case6115patient Admission Test Case6216Patient Chart Test Case6217Charges Test Case6318Payment Test Case6319Patient Discharge Test Case64
+INTRODUCTION
+
+
+Project Context
+
+      In the continuous development of healthcare services, ensuring efficient and accessible maternal care remains a crucial priority. Despite advancements in medical technology and healthcare systems, birthing homes still face challenges in managing patient records, tracking labor and delivery, and ensuring proper postnatal care. Many birthing facilities rely on traditional paper-based documentation, which is prone to inefficiencies such as misplaced records, delayed access to patient information, and difficulty in monitoring patient history. These challenges affect healthcare providers, increasing their workload and potentially compromising the quality of care given to mothers and newborns.
+      The need for an improved birthing home management system is evident, particularly in local communities where healthcare accessibility is limited. Midwives and healthcare professionals often handle multiple responsibilities, including patient admissions, labor monitoring, delivery assistance, and postnatal checkups. The absence of a digitalized system makes these tasks more time-consuming and prone to errors, leading to inconsistencies in documentation and difficulties in retrieving patient data when needed. A web-based birthing home management system offers a solution by integrating essential patient care processes into a centralized platform, streamlining operations, and ensuring accurate record-keeping.
+      From firsthand experience and observations, the reliance on manual systems in birthing homes presents significant operational challenges. Paper-based records are often misplaced, disorganized, or lost, which results in delays in accessing critical patient information. During emergencies, such inefficiencies can lead to poor decision-making and suboptimal maternal and newborn care. Furthermore, postnatal care tracking remains a challenge due to the lack of a structured follow-up system, making it difficult for healthcare providers to monitor the well- being of mothers and their babies after childbirth. Implementing a web-based system will address these issues by providing real-time access to patient records, improving communication
+
+among healthcare staff, and ensuring seamless monitoring of maternal and newborn health.
+
+      The implementation of a web-based birthing home management system aligns with the goal of leveraging technology to improve healthcare services. By integrating features such as digital record-keeping, automated admission tracking, labor and delivery monitoring, and structured postnatal care documentation, the system enhances efficiency and allows healthcare providers to focus more on patient care rather than administrative tasks. This transition from manual to digital management will not only streamline operations but also contribute to better healthcare outcomes for mothers and newborns.
+
+      Additionally, a digital system ensures data security and accuracy, reducing the risk of misplaced or lost records. It also facilitates easier data retrieval, enabling midwives and healthcare staff to access patient history instantly, which is crucial for informed decision- making. By addressing the inefficiencies of traditional record-keeping, the proposed system enhances the overall quality of maternal care and provides a structured approach to managing birthing home operations.
+
+      This research aims to contribute to the ongoing efforts to modernize healthcare services, particularly in maternal and newborn care. By examining the impact of a web-based birthing home management system on healthcare accessibility, patient satisfaction, and service quality, this study highlights the potential of digital solutions in addressing prevailing issues in birthing home management. The findings of this study will serve as a valuable resource for healthcare institutions, policymakers, and technology developers, promoting the adoption of innovative solutions to improve maternal and newborn healthcare services.
+
+      In essence, this project seeks to bridge the gap between traditional healthcare practices and modern technological advancements. By providing an efficient and reliable platform for managing patient records and healthcare processes, the proposed system ensures that birthing homes can deliver high-quality care to mothers and newborns while minimizing administrative burdens on healthcare providers.
+
+Purpose and Description
+
+      The purpose of this project is to develop a structured, accessible, and efficient system to improve the management of birthing homes. By implementing this web-based platform, the system aims to ensure organized patient records, seamless admission processing, accurate tracking of patients on labor and delivery, structured postnatal care, and an internal patient billing module. It is designed to support midwives, facility owners, and other staff in handling patient information efficiently, ensuring better coordination of maternal and newborn healthcare services. By replacing manual record-keeping with a digital system, this project minimizes errors, reduces administrative workload, and enhances the overall efficiency of birthing home operations.
+
+      This Web-Based Birthing Home Patient Services and Records Management System consists of key functional modules tailored for different users. The Facility Owner Module can manage staff accounts, oversee patient records, handle subscription-based access, and monitor overall operations. The Encoder Module can handle patient registration, admission, certificate of live birth generation, and manage patient document collection. The Midwife Module enables midwives to manage patient prenatal care, labor & delivery, postpartum care, emergency referrals, patient discharge, and postnatal follow-up care. The Nurse Module can manage patient monitoring and newborn care. The Doctor's Module can manage newborn screening, pediatric referrals, doctor's prescriptions, and family planning consultations. The Billing Clerk Module is responsible for patient billing, including processing charges for services rendered, tracking payments, and generating patient billing records. The Operation Manager Module can oversee the daily operations, manage the prenatal and post- natal schedules, and generate reports.
+
+      The system does not handle any PhilHealth reimbursement operations, including the submission of claims or receiving payments from PhilHealth through online. The system does not allow tracking of PhilHealth-related claims, updates will be processed manually by the staff based on external communication (e.g., phone calls). The system only accepts patient PhilHealth-related basic information such as philhealth number and category with its information submitted by the patient so that the patient can still use her PhilHealth. All claim processing and reimbursement transactions are handled manually by the birthing home outside of the system. Additionally, The system also features a Mapping Module that provides an interactive map displaying nearby birthing homes using the same system. This module assists users in identifying patients with existing medical records from other facilities, allowing midwives to review prenatal and consultation histories for accurate referrals and improved continuity of maternal care. Furthermore, the system includes a subscription-based user management feature, allowing facility owner's to subscribe, renew, and manage accounts for the birthing home users seamlessly.
+
+      By integrating patient care management, structured billing records, and subscription- based access into a single platform, the system reduces administrative workload while enhancing service delivery. The platform provides a centralized approach to managing patient care, allowing birthing homes to operate more smoothly and effectively. Secure documentation ensures that medical data remains updated and accessible whenever needed. This innovation modernizes birthing home management by making maternal healthcare more accessible, organized, and efficient.
+
+      This project is particularly beneficial for local birthing homes that require a structured and reliable way to manage patient records and internal billing documentation. By transitioning from paper-based processes to a digital system, it enhances service quality, minimizes errors, and improves maternal and newborn care. The system allows midwives and facility owners to collaborate effectively, ensuring that every patient receives the necessary care without unnecessary administrative burdens. Automated workflows improve efficiency, reduce delays, and enhance overall maternal healthcare services.
+
+Objectives
+
+General Objective
+
+     The main objective of this study is to develop a Web-Based Birthing Home for Patient Services and Records Management System that aims to help birthing homes in Davao City improve maternal and newborn care by digitizing patient records and services. It streamlines processes such as admissions, labor and delivery tracking, and postnatal care management, ensuring faster, more accurate, and secure data handling. Through this system, healthcare providers can enhance efficiency and deliver better care to mothers and their newborns.
+
+Specific Objectives
+
+
+? To develop a web-based system that allows users to manage birthing home services.
+? To develop a patient admission module that enables staff to record, track, and manage patient admissions, including personal details, assigned rooms, and attending personnel.
+? To develop a billing and payment module that facilitates accurate computation and record-keeping of patient charges and expenses.
+? To develop a patient discharge module that includes documentation of doctor's prescriptions and necessary postnatal instructions.
+? To develop a report generation and document management module that includes certificate of live birth creation, storing patient documents.
+? To develop a mapping feature that allows users to display nearby birthing homes on a map and allows users to view a patient's consultation history from previously visited birthing homes for referral purposes and also to search registered facilities.
+? To develop a subscription management module that allows facility owners to subscribe, choose customizable plan options, renew, pay.
+
+Scope and Limitations
+
+      The Web-Based Birthing Home Patient Services and Records Management System is designed to support maternal and newborn care by providing a centralized digital platform for managing patient records, admissions, labor and delivery monitoring, and postnatal care. It also supports administrative operations such as billing, document generation, mapping, and subscription handling. The system aims to reduce manual workload, ensure data accuracy, and improve access to important patient information. While it streamlines processes for staff and the facility owner, it does not replace the clinical responsibilities of healthcare providers or include full-scale financial or laboratory management.
+
+Scope
+The system will include the following modules and features:
+
+Patient Records Management
+      This module allows midwives and the facility owner to manage patient records from admission to postnatal care. It stores essential patient details such as medical history, vital signs, labor progress, and delivery outcomes. With centralized data storage and real-time updates, it ensures records are accurate, complete, and easy to access.
+
+Billing and Payment Management
+      This module facilitates accurate computation and record-keeping of patient expenses, particularly based on predefined maternity care packages or services offered. While it does not track itemized charges like laboratory tests or professional fees, it enables staff to input total charges, generate receipts, and monitor payment status linked to each patient. This supports transparency and financial documentation.
+
+Patient Discharge Management
+      This module manages the discharge process by generating prescriptions, postnatal care instructions, and final documentation. It ensures all relevant information is recorded and available for continuity of care and follow-up services.
+Report Generation and Document Management
+      This feature enables users to create and store essential documents such as the Certificate of Live Birth, PhilHealth-related forms, and postnatal reports. Documents are organized in a secure, retrievable format. The system also supports generating basic reports related to patient records and operational data for administrative use.
+
+Mapping Feature
+      The mapping component helps users locate birthing homes and track patient referral transfers. This enhances accessibility, supports patient navigation, and assists staff in coordinating services across different locations when necessary.
+
+Subscription Management
+
+      This module allows the facility owners to manage system access based on subscription plans (e.g., 1 year, 3 years, 5 years). It includes tools for renewing, and tracking subscriptions, with automated reminders for upcoming expirations. It also allows for basic plan customization and monitoring of account status. This module integrates with PayMongo, an online payment gateway that enables secure and convenient subscription payments through GCash, debit card, or credit card. This feature enhances accessibility and efficiency by automating the subscription process and reducing manual payment handling.
+
+Limitations
+
+Technical Limitations:
+      The system relies on stable internet connectivity to ensure real-time access and updates. Without a reliable internet connection, the system may experience delays in updating patient data and generating reports. Furthermore, the system is designed exclusively as a web application and is not optimized for mobile devices, meaning it is not mobile-responsive. The system does not integrate with external hardware such as barcode scanners or biometric devices, which limits its functionality, particularly in areas that require physical identification or real-time tracking. Moreover, the system does not manage or control printing hardware directly, meaning an external printer setup is required for printing receipts and documents. The PayMongo integration is limited exclusively to the Subscription Management module. It handles subscription payments for birthing homes through online transactions. Other payment processes, such as those managed under the Billing and Payment Management module, continue to rely on cash-on-hand payments and are not connected to PayMongo.
+Operational Limitations:
+      The Birthing Home Management System is designed for use exclusively within Davao City and is tailored to the workflows and operational requirements of local birthing homes. It is not intended for deployment or use in other regions without significant customization. Healthcare staff must manually input all vital signs and medical data, as the system does not support real-time integration with medical devices. This manual data entry process may increase the risk of human error. Patient-submitted documents, such as PhilHealth forms, must also be manually uploaded by staff, which can lead to inaccuracies or delays in documentation. The system does not include automated patient reminder features for postnatal follow- ups, requiring staff to manage scheduling and follow-ups manually. Payment confirmations, subscription status updates, and PhilHealth claim tracking are also processed manually, which may result in delays or errors. Furthermore, the system does not facilitate electronic PhilHealth reimbursements; all claims must be prepared and submitted manually by the birthing home staff.
+
+Functional Limitations:
+      The system does not support automated error detection in patient records, billing entries, or document uploads. This means that if incorrect data is entered, the system will not automatically flag or correct the mistakes. Report generation relies on accurate manual input, and the system does not auto-correct inconsistent entries, which can lead to discrepancies in generated reports if incorrect data is entered. Subscription plan upgrades, renewals, and cancellations require manual confirmation if there are payment issues, and there is no automated error handling for payment-related problems. Only authorized personnel can edit or modify patient records and financial data, ensuring security but requiring manual oversight to prevent unauthorized changes. Additionally, the system does not support inventory management for vitamins, medications, and other prescribed items. These supplies must be tracked manually by the staff, as the system does not track stock levels or manage inventory.
+
+REVIEW OF RELATED LITERATURE/STUDIES/SYSTEMS
+
+Related Studies and/or Systems
+
+Antenatal Care Management Platform (Aliyi, A., Mesfin, B., Hassen, F. et al. 2023)
+
+      Pregnancy is a process of developing a fetus in a woman's womb leading to anatomical and physiological changes. Currently, numerous health facilities offering antenatal services are yet to adopt health informatics. This led to several challenges, including unskilled, early and poor quality antenatal and delivery care, case traffic because many patients are admitted per day, and shy medical professional doctors, nurses, midwives and nursing aids. The main idea of this project was to design and develop a new system for managing maternal health in antenatal care. (Alivi., A., Mesfin, B., Hassen, F. et al. 2023)
+      This web-based antenatal care management platform is designed using XAMPP, PHP, HTML and CSS. It involves designing the stoner interface and identifying the inputs, outputs, and processes of the designed system. The configuration involves the use of case diagrams, sequence diagrams and class diagram tools to achieve the physical consummation of the antenatal care management platform and positive living information system. The purpose of this work was to create a web-based platform for managing antenatal care.
+
+
+Effect of Midwives' Application of Intelligent Delivery Room Management System on Delivery Outcome
+
+     Li et al. (2022) investigated the impact of implementing an intelligent Delivery Room Management System (IDRMS) by midwives on delivery outcomes. The study included 100 primaries who were admitted between January 2019 and June 2020. They were randomized to either the observation group, which had midwives using the IDRMS, included data from portable monitoring equipment, analgesia pump operations, and real-time monitoring of maternal physiological indicators, all of which were available to medical personnel via mobile devices. In an effort to improve job productivity and the
+
+quality of birthing, the technology also made electronic documentation and interaction with hospital information systems easier.
+
+      The results showed that, in comparison to the control group, the observation group's first and second stages of labor were noticeably shorter. The observation group also reported higher neonatal Apgar scores and decreased postpartum Numerical Rating Scale (NRS) pain scores. Interestingly, the observation group experienced a decreased rate of vaginal deliveries turning into cesarean sections. Additionally, the observation group's postpartum anxiety and despair levels were much lower, suggesting that mother's psychological health had improved. These findings imply that midwives' use of IDRMS can improve mother and newborn health by having a positive impact on delivery outcomes.
+
+Designing a Midwife-Led Birth Center Program Based on the MAP-IT Model: A Sequential Explanatory Mixed-Methods Study (Bakhshi, M., Mollazadeh, S., Khadivzadeh, T., Moghri, J., Saki, A., & Firoozi, M. (2024).)
+
+
+      A 2024 study utilized the MAP-IT model to design a midwife-led birth center program. This sequential explanatory mixed-methods study emphasized the importance of understanding community attitudes and preferences toward midwifery care. The findings highlighted that tailored midwife-led care models could effectively address the needs of low-risk pregnancies, promoting positive birth experiences and outcomes. In recent decades, childbirth has increasingly been treated as a medical event, often sidelining the traditional role of midwives. This shift has led to a reliance on medical interventions, such as cesarean sections, which may not always be necessary. Recognizing this trend, a study titled "Designing a Midwife-Led Birth Center Program Based on the MAP-IT Model: A Sequential Explanatory Mixed-Methods Study" aimed to develop a program that emphasizes midwifery-led care, offering a more natural and personalized childbirth experience.
+
+      This study stands out as the first to utilize a mixed-method approach based on the MAP- IT model to design a midwife-led maternity care program. By aligning the program with the specific needs and preferences of pregnant women and midwives, it aims to empower midwives and promote a more natural childbirth process. The anticipated outcome is an improvement in maternal and infant health outcomes, offering women a supportive environment that respects their childbirth choices.
+
+
+Synthesis
+
+
+      The review of related studies and systems underscores the evolving landscape of maternal healthcare delivery, characterized by innovative solutions aimed at enhancing accessibility, efficiency, and quality of care for mothers and newborns.
+      The Antenatal Care Management Platform (Aliyi et al., 2023) represents a significant advancement in maternal health technology, emphasizing structured digital health solutions to address challenges such as poor-quality antenatal care and high patient volume. By implementing a web-based platform, this system streamlines patient records, improves monitoring, and enhances service delivery in antenatal care.
+      The Intelligent Delivery Room Management System (IDRMS), introduced by Li et al. (2022), highlights the transformative potential of digital innovations in labor and delivery management. By integrating real-time monitoring, electronic documentation, and automated medical processes, the IDRMS optimizes workflow efficiency and improves maternal and neonatal outcomes, reducing labor duration and enhancing patient safety.
+
+      Additionally, the Midwife-Led Birth Center Program by Bakhshi et al. (2024) underscores the importance of personalized, midwifery-centered care in modern maternal health services. By utilizing the MAP-IT model, this program shifts  away from medicalized childbirth and prioritizes holistic, patient-centered care, empowering midwives and enhancing natural birthing experiences.
+      In contrast, the developers' proposed An Web-Based Birthing Home Management System aims to redefine maternal healthcare delivery by integrating digital record-keeping, labor and delivery monitoring, and postnatal care management. Unlike existing systems, this platform focuses on a comprehensive approach to birthing home operations, ensuring structured patient records, seamless admission, billing and payment processes, and efficient birth certificate generation. While previous systems have significantly improved healthcare accessibility and efficiency, this Birthing Home Management System stands out for its tailored design, aligning with the specific needs of midwives and maternal care providers. By seamlessly integrating technology into birthing home management, this system promises to enhance maternal healthcare services, ensuring better coordination, improved outcomes, and streamlined workflows in the digital age.
+
+METHODOLOGY
+
+
+Technical Background
+
+Overview of Current Technologies to be Used in the System
+
+      Technologies that help healthcare institutions improve their operations are among humanity's greatest innovations. A web-based management system is one of these breakthroughs. These systems are accessible to all users due to their scalability, efficiency, and automation capabilities. They have become essential in medical facilities as they enhance record-keeping accuracy and streamline patient management.
+      The Web-based Birthing Home Management System is designed to facilitate patient records management, admissions, labor and delivery tracking, and postnatal care. Unlike traditional manual systems, this web-based platform allows midwives and facility owners to easily access and update patient information from any desktop device with a web browser and an internet connection. This ensures a dynamic and efficient workflow, reducing paperwork and improving overall service delivery.
+      To guide the development process, the proponents will follow the Spiral Model (Please refer to Figure 2, Page 75). This iterative methodology allows the system to be developed in cycles, with each round consisting of four phases: planning, risk analysis, product development, and evaluation. This model is ideal for the project as it supports continuous user feedback and refinement-an important approach for a system involving sensitive healthcare data and operational complexity. By revisiting each phase multiple times, the team can manage potential risks early and ensure the system's quality, reliability, and alignment with real-world birthing home needs.
+      The developers will also make use of Use Case Diagrams to map out how each system user-such as encoder, midwives, doctors, nurse, facility owners, and billing clerks-interacts with the system. These diagrams help identify system functionalities like patient registration, labor monitoring, birth certificate generation, and billing access. They provide a visual guide for
+
+planning and testing each user feature, ensuring that system roles and permissions are clearly defined and implemented according to real workflows.
+      In addition to Use Case Diagrams, a Domain Class Diagram will be used to design the structure of the system's database. The Domain Diagram will outline the relationships between entities such as patients, admissions, labor records, billing entries, and users. This will ensure data consistency and integrity throughout the platform, especially when managing interconnected records like patient details linked to delivery logs or billing information. By designing a well-structured database early on, the developers can reduce redundancy and prevent future data-related issues.
+      For the visual and technical side of the system, the proponents are going to use Figma as a design tool to create mockups and prototypes of the user interface. This will help visualize and refine page layouts, navigation structure, and user experience based on feedback during the early stages. The frontend will be built using Next.js, ensuring an interactive, responsive, and modern web interface. Styling will be handled with Tailwind CSS, which allows for efficient and consistent design elements across all pages.
+      On the backend, Laravel will be used-a powerful PHP framework known for its security and scalability. Laravel's features like built-in authentication and Eloquent ORM will help manage patient records and ensure secure data handling. The database behind the system will be MySQL, chosen for its reliability and performance in handling structured medical data.
+      To improve communication and alerts within the platform, Node.js will be integrated to handle real-time notifications. This feature will allow the system to notify midwives about new admissions, active labor cases, or required postnatal follow-ups-enhancing responsiveness and patient care.
+      Moreover, the system will include a billing and payments module that helps facility owners to generate invoices, track services rendered, and log transactions. Although the initial version focuses on onsite payments, the system will be designed to accommodate digital payment integration in the future, allowing for system scalability as the birthing home's operations grow.
+
+      By combining tools like Use Case Diagrams, Domain Diagram, and the Spiral Model with modern technologies such as Next.js, Laravel, Node.js, and MySQL, the proponents aim to deliver a well-planned, efficient, and secure Web-Based Birthing Home Management System. This project is designed not only to streamline workflows and enhance data accuracy but also to support safer, faster, and more organized maternal healthcare services.
+
+
+Gantt Chart of Activities
+
+      The developers initiated the project through Idea Brainstorming, where they engaged in analyzing potential issues to generate project ideas. This activity was conducted from the 1st week to the 2nd week of February. Following this, Title Creation took place within the same period, during which the developers collaborated to finalize a project title for the Title Defense presentation.
+      The Title Defense was conducted from the 2nd week to the 3rd week of February. The developers presented the selected project, discussing the identified problems, proposed solutions, objectives, and an initial data flow diagram to better illustrate the system's process. To deepen their understanding of the project's real-world application, the developers conducted an Interview with birthing home staff and patients, gathering essential data and information. This interview process spanned from the 3rd week of February to the 1st week of March and continued up to the 3rd week of April to collect additional details as needed.
+      After gathering sufficient information, the Project Context was developed in the 1st week of March. It outlined the existing problems, the rationale behind selecting the issue, and its connection to the proposed web application. Simultaneously, the Purpose and Description of the project were crafted, briefly but clearly presenting the project's goals and relevant data. In the same timeframe, the Objectives were drafted, detailing the intended outcomes, the significance of the project, and its potential impact. Additionally, the Scope and Limitations were defined to set the boundaries for system
+
+deployment, user capabilities, and system functions.
+
+      Following feedback from the project adviser, Revisions were made. The Purpose and Description were updated between the 2nd and 3rd week of March to include billing and payment transactions and clarify the project's focus. The objectives were also revised during the 2nd week of March, ensuring proper sequencing and adding modules such as patient charges (laboratory tests, medical fees, professional fees, and other services), billing and payment, patient discharge with prescriptions, report generation, and subscription management. Similarly, the Scope and Limitations were rewritten into a narrative format and aligned with the revised objectives.
+      The Review of Related Studies/Systems was conducted from the 2nd to the 3rd week of March, where the developers analyzed existing systems related to birthing homes to support the relevance of their project. A Technical Background was then prepared, outlining the proposed technologies, hardware, and software needed for system development.
+      From the 3rd week of March to the 3rd week of April, the Requirements Analysis phase took place. During this period, developers processed the gathered information to guide system development. Simultaneously, Diagrams were created to visualize the system's structure and flow, providing a step-by-step breakdown of each module. The Resources required for project completion, including specific hardware and software, were also outlined during the 3rd week of March. From the 4th week of March to the 2nd week of April, the Requirements Documentation was prepared, detailing the functional and non-functional requirements of the system. The Appendices, which include supplementary materials, were also compiled during the 4th week of March to 4th week of April. The Proposal Defense was conducted from the 1st week to the 2nd week of May. During this phase, the developers presented their refined project proposal, incorporating all the gathered information and revisions. Following a successful proposal defense, the Planning System Development phase began, spanning from the 3rd week of May to the 2nd week of August. This involved strategizing the overall development process. Creating the UI (Figma) commenced in the 3rd week of May and continued until the 3rd week
+
+of September. This involved designing the user interface using Figma. Simultaneously, Creating Database Flow was initiated in the 3rd week of July and concluded in the 1st week of October, focusing on designing the database structure. Programming UI - Frontend began in the 3rd week of July and extended until the 1st week of November, where the front-end user interface was developed. Programming Database - Backend started in the 3rd week of July and continued until the 1st week of November, focusing on the back-end database development. Creating Diagrams was revisited from the 4th week of September to the 1st week of November, likely for updates or additional visualizations. Updating the Thesis Document took place from the 2nd week to the 1st week of November, incorporating all the development progress. Deployment of the system began in the 4th week of October and continued until the 2nd week of November. Finally, Testing commenced in the 4th week of October and is expected to conclude in the 3rd week of November. (Please refer to Figure 1, Page 73)
+
+
+Resources
+
+
+Hardware
+
+
+      In this section, the system's hardware requirements are outlined. Two devices were used in building and testing the system, each with distinct specifications to ensure compatibility and performance across different setups.
+      Device 1 is equipped with Windows 11 Pro 64-bit operating system. It runs on an AMD Ryzen 5 5600X 6-core processor with a base clock speed of
+3.70 GHz. The device has 16 GB of RAM and 1 TB of storage. For display, it utilizes an AOC 24B36H+ 23.8-inch monitor with a 120Hz refresh rate, providing smooth visual performance. Device 2 also uses Windows 11 Pro x64-bit as its operating system. It is powered by an AMD Ryzen 3 3200G 4-core processor running at 3.60 GHz, and includes 8 GB of RAM with 1 TB of storage. The monitor used is an ACER EK220Q, featuring a 1920x1080 resolution with a 60Hz refresh rate.
+
+      These hardware configurations were selected to test the system's functionality under different performance capacities, ensuring both high-end and mid-range setups can support the system effectively.
+Software
+
+      The proponents plan on using the Windows operating system on both desktops and laptops. Before diving into development, the proponents will use Figma to create a prototype or mockup design for the system. For backend development, the proponents will use Laravel, a PHP framework, along with MySQL, an open-source relational database. To enhance both the appearance and functionality of the system, they will use Next.js for the frontend, along with Tailwind CSS for styling and JavaScript for interactivity.
+
+Requirements Gathering and Analysis
+
+      The development of the Web-Based Birthing Home Management System began with a crucial step: understanding the actual needs and workflow of the birthing home. The team recognized that for the system to be truly helpful, it had to reflect the real-life processes and responsibilities of the staff who would use it daily. To achieve this, they started with background research on existing maternal care systems and examined how technology was currently being used in similar healthcare settings. This provided valuable insights into common gaps and limitations, helping the team set a clear direction for what the system should address.
+      The heart of the requirement's gathering process was a four-day interview session with the birthing home's key personnel. These included midwives, nurses, a billing clerk, and an encoder. Each day of the session was dedicated to understanding a specific aspect of the birthing home's operations. On the first day, the team focused on patient intake and record management. Staff members walked the team through how patient information is collected during admission, how records are updated, and how data is handled during a patient's stay. They emphasized the need for a system that could store and
+
+update patient data efficiently from admission to discharge.
+
+      The second day was centered on labor and delivery processes. The midwives and nurses explained how they monitor patients during childbirth and how important it is to record each detail as the labor progresses. They noted the challenges of keeping manual records up to date in such a fast-paced setting and expressed interest in having an organized digital log that would allow them to record and view patient updates in real time.
+      On the third day, the conversation shifted to postnatal care. The team asked about discharge procedures and how care instructions were communicated to new mothers. The staff stressed the importance of clear documentation of postnatal instructions and prescriptions. They wanted these to be part of the system so they wouldn't have to rely on scattered handwritten notes or verbal reminders, which can easily be forgotten or lost.
+      The fourth and final day focused on administrative concerns. The billing clerk and encoder discussed how billing is currently handled, including how payments are recorded and how they manage package availment manually. They shared their struggles with tracking payment records using separate logs and stressed the need for a simple module that could accurately record payments and monitor the status of packages availed by patients. They also noted that generating summary reports such as birth counts and postnatal statistics would be helpful for both internal tracking and reporting to local health units.
+      Throughout the interviews, several consistent themes emerged. The staff agreed that a centralized system was essential to handle all aspects of patient care, from admission to postnatal discharge. They highlighted the need for manual entry options for referral cases and PhilHealth claim details, noting that although automation in these areas wasn't necessary, it was important to organize the information digitally. Generating a Certificate of Live Birth was also mentioned as a core feature, as it is a critical document in every childbirth case.
+Another point emphasized during the discussions was the importance of
+
+role-based access. The team learned that different staff members should have access to different parts of the system. For example, midwives and nurses should manage medical data, while the billing clerk and encoder should focus on financial records and reports. This would protect sensitive information and ensure that each user could work more efficiently within their assigned role.
+      By the end of the four-day session, the team had a clear and complete understanding of what the system needed to include. From patient registration and labor tracking to discharge documentation and billing, each feature was grounded in the real-world needs of the birthing home staff. This in-depth and collaborative approach ensured that the system would not only be functional but also practical, making daily tasks easier for healthcare workers and improving maternal care services in Davao City.
+
+
+Requirements Documentation
+
+      This section serves as a comprehensive record of the BirthCare Web-Based Birthing Home Management System's functional and non-functional requirements. It details the specific features, capabilities, and constraints that guided the system's development, ensuring a shared understanding between the development team and stakeholders. The process of requirements gathering involved extensive consultations and interviews with birthing home personnel, including midwives, nurses, billing clerks, and facility owners. This direct engagement was crucial for identifying the real-world operational needs, pain points with existing manual systems, and desired functionalities. These insights were then meticulously analyzed and translated into a structured set of requirements.
+      To clearly articulate these requirements and visualize the system's intended behavior and structure, a series of Unified Modeling Language (UML) diagrams were extensively utilized. These diagrams include Use Case Diagrams, which captured the system's functional scope from various user perspectives; Sequence Diagrams, which illustrated the dynamic interactions between system components for specific scenarios; Activity Diagrams, which modeled the detailed workflows and business processes; and a Domain Class Diagram, which defined the core data entities and their
+
+relationships. Collectively, these visual tools provided a detailed blueprint of the software product's design and operational flow.
+
+      This thorough documentation ensures that the final system aligns precisely with user needs, industry standards, and project objectives. It serves as a critical reference point for subsequent design, development, and testing phases, minimizing ambiguities and facilitating effective communication throughout the project lifecycle.
+
+Patient Management Module
+
+      The Patient Management Module is central to the BirthCare system, designed to streamline the entire patient journey from admission through postnatal care. This module allows healthcare providers, particularly midwives and facility owners, to efficiently record, track, and manage comprehensive patient information. It encompasses medical history, vital signs, labor progress, and delivery outcomes, ensuring that all critical data is centralized, accurate, and easily accessible. By digitizing these records, the module significantly reduces the inefficiencies associated with traditional paper-based documentation, such as misplaced records and delayed access to information.
+
+      The module's functionalities support patient registration, admission processing, and ongoing record updates, which are crucial for informed decision-making and continuity of care. It also lays the groundwork for other interconnected modules by providing a robust and consistent source of patient data.
+
+      Use Case Diagram: The Use Case Diagram for Patient Management illustrates the interactions between various actors (e.g., Midwife, Encoder, Facility Owner) and the system's functionalities related to patient records. It outlines use cases such as "Register Patient," "Admit Patient," "Update Patient Record," and "View Patient History," clearly defining the scope of user interactions within this module.(Please refer to Figure 3, Page 75)
+      Activity Diagram: The Patient Admission Activity Diagram visually represents the workflow for admitting a patient, clearly delineating responsibilities across different roles using swimlanes. It shows the BirthCare
+
+Staff collecting and verifying patient details, checking room availability, and either assigning a room or placing the patient on a waiting list. The System then stores patient information, updates room assignments, and notifies attending personnel. Finally, the Nurse reviews the admission, prepares for patient care, and confirms details before the BirthCare Staff finalizes the admission process. This diagram highlights decision points and the parallel activities involved from initial data entry to final record creation. (Please refer to Figure 15, Page 87)
+      Sequence Diagram: The Sequence Diagram for Patient Admission details the chronological flow of interactions between the user interface, application logic, and database when a patient is admitted. It shows how data is captured, validated, and stored, ensuring a smooth and accurate admission process. (Please refer to Figure 21, Page 93)
+      Domain Class Diagram: The Patient Management Database (Domain Diagram) illustrates the key entities within the patient management module, such as Patients, Admissions, and PatientDocuments, and their relationships. This diagram is crucial for understanding the underlying data structure and ensuring data integrity and consistency. (Please refer to Figure 9, Page 81)
+Billing and Payment Module
+
+      The Billing and Payment Module is designed to manage all financial transactions within the birthing home, ensuring accurate computation and record-keeping of patient charges. This module facilitates the processing of charges for services rendered, tracks payments, and generates comprehensive patient billing records. It is particularly beneficial for the Billing Clerk and Facility Owner, providing a structured approach to financial management that minimizes errors and enhances transparency. While the module focuses on predefined maternity care packages and services, it supports the input of total charges, generation of receipts, and monitoring of payment statuses linked to each patient. This digital approach replaces manual billing processes, reducing administrative workload and improving financial documentation.
+
+      Use Case Diagram: The Use Case Diagram for the Billing and Payment Module outlines the interactions between actors such as the Billing Clerk and Facility Owner with functionalities like "Process Payment," "Generate Bill," "View Payment History," and "Manage Service Charges." This diagram clearly delineates the system's financial capabilities and user roles. (Please refer to Figure 4, Page 76)
+      Activity Diagram: The Patient Billing and Payment Activity Diagram visually represents the workflow for managing patient billing. It would typically show the Billing Clerk initiating a bill, selecting services, calculating charges, and processing payments. The System would then validate inputs, update financial records, and generate receipts. This diagram clarifies the sequential steps, decision points (e.g., payment method), and responsibilities across roles in managing patient accounts. (Please refer to Figure 16, Page 88)
+      Sequence Diagram: The Sequence Diagram for Patient Billing and Payment illustrates the step-by-step process of handling a patient's bill, from initiating a charge to recording a payment. It shows the flow of information between the user interface, the application's business logic, and the database, ensuring that billing transactions are processed accurately and securely. (Please refer to Figure 22, Page 94)
+      Domain Class Diagram: The Billing and Payment Database (Domain Diagram) defines the core data entities related to financial transactions, including PatientBills, BillItems, Payments, and PatientCharges. This diagram illustrates the relationships between these entities, ensuring a robust and consistent structure for managing all billing and payment information. (Please refer to Figure 10, Page 82)
+Patient Discharge Module
+
+      The Patient Discharge Module is crucial for managing the final phase of a patient's stay at the birthing home, ensuring a smooth transition from inpatient care to home recovery. This module streamlines the discharge process by facilitating the generation of essential documents such as doctor's prescriptions, comprehensive
+
+postnatal care instructions, and final medical documentation. It ensures that all relevant information is accurately recorded and readily available for continuity of care and subsequent follow-up services. By digitizing these critical discharge procedures, the module minimizes the reliance on scattered handwritten notes or verbal reminders, which can easily be forgotten or lost, thereby enhancing patient safety and improving the quality of postnatal care.
+
+      Use Case Diagram: The Use Case Diagram for the Patient Discharge Module depicts the interactions of healthcare staff, primarily midwives and doctors, with system functionalities such as "Initiate Discharge," "Generate Prescription," "Provide Postnatal Instructions," and "Finalize Discharge Summary." This diagram clearly outlines the scope of activities involved in releasing a patient. (Please refer to Figure 5, Page 77)
+      Activity Diagram: The Patient Discharge Activity Diagram visually represents the workflow for discharging a patient. It would typically show a Midwife or Doctor initiating the discharge, documenting prescriptions and postnatal instructions, and updating the patient's status. The System would then process these updates, generate necessary documents, and finalize the patient's record. This diagram highlights the sequential steps, decision points, and responsibilities across roles in ensuring a complete and proper discharge. (Please refer to Figure 17, Page 89)
+      Sequence Diagram: The Sequence Diagram for Patient Discharge details the chronological flow of events during the patient discharge process. It illustrates how discharge requests are processed, how prescriptions and instructions are generated, and how the patient's status is updated in the system, ensuring a systematic and error-free discharge. (Please refer to Figure 23, Page 95)
+      Domain Class Diagram: The Patient Discharge Database (Domain Diagram) illustrates the key data entities involved in the discharge process, such as DischargeRecords, Prescriptions, and PostnatalInstructions. This diagram defines the relationships between these entities, ensuring that all discharge-related information is structured, consistent, and easily retrievable
+
+for future reference. (Please refer to Figure 11, Page 83)
+
+Report Generation and Document Management Module
+
+      The Report Generation and Document Management Module is designed to enhance administrative efficiency and data accessibility within the birthing home by providing robust tools for creating, storing, and retrieving essential documents and reports. This feature enables users to generate critical documents such as the Certificate of Live Birth, and various postnatal reports. All documents are organized in a secure, retrievable format, reducing the risk of loss or disorganization associated with paper-based systems. The module also supports the generation of basic reports related to patient records and operational data, which are invaluable for internal tracking, administrative oversight, and reporting to local health units. This digitization of documentation and reporting streamlines workflows, ensures data accuracy, and supports informed decision-making.
+
+      Use Case Diagram: The Use Case Diagram for the Report Generation Module outlines the functionalities available to users, such as "Generate Certificate of Live Birth," "Upload Patient Document," "View Reports," and "Search Documents." It clarifies how different staff roles interact with the system to manage and retrieve documentation. (Please refer to Figure 6, Page 78)
+      Activity Diagram: The Report Generation and Document Management Activity Diagram visually represents the workflow for creating reports and managing documents. It would typically show a Staff Member selecting report parameters or uploading a document, with the System processing the request, retrieving data, and generating or storing the file. This diagram details the steps involved, from user initiation to the final output or storage, highlighting the system's automated and manual processes. (Please refer to Figure 18, Page 90)
+      Sequence Diagram: The Sequence Diagram for Report Generation and Document Management illustrates the flow of interactions when a user generates a report or manages a document. It details how requests are
+
+processed, data is retrieved from the database, and documents are created or stored, ensuring an efficient and accurate process. (Please refer to Figure 24, Page 96)
+      Domain Class Diagram: The Report Generation and Document Management Database (Domain Diagram) defines the data entities related to documents and reports, such as Documents, ReportTemplates, and their associations with patient records. This diagram ensures a structured approach to storing and managing all generated and uploaded files, maintaining data integrity and retrievability. (Please refer to Figure 12, Page 84)
+Mapping Feature Module
+
+      The Mapping Feature Module provides an interactive and geographically-aware component within the BirthCare system, significantly enhancing accessibility and coordination of maternal care services. This module helps users locate birthing homes that are part of the BirthCare network and facilitates the tracking of patient referral transfers between facilities. By displaying nearby birthing homes on a map, it assists users in identifying patients with existing medical records from other facilities. This capability allows midwives to review prenatal and consultation histories for accurate referrals and improved continuity of maternal care, especially when patients move between different locations. The mapping feature supports patient navigation and assists staff in coordinating services across various birthing homes when necessary, ultimately improving patient experience and care coordination.
+
+      Use Case Diagram: The Use Case Diagram for the Mapping Feature Module illustrates how users, such as midwives and facility owners, interact with functionalities like "View Nearby Birthing Homes," "Search Registered Facilities," and "View Patient Consultation History from Other Facilities." This diagram clarifies the module's scope in terms of location-based services and data sharing. (Please refer to Figure 7, Page 79)
+      Activity Diagram: The Mapping and Consultation History Activity Diagram visually represents the workflow for using the mapping feature. It
+
+would typically show a User (e.g., Midwife) initiating a search for facilities or patient history, with the System querying geographical data and patient records, and then displaying the results on a map or as a consultation history. This diagram outlines the steps involved in leveraging geographical data for improved patient care coordination. (Please refer to Figure 19, Page 91)
+      Sequence Diagram: The Sequence Diagram for Mapping Features details the chronological flow of interactions when a user utilizes the mapping feature, such as searching for a birthing home or retrieving a patient's history from another facility. It shows how the system queries location data and patient records to provide relevant information. (Please refer to Figure 25, Page 97)
+      Domain Class Diagram: The Mapping Feature (Domain Diagram) defines the data entities related to geographical information and inter-facility patient records, such as BirthingHomes, Locations, and ReferralRecords. This diagram ensures a structured approach to managing location-based data and patient transfer information, supporting seamless coordination across facilities. (Please refer to Figure 13, Page 85)
+Subscription Management Module
+
+      The Subscription Management Module is designed to handle the administrative aspects of system access for birthing home facilities, allowing facility owners to subscribe, renew, and manage accounts seamlessly. This module provides tools for tracking subscription statuses, offering customizable plan options (e.g., 1 year, 3 years, 5 years), and sending automated reminders for upcoming expirations. It integrates with PayMongo, an online payment gateway, to enable secure and convenient subscription payments through various methods like GCash, debit cards, or credit cards. This feature enhances accessibility and efficiency by automating the subscription process and significantly reducing manual payment handling, ensuring continuous access to the BirthCare system for subscribing birthing homes.
+
+      Use Case Diagram: The Use Case Diagram for the Subscription Management Module outlines the interactions between the Facility Owner and
+
+system functionalities such as "Subscribe to Plan," "Renew Subscription," "Manage Account," "Process Payment (via PayMongo)," and "View Subscription Status." This diagram clearly defines the administrative and financial aspects of system access. (Please refer to Figure 8, Page 80)
+      Activity Diagram: The Subscription Management Activity Diagram visually represents the workflow for managing subscriptions. It would typically show the Facility Owner selecting a subscription plan, initiating payment, and the System interacting with PayMongo to process the transaction, confirm payment, and update the subscription status. This diagram highlights the steps involved in ensuring continuous and managed access to the BirthCare system. (Please refer to Figure 20, Page 92)
+      Sequence Diagram: The Sequence Diagram for Subscription Management details the chronological flow of interactions when a facility owner manages their subscription, including selecting a plan, initiating payment through PayMongo, and updating the subscription status. It illustrates the secure and automated process of handling subscription transactions. (Please refer to Figure 26, Page 98)
+      Domain Class Diagram: The Subscription Database (Domain Diagram) defines the data entities related to subscriptions, such as Subscriptions, SubscriptionPlans, Payments, and their associations with facility owner accounts. This diagram ensures a robust and consistent structure for managing all subscription-related information, including payment details and access levels. (Please refer to Figure 14, Page 86)
+
+
+Design of Software, System, Product, and/or Processes
+
+      The design phase of BirthCare was a carefully orchestrated process that utilized a variety of tools and methodologies to create a solid, scalable, and user-focused system. The goal was to deliver a platform capable of supporting the operational needs of healthcare professionals in a birthing home while remaining flexible enough to accommodate future enhancements and changing requirements.
+
+This comprehensive approach ensured that the system would not only be effective in managing patient records, delivery processes, billing, and postnatal care, but also adaptable as the platform grows.
+      At the core of the system's design was Figma, a collaborative interface design tool used to prototype and visualize the user interface (UI) of BirthCare. Figma proved to be an essential tool for developing an accurate and interactive representation of the system's UI. The ability to create clickable prototypes allowed the development team, as well as key stakeholders like healthcare professionals, to interact with the design early in the process. This ensured that the user interface was intuitive, functional, and met the needs of the users. Figma's real-time collaboration feature enabled designers, developers, and stakeholders to work together on the same prototype simultaneously, providing immediate feedback and allowing for quick revisions. This streamlined the iterative design process, resulting in a UI that was both visually appealing and user-friendly. (Please refer to Figure 44-75, Page 116-131)
+      In addition to Figma, the development team created a series of Unified Modeling Language (UML) diagrams to formally define and visualize the system's architecture and behavior. DataBase Design was created to map out the relationships between key data entities in the system. The DataBase Design helped visualize how patient records, midwives, nurses, billing information, and delivery details interacted within the system. This diagram was essential for designing a robust database structure that could handle complex data interactions while maintaining data integrity and avoiding redundancy. By ensuring that these relationships were clearly defined, the team could design a database capable of efficiently handling large volumes of data, with the flexibility to scale as the platform grows.
+      The database design focused on normalization, data integrity, and performance. Each table was structured to minimize redundancy through normalization techniques, ensuring that data such as patient information, user roles, billing entries, and medical histories were stored logically and efficiently. Referential integrity was enforced using primary and foreign key relationships, which safeguarded the consistency and accuracy of data throughout the system.
+The team also considered indexing and query optimization in preparation for
+
+real-world use, allowing the system to retrieve data quickly even as records increased. This well-planned database architecture enabled smooth integration between modules and laid the groundwork for secure, consistent, and high-performance data management.
+      Once the database design was completed, the team focused on defining the system architecture. The Model-View-Controller (MVC) pattern was chosen for its clear separation of concerns, allowing the development team to organize the codebase in a modular and maintainable way. In MVC, the Model component manages the data and business logic of the system, handling tasks like storing patient records, delivery details, and billing information. The View component is responsible for the presentation layer, ensuring that the user interface designed in Figma is faithfully rendered and providing a smooth user experience. The Controller acts as the intermediary between the Model and View, processing user inputs, updating the data in the Model, and refreshing the View as necessary.
+      The MVC pattern provided several benefits for the development team. By isolating each component, developers were able to work on separate parts of the system without interfering with one another's work. This modular approach facilitated parallel development and made it easier to update or modify individual components without affecting the rest of the system. Moreover, MVC contributed to better code maintainability and scalability, making it easier to debug and implement updates as the system evolves.
+      On the programming side, the team decided to use a procedural programming approach. This paradigm organizes the system's logic into a series of functions or procedures, each designed to perform specific tasks, such as input validation, calculating billing charges, or creating a certificate of live birth. The procedural approach was particularly suited for managing structured workflows and ensuring that tasks like patient record management and payment processing were carried out in a clear and sequential manner. This approach helped simplify the system's logic and made it easier for developers to trace and fix issues. By using a procedural style, the team also made it possible to isolate functionalities, ensuring that updates to one part of the system could be made without affecting others.
+In addition, the team utilized the Factory Method Design Pattern to manage
+
+the creation of objects, such as patient records, user roles (e.g., midwife, nurse, encoder), and various types of reports. This pattern enabled the system to dynamically instantiate objects without being tightly coupled to specific class implementations, improving scalability and flexibility for future feature expansion.
+      To further enhance modularity and efficiency, the team also applied the Singleton Pattern to manage shared system resources such as database connections and configuration settings ensuring that only one instance of these critical resources exists throughout the system lifecycle. This helped prevent unnecessary resource duplication and streamlined data handling across different modules.
+    For scenarios involving complex decision-making, such as determining patient referral pathways or handling varying billing computations based on package avails, the Strategy Pattern was employed. This allowed the system to define a family of interchangeable algorithms and encapsulate them for use depending on specific conditions, reducing the need for rigid conditional statements and enhancing code reusability.
+      Additionally, the Observer Pattern was integrated into parts of the system that benefit from real-time updates and notifications, such as tracking subscription status or sending manual alerts for postnatal care follow-ups. By using this pattern, relevant modules could be automatically updated when changes occurred, supporting a more responsive and maintainable architecture.
+     Together, these methodologies and tools Model-View-Controller (MVC) for system architecture, Factory Method for flexible object creation, Singleton for managing shared instances, Strategy for dynamic process selection, Observer for real-time updates, procedural programming for clear and modular logic, and the detailed System Design Class Diagrams-formed the backbone of BirthCare's design. This integrated and design-pattern-driven approach ensured that the system not only met the current operational needs of birthing home professionals, but was also adaptable to future changes. The team's focus on scalability, maintainability, and user-centered design laid a strong foundation for the successful implementation of BirthCare, creating a platform that effectively supports the management of patient care during the birthing process and beyond.
+
+System Design Class Diagrams Discussion
+
+     The overall system architecture is further detailed in the System Design Class Diagrams provided in the appendices. Offers a high-level overview of how all major components and modules of the BirthCare system are interconnected. This diagram illustrates the relationships between core entities like users, patients, and various management modules, providing a comprehensive view of the system's structure. More granular views of specific functionalities are presented in subsequent diagrams. (Please refer to Figure 27-35, Page 99-107)
+Admission & Labor Monitoring
+
+      System Design Class Diagram (Admission & Labor Monitoring), focuses on the classes and their relationships involved in managing patient admissions and tracking labor progress. This includes entities for patient details, admission records, and real-time labor updates. (Please refer to Figure 28, Page 100)
+
+Billing & Payment
+
+      System Design Class Diagram (Billing & Payments), details the structure for handling financial transactions, showing classes related to patient bills, service charges, and payment records. This ensures accurate and transparent financial management within the birthing home. (Please refer to Figure 29, Page 101)
+
+BirthCare Management
+
+      System Design Class Diagram (BirthCare Management), provides insights into the administrative aspects of the birthing home, including classes for managing staff, facilities, and overall operational settings. (Please refer to Figure 30, Page 102)
+
+Patient Management
+
+      System Design Class Diagram (Patient Management), expands on the core patient data, illustrating how patient records, medical history, and other personal information are structured and linked within the system. (Please refer to Figure 31, Page 103)
+
+Patient Prenatal
+
+      System Design Class Diagram (Patient Prenatal), specifically addresses the management of prenatal care, detailing classes for appointments, check-ups, and prenatal records. (Please refer to Figure 32, Page 104)
+
+Room Management
+
+      System Design Class Diagram (Room Management), outlines the classes responsible for managing rooms within the birthing home, including room availability, assignments, and status. (Please refer to Figure 33, Page 105)
+
+Subscription Management
+
+      System Design Class Diagram (Subscription Management), focuses on the subscription-based access model, showing classes for subscription plans, payments, and user accounts, particularly in relation to the PayMongo integration. (Please refer to Figure 34, Page 106)
+
+User Management
+
+      System Design Class Diagram (User Management), details the classes involved in managing user accounts, roles, and permissions, ensuring secure and role-based access to the system's functionalities. (Please refer to Figure 35, Page 107)
+
+Database Design Discussion Per Objective
+
+To further elaborate on the database structure and its alignment with the project's objectives, the following sections detail the design considerations for each key module:
+
+Objective: To develop a web-based system that allows users to manage birthing home services.
+
+     The database design models facilities, staff, rooms, services, and operating schedules to support centralized management of birthing home operations. Users and their roles (e.g., system administrator, facility owner, staff) are captured to establish authorization and responsibility. Facilities are linked to their owners and include location attributes used throughout the system. Facility staff associates users to specific facilities with clinical or administrative roles, enabling accurate personnel rosters. Rooms define available capacity and room types per facility, while services represent the catalog of billable offerings (e.g., delivery packages, room charges, laboratory services) with default pricing. Facility schedules store opening days and hours for operational visibility. Together, these entities provide a comprehensive foundation for configuring and managing the services, resources, and personnel of each birthing home.
+
+Objective: To develop a patient admission module that enables staff to record, track, and manage patient admissions, including personal details, assigned rooms, and attending personnel.
+
+     This module is structured around patient identity, facility registration, admission events, attending staff, and room assignments. The patient table holds core demographics, while a per-facility profile assigns a unique medical record number for patients who visit multiple birthing homes. Admissions record the start of care, reason, status, and the primary attending provider, forming the anchor for inpatient workflows. Room assignments track which room and bed are occupied over time, preserving transfer history and occupancy data. A junction between admissions and facility staff records all personnel roles involved in the case (e.g., attending, assistant, nurse), enabling precise clinical accountability. This combination supports full lifecycle tracking of inpatient encounters, from intake to discharge, including personal details, room allocation, and attending personnel.
+
+Objective: To develop a billing and payment module that facilitates accurate computation and record-keeping of patient charges and expenses.
+
+     The financial model links services, invoices, invoice items, and payments to produce transparent billing. Services define standard billable items and prices, creating a consistent basis for charges. Invoices represent bills issued to patients, tied to the facility and optionally to an admission, and maintain status and running balances. Each invoice is itemized through invoice items, which store quantities, unit prices, and line totals-supporting detailed cost capture and adjustments. Payments record settlements against invoices, including amounts, methods, timestamps, and references, enabling reconciliation and audit trails. By normalizing services and separating invoice headers from line items and payments, the schema ensures precise calculation of charges and accurate, traceable financial records.
+
+Objective: To develop a patient discharge module that includes documentation of doctor's prescriptions and necessary postnatal instructions.
+
+     Discharge documentation centers on the admission context and the clinical outputs produced at the end of care. The discharge record captures the date and time, clinical outcome, a narrative summary, and explicit postnatal instructions, all attributed to the responsible staff member. Prescriptions are stored separately with a header that identifies the facility, patient, related admission, prescriber, and date, while prescription items enumerate each medication's name, dosage, frequency, duration, and instructions. This separation supports clear clinical documentation and safe medication guidance while preserving attribution and timelines. The result is a complete discharge package that formalizes clinical outcomes and postnatal guidance and records the prescriptive plan for continuity of care.
+
+Objective: To develop a report generation and document management module that includes certificate of live birth creation and storing patient documents, where filled forms can be printed as PDF.
+
+      The database design for this objective focuses on storing structured form data that the system can use to generate printable PDF reports, as well as managing the resulting files. The birth certificates table captures all fields that appear on the certificate of live birth form-such as newborn details, parent information, facility and admission references, certificate number, and birth details-so that when the user fills the form on the web interface, the entered values are saved in this table. From these stored values, the system can render a formatted certificate template and export it as a PDF. More generally, other forms (such as discharge summaries or billing statements) draw from their respective tables (e.g., discharges, invoices, patients, facilities) to generate printable reports without duplicating data. The documents table then serves as a repository for any generated PDFs or uploaded files, storing metadata like file name, file path, type (e.g., birth certificate, patient discharge), and links to the related patient, admission, or birth certificate record. This design ensures that user-filled forms are persisted as structured data, can be reliably converted to PDF for printing, and are archived as documents for future viewing and retrieval.
+
+Objective: To develop a mapping feature that allows users to display nearby birthing homes on a map and allows users to view a patient's consultation history from previously visited birthing homes for referral purposes and also to search registered facilities.
+
+     The schema supports geospatial display and cross-facility care history by combining facility location data, consultation records, and referrals. Facilities store latitude and longitude with city and province, enabling proximity searches and map visualization. Consultations record outpatient visits at any facility, including timing, reason, notes, and attending staff, forming a longitudinal view of encounters across the network. Referrals capture formal transfers of care between facilities for a given patient, preserving the origin, destination, rationale, and creating staff attribution. Together, these entities allow users to search and map registered birthing homes, visualize nearby facilities, and review a patient's consultation and referral history.
+
+Objective: To develop a subscription management module that allows facility owners to subscribe, choose customizable plan options, renew, pay.
+
+     Access control and monetization are handled via plans, subscriptions, and subscription payments linked to facility ownership. Plans define the available offerings, including billing cycles, prices, and limits (e.g., users, storage), enabling configurable tiers. Subscriptions connect a facility to a plan and record status, coverage dates, auto-renew settings, and renewal timestamps, establishing whether and under what conditions a facility may use the system. Subscription payments log each financial transaction against a subscription with amounts, methods, references, and statuses, supporting renewals, dunning, and financial reporting. By tying subscriptions to facilities owned by specific users, the model enforces responsibility and provides a clear, auditable record of plan selection, renewal behavior, and payment history. (Please refer to Figure 36-43, Page 108-116)
+
+Data Dictionary - Web-Based Birthing Home Management System
+
+      This Data Dictionary provides detailed information about the core database tables used in the Web-Based Birthing Home Management System. It outlines the structure, data types, and purpose of key fields within essential modules such as Patient Management, Billing and Payments, and User & Access Control. Each table entry defines the meaning and use of stored data, ensuring proper understanding and maintenance of the database system.
+
+
+
+
+
+Table 1. BirthCare - Patient Management (Patients Table)
+
+
+
+
+Table 2. BirthCare - Patient Management (Patient Admissions Table)
+
+
+
+
+
+Table 3. BirthCare - Billing & Payments (Patient Bills Table)
+
+
+
+
+Table 4. BirthCare - Billing & Payments (Bill Items Table)
+
+
+
+
+Table 5. BirthCare - Billing & Payments (Patient Charges Table)
+
+
+
+
+
+
+
+Table 6. BirthCare - User & Access Control (Users Table)
+
+
+
+
+
+Table 7. BirthCare - User & Access Control (System Roles Table)
+
+
+
+
+
+Table 8. BirthCare - User & Access Control (Birth Care Roles Table)
+
+
+
+
+Table 9. BirthCare - User & Access Control (Permissions Table)
+
+Development
+
+      In this phase, the BirthCare: A Web-Based Birthing Home for Patient Services and Records Management System was brought to life through meticulous coding, integration, and iterative refinement, adhering strictly to the design specifications and established software development standards. Following the architectural blueprint laid out in the design phase, including the detailed UML diagrams and MVC pattern, the development team proceeded with implementing each module, translating the conceptual designs and prototypes into a functional application.
+
+      The frontend, built with Next.js and styled using Tailwind CSS, was developed to be highly responsive and user-friendly, ensuring a consistent experience across various devices as envisioned in the Figma prototypes. JavaScript was extensively used to implement interactive elements and dynamic content, enhancing the overall user experience.
+
+      For the backend, Laravel, a robust PHP framework, was utilized to construct the server-side logic. This involved developing APIs for data handling, implementing secure authentication and authorization mechanisms, and managing business logic for patient records, billing, and other core functionalities. The structured data models derived from the Domain Class Diagrams were implemented in MySQL, serving as the relational database to ensure data integrity, efficient storage, and retrieval of sensitive medical information.
+
+      Node.js was integrated to facilitate real-time notifications, a critical feature for timely alerts regarding new admissions, labor progress, and postnatal follow-ups, thereby improving communication among healthcare staff. The development process followed an agile approach, with continuous integration and regular testing cycles to identify and resolve issues early. Each module, including Patient Management, Billing and Payment, Discharge and Postnatal Care, Reports, and Subscription Management, underwent rigorous unit and integration testing to ensure seamless operation and adherence to the defined requirements.
+
+RESULTS AND DISCUSSION
+Testing
+
+      The testing efforts began by focusing on user inputs and outputs. The developers meticulously validated the system's handling of user-provided data, such as credentials entered during login or registration.
+
+
+Table 10. Owner's Registration Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksORTC1Register account without filling the First
+Name fieldDisplay error prompt "This field is required."Display error prompt "Please fill out
+this field."  Must fill the First Name fieldORTC2Register account without an email
+addressDisplay error prompt "This field is required."Display error prompt "Please fill out
+this field."Must enter an existing email address.ORTC3Register account with only 6 character passwordDisplay error prompt "Password is too weak, try a longer password."Display error prompt "The password field must be at least 8
+characters."Password must contain at least 8 characters.
+
+Table 11. Owner's Login Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksLTC1Enter
+incorrect emailDisplay error prompt
+"Please Enter valid email."Display error prompt
+"These
+credentials do not match our records."Must provide correct
+username
+LTC2Enter
+incorrect passwordDisplay error prompt "Incorrect
+username or password.
+Please try
+again."Display error prompt
+"These
+Credentials do match our
+records."Must provide correct passwordLTC3Login with correct
+credentials but without @ in
+the emailDisplay error prompt
+"Include @ in the email
+address."Display error prompt
+"Please
+include an '@' in the email address, 'username' is missing an
+'@'."Must include @ in the email address.
+
+Table 12. Patient Registration Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksPRTC 1Register patient without filling Date of BirthDisplay error prompt
+"Please fill out this
+field."Display error prompt
+"Please fill out this field."Must fill out Date of BirthPRTC 2Register patient without filling Age.Display error prompt
+"Please fill out this
+field."Display error prompt
+"Please fill out this field."Must fill out the age of the patientPRTC 3Register Patient after filling all informationDisplay prompt "Patient Successfully Registered."Display prompt "Patient has been successfully registered to Birthing
+Home."The	test was success
+Table 13. Patient Prenatal Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksPPTC1Create form without filling the examination
+date fieldDisplay error prompt "This field is
+required"Display error prompt "Fill out this field"Must fill the examination date fieldPPTC2Create form without filling the weight and height fieldDisplay error prompt "This field is
+required"Display error prompt "Fill out this field"Must fill the weight and height fieldPPTC3Create form without filling the blood
+pressure fieldDisplay error prompt "This field is
+required"Display error prompt "Fill out this field"Must fill the blood pressure field
+
+Table 14. Mapping Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksMTC1Searching for a birthing
+home that doesn't existDisplay error prompt "This Birthing Home Doesn't exist"Display error prompt "Facility Doesn't Exist, "The facility you searched for was not found on the map."Must input a registered Facility NameMTC2Searching for a birthing
+home that exist   Display Facility NameRedirected to the location of the existing Facility and display Facility Name.Must input a registered Facility NameMTC3Searching a patient thatDisplay promptDisplay prompt "Patient Not Found, PatientMust input an existing patient name
+doesn't exist in the facility  "Patient doesn't exist"doesn't exist in the Facility."MTC4Searching a patient that exist in the facilityDisplay Patient Consultation HistoryDisplay Patient Consultation HistoryMust input an existing patient in the facility.
+
+Table 15. Patient Admission Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksATC1Admit Patient without filling Admission
+timeDisplay error prompt "Please fill out this field."Display error prompt "Please Enter a valid value. The field is incomplete or has an invalid date." Must fill out Admission timeATC2Admit Patient without attending MidwifeCannot Admit PatientCannot Admit PatientMust have an attending MidwifeATC3 Admit Patient without filling Admission DateDisplay prompt "Please fill out this field."Display prompt "Please enter a valid value. The field is incomplete or has an invalid date."Need to Fill out the Admission Date.
+
+Table 16. Patient Chart Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksPCTC1Search for a patient not found in the listSystem should show no patient results"No patient found"Must search for a patient name that is on the list.
+PCTC2Update an existing patient chart"Patient chart updated
+successfully!"Able to update the patient chartEnsure that all required fields are filled
+before updatingPCTC3  Print the patient chartSystem should display the chart in PDF formatChart displays in PDF formatEnsure printer/PDF viewer is functioning
+
+Table 17. Charges Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksCTC1Search admitted patientDisplay patient name and info.Display patient name and infoMust enter an admitted patient.CTC2Add and Save pending charge to patientSave charges to patientSave charges to patientCharges successfully save to patientCTC3Finalized and Charge PatientPatient Charges will be finalizePatient Charges will be finalize Saved charges will be finalized
+
+Table 18. Payment Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksPTC1Process Payment without filling out payment dateDisplay error prompt "This field is required."Display error prompt "Please fill out this field."Must fill out the payment date field.PTC2Process Payment without entering reference numberDisplay error prompt "This field is required."No error prompt Reference number will be auto-mated even leaving itThe Payment is successful
+blank.PTC3Process Payment after filling all fields.Display prompt "Payment is successful"Display prompt "Payment is successful."The Payment is successful.
+
+Table 19. Patient Discharge Test Case
+
+
+
+Test IDScenarioExpected ResultActual ResultRemarksDTC1Discharge Mother without filling the discharge diagnostic field.Display error prompt "This field is required."Display error prompt "Please fill out this field."Must fill out the Diagnostic fieldDTC2Discharge Mother without filling the final diagnosisDisplay error prompt "This field is required."Display error prompt "This field is required."Must fill out final diagnosis fieldDTC3Discharge Patient after filling out all the necessary fields.Display notification "Patient successfully discharged."Display notification "Mother discharge form created and saved to patient documents successfullyMust fill out all necessary fields
+Description of Prototype
+
+      This section presents the prototype of the BirthCare: A Web-Based Birthing Home for Patient Services and Records Management System, which includes the system requirements, testing and evaluation methodology, and detailed descriptions of its main modules.
+
+System Requirements
+
+      The BirthCare Web-Based Birthing Home Management System is designed for use exclusively by authorized birthing home staff and facility
+
+owners. Due to the sensitive nature of patient information stored within the platform, access is restricted to computers and laptops equipped with a modern web browser and stable internet connectivity. The system can be utilized by both private and public birthing homes that subscribe to the BirthCare platform. Each subscribing institution is provided with secure login credentials and role-based access permissions, ensuring that users can only view or modify data relevant to their designated responsibilities. This approach upholds confidentiality and compliance with data privacy standards while maintaining efficient workflow management.
+
+
+Testing and Evaluation Methodology
+
+      The testing and evaluation phase of the BirthCare system focused on ensuring the prototype's functionality, performance, and data security through white-box testing. This testing approach allowed developers to closely examine the internal logic, control flow, and structure of the system's source code. Each component was evaluated to confirm that processes such as form validation, data entry, and database transactions operated as intended.
+      Special attention was given to verifying input validation and authentication features to safeguard sensitive patient information. By acting as end-users during testing, the developers were able to identify potential errors, inefficiencies, and interface inconsistencies early in the process. This ensured that the system prototype met the required standards of functionality, reliability, and security before proceeding to full deployment and user evaluation.
+
+
+Implementation Plan
+
+      The implementation plan was designed in accordance with the project's system design and functional requirements to ensure the successful deployment of the BirthCare Web-Based Birthing Home Management System. This plan outlines the step-by-step process for integrating all major modules-Patient Management, Billing and Payment, Discharge and Postnatal Care, Reports, and
+
+Subscription Management-into a cohesive and fully functional platform. On the frontend, the plan involves translating the Figma-designed user interface into a responsive and visually consistent layout using Tailwind CSS, while utilizing JavaScript to enhance interactivity and ensure seamless navigation across multiple devices. On the backend, Express.js will be used to establish the server-side logic following the Model-View-Controller (MVC) architecture to promote organized code structure, scalability, and maintainability.
+      The MySQL database will be configured to securely store and manage patient, billing, and subscription data, ensuring proper execution of all CRUD (Create, Read, Update, Delete) operations. Integration activities will focus on establishing smooth communication between the frontend and backend components through API connections, verifying accurate data synchronization and efficient workflow across all modules. Core functionalities-including patient registration, billing automation, discharge tracking, postnatal care monitoring, and report generation-will be implemented and tested according to system design specifications. The plan also includes comprehensive testing procedures, such as system and user acceptance testing, to evaluate performance, security, and usability. Overall, this implementation plan aims to ensure that the BirthCare system is developed as a reliable, efficient, and user-friendly digital solution that enhances birthing home management operations and supports high-quality maternal and newborn care services.
+Implementation Results
+
+      The implementation results were based on the established implementation plan, which aligned with the project's system design and functional requirements to ensure the successful deployment of the BirthCare Web-Based Birthing Home Management System. The integration of all major modules-Patient Management, Billing and Payment, Discharge and Postnatal Care, Reports, and Subscription Management-was successfully completed, resulting in a fully operational and cohesive platform. On the frontend, the Figma-designed user interface was effectively translated into a responsive and visually consistent layout using Tailwind CSS, while JavaScript enhanced interactivity and ensured seamless navigation across various
+
+devices. On the backend, Express.js provided a solid foundation for server-side logic through the Model-View-Controller (MVC) architecture, which improved code organization, scalability, and maintainability. The MySQL database was successfully implemented to securely store and manage patient, billing, and subscription data, with all CRUD (Create, Read, Update, Delete) operations functioning as intended. Integration testing confirmed smooth communication between the frontend and backend components, ensuring accurate data synchronization and efficient workflow across all modules.
+      Core functionalities such as patient registration, billing automation, discharge tracking, postnatal care monitoring, and report generation operated seamlessly according to design specifications. Furthermore, system testing verified optimal performance, strong security measures, and high reliability, while user acceptance testing confirmed that the system met usability and accessibility expectations. Overall, the implementation results demonstrate that the BirthCare system successfully achieved its goal of delivering a reliable, efficient, and user-friendly digital platform that enhances birthing home management and supports quality maternal and newborn care services.
+Conclusions
+
+      The development and testing of the BirthCare Web-Based Birthing Home Management System successfully produced a functional and secure platform that addresses the essential administrative and medical management needs of birthing homes. The system integrates critical modules-such as Patient Management, Billing and Payment, Discharge and Postnatal Care, Reports, and Subscription Management-to streamline operations and enhance efficiency. By employing modern technologies like Laravel, Next.js, MySQL, and Tailwind CSS, the proponents achieved a stable, scalable, and user-friendly system.
+      Comprehensive testing through white-box testing verified the accuracy of data handling, security of patient information, and performance consistency across all modules. The system ensures that birthing home staff can perform patient registration, billing, and reporting tasks digitally, reducing manual paperwork and human error. Furthermore, the system's role-based access structure helps maintain
+
+confidentiality and integrity of sensitive health data. Overall, the BirthCare Web-Based Birthing Home Management System achieved its goal of providing an organized, secure, and efficient digital solution that improves the quality of maternal and newborn care management for subscribing birthing homes within Davao City.
+
+
+Recommendations
+
+      To ensure smooth and secure operation of the BirthCare Web-Based Birthing Home Management System, it is recommended that users access the system using desktop computers or laptops with an updated web browser and a stable internet connection, as the system relies heavily on online data access and synchronization. Since it contains confidential patient information, mobile and public access should remain restricted to preserve privacy and prevent unauthorized use. Staff members should also be trained in proper data encoding and management to minimize manual entry errors and maintain data integrity.
+      In consideration of the identified technical, operational, and functional limitations, the following recommendations are proposed for future system enhancement and development:
+      Integrate External Device Support: Enable compatibility with hardware such as barcode scanners or biometric devices to facilitate faster and more secure patient identification and record access.
+      Develop Offline or Local Caching Features: Introduce limited offline functionality or temporary data caching to allow uninterrupted use during internet outages, ensuring continuous workflow and preventing data loss.
+      Implement Automated Patient Notifications: Add built-in reminders for postnatal check-ups, billing updates, and schedule follow-ups through email or SMS to reduce manual coordination by staff.
+      Enhance Data Validation and Error Detection: Incorporate automated validation rules and real-time error detection in patient records, billing entries, and document uploads to minimize discrepancies and
+
+improve report accuracy.
+
+      Add Inventory Management Module: Develop an inventory tracking feature for vitamins, medications, and medical supplies to help birthing homes manage stock levels efficiently.
+      Automate Payment and Subscription Handling: Improve subscription management by integrating an automated confirmation system for payments, renewals, and plan upgrades to reduce manual processing delays.
+      Enable PhilHealth Integration: In future versions, explore secure integration with the PhilHealth system to automate claim submissions, tracking, and reimbursements for faster processing.
+      Expand Geographic Adaptability: Modify system configurations to support birthing homes outside Davao City by allowing customization of workflows, regional requirements, and healthcare standards.
+      By implementing these recommendations, the BirthCare: Web-Based Birthing Home for Patient Services and Records Management System can evolve into a more comprehensive and intelligent healthcare management platform. These improvements would not only enhance operational efficiency and accuracy but also strengthen the system's reliability and scalability, enabling it to support a wider range of birthing home operations across different regions.
+
+REFERENCES
+
+
+      Aliyi, A., Mesfin, B., Hassen, F., & Others. (2023). Antenatal care management platform. BMC Digital Health, 3, Article 52. https://doi.org/10.1186/s44247-023-00052-x BioMed Central
+      Li, X., Zhang, P., Zhang, Y., Cui, G., & Du, H. (2022). Effect of midwives' application of intelligent delivery room management system on delivery outcome. Computational and Mathematical Methods in Medicine, 2022,	Article 4912053.
+https://doi.org/10.1155/2022/4912053PMC+1alternative-therapies.com+1
+
+      Bakhshi, M., Mollazadeh, S., Khadivzadeh, T., Moghri, J., Saki, A., & Firoozi, M. (2024). Designing a midwife-led birth center program based on the MAP-IT model: A sequential explanatory mixed-methods study. Reproductive Health, 21, Article 1824. https://doi.org/10.1186/s12978-024-01824-y
+      American Association of Birth Centers. (n.d.). What is a birth center? American Association of Birth Centers. Retrieved April 30, 2025, from https://www.birthcenters.org/what- is-a-bc
+      Mayo Clinic Staff. (n.d.). Home birth: Know the pros and cons. Mayo Clinic.	Retrieved	April	30,	2025,	from https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-
+depth/home-birth/art-20046878
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+APPENDICES
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CALENDAR OF ACTIVITIES
+
+
+
+Figure 1: Gantt Chart of Activities
+
+
+
+
+Figure 2: Spiral Model
+
+
+
+
+
+Figure 3: Patient Management (Use-Case)
+
+
+
+
+Figure 4: Billing and Payment Module (Use-Case)
+
+
+
+
+
+
+
+
+Figure 5: Patient Discharge Module (Use-Case)
+
+
+
+
+
+
+Figure 6: Report Generation Module (Use-Case)
+
+
+
+Figure 7: Mapping Feature Module (Use-Case)
+
+
+
+Figure 8: Subscription Management Module (Use-Case)
+
+
+Figure 9: Patient Management Database (Domain Diagram)
+
+
+
+Figure 10: Billing and Payment Database (Domain Diagram)
+
+
+
+Figure 11: Patient Discharge Database (Domain Diagram)
+
+
+
+
+Figure 12: Report Generation and Document Management Database (Domain Diagram)
+
+
+Figure 13: Mapping Feature (Domain Diagram)
+
+
+
+Figure 14: Subscription Database (Domain Diagram)
+
+
+
+
+Figure 15: Patient Admission (Activity Diagram)
+
+
+
+Figure 16: Patient Billing and Payment (Activity Diagram)
+
+
+
+Figure 17: Patient Discharge (Activity Diagram)
+
+
+
+Figure 18: Report Generation and Document Management (Activity Diagram)
+
+
+
+
+
+
+
+
+
+
+
+Figure 19: Mapping and Consultation History (Activity Diagram)
+
+
+
+
+Figure 20: Subscription Management (Activity Diagram)
+
+
+
+
+Figure 21: Patient Admission Module (Sequence Diagram)
+
+
+Figure 22: Billing and Payment Module (Sequence Diagram)
+
+
+
+
+Figure 23: Patient Discharge Module(Sequence Diagram)
+
+
+
+Figure 24: Report Generation and Document Management (Sequence Diagram)
+
+
+Figure 25: Mapping Features (Sequence Diagram)
+
+
+
+
+
+Figure 26: Subscription Management Module(Sequence Diagram)
+
+
+
+Figure 27: The Whole System Design Class Diagram
+(BirthCare - Web Application)
+
+
+
+
+
+
+
+
+Figure 28: System Design Class Diagram (Admission & Labor Monitoring)
+
+
+
+
+Figure 29: System Design Class Diagram (Billing & Payments)
+
+
+
+Figure 30: System Design Class Diagram (BirthCare Management)
+
+
+
+Figure 31: System Design Class Diagram (Patient Management)
+
+
+
+
+
+Figure 32: System Design Class Diagram (Patient Prenatal)
+
+
+
+Figure 33: System Design Class Diagram (Room Management)
+
+
+
+
+Figure 34: System Design Class Diagram (Subscription Management)
+
+
+
+Figure 35: System Design Class Diagram (User Management)
+
+
+
+Figure 36: The Whole Database Design (BirthCare - Web Application)
+
+
+Figure 37: Database Design (web-based system)
+
+
+
+Figure 38: Database Design (patient admission module)
+
+
+
+Figure 39: Database Design (billing and payment module)
+
+
+
+Figure 40: Database Design (patient discharge module)
+
+
+
+
+Figure 41: Database Design (report generation and document management module)
+
+
+Figure 42: Database Design (mapping feature)
+
+
+
+
+
+Figure 43: Database Design (subscription management module)
+
+SYSTEM'S USER INTERFACE
+
+
+Figure 44: BirthCare's Landing Page
+
+
+
+Figure 45: BirthCare's Subscription Plan
+
+
+
+Figure 46: BirthCare's Login Page
+
+
+Figure 47: BirthCare's Registration Page
+
+
+
+Figure 48: Owner's Dashboard
+
+
+Figure 49: Owner's Subscription Page
+
+
+
+Figure 50: Staff's Dashboard
+
+
+
+
+
+Figure 51: Patient List Page
+
+
+
+Figure 52: Patient Documents Page
+
+
+
+
+Figure 53: Patient Chart Page
+
+
+
+Figure 54: Patient Admission's Page
+
+
+
+
+Figure 55: Mother's Discharge Page
+
+
+
+Figure 56: Newborn Discharge Page
+
+
+
+
+Figure 57: Patient Referrals Page
+
+
+
+Figure 58: Patient Prenatal Schedule's Page
+
+
+
+
+
+Figure 59: Patient Prenatal Forms Page
+
+
+
+Figure 60: Patient Prenatal Visit Logs
+
+
+
+
+Figure 61: Room Management Page
+
+
+
+Figure 62: Patient Labor Monitoring Page
+
+
+Figure 63: Newborn Birth Details & APGAR Score Page
+
+
+
+Figure 64: Newborn Screening Form Page
+
+
+
+
+Figure 65: Certificate of Live Birth Page
+
+
+
+Figure 66: Item Charges Page
+
+
+
+
+
+Figure 67: Payments Dashboard
+
+
+
+Figure 68: Payments Reports & Analytics Page
+
+
+
+
+
+Figure 69: Registered Facilities Map Page
+
+
+
+Figure 70: Role Management Page
+
+
+
+
+
+
+
+Figure 71: Staff Management Page
+
+
+
+Figure 72: Admin's Dashboard
+
+
+
+
+
+Figure 73: Admin's BirthCare's Applications Page
+
+
+
+Figure 74: Admin's Subscription Transactions Page
+
+
+
+
+
+Figure 75: Admin's User Management Page
+
+APPENDIX A. RESOURCE PERSONS
+
+
+
+
+Resources Persons
+
+Engr. Elvi Lito E. Ubas, CPE, MEEd
+
+Capstone Project Adviser
+
+
+Jessiel Chris D. Hilot
+
+Capstone Project Coordinator
+
+APPENDIX B. EVALUATION TOOL/TEST DOCUMENTS
+
+
+
+
+Name (Optional): 	
+Date: 	
+
+Survey Questionnaire (Admin Side)
+
+Good Day! We, the developers of BirthCare: A Web-Based Birthing Home for Patient Services and Records Management System, would like to request your participation to help us improve the system's functionality. Please indicate if a certain condition meets your user experience using the legend provided below. Your responses will be kept confidential and used solely for educational and testing purposes. Thank you for your time and feedback!
+
+Legend:SD - strongly disagree D - disagreeU - uncertain
+SA - strongly agreeA- agree
+
+ConditionSDDUSAAThe system is easy to learn, navigate, and use.The login and access control (user accounts and roles) work reliably and securely.Managing facilities, staff, rooms, and services in the system is clear and efficient.Registering patients and recording their admissions, rooms, and attending staff is easy.The system computes billing charges correctly and records payments accurately.Creating discharge records, prescriptions, and postnatal instructions is straightforward.Filling out forms that can be printed as PDF (e.g., birth certificate, discharge summary) is clear and complete.
+The document storage feature (uploading and retrieving patient-related files) works effectively.The mapping and search features help me locate facilities and view patient consultation history.The overall performance and usefulness of the system meet my expectations for birthing home operations.
+
+Final Thoughts:
+
+
+
+APPENDIX C. SAMPLE INPUT/OUTPUT/REPORTS
+
+
+
+Input: Patient Registration
+
+
+
+
+Output: Patient Registered
+
+
+
+Input: Patient Admission
+
+
+Output: Patient Admitted
+
+
+
+Input: Charges Patient
+
+
+
+
+Output: Charged Patient
+
+
+
+
+Input: Patient Payment
+
+
+
+Output: Added Payment
+
+
+
+
+
+
+
+Input: Mother Discharge Form
+
+
+
+
+
+Output: Saved Patient Documents
+
+APPENDIX D: USER'S GUIDE
+
+
+
+1. Account Registration (Facility Owner Only)
+
+
+Only the facility owner is allowed to register directly on the system. Staff (midwives, nurses, clerks, etc.) do not register themselves; their accounts are created under the owner's facility.
+
+1.1 Creating the Facility Owner Account
+
+1. Open your browser and go to the BirthCare System URL. (https://birthcare.vercel.app/)
+2. On the login page, click Register / Sign Up.
+3. Fill in the registration form:
+• Full Name - your complete name as the facility owner.
+• Email Address - this will be your login email.
+• Password and Confirm Password - choose a strong password.
+4. Read and accept the terms and conditions if shown.
+5. Click Register / Create Account.
+
+Email verification is enabled:
+1. Check your email inbox for a message from the system.
+2. Click the verify email.
+3. After verification, your owner account is ready to use.
+4. Notification feature is not added to the system. Refresh the page so you will be able to use the system.
+
+2. First Login and Facility Setup (Owner)
+
+
+2.1 Logging In
+
+
+1. Go back to the Login page.
+2. Enter your registered email and password.
+3. Click Login.
+4. You will be redirected to the Owner Dashboard or general dashboard.
+
+2.2 Registering Your Birthing Facility
+
+
+1. From the sidebar, go to the Owner section (or Facility Settings).
+2. Click Create Facility / Add Birthing Home.
+3. Enter your facility details:
+• Facility Name
+• Address (street, barangay, city, province)
+• Contact Number
+• License / Accreditation Number (if applicable)
+4. Click Save.
+5. The system will create a BirthCare ID (facility identifier) that will appear in the URL and link all records to your facility.
+
+3. Subscription Setup (Owner)
+
+
+If your system uses subscriptions:
+
+1. Go to Owner ? Subscription or Plans.
+2. Review the available plans (e.g., Basic, Standard, Premium) and their limits/features.
+3. Choose a plan and click Subscribe / Start Plan.
+4. Select billing cycle (Monthly / Yearly).
+5. Complete the payment steps (if online payment is enabled).
+
+6. After success, your facility status should show as Active and staff can login.
+
+
+
+
+
+
+4. Creating Staff Accounts (By Owner Only)
+
+Staff do not register via the public registration form. Instead, the facility owner creates their accounts.
+
+4.1 Adding Staff
+
+
+1. Go to Owner ? Staff Management (or similar menu).
+2. Click Add Staff.
+3. Fill in:
+• Staff Name
+• Email Address - this will be the staff's login email.
+• Role - e.g., Midwife, Nurse, Clerk, Doctor.
+4. Click Save / Create Account.
+
+
+
+4.2 How Staff Log In (No Self-Registration)
+
+Once their account is created by the owner:
+
+
+1. Staff go to the BirthCare System URL.
+2. Enter the email assigned by the owner and their password
+3. Click Login.
+4. They will see the modules allowed for their role (Patient, Prenatal, Labor Monitoring, Newborn, Billing, etc.) under your facility.
+5. After Setup - Daily Use
+
+After the owner account, facility, subscription, and staff accounts are set up:
+
+• Owner focuses on:
+• Facility profile
+• Subscription and payments
+• High-level reports (payments, revenue, usage)
+• Staff use:
+• Patient - register patients and update records
+• Prenatal - record prenatal visits, print prenatal forms
+• Room Management - manage rooms and bed assignments
+• Labor Monitoring - record labor vitals, print monitoring sheets
+• Newborn - record birth details, screening, discharge
+• Discharge - mother and newborn discharge instructions
+• Billing / Payments / Reports - create bills, record payments, print reports
+• Map - view registered facilities and consultation history (if enabled)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+APPENDIX E. PERSONAL TECHNICAL VITAE
+
+Curriculum Vitae of
+CAROL CLARE R. BALISTA
+Purok 23 brgy. 76-A, Isla Suerte, Ecoland Davao City balista.224650@davao.sti.edu.ph
+09486198125
+
+EDUCATIONAL BACKGROUND
+LEVELINCLUSIVE DATENAME OF SCHOOLTertiary2022 - PresentSTI College DavaoSHS - MAWD2019 - 2021STI College DavaoJunior High School2016 - 2019Agro - Industrial Foundation College of the PhilippinesElementary2010 - 2016Lamb of God Sped Center
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+INCLUSIVE DATES      NATURE OF EXPERIENCE/JOB TITLE NAME AND ADDRESS OF COMPANY/ORGANIZATIONN/AN/AN/A
+AFFILIATIONS
+INCLUSIVE DATESNATURE OF
+ORGANIZATIONPOSITION2020 - 2021VAST CLUBMember2021 - 2022VAST CLUBMember
+SKILLS
+SKILLSLEVEL OF
+COMPETENCYDATE ACQUIREDFront-End DeveloperINTERMEDIATE2022
+TRAININGS, SEMINARS OR WORKSHOPS ATTENDED
+INCLUSIVE DATESLEVEL OF COMPETENCYN/AN/A
+Curriculum Vitae of
+ALDRIN MAR J. ALIVIO
+Purok 8, Dama De Noche, Brgy. 76 - A Bucana Davao City alivio.149304@davao.sti.edu.ph
+09129377496
+
+EDUCATIONAL BACKGROUND
+LEVELINCLUSIVE DATENAME OF SCHOOLTertiary2021 - PresentSTI College DavaoSHS - MAWD2017 - 2019STI College DavaoJunior High School2011 - 2017Sta. Ana NHSElementary2005 - 2011Magallanes Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+INCLUSIVE DATES      NATURE OF EXPERIENCE/JOB TITLE NAME AND ADDRESS OF COMPANY/ORGANIZATIONN/AN/AN/A
+AFFILIATIONS
+INCLUSIVE DATESNATURE OF
+ORGANIZATIONPOSITION2017 - 2019VAST CLUBMember
+SKILLS
+SKILLSLEVEL OF
+COMPETENCYDATE ACQUIREDN/AN/AN/A
+TRAININGS, SEMINARS OR WORKSHOPS ATTENDED
+INCLUSIVE DATESLEVEL OF COMPETENCYN/AN/A
+Curriculum Vitae of
+KENT GERALD B. JANDUG
+Km. 8 Inigo Village, Matina Pangi, Davao City jandug.259420@davao.sti.edu.ph
+
+
+EDUCATIONAL BACKGROUND
+LEVELINCLUSIVE DATENAME OF SCHOOLTertiary2021 - PresentSTI College DavaoSHS - TVL2018 - 2021DRANHSJunior High School2015 - 2018DRANHSElementary2009 - 2015Don Manuel H. Gutierrez Sr. Elementary School
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+INCLUSIVE DATES      NATURE OF EXPERIENCE/JOB TITLE NAME AND ADDRESS OF COMPANY/ORGANIZATIONN/AN/AN/A
+AFFILIATIONS
+INCLUSIVE DATESNATURE OF
+ORGANIZATIONPOSITIONN/AN/AN/A
+SKILLS
+SKILLSLEVEL OF
+COMPETENCYDATE ACQUIREDN/AN/AN/A
+TRAININGS, SEMINARS OR WORKSHOPS ATTENDED
+INCLUSIVE DATESLEVEL OF COMPETENCYN/AN/A
+
+
+
+
+
+

@@ -172,6 +172,17 @@ export const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 
+  feeDisclaimer: {
+    fontSize: moderateScale(theme.typography.bodySmall.fontSize - 1),
+    color: theme.colors.text.tertiary,
+    lineHeight: moderateScale(16),
+    marginTop: verticalScale(theme.spacing.sm),
+    paddingTop: verticalScale(theme.spacing.sm),
+    borderTopWidth: moderateScale(1),
+    borderTopColor: theme.colors.border.light,
+    fontStyle: 'italic',
+  },
+
   // Orientation Notice Styles
   orientationNotice: {
     backgroundColor: theme.colors.semantic.warning + '10',

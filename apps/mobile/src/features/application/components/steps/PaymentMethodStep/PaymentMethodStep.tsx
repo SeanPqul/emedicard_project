@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomTextInput } from '@shared/components';
 import { theme } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
+import { usePricing } from '@features/payment/hooks/usePricing';
 
 import { PaymentMethodStepProps, PaymentMethodOption, PaymentMethod } from './PaymentMethodStep.types';
 import { styles } from './PaymentMethodStep.styles';
@@ -14,12 +15,17 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
   setFormData,
   errors,
 }) => {
+  // Fetch all pricing configurations to display on each card
+  const mayaPricing = usePricing('Maya');
+  const barangayPricing = usePricing('BaranggayHall');
+  const cityHallPricing = usePricing('CityHall');
+
   const paymentMethods: PaymentMethodOption[] = [
     {
       id: 'Maya' as const,
       name: 'Maya',
-      icon: 'card-outline', 
-      description: 'Pay with card, QR code, or Maya wallet',
+      icon: 'card-outline',
+      description: `Pay with card, QR code, or Maya wallet • Total: ₱${mayaPricing.totalFee}`,
       requiresReference: true,
       bgColor: theme.colors.brand.primary + '10',
       iconColor: theme.colors.brand.primary,
@@ -28,7 +34,7 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
       id: 'BaranggayHall' as const,
       name: 'Barangay Hall',
       icon: 'business-outline',
-      description: 'Pay in person at your local Barangay Hall',
+      description: `Pay in person at your local Barangay Hall • Total: ₱${barangayPricing.totalFee}`,
       requiresReference: false,
       bgColor: theme.colors.semantic.warning + '10',
       iconColor: theme.colors.semantic.warning,
@@ -37,12 +43,15 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
       id: 'CityHall' as const,
       name: 'Sanggunian Hall',
       icon: 'library-outline',
-      description: 'Pay in person at Sanggunian Hall',
+      description: `Pay in person at Sanggunian Hall • Total: ₱${cityHallPricing.totalFee}`,
       requiresReference: false,
       bgColor: theme.colors.semantic.info + '10',
       iconColor: theme.colors.semantic.info,
     },
   ];
+
+  // Get dynamic pricing based on selected payment method
+  const { baseFee, serviceFee, totalFee } = usePricing(formData.paymentMethod || 'Maya');
 
   const handleMethodSelect = (method: PaymentMethod) => {
     const selectedMethod = paymentMethods.find(m => m.id === method);
@@ -94,7 +103,7 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
     <View style={styles.container}>
       <Text style={styles.heading}>Payment Method</Text>
       <Text style={styles.description}>
-        Choose how you'd like to pay. All methods require ₱60 total (₱50 application fee + ₱10 processing fee).
+        Choose your preferred payment method. Prices vary by payment method - see total amount on each option below.
       </Text>
 
       {/* Fee Breakdown */}
@@ -102,15 +111,15 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
         <Text style={styles.feeBreakdownTitle}>Fee Breakdown:</Text>
         <View style={styles.feeRow}>
           <Text style={styles.feeLabel}>Application Fee:</Text>
-          <Text style={styles.feeValue}>₱50.00</Text>
+          <Text style={styles.feeValue}>₱{baseFee}.00</Text>
         </View>
         <View style={styles.feeRow}>
           <Text style={styles.feeLabel}>Processing Fee:</Text>
-          <Text style={styles.feeValue}>₱10.00</Text>
+          <Text style={styles.feeValue}>₱{serviceFee}.00</Text>
         </View>
         <View style={styles.feeRowTotal}>
           <Text style={styles.feeTotalLabel}>Total:</Text>
-          <Text style={styles.feeTotalValue}>₱60.00</Text>
+          <Text style={styles.feeTotalValue}>₱{totalFee}.00</Text>
         </View>
       </View>
 
@@ -144,7 +153,7 @@ export const PaymentMethodStep: React.FC<PaymentMethodStepProps> = ({
             <View style={styles.instructionsText}>
               <Text style={styles.instructionsTitle}>Payment Instructions:</Text>
               <Text style={styles.instructionsBody}>
-                After submitting this application, visit {formData.paymentMethod === 'BaranggayHall' ? 'your local Barangay Hall' : 'Sanggunian Hall'} to complete your ₱60 payment (₱50 application + ₱10 processing). Bring your application reference number.
+                After submitting this application, visit {formData.paymentMethod === 'BaranggayHall' ? 'your local Barangay Hall' : 'Sanggunian Hall'} to complete your ₱{totalFee} payment (₱{baseFee} application + ₱{serviceFee} processing). Bring your application reference number.
               </Text>
             </View>
           </View>

@@ -1,0 +1,1643 @@
+Trav2Phil: A Qr-Based Transportation Ticketing System in the Philippines
+
+
+
+
+A Thesis
+Presented to the Faculty of 
+Information and Communications Technology Program
+STI College Davao
+
+In Partial Fulfilment
+of the Requirements for the Degree
+Bachelor of Science in Information Technology
+Cawayan Geraldine L.
+Firmeza, Alfred Jonathan
+Soriano, Marron S.
+
+
+
+
+
+
+December  2025
+
+
+ENDORSEMENT FORM FOR ORAL DEFENSE
+
+
+TITLE OF RESEARCH: Trav2Phil: A QR-Based Transportation Ticketing 
+                      System in the Philippines		
+
+
+NAME OF PROPONENTS:	Cawayan, Geraldine
+Firmeza, Alfred Jonathan
+Soriano, Marron S.
+
+      			
+
+
+In Partial Fulfillment of the Requirements 
+for the degree Bachelor of Science in Information Technology
+has been examined and is recommended for Oral Defense.
+
+
+
+ENDORSED BY:
+
+
+Ariel Lapiñas
+Capstone Project Adviser
+
+
+APPROVED FOR ORAL DEFENSE:
+
+
+
+Jessiel Chris D. Hilot
+Capstone Project Coordinator
+
+
+NOTED BY:
+
+
+
+Jessiel Chris D. Hilot
+Program Head
+
+
+November 2025
+
+APPROVAL SHEET
+
+This capstone project titled Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines, prepared and submitted by , Geraldine L. Cawayan, Alfred Jonathan Firmeza, and Marron S. Soriano, in partial fulfillment of the requirements for the degree of Bachelor of Science in Information Technology, has been examined and is recommended for acceptance and approval.
+Ariel Lapiñas
+Capstone Project Adviser
+Accepted and approved by the Capstone Project Review Panel
+in partial fulfillment of the requirements for the degree of 
+Bachelor of Science in Information Technology
+
+Engr. Darwin Ian I. GuerreroReinamie G. Dayrit Panel MemberPanel Member
+Engr. Elvi Lito E. Ubas, CPE, MEEd
+Lead Panelist
+
+Noted:
+Jessiel Chris D. HilotJessiel Chris D. HilotCapstone Project CoordinatorProgram Head
+November 2025
+
+ACKNOWLEDGEMENTS
+      The researchers would like to extend their deepest gratitude to the following individuals and groups who have contributed to the successful completion of this capstone project, the Online Transportation Ticketing System.
+      To Almighty God, for His endless guidance, protection, and wisdom throughout the entire duration of this study. His grace has strengthened the researchers in moments of challenge and uncertainty, providing clarity, perseverance, and hope. Without His divine guidance, the completion of this system would not have been possible.
+      To our Capstone Project Coordinator, Jessiel Chris D. Hilot, for providing continuous guidance, clear instructions, and structured direction throughout the project. Your dedication to ensuring academic excellence and adherence to institutional standards has greatly supported the researchers. Your patience, timely reminders, and organized coordination helped us stay on track and focused on achieving the project's goals.
+      To our Capstone 1 Project Adviser, Mr. Dominic R. Bantigue, for his insightful guidance that helped us better understand the foundational concepts and core aspects of our study. Your constructive suggestions strengthened our research design and improved our decision-making during the initial stages of the project. Your encouragement motivated us to refine our ideas and approach the project with clarity.
+      To our Capstone 2 Project Adviser, Mr. Ariel P. Lapiñas, for your expert insights, constructive feedback, and technical assistance during the development of the system. Your support has played a significant role in refining the system's features, ensuring its functionality, and improving the overall quality of this research. Your hands-on guidance and willingness to assist helped the researchers overcome technical challenges and enhance the system's performance.
+      To our Capstone Project Review Panel, Engr. Elvi Lito E. Ubas, CPE, MEEd, Engr. Darwin Ian I. Guerrero, and Ms. Reinamie G. Dayrit, for your time, effort, and expertise in reviewing, evaluating, and providing valuable recommendations for the improvement of the project. Your thorough evaluation, professional insights, and practical suggestions greatly contributed to strengthening the system's implementation, documentation, and research credibility.
+      To our Parents and/or Guardians, for their unending love, prayers, and financial support. Your sacrifices and unwavering belief in the researchers' potential have been a profound source of inspiration. Your encouragement has been a driving force behind the researchers' dedication and determination to complete this project despite challenges.
+      To our Friends and Inspirations, for their constant encouragement, motivation, and understanding throughout the development of this system. Your emotional support, patience, and constant reminders to persevere helped the researchers remain focused and committed during both demanding and fulfilling phases of this journey.
+      To those who directly or indirectly contributed to this study-classmates, instructors, and individuals who provided insights, feedback, or moral support-your contributions have helped shape the success of this project. The researchers express their heartfelt gratitude for every assistance extended, no matter how big or small.
+Above all, the researchers offer this work to God, trusting in His promise:
+"Commit to the Lord whatever you do, and He will establish your plans." - Proverbs 16:3 (NIV)
+
+
+
+
+
+ABSTRACT
+Title of research:	Trav2Phil: A QR-Based Transportation Ticketing 
+                  System in the Philippines
+
+Researchers:               Geraldine L. Cawayan
+			Alfred Jonathan Firmeza
+      Marron S. Soriano
+      
+
+Degree:		Bachelor of Science in Information Technology
+
+Date of Completion:   December  2025
+
+Keywords:      	QR Code, Ticketing System, Transportation, Online Booking, Laravel, React.js, MySQL
+
+      The study entitled Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines" was developed to provide an efficient and modernized solution to the existing manual process of purchasing and managing transportation tickets. The system aims to automate ticketing transactions through the use of Quick Response (QR) technology, allowing passengers to conveniently book trips, verify tickets, and access travel information using a digital platform.
+      The researchers designed and developed the system using the Spiral Model of software development, ensuring that each phase-planning, design, development, testing, and evaluation-was properly executed. The system was implemented using Laravel for the back-end, React.js for the front-end, and MySQL as the database management system. The architecture follows a client-server structure that enables real-time communication between the user interface and the database.
+      Overall, the Trav2Phil system successfully achieved its objectives of enhancing the efficiency and reliability of transportation ticketing services. The study concludes that implementing a QR-based ticketing system significantly reduces human error, improves data management, and offers a more convenient and secure way for passengers to book and manage trips in the Philippines.
+
+TABLE OF CONTENTS
+PageTitle PageiEndorsement Form for Oral DefenseiiApproval SheetiiiAcknowledgementsivAbstractviTable of Contentsvii List of FiguresixList of TablesxIntroductionProject Context1Purpose and Description2Objectives3Scope and Limitations
+Review of Related Literature/Studies/Systems5
+9MethodologyTechnical Background13Requirements Analysis17Requirements Documentation18Design of Software, System, Product, and/or Processes21Development47Results and DiscussionTesting53Description of Prototype64Implementation Plan66Implementation Results68Conclusion72References74Appendices75Resource Persons90Relevant Source Code91Evaluation Tool/Test Documents92Sample Input/Output/Reports95User's Guide105Personal Technical Vitae117
+
+
+List of Figures
+FigurePage1 - 2Calendar of Activities77-783Spiral Model794Booking Management Module (Use-Case)805Unique QR-Based Ticket Generation Module (Use-Case)816Payment Module (Use-Case)827Registration With Subscription Module (Use-Case)838Transportation Company Dashboard Module (Use-Case)849Booking Management (Activity Diagram)8510Unique QR-Based Ticket (Activity Diagram)8611Payment (Activity Diagram)8712Registration With Subscription (Activity Diagram)8813Transportation Company (Activity Diagram)8914Booking Management (Sequence Diagram)9015Unique QR-Based Ticket (Sequence Diagram)9116Payment (Sequence Diagram)9217Registration With Subscription (Sequence Diagram)9318Transportation Company (Sequence Diagram)9419Booking Management and Unique QR-Based Ticket (Domain Diagram)9520Payment (Domain Diagram)9621Registration With Subscription (Domain Diagram)9722Transportaion Company (Domain Diagram)98
+
+
+List of Tables
+
+TablePage1User312Usertype333Account Status334Roles345Employee Types356Employees357Employement Status368Partner Subscription379Vehicle3810Vehicle Status4011Vehicle Types4012Routes4113Schedules4214Schedule Status4315Schedule Type4316Bookings4417Booking Status4618Payment Status4619Refund Request4720Refund Status48
+
+
+INTRODUCTION
+
+Project Context
+      Transportation is a cornerstone of national development, as it facilitates the          movement of people, goods, and services. Buses, vans, and ferries are among the most widely used transportation modes, often operating on inconsistent schedules, causing uncertainty and frustration between passengers. Overcrowding during peak hours makes the ride uncomfortable and increases the risk of accidents and health issues due to limited space and poor ventilation. Additionally, manual processing of fares slow down boarding times and increase the chances of delays. Accessible transportation is a fundamental component of urban and rural development, directly affecting people's mobility, productivity, and quality of life. Transportation access remains uneven, especially in places that are not accessible by some modes of transportation. The inability to find reliable or convenient transportation limits access to these certain places.
+
+      Given the geographic makeup of the Philippines, comprising thousands of islands with varying levels of infrastructure, many destinations are not directly connected by a single transportation line. For instance, a traveler might need to ride a tricycle to a jeepney terminal, transfer to a bus, and then board a ferry to reach a specific destination. Without clear information on transfer points, schedules, and trip times, travelers are often left guessing or relying on word-of-mouth directions. Currently, there is a lack of an integrated system that helps travelers plan trips involving multiple transport connections. This results in missed connections, inefficient routes, and wasted time, particularly for first-time visitors or residents unfamiliar with transport patterns in a given area. The absence of reliable route planning tools makes mobility challenging in areas without centralized transportation systems or fixed schedules.
+       
+      This project proposes the development of a point-to-point multi-mode transportation system using QR Code as ticket. The system aims to assist travelers in navigating trips that require connecting different modes of transport such as tricycles, 
+jeepneys, buses, ferries, or ride-hailing services to reach a destination. By inputting their starting point and desired endpoint, users will receive a detailed trip plan that includes available routes, estimated travel times, transfer points, and waiting times between connections. The system will address the transportation gaps in underserved and geographically complex areas by consolidating local route data and creating optimized travel pathways. Through this solution, the project seeks to improve travel efficiency, support local mobility, and enhance the overall transportation experience for both residents and tourists.
+
+Purpose and Description
+
+      The purpose of this study is to develop a transportation ticketing and suggestion system that assists travelers in identifying and navigating multi-step or connecting transportation routes from one location to another, particularly in areas where no single direct transport is available. By analyzing local transportation data and user locations, the system aims to provide optimized trip suggestions using a combination of available modes such as buses, ferries, and vans. This project seeks to improve trip efficiency, enhance user convenience, and address mobility challenges in geographically fragmented or under-served areas in the Philippines. Ultimately, the study aims to provide a scalable and data-driven solution to bridge transportation gaps and make local commuting more accessible and informed.
+      The transportation suggestion system is a web-based platform designed to help   users find viable transport routes involving one or more connections to reach their destination. It caters to travelers who need to move between locations that are not connected by a single mode of transport. By allowing users to input a point of origin and a target destination, the system will process this data to identify nearby available transport services, determine possible transfer points, and suggest a step-by-step trip route. The end goal of the system is to assist both locals and tourists in navigating complex or unfamiliar areas with greater ease, helping reduce time spent planning routes and increasing the overall accessibility of transportation services.
+Objectives
+      The main objective of this study is to provide a transportation ticketing and trip recommendation engine that identifies and recommends multi-modal trip routes for users going from one point to another, especially in areas without direct transportation access in the Philippines. Specifically, this project aims:
+
+* To develop a booking management module that can recommend connecting transportation options.
+      Aside from identifying and recommending transport routes involving multiple modes of travel, this also enables users to book available transport options directly through the platform, whether one-way or round-trip. Also, the user can reschedule or cancel their booked tickets.
+
+* To develop a unique QR-based ticket generation module for each transportation.
+      This module will generate and issue one unique QR Code for a specific booking which will serve as their ticket or boarding pass throughout the entire trip. This QR will be scanned and validated by terminal or boarding staff.
+
+* To design a payment module that integrates various payment methods.
+      This module will compute total charges based on destination and additional fees,     confirm payment before ticket issuance, and issue receipts or confirmation messages to passengers, ensuring accurate and reliable transactions
+* To develop a registration with subscription module for transportation companies.
+      This module facilitates the submission, validation, and approval of necessary documents and credentials from transportation companies, such as business name registration, barangay clearance, vehicle registration documents, and franchise certificate of public convenience (CPC). This module also enables subscription registration, renewal processing, account activation and deactivation, and monitoring of subscription status.
+
+* To develop a transportation company dashboard module.
+      This module manages employee records within the transportation companies, including their status. This module also allows to manage trips including the origin, destination, and routes. In addition it also relates to schedules where transportation companies can set their availability for trips. Lastly, vehicles are managed in terms of its capacity and vehicle number, then assigned on the specific trips and schedules including the drivers and other personnel.
+
+
+Scope and limitations
+Scope
+
+      This study focuses on the design and development of a web-based transportation suggestion and booking system aimed at assisting travelers in navigating from one location to another within the Philippines. The system is intended to help users, particularly in areas with limited direct transportation options, by recommending available routes through one or more connected transportation modes.
+      
+      This project will benefit the following:
+      
+* Travelers and Commuters
+
+      Individuals traveling between various points in the Philippines, especially in areas with limited direct transportation, will benefit from the system's ability to suggest efficient and reliable routes. It will help reduce travel confusion, time spent on planning, and the stress of navigating unfamiliar areas. The option to book transport directly also increases convenience and safety.
+
+* Tourists
+
+  	Tourists unfamiliar with the local transport structure often struggle with fragmented routes and lack of signage. This system provides a guided, step-by-step travel plan with booking options, making tourism in less connected regions more accessible, organized, and appealing.
+
+
+
+
+* Land and Sea Transport Operators and
+
+      Participating transportation providers gain increased visibility and potential revenue by being included in a system that promotes their services to a wider audience. The booking functionality also helps them manage demand and schedules more efficiently.
+     The key function of the system includes:
+     
+* Passenger Booking
+       Allows the passenger to view available routes, select their seats, input trip details, and complete booking with a QR-based ticket issued upon confirmation.
+      
+* Payment Processing
+
+        Supports multiple secure payments options and automatically computes total cost, including fare, and any applicable charges.
+
+* QR Code Ticketing and Validation
+
+       Each ticket generates a QR Code that can be scanned by conductors for secure and efficient boarding.
+
+* Cancellation, Refund, and Reschedule
+
+       Allows users to cancel/refund under certain conditions and allows users to reschedule their tickets with a certain fee.
+      
+
+
+* Connecting Transportation Suggestion
+
+      When a direct route is unavailable, the system suggests a series of connecting transportation modes to complete the trip.
+
+* Subscription
+
+      Allows transportation companies to select different subscription plans from basic, standard, and premium.
+
+
+     Limitations
+
+     The system has several limitations that may affect its overall performance and reach. First, the availability and accuracy of transportation data are dependent on external sources such as local government units and transport operators, which may not always be up-to-date or comprehensive. Additionally, the system's geographic coverage may initially be limited to selected areas within the Philippines where sufficient data can be obtained, thereby excluding some remote or less-documented regions. 
+     
+     Real-time updates regarding delays, cancellations, or route changes are not guaranteed unless integrated with live data feeds, which may not be feasible in all cases. Furthermore, not all transportation modes, particularly informal or small-scale operators like tricycles or jeepneys, support online booking, limiting the system's booking functionality to only those services that have formal booking mechanisms. 
+     
+     The system also requires stable internet connectivity to function effectively, which may be a challenge in areas with poor network coverage. In addition, the current payment feature operates only in a sandbox environment and does not support live or real monetary transactions, which limits the system's ability to process actual payments from users. This setup is intended for testing and development purposes, but it means that full payment functionality will only be available in future phases once live payment integration is implement
+
+
+REVIEW OF RELATED LITERATURE/STUDIES/SYSTEMS
+
+
+Related Studies and/or System 
+      This chapter presents a review of related literature, studies, and existing systems that support the development of Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines. These studies and systems provide insights into digital ticketing, QR code verification, online booking, and transportation management, which help establish the foundation and relevance of the proposed system.
+      Several local and international studies highlight the effectiveness of QR codes in improving operational efficiency within transportation services. QR-based systems are shown to reduce manual errors, accelerate passenger verification, and enhance security by providing unique, tamper-proof digital tickets. These findings support the implementation of QR technology in Trav2Phil, reinforcing its capability to simplify boarding procedures and minimize fraudulent ticket usage.
+      Other related booking systems demonstrate the benefits of online scheduling and digital reservations. Prior studies emphasize how online booking platforms reduce long queues, improve customer satisfaction, and ensure better record-keeping for service providers. These insights parallel the objectives of the proposed system, which incorporates an online booking module that allows passengers to select routes, schedules, and generate digital tickets.
+      Existing systems used by transport companies, such as mobile bus ticketing apps and railway e-ticket platforms, also show the importance of integrating secure authentication and real-time updates. These systems highlight features such as email verification, transaction history monitoring, and automated notifications-all of which are adopted in Trav2Phil to enhance user experience and operational transparency.
+      Overall, the reviewed literature and systems demonstrate a clear trend toward digital transformation in transportation services. The insights from these studies validate the need for an efficient, accessible, and secure ticketing solution, forming the basis for the development of Trav2Phil as a modern alternative to traditional manual ticketing processes.
+Smart Bus Ticketing System Using QR Code 
+
+      Digital transformation in public transportation is gaining interest due to ineffective manual fare collection and paper ticket issuance. While handheld devices offer minor improvements, they require trained personnel and specific hardware. RFID and GPS-based systems aim to automate fare collection and enhance tracking, but they lack user-friendly features, mobile integration, and real-time interactivity. Bagde et al. (2022) proposed a smart bus ticketing system using QR codes and an Android app to streamline travel and payment processes. Their system enables users to register, choose routes, calculate fares, and make online payments, thereby expediting boarding and eliminating paper tickets. It also incorporates an SVM-based classification model for real-time travel data analysis.
+Bus Pass Booking System Using QR code:
+      Bus pass systems often face challenges such as long queues, manual errors, and the risk of losing paper-based passes. With digital technologies advancing, public transportation is steadily evolving. Dumbre et al. (2023) introduced a QR-code-based bus pass system that enables passengers to apply for passes online and receive a digital QR code upon approval. This method reduces paperwork and waiting time. It also provides security features and online payment options. Conductors can scan the QR code to validate the pass, and the system sends an alert message containing the location and usage time.
+E- Ticket Booking System for Public Transportation using QR Code:
+      Similarly, Putra and Nurdiansyah (2023) highlighted the benefits of using QR codes in public transportation. Their study showed that QR-based systems reduce wait times, increase reliability, minimize human error, and eliminate paper usage. These systems also enhance real-time tracking and data management while improving overall convenience and safety for both passengers and operators.
+QR Code Based Booking System:
+      Somani et al. (2023) developed a QR code-based booking system designed to simplify ticket purchases for public transportation. Their system allows users to reserve, modify, or cancel tickets online using a unique QR code as their boarding pass. This method reduces manual errors and queues, facilitates faster and more secure boarding, and supports real-time passenger monitoring to improve crowd management.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Synthesis
+
+
+      Recent research highlights a growing trend toward digitizing public transportation systems to address inefficiencies inherent in manual fare collection and paper-based ticketing. QR code-based systems have emerged as a practical solution for streamlining operations and improving passenger experience. Several studies support this shift. For instance, Bagde et al. (2022) developed a smart bus ticketing system that utilizes QR codes and an Android application, enabling users to register, select routes, and pay fares online. 
+      Their system also integrates an SVM-based model to analyze real-time travel data, contributing to smarter transportation planning. Similarly, Dumbre et al. (2023) introduced a QR-based bus pass system that automates application, issuance, and renewal of passes, reducing paperwork and queue times while enhancing security through digital validation. Complementing these efforts, Putra and Nurdiansyah (2023) demonstrated that QR code systems can minimize human errors, shorten waiting times, and facilitate real-time data tracking, offering a secure and efficient alternative to traditional ticketing. 
+      Adding to this, Somani et al. (2023) proposed a system that not only simplifies ticket booking and boarding through QR codes but also allows passengers to manage their reservations online, thereby improving convenience and operational efficiency. Collectively, these studies affirm the potential of QR code-based solutions to modernize fare systems, enhance user experience, and optimize public transport infrastructure.
+
+
+
+METHODOLOGY
+Technical Background
+Overview of Current Technologies to be Used in the System 
+     Technology plays a vital role in automating transportation systems, allowing operators to streamline ticketing processes, monitor transportation routes, and manage customer feedback more efficiently. With the increasing demand for digital transformation in the transport sector, traditional methods of ticket issuance and schedule tracking are gradually being replaced by modern, QR-based digital platforms. This project is designed to improve public transportation experience by introducing a platform that enables passengers to search for connecting transportation, scan QR Code for ticket validation, automate fare computation, and streamline schedule management. This System Ensures faster, contactless ticket processing, reduces fraud, and improves real-time tracking capabilities for bus operators.
+     For front-end development, a framework of JavaScript will be used and it is React  that has a library for building user interfaces. It allows developers to create reusable UI components and manage their state efficiently. For back-end development, Laravel will be used in conjunction with MySQL, a reliable relational database, to manage ticket data, routes, schedules, and transaction history. The system architecture will be hosted on a XAMPP server during the development phase, simulating the production environment. It provides all the components required to operate the system locally and do testing, including Apache, MySQL, and Laravel. Security features such as role-based access control, data encryption, and input validation will be integrated to ensure confidentiality, integrity, and availability of data. Certain system components, such the administrator panel and driver dashboard, will only be accessible by authorized users.
+
+     The development of the project will follow the Spiral Model, a Software Development Life Cycle (SDLC) approach that combines iterative development, risk management, and prototyping. This model is ideal for complex, multi-module systems like searching for connecting transportation, bus ticketing, which includes booking, scheduling, QR code generation, payments, and employee management. Each development cycle-consisting of planning, risk analysis, engineering, and evaluation-ensures flexibility, early validation, and continuous stakeholder feedback. By incorporating user input and addressing risks at every stage, the Spiral Model supports the creation of a reliable, user-friendly, and efficient system aligned with the needs of both passengers and bus operators
+    
+     The planning phase is the foundation of each cycle in the Spiral Model. The stage involves the developer's identifying system or module goals, developing a plan, collecting functional and non-functional requirements, considering technology, tools, and methodologies, schedule, and resource availability, and aligning developers and users.
+
+     The risk analysis phase is the distinguishing feature of the spiral model. The project's risk identification phase identifies potential issues like scheduling conflicts and technical issues. These risks are assessed for likelihood and consequences, and mitigation techniques are suggested. Prototypes or simulations are used to evaluate risky ideas.
+      
+     Once the risks have been addressed, the Engineering Phase involves the actual development of the software. The system architecture will be developed, components will be built, and the application will be coded, with testing including integration and unit testing. 
+      
+     In the assessment Phase, the developed prototype or system increment will be presented to stakeholders for review and feedback. The Spiral Model ensures development meets business and user expectations by involving stakeholders in testing functionality, evaluating progress, and requesting enhancements, thereby ensuring the system is usable and meets user needs.
+     
+     
+   
+     
+Calendar of activities
+      The following shows the description of each activity finished and planned by the developers. Idea Brainstorming was conducted from the 1st week of February where the developers explore relevant issues to identify a suitable project idea. By the Following Week Title Creation took place which ensured that the topic aligned with identifying problems and proposed solutions.
+	To improve comprehension of the system process, the developers presented their selected project concept during the second and third weeks of February, outlining the problem, solution, goals, and preliminary data flow diagram. To understand more about the selected project which is the bus ticketing system, interviews were conducted with the bus liners or bus company, However the developers were not allowed to conduct interviews with bus liners, so they instead looked for the general process and conducted research. 
+	The team started drafting the Project Context in early March, focusing on the issues with conventional bus reservation systems. The Purpose and Description were then established, detailing how the project would provide a more effective, accessible, and user-friendly booking experience. To properly identify the elements of the web system, such as real-time seat tracking, digital payment, QR-based ticket production, and trip scheduling, this involved creating the project's objectives and outlining its scope and limitations. 
+	As development proceeded, during the second and third weeks of March, the original documentation was revised in response to adviser input. New modules including bus timetable management, refund and cancellation procedures, and platform-based item delivery support were added in these revisions.
+	To better support the project, the developers looked for a similar system to identify gaps by doing Review of Related Studies and System that took two weeks to complete 
+	This helps the developers to understand how other systems work and what improvements they could make in their own system. In the same week, the developers worked on the Technical Background, where the developers explained what programming language, system design, and tools that they planned to use.
+      The team concentrated on the requirements analysis from the third week of  March    to the third week of April. The team ensured that all user and system needs were addressed and incorporated into the features during this time. 
+      
+      To illustrate how users would interact with the system, how the database would be structured, and how the bus ticketing procedure would operate, they also produced system diagrams. They enumerated every item required for the project, including software, web hosting, and testing equipment. They ultimately finished the Appendix, which contained the developer profiles, UI designs, and diagrams, as well as the Requirements Documentation.
+      
+      All tasks were done according to the timeline shown in the Gantt chart, helping our group stay organized and on schedule.
+
+Resources
+	The development of the Bus Ticketing and Management System required combination of hardware and software resources to support coding, testing, deployment, and demonstration. Development was primarily conducted on personal computers and laptops equipped with AMD Ryzen 7 7730U with Radeon Graphics, 16 Gigabytes of RAM, 500GB of SSD, and Intel Core i5-1035G1 of CPU with 8GB of RAM on 256GB of SSD to ensure smooth operation of development environments and testing platforms. 
+      For mobile testing and responsiveness, Android smartphones with at least 3GB RAM and running Android 8 or higher were used to simulate commuter-side interactions, including QR code scanning, ticket display, and payment processes. In some cases, tablets with larger displays were used to simulate the view of ticketing staff, which is the conductor.
+     
+      On the software side, the system was developed using a full-stack framework, including technologies such as React for the front-end, Laravel for the backend, and MySQL as the database management system. QR code functionality was tested using both browser-based tools and mobile QR scanning applications. The integrated development environment (IDE) used included Visual Studio Code, while version control was managed via Git and GitHub.
+     
+      Cloud-based services and virtual machines were utilized for staging and testing, simulating real-time operations without disrupting existing infrastructures. Additionally, web browsers such as Google Chrome and Mozilla Firefox were used for cross-browser compatibility testing. These resources collectively supported the development of a robust, responsive, and scalable system suitable for both administrative users and everyday passengers.
+    
+Requirements gathering and analysis
+
+	The developers have performed data gathering and research to determine the necessary requirements that should be defined for the project. A letter and a set of questions were formulated by the members to be used as a research instrument for relevant people related to the project. Though, the developers tried to request the people involved but were unable to conduct the said interview.	
+      As a result, thorough research was carried out. This includes the general process of ticketing and booking, transportation vehicles, people included in the vehicle such as drivers and conductors, fares, and passengers.
+     
+      This information was used to write the project's purpose, description, objectives, scope, and limitations. In addition, the diagrams such as use case, data flow, entity relation, database, and prototype were referred to the gathered data. 
+
+
+Requirements documentation
+      This document outlines the design and requirements of a web-based interface aimed at improving passenger travel experience through a visually engaging and easy-to-navigate ticket booking page, and transportation company dashboard page.
+Use Cases:
+
+Booking Management Module
+
+     The Booking Management Module enables passengers to search for routes, view available schedules, and book trips based on their chosen origin, destination, and travel date. It supports both direct and connecting trips through its route recommendation feature. The module also allows users to manage their reservations by rescheduling or canceling bookings. Overall, it ensures a smooth and organized booking process within the system
+          
+     This diagram shows how passengers interact with the booking system to search for transport options, select trips, and receive route recommendations. The main process, Manage Trip Booking, is supported by actions such as choosing trip type, selecting routes and schedules, and viewing recommended routes. An extended use case, View Recommended Connecting Trips, activates when no direct route is available. Other functions like account registration, login, and refund requests allow passengers to manage their accounts and bookings within the system. Use Case Diagram (Please refer to Figure 4, page 80)
+
+
+Unique QR-based ticket generation module
+
+ 	The QR-Based Ticket Generation Module creates a unique QR code for every confirmed booking, serving as the passenger's digital ticket or boarding pass. This QR code is scanned and validated by transport staff during boarding to verify the passenger's booking and ensure secure and efficient check-in. It helps prevent fraud, speeds up boarding, and maintains accurate trip records.
+          
+      This diagram illustrates how the System generates and manages unique QR codes for ticket bookings. The primary function, Generate Unique QR Code, includes linking the code to the booking record. The system also stores the QR code in the database and sends it to the passenger. The passenger displays the QR code for scanning, and the chauffeur scans it to validate and update the trip status to "Boarded," ensuring a secure and efficient ticket verification process. Use Case Diagram (Please refer to Figure 5, page 81)
+Payment module
+      The Payment Module processes passenger payments by computing the total fare, including additional fees if applicable, and verifying successful transactions before issuing the ticket. It supports multiple payment methods and provides digital receipts or confirmation messages to ensure secure, accurate, and reliable payment processing.
+          
+      This diagram illustrates how passengers interact with the payment module to complete transactions. The primary function, Process Payment, is supported by selecting a payment method, choosing payment type, and entering payment details. Additional related actions include verifying payment credentials, generating payment receipts, saving payment records in the database, and updating booking status to "Paid," ensuring a smooth and secure payment process. Use Case Diagram (Please refer to Figure 6, page 82) 
+     Registration With Subscription Module
+      The Registration with Subscription Module allows transportation companies to register by submitting required documents for verification. Once approved, companies can choose a subscription plan, manage renewals, and monitor their subscription status. This module ensures that only verified and active companies can operate within the system.   	
+      This diagram illustrates how Company Owners interact with the system to register and  subscribe. The primary function, Register Partner, includes submitting company information, uploading required documents, and validating data completeness. Admins verify the submitted documents and approve or reject applications. Accepted applications proceed to applying subscription plans and storing data, while rejected ones allow document editing and resubmission, facilitating a thorough registration and subscription process. Use Case Diagram (Please refer to Figure 7, page 83)
+Transportation Company Dashboard Module
+      The Transportation Company Dashboard Module provides transport companies with tools to manage their operations, including employee records, routes, trip schedules, and vehicle assignments. It displays important data such as active trips, available vehicles, and booking statistics, helping companies monitor and organize their daily operations efficiently.
+      This diagram illustrates how a Dispatcher interacts with the transportation company dashboard to manage trips. The primary function, Manage Trips, is extended by actions such as viewing assigned trips, updating trip status, and managing trip details. Additional use cases, including assigning trips to chauffeurs and tracking trip progress, enable efficient coordination and real-time monitoring of transportation operations. Use Case Diagram (Please refer to Figure 8, page 84)
+
+
+Activity Diagrams: 
+      Booking Management 
+      This activity diagram outlines the workflow in the transportation company dashboard module. The process starts with the passenger logging in and the system authenticating the user. The passenger searches for a destination, prompting the system to check trip availability. If a direct trip is available, direct trip options are displayed; otherwise, connecting trip options are recommended. The passenger then selects a trip and seat, and the system calculates the fare. After confirming the booking, the passenger proceeds to make payment, which triggers the system to generate a QR code, completing the booking and payment process.  (Please refer to Figure 9, page 85)
+      Unique QR-Based Ticket
+      This activity diagram illustrates the passenger's journey through the transportation company dashboard module. It begins with the passenger logging in and the system authenticating their credentials. Next, the passenger searches for a destination, prompting the system to check trip availability. If a direct trip is available, the system displays direct trip options; otherwise, it recommends connecting trip options. The passenger then selects a trip and seat, after which the system calculates the fare. Upon confirming the booking, the passenger proceeds to make payment, and the system generates a unique QR code to complete the process, enabling a seamless booking and payment experience. (Please refer to Figure 10, page 86)
+
+
+      Payment 
+      This activity diagram maps the workflow for passengers completing payments in the transportation system. It begins with the passenger logging in and accessing their booking, followed by reviewing the total fare computed by the system. The passenger selects a payment method and enters payment details, which the system and payment gateway verify for transaction validity and credentials. Upon successful verification, the system updates the booking status to "Paid," generates a receipt or confirmation, records the payment in the database, and then shows the payment confirmation to the passenger. This process ensures secure, accurate, and efficient payment handling within the system. (Please refer to Figure 11, page 87)
+
+      Registration With Subscription
+      This activity diagram maps the registration with subscription workflow for companies using the system. It begins with the company registering and submitting company information and documents, which the admin reviews after email verification. Based on the review, the admin either approves or rejects the registration; rejected applications are returned for editing and resubmission. Approved companies proceed to select a subscription plan and confirm payment. The system processes the payment, stores the registration and subscription records, activates the account, and finally grants the company access to the dashboard. This process ensures thorough verification and seamless subscription activation. (Please refer to Figure 12, page 88)
+
+
+
+
+
+      Transportation Company Dashboard
+      This activity diagram maps the work-flow for a transportation company managing its dashboard. The process starts with the company logging in and the system authenticating the passenger. Upon accessing the dashboard, the company manages employee records, which the system updates accordingly. Next, the company manages vehicles, where the system checks availability and stores vehicle information. The company then manages routes and trips; the system stores trip details, assigns vehicles and personnel, and updates schedules and assignments. The company can view real-time reports and statistics on the dashboard. Additionally, refund requests are handled, with the system validating refund eligibility and updating booking and payment records. This design ensures efficient management of personnel, vehicles, trips, and financial transactions in real-time. (Please refer to Figure 13, page 89)
+
+
+Sequence Diagrams:
+
+
+Booking Management Diagram 
+      This diagram shows the step-by-step interactions between the passenger and the system during the booking process. It starts with the passenger logging in, where the system verifies credentials with the database and then displays the dashboard. The passenger searches for trips, prompting the system to retrieve schedules and available seats from the database and show them. After the passenger confirms the booking, the system saves the booking record in the database and then displays a booking summary, enabling a smooth and verified booking experience. (Please refer to Figure 14, page 90)
+
+
+
+
+      Unique QR-Based Ticket Generation Module
+      This diagram shows the sequential interactions between the passenger, conductor, and system during unique QR-based ticket generation and validation. It begins with the system generating a QR code for a paid booking using the QR code generator, saving it linked to the booking record in the database, and confirming the save. The passenger then displays the QR code for boarding, which the conductor scans for validation. The system verifies the QR code's validity and booking status in the database and returns whether it is valid or invalid, and the conductor displays the verification result, ensuring secure and accurate ticket verification. (Please refer to Figure 15, page 91)
+
+      Payment Module
+      This diagram shows the sequential interactions between the passenger, system, payment gateway, and database during the payment process. It begins with the passenger proceeding to payment, prompting the system to send payment details to the payment gateway. After the payment gateway returns the payment status (success or failure), the system updates the booking record in the database with this status. Finally, the system confirms the payment and displays the payment confirmation and receipt to the passenger, ensuring a secure and transparent transaction process. (Please refer to Figure 16, page 92)
+
+
+
+
+
+
+
+
+      Registration With Subscription Module
+      
+      This diagram shows the sequential interactions between a company, the system, the database, and an admin during registration with subscription. It begins with the company submitting a registration form and documents, which the system saves in the database and notifies the admin for review. The admin then accepts or rejects the registration, prompting the system to update and confirm the company's status. After notification of the registration result and dashboard display, the company activates a subscription and selects a plan, which the system saves and marks as active, confirming the subscription. (Please refer to Figure 17, page 93)
+
+      Transportation Company Dashboard Module.
+      
+      This diagram shows the sequential interactions between the company, system, and database within the transportation company dashboard module. It begins with the company logging into the dashboard, prompting the system to verify credentials and return the authentication result. Upon successful login, the system displays the company dashboard. The company then manages trips by inputting details like origin, destination, and route, and assigns vehicles and drivers to schedules. The system saves and updates trip, vehicle, and employee data in the database, confirms the updates, and finally displays the updated schedules and trip availability, enabling effective management of transportation operations. (Please refer to Figure 18, page 94)
+
+
+
+
+
+
+
+
+Domain Model Class Diagrams:
+
+
+      Booking Management Diagram and Unique QR-Based 
+      Ticket Generation Module
+
+      This domain diagram outlines the core entities and relationships central to booking management and unique QR-based ticket generation in the transportation system. It highlights key classes such as Users (with attributes including UserID, name, email, and password), Bookings (capturing details like booking ID, QR code, seat selection, payment and boarding statuses), and Schedules (linking vehicles, routes, and timings). Routes define trip specifics including origin, destination, and stops, while Vehicles and their types, statuses, and ownership details are managed separately. Refunds and their statuses are integrated with bookings for financial management. The relationships between classes ensure data integrity and support functionalities like secure user authentication, detailed trip scheduling, QR code ticket generation, and comprehensive booking tracking, thereby facilitating an organized and efficient transportation booking system. (Please refer to Figure 19, page 95)
+
+      Payment Module
+      This domain diagram outlines the core entities involved in the payment module of the booking system. It centers on the Bookings class, which contains attributes such as BookingID, UserID, ScheduleID, QRCode, PaymentMethod, PaymentStatusID, TotalFare, and timestamps for payment and refund activities. The PaymentStatuses class, linked to Bookings via PaymentStatusID, categorizes the current payment state of each booking. This structure supports tracking of payment methods and statuses tied to individual bookings, ensuring accurate and reliable financial processing within the system. (Please refer to Figure 20, page 96)
+
+
+
+      Registration With Subscription Module
+      This domain diagram defines the structure for the Registration with Subscription module. Key entities include Users, capturing user details like UserID, name, email, password, and account status, linked to AccountStatuses and UserTypes for role and status management. The PartnerProfiles entity stores company-related information verified through the PartnerVerifications class, which tracks verification details and status. Associated PartnerDocuments hold submission files connected to verification records. The PartnerSubscriptions entity manages subscription details such as plan type, status, expiry, and creation dates, linked directly to users. Relationships ensure secure user registration, thorough partner verification, document handling, and subscription tracking, supporting a comprehensive registration and subscription management process. (Please refer to Figure 21, page 97)
+
+      Transportation Company Dashboard Module.
+      This domain diagram defines the core structure of the Transportation Company Dashboard Module. It includes key entities such as Users (with attributes like UserID, email, password, and role), connected to Roles and UserTypes to manage access and permissions. The Employees entity stores employee details linked to account statuses and roles. Vehicles are managed through Vehicles and VehicleTypes, with statuses tracked separately. The Routes class outlines trip routes, including origin, destination, and checkpoints, while Schedules link vehicles, routes, and employees with trip details and timings. The diagram also includes Refunds for managing refund requests and statuses, and PartnerSubscriptions for handling company subscription plans. Relationships among these classes provide a comprehensive framework for managing personnel, vehicles, routes, schedules, refunds, and subscriptions, ensuring efficient operation and control within the transportation company's dashboard system. (Please refer to Figure 22, page 98)
+
+Database Design
+
+	The database design defines the relational schema for Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines, capturing essential entities such as Passenger, Booking, Route, Schedule, Driver, Admin, QRTicket, and PaymentRecord, each with detailed attributes (e.g., id, name, email, route_id, fare, booking_status, scan_timestamp). The design also specifies the cardinalities among key tables-for instance, the one-to-many relationship between Route and Schedule, Passenger and Booking, and Booking and QRTicket-ensuring that the system accurately reflects real-world operations of transportation workflows.
+	Primary and foreign keys are used to preserve referential integrity across interconnected modules. Examples include linking booking.passenger_id to the Passenger table, schedule.route_id to Route, and qr_ticket.booking_id to Booking. This ensures that every generated QR code corresponds to a valid booking, and every booking is associated with a registered passenger and an available schedule. The schema follows normalization principles to eliminate redundancy, optimize data retrieval, and maintain consistent transaction records throughout the system.
+	The designed database supports the system's operational needs, including passenger management, route browsing, real-time booking transactions, QR code generation, ticket validation logs, and optional payment tracking. Queries can efficiently retrieve data for schedule availability, booking histories, scan validations performed by drivers, and admin-level summaries for monitoring revenue, active routes, and passenger volume.
+	Through its structured relational model, the database enables secure, scalable, and efficient data persistence. This ensures seamless integration with backend services, reliable data flow to dashboards, and smooth performance across all modules of Trav2Phil, supporting the system's goal of providing a modern and dependable digital ticketing platform for transportation operators and passengers.
+
+Data dictionary
+
+	The data dictionary defines the structure, attributes, and purpose of each table within the Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines database. It outlines all fields used to store passenger records, booking details, transportation routes, schedules, user authentication, and QR ticket validations. Each table specifies its data type, format, constraints, and functional role within the system. The database includes core tables such as Passenger, Booking, Route, Schedule, Driver, Admin, QRTicket, and PaymentRecord, which collectively support the system's workflow from account registration to ticket validation.
+	The Passenger table stores user credentials and personal information required for registration and login processes. The Booking table manages travel reservations, capturing route selections, schedules, fare details, and booking statuses. The Route and Schedule tables define transportation paths and their corresponding departure times, ensuring that passengers can view accurate route availability. The Driver table records driver credentials and enables QR validation through the scanning module. The QRTicket table retains all generated QR codes linked to confirmed bookings, while the PaymentRecord table (if enabled) documents payment attempts and transaction statuses.
+	These tables are interconnected through relational foreign keys, maintaining data integrity and ensuring consistency across all modules. For example, booking.passenger_id references the Passenger table, while qr_ticket.booking_id references the Booking table, guaranteeing that every QR entry corresponds to a valid reservation. This relational structure allows seamless retrieval of passenger booking histories, route schedules, driver validation logs, and admin-level summaries. The data dictionary supports comprehensive data management, enabling the system to deliver fast, accurate, and secure ticketing operations throughout the Trav2Phil platform.
+
+
+Users
+
+
+	The Users table stores all registered accounts in the system, including passengers, transport companies, and company staff. It manages essential information such as personal details, login credentials, and account status. The table is linked to other major modules like bookings, subscriptions, vehicles, and employee records, ensuring that each transaction and activity can be associated with the correct user. This structure allows the system to maintain secure authentication, proper user role identification, and accurate tracking of all user-related actions.
+Table 1: User
+
+Field Name
+Data TypeKey TypeData FormatNumber of Bytes/SizeDescriptionNotesNotesUserIDINTPrimary KeyInteger4 bytesUnique user identifierAuto Increment1NameVARCHAR(255)-Text String255Full name of the userRequiredJuan Dela CruzEmailVARCHAR(255)-Text String255User's email addressMust be uniquejuan@gmail.comUserTypeIDINTForeign KeyInteger4Identifies user type (Passenger / Company / Staff)FK ? UserTypes1AccountStatusIDINTForeign KeyInteger4Indicates account status (Active, Pending, Banned)FK ? AccountStatuses1EmployeeTypeIDINTForeign KeyInteger4Type of employee if user belongs to a companyFK ? EmployeeTypesNULL for passengersEmailVerifiedAtDATETIME-Date-Time8When the user verified their emailOptional2025-02-01 10:20PasswordVARCHAR(255)-Text String255Encrypted passwordRequired******RememberTokenVARCHAR(255)-Text String255Token for session loginOptionalabcd1234UserIDINTPrimary KeyInteger4 bytesUnique user identifierAuto Increment1
+
+Userstype
+
+      The UserTypes table defines the different classifications of users in the system, such as passengers, company owners, and staff members. It helps the system assign the correct permissions and access levels to each account. Other tables, such as Users and Employees, rely on this table to accurately identify the type of user interacting with the system.
+
+
+Table 2: Usertype
+
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleUserTypeIDINTPrimary KeyInt4Identifier for user typeAuto Increment1TypeNameVARCHAR(255)-String255Type of user (Passenger, Company Owner, Staff)RequiredPassenger
+Account statuses 
+
+      The AccountStatuses table stores the possible states of a user account, such as Active, Pending, or Suspended. It ensures that the system can properly control user access and enforce restrictions when needed. This table is linked to the Users table to determine whether an account is allowed to log in or perform actions.
+
+Table 3: Account Status
+
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleStatusIDINTPrimary KeyInt4Unique ID for account statusAuto Increment1StatusNameVARCHAR(255)-String255Status name (Active, Pending, Suspended)RequiredActive
+
+Roles table
+      The Roles table contains the different job roles assigned to company employees, including drivers, conductors, or inspectors. It identifies whether a role requires system access and helps manage permissions within the transportation company. This table is connected to the Employees table for assigning the correct role to each staff member.
+Table 4: Roles
+
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleRoleIDINTPrimary KeyInt4Unique identifier for company employee roleAuto Increment1NameVARCHAR(255)-Text255Role name (Driver, Conductor, Inspector)RequiredDriverRequiresUserAccountBIT-Bool1Whether this role needs a system login0/11
+
+
+Employee types
+
+      The EmployeeTypes table specifies categories of employees such as drivers, conductors, or administrative staff. It helps organize employee data and ensures that each employee is properly labeled according to their work classification. The Employees table references this to determine each employee's type.
+
+Table 5: Employee Types
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleEmployeeTypeIDINTPrimary KeyInt4Identifier for employee typeAuto Increment1TypeNameVARCHAR(255)-Text255Employee type nameRequiredDriver
+Employees 
+      The Employees table stores detailed records of all employees under a transport company, including their names, contact details, roles, and employment status. It links to tables such as Roles, EmployeeTypes, and EmploymentStatuses to ensure accurate employee identification and proper assignment of responsibilities. This table supports company operations by maintaining complete staff information.
+Table 6: Employee
+Field NameData TypeKey TypeData FormatSize (Bytes)DescriptionNotesExampleEmployeeIDINTPrimary KeyInteger4Unique ID for each employeeAuto Increment101CompanyIDINTForeign KeyInteger4The company this employee belongs toFK ? Users(UserID) where UserType = Company12FirstNameVARCHAR(255)-Text255Employee's given nameRequiredMariaLastNameVARCHAR(255)-Text255Employee's last nameRequiredSantosEmailVARCHAR(255)-Text255Employee emailOptionalmaria.santos@busco.comPhoneVARCHAR(50)-Text50Mobile/telephoneOptional09123456789PositionVARCHAR(255)-Text255Employee position or titleRequiredDriverRoleIDINTForeign KeyInteger4Employee role (Driver/Conductor/etc.)FK ? Roles2EmployeeTypeIDINTForeign KeyInteger4Identifies type of employeeFK ? EmployeeTypes1StatusIDINTForeign KeyInteger4Employment statusFK ? EmploymentStatuses1
+Employement status
+      The EmploymentStatuses table defines the employment condition of each staff member, such as Active or Inactive. This helps the system track which employees are currently allowed to be assigned to routes or schedules. It works closely with the Employees table to maintain accurate workforce management.
+Table 7: Employement Status
+Field NameData TypeKey TypeData FormatSizeDescriptionNotesExampleStatusIDINTPrimary KeyInteger4Unique employment status IDAuto Increment1StatusNameVARCHAR(255)-Text255Name of status (Active, Inactive)RequiredActive
+
+Partner subscription
+      The PartnerSubscription table stores subscription records for transport companies, including plan type, duration, payment details, and allowed vehicle limits. It connects companies to their subscription status and helps enforce feature access depending on their chosen plan. This table ensures proper tracking of active, expired, or pending subscriptions.
+Table 8: Partner Subscription
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleSubscriptionIDINTPrimary KeyInt4Unique identifier for subscription recordAuto Increment501UserIDINTForeign KeyInt4The company that owns the subscriptionFK ? Users(UserID)12PlanTypeVARCHAR(255)-Text255Subscription plan (Basic, Standard, Premium)RequiredPremiumStartDateDATE-Date3Start of subscriptionRequired2025-01-01EndDateDATE-Date3End/expiration of subscriptionRequired2025-12-31StatusIDINTForeign KeyInt4Subscription status (Active, Expired, Pending Approval)FK ? SubscriptionStatuses1PriceDECIMAL(10,2)-Numeric9Price of subscription planRequired2499.00PaymentModeVARCHAR(255)-Text255Payment method (GCash, Paypal)RequiredGCashNumberOfVehiclesINT-Int4Maximum number of vehicles allowed by the planOptional10TransportationModesVARCHAR(255)-Text255Modes covered (Bus, Van, Ferry)OptionalBus, Van
+Vehicle
+      The Vehicle table records all vehicles registered under transport companies. It stores important information such as vehicle name, plate number, type, seating capacity, and operational status. The table links to VehicleTypes and VehicleStatuses, allowing the system to manage the availability and condition of each vehicle for scheduling and booking.
+Table 9: Vehicle
+Field NameData TypeKey TypeData FormatSizeDescriptionNotesExampleVehicleIDINTPrimary KeyInteger4Unique identifier for each vehicleAuto Increment3001PartnerIDINTForeign KeyInteger4The company that owns this vehicleFK ? Users(UserID)12VehicleNameVARCHAR(255)-Text255Name or label of the vehicleRequiredBus 101PlateNumberVARCHAR(100)-Text100Official vehicle plate numberRequiredABC-1234VehicleTypeIDINTForeign KeyInteger4Type of vehicleFK ? VehicleTypes1HasAirconBOOLEAN-Boolean1Whether vehicle has air conditioningDefault: NoTRUEModelVARCHAR(255)-Text255Vehicle modelOptionalToyota CoasterSeatCapacityINT-Integer4Total seats availableRequired45SeatLayoutVARCHAR(255)-Text255Description of seating layoutOptional2x2DescriptionTEXT-Text~Extra vehicle detailsOptional"For long trips"StatusIDINTForeign KeyInteger4Vehicle condition (Active, For Repair, etc.)FK ? VehicleStatuses1
+Vehicle status
+      The VehicleStatuses table lists the operational conditions of vehicles, such as Active, Under Maintenance, or For Repair. It helps the system determine which vehicles are available for assigned schedules. This table supports the Vehicle table by ensuring accurate status tracking.
+Table 10: Vehicle Status
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleStatusIDINTPrimary KeyInteger4Unique status for vehiclesAuto Increment1StatusNameVARCHAR(255)-Text255Name of status (Active, Inactive, Under Maintenance, For Repair)RequiredActive
+Vehicle types
+      The VehicleTypes table categorizes vehicles based on their type, such as buses, vans, or ferries. By linking to the Vehicles table, it ensures proper classification for scheduling, booking, and capacity management.
+Table 11: Vehicle Types
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleVehicleTypeIDINTPrimary KeyInteger4Unique vehicle type identifierAuto Increment1TypeNameVARCHAR(255)-Text255Type of vehicleRequiredBus
+Routes
+      The Routes table stores all available transportation routes offered by partner companies. It includes information like origin, destination, stopovers, distance, and route status. This table is essential for creating schedules and helps passengers easily identify available trips.
+      Table 12: Routes
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleRouteIDINTPrimary KeyInteger4Unique identifier for each routeAuto Increment900CompanyIDINTForeign KeyInteger4Transport company offering this routeFK ? Users(UserID)12OriginVARCHAR(255)-Text255Starting point of the routeRequiredDavao CityDestinationVARCHAR(255)-Text255End point of the routeRequiredCagayan de OroIntermediateStopsTEXT-Text~All stopovers or checkpointsOptionalTagum, MalaybalayDistanceDECIMAL(10,2)-Number9Estimated distance in kilometersOptional250.50EstimatedDurationVARCHAR(255)-Text255Estimated time durationOptional5 hoursStatusIDINTForeign KeyInteger4Route status (Active, Inactive)FK ? RouteStatuses1
+
+
+Schedules
+      The Schedules table contains all trip schedules created by transport companies. It tracks the assigned vehicle, driver, route, departure time, fare, seat availability, and schedule status. It serves as a core reference for booking, ensuring passengers can select valid and updated trips.
+Table 13: Schedules
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleScheduleIDINTPrimary KeyInteger4Unique schedule recordAuto Increment5001VehicleIDINTForeign KeyInteger4Assigned vehicleFK ? Vehicles3001AssignedDriverIDINTForeign KeyInteger4Driver assigned to the tripFK ? Employees18AssignedStaffIDINTForeign KeyInteger4Staff/Conductor assignedFK ? Employees32RouteIDINTForeign KeyInteger4Associated routeFK ? Routes900DepartureDateTimeDATETIME-DateTime8Trip departure date and timeRequired2025-01-20 06:00ArrivalDateTimeDATETIME-DateTime8Expected arrivalOptional2025-01-20 11:00SeatAvailabilityINT-Integer4Remaining seatsAuto-updated38FareDECIMAL(10,2)-Numeric9Fare per personRequired550.00ScheduleTypeIDINTForeign KeyInteger4One-way or RoundtripFK ? ScheduleTypes1StatusIDINTForeign KeyInteger4Schedule statusFK ? ScheduleStatuses1Schedule status
+      The ScheduleStatuses table stores the different states of a trip schedule, such as Scheduled, Cancelled, or Completed. It helps the system manage active trips and provides visibility into the current condition of each schedule.
+Table 14: Schedules Status
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleStatusIDINTPrimary KeyInt4Unique schedule statusAuto Increment1StatusNameVARCHAR(255)-Text255Status of the tripRequiredScheduled
+Schedule type
+      The ScheduleTypes table defines whether a schedule is a one-way, round trip, or other travel format. It is referenced in the Schedules table to properly classify how each trip is structured.
+Table 15: Schedules Type
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleScheduleTypeIDINTPrimary KeyInt4Unique type IDAuto Increment1TypeNameVARCHAR(255)-Text255Type of scheduleRequiredOne-way
+
+
+
+Bookings
+      The BookingStatuses table defines the current state of a booking, such as Pending, Confirmed, or Cancelled. It allows the system to track the progress of each transaction and support booking management activities.
+Table 16: Bookings
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleBookingIDINTPrimary KeyInteger4Unique booking identifierAuto Increment7001UserIDINTForeign KeyInteger4Passenger who created the bookingFK ? Users102ScheduleIDINT4Selected scheduleFK ? Schedules5001BookingReferenceVARCHAR(100)100System-generated unique booking codeUniqueTRAV2PHIL-98301NumberOfPassengersINT4Number of seats bookedRequired2FarePerPersonForeign KeyInteger9Cost per passengerRequired550.00TotalFare-Text9Total amount to be paidAuto-calculated1100.00StatusID-Integer4Booking statusFK ? BookingStatuses2PaymentStatusID-Numeric4Current payment stateFK ? PaymentStatuses1SelectedSeats-Numeric255Seat numbersOptionalA1, A2IsWalkInForeign KeyInteger1Indicates walk-in transactionDefault: 00IsStandingForeign KeyIntegerBoolean1Passenger has no seatDefault: 00ConnectingBookingID-TextInteger4For connected trips (multi-leg)FK ? BookingsNULLQRCode-BooleanText255Base64 or path to QR codeAuto-generatedQR-IMG-100234CreatedAtDATETIME-DateTime8When booking was createdAuto2025-01-10
+
+
+
+
+
+Booking status
+      The PaymentStatuses table stores the different states of booking payments, such as Paid, Unpaid, or Refunded. By linking to the Bookings table, it helps the system confirm whether a transaction has been completed or requires follow-up.
+Table 17: Bookings Status
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleStatusIDINTPrimary KeyInt4Booking status identifierAuto Increment1StatusNameVARCHAR(255)-Text255Name of booking statusRequiredPending
+Payment status
+      The PaymentStatuses table stores the different states of booking payments, such as Paid, Unpaid, or Refunded. By linking to the Bookings table, it helps the system confirm whether a transaction has been completed or requires follow-up.
+Table 18: Payment Status
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleStatusIDINTPrimary KeyInt4Payment status identifierAuto Increment1StatusNameVARCHAR(255)-Text255Name of payment stateRequiredPaid
+
+
+Refund requests
+      The RefundRequests table keeps all refund transactions made by passengers. It includes the booking ID, user requesting the refund, reason, status, and admin remarks. This table ensures that refund processes are properly documented and monitored.
+Table 19: Refund Requests
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleRefundIDINTPrimary KeyInteger4Unique refund request IDAuto Increment900BookingIDINTForeign KeyInteger4Booking requesting a refundFK ? Bookings7001UserIDINTForeign KeyInteger4Passenger who requested refundFK ? Users102ReasonVARCHAR(255)-Text255Passenger-provided refund reasonRequiredChange of plansStatusIDINTForeign KeyInteger4Refund statusFK ? RefundStatuses1AdminRemarksVARCHAR(255)-Text255Admin/Company decision notesOptionalApprovedCreatedAtDATETIME-DateTime8Submission dateAuto2025-01-15
+
+
+
+
+Refund status
+      The RefundStatuses table lists the possible outcomes of refund requests, such as Pending, Approved, or Rejected. It works together with the RefundRequests table to track the progress and final decision of each refund inquiry.
+Table 20: Refund Status
+Field NameData TypeKey TypeFormatSizeDescriptionNotesExampleLogIDINTPrimary KeyInteger4Unique scan recordAuto Increment350BookingIDINTForeign KeyInteger4Scanned bookingFK ? Bookings7001EmployeeIDINTForeign KeyInteger4Employee who performed the scanFK ? Employees18ScanTimeDATETIME-DateTime8Timestamp of scanAuto2025-01-20 05:55ScanTypeVARCHAR(100)-Text100Scan-in or Scan-outRequiredScan-InResultVARCHAR(100)-Text100Status of verificationRequiredValid
+
+
+
+
+
+Development
+      Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines followed established software engineering standards and best practices to ensure functionality, efficiency, security, and maintainability.  The system was created using the Spiral Model methodology, which allowed the developers to plan, design, build, test, and refine the system in iterative cycles with continuous feedback and risk analysis.
+Adherence to Standards
+      Throughout the development process, the following guidelines were followed to preserve uniformity and software quality:
+
+		Coding Standards
+
+      The team implemented structured naming conventions to promote code readability and uniformity. All table names began with the prefix tbl, and UI elements followed the pattern TaskName + ActionEvent + Btn (e.g., BookingAddBtn, SalesExitBtn). Each function was documented using inline comments for clarity.
+
+		Software Design Standard
+
+      The system was designed using the Model-View-Controller (MVC) architecture to separate concerns between the data model, user interface, and control logic. This ensured scalability, simplified debugging, and allowed independent updates to specific components without affecting others.
+
+
+
+
+
+		Database Design Standard
+      
+      A normalized database structure was implemented using MySQL, following the 3rd Normal Form (3NF) to minimize data redundancy and preserve integrity. Primary and foreign key constraints were used to maintain relational consistency across entities such as tblBooking, tblUser, and tblPayment.
+
+		Security Standard
+
+      The developers integrated authentication and authorization measures through role-based access control, data validation, and encryption techniques to protect confidential user and company data. Input sanitation was applied to prevent SQL injection and cross-site scripting (XSS).
+
+		User Interface (UI) and Experience (UX) Standards
+
+      The front-end design was created using React.js, focusing on usability  and responsiveness across various devices. The color schemes and layout maintained visual consistency with clear navigation elements, ensuring an intuitive experience for passengers, transport operators, and administrators.
+
+
+
+
+
+
+
+
+
+
+
+
+Development Tools and Environment
+
+      The development of Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines utilized a combination of modern tools and technologies to ensure a reliable, scalable, and efficient system. The front-end was developed using React.js, a JavaScript framework known for building dynamic and responsive user interfaces through reusable components. For the back-end, the developers used Laravel, a PHP framework that efficiently manages business logic, handles routing, and provides secure API communication between the client and the server. 
+      The system's data was stored and managed using MySQL, a relational database management system that supports structured data relationships and ensures data integrity to simulate the production environment during testing and deployment, the team used XAMPP, an all-in-one server package that includes Apache, MySQL, PHP, and Perl. For version control and collaborative development, Git and GitHub were used to manage source code versions and track modifications among team members. Coding and debugging were performed using Visual Studio Code (VS Code), a   versatile integrated development environment that supports multiple extensions for Laravel, React, and database integration. 
+      Lastly, the system underwent extensive testing using browser developer tools, mobile QR scanning applications, and local testing servers to ensure full functionality and compatibility across devices and environments.
+
+
+
+
+
+
+Implementation Process
+   The following stages of development were followed:
+Planning Phase 
+      The team identified key objectives, features, timeline, and resources needed for system implementation. Project modules were assigned to each developer for efficient work-flow management.
+Design Phase
+      System diagrams such as Use Case, Data Flow Diagram (DFD), and Entity Relationship Diagram (ERD) were created to illustrate the system's logic and structure. Mockups were developed for the user interface.
+Coding and Integration Phase
+      Each module such as booking management, QR code generation, payment processing, and subscription was implemented and integrated. RESTful APIs connected the back-end (Laravel) and front-end (React.js) for smooth data communication.
+Testing Phase
+      The team conducted unit testing, integration testing, and user acceptance testing (UAT) to verify functionality and performance. Bugs and inconsistencies were corrected before final validation.
+Evaluation and Refinement Phase
+      The system was reviewed based on performance, security, and user feedback. Adjustments were made to improve speed, accuracy, and interface usability.
+
+Collaboration and Version Management
+      The team used GitHub as the central repository to coordinate development tasks, ensuring proper documentation of commits and preventing code conflicts. Each member contributed to different modules but adhered to shared coding conventions and documentation rules to maintain consistency.
+Quality Assurance
+      Quality assurance was maintained through peer reviews, adherence to software design principles, and continuous testing. The project adviser regularly reviewed progress to ensure compliance with academic and industry standards.
+
+Results and discussion
+
+      This section presents the comprehensive testing procedures, prototype architecture, implementation strategies, and system outcomes for Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines. Both white-box and black-box testing were conducted to validate essential functionalities such as email-verified registration, secured passenger authentication, booking workflow accuracy, QR code generation, and real-time ticket validation across different user roles. Stress-testing scenarios examined system stability under multiple concurrent booking attempts, confirming consistent performance and reliable database handling.
+      The Trav2Phil prototype consists of a React.js-based user interface and a Laravel REST API backend, supported by a MySQL database for scalable transportation data management. Core modules-including passenger registration, schedule browsing, booking creation, QR ticket generation, driver QR scanning, and admin route management-were assessed to ensure seamless communication between system components. Role-based dashboards and automated email notifications were also verified for accuracy, responsiveness, and usability across devices.
+      Using the phased Waterfall Methodology, the system was deployed through Vercel for the frontend, Render for backend API hosting, and Railway for database management. Integration tests showed smooth synchronization of all layers, with rapid data propagation between booking operations and QR validation logs. Requirement traceability consistently aligned with project objectives, demonstrating that Trav2Phil improves operational efficiency, reduces manual ticketing workload, and enhances user satisfaction through faster, error-free digital transactions. Overall, the prototype evaluation confirmed that the system meets its intended goals and is ready for further enhancement and deployment.
+
+Evaluation and Testing
+
+
+      The Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines underwent a structured evaluation and testing process aligned with the Waterfall methodology to ensure it effectively addresses long-standing inefficiencies in transportation ticketing and passenger management. This phase validates the system's core functionalities, including secure passenger registration with email verification, online trip booking, automated QR code ticket generation, real-time ticket validation for drivers, and role-based dashboards for administrators. The testing process also confirms alignment with user needs identified through interviews and requirements-gathering sessions with transportation staff and potential passengers.
+      Functional testing was performed first to verify that essential components-such as account creation, schedule browsing, booking submission, and QR ticket generation-operate as intended to reduce manual recording, long queues, and ticketing errors. Additional functional tests were conducted on processes like booking updates, cancellation handling, and ride validation to ensure that all system outputs reflected accurate and consistent data between users, drivers, and administrators.
+      Integration testing followed to assess the smooth interaction across interconnected modules. This included evaluating communication between the frontend and backend, verifying that booking data in the passenger interface correctly synchronized with the driver scanner module, and ensuring that admin route or price updates propagated in real time. Email verification and notification processes were also tested to confirm reliable delivery and proper account activation flow.
+      System testing then evaluated the overall performance, reliability, and scalability of Trav2Phil under different usage conditions. Stress tests simulated multiple passengers booking simultaneously to ensure the application remained stable and responsive. Additional tests verified database integrity, consistency of QR validation logs, and the system's ability to prevent issues such as duplicate bookings or invalid ticket scans.
+      The evaluation phase concluded with acceptance testing, involving feedback from transportation staff, system testers, and potential end-users who assessed the clarity, usability, and responsiveness of each module. Their insights helped refine interface layouts, navigation flow, and error-handling prompts to ensure the platform remained intuitive and accessible. Throughout the process, user feedback collected during earlier requirement-gathering sessions was continuously integrated to strengthen the prototype
+      This structured evaluation and testing approach ensured that Trav2Phil meets its primary objectives: to streamline transportation workflows, minimize manual errors, enhance passenger convenience, and ultimately deliver a reliable, modernized digital ticketing system suited for the Philippine transportation sector.
+
+
+
+
+
+
+
+Testing
+      Testing commenced with a primary emphasis on user inputs and outputs. Developers carefully examined the system's processing of user-submitted information, including details like login, registration credentials.
+Table 1. Login Test Case
+Test IDScenarioExpected ResultActual ResultRemarksLTC1Enter incorrect email addressThe system should display an error message stating "These credentials do not match our records." and prevent login.The system displayed an error message "These credentials do not match our records." when an incorrect email address was entered, and the user was not allowed to log in.The test was successful; the system correctly validated login credentials and prevented unauthorized access.LTC2Enter incorrect passwordThe system should display an error message stating "These credentials do not match our records." and prevent login.When the user entered a correct email but an incorrect password, the system displayed the message "These credentials do not match our records." and login was denied.The test was successful; the system correctly validated login credentials and prevented unauthorized access.LTC3Leave both email and password fields emptyThe system should display a validation message such as "Please fill out this fields."When both fields were left empty and the user attempted to log in, the browser displayed the message "Please fill out this field," prompting the user to complete the required inputs.The test was successful; the system correctly enforced input validation.LTC4Enter valid email but incorrect passwordThe system should display an error message stating "These credentials do not match our records."When a valid email but incorrect password was entered, the system displayed the message "These credentials do not match our records." and access denied.The test was successful; the system correctly validated login credentials and prevented unauthorized access.LTC5Login with correct passenger credentialsThe passenger dashboard should be displayed to the user.
+
+When the correct passenger email and password were entered, the system successfully redirected the user to the passenger dashboard.The test was successful; the system correctly authenticated the passenger account and granted access to the designated dashboard.LTC6Login with correct driver credentialsThe driving dashboard should be displayed to the user.When the correct passenger email and password were entered, the system successfully redirected the user to the driver dashboard.The test was successful; the system correctly authenticated the driver account and granted access to the designated dashboard.LTC7Login with correct admin credentialsThe admin dashboard should be displayed to the user.
+When the correct admin email and password were entered, the system successfully redirected the user to the admin dashboard.The test was successful; the system correctly authenticated the admin account and granted access to the designated dashboard.LTC8Attempt to access admin dashboard without logging inThe system should redirect the user to the login page and display "Unauthorized access."When a user tried to access the admin dashboard without logging in, the system redirected to the login page and displayed "Unauthorized access.The test was successful; the system correctly prevented unauthorized access and enforced login requirements.LTC9Logout from the system and verify if session is clearedThe user shouldn't be able to view any dashboards without checking in again after being sent to the login page.After logging out, the user was redirected to the login page and could not access any dashboards unless they logged in again.The test was successful; the system correctly cleared the session and prevented access after logout.
+Table 2. Registration Test Case
+Test IDScenarioExpected ResultActual ResultRemarksRTC1Leaving first name blankDisplay error "Please fill out this field."Displayed error "Please fill out this field."Must provide first name to proceed.RTC2Leaving last name blankDisplay error "Please fill out this field."Displayed error "Please fill out this field."Must provide last name to proceed.RTC3Leaving middle name blankField is optional; registration continues without middle initial.Registration proceeded successfully even without middle initial.Middle initial is optional; user can continue registration.RTC4Entering invalid email format (e.g. missing "@")Display error "Please include an '@' in the email address, Display error "Please include an '@' in the email address, missing an Must use a valid email format.RTC5Leaving password blankDisplay error "Please fill out this field."Displayed error "Please fill out this field."Must provide password to proceed.RTC6
+Leaving confirm password blankDisplay error "Please fill out this field."Displayed error "Please fill out this field."Must confirm password to proceed.RTC7Password and confirm password do not matchDisplay error "Passwords do not match."Displayed error "Passwords do not match."Must ensure both passwords are the same.RTC8Registering with an existing emailSystem sends verification email to provided address.System sent verification email to user's Gmail account with a "Verify Email Address" button.The test was successful; verification email sent successfully.RT9Register with complete and valid credentialsRedirected to passenger dashboard after successful registration.Redirected to passenger dashboard successfully.The test was successful; registration completed.
+Table 3. Passenger Registration Test Case
+Test IDScenarioExpected ResultActual ResultRemarksPRTC1Leaving Full Name blankDisplay error "Please fill out this field."Displayed error "Please fill out this field.".Must provide full name to proceed.PRTC2Leaving Email Address blankDisplay error "Please fill out this field."Displayed error "Please fill out this field."Must provide email address to proceed.PRTC3Entering invalid email format (e.g., "passengerexample.com")Display error "Please include an '@' in the email address, missin an '@' "Display error "Please include an '@' in the email address, missin an '@' "Must use a valid email format.PRTC4Leaving Password blankDisplay error "Please fill out this field."Must provide password to proceed.Must provide password to proceed.PRTC5Leaving Confirm Password blankDisplay error "Please fill out this field."Displayed error "Please fill out this field."Must confirm password to proceed.PRTC6Password and Confirm Password do not matchDisplay error "Passwords do not match."Displayed error "Passwords do not match."Must ensure both passwords match.PRTC7Registering with an existing email addressDisplay error "Email already exists."Displayed error "Email already exists."Must use a different email address.PRTC8Registering without selecting account typeDisplay error "Please select an account type."Displayed error "Please select an account type."Must choose an account type before proceeding.PRTC9Registering with valid and complete informationSystem sends verification email to provided address.System sent verification email to user's Gmail account with a "Verify Email Address" button.The test was successful; verification email sent successfully.PRTC10Clicking on the verification link in the emailRedirects user to Passenger Dashboard and marks email as verified.After clicking the verification link, the user was redirected to the Passenger Dashboard and email was successfully verified.The test was successful; registration and verification process completed.
+Table 4.  Employee Test Case
+Test IDScenarioExpected ResultActual ResultRemarksEtc1Leaving First Name blankDisplay error "Please fill out this field"Display error "Please fill out this field"Must provide first name to proceedEc2Leaving Last Name blankDisplay error "Please fill out this field"Display error "Please fill out this field"Must provide last name to proceedAec3Leaving Email Address blankDisplay error "Please fill out this field"Display error "Please fill out this field"Must provide email to proceedAec4Entering invalid email format (ex: abc@)Display error "Enter a valid email"Display error "Enter a valid email"Email must follow valid formatAec5Leaving Phone Number blankDisplay error "Please fill out this field"Display error "Please fill out this field"Must provide phone numberAec6Entering non-numeric phone number (ex: ABC123)Display error "Invalid phone number"Display error "Invalid phone number"Phone must only contain digitsAec7Leaving Role dropdown unselectedDisplay error "Please select a role"Display error "Please select a role"Must select a roleAec8Leaving Status unselectedDisplay error "Please select a status"Display error "Please select a status"Must select a statusAec9Leaving Notes blankShould allow submission (optional)Allowed submissionNotes are optionalAec10Clicking Add Employee with all required fields completedRedirect to Employees List with success message "Employee added successfully"Redirected successfullyPassAec11Clicking Cancel buttonRedirect to Employees List without saving dataRedirected back, no data savedPass
+
+Table 5.  Booking and trip search Test Case
+Test IDScenarioExpected ResultActual ResultRemarksBook1Missing origin/destinationShow "Please complete trip details."As expectedRequired fields validatedBook2Same origin & destinationDisplay "Destination must be different."As expectedPrevents invalid routeBook3Direct trip availableDisplay direct trip resultsAs expectedRoute search workingBook4No direct tripSystem recommends connecting routesAs expectedMulti-leg suggestion functionalBook5Round-trip selected without return dateDisplay "Return date required."As expectedRound-trip validation correctBook6Exceeding seat availabilityDisplay "Not enough seats available."As expectedSeat validation enforcedBook7Successful booking (pre-payment)Booking saved as Pending PaymentAs expectedBooking stored properly
+Table 6.  Payment Test Case
+Test IDScenarioExpected ResultActual ResultRemarksPay1No payment method chosenShow "Please select a payment method."As expectedPayment option requiredPay2Payment declinedShow "Payment failed."As expectedHandles payment errorsPay3Successful paymentQR ticket generatedAs expectedPayment + ticket generation correct
+Table 7.  Qr-code ticketing and validation test case
+Test IDScenarioExpected ResultActual ResultRemarksQr1Viewing ticket before paymentDisplay "Ticket available after payment."As expectedPrevents early ticket accessQr2Valid QR scanDisplay passenger details "Valid"As expectedQR validation functionalQr3Expired QRDisplay "Ticket expired."As expectedExpiration rule enforcedQr4Already-used QRDisplay "Ticket already validated."As expectedPrevents duplicate boardingQr5Invalid QRDisplay "Invalid QR code."As expectedHandles tampered/incorrect QR
+Table 8.  Refund test case
+Test IDScenarioExpected ResultActual ResultRemarksCan1Cancel outside allowed windowShow "Cancellation not allowed."As expectedCancellation window validatedCan2Valid cancellationStatus set to CancelledAs expectedCancellation functioningRef1Refund eligibleStatus = Pending RefundAs expectedRefund request recordedRef2Refund after 3-day ruleShow "Refund not eligible."As expectedRefund policy enforcedRs1Reschedule with no seatsShow "No seats available."As expectedSeat availability validatedRs2Successful rescheduleNew schedule + new QRAs expectedRescheduling working
+
+
+Table 9.  Subscription test case
+Test IDScenarioExpected ResultActual ResultRemarksSub1Missing documentsDisplay "Please upload required documents."As expectedFile requirement enforcedSub2Upload wrong file formatDisplay "Unsupported file type."As expectedFile validation workingSub3Submit subscriptionStatus = Pending ApprovalAs expectedSubscription storedSub4Approved subscriptionAccess to company dashboardAs expectedApproval process correctSub5Subscription expiredSystem restricts featuresAs expectedExpiration rule implemented
+Table 10.  Fleet test case
+Test IDScenarioExpected ResultActual ResultRemarksVeh1Missing fieldsDisplay "Please complete vehicle details."As expectedValidation presentVeh2Invalid capacityDisplay "Enter a valid capacity."As expectedCapacity validation worksVeh3Duplicate vehicle numberDisplay "Vehicle already exists."As expectedPrevents duplicatesVeh4Successful creationVehicle appears in listAs expectedVehicle module functional
+
+
+
+Table 11.  Routes test case
+Test IDScenarioExpected ResultActual ResultRemarksRoute1Missing origin/destinationShow required field errorAs expectedValidation correctRoute2Duplicate routeShow "Route already exists."As expectedDuplicate check workingRoute3Successful creationRoute saved to systemAs expectedRoute module working
+Table 12 Q.  Driver/collector/inspector test case
+Test IDScenarioExpected ResultActual ResultRemarksDC1Inactive employee trying to log inShow "Account disabled."As expectedRestricts accessDC2Viewing passenger manifestPassenger list displayedAs expectedManifest loadsDC3Validating QRPassenger marked as BoardedAs expectedQR workflow working
+      After completing the functional test cases for login, registration, booking, and QR validation, the proponents further examined the system's data management and overall performance beyond basic input handling. For example, the booking module was evaluated to ensure that passenger-selected routes, schedules, and fares were accurately saved in the MySQL database and correctly displayed across all user dashboards. The QR code generation process was tested to verify that each booking produced a unique and scannable code, which drivers could successfully validate using mobile QR scanning applications, ensuring accurate boarding verification and prevention of duplicate ticket usage.
+      Forms for registration, email verification, and booking submission were checked to confirm that all passenger information, including personal details and transaction history,  was stored securely and reflected consistently across the system. Core data operations-such as creating new bookings, updating booking statuses, and storing validation logs-became a primary focus during testing. Administrators validated route creation, fare updates, and schedule modifications, ensuring that all changes propagated instantly across interfaces without inconsistencies. Each update was confirmed through real-time data refreshes, allowing both drivers and passengers to view accurate and synchronized information.
+      To assess system resilience, error-handling scenarios were simulated. These included attempting to process a booking during slow internet connectivity, scanning an invalid or expired QR code, and interacting with the system during temporary database latency. In each case, the system responded gracefully by displaying clear, user-friendly prompts such as "Unable to process request. Please try again." while internally logging the issue for review. Input validation was also tested by intentionally submitting incomplete or incorrect fields, confirming that the system prevented errors and maintained data intgrity.
+	Stress testing was conducted to evaluate performance under simultaneous booking attempts. The system remained stable, with consistent loading times and no data loss across concurrent transactions. QR validation accuracy was also tested using multiple   devices, confirming reliable scanning and immediate status updates in the driver and  admin dashboards.
+	These comprehensive tests validated the system's functionality, reliability, and usability using both white-box and black-box methods. The results demonstrate that Trav2Phil successfully handles diverse scenarios, ensuring accurate data recording, secure ticketing workflows, and seamless coordination between passengers, drivers, and administrators. This testing phase confirmed that the platform is intuitive, stable, and ready for wider deployment in transportation ticketing operations.
+
+
+Description of Prototype 
+      The prototype of Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines was developed to provide a convenient and efficient platform for passengers and transportation companies to manage ticketing transactions digitally. It automates the booking and payment processes, replacing the traditional manual ticketing system with a QR-based solution that ensures accuracy, security, and ease of access. The system prototype demonstrates all major functionalities, including user registration, email verification, QR code generation, and dashboard management.
+
+System Requirements
+      To ensure the smooth and efficient operation of the system, both hardware and software requirements were defined and followed during the development and testing process.
+Hardware Requirements
+* Processor: Intel Celeron or higher and AMD athlon  or higher
+* RAM: 8GB minimum
+* Storage: 250GB SSD or higher
+* Network: Stable internet connection
+Software Requirements
+* Operating System: Windows 10 or Windows 11
+* Development Tools: Visual Studio Code, XAMPP, Node.js
+* Frameworks and Languages: Laravel (Backend), React.js (Frontend), PHP, JavaScript, HTML, CSS
+* Database Management System: MySQL
+* Browser Compatibility: Google Chrome, Microsoft Edge, and Mozilla Firefox
+Preliminary Design
+	The Trav2Phil system prototype was designed using a client-server architecture that separates the front-end interface from the back-end logic to ensure scalability and maintainability. The front-end, developed using React.js, provides a responsive and user-friendly interface where passengers can register, log in, book tickets, and manage trips. The back-end, built with Laravel, handles business logic, database operations, and communication between the system's components through  RESTful APIs.
+	The registration process requires passengers to enter their details, including full name, email address, and password. Once registered, the system automatically sends a verification email containing a confirmation link. Upon clicking the link, the user is redirected to the Passenger Dashboard, confirming successful verification. The dashboard allows passengers to book trips, view booking history, and access QR codes used for ticket validation during travel.
+
+System Evaluation and Testing
+      The system was evaluated and tested to ensure that all functionalities worked according to the defined requirements and standards. Various testing procedures were conducted, including unit testing, integration testing, and user acceptance testing (UAT). Each test case was carefully designed to assess the system's performance, data validation, and overall user experience.
+      During testing, modules such as login, registration, booking, and QR code generation were verified. The registration process successfully validated user input and prevented submission of incomplete forms. The system also confirmed user identity through email verification before granting dashboard access. Furthermore, QR codes were generated accurately for each booking and were readable by standard QR scanners, ensuring smooth transaction verification.
+      Overall, the prototype performed as expected, passing all major test cases. The system met the established functional and non-functional requirements, demonstrating reliability, responsiveness, and ease of use. The results of the testing confirmed that Trav2Phil can effectively support transportation ticketing operations through secure digital transactions.
+
+System Overview
+      Trav2Phil was developed to digitize the process of booking, ticketing, and validating passenger trips through QR technology. The system enables passengers to register, verify their accounts via email, book trips, and present QR codes for validation. The platform also provides administrative dashboards for transportation companies and staff to manage bookings and monitor transactions efficiently.
+* Major Tasks in Implementation
+   The following major tasks were conducted during the implementation phase:
+* Server and Database Setup
+	The system was installed on a local server using XAMPP for testing and configuration. A MySQL database was created to handle user, booking, and payment data.
+* Backend and Frontend Deployment
+	The back-end system (Laravel) was configured to manage authentication, routes, and API connections. The front-end (React.js) was integrated and deployed for user access.
+* Email Configuration:
+		The email verification feature was configured using SMTP to ensure that passengers could verify their accounts before gaining access to the system dashboard.
+* Testing and Debugging
+    	Prior to full deployment, functional testing and user acceptance testing were conducted to identify and correct any system errors or inconsistencies.
+* User Orientation and Training
+	A brief orientation was conducted for users and administrators to demonstrate how to navigate the system, book trips, and validate QR tickets.
+* Site-Specific Requirements
+	The system was implemented in a controlled local environment during the testing phase. Internet connectivity was required for email verification and real-time database communication. Upon full deployment, the system can be hosted on a live web server to allow public access by transportation operators and passengers.
+
+Implementation Results
+      Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines successfully demonstrated that the system was functional, stable, and met the intended objectives. During the deployment phase, the system was installed and configured using XAMPP for local hosting, and all modules such as registration, email verification, booking, and QR ticket validation performed as expected.
+      One of the major outcomes observed was the smooth integration of the email verification process, which ensured that only verified users could access the Passenger Dashboard. The booking module functioned accurately, allowing passengers to select routes, view available schedules, and generate corresponding QR codes. Each QR code was successfully scanned and validated using standard QR scanner applications, confirming that the digital ticketing feature operated effectively.
+      Minor interface and responsiveness adjustments were also made based on the initial testing results. These improvements included optimizing the layout for mobile devices and enhancing the speed of page loading for better user experience.
+      Overall, the implementation phase verified that Trav2Phil could serve as a reliable platform for digital ticketing operations. The generated outcomes provided a foundation for future improvements such as online payment integration, data analytics reporting, and expanded support for multiple transportation companies. The results confirmed that the system was ready for full-scale deployment and practical use within the transportation sector.
+Figure 1. Passenger Dashboard Interface
+
+Figure 1. Sample Generated QR Code
+
+
+Maintenance Plan
+
+      Trav2Phil: A QR-Based Transportation Ticketing System in the Philippines ensures that the system remains functional, secure, and up to date after its deployment. Regular maintenance is essential to address potential issues, enhance system performance, and accommodate future improvements based on user feedback.
+		Corrective Maintenance
+      Corrective maintenance involves fixing errors, bugs, or malfunctions discovered during system usage. This includes resolving issues in data processing, UI responsiveness, and back-end operations. If users encounter errors such as failed QR validation, incorrect booking details, or email delivery issues, the development team will promptly analyze and correct the source of the problem.
+
+		Adaptive Maintenance
+      Adaptive maintenance focuses on ensuring that the system continues to operate efficiently despite environmental or technological changes. As server configurations, browsers, or frameworks update over time, Trav2Phil will be modified accordingly. The development team will monitor compatibility with updated versions of Laravel, React.js, and MySQL to ensure seamless functionality across devices and platforms.
+		Perfective Maintenance
+      Perfective maintenance includes enhancements and optimizations based on user feedback and evolving requirements. Examples include improving interface design, integrating online payment options, generating analytical reports, or expanding system coverage to additional transportation companies. These improvements aim to enhance the system's usability and overall user experience.
+		
+Preventive Maintenance
+	Preventive maintenance is carried out to minimize the occurrence of future system problems. Regular data backups, system audits, and security updates will be performed to protect sensitive passenger and company information. The development team will also monitor system logs to detect and prevent unauthorized access or potential vulnerabilities.
+		Documentation and Support
+      Comprehensive system documentation will be maintained and updated regularly. This includes the user manual, system architecture diagrams, and code documentation. A support channel or feedback form will also be provided to collect reports from users regarding issues or suggestions for future updates.
+Conclusion and Recommendations	
+      Based on the testing results, the first conclusion is that the system effectively streamlines the ticketing process by automating registration, booking, and QR-based validation. This significantly reduces manual work, minimizes human errors, and improves the reliability of traditional ticketing operations.
+	The second conclusion is that the system ensures secure and accurate data handling. All records-such as passenger information, booking details, schedules, refund requests, and ticket history-were properly stored, updated, and retrieved during testing. This confirms the system's reliability and consistency in handling essential transportation data while maintaining data integrity.
+	The third conclusion is that the system enhances overall service efficiency for both passengers and transportation staff. Features such as real-time schedule viewing, automated email verification, subscription processing for companies, and unique QR ticket generation improved user convenience and operational workflow. The structured dashboard also enabled transportation companies to efficiently manage vehicles, routes, employees, and schedules.
+      Furthermore, the testing results show that the system successfully supports multi-module integration. From booking management to company subscriptions and trip scheduling, each component functions cohesively. The ability to generate data-driven insights-such as popular routes and active bookings-demonstrates the system's potential to support informed decision-making for transportation companies.
+      Overall, the system proves to be a functional, dependable, and scalable digital ticketing platform. With proper deployment and continuous enhancement, it can significantly contribute to improving transportation accessibility, operational efficiency, and passenger experience in various regions of the Philippines.
+
+Recommendations
+	Based on the conclusions, it is recommended that future enhancements focus on integrating additional online payment methods such as GCash, PayMaya, or debit/credit card processing. Adding these payment options will further streamline the booking process, reduce the need for on-site transactions, and support a fully digital and contactless workflow for passengers.
+	It is also recommended to deploy the system on a live and secure hosting environment. This includes implementing SSL certificates for encrypted communication, automated backup systems, and stronger authentication mechanisms. These measures will help ensure the safety of user data, prevent unauthorized access, and maintain consistent system availability for both passengers and transportation administrators.
+	Another recommendation is to enhance system scalability by optimizing server performance and database structure. Since transportation services experience peak seasons and unpredictable traffic spikes, a scalable infrastructure will ensure that the system remains responsive and stable even during high booking volume.
+      Future developers may also consider integrating real-time GPS tracking for vehicles. This feature would allow passengers to monitor estimated arrival times, track delays, and receive live notifications about trip updates. Such enhancement would greatly improve transparency and user trust.
+      Further research may explore the addition of advanced analytics for transportation companies. This may include dashboards for passenger volume trends, revenue forecasting, peak travel time analysis, or route performance evaluation. These insights would help companies make data-driven decisions, optimize operations, and enhance service delivery.
+      Finally, continuous user testing and feedback gathering are recommended to ensure that future versions of the system remain user-friendly and aligned with the needs of passengers and transport operators. Regular updates and iterative.
+
+
+REFERENCES
+Deshpande, C. (2025, April 13). The best guide to know what is react. Simplilearn.com. https://www.simplilearn.com/tutorials/reactjs-tutorial/what-is-reactjs\
+
+Dumbre, S. D., Patil, I. E., Sathe, R. A., & Shobhana Gaikwad, Mrs. (2023). Bus pass booking System using QR code [Research Article]. International Journal of Advanced Research in Computer and Communication Engineering, 12(4), 75. https://doi.org/10.17148/IJARCCE.2023.12414
+
+G, D. (2025, April 28). What is MySQL and how does it work. Hostinger Tutorials. https://www.hostinger.com/tutorials/what-is-mysql#:~:text=MySQL%20is%20an%20open%2Dsource,and%20retrieve%20structured%20data%20efficiently.
+
+K, A. (2021, May 11). What is XAMPP? and How to Install XAMPP? - DevOpsSchool.com. DevOpsSchool.com. https://www.devopsschool.com/blog/what-is-xampp-and-how-to-install-xampp/
+
+Karale, P., Patil, G., Soor, K., Suryavanshi, T., & Thorat, P. (2024). E-Ticket Booking System for Public Transportation using QR Code. International Journal of Advanced Research in Science, Communication and Technology (IJARSCT), 4(1), 30-32. https://doi.org/10.48175/IJARSCT-15605
+
+Ribeiro, C., & Ribeiro, C. (2024, January 24). An introduction to the Laravel PHP framework. SitePoint. https://www.sitepoint.com/laravel-introduction
+
+Somani, R., Vishwakarma, R., Soni, R., Bansal, R., & Punde, A. (2023). QR Based (E-Ticket) Booking System. International Journal of Research Publication and Reviews, 4(4), 3572-3574. https://ijrpr.com/uploads/V4ISSUE4/IJRPR11906.p
+
+APPENDICES
+
+Figure 1. Calendar of Activities.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 2. Calendar of Activities.
+
+
+
+
+
+
+
+
+Figure 3. Spiral Model.
+
+
+
+
+
+
+
+
+
+
+
+USE CASE 
+
+   
+   Figure 4. Booking Management module (Use case)
+   
+   
+
+
+Figure 5. Unique QR-Based Ticket Generation Module (Use case)
+
+
+
+Figure 6. Payment Module (Use case)
+
+
+
+
+
+
+
+
+
+
+
+Figure 7. Registration With Subscription Module (Use case)
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 8. Transportation Company Dashboard Module (Use case)
+
+
+
+
+
+
+Activity Diagram
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 9. Booking Management (Activity Diagram)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 10. Unique QR Based Ticket (Activity Diagram)
+
+
+
+
+
+Figure 11. Payment (Activity Diagram)
+
+
+
+
+
+
+
+Figure 12. Registration With Subscription (Activity Diagram)
+
+Figure 13. Transportation Company(Activity Diagram)
+
+
+
+
+
+
+Figure 14. Booking Management(Sequence Diagram)
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 15. Unique QR-Based Ticket (Sequence Diagram)
+
+
+Figure 16. Payment ( Sequence Diagram)
+
+Figure 17. Registration With Subscription(Sequence Diagram)
+
+
+
+Figure 18. Transportation Company (Sequence Diagram)
+
+
+
+Figure 19. Booking Management and Unique QR-Based Ticket  (Domain Diagram)
+
+
+
+
+
+
+
+
+
+
+
+Figure 20. Payment (Domain Diagram)
+
+
+
+
+
+
+
+
+
+Figure 21. Registration With Subscription (Domain Diagram)
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 22. Transportation Company (Domain Diagram)
+
+
+
+
+
+
+
+APPENDIX A. RESOURCE PERSONS
+Ariel P. Lapiñas 
+
+Capstone Project Adviser 
+
+
+Jessiel Chris D. Hilot 
+
+Capstone project coordinator
+
+
+  			APPENDIX B. RELEVANT SOURCE CODE
+
+
+APPENDIX C. EVALUATION TOOL/TEST DOCUMENT
+Name (Optional): ________________________________
+Date: ___________________
+Survey Questionnaire (Trav2Phil System Evaluation  Passengers, Drivers, Staff, and Admin Users)
+      Good day! We, the developers of Trav2Phil: A QR-Based Transportation Ticketing System, are conducting an evaluation of the system's usability, functionality, and overall performance. Your feedback is essential in helping us improve the system and ensure reliable transportation services. Please rate each statement based on your experience using the system. Your responses will be used solely for research and system improvement.
+Thank you for your time and valuable insights.
+
+Legend:
+Strongly Disagree                                     -                                                         SD
+Disagree                                                    -                                                           D 
+Uncertain                                                  -                                                           U
+Agree                                                        -                                                           A 
+Strongly Agree                                         -                                                         SA
+
+ConditionSDDUASAThe system is easy to learn, navigate, and use.The booking, confirmation, and ticket issuance processes are smooth and functional.Viewing routes, schedules, and available transportation options is convenient and efficient.The system accurately suggests connecting transportation when direct trips are unavailable.QR code generation and validation function reliably and consistently.Payment processing is accurate, secure, and easy to complete.The system records, retrieves, and updates booking information accurately.The system responds quickly and performs tasks efficiently.The system's layout and interface are clear, organized, and user-friendly.The system enhances the accuracy and reliability of transportation operationsThe system improves work efficiency for drivers, dispatchers, and staff.The dashboard provides clear and useful data for decision-makingRoute, vehicle, and schedule management are easy to perform using the system.The system's QR validation and scanning features support secure and reliable boardingThe system overall improves transportation operations and enhances user experience.
+
+Final Thoughts:
+
+
+_____________________________________________________________________
+
+
+
+
+APPENDIX D. SAMPLE INPUT/OUTPUT/REPORTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Input: Partner Registration
+
+
+
+Output: Registered Partner
+
+
+
+Input: Add Employees
+
+Output: Added Employees
+
+Input: Add Vehicles
+
+Output: Added Vehicles
+
+Input: Add Routes
+
+Output: Added Routes
+
+
+
+Input: Add Schedules
+
+Output: Added Schedules
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Input: Create Passenger
+
+Output: After Creating Passenger
+
+
+
+
+Input: Book Trip
+
+Output: Direct Trip
+
+Output: Connecting Trip
+
+Input: Book Trip for Roundtrip
+
+Output: Roundtrip
+
+
+
+
+APPENDIX E. USER'S GUIDE
+
+Partner Registration
+      Access the Website
+* Open your web browser and go to the official site:
+https://travtrav-main-6af69u.laravel.cloud/
+* On the Landing Page, click "Be Our Partner" to begin the registration process.
+      Email Verification
+* On the Partner Registration page, enter your email address.
+* Click Continue to receive a verification link.
+* Open your email inbox and click the verification link to proceed.
+      Fill out the Registration Form
+Complete all required fields, including:
+* Basic Information
+* Company Name
+* Password
+* Required Documents
+   Submit the form to finalize your registration.
+      Login and Approval
+* After registering, log in using your email and password.
+* You will be redirected to the Company Dashboard.
+* Your account will remain in a Pending Approval state.
+* A system administrator must approve your application before you can subscribe to a plan or use the full features.
+
+After Approval
+* Once your company account is approved, you can access all partner features.
+* Subscriptions
+
+Only Approved companies can subscribe to a plan.
+Subscriptions plans unlock full access to system modules such as:
+
+* Vehicle Management
+* Route Management
+* Schedule Management
+* Employee Management
+* Booking and Trip Operation
+      Choosing a Subscription Plan
+* Go to your dashboard
+* Choose from the available subscription plans:
+* Basic
+* Standard
+* Premium
+* Select your desired plan to activate additional features.
+* Once subscribed, all included tools and modules will become available for use.
+* 
+      Manage Employee
+* On the Dashboard, Select Employee.
+* Click Add Employee, you will be directed to the Add New Employee Form.
+* Under Personal Information, fill in the following required fields:
+a.) First Name
+b.) Last Name
+c.) Email Address
+d.) Phone Number
+* Under Personal Information, fill in the following required fields:
+Role - choose one of the available roles:
+* Driver (Login Required)
+* Conductor (Login Required)
+* Inspector (Login Required)
+* Staff
+Status - select the employment status:
+* Active
+* Inactive
+Notes (Optional) - add any remarks about the employee.
+
+  	  Creating a User Account (If Required)
+
+* For roles that require system access - Driver, Conductor, and Inspector - the system will automatically prepare a User Account for the employee.
+* After Selecting any of these roles:
+A user account Password section will appear.
+Fill in the following fields:
+Password - must be at least 8 characters.
+      Confirm Password - re-enter the same password.
+			
+You may Click the eye icon to show or hide the password while typing.
+The password entered will be used by the employee to log in to their assigned dashboard.
+Note: For the Staff role, a login is not required. Therefore, the password section will not appear.
+
+      Saving the Employee Record
+
+Review all the information entered to ensure accuracy.
+Scroll to the bottom of the form and click Add Employee.
+If all required fields are valid, the system will save the employee record.
+A confirmation message will appear indicating a successful addition.
+The newly added employee will now appear in the Employee List, where you can:
+o View the employee
+o Edit their details
+o Delete their record, if necessary
+* 
+      Managing Vehicles (Company Fleet)
+
+This section explains how company users can add, view, edit, and remove vehicles from their fleet.
+				
+      Opening Fleet Management
+From the sidebar menu, click Vehicles or Fleet Management.
+The Fleet Management page will display all vehicles registered under your company, along with an Add Vehicle button.
+      Note:
+If you have reached the maximum number of vehicles allowed by your subscription plan, the system will show a warning. You will not be able to add more vehicles until you upgrade your plan or remove an existing vehicle.
+
+
+
+
+
+
+      Adding a Vehicle
+
+	On the Fleet Management page, click Add Vehicle.
+	Fill out the Vehicle Information form:
+Required Details
+		Vehicle Name* - e.g., "Manila Express Bus 01".
+Vehicle Type* - Bus, Van, or Ferry
+(Only the vehicle types included in your subscription plan will appear.)
+Total Seat Capacity* - total number of passenger seats.
+	Status - choose:
+Active
+Inactive
+Maintenance
+
+      Additional Details (based on Vehicle Type)
+      For Bus / Van
+      
+* Plate Number (Optional but recommended)
+* Vehicle Model (Optional, e.g., "Toyota Hiace")
+      For Ferry
+* Plate Number and Vehicle Model may automatically be set to N/A.
+      For Bus Only
+	Air Conditioning* - select:
+Aircon
+Non-Aircon
+Seat Layout Configuration (Optional)
+Set number of rows
+Left/Right seat arrangement
+Rear seat layout
+
+
+
+      Saving
+	After completing all the required fields, click Add Vehicle.
+      If the information is valid, the system will save the vehicle and it will appear in your Vehicle List.
+
+      Editing or Deleting a Vehicle
+
+      Edit a Vehicle
+	In the Vehicle List, click the Edit icon beside the vehicle you want to update.
+Modify any details such as vehicle name, type, seat capacity, status, description, or seat layout.
+	Click Update Vehicle to save your changes.
+      Delete a Vehicle
+	In the Vehicle List, click the Delete icon for the vehicle.
+	Confirm the deletion in the popup dialog.
+	The vehicle will be permanently removed from your fleet.
+
+    Managing Routes
+
+This section explains how company users can view, create, and manage travel routes used for scheduling trips.
+      Opening the Routes Module
+       	 From the sidebar menu, click Routes.
+	The Routes page will display all existing routes along with an Add Route button.
+         Adding a Route
+	On the Routes page, click Add Route.
+	Fill out the Route Information form:
+       Required Fields
+
+Origin - select the starting city and terminal.
+Destination- select the ending city and terminal.
+Status - choose one of the following:
+Active
+Inactive
+o Suspended
+
+   Optional Fields
+Intermediate Stops - add one or multiple stops between the origin and destination.
+   Automatic Calculations
+* Once the origin and destination are selected, the system will automatically compute:
+o Estimated Distance (km)
+o Estimated Travel Duration
+* These values also update automatically when you add or modify intermediate stops.
+After completing the details, click Add Route.
+If all inputs are valid, the new route will be saved and will appear in the Routes List.
+
+      Edit or Delete a Route
+•  Edit:  
+a. In the Routes list, click the Edit icon for a route.  
+b. Update origin, destination, stops, or status as needed (distance and duration will auto-recalculate).  
+c. Click Save Changes.
+•  Delete:  
+a. In the Routes list, click the Delete icon for a route.  
+b. Confirm in the dialog.  
+c. The route is permanently removed and will no longer be used by schedules.
+
+     Opening the Schedules Module
+Log in using your Company Account.
+From the sidebar menu, click Schedules.
+You will see the list of all existing schedules and an Add Schedule button.
+
+
+
+ 	Adding a Schedule
+	On the Schedules page, click Add Schedule.
+	Fill out the form using the sections described below.
+
+   Trip Details
+Vehicle - select a vehicle from your fleet.
+The Available Seats field will automatically fill based on the vehicle's seat capacity.
+Route - choose an existing route (origin ? destination).
+The system will use the route's estimated duration to calculate the arrival time.
+
+      Staff Assignment
+      Select the personnel who will handle the trip:
+* Driver* - choose from employees with the Driver role.
+* Conductor* - choose from employees with the Conductor role.
+* Inspector (Optional) - choose from employees with the Inspector role.
+
+      Schedule Details
+
+      Set the trip's schedule information:
+
+Departure Date & Time* - the starting time of the trip.
+Arrival Date & Time - automatically calculated based on departure time + route duration (read-only).
+Available Seats* - auto-filled according to the selected vehicle's capacity (not editable).
+Fare (?) - optional fare per passenger.
+Status* - select one of the following:
+o Scheduled
+o Ongoing
+o Completed
+o Canceled
+      Refund Policy (Optional)
+      Set refund rules for this trip:
+* Refund Percentage (%) - the percentage of the fare that will be refunded upon cancellation.
+* Refund Deadline (Days) - how many days before the trip passengers are allowed to request a refund.
+o Example: 0 days = refunds allowed until the day of departure.
+      Saving the Schedule
+
+	After completing all required fields, click Add Schedule.
+If everything is valid, the schedule will be saved and displayed in the Schedules List.
+	The new schedule becomes available for passenger booking.
+      Editing or Deleting a Schedule
+
+      Edit a Schedule
+
+	In the Schedules List, click the Edit icon beside the schedule.
+	Modify any details such as vehicle, route, staff assignment, departure time, fare, status, or refund settings.
+	Click Save Changes to update the schedule.
+
+      Delete a Schedule
+
+	In the Schedules List, click the Delete icon.
+	Confirm deletion in the popup dialog.
+The schedule will be permanently removed and cannot be used for future bookings.
+
+
+
+ Viewing Booked Schedules	
+
+This section allows company users to view all schedules that have at least one active booking.
+
+    	Opening Booked Schedules
+      From the sidebar menu, click Booked Schedules.
+The page will display schedules only if they have confirmed or pending bookings.
+ Searching and Viewing Schedule Summary
+
+Use the search bar to filter schedules by:
+o Route
+o Vehicle
+o Driver
+
+Each schedule row shows important details:
+o Route (Origin ? Destination) and trip type (One Way / Round Trip)
+o Status (Scheduled, Ongoing, Completed, Canceled)
+o Departure Time and Available Seats
+o Assigned Vehicle and Driver
+o Inspection Status:
+* Pending Inspection
+* Inspected (shows booked, walk-in, and total passenger counts)
+      Viewing Passenger Bookings
+
+      On a schedule row, click View Bookings.
+A Booking Details modal will open showing:
+o Passenger name and contact information
+o Booking reference number
+o Number of passengers and total fare
+o Booking Status: Confirmed, Pending, or Canceled
+o Payment Status: Paid, Pending, or Failed
+This list is used during check-in, passenger inspection, and trip reconciliation.
+
+Managing Refunds
+This section explains how to review, approve, and reject passenger refund requests.
+
+Opening Refund Requests
+From the sidebar menu, click Refunds.
+You will see three tabs with counters:
+o Pending
+o Approved
+o Rejected
+
+ Reviewing a Refund Request
+   Under the Pending tab, each refund request card displays:
+* Booking reference number
+* Route and departure date
+* Passenger name and email
+* Refund reason
+* Refund amount (based on schedule policy)
+* Review the information to decide whether to approve or reject the request.
+
+ Approving a Refund
+On a pending refund card, click Approve.
+In the confirmation modal, optionally add Notes (e.g., "Valid request-processed via ").
+Click Approve Refund.
+The request will move to the Approved tab and be marked as completed.
+
+Rejecting a Refund
+
+On a pending refund card, click Reject.
+
+In the modal, enter the required Reason for Rejection (e.g., "Refund period expired").
+Click Reject Refund.
+The request will move to the Rejected tab with your notes stored for reference.
+
+Registering an Account (Passenger)
+
+This section guides passengers through creating and verifying their Trav2Phil account using the mobile app or website.
+
+
+
+ Creating an Account
+
+Open the Passenger App or visit the Passenger Website.
+On the login screen, select Sign Up or Create Account.
+Fill in the required information:
+o Full Name
+o Email Address
+o Mobile Number
+o Password
+Read and accept the Terms and Conditions and Privacy Policy (if displayed).
+Click Create Account to proceed.
+
+
+
+
+Verifying Your Account (If Required)
+
+Check your email inbox or SMS for a verification code or verification link.
+Enter the code in the app or click the provided link.
+After successful verification, your passenger account will be activated and ready to use.
+
+Booking a Trip (Passenger)
+This section explains how passengers can search for trips, choose seats, provide details, and complete payment.
+Log In - Access your account as a Passenger.
+Start Booking - On the home screen, tap Book a Trip.
+Enter Trip Details - Select Origin, Destination, Departure Date (and Return Date if round-trip), and Number of Passengers.
+Search Trips - Tap Search Trips to view available schedules.
+Select a Trip - Review trips showing Operator, Route, Departure & Arrival times, Duration, and Fare per passenger. 
+Tap a trip to view vehicle type and amenities.
+Choose Seats - Tap Select Seats and pick seats for each passenger on the seat map. Tap Continue when done.
+Enter Passenger Information - Provide Full Name, Mobile Number, Email, and ID/reference number if required. Review trip summary, seats, and fare. Apply Voucher Code if available.
+Proceed to Payment - Tap Continue to Payment and select a payment method (e.g., GCash, card, over-the-counter). Follow on-screen instructions.
+Complete Transaction - Enter required payment details and confirm. Wait for processing; do not close the app/browser.
+View Booking Confirmation - Once successful, view Booking Reference Number, trip details, total paid, payment method, and access your digital ticket and QR code under My Bookings.
+
+
+
+      My Bookings (Passenger)
+o Open My Bookings
+o Log in as a Passenger user.  
+o In the left menu, click My Bookings.  
+o The My Bookings page opens with tabs 
+o (e.g., Upcoming, Past, Canceled), if   available.
+o View Upcoming Bookings
+o On the My Bookings page, click the Upcoming tab.  
+o Booking card shows:
+o Booking reference and route.  
+o Departure date and time.  
+o Operator name and seat numbers.  
+o Click a booking card to open the booking details.
+o View Booking Details
+o In the booking details view, you can see:
+o Trip information (origin, destination, date, time).  
+o Passenger names and seat numbers.  
+o Payment status and amount paid.  
+o Any notes or instructions from the operator.  
+o If available, click View Ticket or Show QR Code to display the ticket for boarding.
+      Payments (Passenger)
+      Open Payments
+* 1. Log in as a Passenger user.  
+* 2. In the left menu, click Payments.  
+* 3. The Payments page shows a list of your payment transactions.
+* 
+     
+
+
+      View Payment History
+*  On the Payments page, each row or card shows:
+* Payment date and time.  
+* Booking reference or description.  
+* Amount paid.  
+* Payment method (e.g., GCash, card).  
+* Status (e.g., Successful, Pending, Failed, Refunded).  
+Use any available filters (e.g., date range, status) to narrow down the list.
+
+    View Payment Details
+*  Click a payment entry to open its details.  
+* The payment details view may show:
+* Transaction ID or reference number.  
+* Breakdown of charges (fare, fees, discounts).  
+* Payment method and masked account details (if applicable).  
+* Related booking reference and a link to View Booking.  
+* Use this information for support queries or your own records.
+
+APPENDIX F. PERSONAL TECHNICAL VITAE
+
+
+Curriculum Vitae of
+Geraldine L. Cawayan
+Purok -34 Greenhills Barangay Ilang, Bunawan District. Davao City
+Cawayan.285771@davao.sti.edu.ph
+09381181006 
+
+
+EDUCATIONAL BACKGROUND
+LevelInclusive DatesName of school/ InstitutionTertiary2022-PresentSTI College DavaoSr.High School2020-2022Dr.Santiago Dakudao Sr. National HighschoolHigh School2016-2020Dr.Santiago Dakudao Sr. National HighschoolElementary2010-2016Afplc Elementary School
+
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+Inclusive DatesNature of Experience/ 
+Job TitleName and Address of Company or OrganizationN/AN/A
+
+
+AFFILIATIONS
+Inclusive DatesName of OrganizationPosition2023PSITS 11Member2024PSITS 1Member
+
+SKILLS
+SKILLSLevel of CompetencyDate AcquiredUI/UXIntermediate2024Photo Editing Intermediate2022DesigningHigh2022
+
+TRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+Inclusive DatesTitle of Training, Seminar, or WorkshopJune 6, 2022Audio Editing WorkshopJune 7 - 8, 2022Video Editing WorkshopJune 1, 2022Basic Photography and Videography WorkshopJune 27 - 30, 2022Adobe Photoshop Workshop June 13, 2022Basic Illustration WorkshopJune 15-16, 2022Android App Development WorkshopJune 2, 2022Workshop on Photo Edting using Lightroom2023National Service Training Program 12024National Service Training Program 2Curriculum Vitae of
+Marron S. Soriano
+Zone 3 San Vicente Buhangin, Davao City
+soriano.293058@davao.sti.edu.ph
+09638133288 
+
+
+EDUCATIONAL BACKGROUND
+LevelInclusive DatesName of school/ InstitutionTertiary2022-PresentSTI College DavaoSenior High School2020-2022Davao City National High SchoolHigh School2016-2020Davao City National High SchoolElementary2010-2016San Roque Central Elementary School
+
+
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+Inclusive DatesNature of Experience/ 
+Job TitleName and Address of Company or OrganizationN/AN/A
+AFFILIATIONS
+Inclusive DatesName of OrganizationPosition2023PSITS 11Member2024PSITS 11Membe
+
+SKILLS
+SKILLSLevel of CompetencyDate AcquiredEssay WritingIntermediate2015FrontEnd/UIIntermediate2021
+
+
+TRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+Inclusive DatesTitle of Training, Seminar, or Workshop2024       National Youth Convention2022       National Service Training Program 12023       National Service Training Program 2
+
+
+
+
+
+
+
+
+
+
+Curriculum Vitae of 
+Alfred Jonathan Firmeza
+Blk 22 Lot 6 SIR New Matina Davao City 8000, Davao Del Sur
+alfredfirmeza@gmail.com
+09288449006
+
+
+
+EDUCATIONAL BACKGROUND
+LevelInclusive DatesName of school/ InstitutionTertiary2022 - PresentSTI College of DavaoSenior High School2020 - 2022Davao Doctors College Inc.High School2016 - 2020Davao City National High SchoolElementary2010 - 2016SIR Elementary School
+
+
+PROFESSIONAL OR VOLUNTEER EXPERIENCE
+Inclusive DatesNature of Experience/ 
+Job TitleName and Address of Company or Organization2024 - PresentService CrewGolden Arches Development Corporation
+
+AFFILIATIONS
+Inclusive DatesName of OrganizationPosition2023PSITS 11MEMBER2024PSITS 11MEMBER
+
+SKILLS
+SKILLSLevel of CompetencyDate AcquiredVideography, Photography, EditingIntermediate2016Java Programming LanguageIntermediate2022Python Programming LanguageLow2023Backend DeveloperIntermediate2025
+
+
+TRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+Inclusive DatesTitle of Training, Seminar, or Workshop2024National Youth Convention2022National Service Training Program 12023National Service Training Program 2
+STI College Davao
+
+
+STI College Davao                                                                                                                                    
+73
+
+STI College Davao7
+
+STI College Davao73
+

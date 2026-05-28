@@ -58,16 +58,6 @@ export function useApplyForm() {
   // Get requirements for current job category
   const requirements = useRequirements(formData.jobCategory);
 
-  // Document selection hook
-  const documentSelection = useDocumentSelection({
-    selectedDocuments,
-    setSelectedDocuments,
-    formData,
-    currentStep,
-    showSuccess,
-    showError,
-  });
-
   // Local state
   const [jobCategoriesData, setJobCategoriesData] = useState<JobCategory[]>([]);
   const [userProfile, setUserProfile] = useState<User | null>(null);
@@ -82,6 +72,18 @@ export function useApplyForm() {
   const activeJobCategories = useMemo(() => jobCategories.jobCategories || [], [jobCategories.jobCategories]);
   const currentUser = useMemo(() => users.data.currentUser || null, [users.data.currentUser]);
   const currentRequirements = useMemo(() => requirements.data.jobCategoryRequirements || [], [requirements.data.jobCategoryRequirements]);
+
+  // Document selection hook (must be after currentUser and requirementsByJobCategory)
+  const documentSelection = useDocumentSelection({
+    selectedDocuments,
+    setSelectedDocuments,
+    formData,
+    currentStep,
+    showSuccess,
+    showError,
+    currentUser,
+    requirements: requirementsByJobCategory,
+  });
 
   // Submission hook
   const submission = useSubmission({

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@backend/convex/_generated/api';
 import { Id } from '@backend/convex/_generated/dataModel';
 import { PaymentMethod } from '@entities/application';
@@ -27,11 +27,19 @@ export function useManualPaymentUpload() {
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl.generateUploadUrlMutation);
   const createPayment = useMutation(api.payments.createPayment.createPaymentMutation);
 
+  // Fetch pricing configuration once
+  const pricingConfig = useQuery(api.pricingConfig.index.getActivePricing);
+
   const submitManualPayment = async (input: ManualPaymentInput) => {
     setIsUploading(true);
     setUploadProgress(0);
 
     try {
+      // Calculate pricing based on payment method
+      const baseFee = pricingConfig?.baseFee?.amount ?? 50;
+      const serviceFee = pricingConfig?.serviceFees?.[input.paymentMethod]?.amount ?? 10;
+      const totalFee = baseFee + serviceFee;
+
       // Step 1: Upload receipt to storage
       setUploadProgress(20);
       const uploadUrl = await generateUploadUrl();
@@ -55,12 +63,12 @@ export function useManualPaymentUpload() {
       setUploadProgress(80);
 
       // Step 2: Create payment record
-      // All payments include ₱10 processing fee (charged by payment centers)
+      // All payments include processing fee (charged by payment centers)
       const paymentId = await createPayment({
         applicationId: input.applicationId,
-        amount: 50, // Application fee
-        serviceFee: 10, // Processing fee (charged by payment center)
-        netAmount: 60, // Total amount (base fee + processing)
+        amount: baseFee, // Application fee
+        serviceFee: serviceFee, // Processing fee (charged by payment center)
+        netAmount: totalFee, // Total amount (base fee + processing)
         paymentMethod: input.paymentMethod,
         paymentLocation: input.paymentLocation,
         referenceNumber: input.referenceNumber,

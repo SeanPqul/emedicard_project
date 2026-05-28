@@ -61,12 +61,12 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
             <View style={styles.documentHeader}>
               <View style={styles.documentInfo}>
                 <Text style={styles.documentTitle}>
-                  {document.name}
+                  {document.name || 'Document'}
                   <Text style={styles.requiredAsterisk}> *</Text>
                 </Text>
-                <Text style={styles.documentDescription}>{document.description}</Text>
+                <Text style={styles.documentDescription}>{document.description || 'Please upload this document'}</Text>
                 <Text style={styles.documentFormats}>
-                  Formats: {(document as any).formats ? (document as any).formats.join(', ').toUpperCase() : 'JPG, PNG, PDF'}
+                  {`Formats: ${(document as any).formats ? (document as any).formats.join(', ').toUpperCase() : 'JPG, PNG, PDF'}`}
                 </Text>
               </View>
               <View style={styles.documentStatus}>
@@ -77,6 +77,16 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
                 )}
               </View>
             </View>
+
+            {/* Auto-filled Badge */}
+            {selectedDocuments[document.fieldName]?.isAutoFilled && (
+              <View style={styles.autoFilledBadge}>
+                <Ionicons name="shield-checkmark" size={moderateScale(16)} color="#059669" />
+                <Text style={styles.autoFilledText}>
+                  Using your registration ID • Use "Replace" button below to upload a different ID
+                </Text>
+              </View>
+            )}
 
             {/* Upload Progress */}
             {getUploadState(document.fieldName)?.uploading && (
@@ -106,19 +116,28 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
             {/* Document Preview */}
             {selectedDocuments[document.fieldName] && !getUploadState(document.fieldName)?.uploading && (
               <View style={styles.documentPreview}>
-                <View style={styles.documentPreviewContent}>
+                <TouchableOpacity
+                  style={styles.documentPreviewContent}
+                  activeOpacity={0.9}
+                  onPress={() => {
+                    // TODO: Add modal to view full image
+                  }}
+                >
                   <Image
                     source={{ uri: selectedDocuments[document.fieldName]?.uri }}
                     style={styles.documentImage}
-                    resizeMode="cover"
+                    resizeMode="contain"
                   />
-                  <TouchableOpacity
-                    style={styles.removeDocumentButton}
-                    onPress={() => onRemoveDocument(document.fieldName)}
-                  >
-                    <Ionicons name="close-circle" size={moderateScale(20)} color={theme.colors.semantic.error} />
-                  </TouchableOpacity>
-                </View>
+                  {/* Hide remove button for auto-filled documents - user must use Replace button */}
+                  {!selectedDocuments[document.fieldName]?.isAutoFilled && (
+                    <TouchableOpacity
+                      style={styles.removeDocumentButton}
+                      onPress={() => onRemoveDocument(document.fieldName)}
+                    >
+                      <Ionicons name="close-circle" size={moderateScale(20)} color={theme.colors.semantic.error} />
+                    </TouchableOpacity>
+                  )}
+                </TouchableOpacity>
 
                 {/* Status Information */}
                 <View style={styles.statusContainer}>
@@ -134,15 +153,15 @@ export const UploadDocumentsStep: React.FC<UploadDocumentsStepProps> = ({
                       <>
                         <View style={styles.statusRow}>
                           <Ionicons
-                            name={statusInfo.icon as any}
+                            name={(statusInfo?.icon || 'checkmark-circle') as any}
                             size={moderateScale(16)}
-                            color={statusInfo.color}
+                            color={statusInfo?.color || '#10B981'}
                           />
-                          <Text style={[styles.statusLabel, { color: statusInfo.color }]}>
-                            {statusInfo.label}
+                          <Text style={[styles.statusLabel, { color: statusInfo?.color || '#10B981' }]}>
+                            {statusInfo?.label || 'Ready'}
                           </Text>
                         </View>
-                        {docSize && (
+                        {docSize && docSize > 0 && (
                           <Text style={styles.fileSize}>
                             {formatFileSize(docSize)}
                           </Text>

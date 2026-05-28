@@ -18,6 +18,7 @@ import { styles } from './ApplicationDetailWidget.styles';
 import { theme } from '@shared/styles/theme';
 import MayaLogo from '@/assets/svgs/maya-logo-brandlogos.net_gpvn1r359.svg';
 import { usePaymentRejectionHistory } from '@features/payment';
+import { usePricing } from '@features/payment/hooks/usePricing';
 
 const STATUS_COLORS = {
   'Pending Payment': '#FFA500',
@@ -90,6 +91,10 @@ export function ApplicationDetailWidget({
     { label: 'Civil Status', value: application.form?.civilStatus },
   ];
 
+  // Get pricing based on the payment method used for this application
+  const paymentMethod = (application.payment?.method as PaymentMethod) || 'Maya';
+  const { baseFee, serviceFee, totalFee } = usePricing(paymentMethod);
+  
   const statusColor = STATUS_COLORS[application.status as keyof typeof STATUS_COLORS] ?? theme.colors.primary[500];
 
   // Use server-computed deadline if available (tamper-proof)
@@ -417,18 +422,18 @@ export function ApplicationDetailWidget({
 
           {/* Fee Breakdown */}
           <View style={styles.feeBreakdown}>
-            <View style={styles.feeRow}>
-              <Text style={styles.feeLabel}>Application Fee</Text>
-              <Text style={styles.feeValue}>₱50.00</Text>
-            </View>
-            <View style={styles.feeRow}>
-              <Text style={styles.feeLabel}>Processing Fee</Text>
-              <Text style={styles.feeValue}>₱10.00</Text>
-            </View>
-            <View style={[styles.feeRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>Total Amount</Text>
-              <Text style={styles.totalValue}>₱60.00</Text>
-            </View>
+        <View style={styles.feeRow}>
+          <Text style={styles.feeLabel}>Application Fee</Text>
+          <Text style={styles.feeValue}>₱{baseFee}.00</Text>
+        </View>
+        <View style={styles.feeRow}>
+          <Text style={styles.feeLabel}>Processing Fee</Text>
+          <Text style={styles.feeValue}>₱{serviceFee}.00</Text>
+        </View>
+        <View style={styles.totalRow}>
+          <Text style={styles.totalLabel}>Total Amount</Text>
+          <Text style={styles.totalValue}>₱{totalFee}.00</Text>
+        </View>
           </View>
 
           {/* Payment Methods */}
@@ -533,12 +538,12 @@ export function ApplicationDetailWidget({
             </View>
           )}
 
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Amount Paid</Text>
-            <Text style={styles.detailValue}>
-              ₱{application.payment.netAmount?.toFixed(2) || application.payment.amount?.toFixed(2) || '60.00'}
-            </Text>
-          </View>
+      <View style={styles.detailRow}>
+        <Text style={styles.detailLabel}>Amount Paid</Text>
+        <Text style={styles.detailValue}>
+          ₱{application.payment.netAmount?.toFixed(2) || application.payment.amount?.toFixed(2) || (totalFee + '.00')}
+        </Text>
+      </View>
 
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Payment Status</Text>

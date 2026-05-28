@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BaseScreen } from '@shared/components/core';
 import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
+import { usePricing } from '@/src/features/payment/hooks/usePricing';
 
 interface FAQItem {
   id: string;
@@ -23,6 +24,7 @@ export function HelpCenterScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const [contactSectionY, setContactSectionY] = useState<number>(0);
   const params = useLocalSearchParams();
+  const { baseFee, serviceFee, totalFee } = usePricing();
 
   const toggleFAQ = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -81,7 +83,7 @@ export function HelpCenterScreen() {
     {
       id: 'fees',
       question: 'What are the fees?',
-      answer: 'The total application fee is ₱60.00, which includes a ₱50.00 application fee and a ₱10.00 processing fee.',
+      answer: `The total application fee is ₱${totalFee}.00, which includes a ₱${baseFee}.00 application fee and a ₱${serviceFee}.00 processing fee.`,
     },
     {
       id: 'compliance',

@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@shared/styles/theme';
 import { moderateScale, verticalScale } from '@shared/utils/responsive';
 import { formatFileSize } from '@shared/utils/documentStatus';
+import { usePricing } from '@features/payment/hooks/usePricing';
 
 import { ReviewStepProps, DocumentStatusInfo, ApplicationSummary } from './ReviewStep.types';
 import { styles } from './ReviewStep.styles';
@@ -27,10 +28,12 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   const missingDocuments = documentRequirements.filter(doc => doc.required && !selectedDocuments[doc.fieldName]);
   const documentsWithErrors = Object.keys(selectedDocuments).filter(docKey => getUploadState(docKey)?.error);
 
-  // Application fee constants
-  const APPLICATION_FEE = 50;
-  const PROCESSING_FEE = 10;
-  const TOTAL_FEE = APPLICATION_FEE + PROCESSING_FEE;
+  // Application fee (Dynamic) - Show minimum price (Maya) as default
+  // User will select actual payment method after submission in Application Detail screen
+  const { baseFee, serviceFee, totalFee } = usePricing('Maya');
+  const APPLICATION_FEE = baseFee;
+  const PROCESSING_FEE = serviceFee;
+  const TOTAL_FEE = totalFee;
 
   const renderApplicationDetails = () => (
     <View style={styles.reviewSection}>
@@ -182,21 +185,25 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
       <Text style={styles.feeNote}>
         Payment will be required after submission. You'll have 7 days to complete the payment.
       </Text>
-      
+
       <View style={styles.detailItem}>
-        <Text style={styles.detailLabel}>Application Fee:</Text>
+        <Text style={styles.detailLabel}>Base Application Fee:</Text>
         <Text style={styles.detailValue}>₱{APPLICATION_FEE}.00</Text>
       </View>
-      
+
       <View style={styles.detailItem}>
         <Text style={styles.detailLabel}>Processing Fee:</Text>
-        <Text style={styles.detailValue}>₱{PROCESSING_FEE}.00</Text>
+        <Text style={styles.detailValue}>from ₱{PROCESSING_FEE}.00*</Text>
       </View>
-      
+
       <View style={[styles.detailItem, styles.lastItem]}>
-        <Text style={styles.detailLabel}>Total Amount:</Text>
-        <Text style={[styles.detailValue, styles.totalAmount]}>₱{TOTAL_FEE}.00</Text>
+        <Text style={styles.detailLabel}>Estimated Total:</Text>
+        <Text style={[styles.detailValue, styles.totalAmount]}>from ₱{TOTAL_FEE}.00</Text>
       </View>
+
+      <Text style={styles.feeDisclaimer}>
+        *Final amount depends on payment method (Maya, Barangay Hall, or Sanggunian Hall). You'll select your payment method and see the exact amount after submission.
+      </Text>
     </View>
   );
 

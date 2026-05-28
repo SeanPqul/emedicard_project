@@ -14,6 +14,7 @@ import { FilterStatus, SortOption } from '@/src/features/application/hooks/useAp
 import { moderateScale } from '@/src/shared/utils/responsive';
 import { theme } from '@/src/shared/styles/theme';
 import { styles } from './ApplicationListWidget.styles';
+import { usePricing } from '@/src/features/payment/hooks/usePricing';
 
 // UI constants (Phase 4 Migration: Added new statuses)
 const STATUS_COLORS = {
@@ -26,9 +27,6 @@ const STATUS_COLORS = {
   'Documents Need Revision': '#F59E0B', // Orange - document issues
   'Referred for Medical Management': '#3B82F6', // Blue - medical referrals
 } as const;
-
-// Business constants
-const DEFAULT_TOTAL_AMOUNT = 60; // ₱50 application + ₱10 service by default
 
 // Phase 4 Migration: Added new filter options
 const FILTER_OPTIONS: FilterStatus[] = [
@@ -78,6 +76,9 @@ export function ApplicationListWidget({
   getProgressText,
 }: ApplicationListWidgetProps) {
   
+  const { totalFee } = usePricing();
+  const DEFAULT_TOTAL_AMOUNT = totalFee;
+
   const renderFilters = () => {
     if (!showFilters) return null;
     

@@ -22,10 +22,6 @@ module.exports = function(api) {
           '@core': './src/core',
           '@types': './src/types',
           '@backend': '../../backend',
-          '@emedicard/constants': '../../packages/constants/src',
-          '@emedicard/types': '../../packages/types/src',
-          '@emedicard/utils': '../../packages/utils/src',
-          '@emedicard/validation': '../../packages/validation/src',
         },
       }],
       // React Native Reanimated plugin should be listed last

@@ -288,15 +288,15 @@ export default function AttendanceTrackerPage() {
   // Filter schedules by selected time slot
   const filteredSchedules = useMemo(() => {
     if (!schedules) return [];
-    if (selectedTimeSlot === 'all') return schedules;
-    return schedules.filter(s => s.time === selectedTimeSlot);
+    if (selectedTimeSlot === "all") return schedules;
+    return schedules.filter((s) => s.time === selectedTimeSlot);
   }, [schedules, selectedTimeSlot]);
 
   // Filter attendees by search query
   const getFilteredAttendees = (scheduleId: string, attendees: Attendee[]) => {
-    const query = searchQuery[scheduleId]?.toLowerCase() || '';
+    const query = (searchQuery[scheduleId] || "").toLowerCase();
     if (!query) return attendees;
-    return attendees.filter(a => a.fullname.toLowerCase().includes(query));
+    return attendees.filter((a) => a.fullname.toLowerCase().includes(query));
   };
 
   return (
@@ -652,8 +652,6 @@ className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all border
                         </p>
                       </div>
                     )}
-                  </div>
-                )}
                   </div>
                 )}
               </div>

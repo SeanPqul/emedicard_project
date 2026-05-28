@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { moderateScale } from '@shared/utils/responsive';
 import { theme } from '@shared/styles/theme';
 import { styles } from './ActionCenter.styles';
+import { usePricing } from '@/src/features/payment/hooks/usePricing';
 
 export interface ActionCenterProps {
   dashboardStats: {
@@ -46,6 +47,9 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
   });
   const uniqueApps = Array.from(uniqueAppsMap.values());
 
+  const { totalFee } = usePricing();
+  const DEFAULT_TOTAL_AMOUNT = totalFee;
+
   const ACTIONABLE_STATUSES = new Set([
     'Pending Payment',
     'Submitted',
@@ -55,7 +59,6 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
   ]);
 
   // 1. Payment due (highest priority if overdue) - evaluate across all applications
-  const DEFAULT_TOTAL_AMOUNT = 60;
   const paymentApps = uniqueApps.filter((app: any) => app?.status === 'Pending Payment');
   paymentApps.forEach((app: any) => {
     const daysLeft = app?.paymentDeadline

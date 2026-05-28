@@ -40,6 +40,17 @@ export default function TabLayout() {
     );
   }
 
+  // Check for registration status
+  const registrationStatus = userProfile?.registrationStatus;
+  
+  if (!registrationStatus) {
+    return <Redirect href="/(auth)/upload-documents" />;
+  }
+
+  if (registrationStatus === 'pending' || registrationStatus === 'rejected') {
+    return <Redirect href="/(auth)/pending-approval" />;
+  }
+  
   // Only applicants should access tab navigation
   // Inspectors should be redirected to their Tab-based navigation
   if (userProfile?.role === 'inspector') {

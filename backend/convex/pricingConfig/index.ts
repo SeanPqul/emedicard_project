@@ -232,7 +232,7 @@ export const updatePricing = mutation({
       value: {
         amount: args.amount,
         currency: "PHP",
-        description: descriptions[args.key],
+        description: descriptions[args.key] || "Updated pricing configuration",
         isActive: true,
         effectiveFrom: effectiveFromTimestamp,
         effectiveTo: undefined,

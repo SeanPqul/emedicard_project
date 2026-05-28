@@ -624,6 +624,7 @@ export default function PaymentHistoryPage() {
                   <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Method</th>
                   <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Location</th>
                   <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Amount</th>
+                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Commission</th>
                   <th className="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
                   <th className="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -700,6 +701,9 @@ export default function PaymentHistoryPage() {
                         <div className="text-sm font-bold text-gray-900">{formatCurrency(payment.amount)}</div>
                         <div className="text-xs text-gray-500">Net: {formatCurrency(payment.netAmount)}</div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-semibold text-orange-600">{formatCurrency(payment.serviceFee)}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1.5 text-xs font-bold rounded-full shadow-sm ${getStatusBadgeClass(payment.paymentStatus)}`}>

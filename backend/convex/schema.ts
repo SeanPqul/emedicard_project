@@ -22,6 +22,17 @@ export default defineSchema({
         v.literal("system_admin")
       )
     ),
+    // Registration Approval Fields
+    registrationStatus: v.optional(v.string()), // "pending", "approved", "rejected"
+    registrationDocumentId: v.optional(v.string()),
+    registrationDocumentType: v.optional(v.union(
+      v.literal("government_id"),
+      v.literal("previous_health_card"),
+      v.literal("medical_certificate"),
+      v.literal("other")
+    )),
+    registrationSubmittedAt: v.optional(v.string()),
+    
     updatedAt: v.optional(v.float64()),
     deletedAt: v.optional(v.float64()),
   })

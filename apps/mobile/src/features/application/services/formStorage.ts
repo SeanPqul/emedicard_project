@@ -1,4 +1,4 @@
-import { storage as cacheStorage, setObject, getObject, removeItem } from '@shared/services/storage/storage';
+import { storage as cacheStorage, setObject, getObject, removeItem } from '@shared/services/storageService';
 import { ApplicationFormData } from './applicationService';
 import { SelectedDocuments } from '@shared/types';
 import { UploadOperation, UploadFile } from '@entities/upload';

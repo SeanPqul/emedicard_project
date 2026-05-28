@@ -28,10 +28,6 @@
   },
   "dependencies": {
     "@clerk/clerk-expo": "^2.13.2",
-    "@emedicard/constants": "workspace:*",
-    "@emedicard/types": "workspace:*",
-    "@emedicard/utils": "workspace:*",
-    "@emedicard/validation": "workspace:*",
     "@expo/metro-runtime": "~6.1.2",
     "@expo/vector-icons": "^15.0.2",
     "@faker-js/faker": "^9.9.0",

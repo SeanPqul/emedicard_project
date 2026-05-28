@@ -22,6 +22,7 @@ import { styles } from './ManualPaymentScreen.styles';
 import { theme } from '@shared/styles/theme';
 import { moderateScale } from '@shared/utils/responsive';
 import { DAVAO_CITY_BARANGAYS, SANGGUNIAN_HALL_LOCATION, getLocationLabel, getLocationOptions } from '@shared/constants/barangays';
+import { usePricing } from '@/src/features/payment/hooks/usePricing';
 
 export function ManualPaymentScreen() {
   const params = useLocalSearchParams<{
@@ -41,8 +42,11 @@ export function ManualPaymentScreen() {
 
   const { submitManualPayment, isUploading, uploadProgress } = useManualPaymentUpload();
 
-  const paymentMethodName =
-    params.paymentMethod === 'BaranggayHall' ? 'Barangay Hall' : 'Sanggunian Hall';
+  // Get dynamic pricing based on selected payment method
+  const { baseFee, serviceFee, totalFee } = usePricing(params.paymentMethod || 'Maya');
+
+  // Refs for scrolling to errors
+  const paymentMethodName = params.paymentMethod === 'BaranggayHall' ? 'Barangay Hall' : 'Sanggunian Hall';
 
   const handlePickImage = async () => {
     try {
@@ -221,19 +225,18 @@ export function ManualPaymentScreen() {
         {/* Amount Card */}
         <View style={styles.amountCard}>
           <Text style={styles.sectionTitle}>Payment Amount</Text>
-          <View style={styles.feeRow}>
-            <Text style={styles.feeLabel}>Application Fee</Text>
-            <Text style={styles.feeValue}>₱50.00</Text>
-          </View>
-          <View style={styles.feeRow}>
-            <Text style={styles.feeLabel}>Processing Fee</Text>
-            <Text style={styles.feeValue}>₱10.00</Text>
-          </View>
-          <View style={[styles.feeRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total Amount</Text>
-            <Text style={styles.totalValue}>₱60.00</Text>
-          </View>
-        </View>
+                      <View style={styles.feeRow}>
+                        <Text style={styles.feeLabel}>Application Fee</Text>
+                        <Text style={styles.feeValue}>₱{baseFee}.00</Text>
+                      </View>
+                      <View style={styles.feeRow}>
+                        <Text style={styles.feeLabel}>Processing Fee</Text>
+                        <Text style={styles.feeValue}>₱{serviceFee}.00</Text>
+                      </View>
+                      <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>Total Amount</Text>
+                        <Text style={styles.totalValue}>₱{totalFee}.00</Text>
+                      </View>        </View>
 
         {/* Instructions Card */}
         <View style={styles.instructionsCard}>
@@ -249,7 +252,7 @@ export function ManualPaymentScreen() {
             1. Visit {params.paymentMethod === 'BaranggayHall' ? 'your barangay hall in Davao City' : 'Sangguniang Panlungsod ng Dabaw'}
           </Text>
           <Text style={styles.instructionStep}>
-            2. Pay the total amount of ₱60.00
+            2. Pay the total amount of ₱{totalFee}.00
           </Text>
           <Text style={styles.instructionStep}>
             3. Get your official receipt

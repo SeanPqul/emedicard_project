@@ -1,5 +1,5 @@
 import { Id } from '@backend/convex/_generated/dataModel';
-import { setObject, getObject, removeItem, getAllKeys } from '@shared/services/storage';
+import { setObject, getObject, removeItem, getAllKeys } from '@shared/services/storageService';
 
 export interface CachedDocument {
   id: string; // Unique identifier for cached document

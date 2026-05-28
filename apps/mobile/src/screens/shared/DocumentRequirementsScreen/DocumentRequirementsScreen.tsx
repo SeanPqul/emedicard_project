@@ -16,6 +16,7 @@ import { useJobCategories } from '@features/jobCategory/hooks';
 import { getHealthCardTypeName, getPaymentMethods } from '@features/healthCards';
 import { moderateScale, scale, verticalScale } from '@shared/utils/responsive';
 import MayaLogo from '@/assets/svgs/maya-logo-brandlogos.net_gpvn1r359.svg';
+import { usePricing } from '@/src/features/payment/hooks/usePricing';
 
 interface Requirement {
   name: string;
@@ -53,6 +54,7 @@ const getDocumentIconBg = (iconName: string): string => {
 
 export function DocumentRequirementsScreen() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const { totalFee } = usePricing();
   
   const {
     jobCategories,
@@ -159,7 +161,7 @@ export function DocumentRequirementsScreen() {
               <View style={styles.summaryItem}>
                 <Ionicons name="card-outline" size={moderateScale(18)} color={theme.colors.accent.safetyGreen} />
                 <Text style={styles.summaryText}>
-                  Application Fee: ₱60
+                  Application Fee: ₱{totalFee}
                 </Text>
               </View>
             </View>
