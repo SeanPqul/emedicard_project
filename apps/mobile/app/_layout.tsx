@@ -5,7 +5,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { layoutStyles } from "@/src/shared/styles/layouts/root-layout";
 import { Slot } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
-import { startAutomaticCleanup, stopAutomaticCleanup } from "@/src/shared/services/storage";
+import { startAutomaticCleanup, stopAutomaticCleanup } from "@/src/shared/services/storageService";
 import * as SplashScreen from "expo-splash-screen";
 import { AnimatedSplashScreen } from "@/src/shared/components/layout";
 
@@ -30,8 +30,6 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Add any initialization logic here (fonts, assets, etc.)
-        // For now, we'll just wait a brief moment for providers to initialize
         await new Promise(resolve => setTimeout(resolve, 100));
       } catch (e) {
         console.warn(e);

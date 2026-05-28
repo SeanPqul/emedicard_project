@@ -29,11 +29,7 @@
       "@widgets/*": ["./src/widgets/*"],
       "@core/*": ["./src/core/*"],
       "@types/*": ["./src/types/*"],
-      "@backend/convex/*": ["../../backend/convex/*"],
-      "@emedicard/constants": ["../../packages/constants/src"],
-      "@emedicard/types": ["../../packages/types/src"],
-      "@emedicard/utils": ["../../packages/utils/src"],
-      "@emedicard/validation": ["../../packages/validation/src"]
+      "@backend/convex/*": ["../../backend/convex/*"]
     },
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },

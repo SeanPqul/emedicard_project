@@ -17,8 +17,8 @@ import { MAYA_DEFAULTS, MAYA_ENDPOINTS, MAYA_HEADERS } from "./constants";
 // Maya configuration from environment variables
 const getMayaConfig = (): MayaConfig => ({
   apiUrl: process.env.MAYA_API_URL || 'https://pg-sandbox.paymaya.com',
-  publicKey: process.env.MAYA_PUBLIC_KEY || 'pk-Z0OSzLvIcOI2UIvDhdTGVVfRSSeiGStnceqwUE7n0Ah', // Sandbox default
-  secretKey: process.env.MAYA_SECRET_KEY || 'sk-X8qolYjy62kIzEbr0QRK1h4b4KDVHaNcwMYk39jInSl', // Sandbox default
+  publicKey: process.env.MAYA_PUBLIC_KEY || '',
+  secretKey: process.env.MAYA_SECRET_KEY || '',
   webhookSecret: process.env.MAYA_WEBHOOK_SECRET || '',
 });
 

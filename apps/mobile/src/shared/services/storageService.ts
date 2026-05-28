@@ -1,309 +1,403 @@
-/**
- * Storage Service
- * 
- * Centralized service for local storage operations including MMKV,
- * AsyncStorage, and SecureStore with consistent API
- */
-
 import { MMKV } from 'react-native-mmkv';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
 
-export type StorageType = 'mmkv' | 'async' | 'secure';
+// Fallback storage for debugging scenarios
+class FallbackStorage {
+  private data = new Map<string, any>();
 
-export interface StorageOptions {
-  type?: StorageType;
-  encryptionKey?: string;
-  expiresIn?: number; // milliseconds
-}
-
-export interface StorageItem<T = any> {
-  data: T;
-  timestamp: number;
-  expiresAt?: number;
-}
-
-export class StorageService {
-  private static instance: StorageService;
-  private mmkv: MMKV;
-
-  private constructor() {
-    this.mmkv = new MMKV();
+  set(key: string, value: any): void {
+    this.data.set(key, JSON.stringify(value));
   }
 
-  static getInstance(): StorageService {
-    if (!StorageService.instance) {
-      StorageService.instance = new StorageService();
-    }
-    return StorageService.instance;
-  }
-
-  /**
-   * Set a value in storage
-   */
-  async set<T>(
-    key: string, 
-    value: T, 
-    options: StorageOptions = {}
-  ): Promise<boolean> {
+  getString(key: string): string | undefined {
+    const value = this.data.get(key);
     try {
-      const item: StorageItem<T> = {
-        data: value,
-        timestamp: Date.now(),
-        expiresAt: options.expiresIn ? Date.now() + options.expiresIn : undefined
-      };
-
-      const serializedValue = JSON.stringify(item);
-
-      switch (options.type || 'mmkv') {
-        case 'mmkv':
-          this.mmkv.set(key, serializedValue);
-          return true;
-
-        case 'async':
-          await AsyncStorage.setItem(key, serializedValue);
-          return true;
-
-        case 'secure':
-          await SecureStore.setItemAsync(key, serializedValue);
-          return true;
-
-        default:
-          throw new Error('Invalid storage type');
-      }
-    } catch (error) {
-      console.error(`Storage set error for key "${key}":`, error);
-      return false;
+      return value ? JSON.parse(value) : undefined;
+    } catch {
+      return value;
     }
   }
 
-  /**
-   * Get a value from storage
-   */
-  async get<T>(
-    key: string, 
-    options: StorageOptions = {}
-  ): Promise<T | null> {
+  getNumber(key: string): number | undefined {
+    const value = this.data.get(key);
     try {
-      let serializedValue: string | null = null;
+      const parsed = value ? JSON.parse(value) : undefined;
+      return typeof parsed === 'number' ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
 
-      switch (options.type || 'mmkv') {
-        case 'mmkv':
-          serializedValue = this.mmkv.getString(key) || null;
-          break;
+  getBoolean(key: string): boolean | undefined {
+    const value = this.data.get(key);
+    try {
+      const parsed = value ? JSON.parse(value) : undefined;
+      return typeof parsed === 'boolean' ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
 
-        case 'async':
-          serializedValue = await AsyncStorage.getItem(key);
-          break;
+  delete(key: string): void {
+    this.data.delete(key);
+  }
 
-        case 'secure':
-          serializedValue = await SecureStore.getItemAsync(key);
-          break;
+  clearAll(): void {
+    this.data.clear();
+  }
 
-        default:
-          throw new Error('Invalid storage type');
-      }
+  getAllKeys(): string[] {
+    return Array.from(this.data.keys());
+  }
 
-      if (!serializedValue) {
-        return null;
-      }
+  contains(key: string): boolean {
+    return this.data.has(key);
+  }
 
-      const item: StorageItem<T> = JSON.parse(serializedValue);
+  recrypt(_key?: string): void {
+    // No-op for fallback
+  }
+}
 
-      // Check if item has expired
-      if (item.expiresAt && Date.now() > item.expiresAt) {
-        await this.remove(key, options);
-        return null;
-      }
+// Create storage instances with proper error handling
+let storage: MMKV | FallbackStorage;
+let encryptedStorage: MMKV | FallbackStorage;
 
-      return item.data;
-    } catch (error) {
-      console.error(`Storage get error for key "${key}":`, error);
+try {
+  // Try to create MMKV instances
+  storage = new MMKV({
+    id: 'emedicard-storage',
+    encryptionKey: 'emedicard-secure-key-2024'
+  });
+
+  encryptedStorage = new MMKV({
+    id: 'emedicard-encrypted-storage',
+    encryptionKey: 'emedicard-secure-key-2024'
+  });
+
+  console.log('✅ MMKV initialized successfully');
+} catch (error) {
+  console.warn('⚠️ MMKV failed to initialize (likely due to remote debugging), using fallback storage:', error);
+  storage = new FallbackStorage();
+  encryptedStorage = new FallbackStorage();
+}
+
+export { storage, encryptedStorage };
+
+// Storage monitoring and cleanup (2024 best practice)
+const STORAGE_SIZE_LIMIT = 50 * 1024 * 1024; // 50MB limit
+
+// Forward declaration - will be implemented later in the file
+let cacheUtils: any;
+
+const monitorStorageSize = () => {
+  // MMKV v2 doesn't have size property, so we'll use key count as approximation
+  const keyCount = storage.getAllKeys().length;
+  const approximateMaxKeys = 1000; // Reasonable limit for key count
+
+  if (keyCount >= approximateMaxKeys) {
+    console.warn(`Storage has ${keyCount} keys, approaching limit. Running cleanup...`);
+    // Instead of trim(), we'll trigger our custom cleanup if available
+    if (cacheUtils?.clearExpired) {
+      cacheUtils.clearExpired();
+    }
+  }
+};
+
+/**
+ * User-specific storage instance with fallback support
+ * Can be used to separate data per user
+ */
+export const createUserStorage = (userId: string): MMKV | FallbackStorage => {
+  try {
+    return new MMKV({
+      id: `user-${userId}-storage`,
+      encryptionKey: `user-${userId}-key-2024`
+    });
+  } catch (error) {
+    console.warn(`⚠️ Failed to create user MMKV storage for ${userId}, using fallback:`, error);
+    return new FallbackStorage();
+  }
+};
+
+// Storage helper interface with proper TypeScript typing
+interface StorageHelper {
+  setItem: (key: string, value: string) => void;
+  getItem: (key: string) => string | undefined;
+  setNumber: (key: string, value: number) => void;
+  getNumber: (key: string) => number | undefined;
+  setBoolean: (key: string, value: boolean) => void;
+  getBoolean: (key: string) => boolean | undefined;
+  setObject: <T>(key: string, value: T) => void;
+  getObject: <T>(key: string) => T | null;
+  removeItem: (key: string) => void;
+  clearAll: () => void;
+  getAllKeys: () => string[];
+  hasKey: (key: string) => boolean;
+  getStorageSize: () => number;
+  trimStorage: () => void;
+}
+
+/**
+ * Set a string value in storage with automatic size monitoring
+ */
+export const setItem = (key: string, value: string): void => {
+  storage.set(key, value);
+  monitorStorageSize();
+};
+
+/**
+ * Get a string value from storage with null safety
+ */
+export const getItem = (key: string): string | undefined => {
+  const value = storage.getString(key);
+  return value ?? undefined;
+};
+
+/**
+ * Set a number value in storage
+ */
+export const setNumber = (key: string, value: number): void => {
+  storage.set(key, value);
+  monitorStorageSize();
+};
+
+/**
+ * Get a number value from storage with proper undefined handling
+ */
+export const getNumber = (key: string): number | undefined => {
+  const value = storage.getNumber(key);
+  return value ?? undefined;
+};
+
+/**
+ * Set a boolean value in storage
+ */
+export const setBoolean = (key: string, value: boolean): void => {
+  storage.set(key, value);
+  monitorStorageSize();
+};
+
+/**
+ * Get a boolean value from storage with proper undefined handling
+ */
+export const getBoolean = (key: string): boolean | undefined => {
+  const value = storage.getBoolean(key);
+  return value ?? undefined;
+};
+
+/**
+ * Set an object value in storage (automatically serialized to JSON)
+ * Enhanced with better error handling and type safety
+ */
+export const setObject = <T>(key: string, value: T): void => {
+  try {
+    const jsonValue = JSON.stringify(value);
+    storage.set(key, jsonValue);
+    monitorStorageSize();
+  } catch (error) {
+    console.error(`Failed to serialize object for key "${key}":`, error);
+    throw new Error(`Storage serialization failed for key: ${key}`);
+  }
+};
+
+/**
+ * Get an object value from storage (automatically parsed from JSON)
+ * Enhanced with better error handling and null safety
+ */
+export const getObject = <T>(key: string): T | null => {
+  try {
+    const jsonValue = storage.getString(key);
+    if (!jsonValue) return null;
+
+    return JSON.parse(jsonValue) as T;
+  } catch (error) {
+    console.error(`Failed to parse object from key "${key}":`, error);
+    // Clean up corrupted data
+    storage.delete(key);
+    return null;
+  }
+};
+
+/**
+ * Remove an item from storage
+ */
+export const removeItem = (key: string): void => {
+  storage.delete(key);
+};
+
+/**
+ * Clear all items from storage
+ */
+export const clearAll = (): void => {
+  storage.clearAll();
+};
+
+/**
+ * Get all keys in storage
+ */
+export const getAllKeys = (): string[] => {
+  return storage.getAllKeys();
+};
+
+/**
+ * Check if a key exists in storage
+ */
+export const hasKey = (key: string): boolean => {
+  return storage.contains(key);
+};
+
+/**
+ * Get approximation of storage usage (MMKV v2 compatible)
+ */
+export const getStorageSize = (): number => {
+  // MMKV v2 doesn't provide size info, return keys count as approximation
+  return storage.getAllKeys().length;
+};
+
+/**
+ * Clean expired cache items (MMKV v2 compatible alternative to trim)
+ */
+export const trimStorage = (): void => {
+  const removedCount = cacheUtils.clearExpired();
+  console.log(`Storage cleanup completed: removed ${removedCount} expired items`);
+};
+
+/**
+ * Encrypt the storage with a new key
+ */
+export const encryptStorage = (encryptionKey: string): void => {
+  storage.recrypt(encryptionKey);
+};
+
+/**
+ * Remove encryption from storage
+ */
+export const removeEncryption = (): void => {
+  storage.recrypt(undefined);
+};
+
+/**
+ * Storage helper object with all methods
+ */
+export const storageHelper: StorageHelper = {
+  setItem,
+  getItem,
+  setNumber,
+  getNumber,
+  setBoolean,
+  getBoolean,
+  setObject,
+  getObject,
+  removeItem,
+  clearAll,
+  getAllKeys,
+  hasKey,
+  getStorageSize,
+  trimStorage,
+};
+
+/**
+ * Enhanced cache utilities with expiration and cleanup
+ */
+export const cacheUtilsImpl = {
+  /**
+   * Set a value with expiration time
+   */
+  setWithExpiry: <T>(key: string, value: T, expiryInMs: number): void => {
+    const expiryTime = Date.now() + expiryInMs;
+    const cacheItem = {
+      value,
+      expiry: expiryTime,
+      createdAt: Date.now()
+    };
+    setObject(`cache_${key}`, cacheItem);
+  },
+
+  /**
+   * Get a value if not expired, null if expired or doesn't exist
+   */
+  getWithExpiry: <T>(key: string): T | null => {
+    const cacheItem = getObject<{ value: T; expiry: number; createdAt: number }>(`cache_${key}`);
+    if (!cacheItem) return null;
+
+    if (Date.now() > cacheItem.expiry) {
+      removeItem(`cache_${key}`);
       return null;
     }
-  }
+
+    return cacheItem.value;
+  },
 
   /**
-   * Remove a value from storage
+   * Clear expired cache items with performance optimization
    */
-  async remove(key: string, options: StorageOptions = {}): Promise<boolean> {
-    try {
-      switch (options.type || 'mmkv') {
-        case 'mmkv':
-          this.mmkv.delete(key);
-          return true;
+  clearExpired: (): number => {
+    const keys = getAllKeys().filter(key => key.startsWith('cache_'));
+    let removedCount = 0;
 
-        case 'async':
-          await AsyncStorage.removeItem(key);
-          return true;
-
-        case 'secure':
-          await SecureStore.deleteItemAsync(key);
-          return true;
-
-        default:
-          throw new Error('Invalid storage type');
+    keys.forEach(key => {
+      const cacheItem = getObject<{ value: any; expiry: number }>(key);
+      if (cacheItem?.expiry && Date.now() > cacheItem.expiry) {
+        removeItem(key);
+        removedCount++;
       }
-    } catch (error) {
-      console.error(`Storage remove error for key "${key}":`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Check if a key exists in storage
-   */
-  async exists(key: string, options: StorageOptions = {}): Promise<boolean> {
-    try {
-      const value = await this.get(key, options);
-      return value !== null;
-    } catch (error) {
-      console.error(`Storage exists error for key "${key}":`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Clear all data from storage
-   */
-  async clear(options: StorageOptions = {}): Promise<boolean> {
-    try {
-      switch (options.type || 'mmkv') {
-        case 'mmkv':
-          this.mmkv.clearAll();
-          return true;
-
-        case 'async':
-          await AsyncStorage.clear();
-          return true;
-
-        case 'secure':
-          // SecureStore doesn't have a clear all method
-          // This would need to be implemented by tracking keys
-          console.warn('SecureStore clear all not implemented');
-          return false;
-
-        default:
-          throw new Error('Invalid storage type');
-      }
-    } catch (error) {
-      console.error('Storage clear error:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Get all keys from storage
-   */
-  async getAllKeys(options: StorageOptions = {}): Promise<string[]> {
-    try {
-      switch (options.type || 'mmkv') {
-        case 'mmkv':
-          return this.mmkv.getAllKeys();
-
-        case 'async':
-          return (await AsyncStorage.getAllKeys()) as string[];
-
-        case 'secure':
-          // SecureStore doesn't have a get all keys method
-          console.warn('SecureStore getAllKeys not available');
-          return [];
-
-        default:
-          throw new Error('Invalid storage type');
-      }
-    } catch (error) {
-      console.error('Storage getAllKeys error:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Get storage size/stats
-   */
-  getStats(): { keys: number; size?: number } {
-    try {
-      const keys = this.mmkv.getAllKeys();
-      return {
-        keys: keys.length,
-        size: undefined // MMKV doesn't provide size info easily
-      };
-    } catch (error) {
-      console.error('Storage stats error:', error);
-      return { keys: 0 };
-    }
-  }
-
-  /**
-   * Set with automatic expiration cleanup
-   */
-  async setWithExpiry<T>(
-    key: string,
-    value: T,
-    expiresInMs: number,
-    options: StorageOptions = {}
-  ): Promise<boolean> {
-    return this.set(key, value, {
-      ...options,
-      expiresIn: expiresInMs
     });
-  }
+
+    if (removedCount > 0) {
+      console.log(`Cleaned up ${removedCount} expired cache items`);
+    }
+
+    return removedCount;
+  },
 
   /**
-   * Batch operations
+   * Clear all cache items
    */
-  async multiSet(
-    keyValuePairs: Array<[string, any]>,
-    options: StorageOptions = {}
-  ): Promise<boolean[]> {
-    const results: boolean[] = [];
-    
-    for (const [key, value] of keyValuePairs) {
-      const success = await this.set(key, value, options);
-      results.push(success);
-    }
-    
-    return results;
+  clearAllCache: (): number => {
+    const keys = getAllKeys().filter(key => key.startsWith('cache_'));
+    keys.forEach(key => removeItem(key));
+    console.log(`Cleared ${keys.length} cache items`);
+    return keys.length;
   }
+};
 
-  async multiGet<T>(
-    keys: string[],
-    options: StorageOptions = {}
-  ): Promise<Array<T | null>> {
-    const results: Array<T | null> = [];
-    
-    for (const key of keys) {
-      const value = await this.get<T>(key, options);
-      results.push(value);
-    }
-    
-    return results;
-  }
+// Assign the implementation to the forward declaration
+cacheUtils = cacheUtilsImpl;
+export { cacheUtilsImpl as cacheUtils };
 
-  /**
-   * Clean up expired items
-   */
-  async cleanupExpired(options: StorageOptions = {}): Promise<number> {
+// Periodic cleanup task
+let cleanupInterval: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Start automatic cache cleanup (runs every 5 minutes)
+ */
+export const startAutomaticCleanup = (): void => {
+  if (cleanupInterval) return; // Already started
+
+  cleanupInterval = setInterval(() => {
     try {
-      const keys = await this.getAllKeys(options);
-      let cleanedCount = 0;
+      cacheUtils.clearExpired();
 
-      for (const key of keys) {
-        const value = await this.get(key, options);
-        if (value === null) {
-          // Item was expired and automatically removed
-          cleanedCount++;
-        }
+      // Clean storage if it gets too many keys (MMKV v2 compatible)
+      const keyCount = getStorageSize();
+      if (keyCount > 800) { // Trigger at 80% of 1000 keys limit
+        trimStorage();
       }
-
-      return cleanedCount;
     } catch (error) {
-      console.error('Storage cleanup error:', error);
-      return 0;
+      console.error('Error during automatic storage cleanup:', error);
     }
-  }
-}
+  }, 5 * 60 * 1000); // Every 5 minutes
+};
 
-// Export singleton instance
-export const storageService = StorageService.getInstance();
-export default storageService;
+/**
+ * Stop automatic cleanup
+ */
+export const stopAutomaticCleanup = (): void => {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+};
+
+// Default export
+export default storageHelper;

@@ -1,4 +1,4 @@
-import { cacheUtils, setObject, getObject, removeItem, getAllKeys } from '@shared/services/storage/storage';
+import { cacheUtils, setObject, getObject, removeItem, getAllKeys } from '@shared/services/storageService';
 import { JobCategory } from '@entities/jobCategory';
 
 // JobCategory is now imported from entities to maintain type consistency
